@@ -1,0 +1,1044 @@
+
+= Remoting and web services using Spring
+
+== Introduction
+
+Spring features integration classes for remoting support using various technologies.
+The remoting support eases the development of remote-enabled services, implemented by your usual (Spring) POJOs.
+Currently, Spring supports the following remoting technologies: 
+
+* _Remote Method Invocation (RMI)_.
+  Through the use of the [class]`RmiProxyFactoryBean` and the [class]`RmiServiceExporter` Spring supports both traditional RMI (with [interface]`java.rmi.Remote` interfaces and ) and transparent remoting via RMI invokers (with any Java interface).
+* _Spring's HTTP invoker_.
+  Spring provides a special remoting strategy which allows for Java serialization via HTTP, supporting any Java interface (just like the RMI invoker).
+  The corresponding support classes are [class]`HttpInvokerProxyFactoryBean` and [class]`HttpInvokerServiceExporter`.
+* _Hessian_.
+  By using Spring's [class]`HessianProxyFactoryBean` and the [class]`HessianServiceExporter` you can transparently expose your services using the lightweight binary HTTP-based protocol provided by Caucho.
+* _Burlap_.
+  Burlap is Caucho's XML-based alternative to Hessian.
+  Spring provides support classes such as [class]`BurlapProxyFactoryBean` and [class]`BurlapServiceExporter`.
+* _JAX-WS_.
+  Spring provides remoting support for web services via JAX-WS (the successor of JAX-RPC, as introduced in Java EE 5 and Java 6).
+* _JMS_.
+  Remoting using JMS as the underlying protocol is supported via the [class]`JmsInvokerServiceExporter` and [class]`JmsInvokerProxyFactoryBean` classes.
+
+While discussing the remoting capabilities of Spring, we'll use the following domain model and corresponding services:
+
+[source,java]
+----
+public class Account implements Serializable{
+
+    private String name;
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+}
+----
+
+[source,java]
+----
+public interface AccountService {
+
+    public void insertAccount(Account account);
+
+    public List<Account> getAccounts(String name);
+}
+----
+
+[source,java]
+----
+public interface RemoteAccountService extends Remote {
+
+    public void insertAccount(Account account) throws RemoteException;
+
+    public List<Account> getAccounts(String name) throws RemoteException;
+}
+----
+
+[source,java]
+----
+// the implementation doing nothing at the moment
+public class AccountServiceImpl implements AccountService {
+
+    public void insertAccount(Account acc) {
+        // do something...
+    }
+
+    public List<Account> getAccounts(String name) {
+        // do something...
+    }
+}
+----
+
+We will start exposing the service to a remote client by using RMI and talk a bit about the drawbacks of using RMI. We'll then continue to show an example using Hessian as the protocol.
+
+== Exposing services using RMI
+
+Using Spring's support for RMI, you can transparently expose your services through the RMI infrastructure.
+After having this set up, you basically have a configuration similar to remote EJBs, except for the fact that there is no standard support for security context propagation or remote transaction propagation.
+Spring does provide hooks for such additional invocation context when using the RMI invoker, so you can for example plug in security frameworks or custom security credentials here.
+
+=== Exporting the service using the [class]`RmiServiceExporter`
+
+Using the [class]`RmiServiceExporter`, we can expose the interface of our AccountService object as RMI object.
+The interface can be accessed by using [class]`RmiProxyFactoryBean`, or via plain RMI in case of a traditional RMI service.
+The [class]`RmiServiceExporter` explicitly supports the exposing of any non-RMI services via RMI invokers.
+
+Of course, we first have to set up our service in the Spring container:
+
+[source,xml]
+----
+<bean id="accountService" class="example.AccountServiceImpl">
+    <!-- any additional properties, maybe a DAO? -->
+</bean>
+----
+
+Next we'll have to expose our service using the [class]`RmiServiceExporter`:
+
+[source,xml]
+----
+<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+    <!-- does not necessarily have to be the same name as the bean to be exported -->
+    <property name="serviceName" value="AccountService"/>
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+    <!-- defaults to 1099 -->
+    <property name="registryPort" value="1199"/>
+</bean>
+----
+
+As you can see, we're overriding the port for the RMI registry.
+Often, your application server also maintains an RMI registry and it is wise to not interfere with that one.
+Furthermore, the service name is used to bind the service under.
+So right now, the service will be bound at `'rmi://HOST:1199/AccountService'`.
+We'll use the URL later on to link in the service at the client side.
+
+NOTE: The `servicePort` property has been omitted (it defaults to 0).
+This means that an anonymous port will be used to communicate with the service.
+
+=== Linking in the service at the client
+
+Our client is a simple object using the [interface]`AccountService` to manage accounts:
+
+[source,java]
+----
+public class SimpleObject {
+
+    private AccountService accountService;
+
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    // additional methods using the accountService
+
+}
+----
+
+To link in the service on the client, we'll create a separate Spring container, containing the simple object and the service linking configuration bits:
+
+[source,xml]
+----
+<bean class="example.SimpleObject">
+    <property name="accountService" ref="accountService"/>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+    <property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+That's all we need to do to support the remote account service on the client.
+Spring will transparently create an invoker and remotely enable the account service through the [class]`RmiServiceExporter`.
+At the client we're linking it in using the [class]`RmiProxyFactoryBean`.
+
+== Using Hessian or Burlap to remotely call services via HTTP
+
+Hessian offers a binary HTTP-based remoting protocol.
+It is developed by Caucho and more information about Hessian itself can be found at <<,>>.
+
+=== Wiring up the [class]`DispatcherServlet` for Hessian and co.
+
+Hessian communicates via HTTP and does so using a custom servlet.
+Using Spring's [class]`DispatcherServlet` principles, as known from Spring Web MVC usage, you can easily wire up such a servlet exposing your services.
+First we'll have to create a new servlet in your application (this is an excerpt from [file]`'web.xml'`):
+
+[source,xml]
+----
+<servlet>
+    <servlet-name>remoting</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>remoting</servlet-name>
+    <url-pattern>/remoting/*</url-pattern>
+</servlet-mapping>
+----
+
+You're probably familiar with Spring's [class]`DispatcherServlet` principles and if so, you know that now you'll have to create a Spring container configuration resource named [file]`'remoting-servlet.xml'` (after the name of your servlet) in the [file]`'WEB-INF'` directory.
+The application context will be used in the next section.
+
+Alternatively, consider the use of Spring's simpler [class]`HttpRequestHandlerServlet`.
+This allows you to embed the remote exporter definitions in your root application context (by default in [file]`'WEB-INF/applicationContext.xml'`), with individual servlet definitions pointing to specific exporter beans.
+Each servlet name needs to match the bean name of its target exporter in this case.
+
+=== Exposing your beans by using the [class]`HessianServiceExporter`
+
+In the newly created application context called `remoting-servlet.xml`, we'll create a [class]`HessianServiceExporter` exporting your services:
+
+[source,xml]
+----
+<bean id="accountService" class="example.AccountServiceImpl">
+    <!-- any additional properties, maybe a DAO? -->
+</bean>
+
+<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+Now we're ready to link in the service at the client.
+No explicit handler mapping is specified, mapping request URLs onto services, so [class]`BeanNameUrlHandlerMapping` will be used: Hence, the service will be exported at the URL indicated through its bean name within the containing [class]`DispatcherServlet`'s mapping (as defined above): `'http://HOST:8080/remoting/AccountService'`.
+
+Alternatively, create a [class]`HessianServiceExporter` in your root application context (e.g.
+in [file]`'WEB-INF/applicationContext.xml'`):
+
+[source,xml]
+----
+<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+In the latter case, define a corresponding servlet for this exporter in [file]`'web.xml'`, with the same end result: The exporter getting mapped to the request path `/remoting/AccountService`.
+Note that the servlet name needs to match the bean name of the target exporter.
+
+[source,xml]
+----
+<servlet>
+    <servlet-name>accountExporter</servlet-name>
+    <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>accountExporter</servlet-name>
+    <url-pattern>/remoting/AccountService</url-pattern>
+</servlet-mapping>
+----
+
+=== Linking in the service on the client
+
+Using the [class]`HessianProxyFactoryBean` we can link in the service at the client.
+The same principles apply as with the RMI example.
+We'll create a separate bean factory or application context and mention the following beans where the [class]`SimpleObject` is using the [interface]`AccountService` to manage accounts:
+
+[source,xml]
+----
+<bean class="example.SimpleObject">
+    <property name="accountService" ref="accountService"/>
+</bean>
+
+<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+    <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+=== Using Burlap
+
+We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here, since it is configured and set up in exactly the same way as the Hessian variant explained above.
+Just replace the word `Hessian` with `Burlap` and you're all set to go.
+
+=== Applying HTTP basic authentication to a service exposed through Hessian or Burlap
+
+One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic authentication, because both protocols are HTTP-based.
+Your normal HTTP server security mechanism can easily be applied through using the `web.xml` security features, for example.
+Usually, you don't use per-user security credentials here, but rather shared credentials defined at the `Hessian/BurlapProxyFactoryBean` level (similar to a JDBC [interface]`DataSource`).
+
+[source,xml]
+----
+<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+    <property name="interceptors" ref="authorizationInterceptor"/>
+</bean>
+
+<bean id="authorizationInterceptor"
+      class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
+    <property name="authorizedRoles" value="administrator,operator"/>
+</bean>
+----
+
+This is an example where we explicitly mention the [class]`BeanNameUrlHandlerMapping` and set an interceptor allowing only administrators and operators to call the beans mentioned in this application context.
+
+NOTE: Of course, this example doesn't show a flexible kind of security infrastructure.
+For more options as far as security is concerned, have a look at the Spring Security project at <<,>>.
+
+== Exposing services using HTTP invokers
+
+As opposed to Burlap and Hessian, which are both lightweight protocols using their own slim serialization mechanisms, Spring HTTP invokers use the standard Java serialization mechanism to expose services through HTTP. This has a huge advantage if your arguments and return types are complex types that cannot be serialized using the serialization mechanisms Hessian and Burlap use (refer to the next section for more considerations when choosing a remoting technology).
+
+Under the hood, Spring uses either the standard facilities provided by J2SE to perform HTTP calls or Commons [class]`HttpClient`.
+Use the latter if you need more advanced and easy-to-use functionality.
+Refer to <<,jakarta.apache.org/commons/httpclient>> for more info.
+
+=== Exposing the service object
+
+Setting up the HTTP invoker infrastructure for a service object resembles closely the way you would do the same using Hessian or Burlap.
+Just as Hessian support provides the [class]`HessianServiceExporter`, Spring's HttpInvoker support provides the [class]`org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
+
+To expose the `AccountService` (mentioned above) within a Spring Web MVC [class]`DispatcherServlet`, the following configuration needs to be in place in the dispatcher's application context:
+
+[source,xml]
+----
+<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+Such an exporter definition will be exposed through the [class]`DispatcherServlet`'s standard mapping facilities, as explained in the section on Hessian.
+
+Alternatively, create an [class]`HttpInvokerServiceExporter` in your root application context (e.g.
+in [file]`'WEB-INF/applicationContext.xml'`):
+
+[source,xml]
+----
+<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+In addition, define a corresponding servlet for this exporter in [file]`'web.xml'`, with the servlet name matching the bean name of the target exporter:
+
+[source,xml]
+----
+<servlet>
+    <servlet-name>accountExporter</servlet-name>
+    <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>accountExporter</servlet-name>
+    <url-pattern>/remoting/AccountService</url-pattern>
+</servlet-mapping>
+----
+
+If you are running outside of a servlet container and are using Sun's Java 6, then you can use the built-in HTTP server implementation.
+You can configure the [class]`SimpleHttpServerFactoryBean` together with a [class]`SimpleHttpInvokerServiceExporter` as is shown in this example:
+
+[source,xml]
+----
+<bean name="accountExporter"
+    class="org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter">
+    <property name="service" ref="accountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+
+<bean id="httpServer"
+        class="org.springframework.remoting.support.SimpleHttpServerFactoryBean">
+    <property name="contexts">
+        <util:map>
+            <entry key="/remoting/AccountService" value-ref="accountExporter"/>
+        </util:map>
+    </property>
+    <property name="port" value="8080" />
+</bean>
+----
+
+=== Linking in the service at the client
+
+Again, linking in the service from the client much resembles the way you would do it when using Hessian or Burlap.
+Using a proxy, Spring will be able to translate your calls to HTTP POST requests to the URL pointing to the exported service.
+
+[source,xml]
+----
+<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+    <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
+    <property name="serviceInterface" value="example.AccountService"/>
+</bean>
+----
+
+As mentioned before, you can choose what HTTP client you want to use.
+By default, the [class]`HttpInvokerProxy` uses the J2SE HTTP functionality, but you can also use the Commons [class]`HttpClient` by setting the `httpInvokerRequestExecutor` property:
+
+[source,xml]
+----
+<property name="httpInvokerRequestExecutor">
+    <bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+</property>
+----
+
+== Web services
+
+Spring provides full support for standard Java web services APIs:
+
+* Exposing web services using JAX-WS
+* Accessing web services using JAX-WS
+
+In addition to stock support for JAX-WS in Spring Core, the Spring portfolio also features <<,Spring Web
+    Services>>, a solution for contract-first, document-driven web services - highly recommended for building modern, future-proof web services.
+
+=== Exposing servlet-based web services using JAX-WS
+
+Spring provides a convenient base class for JAX-WS servlet endpoint implementations - [class]`SpringBeanAutowiringSupport`.
+To expose our [interface]`AccountService` we extend Spring's [class]`SpringBeanAutowiringSupport` class and implement our business logic here, usually delegating the call to the business layer.
+We'll simply use Spring 2.5's `@Autowired` annotation for expressing such dependencies on Spring-managed beans.
+
+[source,java]
+----
+/**
+ * JAX-WS compliant AccountService implementation that simply delegates
+ * to the AccountService implementation in the root web application context.
+ *
+ * This wrapper class is necessary because JAX-WS requires working with dedicated
+ * endpoint classes. If an existing service needs to be exported, a wrapper that
+ * extends SpringBeanAutowiringSupport for simple Spring bean autowiring (through
+ * the @Autowired annotation) is the simplest JAX-WS compliant way.
+ *
+ * This is the class registered with the server-side JAX-WS implementation.
+ * In the case of a Java EE 5 server, this would simply be defined as a servlet
+ * in web.xml, with the server detecting that this is a JAX-WS endpoint and reacting
+ * accordingly. The servlet name usually needs to match the specified WS service name.
+ *
+ * The web service engine manages the lifecycle of instances of this class.
+ * Spring bean references will just be wired in here.
+ */
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+@WebService(serviceName="AccountService")
+public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
+
+    @Autowired
+    private AccountService biz;
+
+    @WebMethod
+    public void insertAccount(Account acc) {
+       biz.insertAccount(acc);
+    }
+
+    @WebMethod
+    public Account[] getAccounts(String name) {
+       return biz.getAccounts(name);
+    }
+}
+----
+
+Our [class]`AccountServletEndpoint` needs to run in the same web application as the Spring context to allow for access to Spring's facilities.
+This is the case by default in Java EE 5 environments, using the standard contract for JAX-WS servlet endpoint deployment.
+See Java EE 5 web service tutorials for details.
+
+=== Exporting standalone web services using JAX-WS
+
+The built-in JAX-WS provider that comes with Sun's JDK 1.6 supports exposure of web services using the built-in HTTP server that's included in JDK 1.6 as well.
+Spring's [class]`SimpleJaxWsServiceExporter` detects all `@WebService` annotated beans in the Spring application context, exporting them through the default JAX-WS server (the JDK 1.6 HTTP server).
+
+In this scenario, the endpoint instances are defined and managed as Spring beans themselves; they will be registered with the JAX-WS engine but their lifecycle will be up to the Spring application context.
+This means that Spring functionality like explicit dependency injection may be applied to the endpoint instances.
+Of course, annotation-driven injection through `@Autowired` will work as well.
+
+[source,xml]
+----
+<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
+    <property name="baseAddress" value="http://localhost:8080/"/>
+</bean>
+
+<bean id="accountServiceEndpoint" class="example.AccountServiceEndpoint">
+    ...
+</bean>
+
+...
+----
+
+The [class]`AccountServiceEndpoint` may derive from Spring's [class]`SpringBeanAutowiringSupport` but doesn't have to since the endpoint is a fully Spring-managed bean here.
+This means that the endpoint implementation may look like as follows, without any superclass declared - and Spring's `@Autowired` configuration annotation still being honored:
+
+[source,java]
+----
+@WebService(serviceName="AccountService")
+public class AccountServiceEndpoint {
+
+    @Autowired
+    private AccountService biz;
+
+    @WebMethod
+    public void insertAccount(Account acc) {
+       biz.insertAccount(acc);
+    }
+
+    @WebMethod
+    public List<Account> getAccounts(String name) {
+       return biz.getAccounts(name);
+    }
+}
+----
+
+=== Exporting web services using the JAX-WS RI's Spring support
+
+Sun's JAX-WS RI, developed as part of the GlassFish project, ships Spring support as part of its JAX-WS Commons project.
+This allows for defining JAX-WS endpoints as Spring-managed beans, similar to the standalone mode discussed in the previous section - but this time in a Servlet environment.
+_Note that this is not portable in a Java
+      EE 5 environment; it is mainly intended for non-EE environments such as
+      Tomcat, embedding the JAX-WS RI as part of the web
+      application._
+
+The difference to the standard style of exporting servlet-based endpoints is that the lifecycle of the endpoint instances themselves will be managed by Spring here, and that there will be only one JAX-WS servlet defined in `web.xml`.
+With the standard Java EE 5 style (as illustrated above), you'll have one servlet definition per service endpoint, with each endpoint typically delegating to Spring beans (through the use of `@Autowired`, as shown above).
+
+Check out <<,https://jax-ws-commons.dev.java.net/spring/>> for the details on setup and usage style.
+
+=== Accessing web services using JAX-WS
+
+Spring provides two factory beans to create JAX-WS web service proxies, namely [class]`LocalJaxWsServiceFactoryBean` and [class]`JaxWsPortProxyFactoryBean`.
+The former can only return a JAX-WS service class for us to work with.
+The latter is the full-fledged version that can return a proxy that implements our business service interface.
+In this example we use the latter to create a proxy for the [interface]`AccountService` endpoint (again):
+
+[source,xml]
+----
+<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
+    <property name="serviceInterface" value="example.AccountService"/>
+    <property name="wsdlDocumentUrl" value="http://localhost:8888/AccountServiceEndpoint?WSDL"/>
+    <property name="namespaceUri" value="http://example/"/>
+    <property name="serviceName" value="AccountService"/>
+    <property name="portName" value="AccountServiceEndpointPort"/>
+</bean>
+----
+
+Where `serviceInterface` is our business interface the clients will use.
+`wsdlDocumentUrl` is the URL for the WSDL file.
+Spring needs this a startup time to create the JAX-WS Service.
+`namespaceUri` corresponds to the targetNamespace in the .wsdl file.
+`serviceName` corresponds to the service name in the .wsdl file.
+`portName` corresponds to the port name in the .wsdl file.
+
+Accessing the web service is now very easy as we have a bean factory for it that will expose it as `AccountService` interface.
+We can wire this up in Spring:
+
+[source,xml]
+----
+<bean id="client" class="example.AccountClientImpl">
+    ...
+    <property name="service" ref="accountWebService"/>
+</bean>
+----
+
+From the client code we can access the web service just as if it was a normal class:
+
+[source,java]
+----
+public class AccountClientImpl {
+
+    private AccountService service;
+
+    public void setService(AccountService service) {
+        this.service = service;
+    }
+
+    public void foo() {
+        service.insertAccount(...);
+    }
+}
+----
+
+_NOTE:_ The above is slightly simplified in that JAX-WS requires endpoint interfaces and implementation classes to be annotated with `@WebService`, `@SOAPBinding` etc annotations.
+This means that you cannot (easily) use plain Java interfaces and implementation classes as JAX-WS endpoint artifacts; you need to annotate them accordingly first.
+Check the JAX-WS documentation for details on those requirements.
+
+== JMS
+
+It is also possible to expose services transparently using JMS as the underlying communication protocol.
+The JMS remoting support in the Spring Framework is pretty basic - it sends and receives on the [interface]`same thread` and in the _same
+    non-transactional_ [interface]`Session`, and as such throughput will be very implementation dependent.
+Note that these single-threaded and non-transactional constraints apply only to Spring's JMS _remoting_ support.
+See <<jms>> for information on Spring's rich support for JMS-based _messaging_.
+
+The following interface is used on both the server and the client side.
+
+[source,java]
+----
+package com.foo;
+
+public interface CheckingAccountService {
+
+    public void cancelAccount(Long accountId);
+}
+----
+
+The following simple implementation of the above interface is used on the server-side.
+
+[source,java]
+----
+package com.foo;
+
+public class SimpleCheckingAccountService implements CheckingAccountService {
+
+    public void cancelAccount(Long accountId) {
+        System.out.println("Cancelling account [" + accountId + "]");
+    }
+}
+----
+
+This configuration file contains the JMS-infrastructure beans that are shared on both the client and server.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://ep-t43:61616"/>
+    </bean>
+
+    <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="mmm"/>
+    </bean>
+
+</beans>
+----
+
+=== Server-side configuration
+
+On the server, you just need to expose the service object using the [class]`JmsInvokerServiceExporter`.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="checkingAccountService"
+          class="org.springframework.jms.remoting.JmsInvokerServiceExporter">
+        <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+        <property name="service">
+            <bean class="com.foo.SimpleCheckingAccountService"/>
+        </property>
+   </bean>
+
+   <bean class="org.springframework.jms.listener.SimpleMessageListenerContainer">
+       <property name="connectionFactory" ref="connectionFactory"/>
+       <property name="destination" ref="queue"/>
+       <property name="concurrentConsumers" value="3"/>
+       <property name="messageListener" ref="checkingAccountService"/>
+   </bean>
+
+</beans>
+----
+
+[source,java]
+----
+package com.foo;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Server {
+
+    public static void main(String[] args) throws Exception {
+        new ClassPathXmlApplicationContext(new String[]{"com/foo/server.xml", "com/foo/jms.xml"});
+    }
+}
+----
+
+=== Client-side configuration
+
+The client merely needs to create a client-side proxy that will implement the agreed upon interface ([interface]`CheckingAccountService`).
+The resulting object created off the back of the following bean definition can be injected into other client side objects, and the proxy will take care of forwarding the call to the server-side object via JMS.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="checkingAccountService"
+          class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean">
+        <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="queue" ref="queue"/>
+    </bean>
+
+</beans>
+----
+
+[source,java]
+----
+package com.foo;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Client {
+
+    public static void main(String[] args) throws Exception {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(
+                new String[] {"com/foo/client.xml", "com/foo/jms.xml"});
+        CheckingAccountService service = (CheckingAccountService) ctx.getBean("checkingAccountService");
+        service.cancelAccount(new Long(10));
+    }
+}
+----
+
+You may also wish to investigate the support provided by the <<,Lingo>> project, which (to quote the homepage blurb) 
+
+== Auto-detection is not implemented for remote interfaces
+
+The main reason why auto-detection of implemented interfaces does not occur for remote interfaces is to avoid opening too many doors to remote callers.
+The target object might implement internal callback interfaces like [interface]`InitializingBean` or [interface]`DisposableBean` which one would not want to expose to callers.
+
+Offering a proxy with all interfaces implemented by the target usually does not matter in the local case.
+But when exporting a remote service, you should expose a specific service interface, with specific operations intended for remote usage.
+Besides internal callback interfaces, the target might implement multiple business interfaces, with just one of them intended for remote exposure.
+For these reasons, we _require_ such a service interface to be specified.
+
+This is a trade-off between configuration convenience and the risk of accidental exposure of internal methods.
+Always specifying a service interface is not too much effort, and puts you on the safe side regarding controlled exposure of specific methods.
+
+== Considerations when choosing a technology
+
+Each and every technology presented here has its drawbacks.
+You should carefully consider your needs, the services you are exposing and the objects you'll be sending over the wire when choosing a technology.
+
+When using RMI, it's not possible to access the objects through the HTTP protocol, unless you're tunneling the RMI traffic.
+RMI is a fairly heavy-weight protocol in that it supports full-object serialization which is important when using a complex data model that needs serialization over the wire.
+However, RMI-JRMP is tied to Java clients: It is a Java-to-Java remoting solution.
+
+Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also rely on Java serialization.
+It shares the basic infrastructure with RMI invokers, just using HTTP as transport.
+Note that HTTP invokers are not only limited to Java-to-Java remoting but also to Spring on both the client and server side.
+(The latter also applies to Spring's RMI invoker for non-RMI interfaces.)
+
+Hessian and/or Burlap might provide significant value when operating in a heterogeneous environment, because they explicitly allow for non-Java clients.
+However, non-Java support is still limited.
+Known issues include the serialization of Hibernate objects in combination with lazily-initialized collections.
+If you have such a data model, consider using RMI or HTTP invokers instead of Hessian.
+
+JMS can be useful for providing clusters of services and allowing the JMS broker to take care of load balancing, discovery and auto-failover.
+By default: Java serialization is used when using JMS remoting but the JMS provider could use a different mechanism for the wire formatting, such as XStream to allow servers to be implemented in other technologies.
+
+Last but not least, EJB has an advantage over RMI in that it supports standard role-based authentication and authorization and remote transaction propagation.
+It is possible to get RMI invokers or HTTP invokers to support security context propagation as well, although this is not provided by core Spring: There are just appropriate hooks for plugging in third-party or custom solutions here.
+
+== Accessing RESTful services on the Client
+
+The [class]`RestTemplate` is the core class for client-side access to RESTful services.
+It is conceptually similar to other template classes in Spring, such as [class]`JdbcTemplate` and [class]`JmsTemplate` and other template classes found in other Spring portfolio projects.
+[class]`RestTemplate`'s behavior is customized by providing callback methods and configuring the [interface]`HttpMessageConverter` used to marshal objects into the HTTP request body and to unmarshal any response back into an object.
+As it is common to use XML as a message format, Spring provides a [class]`MarshallingHttpMessageConverter` that uses the Object-to-XML framework that is part of the [class]`org.springframework.oxm` package.
+This gives you a wide range of choices of XML to Object mapping technologies to choose from.
+
+This section describes how to use the [class]`RestTemplate` and its associated [interface]`HttpMessageConverters`.
+
+=== RestTemplate
+
+Invoking RESTful services in Java is typically done using a helper class such as Jakarta Commons [class]`HttpClient`.
+For common REST operations this approach is too low level as shown below.
+
+[source]
+----
+String uri = "http://example.com/hotels/1/bookings";
+
+PostMethod post = new PostMethod(uri);
+String request = // create booking request content
+post.setRequestEntity(new StringRequestEntity(request));
+
+httpClient.executeMethod(post);
+
+if (HttpStatus.SC_CREATED == post.getStatusCode()) {
+  Header location = post.getRequestHeader("Location");
+  if (location != null) {
+    System.out.println("Created new booking at :" + location.getValue());
+  }
+}
+----
+
+RestTemplate provides higher level methods that correspond to each of the six main HTTP methods that make invoking many RESTful services a one-liner and enforce REST best practices.
+
+.Overview of RestTemplate methods
+[cols="1,1"]
+|===
+| HTTP Method
+| RestTemplate
+              Method
+
+| delete
+
+| getForObject
+
+| getForEntity
+
+| headForHeaders(String
+              url, String... urlVariables)
+
+| optionsForAllow(String
+              url, String... urlVariables)
+
+| postForLocation(String
+              url, Object request, String... urlVariables)
+
+| postForObject(String
+                  url, Object request, Class<T> responseType, String...
+                  uriVariables)
+
+| put(String
+              url, Object request, String...urlVariables)
+|===
+
+The names of [class]`RestTemplate` methods follow a naming convention, the first part indicates what HTTP method is being invoked and the second part indicates what is returned.
+For example, the method [method]`getForObject()` will perform a GET, convert the HTTP response into an object type of your choice and return that object.
+The method [method]`postForLocation()` will do a POST, converting the given object into a HTTP request and return the response HTTP Location header where the newly created object can be found.
+In case of an exception processing the HTTP request, an exception of the type [class]`RestClientException` will be thrown; this behavior can be changed by plugging in another [interface]`ResponseErrorHandler` implementation into the [class]`RestTemplate`.
+
+Objects passed to and returned from these methods are converted to and from HTTP messages by [interface]`HttpMessageConverter` instances.
+Converters for the main mime types are registered by default, but you can also write your own converter and register it via the [method]`messageConverters()` bean property.
+The default converter instances registered with the template are [class]`ByteArrayHttpMessageConverter`, [class]`StringHttpMessageConverter`, [class]`FormHttpMessageConverter` and [class]`SourceHttpMessageConverter`.
+You can override these defaults using the [method]`messageConverters()` bean property as would be required if using the [class]`MarshallingHttpMessageConverter` or [class]`MappingJackson2HttpMessageConverter`.
+
+Each method takes URI template arguments in two forms, either as a `String` variable length argument or a `Map<String,String>`.
+For example,
+
+[source,java]
+----
+String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}",
+                                          String.class,"42", "21");
+----
+
+using variable length arguments and
+
+[source,java]
+----
+Map<String, String> vars = Collections.singletonMap("hotel", "42");
+String result =
+  restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+----
+
+using a `Map<String,String>`.
+
+To create an instance of [class]`RestTemplate` you can simply call the default no-arg constructor.
+This will use standard Java classes from the `java.net` package as the underlying implementation to create HTTP requests.
+This can be overridden by specifying an implementation of [interface]`ClientHttpRequestFactory`.
+Spring provides the implementation [class]`HttpComponentsClientHttpRequestFactory` that uses the Apache HttpComponents [class]`HttpClient` to create requests.
+[class]`HttpComponentsClientHttpRequestFactory` is configured using an instance of [class]`org.apache.http.client.HttpClient` which can in turn be configured with credentials information or connection pooling functionality.
+
+TIP: Note that the `java.net` implementation for HTTP requests may raise an exception when accessing the status of a response that represents an error (e.g.
+401).
+If this is an issue, switch to [class]`HttpComponentsClientHttpRequestFactory` instead.
+
+
+The previous example using Apache HttpComponents [class]`HttpClient` directly rewritten to use the [class]`RestTemplate` is shown below
+
+[source,java]
+----
+uri = "http://example.com/hotels/{id}/bookings";
+
+RestTemplate template = new RestTemplate();
+
+Booking booking = // create booking object
+
+URI location = template.postForLocation(uri, booking, "1");
+----
+
+To use Apache HttpComponents instead of the native `java.net` functionality, construct the [class]`RestTemplate` as follows:
+
+[source,java]
+----
+RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+----
+
+[TIP]
+====
+Apache HttpClient supports gzip encoding via the [class]`DecompressingHttpClient`.
+To use it, construct a [class]`HttpComponentsClientHttpRequestFactory` like so:
+
+[source,java]
+----
+HttpClient httpClient = new DecompressingHttpClient(new DefaultHttpClient());
+ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+RestTemplate template = new RestTemplate(requestFactory);
+----
+====
+
+The general callback interface is [interface]`RequestCallback` and is called when the execute method is invoked.
+
+[source,java]
+----
+public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
+                     ResponseExtractor<T> responseExtractor,
+                     String... urlVariables)
+
+
+// also has an overload with urlVariables as a Map<String, String>.
+----
+
+The [interface]`RequestCallback` interface is defined as
+
+[source,java]
+----
+public interface RequestCallback {
+ void doWithRequest(ClientHttpRequest request) throws IOException;
+}
+----
+
+and allows you to manipulate the request headers and write to the request body.
+When using the execute method you do not have to worry about any resource management, the template will always close the request and handle any errors.
+Refer to the API documentation for more information on using the execute method and the meaning of its other method arguments.
+
+==== Working with the URI
+
+For each of the main HTTP methods, the [class]`RestTemplate` provides variants that either take a String URI or [class]`java.net.URI` as the first argument.
+
+
+The String URI variants accept template arguments as a String variable length argument or as a [class]`Map<String,String>`.
+They also assume the URL String is not encoded and needs to be encoded.
+For example the following: 
+
+[source,java]
+----
+restTemplate.getForObject("http://example.com/hotel list", String.class);
+----
+
+will perform a GET on [file]`http://example.com/hotel%20list`.
+That means if the input URL String is already encoded, it will be encoded twice -- i.e.
+[file]`http://example.com/hotel%20list` will become [file]`http://example.com/hotel%2520list`.
+If this is not the intended effect, use the [class]`java.net.URI` method variant, which assumes the URL is already encoded is also generally useful if you want to reuse a single (fully expanded) [class]`URI` multiple times.
+
+The [class]`UriComponentsBuilder` class can be used to build and encode the [class]`URI` including support for URI templates.
+For example you can start with a URL String: 
+
+[source,java]
+----
+UriComponents uriComponents =
+        UriComponentsBuilder.fromUriString("http://example.com/hotels/{hotel}/bookings/{booking}").build()
+            .expand("42", "21")
+            .encode();
+
+URI uri = uriComponents.toUri();
+----
+
+Or specify each URI component individually:
+
+[source,java]
+----
+UriComponents uriComponents =
+        UriComponentsBuilder.newInstance()
+            .scheme("http").host("example.com").path("/hotels/{hotel}/bookings/{booking}").build()
+            .expand("42", "21")
+            .encode();
+
+URI uri = uriComponents.toUri();
+----
+
+==== Dealing with request and response headers
+
+Besides the methods described above, the [class]`RestTemplate` also has the [method]`exchange()` method, which can be used for arbitrary HTTP method execution based on the [class]`HttpEntity` class.
+
+Perhaps most importantly, the [method]`exchange()` method can be used to add request headers and read response headers.
+For example:
+
+[source,java]
+----
+HttpHeaders requestHeaders = new HttpHeaders();
+requestHeaders.set("MyRequestHeader", "MyValue");
+HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+
+HttpEntity<String> response = template.exchange("http://example.com/hotels/{hotel}",
+  HttpMethod.GET, requestEntity, String.class, "42");
+
+String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
+String body = response.getBody();
+----
+
+In the above example, we first prepare a request entity that contains the `MyRequestHeader` header.
+We then retrieve the response, and read the `MyResponseHeader` and body.
+
+=== HTTP Message Conversion
+
+Objects passed to and returned from the methods [method]`getForObject()`, [method]`postForLocation()`, and [method]`put()` are converted to HTTP requests and from HTTP responses by [interface]`HttpMessageConverters`.
+The [interface]`HttpMessageConverter` interface is shown below to give you a better feel for its functionality
+
+[source,java]
+----
+public interface HttpMessageConverter<T> {
+
+      // Indicate whether the given class and media type can be read by this converter.
+      boolean canRead(Class<?> clazz, MediaType mediaType);
+
+      // Indicate whether the given class and media type can be written by this converter.
+      boolean canWrite(Class<?> clazz, MediaType mediaType);
+
+      // Return the list of MediaType objects supported by this converter.
+      List<MediaType> getSupportedMediaTypes();
+
+      // Read an object of the given type from the given input message, and returns it.
+      T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException,
+                                                                   HttpMessageNotReadableException;
+
+      // Write an given object to the given output message.
+      void write(T t, HttpOutputMessage outputMessage) throws IOException,
+                                                              HttpMessageNotWritableException;
+
+    }
+----
+
+Concrete implementations for the main media (mime) types are provided in the framework and are registered by default with the [class]`RestTemplate` on the client-side and with [class]`AnnotationMethodHandlerAdapter` on the server-side.
+
+The implementations of [class]`HttpMessageConverter`s are described in the following sections.
+For all converters a default media type is used but can be overridden by setting the [class]`supportedMediaTypes` bean property
+
+==== StringHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write Strings from the HTTP request and response.
+By default, this converter supports all text media types (`text/*`), and writes with a `Content-Type` of `text/plain`.
+
+==== FormHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write form data from the HTTP request and response.
+By default, this converter reads and writes the media type `application/x-www-form-urlencoded`.
+Form data is read from and written into a `MultiValueMap<String,
+        String>`.
+
+==== ByteArrayHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write byte arrays from the HTTP request and response.
+By default, this converter supports all media types (`*/*`), and writes with a `Content-Type` of `application/octet-stream`.
+This can be overridden by setting the  property, and overriding `getContentType(byte[])`.
+
+==== MarshallingHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write XML using Spring's [interface]`Marshaller` and [interface]`Unmarshaller` abstractions from the [class]`org.springframework.oxm` package.
+This converter requires a [interface]`Marshaller` and [interface]`Unmarshaller` before it can be used.
+These can be injected via constructor or bean properties.
+By default this converter supports (`text/xml`) and (`application/xml`).
+
+==== MappingJackson2HttpMessageConverter (or MappingJacksonHttpMessageConverter with Jackson 1.x)
+
+An [interface]`HttpMessageConverter` implementation that can read and write JSON using Jackson's [interface]`ObjectMapper`.
+JSON mapping can be customized as needed through the use of Jackson's provided annotations.
+When further control is needed, a custom [interface]`ObjectMapper` can be injected through the `ObjectMapper` property for cases where custom JSON serializers/deserializers need to be provided for specific types.
+By default this converter supports (`application/json`).
+
+==== SourceHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write [class]`javax.xml.transform.Source` from the HTTP request and response.
+Only [class]`DOMSource`, [class]`SAXSource`, and [class]`StreamSource` are supported.
+By default, this converter supports (`text/xml`) and (`application/xml`).
+
+==== BufferedImageHttpMessageConverter
+
+An [interface]`HttpMessageConverter` implementation that can read and write [class]`java.awt.image.BufferedImage` from the HTTP request and response.
+This converter reads and writes the media type supported by the Java I/O API.

@@ -1,0 +1,959 @@
+
+:numbered!:
+
+[appendix]
+= XML Schema-based configuration
+
+== Introduction
+
+This appendix details the XML Schema-based configuration introduced in Spring 2.0 and enhanced and extended in Spring 2.5 and 3.0.
+
+.DTD support?
+****
+Authoring Spring configuration files using the older DTD style is still fully supported.
+
+Nothing will break if you forego the use of the new XML Schema-based approach to authoring Spring XML configuration files.
+All that you lose out on is the opportunity to have more succinct and clearer configuration.
+Regardless of whether the XML configuration is DTD- or Schema-based, in the end it all boils down to the same object model in the container (namely one or more [interface]`BeanDefinition` instances).
+****
+
+The central motivation for moving to XML Schema based configuration files was to make Spring XML configuration easier.
+The _'classic'_ `<bean/>`-based approach is good, but its generic-nature comes with a price in terms of configuration overhead.
+
+From the Spring IoC containers point-of-view, _everything_ is a bean.
+That's great news for the Spring IoC container, because if everything is a bean then everything can be treated in the exact same fashion.
+The same, however, is not true from a developer's point-of-view.
+The objects defined in a Spring XML configuration file are not all generic, vanilla beans.
+Usually, each bean requires some degree of specific configuration.
+
+Spring 2.0's new XML Schema-based configuration addresses this issue.
+The `<bean/>` element is still present, and if you wanted to, you could continue to write the _exact same_ style of Spring XML configuration using only `<bean/>` elements.
+The new XML Schema-based configuration does, however, make Spring XML configuration files substantially clearer to read.
+In addition, it allows you to express the intent of a bean definition.
+
+The key thing to remember is that the new custom tags work best for infrastructure or integration beans: for example, AOP, collections, transactions, integration with 3rd-party frameworks such as Mule, etc., while the existing bean tags are best suited to application-specific beans, such as DAOs, service layer objects, validators, etc.
+
+The examples included below will hopefully convince you that the inclusion of XML Schema support in Spring 2.0 was a good idea.
+The reception in the community has been encouraging; also, please note the fact that this new configuration mechanism is totally customisable and extensible.
+This means you can write your own domain-specific configuration tags that would better represent your application's domain; the process involved in doing so is covered in the appendix entitled <<extensible-xml>>.
+
+== XML Schema-based configuration
+
+=== Referencing the schemas
+
+To switch over from the DTD-style to the new XML Schema-style, you need to make the following change.
+
+[source,xml]
+----
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+The equivalent file in the XML Schema-style would be...
+
+[source,xml]
+----
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+NOTE: The `'xsi:schemaLocation'` fragment is not actually required, but can be included to reference a local copy of a schema (which can be useful during development).
+
+The above Spring XML configuration fragment is boilerplate that you can copy and paste (!) and then plug `<bean/>` definitions into like you have always done.
+However, the entire point of switching over is to take advantage of the new Spring 2.0 XML tags since they make configuration easier.
+The section entitled <<xsd-config-body-schemas-util>> demonstrates how you can start immediately by using some of the more common utility tags.
+
+The rest of this chapter is devoted to showing examples of the new Spring XML Schema based configuration, with at least one example for every new tag.
+The format follows a before and after style, with a _before_ snippet of XML showing the old (but still 100% legal and supported) style, followed immediately by an _after_ example showing the equivalent in the new XML Schema-based style.
+
+=== The `util` schema
+
+First up is coverage of the `util` tags.
+As the name implies, the `util` tags deal with common, _utility_ configuration issues, such as configuring collections, referencing constants, and suchlike.
+
+To use the tags in the `util` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the snippet below references the correct schema so that the tags in the `util` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+==== `<util:constant/>`
+
+Before...
+
+[source,xml]
+----
+<bean id="..." class="...">
+  <property name="isolation">
+    <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+    class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+  </property>
+</bean>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`FieldRetrievingFactoryBean`, to set the value of the `'isolation'` property on a bean to the value of the `'java.sql.Connection.TRANSACTION_SERIALIZABLE'` constant.
+This is all well and good, but it is a tad verbose and (unnecessarily) exposes Spring's internal plumbing to the end user.
+
+
+The following XML Schema-based version is more concise and clearly expresses the developer's intent (_'inject this constant
+                value'_), and it just reads better.
+
+
+[source,xml]
+----
+<bean id="..." class="...">
+  <property name="isolation">
+    <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+  </property>
+</bean>
+----
+
+===== Setting a bean property or constructor arg from a field value
+
+ <<,[class]`FieldRetrievingFactoryBean`>> is a [interface]`FactoryBean` which retrieves a `static` or non-static field value.
+It is typically used for retrieving `public` `static` `final` constants, which may then be used to set a property value or constructor arg for another bean.
+
+
+ Find below an example which shows how a `static` field is exposed, by using the <<,`staticField`>> property: 
+
+[source,xml]
+----
+<bean id="myField"
+        class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+  <property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+</bean>
+----
+
+There is also a convenience usage form where the `static` field is specified as the bean name:
+
+[source,xml]
+----
+<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+    class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>
+----
+
+ This does mean that there is no longer any choice in what the bean id is (so any other bean that refers to it will also have to use this longer name), but this form is very concise to define, and very convenient to use as an inner bean since the id doesn't have to be specified for the bean reference: 
+
+[source,xml]
+----
+<bean id="..." class="...">
+  <property name="isolation">
+    <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+          class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+  </property>
+</bean>
+----
+
+ It is also possible to access a non-static (instance) field of another bean, as described in the API documentation for the <<,[class]`FieldRetrievingFactoryBean`>> class.
+
+
+ Injecting enum values into beans as either property or constructor arguments is very easy to do in Spring, in that you don't actually have to _do_ anything or know anything about the Spring internals (or even about classes such as the [class]`FieldRetrievingFactoryBean`).
+Let's look at an example to see how easy injecting an enum value is; consider this JDK 5 enum: 
+
+[source,java]
+----
+package javax.persistence;
+
+public enum PersistenceContextType {
+
+    TRANSACTION,
+    EXTENDED
+
+}
+----
+
+Now consider a setter of type [class]`PersistenceContextType`:
+
+[source,java]
+----
+package example;
+
+public class Client {
+
+    private PersistenceContextType persistenceContextType;
+
+    public void setPersistenceContextType(PersistenceContextType type) {
+        this.persistenceContextType = type;
+    }
+}
+----
+
+..
+and the corresponding bean definition:
+
+[source,xml]
+----
+<bean class="example.Client">
+    <property name="persistenceContextType" value="TRANSACTION" />
+</bean>
+----
+
+ This works for classic type-safe emulated enums (on JDK 1.4 and JDK 1.3) as well; Spring will automatically attempt to match the string property value to a constant on the enum class.
+
+
+==== `<util:property-path/>`
+
+Before...
+
+[source,xml]
+----
+<!-- target bean to be referenced by name -->
+<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
+  <property name="age" value="10"/>
+  <property name="spouse">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="11"/>
+    </bean>
+  </property>
+</bean>
+
+<!-- will result in 10, which is the value of property 'age' of bean 'testBean' -->
+<bean id="testBean.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`PropertyPathFactoryBean`, to create a bean (of type [class]`int`) called `'testBean.age'` that has a value equal to the `'age'` property of the `'testBean'` bean.
+
+
+After...
+
+[source,xml]
+----
+<!-- target bean to be referenced by name -->
+<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
+  <property name="age" value="10"/>
+  <property name="spouse">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="11"/>
+    </bean>
+  </property>
+</bean>
+
+<!-- will result in 10, which is the value of property 'age' of bean 'testBean' -->
+<util:property-path id="name" path="testBean.age"/>
+----
+
+The value of the `'path'` attribute of the `<property-path/>` tag follows the form `'beanName.beanProperty'`.
+
+===== Using `<util:property-path/>` to set a bean property or constructor-argument
+
+[class]`PropertyPathFactoryBean` is a [interface]`FactoryBean` that evaluates a property path on a given target object.
+The target object can be specified directly or via a bean name.
+This value may then be used in another bean definition as a property value or constructor argument.
+
+Here's an example where a path is used against another bean, by name:
+
+[source,xml]
+----
+// target bean to be referenced by name
+<bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
+  <property name="age" value="10"/>
+  <property name="spouse">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="11"/>
+    </bean>
+  </property>
+</bean>
+
+// will result in 11, which is the value of property 'spouse.age' of bean 'person'
+<bean id="theAge"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+  <property name="targetBeanName" value="person"/>
+  <property name="propertyPath" value="spouse.age"/>
+</bean>
+----
+
+In this example, a path is evaluated against an inner bean:
+
+[source,xml]
+----
+<!-- will result in 12, which is the value of property 'age' of the inner bean -->
+<bean id="theAge"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+  <property name="targetObject">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="12"/>
+    </bean>
+  </property>
+  <property name="propertyPath" value="age"/>
+</bean>
+----
+
+There is also a shortcut form, where the bean name is the property path.
+
+[source,xml]
+----
+<!-- will result in 10, which is the value of property 'age' of bean 'person' -->
+<bean id="person.age"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+----
+
+This form does mean that there is no choice in the name of the bean.
+Any reference to it will also have to use the same id, which is the path.
+Of course, if used as an inner bean, there is no need to refer to it at all:
+
+[source,xml]
+----
+<bean id="..." class="...">
+  <property name="age">
+    <bean id="person.age"
+        class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+  </property>
+</bean>
+----
+
+The result type may be specifically set in the actual definition.
+This is not necessary for most use cases, but can be of use for some.
+Please see the Javadocs for more info on this feature.
+
+==== `<util:properties/>`
+
+Before...
+
+[source,xml]
+----
+<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
+<bean id="jdbcConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+  <property name="location" value="classpath:com/foo/jdbc-production.properties"/>
+</bean>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`PropertiesFactoryBean`, to instantiate a [class]`java.util.Properties` instance with values loaded from the supplied <<resources,[interface]`Resource`>> location).
+
+
+After...
+
+[source,xml]
+----
+<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
+<util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>
+----
+
+==== `<util:list/>`
+
+Before...
+
+[source,xml]
+----
+<!-- creates a java.util.List instance with values loaded from the supplied 'sourceList' -->
+<bean id="emails" class="org.springframework.beans.factory.config.ListFactoryBean">
+  <property name="sourceList">
+      <list>
+        <value>pechorin@hero.org</value>
+        <value>raskolnikov@slums.org</value>
+        <value>stavrogin@gov.org</value>
+        <value>porfiry@gov.org</value>
+      </list>
+  </property>
+</bean>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`ListFactoryBean`, to create a [class]`java.util.List` instance initialized with values taken from the supplied `'sourceList'`.
+
+
+After...
+
+[source,xml]
+----
+<!-- creates a java.util.List instance with the supplied values -->
+<util:list id="emails">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:list>
+----
+
+You can also explicitly control the exact type of [interface]`List` that will be instantiated and populated via the use of the `'list-class'` attribute on the `<util:list/>` element.
+For example, if we really need a [class]`java.util.LinkedList` to be instantiated, we could use the following configuration:
+
+[source,xml]
+----
+<util:list id="emails" list-class="java.util.LinkedList">
+    <value>jackshaftoe@vagabond.org</value>
+    <value>eliza@thinkingmanscrumpet.org</value>
+    <value>vanhoek@pirate.org</value>
+    <value>d'Arcachon@nemesis.org</value>
+</util:list>
+----
+
+If no `'list-class'` attribute is supplied, a [interface]`List` implementation will be chosen by the container.
+
+==== `<util:map/>`
+
+Before...
+
+[source,xml]
+----
+<!-- creates a java.util.Map instance with values loaded from the supplied 'sourceMap' -->
+<bean id="emails" class="org.springframework.beans.factory.config.MapFactoryBean">
+  <property name="sourceMap">
+      <map>
+        <entry key="pechorin" value="pechorin@hero.org"/>
+        <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+        <entry key="stavrogin" value="stavrogin@gov.org"/>
+        <entry key="porfiry" value="porfiry@gov.org"/>
+      </map>
+  </property>
+</bean>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`MapFactoryBean`, to create a [class]`java.util.Map` instance initialized with key-value pairs taken from the supplied `'sourceMap'`.
+
+
+After...
+
+[source,xml]
+----
+<!-- creates a java.util.Map instance with the supplied key-value pairs -->
+<util:map id="emails">
+    <entry key="pechorin" value="pechorin@hero.org"/>
+    <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+    <entry key="stavrogin" value="stavrogin@gov.org"/>
+    <entry key="porfiry" value="porfiry@gov.org"/>
+</util:map>
+----
+
+You can also explicitly control the exact type of [interface]`Map` that will be instantiated and populated via the use of the `'map-class'` attribute on the `<util:map/>` element.
+For example, if we really need a [class]`java.util.TreeMap` to be instantiated, we could use the following configuration:
+
+[source,xml]
+----
+<util:map id="emails" map-class="java.util.TreeMap">
+    <entry key="pechorin" value="pechorin@hero.org"/>
+    <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+    <entry key="stavrogin" value="stavrogin@gov.org"/>
+    <entry key="porfiry" value="porfiry@gov.org"/>
+</util:map>
+----
+
+If no `'map-class'` attribute is supplied, a [interface]`Map` implementation will be chosen by the container.
+
+==== `<util:set/>`
+
+Before...
+
+[source,xml]
+----
+<!-- creates a java.util.Set instance with values loaded from the supplied 'sourceSet' -->
+<bean id="emails" class="org.springframework.beans.factory.config.SetFactoryBean">
+  <property name="sourceSet">
+      <set>
+        <value>pechorin@hero.org</value>
+        <value>raskolnikov@slums.org</value>
+        <value>stavrogin@gov.org</value>
+        <value>porfiry@gov.org</value>
+      </set>
+  </property>
+</bean>
+----
+
+The above configuration uses a Spring [interface]`FactoryBean` implementation, the [class]`SetFactoryBean`, to create a [class]`java.util.Set` instance initialized with values taken from the supplied `'sourceSet'`.
+
+
+After...
+
+[source,xml]
+----
+<!-- creates a java.util.Set instance with the supplied values -->
+<util:set id="emails">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:set>
+----
+
+You can also explicitly control the exact type of [interface]`Set` that will be instantiated and populated via the use of the `'set-class'` attribute on the `<util:set/>` element.
+For example, if we really need a [class]`java.util.TreeSet` to be instantiated, we could use the following configuration:
+
+[source,xml]
+----
+<util:set id="emails" set-class="java.util.TreeSet">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:set>
+----
+
+If no `'set-class'` attribute is supplied, a [interface]`Set` implementation will be chosen by the container.
+
+=== The `jee` schema
+
+The `jee` tags deal with Java EE (Java Enterprise Edition)-related configuration issues, such as looking up a JNDI object and defining EJB references.
+
+To use the tags in the `jee` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `jee` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+==== `<jee:jndi-lookup/>` (simple)
+
+Before...
+
+[source,xml]
+----
+<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/MyDataSource"/>
+</bean>
+
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    <!-- Spring will do the cast automatically (as usual) -->
+    <property name="dataSource" ref="dataSource"/>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:jndi-lookup id="dataSource" jndi-name="jdbc/MyDataSource"/>
+
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    <!-- Spring will do the cast automatically (as usual) -->
+    <property name="dataSource" ref="dataSource"/>
+</bean>
+----
+
+==== `<jee:jndi-lookup/>` (with single JNDI environment setting)
+
+Before...
+
+[source,xml]
+----
+<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/MyDataSource"/>
+    <property name="jndiEnvironment">
+        <props>
+            <prop key="foo">bar</prop>
+        </props>
+    </property>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+    <jee:environment>foo=bar</jee:environment>
+</jee:jndi-lookup>
+----
+
+==== `<jee:jndi-lookup/>` (with multiple JNDI environment settings)
+
+Before...
+
+[source,xml]
+----
+<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/MyDataSource"/>
+    <property name="jndiEnvironment">
+        <props>
+            <prop key="foo">bar</prop>
+            <prop key="ping">pong</prop>
+        </props>
+    </property>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+    <!-- newline-separated, key-value pairs for the environment (standard Properties format) -->
+    <jee:environment>
+        foo=bar
+        ping=pong
+    </jee:environment>
+</jee:jndi-lookup>
+----
+
+==== `<jee:jndi-lookup/>` (complex)
+
+Before...
+
+[source,xml]
+----
+<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/MyDataSource"/>
+    <property name="cache" value="true"/>
+    <property name="resourceRef" value="true"/>
+    <property name="lookupOnStartup" value="false"/>
+    <property name="expectedType" value="com.myapp.DefaultFoo"/>
+    <property name="proxyInterface" value="com.myapp.Foo"/>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:jndi-lookup id="simple"
+             jndi-name="jdbc/MyDataSource"
+             cache="true"
+             resource-ref="true"
+             lookup-on-startup="false"
+             expected-type="com.myapp.DefaultFoo"
+             proxy-interface="com.myapp.Foo"/>
+----
+
+==== `<jee:local-slsb/>` (simple)
+
+The `<jee:local-slsb/>` tag configures a reference to an EJB Stateless SessionBean.
+
+Before...
+
+[source,xml]
+----
+<bean id="simple"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/RentalServiceBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
+    business-interface="com.foo.service.RentalService"/>
+----
+
+==== `<jee:local-slsb/>` (complex)
+
+[source,xml]
+----
+<bean id="complexLocalEjb"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/RentalServiceBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+  <property name="cacheHome" value="true"/>
+  <property name="lookupHomeOnStartup" value="true"/>
+  <property name="resourceRef" value="true"/>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:local-slsb id="complexLocalEjb"
+    jndi-name="ejb/RentalServiceBean"
+    business-interface="com.foo.service.RentalService"
+    cache-home="true"
+    lookup-home-on-startup="true"
+    resource-ref="true">
+----
+
+==== `<jee:remote-slsb/>`
+
+The `<jee:remote-slsb/>` tag configures a reference to a `remote` EJB Stateless SessionBean.
+
+Before...
+
+[source,xml]
+----
+<bean id="complexRemoteEjb"
+      class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/MyRemoteBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+  <property name="cacheHome" value="true"/>
+  <property name="lookupHomeOnStartup" value="true"/>
+  <property name="resourceRef" value="true"/>
+  <property name="homeInterface" value="com.foo.service.RentalService"/>
+  <property name="refreshHomeOnConnectFailure" value="true"/>
+</bean>
+----
+
+After...
+
+[source,xml]
+----
+<jee:remote-slsb id="complexRemoteEjb"
+    jndi-name="ejb/MyRemoteBean"
+    business-interface="com.foo.service.RentalService"
+    cache-home="true"
+    lookup-home-on-startup="true"
+    resource-ref="true"
+    home-interface="com.foo.service.RentalService"
+    refresh-home-on-connect-failure="true">
+----
+
+=== The `lang` schema
+
+The `lang` tags deal with exposing objects that have been written in a dynamic language such as JRuby or Groovy as beans in the Spring container.
+
+These tags (and the dynamic language support) are comprehensively covered in the chapter entitled <<dynamic-language>>.
+Please do consult that chapter for full details on this support and the `lang` tags themselves.
+
+In the interest of completeness, to use the tags in the `lang` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `lang` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+=== The `jms` schema
+
+The `jms` tags deal with configuring JMS-related beans such as Spring's <<jms-mdp,MessageListenerContainers>>.
+These tags are detailed in the section of the <<jms,JMS chapter>> entitled <<jms-namespace>>.
+Please do consult that chapter for full details on this support and the `jms` tags themselves.
+
+In the interest of completeness, to use the tags in the `jms` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `jms` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+=== The `tx` (transaction) schema
+
+The `tx` tags deal with configuring all of those beans in Spring's comprehensive support for transactions.
+These tags are covered in the chapter entitled <<transaction>>.
+
+TIP: You are strongly encouraged to look at the [file]`'spring-tx.xsd'` file that ships with the Spring distribution.
+This file is (of course), the XML Schema for Spring's transaction configuration, and covers all of the various tags in the `tx` namespace, including attribute defaults and suchlike.
+This file is documented inline, and thus the information is not repeated here in the interests of adhering to the DRY (Don't Repeat Yourself) principle.
+
+In the interest of completeness, to use the tags in the `tx` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `tx` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+NOTE: Often when using the tags in the `tx` namespace you will also be using the tags from the `aop` namespace (since the declarative transaction support in Spring is implemented using AOP).
+The above XML snippet contains the relevant lines needed to reference the `aop` schema so that the tags in the `aop` namespace are available to you.
+
+=== The `aop` schema
+
+The `aop` tags deal with configuring all things AOP in Spring: this includes Spring's own proxy-based AOP framework and Spring's integration with the AspectJ AOP framework.
+These tags are comprehensively covered in the chapter entitled <<aop>>.
+
+In the interest of completeness, to use the tags in the `aop` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `aop` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+=== The `context` schema
+
+The `context` tags deal with [interface]`ApplicationContext` configuration that relates to plumbing - that is, not usually beans that are important to an end-user but rather beans that do a lot of grunt work in Spring, such as [interface]`BeanfactoryPostProcessors`.
+The following snippet references the correct schema so that the tags in the `context` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+NOTE: The `context` schema was only introduced in Spring 2.5.
+
+==== `<property-placeholder/>`
+
+This element activates the replacement of `${...}` placeholders, resolved against the specified properties file (as a <<resources,Spring resource location>>).
+This element is a convenience mechanism that sets up a <<beans-factory-placeholderconfigurer,[class]`PropertyPlaceholderConfigurer`>> for you; if you need more control over the [class]`PropertyPlaceholderConfigurer`, just define one yourself explicitly.
+
+==== `<annotation-config/>`
+
+Activates the Spring infrastructure for various annotations to be detected in bean classes: Spring's <<beans-required-annotation,[interface]`@Required`>> and <<beans-annotation-config,[interface]`@Autowired`>>, as well as JSR 250's [interface]`@PostConstruct`, [interface]`@PreDestroy` and [interface]`@Resource` (if available), and JPA's [interface]`@PersistenceContext` and [interface]`@PersistenceUnit` (if available).
+Alternatively, you can choose to activate the individual [interface]`BeanPostProcessors` for those annotations explicitly.
+
+NOTE: This element does _not_ activate processing of Spring's <<transaction-declarative-annotations,[interface]`@Transactional`>> annotation.
+Use the <<tx-decl-explained,`<tx:annotation-driven/>`>> element for that purpose.
+
+==== `<component-scan/>`
+
+This element is detailed in <<beans-annotation-config>>.
+
+==== `<load-time-weaver/>`
+
+This element is detailed in <<aop-aj-ltw>>.
+
+==== `<spring-configured/>`
+
+This element is detailed in <<aop-atconfigurable>>.
+
+==== `<mbean-export/>`
+
+This element is detailed in <<jmx-context-mbeanexport>>.
+
+=== The `tool` schema
+
+The `tool` tags are for use when you want to add tooling-specific metadata to your custom configuration elements.
+This metadata can then be consumed by tools that are aware of this metadata, and the tools can then do pretty much whatever they want with it (validation, etc.).
+
+The `tool` tags are not documented in this release of Spring as they are currently undergoing review.
+If you are a third party tool vendor and you would like to contribute to this review process, then do mail the Spring mailing list.
+The currently supported `tool` tags can be found in the file `'spring-tool.xsd'` in the `'src/org/springframework/beans/factory/xml'` directory of the Spring source distribution.
+
+=== The `jdbc` schema
+
+The `jdbc` tags allow you to quickly configure an embedded database or initialize an existing data source.
+These tags are documented in <<jdbc-embedded-database-support>> and <<jdbc-intializing-datasource>> respectively.
+
+To use the tags in the `jdbc` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `jdbc` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+=== The `cache` schema
+
+The `cache` tags can be used to enable support for Spring's [interface]`@CacheEvict`, [interface]`@CachePut` and [interface]`@Caching` annotations.
+It it also supports declarative XML-based caching.
+See  <<cache-annotation-enable>> and <<cache-declarative-xml>> for details.
+
+To use the tags in the `cache` schema, you need to have the following preamble at the top of your Spring XML configuration file; the text in the following snippet references the correct schema so that the tags in the `cache` namespace are available to you.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd">
+
+<!-- bean definitions here -->
+
+</beans>
+----
+
+=== The `beans` schema
+
+Last but not least we have the tags in the `beans` schema.
+These are the same tags that have been in Spring since the very dawn of the framework.
+Examples of the various tags in the `beans` schema are not shown here because they are quite comprehensively covered in <<beans-factory-properties-detailed>> (and indeed in that entire <<beans,chapter>>).
+
+One thing that is new to the beans tags themselves in Spring 2.0 is the idea of arbitrary bean metadata.
+In Spring 2.0 it is now possible to add zero or more key / value pairs to `<bean/>` XML definitions.
+What, if anything, is done with this extra metadata is totally up to your own custom logic (and so is typically only of use if you are writing your own custom tags as described in the appendix entitled <<extensible-xml>>).
+
+Find below an example of the `<meta/>` tag in the context of a surrounding `<bean/>` (please note that without any logic to interpret it the metadata is effectively useless as-is).
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="foo" class="x.y.Foo">
+        <meta key="cacheName" value="foo"/>
+        <property name="name" value="Rick"/>
+    </bean>
+
+</beans>
+----
+
+In the case of the above example, you would assume that there is some logic that will consume the bean definition and set up some caching infrastructure using the supplied metadata.
+
+:numbered:

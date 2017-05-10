@@ -1,0 +1,462 @@
+
+= Resources
+
+== Introduction
+
+Java's standard [class]`java.net.URL` class and standard handlers for various URL prefixes unfortunately are not quite adequate enough for all access to low-level resources.
+For example, there is no standardized [class]`URL` implementation that may be used to access a resource that needs to be obtained from the classpath, or relative to a [interface]`ServletContext`.
+While it is possible to register new handlers for specialized [class]`URL` prefixes (similar to existing handlers for prefixes such as `http:`), this is generally quite complicated, and the [class]`URL` interface still lacks some desirable functionality, such as a method to check for the existence of the resource being pointed to.
+
+== The [interface]`Resource` interface
+
+Spring's [interface]`Resource` interface is meant to be a more capable interface for abstracting access to low-level resources.
+
+[source,java]
+----
+public interface Resource extends InputStreamSource {
+
+    boolean exists();
+
+    boolean isOpen();
+
+    URL getURL() throws IOException;
+
+    File getFile() throws IOException;
+
+    Resource createRelative(String relativePath) throws IOException;
+
+    String getFilename();
+
+    String getDescription();
+}
+----
+
+[source,java]
+----
+public interface InputStreamSource {
+
+    InputStream getInputStream() throws IOException;
+}
+----
+
+Some of the most important methods from the [interface]`Resource` interface are:
+
+* [method]`getInputStream()`: locates and opens the resource, returning an [class]`InputStream` for reading from the resource.
+  It is expected that each invocation returns a fresh [class]`InputStream`.
+  It is the responsibility of the caller to close the stream.
+* [method]`exists()`: returns a `boolean` indicating whether this resource actually exists in physical form.
+* [method]`isOpen()`: returns a `boolean` indicating whether this resource represents a handle with an open stream.
+  If `true`, the [class]`InputStream` cannot be read multiple times, and must be read once only and then closed to avoid resource leaks.
+  Will be `false` for all usual resource implementations, with the exception of [class]`InputStreamResource`.
+* [method]`getDescription()`: returns a description for this resource, to be used for error output when working with the resource.
+  This is often the fully qualified file name or the actual URL of the resource.
+
+Other methods allow you to obtain an actual [class]`URL` or [class]`File` object representing the resource (if the underlying implementation is compatible, and supports that functionality).
+
+The [interface]`Resource` abstraction is used extensively in Spring itself, as an argument type in many method signatures when a resource is needed.
+Other methods in some Spring APIs (such as the constructors to various [interface]`ApplicationContext` implementations), take a [class]`String` which in unadorned or simple form is used to create a [interface]`Resource` appropriate to that context implementation, or via special prefixes on the [class]`String` path, allow the caller to specify that a specific [interface]`Resource` implementation must be created and used.
+
+While the [interface]`Resource` interface is used a lot with Spring and by Spring, it's actually very useful to use as a general utility class by itself in your own code, for access to resources, even when your code doesn't know or care about any other parts of Spring.
+While this couples your code to Spring, it really only couples it to this small set of utility classes, which are serving as a more capable replacement for [class]`URL`, and can be considered equivalent to any other library you would use for this purpose.
+
+It is important to note that the [interface]`Resource` abstraction does not replace functionality: it wraps it where possible.
+For example, a [class]`UrlResource` wraps a URL, and uses the wrapped [class]`URL` to do its work.
+
+== Built-in [interface]`Resource` implementations
+
+There are a number of [interface]`Resource` implementations that come supplied straight out of the box in Spring:
+
+=== [class]`UrlResource`
+
+The [class]`UrlResource` wraps a [class]`java.net.URL`, and may be used to access any object that is normally accessible via a URL, such as files, an HTTP target, an FTP target, etc.
+All URLs have a standardized [class]`String` representation, such that appropriate standardized prefixes are used to indicate one URL type from another.
+This includes `file:` for accessing filesystem paths, `http:` for accessing resources via the HTTP protocol, `ftp:` for accessing resources via FTP, etc.
+
+A [class]`UrlResource` is created by Java code explicitly using the [class]`UrlResource` constructor, but will often be created implicitly when you call an API method which takes a [class]`String` argument which is meant to represent a path.
+For the latter case, a JavaBeans [interface]`PropertyEditor` will ultimately decide which type of [interface]`Resource` to create.
+If the path string contains a few well-known (to it, that is) prefixes such as `classpath:`, it will create an appropriate specialized [interface]`Resource` for that prefix.
+However, if it doesn't recognize the prefix, it will assume the this is just a standard URL string, and will create a [class]`UrlResource`.
+
+=== [class]`ClassPathResource`
+
+This class represents a resource which should be obtained from the classpath.
+This uses either the thread context class loader, a given class loader, or a given class for loading resources.
+
+This [interface]`Resource` implementation supports resolution as [class]`java.io.File` if the class path resource resides in the file system, but not for classpath resources which reside in a jar and have not been expanded (by the servlet engine, or whatever the environment is) to the filesystem.
+To address this the various [interface]`Resource` implementations always support resolution as a [class]`java.net.URL`.
+
+A [class]`ClassPathResource` is created by Java code explicitly using the [class]`ClassPathResource` constructor, but will often be created implicitly when you call an API method which takes a [class]`String` argument which is meant to represent a path.
+For the latter case, a JavaBeans [interface]`PropertyEditor` will recognize the special prefix `classpath:`on the string path, and create a [class]`ClassPathResource` in that case.
+
+=== [class]`FileSystemResource`
+
+This is a [interface]`Resource` implementation for [class]`java.io.File` handles.
+It obviously supports resolution as a [class]`File`, and as a [class]`URL`.
+
+=== [class]`ServletContextResource`
+
+This is a [interface]`Resource` implementation for [interface]`ServletContext` resources, interpreting relative paths within the relevant web application's root directory.
+
+This always supports stream access and URL access, but only allows [class]`java.io.File` access when the web application archive is expanded and the resource is physically on the filesystem.
+Whether or not it's expanded and on the filesystem like this, or accessed directly from the JAR or somewhere else like a DB (it's conceivable) is actually dependent on the Servlet container.
+
+=== [class]`InputStreamResource`
+
+A [interface]`Resource` implementation for a given [interface]`InputStream`.
+This should only be used if no specific [interface]`Resource` implementation is applicable.
+In particular, prefer [class]`ByteArrayResource` or any of the file-based [interface]`Resource` implementations where possible.
+
+In contrast to other [interface]`Resource` implementations, this is a descriptor for an _already_ opened resource - therefore returning `true` from [method]`isOpen()`.
+Do not use it if you need to keep the resource descriptor somewhere, or if you need to read a stream multiple times.
+
+=== [class]`ByteArrayResource`
+
+This is a [interface]`Resource` implementation for a given byte array.
+It creates a [class]`ByteArrayInputStream` for the given byte array.
+
+It's useful for loading content from any given byte array, without having to resort to a single-use [class]`InputStreamResource`.
+
+== The [interface]`ResourceLoader`
+
+The [interface]`ResourceLoader` interface is meant to be implemented by objects that can return (i.e.
+load) [interface]`Resource` instances.
+
+[source,java]
+----
+public interface ResourceLoader {
+    Resource getResource(String location);
+}
+----
+
+All application contexts implement the [interface]`ResourceLoader` interface, and therefore all application contexts may be used to obtain [interface]`Resource` instances.
+
+When you call [method]`getResource()` on a specific application context, and the location path specified doesn't have a specific prefix, you will get back a [interface]`Resource` type that is appropriate to that particular application context.
+For example, assume the following snippet of code was executed against a [class]`ClassPathXmlApplicationContext` instance:
+
+[source,java]
+----
+Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
+----
+
+What would be returned would be a [class]`ClassPathResource`; if the same method was executed against a [class]`FileSystemXmlApplicationContext` instance, you'd get back a [class]`FileSystemResource`.
+For a [class]`WebApplicationContext`, you'd get back a [class]`ServletContextResource`, and so on.
+
+As such, you can load resources in a fashion appropriate to the particular application context.
+
+On the other hand, you may also force [class]`ClassPathResource` to be used, regardless of the application context type, by specifying the special `classpath:` prefix:
+
+[source,java]
+----
+Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");
+----
+
+Similarly, one can force a [class]`UrlResource` to be used by specifying any of the standard [class]`java.net.URL` prefixes:
+
+[source,java]
+----
+Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt");
+----
+
+[source,java]
+----
+Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+----
+
+The following table summarizes the strategy for converting [class]`String`s to [interface]`Resource`s:
+
+.Resource strings
+[cols="1,1,1", options="header"]
+|===
+| Prefix
+| Example
+| Explanation
+| classpath:
+|  classpath:com/myapp/config.xml
+            
+| Loaded from the classpath.
+
+| file:
+|  file:/data/config.xml
+            
+|  Loaded as a URL, from the
+            filesystem. 
+                But see also
+                .
+               
+
+| http:
+|  http://myserver/logo.png
+            
+| Loaded as a
+            URL.
+
+| (none)
+|  /data/config.xml 
+|  Depends on the underlying
+            ApplicationContext. 
+|===
+
+== The [interface]`ResourceLoaderAware` interface
+
+The [interface]`ResourceLoaderAware` interface is a special marker interface, identifying objects that expect to be provided with a [interface]`ResourceLoader` reference.
+
+[source,java]
+----
+public interface ResourceLoaderAware {
+
+   void setResourceLoader(ResourceLoader resourceLoader);
+}
+----
+
+When a class implements [interface]`ResourceLoaderAware` and is deployed into an application context (as a Spring-managed bean), it is recognized as [interface]`ResourceLoaderAware` by the application context.
+The application context will then invoke the [method]`setResourceLoader(ResourceLoader)`, supplying itself as the argument (remember, all application contexts in Spring implement the [interface]`ResourceLoader` interface).
+
+Of course, since an [interface]`ApplicationContext` is a [interface]`ResourceLoader`, the bean could also implement the [interface]`ApplicationContextAware` interface and use the supplied application context directly to load resources, but in general, it's better to use the specialized [interface]`ResourceLoader` interface if that's all that's needed.
+The code would just be coupled to the resource loading interface, which can be considered a utility interface, and not the whole Spring [interface]`ApplicationContext` interface.
+
+As of Spring 2.5, you can rely upon autowiring of the [interface]`ResourceLoader` as an alternative to implementing the [interface]`ResourceLoaderAware` interface.
+The "traditional" `constructor` and `byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable of providing a dependency of type [interface]`ResourceLoader` for either a constructor argument or setter method parameter respectively.
+For more flexibility (including the ability to autowire fields and multiple parameter methods), consider using the new annotation-based autowiring features.
+In that case, the [interface]`ResourceLoader` will be autowired into a field, constructor argument, or method parameter that is expecting the [interface]`ResourceLoader` type as long as the field, constructor, or method in question carries the [interface]`@Autowired` annotation.
+For more information, see <<beans-autowired-annotation>>.
+
+== `Resources` as dependencies
+
+If the bean itself is going to determine and supply the resource path through some sort of dynamic process, it probably makes sense for the bean to use the [interface]`ResourceLoader` interface to load resources.
+Consider as an example the loading of a template of some sort, where the specific resource that is needed depends on the role of the user.
+If the resources are static, it makes sense to eliminate the use of the [interface]`ResourceLoader` interface completely, and just have the bean expose the [interface]`Resource` properties it needs, and expect that they will be injected into it.
+
+What makes it trivial to then inject these properties, is that all application contexts register and use a special JavaBeans [interface]`PropertyEditor` which can convert [class]`String` paths to [interface]`Resource` objects.
+So if `myBean` has a template property of type [interface]`Resource`, it can be configured with a simple string for that resource, as follows:
+
+[source,xml]
+----
+<bean id="myBean" class="...">
+  <property name="template" value="some/resource/path/myTemplate.txt"/>
+</bean>
+----
+
+Note that the resource path has no prefix, so because the application context itself is going to be used as the [interface]`ResourceLoader`, the resource itself will be loaded via a [class]`ClassPathResource`, `FileSystemResource`, or [class]`ServletContextResource` (as appropriate) depending on the exact type of the context.
+
+If there is a need to force a specific [interface]`Resource` type to be used, then a prefix may be used.
+The following two examples show how to force a [class]`ClassPathResource` and a [class]`UrlResource` (the latter being used to access a filesystem file).
+
+[source,xml]
+----
+<property name="template" value="classpath:some/resource/path/myTemplate.txt">
+----
+
+[source,xml]
+----
+<property name="template" value="file:/some/resource/path/myTemplate.txt"/>
+----
+
+== Application contexts and [interface]`Resource` paths
+
+=== Constructing application contexts
+
+An application context constructor (for a specific application context type) generally takes a string or array of strings as the location path(s) of the resource(s) such as XML files that make up the definition of the context.
+
+When such a location path doesn't have a prefix, the specific [interface]`Resource` type built from that path and used to load the bean definitions, depends on and is appropriate to the specific application context.
+For example, if you create a [class]`ClassPathXmlApplicationContext` as follows:
+
+[source,java]
+----
+ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");
+----
+
+The bean definitions will be loaded from the classpath, as a [class]``[class]`ClassPathResource` will be used.
+But if you create a [class]`FileSystemXmlApplicationContext` as follows:
+
+[source,java]
+----
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("conf/appContext.xml");
+----
+
+The bean definition will be loaded from a filesystem location, in this case relative to the current working directory.
+
+Note that the use of the special classpath prefix or a standard URL prefix on the location path will override the default type of [interface]`Resource` created to load the definition.
+So this [class]`FileSystemXmlApplicationContext`...
+
+[source,java]
+----
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
+----
+
+...
+will actually load its bean definitions from the classpath.
+However, it is still a [class]`FileSystemXmlApplicationContext`.
+If it is subsequently used as a [interface]`ResourceLoader`, any unprefixed paths will still be treated as filesystem paths.
+
+==== Constructing [class]`ClassPathXmlApplicationContext` instances - shortcuts
+
+The [class]`ClassPathXmlApplicationContext` exposes a number of constructors to enable convenient instantiation.
+The basic idea is that one supplies merely a string array containing just the filenames of the XML files themselves (without the leading path information), and one _also_ supplies a [class]`Class`; the [class]`ClassPathXmlApplicationContext` will derive the path information from the supplied class.
+
+An example will hopefully make this clear.
+Consider a directory layout that looks like this:
+
+[source]
+----
+com/
+  foo/
+    services.xml
+    daos.xml
+    MessengerService.class
+----
+
+A [class]`ClassPathXmlApplicationContext` instance composed of the beans defined in the `'services.xml'` and `'daos.xml'` could be instantiated like so...
+
+[source,java]
+----
+ApplicationContext ctx = new ClassPathXmlApplicationContext(
+    new String[] {"services.xml", "daos.xml"}, MessengerService.class);
+----
+
+Please do consult the Javadocs for the [class]`ClassPathXmlApplicationContext` class for details of the various constructors.
+
+=== Wildcards in application context constructor resource paths
+
+The resource paths in application context constructor values may be a simple path (as shown above) which has a one-to-one mapping to a target Resource, or alternately may contain the special "classpath*:" prefix and/or internal Ant-style regular expressions (matched using Spring's [class]`PathMatcher` utility).
+Both of the latter are effectively wildcards
+
+One use for this mechanism is when doing component-style application assembly.
+All components can 'publish' context definition fragments to a well-known location path, and when the final application context is created using the same path prefixed via `classpath*:`, all component fragments will be picked up automatically.
+
+Note that this wildcarding is specific to use of resource paths in application context constructors (or when using the [class]`PathMatcher` utility class hierarchy directly), and is resolved at construction time.
+It has nothing to do with the [interface]`Resource` type itself.
+It's not possible to use the `classpath*:` prefix to construct an actual [interface]`Resource`, as a resource points to just one resource at a time.
+
+==== Ant-style Patterns
+
+When the path location contains an Ant-style pattern, for example:
+
+[source]
+----
+     /WEB-INF/*-context.xml
+     com/mycompany/**/applicationContext.xml
+     file:C:/some/path/*-context.xml
+     classpath:com/mycompany/**/applicationContext.xml
+----
+
+...
+the resolver follows a more complex but defined procedure to try to resolve the wildcard.
+It produces a Resource for the path up to the last non-wildcard segment and obtains a URL from it.
+If this URL is not a "jar:" URL or container-specific variant (e.g.
+"`zip:`" in WebLogic, "`wsjar`" in WebSphere, etc.), then a [class]`java.io.File` is obtained from it and used to resolve the wildcard by traversing the filesystem.
+In the case of a jar URL, the resolver either gets a [class]`java.net.JarURLConnection` from it or manually parses the jar URL and then traverses the contents of the jar file to resolve the wildcards.
+
+===== Implications on portability
+
+If the specified path is already a file URL (either explicitly, or implicitly because the base [interface]`ResourceLoader` is a filesystem one, then wildcarding is guaranteed to work in a completely portable fashion.
+
+If the specified path is a classpath location, then the resolver must obtain the last non-wildcard path segment URL via a [method]`Classloader.getResource()` call.
+Since this is just a node of the path (not the file at the end) it is actually undefined (in the [class]`ClassLoader` Javadocs) exactly what sort of a URL is returned in this case.
+In practice, it is always a [class]`java.io.File` representing the directory, where the classpath resource resolves to a filesystem location, or a jar URL of some sort, where the classpath resource resolves to a jar location.
+Still, there is a portability concern on this operation.
+
+If a jar URL is obtained for the last non-wildcard segment, the resolver must be able to get a [class]`java.net.JarURLConnection` from it, or manually parse the jar URL, to be able to walk the contents of the jar, and resolve the wildcard.
+This will work in most environments, but will fail in others, and it is strongly recommended that the wildcard resolution of resources coming from jars be thoroughly tested in your specific environment before you rely on it.
+
+==== The `classpath*:` prefix
+
+When constructing an XML-based application context, a location string may use the special `classpath*:` prefix:
+
+[source,java]
+----
+ApplicationContext ctx =
+    new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");
+----
+
+This special prefix specifies that all classpath resources that match the given name must be obtained (internally, this essentially happens via a [method]`ClassLoader.getResources(...)` call), and then merged to form the final application context definition.
+
+.Classpath*: portability
+[NOTE]
+====
+The wildcard classpath relies on the `getResources()` method of the underlying classloader.
+As most application servers nowadays supply their own classloader implementation, the behavior might differ especially when dealing with jar files.
+A simple test to check if `classpath*` works is to use the classloader to load a file from within a jar on the classpath: `getClass().getClassLoader().getResources("<someFileInsideTheJar>")`.
+Try this test with files that have the same name but are placed inside two different locations.
+In case an inappropriate result is returned, check the application server documentation for settings that might affect the classloader behavior.
+====
+
+The "`classpath*:`" prefix can also be combined with a `PathMatcher` pattern in the rest of the location path, for example "`classpath*:META-INF/*-beans.xml`".
+In this case, the resolution strategy is fairly simple: a ClassLoader.getResources() call is used on the last non-wildcard path segment to get all the matching resources in the class loader hierarchy, and then off each resource the same PathMatcher resolution strategy described above is used for the wildcard subpath.
+
+==== Other notes relating to wildcards
+
+Please note that "`classpath*:`" when combined with Ant-style patterns will only work reliably with at least one root directory before the pattern starts, unless the actual target files reside in the file system.
+This means that a pattern like "`classpath*:*.xml`" will not retrieve files from the root of jar files but rather only from the root of expanded directories.
+This originates from a limitation in the JDK's [method]`ClassLoader.getResources()` method which only returns file system locations for a passed-in empty string (indicating potential roots to search).
+
+Ant-style patterns with "`classpath:`" resources are not guaranteed to find matching resources if the root package to search is available in multiple class path locations.
+This is because a resource such as
+
+[source]
+----
+    com/mycompany/package1/service-context.xml
+----
+
+may be in only one location, but when a path such as
+
+[source]
+----
+    classpath:com/mycompany/**/service-context.xml
+----
+
+is used to try to resolve it, the resolver will work off the (first) URL returned by [method]`getResource("com/mycompany")`;.
+If this base package node exists in multiple classloader locations, the actual end resource may not be underneath.
+Therefore, preferably, use "`classpath*:`" with the same Ant-style pattern in such a case, which will search all class path locations that contain the root package.
+
+=== [class]`FileSystemResource` caveats
+
+A [class]`FileSystemResource` that is not attached to a [class]`FileSystemApplicationContext` (that is, a [class]`FileSystemApplicationContext` is not the actual [interface]`ResourceLoader`) will treat absolute vs.
+relative paths as you would expect.
+Relative paths are relative to the current working directory, while absolute paths are relative to the root of the filesystem.
+
+For backwards compatibility (historical) reasons however, this changes when the [class]`FileSystemApplicationContext` is the `ResourceLoader`.
+The [class]`FileSystemApplicationContext` simply forces all attached [class]`FileSystemResource` instances to treat all location paths as relative, whether they start with a leading slash or not.
+In practice, this means the following are equivalent:
+
+[source,java]
+----
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("conf/context.xml");
+----
+
+[source,java]
+----
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("/conf/context.xml");
+----
+
+As are the following: (Even though it would make sense for them to be different, as one case is relative and the other absolute.)
+
+[source,java]
+----
+FileSystemXmlApplicationContext ctx = ...;
+ctx.getResource("some/resource/path/myTemplate.txt");
+----
+
+[source,java]
+----
+FileSystemXmlApplicationContext ctx = ...;
+ctx.getResource("/some/resource/path/myTemplate.txt");
+----
+
+In practice, if true absolute filesystem paths are needed, it is better to forgo the use of absolute paths with [class]`FileSystemResource` / [class]`FileSystemXmlApplicationContext`, and just force the use of a [class]`UrlResource`, by using the `file:` URL prefix.
+
+[source,java]
+----
+// actual context type doesn't matter, the Resource will always be UrlResource
+ctx.getResource("file:/some/resource/path/myTemplate.txt");
+----
+
+[source,java]
+----
+// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("file:/conf/context.xml");
+----

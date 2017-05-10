@@ -1,0 +1,162 @@
+
+:numbered!:
+
+[appendix]
+= Migrating to Spring Framework 3.2
+
+In this appendix we discuss what users will want to know when upgrading to Spring Framework 3.2.
+For a general overview of features, please see <<new-in-3.2>>
+
+== Newly optional dependencies
+
+Certain inter-module dependencies are now `optional` at the Maven POM level where they were once required.
+For example, `spring-tx` and its dependence on `spring-context`.
+This may result in `
+    ClassNotFoundErrors` or other similar problems for users that have been relying on transitive dependency management to pull in affected downstream `spring-*
+    `.
+To resolve this problem, simply add the appropriate missing jars to your build configuration.
+
+== EHCache support moved to spring-context-support
+
+Along with Spring's new JCache support, the EHCache support classes in the `org.springframework.cache.ehcache` package moved from the `spring-context` module to `spring-context-support`.
+
+== Inlining of spring-asm jar
+
+In versions 3.0 and 3.1, we published a discrete `spring-asm` containing repackaged `org.objectweb.asm` 3.x sources.
+As of Spring Framework 3.2, we have upgraded to `org.objectweb.asm` 4.0 and done away with the separate module jar, favoring inlining these classes directly within `spring-core`.
+This should cause no migration issue for most users; but on the off chance that you have `spring-asm` declared directly within your project's build script, you'll want to remove it when upgrading to Spring Framework 3.2.
+
+== Explicit CGLIB dependency no longer required
+
+In prior versions, users of Spring's subclass-based AOP proxies (e.g.
+via `proxy-target-class="true"`) and `@Configuration` class support were required to declare an explicit dependency on CGLIB 2.2.
+As of Spring Framework 3.2, we now repackage and inline the newly-released CGLIB 3.0.
+
+This means greater convenience for users, as well as correct functionality for Java 7 users who are creating subclass proxies of types that contain `
+    invokedynamic` bytecode instructions.
+Repackaging CGLIB internally ensures no classpath conflicts with other third party frameworks that may depend on other versions of CGLIB.
+
+== For OSGi users
+
+OSGi metadata is no longer published within individual Spring Framework jar MANIFEST.MF files.
+Please see this <<,announcement>> for more information about how users can get OSGi-ready versions of Spring Framework 3.2 jars.
+
+== MVC Java Config and MVC Namespace
+
+As explained in <<mvc-config-content-negotiation>>, both the MVC Java config and the MVC namespace register extensions such as [file]`.json` and [file]`.xml` if the corresponding classpath dependencies are present.
+That means controller methods may now return JSON or XML formatted content if those extensions are present in the request URI, even if the 'Accept' header doesn't request those media types.
+
+The newly added support for matrix variables is explained in <<mvc-ann-matrix-variables>>.
+To preserve backward compatibility, by default, semicolon content is removed from incoming request URIs and therefore [interface]`@MatrixVariable` cannot be used without additional configuration.
+However, when using the MVC Java config and the MVC namespace, semicolon content is left in the URI so that matrix variables are automatically supported.
+The removal of semicolon content is controlled through the [class]`UrlPathHelper` property of [class]`RequestMappingHandlerMapping`.
+
+== Decoding of URI Variable Values
+
+URI variable values now get decoded when `UrlPathHelper.setUrlDecode` is set to `false`.
+See <<,SPR-9098>>.
+
+== HTTP PATCH method
+
+The [class]`DispatcherServlet` now allows the HTTP PATCH method where previously it didn't.
+
+== Tiles 3
+
+Besides the version number change, the set of Tiles dependencies has also changed.
+You will need to have a subset or all of [file]`tiles-request-api`, [file]`tiles-api`, [file]`tiles-core`, [file]`tiles-servlet`, [file]`tiles-jsp`, [file]`tiles-el`.
+
+
+== Spring MVC Test standalone project
+
+If migrating from the <<,spring-test-mvc>> standalone project to the [file]`spring-test` module in Spring Framework 3.2, you will need to adjust the root package to be [class]`org.springframework.test.web.servlet`.
+
+You will no longer be able to use the [class]`MockMvcBuilders` `annotationConfigSetup` and `xmlConfigSetup` options.
+Instead you'll need to switch to using the [interface]`@WebAppConfiguration` support of [file]`spring-test` for loading Spring configuration, then inject a [interface]`WebApplicationContext` into the test and use it to create a [class]`MockMvc`.
+See <<spring-mvc-test-framework>> for details.
+
+== Spring Test Dependencies
+
+The `spring-test` module has been upgraded to depend on JUnit 4.11 (`junit:junit`), TestNG 6.5.2 (`org.testng:testng`), and Hamcrest Core 1.3 (`org.hamcrest:hamcrest-core`).
+Each of these dependencies is declared as an _optional_ dependency in the Maven POM. Furthermore, it is important to note that the JUnit team has stopped inlining Hamcrest Core within the `junit:junit` Maven artifact as of JUnit 4.11.
+Hamcrest Core is now a _required_ transitive dependency of `junit`, and users may therefore need to remove any exclusions on `hamcrest-core` that they had previously configured for their build.
+
+== Public API changes
+
+=== JDiff reports
+
+ Select JDiff reports are now being published to provide users with a convenient means of understanding what's changed between versions.
+Going forward these will be published between each minor version, e.g.
+from 3.1.3.RELEASE to 3.1.4.RELEASE; from the latest maintenance version to the latest GA release, e.g.
+<<,
+      3.1.3.RELEASE to 3.2.0.RELEASE>>; and in between each milestone and/or RC for users who are tracking next-generation development, e.g.
+<<,
+      3.2.0.RC2 to 3.2.0.RELEASE>>.
+
+
+=== Deprecations
+
+The following packages and types have been wholly or partially deprecated in Spring Framework 3.2 and may be removed in a future version.
+Click through to the linked Javadoc for each item for exact details.
+See also the <<,
+      complete list of deprecations>> in the framework.
+
+*  <<,
+            org.springframework.orm.ibatis>> 
+*  <<,
+            org.springframework.scheduling.backportconcurrent>> 
+*  <<,
+            org.springframework.ejb.support>> 
+*  <<,
+            org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter>> 
+*  <<,
+            org.springframework.web.jsf.DelegatingVariableResolver>> 
+*  <<,
+            org.springframework.web.jsf.SpringBeanVariableResolver>> 
+*  <<,
+            org.springframework.ui.velocity.CommonsLoggingLogSystem>> 
+*  <<,
+            org.springframework.ui.velocity.VelocityEngineUtils>> 
+*  <<,
+            org.springframework.beans.factory.config.BeanReferenceFactoryBean>> 
+*  <<,
+            org.springframework.beans.factory.config.CommonsLogFactoryBean>> 
+*  <<,
+            org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver>> 
+*  <<,
+            org.springframework.transaction.jta.OC4JJtaTransactionManager>> 
+*  <<,
+            org.springframework.web.util.ExpressionEvaluationUtils>> 
+*  <<,
+            org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter>> 
+*  <<,
+            org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver>> 
+*  <<,
+            org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping>> 
+*  <<,
+            org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils>> 
+*  <<,
+            org.springframework.jmx.support.MBeanRegistrationSupport>> 
+*  <<,
+            org.springframework.test.context.ContextConfigurationAttributes>> 
+*  <<,
+            org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests>>: use of the  instance variable has been deprecated in favor of the new  instance variable.
+*  <<,
+            org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests>>: use of the  instance variable has been deprecated in favor of the new  instance variable.
+*  <<,
+            org.springframework.test.jdbc.SimpleJdbcTestUtils>> has been deprecated in favor of [class]`JdbcTestUtils` which now contains all of the functionality previously available in [class]`SimpleJdbcTestUtils`.
+*  <<,
+            org.springframework.web.servlet.view.ContentNegotiatingViewResolver>> 
+*  <<,
+            org.springframework.transaction.interceptor.TransactionAspectUtils>> 
+*  <<,
+            org.springframework.http.HttpStatus>> 
+*  <<,
+            org.springframework.web.util.UriUtils>> 
+*  <<,
+            org.springframework.orm.jpa.vendor.TopLinkJpaDialect>> 
+*  <<,
+            org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter>> 
+*  <<,
+            org.springframework.orm.util.CachingMapDecorator>> 
+
+:numbered:
