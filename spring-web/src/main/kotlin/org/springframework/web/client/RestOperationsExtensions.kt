@@ -8,7 +8,7 @@ import java.net.URI
 
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -19,7 +19,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriV
 		getForObject(url, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -30,7 +30,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariable
 		getForObject(url, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.getForObject] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -41,7 +41,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T =
 		getForObject(url, T::class.java)
 
 /**
- * Extension for [RestOperations.getForEntity] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.getForEntity] avoiding requiring the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -52,7 +52,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriV
 		getForEntity(url, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.postForObject] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -63,7 +63,7 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
 		postForObject(url, request, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.postForObject] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -74,6 +74,8 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
 		postForObject(url, request, T::class.java, uriVariables)
 
 /**
+ * Extension for [RestOperations.postForObject] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
+ *
  * @author Jon Schneider
  * @author Sebastien Deleuze
  * @since 5.0
@@ -83,7 +85,7 @@ inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any)
 		postForObject(url, request, T::class.java)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -94,7 +96,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
 		postForEntity(url, request, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -105,7 +107,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
 		postForEntity(url, request, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.postForEntity] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.postForEntity] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -116,7 +118,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any)
 		postForEntity(url, request, T::class.java)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -127,7 +129,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
 		exchange(url, method, requestEntity, T::class.java, *uriVariables)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -138,7 +140,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
 		exchange(url, method, requestEntity, T::class.java, uriVariables)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
@@ -149,7 +151,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod
 		exchange(url, method, requestEntity, T::class.java)
 
 /**
- * Extension for [RestOperations.exchange] avoiding specifying thanks to Kotlin reified type parameters.
+ * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
  *
  * @author Jon Schneider
  * @author Sebastien Deleuze
