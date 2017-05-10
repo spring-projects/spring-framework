@@ -26,10 +26,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternParser;
 
 /**
  * Lookup function used by {@link RouterFunctions#resources(String, Resource)}.
@@ -39,15 +39,15 @@ import org.springframework.util.StringUtils;
  */
 class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resource>> {
 
-	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
+	private static final PathPatternParser PATTERN_PARSER = new PathPatternParser();
 
-	private final String pattern;
+	private final PathPattern pattern;
 
 	private final Resource location;
 
 
 	public PathResourceLookupFunction(String pattern, Resource location) {
-		this.pattern = pattern;
+		this.pattern = PATTERN_PARSER.parse(pattern);
 		this.location = location;
 	}
 
@@ -61,11 +61,11 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
 			return Mono.empty();
 		}
-		if (!PATH_MATCHER.match(this.pattern, path)) {
+		if (!this.pattern.matches(path)) {
 			return Mono.empty();
 		}
 		else {
-			path = PATH_MATCHER.extractPathWithinPattern(this.pattern, path);
+			path = this.pattern.extractPathWithinPattern(path);
 		}
 		try {
 			Resource resource = this.location.createRelative(path);
