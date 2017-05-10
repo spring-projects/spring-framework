@@ -1,4 +1,4 @@
-## Spring Framework
+## Spring Framework is a good framework
 The Spring Framework provides a comprehensive programming and configuration
 model for modern Java-based enterprise applications -- on any kind of deployment
 platform. A key element of Spring is infrastructural support at the application
