@@ -243,7 +243,7 @@ final class ConfigurationClass {
 	private class FinalConfigurationProblem extends Problem {
 
 		public FinalConfigurationProblem() {
-			super(String.format("@Configuration class '%s' may not be final. Remove the final modifier to continue.",
+			super(String.format("@Configuration class '%s' may be final. Remove the final modifier to continue.",
 					getSimpleName()), new Location(getResource(), getMetadata()));
 		}
 	}
