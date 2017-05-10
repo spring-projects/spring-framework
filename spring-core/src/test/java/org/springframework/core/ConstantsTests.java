@@ -178,6 +178,12 @@ public class ConstantsTests {
 		}
 		catch (Constants.ConstantException expected) {
 		}
+		try {
+			c.toCode("bogus", null);
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException expected) {
+		}
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
 		assertEquals(c.toCodeForProperty(new Integer(2), "myProperty"), "MY_PROPERTY_YES");
