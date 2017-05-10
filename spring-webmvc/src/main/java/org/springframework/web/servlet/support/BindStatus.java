@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.web.util.HtmlUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Darren Davison
+ * @author Kazuki Shimizu
  * @see RequestContext#getBindStatus
  * @see org.springframework.web.servlet.tags.BindTag
  * @see org.springframework.web.servlet.view.AbstractTemplateView#setExposeSpringMacroHelpers
@@ -139,12 +140,12 @@ public class BindStatus {
 			// No BindingResult available as request attribute:
 			// Probably forwarded directly to a form view.
 			// Let's do the best we can: extract a plain target if appropriate.
-			Object target = requestContext.getModelObject(beanName);
-			if (target == null) {
-				throw new IllegalStateException("Neither BindingResult nor plain target object for bean name '" +
-						beanName + "' available as request attribute");
-			}
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
+				Object target = requestContext.getModelObject(beanName);
+				if (target == null) {
+					throw new IllegalStateException("Neither BindingResult nor plain target object for bean name '" +
+							beanName + "' available as request attribute");
+				}
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(target);
 				this.value = bw.getPropertyValue(this.expression);
 				this.valueType = bw.getPropertyType(this.expression);
