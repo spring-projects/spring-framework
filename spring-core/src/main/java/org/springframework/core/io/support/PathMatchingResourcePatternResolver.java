@@ -387,6 +387,34 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 							"] does not support 'getURLs()': " + ex);
 				}
 			}
+			if (ClassLoader.getSystemClassLoader() == classLoader) {
+				try {
+					String classpath = System.getProperty("java.class.path");
+					for (String url : StringUtils.delimitedListToStringArray(classpath, System.getProperty("path.separator"))) {
+						try {
+							if (url.endsWith(ResourceUtils.JAR_FILE_EXTENSION)) {
+								UrlResource jarResource = new UrlResource(
+										ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
+								if (jarResource.exists()) {
+									result.add(jarResource);
+								}
+							}
+						}
+						catch (MalformedURLException ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Cannot search for matching files underneath [" + url +
+										"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
+							}
+						}
+					}
+				}
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cannot introspect system classpath for ClassLoader [" + classLoader +
+								"] " + ex);
+					}
+				}
+			}
 		}
 
 		if (classLoader == ClassLoader.getSystemClassLoader()) {
