@@ -32,6 +32,7 @@ import java.util.concurrent.Callable;
  */
 public interface Cache {
 
+	
 	/**
 	 * Return the cache name.
 	 */
