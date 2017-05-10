@@ -113,11 +113,16 @@ public class MBeanServerFactoryBeanTests {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
+		MBeanServer server = null;
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			server = ManagementFactory.getPlatformMBeanServer();
+			assertSame(server, bean.getObject());
 		}
 		finally {
 			bean.destroy();
+			if (server != null) {
+				MBeanServerFactory.releaseMBeanServer(server);
+			}
 		}
 	}
 
