@@ -532,6 +532,22 @@ public class GenericConversionServiceTests {
 		assertEquals("FIRST", conversionService.convert(EnumWithSubclass.FIRST, String.class));
 	}
 
+	enum EnumWithSubclass {
+		FIRST {
+			@Override
+			public String toString() {
+				return "1st";
+			}
+		}
+	}
+
+	@Test
+	public void testSubclassOfEnumToString() throws Exception {
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		String result = conversionService.convert(EnumWithSubclass.FIRST, String.class);
+		assertEquals("FIRST", result);
+	}
+
 	@Test
 	public void testEnumWithInterfaceToStringConversion() {
 		// SPR-9692
