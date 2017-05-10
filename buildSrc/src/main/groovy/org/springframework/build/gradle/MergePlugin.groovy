@@ -56,8 +56,6 @@ import org.gradle.api.invocation.*
  */
 class MergePlugin implements Plugin<Project> {
 
-	private static boolean attachedProjectsEvaluated;
-
 	public void apply(Project project) {
 		project.plugins.apply(MavenPlugin)
 		project.plugins.apply(EclipsePlugin)
@@ -81,11 +79,12 @@ class MergePlugin implements Plugin<Project> {
 		}
 
 		// Hook to build runtimeMerge dependencies
+		def attachedProjectsEvaluated = project.rootProject.extensions.findByName('attachedProjectsEvaluated')
 		if (!attachedProjectsEvaluated) {
 			project.gradle.projectsEvaluated{
 				postProcessProjects(it)
 			}
-			attachedProjectsEvaluated  = true;
+			project.rootProject.extensions.add('attachedProjectsEvaluated', true)
 		}
 	}
 
