@@ -33,8 +33,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -51,7 +50,7 @@ public class ResourceHandlerFunctionTests {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
-		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
+		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
 
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 
@@ -86,7 +85,7 @@ public class ResourceHandlerFunctionTests {
 		MockServerWebExchange exchange = MockServerHttpRequest.head("http://localhost").toExchange();
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
-		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
+		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
 
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 
@@ -110,7 +109,7 @@ public class ResourceHandlerFunctionTests {
 		MockServerWebExchange exchange = MockServerHttpRequest.options("http://localhost").toExchange();
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
-		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
+		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
 
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 		Mono<Void> result = responseMono.flatMap(response -> {

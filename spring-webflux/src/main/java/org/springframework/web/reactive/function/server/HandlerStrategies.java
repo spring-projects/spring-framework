@@ -27,6 +27,8 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebFilter;
 
 /**
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
@@ -70,6 +72,20 @@ public interface HandlerStrategies {
 	 * @return the locale resolver
 	 */
 	Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver();
+
+	/**
+	 * Supply a {@linkplain Stream stream} of {@link WebFilter}s to be used for filtering the
+	 * request and response.
+	 * @return the stream of web filters
+	 */
+	Supplier<Stream<WebFilter>> webFilters();
+
+	/**
+	 * Supply a {@linkplain Stream stream} of {@link WebExceptionHandler}s to be used for handling
+	 * exceptions.
+	 * @return the stream of exception handlers
+	 */
+	Supplier<Stream<WebExceptionHandler>> exceptionHandlers();
 
 
 	// Static methods
@@ -137,6 +153,20 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 */
 		Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver);
+
+		/**
+		 * Add the given web filter to this builder.
+		 * @param filter the filter to add
+		 * @return this builder
+		 */
+		Builder webFilter(WebFilter filter);
+
+		/**
+		 * Add the given exception handler to this builder.
+		 * @param exceptionHandler the exception handler to add
+		 * @return this builder
+		 */
+		Builder exceptionHandler(WebExceptionHandler exceptionHandler);
 
 		/**
 		 * Builds the {@link HandlerStrategies}.

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -244,5 +247,36 @@ public class RouterFunctionsTests {
 		result.handle(httpRequest, httpResponse).block();
 		assertEquals(HttpStatus.NOT_FOUND, httpResponse.getStatusCode());
 	}
+
+	@Test
+	public void toHttpHandlerWebFilter() throws Exception {
+		AtomicBoolean filterInvoked = new AtomicBoolean();
+
+		WebFilter webFilter = new WebFilter() {
+			@Override
+			public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+				filterInvoked.set(true);
+				return chain.filter(exchange);
+			}
+		};
+
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.accepted().build();
+		RouterFunction<ServerResponse> routerFunction =
+				RouterFunctions.route(RequestPredicates.all(), handlerFunction);
+
+		HandlerStrategies handlerStrategies = HandlerStrategies.builder()
+				.webFilter(webFilter).build();
+
+		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, handlerStrategies);
+		assertNotNull(result);
+
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
+		result.handle(httpRequest, httpResponse).block();
+		assertEquals(HttpStatus.ACCEPTED, httpResponse.getStatusCode());
+
+		assertTrue(filterInvoked.get());
+	}
+
 
 }

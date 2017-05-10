@@ -32,6 +32,9 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
 /**
  * Default implementation of {@link HandlerStrategies.Builder}.
@@ -53,6 +56,9 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
+	private final List<WebFilter> webFilters = new ArrayList<>();
+
+	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
 
 	public DefaultHandlerStrategiesBuilder() {
@@ -62,6 +68,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
 		localeResolver(DEFAULT_LOCALE_RESOLVER);
+		exceptionHandler(new ResponseStatusExceptionHandler());
 	}
 
 	@Override
@@ -95,9 +102,24 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
+	public HandlerStrategies.Builder webFilter(WebFilter filter) {
+		Assert.notNull(filter, "'filter' must not be null");
+		this.webFilters.add(filter);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder exceptionHandler(WebExceptionHandler exceptionHandler) {
+		Assert.notNull(exceptionHandler, "'exceptionHandler' must not be null");
+		this.exceptionHandlers.add(exceptionHandler);
+		return this;
+	}
+
+	@Override
 	public HandlerStrategies build() {
 		return new DefaultHandlerStrategies(this.codecConfigurer.getReaders(),
-				this.codecConfigurer.getWriters(), this.viewResolvers, this.localeResolver);
+				this.codecConfigurer.getWriters(), this.viewResolvers, this.localeResolver,
+				this.webFilters, this.exceptionHandlers);
 	}
 
 
@@ -111,16 +133,24 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final Function<ServerRequest, Optional<Locale>> localeResolver;
 
+		private final List<WebFilter> webFilters;
+
+		private final List<WebExceptionHandler> exceptionHandlers;
+
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
-				Function<ServerRequest, Optional<Locale>> localeResolver) {
+				Function<ServerRequest, Optional<Locale>> localeResolver,
+				List<WebFilter> webFilters,
+				List<WebExceptionHandler> exceptionHandlers) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);
 			this.localeResolver = localeResolver;
+			this.webFilters = unmodifiableCopy(webFilters);
+			this.exceptionHandlers = unmodifiableCopy(exceptionHandlers);
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
@@ -145,6 +175,16 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		@Override
 		public Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver() {
 			return () -> this.localeResolver;
+		}
+
+		@Override
+		public Supplier<Stream<WebFilter>> webFilters() {
+			return this.webFilters::stream;
+		}
+
+		@Override
+		public Supplier<Stream<WebExceptionHandler>> exceptionHandlers() {
+			return this.exceptionHandlers::stream;
 		}
 	}
 

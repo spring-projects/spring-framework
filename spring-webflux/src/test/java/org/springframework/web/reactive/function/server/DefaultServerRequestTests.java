@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,9 +53,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
@@ -64,11 +64,9 @@ public class DefaultServerRequestTests {
 
 	private ServerHttpRequest mockRequest;
 
-	private ServerHttpResponse mockResponse;
-
 	private ServerWebExchange mockExchange;
 
-	private HandlerStrategies mockHandlerStrategies;
+	Supplier<Stream<HttpMessageReader<?>>> messageReaders;
 
 	private DefaultServerRequest defaultRequest;
 
@@ -76,14 +74,15 @@ public class DefaultServerRequestTests {
 	@Before
 	public void createMocks() {
 		mockRequest = mock(ServerHttpRequest.class);
-		mockResponse = mock(ServerHttpResponse.class);
+		ServerHttpResponse mockResponse = mock(ServerHttpResponse.class);
 
 		mockExchange = mock(ServerWebExchange.class);
 		when(mockExchange.getRequest()).thenReturn(mockRequest);
 		when(mockExchange.getResponse()).thenReturn(mockResponse);
-		mockHandlerStrategies = mock(HandlerStrategies.class);
 
-		defaultRequest = new DefaultServerRequest(mockExchange, mockHandlerStrategies);
+		this.messageReaders = Collections.<HttpMessageReader<?>>singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)))::stream;
+
+		defaultRequest = new DefaultServerRequest(mockExchange, messageReaders);
 	}
 
 
@@ -190,10 +189,6 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
-
 		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());
 	}
@@ -210,10 +205,6 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
-
 		Mono<String> resultMono = defaultRequest.bodyToMono(String.class);
 		assertEquals("foo", resultMono.block());
 	}
@@ -229,10 +220,6 @@ public class DefaultServerRequestTests {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
-
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
 		Mono<List<String>> result = resultFlux.collectList();
@@ -251,8 +238,8 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections.emptySet();
-		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		this.messageReaders = Collections.<HttpMessageReader<?>>emptySet()::stream;
+		this.defaultRequest = new DefaultServerRequest(mockExchange, messageReaders);
 
 		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
 		StepVerifier.create(resultFlux)

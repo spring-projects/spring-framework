@@ -65,12 +65,13 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final Headers headers;
 
-	private final HandlerStrategies strategies;
+	private final Supplier<Stream<HttpMessageReader<?>>> messageReaders;
 
 
-	DefaultServerRequest(ServerWebExchange exchange, HandlerStrategies strategies) {
+	DefaultServerRequest(ServerWebExchange exchange,
+			Supplier<Stream<HttpMessageReader<?>>> messageReaders) {
 		this.exchange = exchange;
-		this.strategies = strategies;
+		this.messageReaders = messageReaders;
 		this.headers = new DefaultHeaders();
 	}
 
@@ -102,7 +103,7 @@ class DefaultServerRequest implements ServerRequest {
 				new BodyExtractor.Context() {
 					@Override
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-						return DefaultServerRequest.this.strategies.messageReaders();
+						return DefaultServerRequest.this.messageReaders;
 					}
 
 					@Override

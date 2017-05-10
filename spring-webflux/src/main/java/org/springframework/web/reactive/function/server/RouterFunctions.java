@@ -30,10 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
@@ -197,7 +195,7 @@ public abstract class RouterFunctions {
 	 * @param routerFunction the router function to convert
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction) {
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
@@ -213,32 +211,27 @@ public abstract class RouterFunctions {
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
-	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler}, allowing
-	 * for additional filter and exception handler registration through
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return new HttpWebHandlerAdapter(exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies);
+		WebHandler webHandler = exchange -> {
+			ServerRequest request = new DefaultServerRequest(exchange, strategies.messageReaders());
 			addAttributes(exchange, request);
 			return routerFunction.route(request)
 					.defaultIfEmpty(notFound())
 					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-					.flatMap(response -> wrapException(() -> response.writeTo(exchange, strategies)))
-					.onErrorResume(ResponseStatusException.class,
-							ex -> {
-								exchange.getResponse().setStatusCode(ex.getStatus());
-								if (ex.getMessage() != null) {
-									logger.error(ex.getMessage());
-								}
-								return Mono.empty();
-							});
-		});
+					.flatMap(response -> wrapException(() -> response.writeTo(exchange, strategies)));
+		};
+
+		WebHttpHandlerBuilder handlerBuilder = WebHttpHandlerBuilder.webHandler(webHandler);
+		strategies.webFilters().get().forEach(handlerBuilder::filter);
+		strategies.exceptionHandlers().get().forEach(handlerBuilder::exceptionHandler);
+		return handlerBuilder.build();
 	}
 
 	private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
@@ -280,7 +273,7 @@ public abstract class RouterFunctions {
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		return exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies);
+			ServerRequest request = new DefaultServerRequest(exchange, strategies.messageReaders());
 			addAttributes(exchange, request);
 			return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
 		};
