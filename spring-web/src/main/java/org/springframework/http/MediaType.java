@@ -168,6 +168,16 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public final static String APPLICATION_XML_VALUE = "application/xml";
 
+        /**
+         * Public constant media type for {@code application/pdf}.
+         */
+        public final static org.springframework.http.MediaType APPLICATION_PDF;
+
+        /**
+         * A String equivalent of {@link MediaType#APPLICATION_PDF}.
+         */
+        public final static String APPLICATION_PDF_VALUE = "application/pdf";
+
 	/**
 	 * Public constant media type for {@code image/gif}.
 	 */
@@ -306,6 +316,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_STREAM_JSON = valueOf(APPLICATION_STREAM_JSON_VALUE);
 		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);
+		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
 		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
 		IMAGE_JPEG = valueOf(IMAGE_JPEG_VALUE);
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
