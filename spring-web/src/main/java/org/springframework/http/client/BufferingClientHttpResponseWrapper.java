@@ -16,13 +16,13 @@
 
 package org.springframework.http.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Simple implementation of {@link ClientHttpResponse} that reads the response's body
@@ -65,6 +65,10 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	@Override
 	public InputStream getBody() throws IOException {
+		if(response.getBody() == null) {
+			return null;
+		}
+
 		if (this.body == null) {
 			this.body = StreamUtils.copyToByteArray(this.response.getBody());
 		}
