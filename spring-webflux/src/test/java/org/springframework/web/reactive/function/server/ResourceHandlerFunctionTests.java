@@ -57,13 +57,9 @@ public class ResourceHandlerFunctionTests {
 
 		Mono<Void> result = responseMono.flatMap(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
-					/*
-					TODO: enable when ServerEntityResponse is reintroduced
-					StepVerifier.create(response.body())
-							.expectNext(this.resource)
-							.expectComplete()
-							.verify();
-					*/
+					assertTrue(response instanceof EntityResponse);
+					EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
+					assertEquals(this.resource, entityResponse.entity());
 					return response.writeTo(exchange, HandlerStrategies.withDefaults());
 				});
 
@@ -92,11 +88,14 @@ public class ResourceHandlerFunctionTests {
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
-		Mono<ServerResponse> response = this.handlerFunction.handle(request);
+		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 
-		Mono<Void> result = response.flatMap(res -> {
-			assertEquals(HttpStatus.OK, res.statusCode());
-			return res.writeTo(exchange, HandlerStrategies.withDefaults());
+		Mono<Void> result = responseMono.flatMap(response -> {
+			assertEquals(HttpStatus.OK, response.statusCode());
+			assertTrue(response instanceof EntityResponse);
+			EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
+			assertEquals(this.resource.getFilename(), entityResponse.entity().getFilename());
+			return response.writeTo(exchange, HandlerStrategies.withDefaults());
 		});
 
 		StepVerifier.create(result).expectComplete().verify();
@@ -118,12 +117,6 @@ public class ResourceHandlerFunctionTests {
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
 					response.headers().getAllow());
-			/*
-			TODO: enable when ServerEntityResponse is reintroduced
-			StepVerifier.create(response.body())
-					.expectComplete()
-					.verify();
-			*/
 			return response.writeTo(exchange, HandlerStrategies.withDefaults());
 		});
 

@@ -56,12 +56,12 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 	public Mono<ServerResponse> handle(ServerRequest request) {
 		switch (request.method()) {
 			case GET:
-				return ServerResponse.ok()
-						.body(BodyInserters.fromResource(this.resource));
+				return EntityResponse.fromObject(this.resource).build()
+						.map(response -> response);
 			case HEAD:
 				Resource headResource = new HeadMethodResource(this.resource);
-				return ServerResponse.ok()
-						.body(BodyInserters.fromResource(headResource));
+				return EntityResponse.fromObject(headResource).build()
+						.map(response -> response);
 			case OPTIONS:
 				return ServerResponse.ok()
 						.allow(SUPPORTED_METHODS)
