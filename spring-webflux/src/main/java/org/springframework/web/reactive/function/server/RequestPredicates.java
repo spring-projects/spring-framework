@@ -95,11 +95,7 @@ public abstract class RequestPredicates {
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
 		Assert.notNull(patternParser, "'patternParser' must not be null");
-		return pattern -> {
-			synchronized (patternParser) {
-				return new PathPatternPredicate(patternParser.parse(pattern));
-			}
-		};
+		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
