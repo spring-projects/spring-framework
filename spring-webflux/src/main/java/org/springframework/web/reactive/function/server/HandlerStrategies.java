@@ -16,10 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -40,7 +37,6 @@ import org.springframework.web.server.WebFilter;
  * @author Juergen Hoeller
  * @since 5.0
  * @see RouterFunctions#toHttpHandler(RouterFunction, HandlerStrategies)
- * @see RouterFunctions#toHandlerMapping(RouterFunction, HandlerStrategies)
  */
 public interface HandlerStrategies {
 
@@ -66,12 +62,6 @@ public interface HandlerStrategies {
 	 * @return the stream of view resolvers
 	 */
 	Supplier<Stream<ViewResolver>> viewResolvers();
-
-	/**
-	 * Supply a function that resolves the locale of a given {@link ServerRequest}.
-	 * @return the locale resolver
-	 */
-	Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver();
 
 	/**
 	 * Supply a {@linkplain Stream stream} of {@link WebFilter}s to be used for filtering the
@@ -146,13 +136,6 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 */
 		Builder viewResolver(ViewResolver viewResolver);
-
-		/**
-		 * Set the given function as {@link Locale} resolver for this builder.
-		 * @param localeResolver the locale resolver to set
-		 * @return this builder
-		 */
-		Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver);
 
 		/**
 		 * Add the given web filter to this builder.

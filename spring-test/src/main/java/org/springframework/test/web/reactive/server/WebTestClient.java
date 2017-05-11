@@ -48,6 +48,7 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.server.ServerWebExchange;
@@ -169,8 +170,8 @@ public interface WebTestClient {
 	 * @param routerFunction the RouterFunction to test
 	 * @return the {@link WebTestClient} builder
 	 */
-	static MockServerSpec<?> bindToRouterFunction(RouterFunction<?> routerFunction) {
-		return new RouterFunctionSpec(routerFunction);
+	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?> routerFunction) {
+		return new DefaultRouterFunctionSpec(routerFunction);
 	}
 
 	/**
@@ -282,6 +283,18 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
 		ControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer);
+
+	}
+
+	/**
+	 * Specification for customizing router function configuration.
+	 */
+	interface RouterFunctionSpec extends MockServerSpec<RouterFunctionSpec> {
+
+		/**
+		 * Configure handler strategies.
+		 */
+		RouterFunctionSpec handlerStrategies(HandlerStrategies handlerStrategies);
 
 	}
 

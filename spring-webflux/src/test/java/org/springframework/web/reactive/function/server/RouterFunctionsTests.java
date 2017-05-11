@@ -199,7 +199,7 @@ public class RouterFunctionsTests {
 
 					@Override
 					public Mono<Void> writeTo(ServerWebExchange exchange,
-							HandlerStrategies strategies) {
+							Context context) {
 						return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found"));
 					}
 				});
@@ -232,7 +232,7 @@ public class RouterFunctionsTests {
 
 					@Override
 					public Mono<Void> writeTo(ServerWebExchange exchange,
-							HandlerStrategies strategies) {
+							Context context) {
 						throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
 					}
 				});

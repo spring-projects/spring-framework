@@ -270,9 +270,9 @@ public class DefaultServerResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		HandlerStrategies strategies = mock(HandlerStrategies.class);
+		ServerResponse.Context context = mock(ServerResponse.Context.class);
 
-		result.flatMap(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, context)).block();
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
@@ -287,9 +287,9 @@ public class DefaultServerResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		HandlerStrategies strategies = mock(HandlerStrategies.class);
+		ServerResponse.Context context = mock(ServerResponse.Context.class);
 
-		result.flatMap(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, context)).block();
 
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}

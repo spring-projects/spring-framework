@@ -33,7 +33,6 @@ public class HandlerStrategiesTests {
 		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
 		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
 		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
-		assertNull(strategies.localeResolver().get());
 	}
 
 	@Test
@@ -42,7 +41,6 @@ public class HandlerStrategiesTests {
 		assertNotEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
 		assertNotEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
 		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
-		assertNotNull(strategies.localeResolver().get());
 	}
 
 }

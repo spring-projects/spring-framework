@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -31,11 +33,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -64,10 +68,10 @@ public interface ServerResponse {
 	/**
 	 * Write this response to the given web exchange.
 	 * @param exchange the web exchange to write to
-	 * @param strategies the strategies to use when writing
+	 * @param context the context to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
 	 */
-	Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies);
+	Mono<Void> writeTo(ServerWebExchange exchange, Context context);
 
 
 	// Static builder methods
@@ -298,7 +302,7 @@ public interface ServerResponse {
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
 		 * @return the built response
 		 */
-		Mono<ServerResponse> build(BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction);
+		Mono<ServerResponse> build(BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction);
 	}
 
 
@@ -384,5 +388,26 @@ public interface ServerResponse {
 		 */
 		Mono<ServerResponse> render(String name, Map<String, ?> model);
 	}
+
+	/**
+	 * Defines the context used during the {@link #writeTo(ServerWebExchange, Context)}.
+	 */
+	interface Context {
+
+		/**
+		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s
+		 * to be used for response body conversion.
+		 * @return the stream of message writers
+		 */
+		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+
+		/**
+		 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
+		 * resolution.
+		 * @return the stream of view resolvers
+		 */
+		Supplier<Stream<ViewResolver>> viewResolvers();
+	}
+
 
 }

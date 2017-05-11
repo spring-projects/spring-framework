@@ -169,7 +169,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public Mono<ServerResponse> build(
-			BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
+			BiFunction<ServerWebExchange, ServerResponse.Context, Mono<Void>> writeFunction) {
 
 		Assert.notNull(writeFunction, "'writeFunction' must not be null");
 		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers, writeFunction));
@@ -277,19 +277,19 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	private static final class WriterFunctionServerResponse extends AbstractServerResponse {
 
-		private final BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction;
+		private final BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction;
 
 		public WriterFunctionServerResponse(HttpStatus statusCode, HttpHeaders headers,
-				BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
+				BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction) {
 
 			super(statusCode, headers);
 			this.writeFunction = writeFunction;
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			writeStatusAndHeaders(exchange.getResponse());
-			return this.writeFunction.apply(exchange, strategies);
+			return this.writeFunction.apply(exchange, context);
 		}
 	}
 
@@ -309,13 +309,13 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			return this.inserter.insert(response, new BodyInserter.Context() {
 				@Override
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-					return strategies.messageWriters();
+					return context.messageWriters();
 				}
 
 				@Override

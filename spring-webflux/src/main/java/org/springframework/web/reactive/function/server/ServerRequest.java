@@ -33,9 +33,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 /**
@@ -174,6 +176,19 @@ public interface ServerRequest {
 	 */
 	Mono<? extends Principal> principal();
 
+
+	/**
+	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
+	 * message readers.
+	 * @param exchange the exchange
+	 * @param messageReaders the message readers
+	 * @return the created {@code ServerRequest}
+	 */
+	static ServerRequest create(ServerWebExchange exchange,
+			List<HttpMessageReader<?>> messageReaders) {
+
+		return new DefaultServerRequest(exchange, messageReaders::stream);
+	}
 
 	/**
 	 * Represents the headers of the HTTP request.

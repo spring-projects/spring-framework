@@ -19,7 +19,10 @@ package org.springframework.web.reactive.function.server;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.EnumSet;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -29,9 +32,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static org.junit.Assert.*;
 
@@ -43,6 +48,25 @@ public class ResourceHandlerFunctionTests {
 	private final Resource resource = new ClassPathResource("response.txt", getClass());
 
 	private final ResourceHandlerFunction handlerFunction = new ResourceHandlerFunction(this.resource);
+
+	private ServerResponse.Context context;
+
+	@Before
+	public void createContext() {
+		HandlerStrategies strategies = HandlerStrategies.withDefaults();
+		context = new ServerResponse.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				return strategies.messageWriters();
+			}
+
+			@Override
+			public Supplier<Stream<ViewResolver>> viewResolvers() {
+				return strategies.viewResolvers();
+			}
+		};
+
+	}
 
 
 	@Test
@@ -59,7 +83,7 @@ public class ResourceHandlerFunctionTests {
 					assertTrue(response instanceof EntityResponse);
 					EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 					assertEquals(this.resource, entityResponse.entity());
-					return response.writeTo(exchange, HandlerStrategies.withDefaults());
+					return response.writeTo(exchange, context);
 				});
 
 		StepVerifier.create(result)
@@ -94,7 +118,7 @@ public class ResourceHandlerFunctionTests {
 			assertTrue(response instanceof EntityResponse);
 			EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 			assertEquals(this.resource.getFilename(), entityResponse.entity().getFilename());
-			return response.writeTo(exchange, HandlerStrategies.withDefaults());
+			return response.writeTo(exchange, context);
 		});
 
 		StepVerifier.create(result).expectComplete().verify();
@@ -116,7 +140,7 @@ public class ResourceHandlerFunctionTests {
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
 					response.headers().getAllow());
-			return response.writeTo(exchange, HandlerStrategies.withDefaults());
+			return response.writeTo(exchange, context);
 		});
 
 

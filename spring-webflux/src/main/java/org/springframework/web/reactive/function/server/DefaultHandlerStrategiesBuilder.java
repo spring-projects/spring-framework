@@ -19,10 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -44,17 +41,9 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  */
 class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
-	static final Function<ServerRequest, Optional<Locale>> DEFAULT_LOCALE_RESOLVER =
-			request -> request.headers().acceptLanguage().stream()
-					.map(Locale.LanguageRange::getRange)
-					.map(Locale::forLanguageTag).findFirst();
-
-
 	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
-
-	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
 	private final List<WebFilter> webFilters = new ArrayList<>();
 
@@ -67,7 +56,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
-		localeResolver(DEFAULT_LOCALE_RESOLVER);
 		exceptionHandler(new ResponseStatusExceptionHandler());
 	}
 
@@ -95,13 +83,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
-	public HandlerStrategies.Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver) {
-		Assert.notNull(localeResolver, "'localeResolver' must not be null");
-		this.localeResolver = localeResolver;
-		return this;
-	}
-
-	@Override
 	public HandlerStrategies.Builder webFilter(WebFilter filter) {
 		Assert.notNull(filter, "'filter' must not be null");
 		this.webFilters.add(filter);
@@ -118,8 +99,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	@Override
 	public HandlerStrategies build() {
 		return new DefaultHandlerStrategies(this.codecConfigurer.getReaders(),
-				this.codecConfigurer.getWriters(), this.viewResolvers, this.localeResolver,
-				this.webFilters, this.exceptionHandlers);
+				this.codecConfigurer.getWriters(), this.viewResolvers, this.webFilters,
+				this.exceptionHandlers);
 	}
 
 
@@ -131,8 +112,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<ViewResolver> viewResolvers;
 
-		private final Function<ServerRequest, Optional<Locale>> localeResolver;
-
 		private final List<WebFilter> webFilters;
 
 		private final List<WebExceptionHandler> exceptionHandlers;
@@ -141,14 +120,12 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
-				Function<ServerRequest, Optional<Locale>> localeResolver,
 				List<WebFilter> webFilters,
 				List<WebExceptionHandler> exceptionHandlers) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);
-			this.localeResolver = localeResolver;
 			this.webFilters = unmodifiableCopy(webFilters);
 			this.exceptionHandlers = unmodifiableCopy(exceptionHandlers);
 		}
@@ -170,11 +147,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		@Override
 		public Supplier<Stream<ViewResolver>> viewResolvers() {
 			return this.viewResolvers::stream;
-		}
-
-		@Override
-		public Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver() {
-			return () -> this.localeResolver;
 		}
 
 		@Override

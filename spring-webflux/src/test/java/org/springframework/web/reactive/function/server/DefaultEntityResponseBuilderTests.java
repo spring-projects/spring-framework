@@ -23,6 +23,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -40,10 +42,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
@@ -190,6 +194,17 @@ public class DefaultEntityResponseBuilderTests {
 
 		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
 
+		ServerResponse.Context context = new ServerResponse.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				return Collections.<HttpMessageWriter<?>>singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()))::stream;
+			}
+
+			@Override
+			public Supplier<Stream<ViewResolver>> viewResolvers() {
+				return Collections.<ViewResolver>emptyList()::stream;
+			}
+		};
 		HandlerStrategies strategies = HandlerStrategies.empty()
 				.customCodecs(configurer -> configurer.writer(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes())))
 				.build();
@@ -200,7 +215,7 @@ public class DefaultEntityResponseBuilderTests {
 							.expectNext(body)
 							.expectComplete()
 							.verify();
-					response.writeTo(exchange, strategies);
+					response.writeTo(exchange, context);
 				})
 				.expectComplete()
 				.verify();

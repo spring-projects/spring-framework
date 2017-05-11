@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -158,12 +159,12 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale locale = resolveLocale(exchange, strategies);
-			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
+			Locale locale = resolveLocale(exchange);
+			Stream<ViewResolver> viewResolverStream = context.viewResolvers().get();
 
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))
@@ -173,15 +174,9 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
-		private Locale resolveLocale(ServerWebExchange exchange, HandlerStrategies strategies) {
-			ServerRequest request =
-					exchange.<ServerRequest>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
-							.orElseThrow(() -> new IllegalStateException(
-									"Could not find ServerRequest in exchange attributes"));
-
-			return strategies.localeResolver().get()
-					.apply(request)
-					.orElse(Locale.getDefault());
+		private Locale resolveLocale(ServerWebExchange exchange) {
+			List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
+			return locales.isEmpty() ? Locale.getDefault() : locales.get(0);
 
 		}
 	}
