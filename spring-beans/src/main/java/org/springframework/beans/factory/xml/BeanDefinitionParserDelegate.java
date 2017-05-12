@@ -223,8 +223,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 
-	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
-
 	public static final String DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE = "default-autowire-candidates";
 
 	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
@@ -385,7 +383,7 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
 		bdd.setLazyInit("TRUE".equalsIgnoreCase(this.defaults.getLazyInit()));
-		bdd.setAutowireMode(this.getAutowireMode(DEFAULT_VALUE));
+		bdd.setAutowireMode(getAutowireMode(DEFAULT_VALUE));
 		bdd.setInitMethodName(this.defaults.getInitMethod());
 		bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
 		return bdd;
@@ -610,22 +608,18 @@ public class BeanDefinitionParserDelegate {
 				bd.setInitMethodName(initMethodName);
 			}
 		}
-		else {
-			if (this.defaults.getInitMethod() != null) {
-				bd.setInitMethodName(this.defaults.getInitMethod());
-				bd.setEnforceInitMethod(false);
-			}
+		else if (this.defaults.getInitMethod() != null) {
+			bd.setInitMethodName(this.defaults.getInitMethod());
+			bd.setEnforceInitMethod(false);
 		}
 
 		if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
 			String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 			bd.setDestroyMethodName(destroyMethodName);
 		}
-		else {
-			if (this.defaults.getDestroyMethod() != null) {
-				bd.setDestroyMethodName(this.defaults.getDestroyMethod());
-				bd.setEnforceDestroyMethod(false);
-			}
+		else if (this.defaults.getDestroyMethod() != null) {
+			bd.setDestroyMethodName(this.defaults.getDestroyMethod());
+			bd.setEnforceDestroyMethod(false);
 		}
 
 		if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {

@@ -108,11 +108,10 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	/**
 	 * Apply {@link #beforeCommit(Supplier) beforeCommit} actions, apply the
 	 * request headers/cookies, and write the request body.
-	 * @param writeAction the action to write the request body or {@code null}
+	 * @param writeAction the action to write the request body (may be {@code null})
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
-
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			return Mono.empty();
 		}
@@ -134,15 +133,16 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		return Flux.concat(actions).next();
 	}
 
+
 	/**
-	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is called once only.
+	 * Apply header changes from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyHeaders();
 
 	/**
-	 * Implement this method to add cookies from {@link #getHeaders()} to the
-	 * underlying response. This method is called once only.
+	 * Add cookies from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
 

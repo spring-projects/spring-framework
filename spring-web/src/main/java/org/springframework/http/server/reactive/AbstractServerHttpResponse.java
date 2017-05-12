@@ -183,7 +183,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * Apply {@link #beforeCommit(Supplier) beforeCommit} actions, apply the
 	 * response status and headers/cookies, and write the response body.
-	 * @param writeAction the action to write the response body or {@code null}
+	 * @param writeAction the action to write the response body (may be {@code null})
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
@@ -214,33 +214,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	/**
-	 * Implement this method to write to the underlying the response.
+	 * Write to the underlying the response.
 	 * @param body the publisher to write with
 	 */
 	protected abstract Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body);
 
 	/**
-	 * Implement this method to write to the underlying the response, and flush after
-	 * each {@code Publisher<DataBuffer>}.
+	 * Write to the underlying the response, and flush after each {@code Publisher<DataBuffer>}.
 	 * @param body the publisher to write and flush with
 	 */
 	protected abstract Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body);
 
 	/**
-	 * Implement this method to write the status code to the underlying response.
+	 * Write the status code to the underlying response.
 	 * This method is called once only.
 	 */
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is called once only.
+	 * Apply header changes from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyHeaders();
 
 	/**
-	 * Implement this method to add cookies from {@link #getHeaders()} to the
-	 * underlying response. This method is called once only.
+	 * Add cookies from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
 
