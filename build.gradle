@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M4'
 	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.log4jVersion           = '2.8.2'
-	ext.nettyVersion           = "4.1.10.Final"
+	ext.nettyVersion           = "4.1.11.Final"
 	ext.niomultipartVersion    = "1.0.2"
 	ext.okhttp3Version         = "3.7.0"
 	ext.poiVersion             = "3.16"
