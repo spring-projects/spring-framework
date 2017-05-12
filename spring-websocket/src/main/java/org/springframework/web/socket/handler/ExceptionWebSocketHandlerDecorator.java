@@ -94,7 +94,7 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 				session.close(CloseStatus.SERVER_ERROR);
 			}
 			catch (Throwable ex) {
-				// ignore
+				logger.error("Error for " + this, ex);
 			}
 		}
 	}
