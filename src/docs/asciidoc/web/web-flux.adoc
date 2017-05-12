@@ -238,6 +238,7 @@ public HandlerMapping webSocketMapping() {
 	map.put("/bar", new BarWebSocketHandler());
 
 	SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+	mapping.setOrder(10);
 	mapping.setUrlMap(map);
 	return mapping;
 }
