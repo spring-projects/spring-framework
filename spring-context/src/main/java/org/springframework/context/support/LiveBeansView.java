@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -34,6 +37,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+
 /**
  * Adapter for live beans view exposure, building a snapshot of current beans
  * and their dependencies from either a local {@code ApplicationContext} (with a
@@ -45,6 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Biju Kunjummen
  * @since 3.2
  * @see #getSnapshotAsJson()
  * @see org.springframework.web.context.support.LiveBeansViewServlet
@@ -139,6 +144,37 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 		}
 	}
 
+	/*
+	 * List of all application contexts sorted by dependency on a parent context.
+	 * Parent contexts will come before child contexts.
+	 *
+	 * @return a list with ordered application contexts
+	 */
+	List<ConfigurableApplicationContext> orderedApplicationContexts(Set<ConfigurableApplicationContext> contexts) {
+		List<ConfigurableApplicationContext> orderedList = new ArrayList<>();
+		Set<ConfigurableApplicationContext> marked = new HashSet<>();
+		for (ConfigurableApplicationContext ctx: contexts) {
+			if (!marked.contains(ctx)) {
+				orderedApplicationContexts(ctx, orderedList, marked);
+			}
+		}
+		return orderedList;
+	}
+
+	private void orderedApplicationContexts(ConfigurableApplicationContext context,
+											List<ConfigurableApplicationContext> results,
+											Set<ConfigurableApplicationContext> marked) {
+		marked.add(context);
+		if (context.getParent() != null) {
+			if (!marked.contains(context.getParent())) {
+				orderedApplicationContexts((ConfigurableApplicationContext) context.getParent(), results, marked);
+			}
+		}
+
+		results.add(context);
+	}
+
+
 	/**
 	 * Actually generate a JSON snapshot of the beans in the given ApplicationContexts.
 	 * <p>This implementation doesn't use any JSON parsing libraries in order to avoid
@@ -152,7 +188,8 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	 */
 	protected String generateJson(Set<ConfigurableApplicationContext> contexts) {
 		StringBuilder result = new StringBuilder("[\n");
-		for (Iterator<ConfigurableApplicationContext> it = contexts.iterator(); it.hasNext();) {
+		List<ConfigurableApplicationContext> parentFirstOrderedContexts = orderedApplicationContexts(contexts);
+		for (Iterator<ConfigurableApplicationContext> it = parentFirstOrderedContexts.iterator(); it.hasNext();) {
 			ConfigurableApplicationContext context = it.next();
 			result.append("{\n\"context\": \"").append(context.getId()).append("\",\n");
 			if (context.getParent() != null) {
