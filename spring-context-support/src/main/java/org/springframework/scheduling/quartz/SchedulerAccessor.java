@@ -44,6 +44,9 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,
  * triggers and listeners on a {@link org.quartz.Scheduler} instance.
@@ -81,6 +84,9 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	protected ResourceLoader resourceLoader;
 
+	protected boolean isOverwriteExistingJobs() {
+		return overwriteExistingJobs;
+	}
 
 	/**
 	 * Set whether any jobs defined on this SchedulerFactoryBean should overwrite
@@ -210,30 +216,18 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 
-			// Register JobDetails.
-			if (this.jobDetails != null) {
-				for (JobDetail jobDetail : this.jobDetails) {
-					addJobToScheduler(jobDetail);
-				}
-			}
-			else {
+			if (this.jobDetails == null) {
 				// Create empty list for easier checks when registering triggers.
 				this.jobDetails = new LinkedList<>();
 			}
+			registerJobDetails(unmodifiableList(this.jobDetails));
 
-			// Register Calendars.
 			if (this.calendars != null) {
-				for (String calendarName : this.calendars.keySet()) {
-					Calendar calendar = this.calendars.get(calendarName);
-					getScheduler().addCalendar(calendarName, calendar, true, true);
-				}
+				registerCalendars(unmodifiableMap(this.calendars));
 			}
 
-			// Register Triggers.
 			if (this.triggers != null) {
-				for (Trigger trigger : this.triggers) {
-					addTriggerToScheduler(trigger);
-				}
+				registerTriggers(unmodifiableList(this.triggers));
 			}
 		}
 
@@ -258,6 +252,25 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 		if (transactionStatus != null) {
 			this.transactionManager.commit(transactionStatus);
+		}
+	}
+
+	protected void registerTriggers(List<Trigger> triggers) throws SchedulerException {
+		for (Trigger trigger : triggers) {
+			addTriggerToScheduler(trigger);
+		}
+	}
+
+	protected void registerCalendars(Map<String, Calendar> calendars) throws SchedulerException {
+		for (String calendarName : calendars.keySet()) {
+			Calendar calendar = calendars.get(calendarName);
+			getScheduler().addCalendar(calendarName, calendar, true, true);
+		}
+	}
+
+	protected void registerJobDetails(List<JobDetail> jobDetails) throws SchedulerException {
+		for (JobDetail jobDetail : jobDetails) {
+			addJobToScheduler(jobDetail);
 		}
 	}
 
@@ -299,6 +312,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			if (jobDetail != null && !this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 				this.jobDetails.add(jobDetail);
 			}
+			// rescheduleJob actually deletes the old trigger instead of updating it, this will be a problem if the
+			// multiple nodes in a cluster are started at the same time
 			getScheduler().rescheduleJob(trigger.getKey(), trigger);
 		}
 		else {
@@ -309,15 +324,22 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 					this.jobDetails.add(jobDetail);
 				}
 				else {
+					// if the job already exists but we fail to notice it, this will fail with ObjectAlreadyExists
 					getScheduler().scheduleJob(trigger);
 				}
 			}
 			catch (ObjectAlreadyExistsException ex) {
 				if (logger.isDebugEnabled()) {
+					// Not necessarily, this also happens if an existing trigger changes so that triggerExists
+					// evaluates to false, which causes the code to call scheduleJob instead of rescheduleJob.
+					// This will fail because the job is already registered. The ObjectAlreadyExistsException would
+					// refer to the JobDetail and not the Trigger like it is assumed.
 					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
 							ex.getMessage() + " - can safely be ignored");
 				}
 				if (this.overwriteExistingJobs) {
+					// If it indeed failed because the job details already existed, this won't do anything
+					// The code will try to find the old trigger and it won't find it so it will do nothing
 					getScheduler().rescheduleJob(trigger.getKey(), trigger);
 				}
 			}
