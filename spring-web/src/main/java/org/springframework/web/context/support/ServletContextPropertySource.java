@@ -23,7 +23,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link PropertySource} that reads init parameters from a {@link ServletContext} object.
+ * {@link PropertySource} that reads init parameters , contextPath and realPath from a {@link ServletContext} object.
  *
  * @author Chris Beams
  * @since 3.1
@@ -31,18 +31,29 @@ import org.springframework.util.StringUtils;
  */
 public class ServletContextPropertySource extends EnumerablePropertySource<ServletContext> {
 
-	public ServletContextPropertySource(String name, ServletContext servletContext) {
-		super(name, servletContext);
-	}
+    private static final String CONTEXT_PATH_PROPERTY_NAME = "contextPath";
 
-	@Override
-	public String[] getPropertyNames() {
-		return StringUtils.toStringArray(this.source.getInitParameterNames());
-	}
+    private static final String REAL_PATH_PROPERTY_NAME = "realPath";
 
-	@Override
-	public String getProperty(String name) {
-		return this.source.getInitParameter(name);
-	}
+    public ServletContextPropertySource(String name, ServletContext servletContext) {
+        super(name, servletContext);
+    }
+
+    @Override
+    public String[] getPropertyNames() {
+        String[] initParameterNames = StringUtils.toStringArray(this.source.getInitParameterNames());
+        return StringUtils.mergeStringArrays(initParameterNames, new String[]{CONTEXT_PATH_PROPERTY_NAME,REAL_PATH_PROPERTY_NAME});
+    }
+
+    @Override
+    public String getProperty(String name) {
+        if (CONTEXT_PATH_PROPERTY_NAME.equals(name)) {
+            return this.source.getContextPath();
+        } else if (REAL_PATH_PROPERTY_NAME.equals(name)) {
+            return this.source.getRealPath("");
+        } else {
+            return this.source.getInitParameter(name);
+        }
+    }
 
 }
