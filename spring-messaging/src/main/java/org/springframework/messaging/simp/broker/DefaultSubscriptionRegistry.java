@@ -292,8 +292,11 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					String cachedDestination = entry.getKey();
 					if (getPathMatcher().match(destination, cachedDestination)) {
 						LinkedMultiValueMap<String, String> subs = entry.getValue();
-						subs.add(sessionId, subsId);
-						this.accessCache.put(cachedDestination, subs.deepCopy());
+						// Subscription id's may also be populated via getSubscriptions()
+						if (!subs.containsKey(sessionId) || !subs.get(sessionId).contains(subsId)) {
+							subs.add(sessionId, subsId);
+							this.accessCache.put(cachedDestination, subs.deepCopy());
+						}
 					}
 				}
 			}
