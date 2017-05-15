@@ -74,7 +74,7 @@ class ExchangeMutatingWebFilter implements WebFilter {
 	}
 
 	private Function<ServerWebExchange, ServerWebExchange> getMutatorFor(ServerWebExchange exchange) {
-		String id = WiretapConnector.getRequestId(exchange.getRequest().getHeaders());
+		String id = WiretapConnector.getRequestIdHeader(exchange.getRequest().getHeaders());
 		Function<ServerWebExchange, ServerWebExchange> mutator = this.perRequestMutators.remove(id);
 		return mutator != null ? mutator : NO_OP_MUTATOR;
 	}

@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  */
 class WiretapConnector implements ClientHttpConnector {
 
-	public static final String REQUEST_ID_HEADER_NAME = "request-id";
+	public static final String REQUEST_ID_HEADER_NAME = "webtestclient-request-id";
 
 
 	private final ClientHttpConnector delegate;
@@ -69,8 +69,7 @@ class WiretapConnector implements ClientHttpConnector {
 				})
 				.map(response ->  {
 					WiretapClientHttpRequest wrappedRequest = requestRef.get();
-					String requestId = getRequestId(wrappedRequest.getHeaders());
-					Assert.notNull(requestId, "No request-id header");
+					String requestId = getRequestIdHeader(wrappedRequest.getHeaders());
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
 					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
 					this.exchanges.put(requestId, result);
@@ -78,9 +77,9 @@ class WiretapConnector implements ClientHttpConnector {
 				});
 	}
 
-	public static String getRequestId(HttpHeaders headers) {
+	public static String getRequestIdHeader(HttpHeaders headers) {
 		String requestId = headers.getFirst(REQUEST_ID_HEADER_NAME);
-		Assert.notNull(requestId, "No request-id header");
+		Assert.notNull(requestId, "No \"" + REQUEST_ID_HEADER_NAME + "\" header");
 		return requestId;
 	}
 
@@ -89,7 +88,7 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	public ExchangeResult claimRequest(String requestId) {
 		ExchangeResult result = this.exchanges.get(requestId);
-		Assert.notNull(result, "No match for request with id [" + requestId + "]");
+		Assert.notNull(result, "No match for request with header " + REQUEST_ID_HEADER_NAME + "=" + requestId);
 		return result;
 	}
 

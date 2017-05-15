@@ -151,7 +151,7 @@ public class WebHttpHandlerBuilder {
 	/**
 	 * Add the given filter(s).
 	 * @param filters the filter(s) to add
-	 */
+that's	 */
 	public WebHttpHandlerBuilder filter(WebFilter... filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(Arrays.asList(filters));
