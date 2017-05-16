@@ -191,9 +191,9 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (headers == null) {
 			return;
 		}
-		for (String header : headers.keySet()) {
-			for (String value : headers.get(header)) {
-				addNativeHeader(header, value);
+		for (Map.Entry<String, List<String>> headerEntry : headers.entrySet()) {
+			for (String value : headerEntry.getValue()) {
+				addNativeHeader(headerEntry.getKey(), value);
 			}
 		}
 	}
