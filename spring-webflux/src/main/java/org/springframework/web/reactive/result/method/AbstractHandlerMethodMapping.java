@@ -45,6 +45,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.support.LookupPath;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define
@@ -54,6 +55,7 @@ import org.springframework.web.server.ServerWebExchange;
  * subclasses defining the details of the mapping type {@code <T>}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
  * needed to match the handler method to incoming request.
@@ -255,7 +257,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
+		LookupPath lookupPath = getLookupPath(exchange);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
@@ -289,18 +291,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Look up the best-matching handler method for the current request.
 	 * If multiple matches are found, the best match is selected.
-	 * @param lookupPath mapping lookup path within the current servlet mapping
+	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * @see #handleMatch(Object, String,  ServerWebExchange)
-	 * @see #handleNoMatch(Set, String, ServerWebExchange)
+	 * @see #handleMatch(Object, LookupPath,  ServerWebExchange)
+	 * @see #handleNoMatch(Set, LookupPath, ServerWebExchange)
 	 */
 	@Nullable
-	protected HandlerMethod lookupHandlerMethod(String lookupPath, ServerWebExchange exchange)
+	protected HandlerMethod lookupHandlerMethod(LookupPath lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
 		List<Match> matches = new ArrayList<Match>();
-		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath.getPath());
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, exchange);
 		}
@@ -349,22 +351,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Invoked when a matching mapping is found.
 	 * @param mapping the matching mapping
-	 * @param lookupPath mapping lookup path within the current servlet mapping
+	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 */
-	protected void handleMatch(T mapping, String lookupPath, ServerWebExchange exchange) {
+	protected void handleMatch(T mapping, LookupPath lookupPath, ServerWebExchange exchange) {
 	}
 
 	/**
 	 * Invoked when no matching mapping is not found.
 	 * @param mappings all registered mappings
-	 * @param lookupPath mapping lookup path within the current servlet mapping
+	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return an alternative HandlerMethod or {@code null}
 	 * @throws Exception provides details that can be translated into an error status code
 	 */
 	@Nullable
-	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, ServerWebExchange exchange)
+	protected HandlerMethod handleNoMatch(Set<T> mappings, LookupPath lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
 		return null;

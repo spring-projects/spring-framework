@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -46,6 +47,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
@@ -99,7 +101,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	@Override
 	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
-		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
+		LookupPath lookupPath = getLookupPath(exchange);
 		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
@@ -109,30 +111,31 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath + "] to " + handler);
+			logger.debug("Mapping [" + lookupPath.getPath() + "] to " + handler);
 		}
 		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath + "]");
+			logger.trace("No handler mapping found for [" + lookupPath.getPath() + "]");
 		}
 
 		return Mono.justOrEmpty(handler);
 	}
 
 	/**
-	 * Look up a handler instance for the given URL path.
+	 * Look up a handler instance for the given URL lookup path.
+	 *
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
-	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
-	 * both "/test" and "/team". For details, see the AntPathMatcher class.
-	 * <p>Looks for the most exact pattern, where most exact is defined as
-	 * the longest path pattern.
-	 * @param urlPath URL the bean is mapped to
+	 * and various path pattern matches, e.g. a registered "/t*" matches
+	 * both "/test" and "/team". For details, see the PathPattern class.
+	 *
+	 * @param lookupPath URL the handler is mapped to
 	 * @param exchange the current exchange
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see org.springframework.web.util.pattern.ParsingPathMatcher
 	 */
 	@Nullable
-	protected Object lookupHandler(String urlPath, ServerWebExchange exchange) throws Exception {
+	protected Object lookupHandler(LookupPath lookupPath, ServerWebExchange exchange) throws Exception {
 		// Direct match?
+		String urlPath = lookupPath.getPath();
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			return handleMatch(handler, urlPath, urlPath, exchange);
@@ -156,7 +159,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (!matches.isEmpty()) {
 			Collections.sort(matches, comparator);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Matching patterns for request [" + urlPath + "] are " + matches);
+				logger.debug("Matching patterns for request [" + lookupPath + "] are " + matches);
 			}
 			bestMatch = matches.get(0);
 		}

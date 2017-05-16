@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -43,8 +43,6 @@ import org.springframework.web.util.pattern.ParsingPathMatcher;
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
 	private final Set<String> patterns;
-
-	private final HttpRequestPathHelper pathHelper;
 
 	private final PathMatcher pathMatcher;
 
@@ -61,35 +59,33 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public PatternsRequestCondition(String... patterns) {
-		this(asList(patterns), null, null, true, true, null);
+		this(asList(patterns), null, true, true, null);
 	}
 
 	/**
 	 * Creates a new instance with the given URL patterns.
 	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathHelper to determine the lookup path for a request
 	 * @param pathMatcher for pattern path matching
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param extensions file extensions to consider for path matching
 	 */
-	public PatternsRequestCondition(String[] patterns, HttpRequestPathHelper pathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
+	public PatternsRequestCondition(String[] patterns, PathMatcher pathMatcher,
+			boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
 			Set<String> extensions) {
 
-		this(asList(patterns), pathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, extensions);
+		this(asList(patterns), pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, extensions);
 	}
 
 	/**
 	 * Private constructor accepting a collection of patterns.
 	 */
-	private PatternsRequestCondition(Collection<String> patterns, HttpRequestPathHelper pathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
+	private PatternsRequestCondition(Collection<String> patterns, PathMatcher pathMatcher,
+			boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
 			Set<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.pathHelper = (pathHelper != null ? pathHelper : new HttpRequestPathHelper());
 		this.pathMatcher = (pathMatcher != null ? pathMatcher : new ParsingPathMatcher());
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
@@ -165,7 +161,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+		return new PatternsRequestCondition(result, this.pathMatcher, this.useSuffixPatternMatch,
 				this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
@@ -191,12 +187,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 
-		String lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
+		LookupPath lookupPath = exchange
+				.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE).get();
 		List<String> matches = getMatchingPatterns(lookupPath);
 
 		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+				new PatternsRequestCondition(matches, this.pathMatcher, this.useSuffixPatternMatch,
+						this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
 	/**
@@ -208,7 +205,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param lookupPath the lookup path to match to existing patterns
 	 * @return a collection of matching patterns sorted with the closest match at the top
 	 */
-	public List<String> getMatchingPatterns(String lookupPath) {
+	public List<String> getMatchingPatterns(LookupPath lookupPath) {
 		List<String> matches = new ArrayList<>();
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -216,34 +213,33 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
+		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath.getPath()));
 		return matches;
 	}
 
-	private String getMatchingPattern(String pattern, String lookupPath) {
-		if (pattern.equals(lookupPath)) {
+	private String getMatchingPattern(String pattern, LookupPath lookupPath) {
+		if (pattern.equals(lookupPath.getPath())) {
 			return pattern;
 		}
 		if (this.useSuffixPatternMatch) {
-			if (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) {
-				for (String extension : this.fileExtensions) {
-					if (this.pathMatcher.match(pattern + extension, lookupPath)) {
-						return pattern + extension;
-					}
+			if (!this.fileExtensions.isEmpty() && lookupPath.getFileExtension() != null) {
+				if (this.fileExtensions.contains(lookupPath.getFileExtension()) &&
+						this.pathMatcher.match(pattern, lookupPath.getPathWithoutExtension())) {
+					return pattern + lookupPath.getFileExtension();
 				}
 			}
 			else {
-				boolean hasSuffix = pattern.indexOf('.') != -1;
-				if (!hasSuffix && this.pathMatcher.match(pattern + ".*", lookupPath)) {
+				if (lookupPath.getFileExtension() != null
+						&& this.pathMatcher.match(pattern , lookupPath.getPathWithoutExtension())) {
 					return pattern + ".*";
 				}
 			}
 		}
-		if (this.pathMatcher.match(pattern, lookupPath)) {
+		if (this.pathMatcher.match(pattern, lookupPath.getPath())) {
 			return pattern;
 		}
 		if (this.useTrailingSlashMatch) {
-			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
+			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath.getPath())) {
 				return pattern +"/";
 			}
 		}
@@ -263,8 +259,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public int compareTo(PatternsRequestCondition other, ServerWebExchange exchange) {
-		String lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
-		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
+		LookupPath lookupPath = exchange
+				.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE).get();
+		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath.getPath());
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {

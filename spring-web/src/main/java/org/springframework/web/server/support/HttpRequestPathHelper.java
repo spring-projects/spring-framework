@@ -57,9 +57,14 @@ public class HttpRequestPathHelper {
 	}
 
 
-	public String getLookupPathForRequest(ServerWebExchange exchange) {
+	public LookupPath getLookupPathForRequest(ServerWebExchange exchange) {
 		String path = getPathWithinApplication(exchange.getRequest());
-		return (shouldUrlDecode() ? decode(exchange, path) : path);
+		path = (shouldUrlDecode() ? decode(exchange, path) : path);
+		int begin = path.lastIndexOf('/') + 1;
+		int end = path.length();
+		int paramIndex = path.indexOf(';', begin);
+		int extIndex = path.lastIndexOf('.', paramIndex != -1 ? paramIndex : end);
+		return new LookupPath(path, extIndex, paramIndex);
 	}
 
 	private String getPathWithinApplication(ServerHttpRequest request) {

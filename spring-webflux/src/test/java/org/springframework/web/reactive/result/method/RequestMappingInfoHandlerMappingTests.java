@@ -54,6 +54,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.server.support.LookupPath;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -72,11 +73,15 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
+	private HttpRequestPathHelper pathHelper;
+
 
 	@Before
 	public void setup() throws Exception {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
+		this.pathHelper = new HttpRequestPathHelper();
+		this.handlerMapping.setPathHelper(this.pathHelper);
 	}
 
 
@@ -208,8 +213,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
-		String lookupPath = "/1/2";
-		ServerWebExchange exchange = get(lookupPath).toExchange();
+		ServerWebExchange exchange = get("/1/2").toExchange();
+		LookupPath lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
 
 		RequestMappingInfo key = paths("/{path1}/{path2}").build();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
@@ -228,11 +233,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		URI url = URI.create("/group/a%2Fb");
 		ServerWebExchange exchange = MockServerHttpRequest.method(HttpMethod.GET, url).toExchange();
 
-		HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
-		pathHelper.setUrlDecode(false);
-		String lookupPath = pathHelper.getLookupPathForRequest(exchange);
-
-		this.handlerMapping.setPathHelper(pathHelper);
+		this.pathHelper.setUrlDecode(false);
+		LookupPath lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
+		this.handlerMapping.setPathHelper(this.pathHelper);
+		
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
@@ -248,7 +252,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchBestMatchingPatternAttribute() throws Exception {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
-		this.handlerMapping.handleMatch(key, "/1/2", exchange);
+		LookupPath lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
+		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		assertEquals("/{path1}/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
@@ -257,8 +262,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() throws Exception {
 		RequestMappingInfo key = paths().build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
-
-		this.handlerMapping.handleMatch(key, "/1/2", exchange);
+		LookupPath lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
+		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		assertEquals("/1/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
@@ -268,8 +273,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
-		ServerWebExchange exchange = get("/").toExchange();
-		handleMatch(exchange, "/{cars}", "/cars;colors=red,blue,green;year=2012");
+		ServerWebExchange exchange = get("/cars;colors=red,blue,green;year=2012").toExchange();
+		handleMatch(exchange, "/{cars}");
 
 		matrixVariables = getMatrixVariables(exchange, "cars");
 		uriVariables = getUriTemplateVariables(exchange);
@@ -279,8 +284,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
 
-		exchange = get("/").toExchange();
-		handleMatch(exchange, "/{cars:[^;]+}{params}", "/cars;colors=red,blue,green;year=2012");
+		exchange = get("/cars;colors=red,blue,green;year=2012").toExchange();
+		handleMatch(exchange, "/{cars:[^;]+}{params}");
 
 		matrixVariables = getMatrixVariables(exchange, "params");
 		uriVariables = getUriTemplateVariables(exchange);
@@ -291,8 +296,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
 
-		exchange = get("/").toExchange();
-		handleMatch(exchange, "/{cars:[^;]+}{params}", "/cars");
+		exchange = get("/cars").toExchange();
+		handleMatch(exchange, "/{cars:[^;]+}{params}");
 
 		matrixVariables = getMatrixVariables(exchange, "params");
 		uriVariables = getUriTemplateVariables(exchange);
@@ -308,8 +313,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		urlPathHelper.setUrlDecode(false);
 		this.handlerMapping.setPathHelper(urlPathHelper);
 
-		ServerWebExchange exchange = get("/").toExchange();
-		handleMatch(exchange, "/path{filter}", "/path;mvar=a%2fb");
+		ServerWebExchange exchange = get("/path;mvar=a%2fb").toExchange();
+		handleMatch(exchange, "/path{filter}");
 
 		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "filter");
 		Map<String, String> uriVariables = getUriTemplateVariables(exchange);
@@ -368,8 +373,9 @@ public class RequestMappingInfoHandlerMappingTests {
 						ex.getSupportedMediaTypes()));
 	}
 
-	private void handleMatch(ServerWebExchange exchange, String pattern, String lookupPath) {
+	private void handleMatch(ServerWebExchange exchange, String pattern) {
 		RequestMappingInfo info = paths(pattern).build();
+		LookupPath lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
 		this.handlerMapping.handleMatch(info, lookupPath, exchange);
 	}
 
@@ -474,7 +480,6 @@ public class RequestMappingInfoHandlerMappingTests {
 			RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annot != null) {
 				BuilderConfiguration options = new BuilderConfiguration();
-				options.setPathHelper(getPathHelper());
 				options.setPathMatcher(getPathMatcher());
 				options.setSuffixPatternMatch(true);
 				options.setTrailingSlashMatch(true);

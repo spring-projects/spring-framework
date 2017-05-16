@@ -33,7 +33,6 @@ import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.condition.RequestConditionHolder;
 import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * Encapsulates the following request mapping conditions:
@@ -475,9 +474,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-					this.paths, this.options.getPathHelper(), this.options.getPathMatcher(),
-					this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
-					this.options.getFileExtensions());
+					this.paths, this.options.getPathMatcher(), this.options.useSuffixPatternMatch(),
+					this.options.useTrailingSlashMatch(), this.options.getFileExtensions());
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
 					new RequestMethodsRequestCondition(methods),
@@ -498,8 +496,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
-		private HttpRequestPathHelper pathHelper;
-
 		private PathMatcher pathMatcher;
 
 		private boolean trailingSlashMatch = true;
@@ -509,18 +505,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		private boolean registeredSuffixPatternMatch = false;
 
 		private RequestedContentTypeResolver contentTypeResolver;
-
-		/**
-		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
-		 * <p>By default this is not set.
-		 */
-		public void setPathHelper(HttpRequestPathHelper pathHelper) {
-			this.pathHelper = pathHelper;
-		}
-
-		public HttpRequestPathHelper getPathHelper() {
-			return this.pathHelper;
-		}
 
 		/**
 		 * Set a custom PathMatcher to use for the PatternsRequestCondition.

@@ -37,6 +37,8 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.server.support.LookupPath;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -113,10 +115,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
-		this.config.setPathHelper(getPathHelper());
 		this.config.setPathMatcher(getPathMatcher());
 		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
-		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
 		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
 		this.config.setContentTypeResolver(getContentTypeResolver());
 
@@ -159,7 +159,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.config.getFileExtensions();
 	}
 
-
 	/**
 	 * {@inheritDoc}
 	 * Expects a handler to have a type-level @{@link Controller} annotation.
@@ -168,6 +167,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected boolean isHandler(Class<?> beanType) {
 		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
 				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
+	}
+
+	@Override
+	protected LookupPath createLookupPath(ServerWebExchange exchange) {
+		return getPathHelper().getLookupPathForRequest(exchange);
 	}
 
 	/**
