@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ package org.springframework.web.context.request;
  * attributes, with the optional notion of a "global session".
  *
  * <p>Can be implemented for any kind of request/session mechanism,
- * in particular for servlet requests and portlet requests.
+ * in particular for servlet requests.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see ServletRequestAttributes
- * @see org.springframework.web.portlet.context.PortletRequestAttributes
  */
 public interface RequestAttributes {
 
@@ -43,14 +42,6 @@ public interface RequestAttributes {
 	 * Else, it simply refers to the common session.
 	 */
 	int SCOPE_SESSION = 1;
-
-	/**
-	 * Constant that indicates global session scope.
-	 * <p>This explicitly refers to a globally shared session, if such
-	 * a distinction is available (for example, in a Portlet environment).
-	 * Else, it simply refers to the common session.
-	 */
-	int SCOPE_GLOBAL_SESSION = 2;
 
 
 	/**

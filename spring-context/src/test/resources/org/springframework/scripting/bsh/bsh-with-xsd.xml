@@ -29,7 +29,7 @@
 	</lang:bsh>
 
 	<lang:bsh id="messengerByType" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
-			autowire="byType" dependency-check="objects" init-method="init" destroy-method="destroy">
+			autowire="byType" init-method="init" destroy-method="destroy">
 	</lang:bsh>
 
 	<lang:bsh id="messengerByName" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
@@ -56,7 +56,7 @@
 <lang:inline-script><![CDATA[
 int count;
 void onApplicationEvent (org.springframework.context.ApplicationEvent event) { count++; System.out.println(event); }
-String getMessage() { return "count=" + count; } 
+String getMessage() { return "count=" + count; }
 ]]></lang:inline-script>
 </lang:bsh>
 

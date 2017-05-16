@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,36 @@ package org.springframework.util;
 
 import java.util.LinkedList;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AutoPopulatingListTests extends TestCase {
+public class AutoPopulatingListTests {
 
-	public void testWithClass() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(TestObject.class));
+	@Test
+	public void withClass() throws Exception {
+		doTestWithClass(new AutoPopulatingList<>(TestObject.class));
 	}
 
-	public void testWithClassAndUserSuppliedBackingList() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<Object>(), TestObject.class));
+	@Test
+	public void withClassAndUserSuppliedBackingList() throws Exception {
+		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<>(), TestObject.class));
 	}
 
-	public void testWithElementFactory() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new MockElementFactory()));
+	@Test
+	public void withElementFactory() throws Exception {
+		doTestWithElementFactory(new AutoPopulatingList<>(new MockElementFactory()));
 	}
 
-	public void testWithElementFactoryAndUserSuppliedBackingList() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<Object>(), new MockElementFactory()));
+	@Test
+	public void withElementFactoryAndUserSuppliedBackingList() throws Exception {
+		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<>(), new MockElementFactory()));
 	}
 
 	private void doTestWithClass(AutoPopulatingList<Object> list) {
@@ -68,21 +74,22 @@ public class AutoPopulatingListTests extends TestCase {
 	private void doTestWithElementFactory(AutoPopulatingList<Object> list) {
 		doTestWithClass(list);
 
-		for(int x = 0; x < list.size(); x++) {
+		for (int x = 0; x < list.size(); x++) {
 			Object element = list.get(x);
-			if(element instanceof TestObject) {
+			if (element instanceof TestObject) {
 				assertEquals(x, ((TestObject) element).getAge());
 			}
 		}
 	}
 
-	public void testSerialization() throws Exception {
+	@Test
+	public void serialization() throws Exception {
 		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestObject.class);
 		assertEquals(list, SerializationTestUtils.serializeAndDeserialize(list));
 	}
 
 
-	private static class MockElementFactory implements AutoPopulatingList.ElementFactory {
+	private static class MockElementFactory implements AutoPopulatingList.ElementFactory<Object> {
 
 		@Override
 		public Object createElement(int index) {

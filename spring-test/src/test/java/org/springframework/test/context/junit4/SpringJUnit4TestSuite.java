@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,17 +45,17 @@ import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTe
 import org.springframework.test.context.transaction.programmatic.ProgrammaticTxMgmtTests;
 
 /**
- * JUnit test suite for tests involving {@link SpringJUnit4ClassRunner} and the
+ * JUnit test suite for tests involving {@link SpringRunner} and the
  * <em>Spring TestContext Framework</em>; only intended to be run manually as a
  * convenience.
  *
  * <p>This test suite serves a dual purpose of verifying that tests run with
- * {@link SpringJUnit4ClassRunner} can be used in conjunction with JUnit's
+ * {@link SpringRunner} can be used in conjunction with JUnit's
  * {@link Suite} runner.
  *
  * <p>Note that tests included in this suite will be executed at least twice if
  * run from an automated build process, test runner, etc. that is not configured
- * to exclude tests based on a &quot;*TestSuite.class&quot; pattern match.
+ * to exclude tests based on a {@code "*TestSuite.class"} pattern match.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -104,10 +104,10 @@ StandardJUnit4FeaturesTests.class,//
 	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
 	MethodLevelTransactionalSpringRunnerTests.class,//
-	DefaultRollbackTrueTransactionalSpringRunnerTests.class,//
-	DefaultRollbackFalseTransactionalSpringRunnerTests.class,//
-	RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,//
-	RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,//
+	DefaultRollbackTrueRollbackAnnotationTransactionalTests.class,//
+	DefaultRollbackFalseRollbackAnnotationTransactionalTests.class,//
+	RollbackOverrideDefaultRollbackTrueTransactionalTests.class,//
+	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
 	ProgrammaticTxMgmtTests.class,//

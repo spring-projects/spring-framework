@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class SimpleNamingContextTests {
 		assertTrue("Correct DataSource registered", context1.lookup("java:comp/env/jdbc/myds") == ds);
 		assertTrue("Correct Object registered", context1.lookup("myobject") == obj);
 
-		Hashtable<String, String> env2 = new Hashtable<String, String>();
+		Hashtable<String, String> env2 = new Hashtable<>();
 		env2.put("key1", "value1");
 		Context context2 = factory.getInitialContext(env2);
 		assertTrue("Correct DataSource registered", context2.lookup("java:comp/env/jdbc/myds") == ds);
@@ -116,7 +116,7 @@ public class SimpleNamingContextTests {
 		assertTrue("Correct Integer registered", context3.lookup("myinteger") == i);
 		assertTrue("Correct String registered", context3.lookup("mystring") == s);
 
-		Map<String, Binding> bindingMap = new HashMap<String, Binding>();
+		Map<String, Binding> bindingMap = new HashMap<>();
 		NamingEnumeration<?> bindingEnum = context3.listBindings("");
 		while (bindingEnum.hasMoreElements()) {
 			Binding binding = (Binding) bindingEnum.nextElement();
@@ -127,7 +127,7 @@ public class SimpleNamingContextTests {
 
 		Context jdbcContext = (Context) context3.lookup("jdbc");
 		jdbcContext.bind("mydsX", ds);
-		Map<String, Binding> subBindingMap = new HashMap<String, Binding>();
+		Map<String, Binding> subBindingMap = new HashMap<>();
 		NamingEnumeration<?> subBindingEnum = jdbcContext.listBindings("");
 		while (subBindingEnum.hasMoreElements()) {
 			Binding binding = (Binding) subBindingEnum.nextElement();
@@ -145,7 +145,7 @@ public class SimpleNamingContextTests {
 
 		context1.createSubcontext("jdbc").bind("sub/subds", ds);
 
-		Map<String, String> pairMap = new HashMap<String, String>();
+		Map<String, String> pairMap = new HashMap<>();
 		NamingEnumeration<?> pairEnum = context2.list("jdbc");
 		while (pairEnum.hasMore()) {
 			NameClassPair pair = (NameClassPair) pairEnum.next();
@@ -154,7 +154,7 @@ public class SimpleNamingContextTests {
 		assertTrue("Correct sub subcontext", SimpleNamingContext.class.getName().equals(pairMap.get("sub")));
 
 		Context subContext = (Context) context2.lookup("jdbc/sub");
-		Map<String, String> subPairMap = new HashMap<String, String>();
+		Map<String, String> subPairMap = new HashMap<>();
 		NamingEnumeration<?> subPairEnum = subContext.list("");
 		while (subPairEnum.hasMoreElements()) {
 			NameClassPair pair = (NameClassPair) subPairEnum.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import javax.naming.spi.NamingManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple implementation of a JNDI naming context builder.
@@ -35,7 +37,8 @@ import org.springframework.util.ClassUtils;
  * configure JNDI appropriately, so that {@code new InitialContext()}
  * will expose the required objects. Also usable for standalone applications,
  * e.g. for binding a JDBC DataSource to a well-known JNDI location, to be
- * able to use traditional J2EE data access code outside of a J2EE container.
+ * able to use traditional Java EE data access code outside of a Java EE
+ * container.
  *
  * <p>There are various choices for DataSource implementations:
  * <ul>
@@ -122,7 +125,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final Hashtable<String,Object> boundObjects = new Hashtable<String,Object>();
+	private final Hashtable<String,Object> boundObjects = new Hashtable<>();
 
 
 	/**
@@ -137,12 +140,10 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		logger.info("Activating simple JNDI environment");
 		synchronized (initializationLock) {
 			if (!initialized) {
-				if (NamingManager.hasInitialContextFactoryBuilder()) {
-					throw new IllegalStateException(
+				Assert.state(!NamingManager.hasInitialContextFactoryBuilder(),
 							"Cannot activate SimpleNamingContextBuilder: there is already a JNDI provider registered. " +
 							"Note that JNDI is a JVM-wide service, shared at the JVM system class loader level, " +
 							"with no reset option. As a consequence, a JNDI provider must only be registered once per JVM.");
-				}
 				NamingManager.setInitialContextFactoryBuilder(this);
 				initialized = true;
 			}
@@ -211,10 +212,10 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 							"Specified class does not implement [" + InitialContextFactory.class.getName() + "]: " + icf);
 				}
 				try {
-					return (InitialContextFactory) icfClass.newInstance();
+					return (InitialContextFactory) ReflectionUtils.accessibleConstructor(icfClass).newInstance();
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException("Cannot instantiate specified InitialContextFactory: " + icf, ex);
+					throw new IllegalStateException("Unable to instantiate specified InitialContextFactory: " + icf, ex);
 				}
 			}
 		}

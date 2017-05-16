@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,16 @@ import org.springframework.core.NamedThreadLocal;
 public abstract class LocaleContextHolder {
 
 	private static final ThreadLocal<LocaleContext> localeContextHolder =
-			new NamedThreadLocal<LocaleContext>("Locale context");
+			new NamedThreadLocal<>("LocaleContext");
 
 	private static final ThreadLocal<LocaleContext> inheritableLocaleContextHolder =
-			new NamedInheritableThreadLocal<LocaleContext>("Locale context");
+			new NamedInheritableThreadLocal<>("LocaleContext");
+
+	// Shared default locale at the framework level
+	private static Locale defaultLocale;
+
+	// Shared default time zone at the framework level
+	private static TimeZone defaultTimeZone;
 
 
 	/**
@@ -153,17 +159,37 @@ public abstract class LocaleContextHolder {
 	}
 
 	/**
+	 * Set a shared default locale at the framework level,
+	 * as an alternative to the JVM-wide default locale.
+	 * <p><b>NOTE:</b> This can be useful to set an application-level
+	 * default locale which differs from the JVM-wide default locale.
+	 * However, this requires each such application to operate against
+	 * locally deployed Spring Framework jars. Do not deploy Spring
+	 * as a shared library at the server level in such a scenario!
+	 * @param locale the default locale (or {@code null} for none,
+	 * letting lookups fall back to {@link Locale#getDefault()})
+	 * @since 4.3.5
+	 * @see #getLocale()
+	 * @see Locale#getDefault()
+	 */
+	public static void setDefaultLocale(Locale locale) {
+		LocaleContextHolder.defaultLocale = locale;
+	}
+
+	/**
 	 * Return the Locale associated with the current thread, if any,
-	 * or the system default Locale else. This is effectively a
+	 * or the system default Locale otherwise. This is effectively a
 	 * replacement for {@link java.util.Locale#getDefault()},
 	 * able to optionally respect a user-level Locale setting.
-	 * <p>Note: This method has a fallback to the system default Locale.
+	 * <p>Note: This method has a fallback to the shared default Locale,
+	 * either at the framework level or at the JVM-wide system level.
 	 * If you'd like to check for the raw LocaleContext content
 	 * (which may indicate no specific locale through {@code null}, use
 	 * {@link #getLocaleContext()} and call {@link LocaleContext#getLocale()}
 	 * @return the current Locale, or the system default Locale if no
 	 * specific Locale has been associated with the current thread
 	 * @see LocaleContext#getLocale()
+	 * @see #setDefaultLocale(Locale)
 	 * @see java.util.Locale#getDefault()
 	 */
 	public static Locale getLocale() {
@@ -174,7 +200,7 @@ public abstract class LocaleContextHolder {
 				return locale;
 			}
 		}
-		return Locale.getDefault();
+		return (defaultLocale != null ? defaultLocale : Locale.getDefault());
 	}
 
 	/**
@@ -218,11 +244,30 @@ public abstract class LocaleContextHolder {
 	}
 
 	/**
+	 * Set a shared default time zone at the framework level,
+	 * as an alternative to the JVM-wide default time zone.
+	 * <p><b>NOTE:</b> This can be useful to set an application-level
+	 * default time zone which differs from the JVM-wide default time zone.
+	 * However, this requires each such application to operate against
+	 * locally deployed Spring Framework jars. Do not deploy Spring
+	 * as a shared library at the server level in such a scenario!
+	 * @param timeZone the default time zone (or {@code null} for none,
+	 * letting lookups fall back to {@link TimeZone#getDefault()})
+	 * @since 4.3.5
+	 * @see #getTimeZone()
+	 * @see TimeZone#getDefault()
+	 */
+	public static void setDefaultTimeZone(TimeZone timeZone) {
+		defaultTimeZone = timeZone;
+	}
+
+	/**
 	 * Return the TimeZone associated with the current thread, if any,
-	 * or the system default TimeZone else. This is effectively a
+	 * or the system default TimeZone otherwise. This is effectively a
 	 * replacement for {@link java.util.TimeZone#getDefault()},
 	 * able to optionally respect a user-level TimeZone setting.
-	 * <p>Note: This method has a fallback to the system default Locale.
+	 * <p>Note: This method has a fallback to the shared default TimeZone,
+	 * either at the framework level or at the JVM-wide system level.
 	 * If you'd like to check for the raw LocaleContext content
 	 * (which may indicate no specific time zone through {@code null}, use
 	 * {@link #getLocaleContext()} and call {@link TimeZoneAwareLocaleContext#getTimeZone()}
@@ -230,6 +275,7 @@ public abstract class LocaleContextHolder {
 	 * @return the current TimeZone, or the system default TimeZone if no
 	 * specific TimeZone has been associated with the current thread
 	 * @see TimeZoneAwareLocaleContext#getTimeZone()
+	 * @see #setDefaultTimeZone(TimeZone)
 	 * @see java.util.TimeZone#getDefault()
 	 */
 	public static TimeZone getTimeZone() {
@@ -240,7 +286,7 @@ public abstract class LocaleContextHolder {
 				return timeZone;
 			}
 		}
-		return TimeZone.getDefault();
+		return (defaultTimeZone != null ? defaultTimeZone : TimeZone.getDefault());
 	}
 
 }

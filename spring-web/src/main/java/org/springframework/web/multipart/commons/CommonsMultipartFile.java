@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.multipart.commons;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,10 +27,11 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * MultipartFile implementation for Apache Commons FileUpload.
+ * {@link MultipartFile} implementation for Apache Commons FileUpload.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
@@ -46,6 +46,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	private final FileItem fileItem;
 
 	private final long size;
+
+	private boolean preserveFilename = false;
 
 
 	/**
@@ -66,6 +68,21 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		return this.fileItem;
 	}
 
+	/**
+	 * Set whether to preserve the filename as sent by the client, not stripping off
+	 * path information in {@link CommonsMultipartFile#getOriginalFilename()}.
+	 * <p>Default is "false", stripping off path information that may prefix the
+	 * actual filename e.g. from Opera. Switch this to "true" for preserving the
+	 * client-specified filename as-is, including potential path separators.
+	 * @since 4.3.5
+	 * @see #getOriginalFilename()
+	 * @see CommonsMultipartResolver#setPreserveFilename(boolean)
+	 */
+	public void setPreserveFilename(boolean preserveFilename) {
+		this.preserveFilename = preserveFilename;
+	}
+
+
 	@Override
 	public String getName() {
 		return this.fileItem.getFieldName();
@@ -78,12 +95,17 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			// Should never happen.
 			return "";
 		}
-		// Check for Unix-style path
-		int pos = filename.lastIndexOf("/");
-		if (pos == -1) {
-			// Check for Windows-style path
-			pos = filename.lastIndexOf("\\");
+		if (this.preserveFilename) {
+			// Do not try to strip off a path...
+			return filename;
 		}
+
+		// Check for Unix-style path
+		int unixSep = filename.lastIndexOf("/");
+		// Check for Windows-style path
+		int winSep = filename.lastIndexOf("\\");
+		// Cut off at latest possible point
+		int pos = (winSep > unixSep ? winSep : unixSep);
 		if (pos != -1)  {
 			// Any sort of path separator found...
 			return filename.substring(pos + 1);
@@ -124,7 +146,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			throw new IllegalStateException("File has been moved - cannot be read again");
 		}
 		InputStream inputStream = this.fileItem.getInputStream();
-		return (inputStream != null ? inputStream : new ByteArrayInputStream(new byte[0]));
+		return (inputStream != null ? inputStream : StreamUtils.emptyInput());
 	}
 
 	@Override
@@ -143,7 +165,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			if (logger.isDebugEnabled()) {
 				String action = "transferred";
 				if (!this.fileItem.isInMemory()) {
-					action = isAvailable() ? "copied" : "moved";
+					action = (isAvailable() ? "copied" : "moved");
 				}
 				logger.debug("Multipart file '" + getName() + "' with original filename [" +
 						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
@@ -151,14 +173,18 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			}
 		}
 		catch (FileUploadException ex) {
-			throw new IllegalStateException(ex.getMessage());
+			throw new IllegalStateException(ex.getMessage(), ex);
+		}
+		catch (IllegalStateException ex) {
+			// Pass through when coming from FileItem directly
+			throw ex;
 		}
 		catch (IOException ex) {
+			// From I/O operations within FileItem.write
 			throw ex;
 		}
 		catch (Exception ex) {
-			logger.error("Could not transfer to file", ex);
-			throw new IOException("Could not transfer to file: " + ex.getMessage());
+			throw new IOException("File transfer failed", ex);
 		}
 	}
 

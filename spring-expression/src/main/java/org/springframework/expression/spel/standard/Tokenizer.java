@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
-import org.springframework.util.Assert;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.
@@ -73,7 +72,7 @@ class Tokenizer {
 
 	int max;
 
-	List<Token> tokens = new ArrayList<Token>();
+	List<Token> tokens = new ArrayList<>();
 
 
 	public Tokenizer(String inputData) {
@@ -182,12 +181,12 @@ class Tokenizer {
 						}
 						break;
 					case '&':
-						if (!isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
-							throw new InternalParseException(new SpelParseException(
-									this.expressionString, this.pos, SpelMessage.MISSING_CHARACTER,
-									"&"));
+						if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+							pushPairToken(TokenKind.SYMBOLIC_AND);
 						}
-						pushPairToken(TokenKind.SYMBOLIC_AND);
+						else {
+							pushCharToken(TokenKind.FACTORY_BEAN_REF);
+						}
 						break;
 					case '|':
 						if (!isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
@@ -522,9 +521,9 @@ class Tokenizer {
 	 * Check if this might be a two character token.
 	 */
 	private boolean isTwoCharToken(TokenKind kind) {
-		Assert.isTrue(kind.tokenChars.length == 2);
-		Assert.isTrue(this.toProcess[this.pos] == kind.tokenChars[0]);
-		return this.toProcess[this.pos + 1] == kind.tokenChars[1];
+		return (kind.tokenChars.length == 2 &&
+				this.toProcess[this.pos] == kind.tokenChars[0] &&
+				this.toProcess[this.pos + 1] == kind.tokenChars[1]);
 	}
 
 	/**

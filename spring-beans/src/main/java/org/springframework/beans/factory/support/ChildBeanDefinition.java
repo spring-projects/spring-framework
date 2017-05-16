@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * configured through its bean properties and configuration methods.
 	 * @param parentName the name of the parent bean
 	 * @see #setBeanClass
-	 * @see #setBeanClassName
 	 * @see #setScope
-	 * @see #setAutowireMode
-	 * @see #setDependencyCheck
 	 * @see #setConstructorArgumentValues
 	 * @see #setPropertyValues
 	 */
@@ -174,9 +171,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("Child bean with parent '");
-		sb.append(this.parentName).append("': ").append(super.toString());
-		return sb.toString();
+		return "Child bean with parent '" + this.parentName + "': " + super.toString();
 	}
 
 }

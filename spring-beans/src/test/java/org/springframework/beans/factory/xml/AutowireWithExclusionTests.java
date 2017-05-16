@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -25,13 +25,16 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AutowireWithExclusionTests extends TestCase {
+public class AutowireWithExclusionTests {
 
-	public void testByTypeAutowireWithAutoSelfExclusion() throws Exception {
+	@Test
+	public void byTypeAutowireWithAutoSelfExclusion() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -41,7 +44,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithExclusion() throws Exception {
+	@Test
+	public void byTypeAutowireWithExclusion() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -50,7 +54,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithExclusionInParentFactory() throws Exception {
+	@Test
+	public void byTypeAutowireWithExclusionInParentFactory() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.preInstantiateSingletons();
@@ -64,7 +69,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithPrimaryInParentFactory() throws Exception {
+	@Test
+	public void byTypeAutowireWithPrimaryInParentFactory() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.getBeanDefinition("props1").setPrimary(true);
@@ -82,7 +88,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithPrimaryOverridingParentFactory() throws Exception {
+	@Test
+	public void byTypeAutowireWithPrimaryOverridingParentFactory() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.preInstantiateSingletons();
@@ -100,7 +107,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithPrimaryInParentAndChild() throws Exception {
+	@Test
+	public void byTypeAutowireWithPrimaryInParentAndChild() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.getBeanDefinition("props1").setPrimary(true);
@@ -119,7 +127,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithInclusion() throws Exception {
+	@Test
+	public void byTypeAutowireWithInclusion() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-inclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -128,7 +137,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testByTypeAutowireWithSelectiveInclusion() throws Exception {
+	@Test
+	public void byTypeAutowireWithSelectiveInclusion() throws Exception {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-selective-inclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -137,7 +147,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
-	public void testConstructorAutowireWithAutoSelfExclusion() throws Exception {
+	@Test
+	public void constructorAutowireWithAutoSelfExclusion() throws Exception {
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-constructor-with-exclusion.xml");
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
@@ -149,7 +160,8 @@ public class AutowireWithExclusionTests extends TestCase {
 		assertNotSame(rob.getSpouse(), rob2.getSpouse());
 	}
 
-	public void testConstructorAutowireWithExclusion() throws Exception {
+	@Test
+	public void constructorAutowireWithExclusion() throws Exception {
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-constructor-with-exclusion.xml");
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));

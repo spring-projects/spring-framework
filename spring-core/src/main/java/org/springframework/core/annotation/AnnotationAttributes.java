@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,22 +33,25 @@ import org.springframework.util.StringUtils;
  *
  * <p>Provides 'pseudo-reification' to avoid noisy Map generics in the calling
  * code as well as convenience methods for looking up annotation attributes
- * in a type-safe fashion, including support for attribute aliases configured
- * via {@link AliasFor @AliasFor}.
+ * in a type-safe fashion.
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 3.1.1
  * @see AnnotationUtils#getAnnotationAttributes
  * @see AnnotatedElementUtils
- * @see AliasFor
  */
 @SuppressWarnings("serial")
 public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
+	private static final String UNKNOWN = "unknown";
+
 	private final Class<? extends Annotation> annotationType;
 
 	private final String displayName;
+
+	boolean validated = false;
 
 
 	/**
@@ -58,20 +59,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public AnnotationAttributes() {
 		this.annotationType = null;
-		this.displayName = "unknown";
-	}
-
-	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance for the
-	 * specified {@code annotationType}.
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @since 4.2
-	 */
-	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
-		this.annotationType = annotationType;
-		this.displayName = annotationType.getName();
+		this.displayName = UNKNOWN;
 	}
 
 	/**
@@ -82,21 +70,75 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	public AnnotationAttributes(int initialCapacity) {
 		super(initialCapacity);
 		this.annotationType = null;
-		this.displayName = "unknown";
+		this.displayName = UNKNOWN;
 	}
 
 	/**
-	 * Create a new {@link AnnotationAttributes} instance, wrapping the
-	 * provided map and all its <em>key-value</em> pairs.
-	 * @param map original source of annotation attribute <em>key-value</em>
-	 * pairs
+	 * Create a new {@link AnnotationAttributes} instance, wrapping the provided
+	 * map and all its <em>key-value</em> pairs.
+	 * @param map original source of annotation attribute <em>key-value</em> pairs
 	 * @see #fromMap(Map)
 	 */
 	public AnnotationAttributes(Map<String, Object> map) {
 		super(map);
 		this.annotationType = null;
-		this.displayName = "unknown";
+		this.displayName = UNKNOWN;
 	}
+
+	/**
+	 * Create a new {@link AnnotationAttributes} instance, wrapping the provided
+	 * map and all its <em>key-value</em> pairs.
+	 * @param other original source of annotation attribute <em>key-value</em> pairs
+	 * @see #fromMap(Map)
+	 */
+	public AnnotationAttributes(AnnotationAttributes other) {
+		super(other);
+		this.annotationType = other.annotationType;
+		this.displayName = other.displayName;
+		this.validated = other.validated;
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @since 4.2
+	 */
+	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = annotationType;
+		this.displayName = annotationType.getName();
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the annotation type name represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param classLoader the ClassLoader to try to load the annotation type on,
+	 * or {@code null} to just store the annotation type name
+	 * @since 4.3.2
+	 */
+	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = getAnnotationType(annotationType, classLoader);
+		this.displayName = annotationType;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
+		if (classLoader != null) {
+			try {
+				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
+			}
+			catch (ClassNotFoundException ex) {
+				// Annotation Class not resolvable
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Get the type of annotation represented by this
@@ -122,34 +164,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as a
-	 * string, taking into account alias semantics defined via
-	 * {@link AliasFor @AliasFor}.
-	 * <p>If there is no value stored under the specified {@code attributeName}
-	 * but the attribute has an alias declared via {@code @AliasFor}, the
-	 * value of the alias will be returned.
-	 *
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param annotationSource the source of the annotation represented by
-	 * this {@code AnnotationAttributes} (e.g., the {@link AnnotatedElement});
-	 * or {@code null} if unknown
-	 * @return the string value
-	 * @throws IllegalArgumentException if the attribute and its alias do
-	 * not exist or are not of type {@code String}
-	 * @throws AnnotationConfigurationException if the attribute and its
-	 * alias are both present with different non-empty values
-	 * @since 4.2
-	 * @see ObjectUtils#isEmpty(Object)
-	 */
-	public String getAliasedString(String attributeName, Class<? extends Annotation> annotationType,
-			Object annotationSource) {
-		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, String.class);
-	}
-
-	/**
 	 * Get the value stored under the specified {@code attributeName} as an
 	 * array of strings.
 	 * <p>If the value stored under the specified {@code attributeName} is
@@ -163,33 +177,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public String[] getStringArray(String attributeName) {
 		return getRequiredAttribute(attributeName, String[].class);
-	}
-
-	/**
-	 * Get the value stored under the specified {@code attributeName} as an
-	 * array of strings, taking into account alias semantics defined via
-	 * {@link AliasFor @AliasFor}.
-	 * <p>If there is no value stored under the specified {@code attributeName}
-	 * but the attribute has an alias declared via {@code @AliasFor}, the
-	 * value of the alias will be returned.
-	 *
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param annotationSource the source of the annotation represented by
-	 * this {@code AnnotationAttributes} (e.g., the {@link AnnotatedElement});
-	 * or {@code null} if unknown
-	 * @return the array of strings
-	 * @throws IllegalArgumentException if the attribute and its alias do
-	 * not exist or are not of type {@code String[]}
-	 * @throws AnnotationConfigurationException if the attribute and its
-	 * alias are both present with different non-empty values
-	 * @since 4.2
-	 */
-	public String[] getAliasedStringArray(String attributeName, Class<? extends Annotation> annotationType,
-			Object annotationSource) {
-		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, String[].class);
 	}
 
 	/**
@@ -261,33 +248,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public Class<?>[] getClassArray(String attributeName) {
 		return getRequiredAttribute(attributeName, Class[].class);
-	}
-
-	/**
-	 * Get the value stored under the specified {@code attributeName} as an
-	 * array of classes, taking into account alias semantics defined via
-	 * {@link AliasFor @AliasFor}.
-	 * <p>If there is no value stored under the specified {@code attributeName}
-	 * but the attribute has an alias declared via {@code @AliasFor}, the
-	 * value of the alias will be returned.
-	 *
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param annotationSource the source of the annotation represented by
-	 * this {@code AnnotationAttributes} (e.g., the {@link AnnotatedElement});
-	 * or {@code null} if unknown
-	 * @return the array of classes
-	 * @throws IllegalArgumentException if the attribute and its alias do
-	 * not exist or are not of type {@code Class[]}
-	 * @throws AnnotationConfigurationException if the attribute and its
-	 * alias are both present with different non-empty values
-	 * @since 4.2
-	 */
-	public Class<?>[] getAliasedClassArray(String attributeName, Class<? extends Annotation> annotationType,
-			Object annotationSource) {
-		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, Class[].class);
 	}
 
 	/**
@@ -375,11 +335,12 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	private <T> T getRequiredAttribute(String attributeName, Class<T> expectedType) {
-		Assert.hasText(attributeName, "attributeName must not be null or empty");
+		Assert.hasText(attributeName, "'attributeName' must not be null or empty");
 		Object value = get(attributeName);
 		assertAttributePresence(attributeName, value);
-		if (!expectedType.isInstance(value) && expectedType.isArray()
-				&& expectedType.getComponentType().isInstance(value)) {
+		assertNotException(attributeName, value);
+		if (!expectedType.isInstance(value) && expectedType.isArray() &&
+				expectedType.getComponentType().isInstance(value)) {
 			Object array = Array.newInstance(expectedType.getComponentType(), 1);
 			Array.set(array, 0, value);
 			value = array;
@@ -388,102 +349,26 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		return (T) value;
 	}
 
-	/**
-	 * Get the value stored under the specified {@code attributeName} as an
-	 * object of the {@code expectedType}, taking into account alias semantics
-	 * defined via {@link AliasFor @AliasFor}.
-	 * <p>If there is no value stored under the specified {@code attributeName}
-	 * but the attribute has an alias declared via {@code @AliasFor}, the
-	 * value of the alias will be returned.
-	 *
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param annotationSource the source of the annotation represented by
-	 * this {@code AnnotationAttributes} (e.g., the {@link AnnotatedElement});
-	 * or {@code null} if unknown
-	 * @param expectedType the expected type; never {@code null}
-	 * @return the value
-	 * @throws IllegalArgumentException if the attribute and its alias do
-	 * not exist or are not of the {@code expectedType}
-	 * @throws AnnotationConfigurationException if the attribute and its
-	 * alias are both present with different non-empty values
-	 * @since 4.2
-	 * @see ObjectUtils#isEmpty(Object)
-	 */
-	private <T> T getRequiredAttributeWithAlias(String attributeName, Class<? extends Annotation> annotationType,
-			Object annotationSource, Class<T> expectedType) {
-
-		Assert.hasText(attributeName, "attributeName must not be null or empty");
-		Assert.notNull(annotationType, "annotationType must not be null");
-		Assert.notNull(expectedType, "expectedType must not be null");
-
-		T attributeValue = getAttribute(attributeName, expectedType);
-		String aliasName = AnnotationUtils.getAttributeAliasMap(annotationType).get(attributeName);
-		T aliasValue = getAttribute(aliasName, expectedType);
-		boolean attributeDeclared = !ObjectUtils.isEmpty(attributeValue);
-		boolean aliasDeclared = !ObjectUtils.isEmpty(aliasValue);
-
-		if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) && attributeDeclared && aliasDeclared) {
-			String elementName = (annotationSource == null ? "unknown element" : annotationSource.toString());
-			String msg = String.format("In annotation [%s] declared on [%s], "
-					+ "attribute [%s] and its alias [%s] are present with values of [%s] and [%s], "
-					+ "but only one is permitted.", annotationType.getName(), elementName, attributeName, aliasName,
-				ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue));
-			throw new AnnotationConfigurationException(msg);
-		}
-
-		if (!attributeDeclared) {
-			attributeValue = aliasValue;
-		}
-
-		assertAttributePresence(attributeName, aliasName, attributeValue);
-
-		return attributeValue;
-	}
-
-	/**
-	 * Get the value stored under the specified {@code attributeName},
-	 * ensuring that the value is of the {@code expectedType}.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
-	 * @param expectedType the expected type; never {@code null}
-	 * @return the value
-	 * @throws IllegalArgumentException if the attribute is not of the
-	 * expected type
-	 * @see #getRequiredAttribute(String, Class)
-	 */
-	@SuppressWarnings("unchecked")
-	private <T> T getAttribute(String attributeName, Class<T> expectedType) {
-		Object value = get(attributeName);
-		if (value != null) {
-			assertAttributeType(attributeName, value, expectedType);
-		}
-		return (T) value;
-	}
-
 	private void assertAttributePresence(String attributeName, Object attributeValue) {
-		if (attributeValue == null) {
-			throw new IllegalArgumentException(String.format(
-				"Attribute '%s' not found in attributes for annotation [%s]", attributeName, this.displayName));
-		}
+		Assert.notNull(attributeValue, () -> String.format(
+				"Attribute '%s' not found in attributes for annotation [%s]",
+				attributeName, this.displayName));
 	}
 
-	private void assertAttributePresence(String attributeName, String aliasName, Object attributeValue) {
-		if (attributeValue == null) {
+	private void assertNotException(String attributeName, Object attributeValue) {
+		if (attributeValue instanceof Exception) {
 			throw new IllegalArgumentException(String.format(
-				"Neither attribute '%s' nor its alias '%s' was found in attributes for annotation [%s]", attributeName,
-				aliasName, this.displayName));
+					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
+					attributeName, this.displayName, attributeValue), (Exception) attributeValue);
 		}
 	}
 
 	private void assertAttributeType(String attributeName, Object attributeValue, Class<?> expectedType) {
 		if (!expectedType.isInstance(attributeValue)) {
 			throw new IllegalArgumentException(String.format(
-				"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
-				attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
-				this.displayName));
+					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
+					attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
+					this.displayName));
 		}
 	}
 
@@ -531,6 +416,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 		return String.valueOf(value);
 	}
+
 
 	/**
 	 * Return an {@link AnnotationAttributes} instance based on the given map.

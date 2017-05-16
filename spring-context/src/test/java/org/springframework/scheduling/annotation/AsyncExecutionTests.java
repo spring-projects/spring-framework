@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -71,23 +72,47 @@ public class AsyncExecutionTests {
 		assertEquals("20", future.get());
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
 		assertEquals("20", listenableFuture.get());
+		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
+		assertEquals("20", completableFuture.get());
 
-		future = asyncTest.returnSomething(0);
 		try {
-			future.get();
+			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
 		}
 		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
-		future = asyncTest.returnSomething(-1);
 		try {
-			future.get();
+			asyncTest.returnSomething(-1).get();
 			fail("Should have thrown ExecutionException");
 		}
 		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(-1).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IOException);
+		}
+
+		try {
+			asyncTest.returnSomethingCompletable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
 
@@ -99,6 +124,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -163,6 +189,32 @@ public class AsyncExecutionTests {
 		assertEquals("20", future.get());
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
 		assertEquals("20", listenableFuture.get());
+		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
+		assertEquals("20", completableFuture.get());
+
+		try {
+			asyncTest.returnSomething(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingCompletable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
 	}
 
 	@Test
@@ -397,7 +449,22 @@ public class AsyncExecutionTests {
 		@Async
 		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			else if (i < 0) {
+				return AsyncResult.forExecutionException(new IOException());
+			}
+			return new AsyncResult<>(Integer.toString(i));
+		}
+
+		@Async
+		public CompletableFuture<String> returnSomethingCompletable(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return CompletableFuture.completedFuture(Integer.toString(i));
 		}
 	}
 
@@ -428,13 +495,13 @@ public class AsyncExecutionTests {
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			assertTrue(Thread.currentThread().getName().startsWith("e2-"));
-			return new AsyncResult<String>(Integer.toString(i));
+			return new AsyncResult<>(Integer.toString(i));
 		}
 
 		public Future<String> returnSomething2(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			assertTrue(Thread.currentThread().getName().startsWith("e0-"));
-			return new AsyncResult<String>(Integer.toString(i));
+			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
 
@@ -459,12 +526,27 @@ public class AsyncExecutionTests {
 
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return new AsyncResult<>(Integer.toString(i));
 		}
 
 		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return new AsyncResult<>(Integer.toString(i));
+		}
+
+		@Async
+		public CompletableFuture<String> returnSomethingCompletable(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return CompletableFuture.completedFuture(Integer.toString(i));
 		}
 
 		@Override
@@ -490,7 +572,7 @@ public class AsyncExecutionTests {
 
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
 
@@ -514,7 +596,7 @@ public class AsyncExecutionTests {
 		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
 
@@ -530,7 +612,7 @@ public class AsyncExecutionTests {
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<String>(invocation.getArguments()[0].toString());
+						return new AsyncResult<>(invocation.getArguments()[0].toString());
 					}
 					return null;
 				}
@@ -584,7 +666,7 @@ public class AsyncExecutionTests {
 		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			return new AsyncResult<String>(Integer.toString(i));
+			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
 
@@ -600,7 +682,7 @@ public class AsyncExecutionTests {
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<String>(invocation.getArguments()[0].toString());
+						return new AsyncResult<>(invocation.getArguments()[0].toString());
 					}
 					return null;
 				}

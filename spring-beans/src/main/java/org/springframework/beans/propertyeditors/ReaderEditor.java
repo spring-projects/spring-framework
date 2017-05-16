@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,16 +47,14 @@ public class ReaderEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new ReaderEditor,
-	 * using the default ResourceEditor underneath.
+	 * Create a new ReaderEditor, using the default ResourceEditor underneath.
 	 */
 	public ReaderEditor() {
 		this.resourceEditor = new ResourceEditor();
 	}
 
 	/**
-	 * Create a new ReaderEditor,
-	 * using the given ResourceEditor underneath.
+	 * Create a new ReaderEditor, using the given ResourceEditor underneath.
 	 * @param resourceEditor the ResourceEditor to use
 	 */
 	public ReaderEditor(ResourceEditor resourceEditor) {

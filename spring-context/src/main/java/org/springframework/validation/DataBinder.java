@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,9 +43,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormatterPropertyEditorAdapter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -92,12 +89,13 @@ import org.springframework.util.StringUtils;
  *
  * <p>This generic data binder can be used in any kind of environment.
  * It is typically used by Spring web MVC controllers, via the web-specific
- * subclasses {@link org.springframework.web.bind.ServletRequestDataBinder}
- * and {@link org.springframework.web.portlet.bind.PortletRequestDataBinder}.
+ * subclass {@link org.springframework.web.bind.ServletRequestDataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Stephane Nicoll
+ * @author Kazuki Shimizu
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -124,19 +122,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
-	private static Class<?> javaUtilOptionalClass = null;
-
-	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", DataBinder.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
-	}
-
-
 	private final Object target;
 
 	private final String objectName;
@@ -159,11 +144,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private String[] requiredFields;
 
+	private ConversionService conversionService;
+
+	private MessageCodesResolver messageCodesResolver;
+
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
-	private final List<Validator> validators = new ArrayList<Validator>();
-
-	private ConversionService conversionService;
+	private final List<Validator> validators = new ArrayList<>();
 
 
 	/**
@@ -183,12 +170,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param objectName the name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		if (target != null && target.getClass().equals(javaUtilOptionalClass)) {
-			this.target = OptionalUnwrapper.unwrap(target);
-		}
-		else {
-			this.target = target;
-		}
+		this.target = ObjectUtils.unwrapOptional(target);
 		this.objectName = objectName;
 	}
 
@@ -234,8 +216,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Specify the limit for array and collection auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
+	 * @see #initBeanPropertyAccess()
+	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
 	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
 
@@ -250,34 +236,67 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
+	 * @see #createBeanPropertyBindingResult()
 	 */
 	public void initBeanPropertyAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initBeanPropertyAccess before other configuration methods");
-		this.bindingResult = new BeanPropertyBindingResult(
-				getTarget(), getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		this.bindingResult = createBeanPropertyBindingResult();
+	}
+
+	/**
+	 * Create the {@link AbstractPropertyBindingResult} instance using standard
+	 * JavaBean property access.
+	 * @since 4.2.1
+	 */
+	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
+				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+
 		if (this.conversionService != null) {
-			this.bindingResult.initConversion(this.conversionService);
+			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
+		return result;
 	}
 
 	/**
 	 * Initialize direct field access for this DataBinder,
 	 * as alternative to the default bean property access.
 	 * @see #initBeanPropertyAccess()
+	 * @see #createDirectFieldBindingResult()
 	 */
 	public void initDirectFieldAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initDirectFieldAccess before other configuration methods");
-		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
+		this.bindingResult = createDirectFieldBindingResult();
+	}
+
+	/**
+	 * Create the {@link AbstractPropertyBindingResult} instance using direct
+	 * field access.
+	 * @since 4.2.1
+	 */
+	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
+		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
+				getObjectName(), isAutoGrowNestedPaths());
+
 		if (this.conversionService != null) {
-			this.bindingResult.initConversion(this.conversionService);
+			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
+		return result;
 	}
 
 	/**
 	 * Return the internal BindingResult held by this DataBinder,
-	 * as AbstractPropertyBindingResult.
+	 * as an AbstractPropertyBindingResult.
 	 */
 	protected AbstractPropertyBindingResult getInternalBindingResult() {
 		if (this.bindingResult == null) {
@@ -462,16 +481,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Set whether to extract the old field value when applying a
-	 * property editor to a new value for a field.
-	 * <p>Default is "true", exposing previous field values to custom editors.
-	 * Turn this to "false" to avoid side effects caused by getters.
-	 */
-	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
-	}
-
-	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
 	 * <p>Default is a DefaultMessageCodesResolver.
@@ -479,7 +488,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		getInternalBindingResult().setMessageCodesResolver(messageCodesResolver);
+		Assert.state(this.messageCodesResolver == null, "DataBinder is already initialized with MessageCodesResolver");
+		this.messageCodesResolver = messageCodesResolver;
+		if (this.bindingResult != null && messageCodesResolver != null) {
+			this.bindingResult.setMessageCodesResolver(messageCodesResolver);
+		}
 	}
 
 	/**
@@ -545,7 +558,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the primary Validator to apply after each binding step, if any.
 	 */
 	public Validator getValidator() {
-		return this.validators.size() > 0 ? this.validators.get(0) : null;
+		return (this.validators.size() > 0 ? this.validators.get(0) : null);
 	}
 
 	/**
@@ -760,7 +773,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {
-			Map<String, PropertyValue> propertyValues = new HashMap<String, PropertyValue>();
+			Map<String, PropertyValue> propertyValues = new HashMap<>();
 			PropertyValue[] pvs = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvs) {
 				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
@@ -859,24 +872,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			throw new BindException(getBindingResult());
 		}
 		return getBindingResult().getModel();
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class OptionalUnwrapper {
-
-		public static Object unwrap(Object optionalObject) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-			if (!optional.isPresent()) {
-				return null;
-			}
-			Object result = optional.get();
-			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-			return result;
-		}
 	}
 
 }

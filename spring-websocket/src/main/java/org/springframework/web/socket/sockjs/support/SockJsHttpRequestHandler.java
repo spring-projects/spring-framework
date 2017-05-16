@@ -17,16 +17,19 @@
 package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
@@ -44,13 +47,16 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigurationSource {
+public class SockJsHttpRequestHandler
+		implements HttpRequestHandler, CorsConfigurationSource, Lifecycle, ServletContextAware {
 
 	// No logging: HTTP transports too verbose and we don't know enough to log anything of value
 
 	private final SockJsService sockJsService;
 
 	private final WebSocketHandler webSocketHandler;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -59,8 +65,8 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigu
 	 * @param webSocketHandler the websocket handler
 	 */
 	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sockJsService, "sockJsService must not be null");
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(sockJsService, "SockJsService must not be null");
+		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 		this.sockJsService = sockJsService;
 		this.webSocketHandler =
 				new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(webSocketHandler));
@@ -79,6 +85,39 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigu
 	 */
 	public WebSocketHandler getWebSocketHandler() {
 		return this.webSocketHandler;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.sockJsService instanceof ServletContextAware) {
+			((ServletContextAware) this.sockJsService).setServletContext(servletContext);
+		}
+	}
+
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.sockJsService instanceof Lifecycle) {
+				((Lifecycle) this.sockJsService).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.sockJsService instanceof Lifecycle) {
+				((Lifecycle) this.sockJsService).stop();
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -100,13 +139,13 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigu
 	private String getSockJsPath(HttpServletRequest servletRequest) {
 		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		String path = (String) servletRequest.getAttribute(attribute);
-		return ((path.length() > 0) && (path.charAt(0) != '/')) ? "/" + path : path;
+		return (path.length() > 0 && path.charAt(0) != '/' ? "/" + path : path);
 	}
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		if (sockJsService instanceof CorsConfigurationSource) {
-			return ((CorsConfigurationSource)sockJsService).getCorsConfiguration(request);
+		if (this.sockJsService instanceof CorsConfigurationSource) {
+			return ((CorsConfigurationSource) this.sockJsService).getCorsConfiguration(request);
 		}
 		return null;
 	}

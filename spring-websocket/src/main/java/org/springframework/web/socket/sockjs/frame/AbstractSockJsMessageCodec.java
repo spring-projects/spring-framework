@@ -32,7 +32,7 @@ public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 		Assert.notNull(messages, "messages must not be null");
 		StringBuilder sb = new StringBuilder();
 		sb.append("a[");
-		for (int i=0; i < messages.length; i++) {
+		for (int i = 0; i < messages.length; i++) {
 			sb.append('"');
 			char[] quotedChars = applyJsonQuoting(messages[i]);
 			sb.append(escapeSockJsSpecialChars(quotedChars));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.context.expression;
 
 import java.util.Map;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 
 /**
  * EL property accessor that knows how to traverse the keys
@@ -31,7 +33,7 @@ import org.springframework.expression.TypedValue;
  * @author Andy Clement
  * @since 3.0
  */
-public class MapAccessor implements PropertyAccessor {
+public class MapAccessor implements CompilablePropertyAccessor {
 
 	@Override
 	public Class<?>[] getSpecificTargetClasses() {
@@ -85,6 +87,29 @@ public class MapAccessor implements PropertyAccessor {
 		public String getMessage() {
 			return "Map does not contain a value for key '" + this.key + "'";
 		}
+	}
+
+	@Override
+	public boolean isCompilable() {
+		return true;
+	}
+
+	@Override
+	public Class<?> getPropertyType() {
+		return Object.class;
+	}
+
+	@Override
+	public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
+		String descriptor = cf.lastDescriptor();
+		if (descriptor == null || !descriptor.equals("Ljava/util/Map")) {
+			if (descriptor == null) {
+				cf.loadTarget(mv);
+			}
+			CodeFlow.insertCheckCast(mv, "Ljava/util/Map");
+		}
+		mv.visitLdcInsn(propertyName);
+		mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
 	}
 
 }

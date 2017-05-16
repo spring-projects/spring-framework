@@ -174,13 +174,13 @@
 		<prop key="foo2">bar2</prop>
 	</util:properties>
 
-	<util:properties id="defaultLocalOverrideProperties" 
+	<util:properties id="defaultLocalOverrideProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties">
 		<prop key="foo">local</prop>
 		<prop key="foo2">local2</prop>
 	</util:properties>
 
-	<util:properties id="trueLocalOverrideProperties" 
+	<util:properties id="trueLocalOverrideProperties"
 			location="classpath:/org/springframework/beans/factory/xml/util.properties"
 			local-override="true">
 		<prop key="foo">local</prop>

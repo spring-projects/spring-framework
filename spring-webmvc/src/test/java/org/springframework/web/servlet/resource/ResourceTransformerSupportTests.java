@@ -27,7 +27,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@code ResourceTransformerSupport}.
@@ -59,9 +59,9 @@ public class ResourceTransformerSupportTests {
 		this.request = new MockHttpServletRequest("GET", "");
 	}
 
-	protected ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
+	private ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		handler.setLocations(Arrays.asList(new ClassPathResource("test/", getClass())));
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
@@ -81,19 +81,7 @@ public class ResourceTransformerSupportTests {
 	}
 
 	@Test
-	public void resolveUrlPathWithoutHandlerMappingAttribute() throws Exception {
-		this.request.setRequestURI("/context/servlet/resources/main.css");
-		this.request.setContextPath("/context");
-		this.request.setServletPath("/servlet");
-		String resourcePath = "/context/servlet/resources/bar.css";
-		Resource css = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath(resourcePath, this.request, css, this.transformerChain);
-		assertEquals("/context/servlet/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
-	}
-
-	@Test
 	public void resolveUrlPathWithRelativePath() throws Exception {
-		this.request.setRequestURI("/context/servlet/resources/main.css");
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath("bar.css", this.request, css, this.transformerChain);
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
@@ -101,7 +89,6 @@ public class ResourceTransformerSupportTests {
 
 	@Test
 	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
-		this.request.setRequestURI("/context/servlet/resources/images/image.png");
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
 		String actual = this.transformer.resolveUrlPath("../bar.css", this.request, imagePng, this.transformerChain);
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);

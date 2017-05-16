@@ -52,8 +52,7 @@ import static org.junit.Assert.*;
 import static org.springframework.transaction.event.TransactionPhase.*;
 
 /**
- * Integration tests for {@link TransactionalEventListener @TransactionalEventListener}
- * support
+ * Integration tests for {@link TransactionalEventListener} support
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -61,14 +60,15 @@ import static org.springframework.transaction.event.TransactionPhase.*;
  */
 public class TransactionalEventListenerTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private ConfigurableApplicationContext context;
 
 	private EventCollector eventCollector;
 
 	private TransactionTemplate transactionTemplate = new TransactionTemplate(new CallCountingTransactionManager());
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
 
 	@After
 	public void closeContext() {
@@ -76,6 +76,7 @@ public class TransactionalEventListenerTests {
 			this.context.close();
 		}
 	}
+
 
 	@Test
 	public void immediately() {
@@ -305,30 +306,6 @@ public class TransactionalEventListenerTests {
 		getEventCollector().assertNoEventReceived();
 	}
 
-	@Configuration
-	static class BasicConfiguration {
-
-		@Bean // set automatically with tx management
-		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
-			return new TransactionalEventListenerFactory();
-		}
-
-		@Bean
-		public EventCollector eventCollector() {
-			return new EventCollector();
-		}
-	}
-
-	@EnableTransactionManagement
-	@Configuration
-	static class TransactionalConfiguration {
-
-		@Bean
-		public CallCountingTransactionManager transactionManager() {
-			return new CallCountingTransactionManager();
-		}
-	}
-
 
 	protected EventCollector getEventCollector() {
 		return eventCollector;
@@ -350,6 +327,33 @@ public class TransactionalEventListenerTests {
 		this.eventCollector = this.context.getBean(EventCollector.class);
 	}
 
+
+	@Configuration
+	static class BasicConfiguration {
+
+		@Bean // set automatically with tx management
+		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
+			return new TransactionalEventListenerFactory();
+		}
+
+		@Bean
+		public EventCollector eventCollector() {
+			return new EventCollector();
+		}
+	}
+
+
+	@EnableTransactionManagement
+	@Configuration
+	static class TransactionalConfiguration {
+
+		@Bean
+		public CallCountingTransactionManager transactionManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
+
 	static class EventCollector {
 
 		public static final String IMMEDIATELY = "IMMEDIATELY";
@@ -363,7 +367,6 @@ public class TransactionalEventListenerTests {
 		public static final String AFTER_ROLLBACK = "AFTER_ROLLBACK";
 
 		public static final String[] ALL_PHASES = {IMMEDIATELY, BEFORE_COMMIT, AFTER_COMMIT, AFTER_ROLLBACK};
-
 
 		private final MultiValueMap<String, Object> events = new LinkedMultiValueMap<>();
 
@@ -402,8 +405,8 @@ public class TransactionalEventListenerTests {
 			assertEquals("Wrong number of total events (" + this.events.size() + ") " +
 					"registered phase(s)", number, size);
 		}
-
 	}
+
 
 	static abstract class BaseTransactionalTestListener {
 
@@ -418,8 +421,8 @@ public class TransactionalEventListenerTests {
 				throw new IllegalStateException("Test exception on phase '" + phase + "'");
 			}
 		}
-
 	}
+
 
 	@Component
 	static class ImmediateTestListener extends BaseTransactionalTestListener {
@@ -430,6 +433,7 @@ public class TransactionalEventListenerTests {
 		}
 	}
 
+
 	@Component
 	static class AfterCompletionTestListener extends BaseTransactionalTestListener {
 
@@ -438,6 +442,7 @@ public class TransactionalEventListenerTests {
 			handleEvent(EventCollector.AFTER_COMPLETION, data);
 		}
 	}
+
 
 	@Component
 	static class AfterCompletionExplicitTestListener extends BaseTransactionalTestListener {
@@ -453,6 +458,7 @@ public class TransactionalEventListenerTests {
 		}
 	}
 
+
 	@Transactional
 	@Component
 	static interface TransactionalComponentTestListenerInterface {
@@ -461,6 +467,7 @@ public class TransactionalEventListenerTests {
 		@TransactionalEventListener(condition = "!'SKIP'.equals(#p0)")
 		void handleAfterCommit(String data);
 	}
+
 
 	static class TransactionalComponentTestListener extends BaseTransactionalTestListener implements
 			TransactionalComponentTestListenerInterface {
@@ -471,6 +478,7 @@ public class TransactionalEventListenerTests {
 		}
 	}
 
+
 	@Component
 	static class BeforeCommitTestListener extends BaseTransactionalTestListener {
 
@@ -479,8 +487,8 @@ public class TransactionalEventListenerTests {
 		public void handleBeforeCommit(String data) {
 			handleEvent(EventCollector.BEFORE_COMMIT, data);
 		}
-
 	}
+
 
 	@Component
 	static class FallbackExecutionTestListener extends BaseTransactionalTestListener {
@@ -506,11 +514,13 @@ public class TransactionalEventListenerTests {
 		}
 	}
 
+
 	@TransactionalEventListener(phase = AFTER_COMMIT, condition = "!'SKIP'.equals(#p0)")
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AfterCommitEventListener {
 	}
+
 
 	@Component
 	static class AfterCommitMetaAnnotationTestListener extends BaseTransactionalTestListener {
@@ -519,10 +529,11 @@ public class TransactionalEventListenerTests {
 		public void handleAfterCommit(String data) {
 			handleEvent(EventCollector.AFTER_COMMIT, data);
 		}
-
 	}
 
+
 	static class EventTransactionSynchronization extends TransactionSynchronizationAdapter {
+
 		private final int order;
 
 		EventTransactionSynchronization(int order) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 			context.refresh();
 			fail("expected exception due to multiple matches for byType autowiring");
 		}
-		catch (UnsatisfiedDependencyException e) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
 		}
 	}
@@ -150,32 +150,6 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		assertNull("constructor dependency should not have been autowired", bean.getConstructorDependency());
 		assertNull("property dependencies should not have been autowired", bean.getPropertyDependency1());
 		assertNull("property dependencies should not have been autowired", bean.getPropertyDependency2());
-	}
-
-	@Test
-	public void testDependencyCheckAll() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
-		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultDependencyCheckAllTests.xml");
-		try {
-			context.refresh();
-			fail("expected exception due to dependency check");
-		}
-		catch (UnsatisfiedDependencyException e) {
-			// expected
-		}
-	}
-
-	@Test
-	public void testDependencyCheckObjectsWithAutowireByName() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
-		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultDependencyCheckObjectsWithAutowireByNameTests.xml");
-		context.refresh();
-		DefaultsTestBean bean = (DefaultsTestBean) context.getBean(TEST_BEAN_NAME);
-		assertNull("constructor dependency should not have been autowired", bean.getConstructorDependency());
-		assertNotNull("property dependencies should have been autowired", bean.getPropertyDependency1());
-		assertNotNull("property dependencies should have been autowired", bean.getPropertyDependency2());
 	}
 
 	@Test
@@ -229,7 +203,6 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 		private boolean initialized;
 
 		private boolean destroyed;
-
 
 		public DefaultsTestBean() {
 			INIT_COUNT++;

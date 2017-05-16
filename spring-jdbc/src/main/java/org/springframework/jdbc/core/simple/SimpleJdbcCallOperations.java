@@ -104,6 +104,7 @@ public interface SimpleJdbcCallOperations {
 	/**
 	 * Indicates that parameters should be bound by name.
 	 * @return the instance of this SimpleJdbcCall
+	 * @since 4.2
 	 */
 	SimpleJdbcCallOperations withNamedBinding();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
-		this.resolvedDataSources = new HashMap<Object, DataSource>(this.targetDataSources.size());
+		this.resolvedDataSources = new HashMap<>(this.targetDataSources.size());
 		for (Map.Entry<Object, Object> entry : this.targetDataSources.entrySet()) {
 			Object lookupKey = resolveSpecifiedLookupKey(entry.getKey());
 			DataSource dataSource = resolveSpecifiedDataSource(entry.getValue());

@@ -34,18 +34,20 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	private int order = 50;
 
-	@Override
-	public int getOrder() {
-		return order;
-	}
 
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
 	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+
+	@Override
 	public boolean supportsMethod(Method method) {
-		return AnnotationUtils.findAnnotation(method, TransactionalEventListener.class) != null;
+		return (AnnotationUtils.findAnnotation(method, TransactionalEventListener.class) != null);
 	}
 
 	@Override

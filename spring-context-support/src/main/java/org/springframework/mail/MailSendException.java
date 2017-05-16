@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class MailSendException extends MailException {
 	 */
 	public MailSendException(String msg, Throwable cause) {
 		super(msg, cause);
-		this.failedMessages = new LinkedHashMap<Object, Exception>();
+		this.failedMessages = new LinkedHashMap<>();
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class MailSendException extends MailException {
 	 */
 	public MailSendException(String msg, Throwable cause, Map<Object, Exception> failedMessages) {
 		super(msg, cause);
-		this.failedMessages = new LinkedHashMap<Object, Exception>(failedMessages);
+		this.failedMessages = new LinkedHashMap<>(failedMessages);
 		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);
 	}
 

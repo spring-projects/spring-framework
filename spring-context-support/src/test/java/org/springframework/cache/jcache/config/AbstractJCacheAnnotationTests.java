@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,23 @@ public abstract class AbstractJCacheAnnotationTests {
 		Object first = service.cache(keyItem);
 		Object second = service.cache(keyItem);
 		assertSame(first, second);
+	}
+
+	@Test
+	public void cacheNull() {
+		Cache cache = getCache(DEFAULT_CACHE);
+
+		String keyItem = name.getMethodName();
+		assertNull(cache.get(keyItem));
+
+		Object first = service.cacheNull(keyItem);
+		Object second = service.cacheNull(keyItem);
+		assertSame(first, second);
+
+		Cache.ValueWrapper wrapper = cache.get(keyItem);
+		assertNotNull(wrapper);
+		assertSame(first, wrapper.get());
+		assertNull("Cached value should be null", wrapper.get());
 	}
 
 	@Test

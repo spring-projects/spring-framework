@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -68,23 +70,37 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 			return Collections.emptyMap();
 		}
 
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		String pathVariable = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
 
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
-			MultiValueMap<String, String> map = matrixVariables.get(pathVariable);
-			return (map != null) ? map : Collections.emptyMap();
+			MultiValueMap<String, String> mapForPathVariable = matrixVariables.get(pathVariable);
+			if (mapForPathVariable == null) {
+				return Collections.emptyMap();
+			}
+			map.putAll(mapForPathVariable);
 		}
-
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		for (MultiValueMap<String, String> vars : matrixVariables.values()) {
-			for (String name : vars.keySet()) {
-				for (String value : vars.get(name)) {
-					map.add(name, value);
+		else {
+			for (MultiValueMap<String, String> vars : matrixVariables.values()) {
+				for (String name : vars.keySet()) {
+					for (String value : vars.get(name)) {
+						map.add(name, value);
+					}
 				}
 			}
 		}
 
-		return map;
+		return (isSingleValueMap(parameter) ? map.toSingleValueMap() : map);
+	}
+
+	private boolean isSingleValueMap(MethodParameter parameter) {
+		if (!MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
+			ResolvableType[] genericTypes = ResolvableType.forMethodParameter(parameter).getGenerics();
+			if (genericTypes.length == 2) {
+				return !List.class.isAssignableFrom(genericTypes[1].getRawClass());
+			}
+		}
+		return false;
 	}
 
 }

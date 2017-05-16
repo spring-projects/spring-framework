@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  * {@code OptionSet} in the case of {@link JOptCommandLinePropertySource}.
  *
  * <h3>Purpose and General Usage</h3>
+ *
  * For use in standalone Spring-based applications, i.e. those that are bootstrapped via
  * a traditional {@code main} method accepting a {@code String[]} of arguments from the
  * command line. In many cases, processing command-line arguments directly within the
@@ -38,6 +39,7 @@ import org.springframework.util.StringUtils;
  * will typically be added to the {@link Environment} of the Spring
  * {@code ApplicationContext}, at which point all command line arguments become available
  * through the {@link Environment#getProperty(String)} family of methods. For example:
+ *
  * <pre class="code">
  * public static void main(String[] args) {
  *     CommandLinePropertySource clps = ...;
@@ -46,11 +48,14 @@ import org.springframework.util.StringUtils;
  *     ctx.register(AppConfig.class);
  *     ctx.refresh();
  * }</pre>
+ *
  * With the bootstrap logic above, the {@code AppConfig} class may {@code @Inject} the
  * Spring {@code Environment} and query it directly for properties:
+ *
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
+ *
  *     &#064;Inject Environment env;
  *
  *     &#064;Bean
@@ -63,6 +68,7 @@ import org.springframework.util.StringUtils;
  *         return dataSource;
  *     }
  * }</pre>
+ *
  * Because the {@code CommandLinePropertySource} was added to the {@code Environment}'s
  * set of {@link MutablePropertySources} using the {@code #addFirst} method, it has
  * highest search precedence, meaning that while "db.hostname" and other properties may
@@ -75,9 +81,11 @@ import org.springframework.util.StringUtils;
  * annotation may be used to inject these properties, given that a {@link
  * PropertySourcesPropertyResolver} bean has been registered, either directly or through
  * using the {@code <context:property-placeholder>} element. For example:
+ *
  * <pre class="code">
  * &#064;Component
  * public class MyComponent {
+ *
  *     &#064;Value("my.property:defaultVal")
  *     private String myProperty;
  *
@@ -94,10 +102,12 @@ import org.springframework.util.StringUtils;
  * {@link PropertySource#getProperty(String)} and
  * {@link PropertySource#containsProperty(String)} methods. For example, given the
  * following command line:
- * <pre class="code">
- * --o1=v1 --o2</pre>
+ *
+ * <pre class="code">--o1=v1 --o2</pre>
+ *
  * 'o1' and 'o2' are treated as "option arguments", and the following assertions would
  * evaluate true:
+ *
  * <pre class="code">
  * CommandLinePropertySource<?> ps = ...
  * assert ps.containsProperty("o1") == true;
@@ -105,7 +115,8 @@ import org.springframework.util.StringUtils;
  * assert ps.containsProperty("o3") == false;
  * assert ps.getProperty("o1").equals("v1");
  * assert ps.getProperty("o2").equals("");
- * assert ps.getProperty("o3") == null;</pre>
+ * assert ps.getProperty("o3") == null;
+ * </pre>
  *
  * Note that the 'o2' option has no argument, but {@code getProperty("o2")} resolves to
  * empty string ({@code ""}) as opposed to {@code null}, while {@code getProperty("o3")}
@@ -129,11 +140,13 @@ import org.springframework.util.StringUtils;
  * CommandLinePropertySource} and at the same time lends itself to conversion when used
  * in conjunction with the Spring {@link Environment} and its built-in {@code
  * ConversionService}. Consider the following example:
- * <pre class="code">
- * --o1=v1 --o2=v2 /path/to/file1 /path/to/file2</pre>
+ *
+ * <pre class="code">--o1=v1 --o2=v2 /path/to/file1 /path/to/file2</pre>
+ *
  * In this example, "o1" and "o2" would be considered "option arguments", while the two
  * filesystem paths qualify as "non-option arguments".  As such, the following assertions
  * will evaluate true:
+ *
  * <pre class="code">
  * CommandLinePropertySource<?> ps = ...
  * assert ps.containsProperty("o1") == true;
@@ -141,22 +154,26 @@ import org.springframework.util.StringUtils;
  * assert ps.containsProperty("nonOptionArgs") == true;
  * assert ps.getProperty("o1").equals("v1");
  * assert ps.getProperty("o2").equals("v2");
- * assert ps.getProperty("nonOptionArgs").equals("/path/to/file1,/path/to/file2");</pre>
+ * assert ps.getProperty("nonOptionArgs").equals("/path/to/file1,/path/to/file2");
+ * </pre>
  *
  * <p>As mentioned above, when used in conjunction with the Spring {@code Environment}
  * abstraction, this comma-delimited string may easily be converted to a String array or
  * list:
+ *
  * <pre class="code">
  * Environment env = applicationContext.getEnvironment();
  * String[] nonOptionArgs = env.getProperty("nonOptionArgs", String[].class);
  * assert nonOptionArgs[0].equals("/path/to/file1");
- * assert nonOptionArgs[1].equals("/path/to/file2");</pre>
+ * assert nonOptionArgs[1].equals("/path/to/file2");
+ * </pre>
  *
  * <p>The name of the special "non-option arguments" property may be customized through
  * the {@link #setNonOptionArgsPropertyName(String)} method. Doing so is recommended as
  * it gives proper semantic value to non-option arguments. For example, if filesystem
  * paths are being specified as non-option arguments, it is likely preferable to refer to
  * these as something like "file.locations" than the default of "nonOptionArgs":
+ *
  * <pre class="code">
  * public static void main(String[] args) {
  *     CommandLinePropertySource clps = ...;
@@ -169,6 +186,7 @@ import org.springframework.util.StringUtils;
  * }</pre>
  *
  * <h3>Limitations</h3>
+ *
  * This abstraction is not intended to expose the full power of underlying command line
  * parsing APIs such as JOpt or Commons CLI. It's intent is rather just the opposite: to
  * provide the simplest possible abstraction for accessing command line arguments

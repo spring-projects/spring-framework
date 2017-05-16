@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * to the caller.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see Async
  * @see #forValue(Object)
@@ -103,10 +104,16 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	@Override
 	public void addCallback(SuccessCallback<? super V> successCallback, FailureCallback failureCallback) {
 		try {
-			successCallback.onSuccess(this.value);
+			if (this.executionException != null) {
+				Throwable cause = this.executionException.getCause();
+				failureCallback.onFailure(cause != null ? cause : this.executionException);
+			}
+			else {
+				successCallback.onSuccess(this.value);
+			}
 		}
 		catch (Throwable ex) {
-			failureCallback.onFailure(ex);
+			// Ignore
 		}
 	}
 
@@ -118,7 +125,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @see Future#get()
 	 */
 	public static <V> ListenableFuture<V> forValue(V value) {
-		return new AsyncResult<V>(value, null);
+		return new AsyncResult<>(value, null);
 	}
 
 	/**
@@ -130,7 +137,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @see ExecutionException
 	 */
 	public static <V> ListenableFuture<V> forExecutionException(Throwable ex) {
-		return new AsyncResult<V>(null,
+		return new AsyncResult<>(null,
 				(ex instanceof ExecutionException ? (ExecutionException) ex : new ExecutionException(ex)));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.instrument.classloading;
 
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.UsesJava7;
 
 /**
  * ClassLoader that can be used to load classes without bringing them
@@ -27,13 +26,10 @@ import org.springframework.lang.UsesJava7;
  * @author Rod Johnson
  * @since 2.0
  */
-@UsesJava7
 public class SimpleThrowawayClassLoader extends OverridingClassLoader {
 
 	static {
-		if (parallelCapableClassLoaderAvailable) {
-			ClassLoader.registerAsParallelCapable();
-		}
+		ClassLoader.registerAsParallelCapable();
 	}
 
 

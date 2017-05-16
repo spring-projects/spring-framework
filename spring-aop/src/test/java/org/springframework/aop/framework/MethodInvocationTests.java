@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,14 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 14.03.2003
  */
-public final class MethodInvocationTests {
+public class MethodInvocationTests {
 
 	@Test
 	public void testValidInvocation() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		final Object returnValue = new Object();
-		List<Object> is = new LinkedList<Object>();
+		List<Object> is = new LinkedList<>();
 		is.add(new MethodInterceptor() {
 			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -65,9 +65,9 @@ public final class MethodInvocationTests {
 				throw new UnsupportedOperationException("toString");
 			}
 		};
-		List<Object> is = new LinkedList<Object>();
+		List<Object> is = new LinkedList<>();
 
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		ReflectiveMethodInvocation invocation =
 			new ReflectiveMethodInvocation(proxy, target, m, null, null, is);

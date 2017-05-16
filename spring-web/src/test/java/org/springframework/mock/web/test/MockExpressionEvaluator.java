@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,25 @@ package org.springframework.mock.web.test;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.Expression;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.FunctionMapper;
-import javax.servlet.jsp.el.VariableResolver;
 
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
+import org.springframework.util.Assert;
+
 /**
  * Mock implementation of the JSP 2.0 {@link javax.servlet.jsp.el.ExpressionEvaluator}
- * interface, delegating to the Jakarta JSTL ExpressionEvaluatorManager.
+ * interface, delegating to the Apache JSTL ExpressionEvaluatorManager.
+ * Only necessary for testing applications when testing custom JSP tags.
  *
- * <p>Used for testing the web framework; only necessary for testing
- * applications when testing custom JSP tags.
- *
- * <p>Note that the Jakarta JSTL implementation (jstl.jar, standard.jar)
- * has to be available on the class path to use this expression evaluator.
+ * <p>Note that the Apache JSTL implementation (jstl.jar, standard.jar) has to be
+ * available on the class path to use this expression evaluator.
  *
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager
  */
-@Deprecated
-public class MockExpressionEvaluator extends ExpressionEvaluator {
+@SuppressWarnings("deprecation")
+public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEvaluator {
 
 	private final PageContext pageContext;
 
@@ -54,42 +49,39 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 		this.pageContext = pageContext;
 	}
 
-	@Override
-	public Expression parseExpression(
-			final String expression, final Class expectedType, final FunctionMapper functionMapper)
-			throws ELException {
 
-		return new Expression() {
+	@Override
+	@SuppressWarnings("rawtypes")
+	public javax.servlet.jsp.el.Expression parseExpression(final String expression, final Class expectedType,
+			final javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
+
+		return new javax.servlet.jsp.el.Expression() {
 			@Override
-			public Object evaluate(VariableResolver variableResolver) throws ELException {
+			public Object evaluate(javax.servlet.jsp.el.VariableResolver variableResolver) throws javax.servlet.jsp.el.ELException {
 				return doEvaluate(expression, expectedType, functionMapper);
 			}
 		};
 	}
 
 	@Override
-	public Object evaluate(
-			String expression, Class expectedType, VariableResolver variableResolver, FunctionMapper functionMapper)
-			throws ELException {
+	@SuppressWarnings("rawtypes")
+	public Object evaluate(String expression, Class expectedType, javax.servlet.jsp.el.VariableResolver variableResolver,
+			javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
 
-		if (variableResolver != null) {
-			throw new IllegalArgumentException("Custom VariableResolver not supported");
-		}
+		Assert.isNull(variableResolver, "Custom VariableResolver not supported");
 		return doEvaluate(expression, expectedType, functionMapper);
 	}
 
-	protected Object doEvaluate(
-			String expression, Class expectedType, FunctionMapper functionMapper)
-			throws ELException {
+	@SuppressWarnings("rawtypes")
+	protected Object doEvaluate(String expression, Class expectedType, javax.servlet.jsp.el.FunctionMapper functionMapper)
+			throws javax.servlet.jsp.el.ELException {
 
-		if (functionMapper != null) {
-			throw new IllegalArgumentException("Custom FunctionMapper not supported");
-		}
+		Assert.isNull(functionMapper, "Custom FunctionMapper not supported");
 		try {
 			return ExpressionEvaluatorManager.evaluate("JSP EL expression", expression, expectedType, this.pageContext);
 		}
 		catch (JspException ex) {
-			throw new ELException("Parsing of JSP EL expression \"" + expression + "\" failed", ex);
+			throw new javax.servlet.jsp.el.ELException("Parsing of JSP EL expression \"" + expression + "\" failed", ex);
 		}
 	}
 

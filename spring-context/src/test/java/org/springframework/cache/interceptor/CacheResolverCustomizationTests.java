@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,63 +67,63 @@ public class CacheResolverCustomizationTests {
 
 	@Test
 	public void noCustomization() {
-		Cache cache = cacheManager.getCache("default");
+		Cache cache = this.cacheManager.getCache("default");
 
 		Object key = new Object();
 		assertCacheMiss(key, cache);
 
-		Object value = simpleService.getSimple(key);
+		Object value = this.simpleService.getSimple(key);
 		assertCacheHit(key, value, cache);
 	}
 
 	@Test
 	public void customCacheResolver() {
-		Cache cache = cacheManager.getCache("primary");
+		Cache cache = this.cacheManager.getCache("primary");
 
 		Object key = new Object();
 		assertCacheMiss(key, cache);
 
-		Object value = simpleService.getWithCustomCacheResolver(key);
+		Object value = this.simpleService.getWithCustomCacheResolver(key);
 		assertCacheHit(key, value, cache);
 	}
 
 	@Test
 	public void customCacheManager() {
-		Cache cache = anotherCacheManager.getCache("default");
+		Cache cache = this.anotherCacheManager.getCache("default");
 
 		Object key = new Object();
 		assertCacheMiss(key, cache);
 
-		Object value = simpleService.getWithCustomCacheManager(key);
+		Object value = this.simpleService.getWithCustomCacheManager(key);
 		assertCacheHit(key, value, cache);
 	}
 
 	@Test
 	public void runtimeResolution() {
-		Cache defaultCache = cacheManager.getCache("default");
-		Cache primaryCache = cacheManager.getCache("primary");
+		Cache defaultCache = this.cacheManager.getCache("default");
+		Cache primaryCache = this.cacheManager.getCache("primary");
 
 		Object key = new Object();
 		assertCacheMiss(key, defaultCache, primaryCache);
-		Object value = simpleService.getWithRuntimeCacheResolution(key, "default");
+		Object value = this.simpleService.getWithRuntimeCacheResolution(key, "default");
 		assertCacheHit(key, value, defaultCache);
 		assertCacheMiss(key, primaryCache);
 
 		Object key2 = new Object();
 		assertCacheMiss(key2, defaultCache, primaryCache);
-		Object value2 = simpleService.getWithRuntimeCacheResolution(key2, "primary");
+		Object value2 = this.simpleService.getWithRuntimeCacheResolution(key2, "primary");
 		assertCacheHit(key2, value2, primaryCache);
 		assertCacheMiss(key2, defaultCache);
 	}
 
 	@Test
 	public void namedResolution() {
-		Cache cache = cacheManager.getCache("secondary");
+		Cache cache = this.cacheManager.getCache("secondary");
 
 		Object key = new Object();
 		assertCacheMiss(key, cache);
 
-		Object value = simpleService.getWithNamedCacheResolution(key);
+		Object value = this.simpleService.getWithNamedCacheResolution(key);
 		assertCacheHit(key, value, cache);
 	}
 
@@ -131,7 +131,7 @@ public class CacheResolverCustomizationTests {
 	public void noCacheResolved() {
 		Method method = ReflectionUtils.findMethod(SimpleService.class, "noCacheResolved", Object.class);
 		try {
-			simpleService.noCacheResolved(new Object());
+			this.simpleService.noCacheResolved(new Object());
 			fail("Should have failed, no cache resolved");
 		}
 		catch (IllegalStateException ex) {
@@ -142,7 +142,7 @@ public class CacheResolverCustomizationTests {
 	@Test
 	public void unknownCacheResolver() {
 		try {
-			simpleService.unknownCacheResolver(new Object());
+			this.simpleService.unknownCacheResolver(new Object());
 			fail("Should have failed, no cache resolver with that name");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -214,37 +214,37 @@ public class CacheResolverCustomizationTests {
 
 		@Cacheable
 		public Object getSimple(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheResolver = "primaryCacheResolver")
 		public Object getWithCustomCacheResolver(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheManager = "anotherCacheManager")
 		public Object getWithCustomCacheManager(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheResolver = "runtimeCacheResolver", key = "#p0")
 		public Object getWithRuntimeCacheResolution(Object key, String cacheName) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheResolver = "namedCacheResolver")
 		public Object getWithNamedCacheResolution(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheResolver = "nullCacheResolver") // No cache resolved for the operation
 		public Object noCacheResolved(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@Cacheable(cacheResolver = "unknownCacheResolver") // No such bean defined
 		public Object unknownCacheResolver(Object key) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 	}
 

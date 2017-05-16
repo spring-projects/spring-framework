@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -38,11 +38,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * with success and error callbacks. If this method returns {@code true},
 	 * then {@link #toListenableFuture} is invoked next. If it returns
 	 * {@code false}, then {@link #handleReturnValue} is called.
-	 *
 	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
 	 * is called and it returns {@code true}.
-	 *
 	 * @param returnValue the value returned from the handler method
 	 * @param returnType the type of the return value.
 	 * @return true if the return value type represents an async value.
@@ -55,11 +53,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * {@link org.springframework.util.concurrent.SettableListenableFuture
 	 * SettableListenableFuture}. Return value handling will then continue when
 	 * the ListenableFuture is completed with either success or error.
-	 *
 	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
 	 * is called and it returns {@code true}.
-	 *
 	 * @param returnValue the value returned from the handler method
 	 * @param returnType the type of the return value.
 	 * @return the resulting ListenableFuture or {@code null} in which case no

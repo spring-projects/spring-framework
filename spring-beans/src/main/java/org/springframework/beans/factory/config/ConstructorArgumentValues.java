@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
-	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<Integer, ValueHolder>(0);
+	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>(0);
 
-	private final List<ValueHolder> genericArgumentValues = new LinkedList<ValueHolder>();
+	private final List<ValueHolder> genericArgumentValues = new LinkedList<>();
 
 
 	/**
@@ -156,7 +156,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the type to match (can be {@code null} to match
 	 * untyped values only)
 	 * @param requiredName the type to match (can be {@code null} to match
-	 * unnamed values only)
+	 * unnamed values only, or empty String to match any name)
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getIndexedArgumentValue(int index, Class<?> requiredType, String requiredName) {
@@ -165,7 +165,7 @@ public class ConstructorArgumentValues {
 		if (valueHolder != null &&
 				(valueHolder.getType() == null ||
 						(requiredType != null && ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
-				(valueHolder.getName() == null ||
+				(valueHolder.getName() == null || "".equals(requiredName) ||
 						(requiredName != null && requiredName.equals(valueHolder.getName())))) {
 			return valueHolder;
 		}
@@ -268,7 +268,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the type to match (can be {@code null} to find
 	 * an arbitrary next generic argument value)
 	 * @param requiredName the name to match (can be {@code null} to not
-	 * match argument values by name)
+	 * match argument values by name, or empty String to match any name)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already been used
 	 * in the current resolution process and should therefore not be returned again
 	 * @return the ValueHolder for the argument, or {@code null} if none found
@@ -278,7 +278,7 @@ public class ConstructorArgumentValues {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
 			}
-			if (valueHolder.getName() != null &&
+			if (valueHolder.getName() != null && !"".equals(requiredName) &&
 					(requiredName == null || !valueHolder.getName().equals(requiredName))) {
 				continue;
 			}
@@ -335,7 +335,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the parameter type to match (can be {@code null}
 	 * to find an untyped argument value)
 	 * @param requiredName the parameter name to match (can be {@code null}
-	 * to find an unnamed argument value)
+	 * to find an unnamed argument value, or empty String to match any name)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already
 	 * been used in the current resolution process and should therefore not
 	 * be returned again (allowing to return the next generic argument match

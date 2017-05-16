@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,31 +63,31 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * Build Spring AOP Advisors for all annotated At-AspectJ methods
 	 * on the specified aspect instance.
-	 * @param aif the aspect instance factory (not the aspect instance itself
-	 * in order to avoid eager instantiation)
+	 * @param aspectInstanceFactory the aspect instance factory
+	 * (not the aspect instance itself in order to avoid eager instantiation)
 	 * @return a list of advisors for this class
 	 */
-	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aif);
+	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aspectInstanceFactory);
 
 	/**
 	 * Build a Spring AOP Advisor for the given AspectJ advice method.
 	 * @param candidateAdviceMethod the candidate advice method
-	 * @param aif the aspect instance factory
-	 * @param declarationOrderInAspect the declaration order within the aspect
+	 * @param aspectInstanceFactory the aspect instance factory
+	 * @param declarationOrder the declaration order within the aspect
 	 * @param aspectName the name of the aspect
 	 * @return {@code null} if the method is not an AspectJ advice method
 	 * or if it is a pointcut that will be used by other advice but will not
 	 * create a Spring advice in its own right
 	 */
-	Advisor getAdvisor(Method candidateAdviceMethod,
-			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName);
+	Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aspectInstanceFactory,
+			int declarationOrder, String aspectName);
 
 	/**
 	 * Build a Spring AOP Advice for the given AspectJ advice method.
 	 * @param candidateAdviceMethod the candidate advice method
-	 * @param pointcut the corresponding AspectJ expression pointcut
-	 * @param aif the aspect instance factory
-	 * @param declarationOrderInAspect the declaration order within the aspect
+	 * @param expressionPointcut the AspectJ expression pointcut
+	 * @param aspectInstanceFactory the aspect instance factory
+	 * @param declarationOrder the declaration order within the aspect
 	 * @param aspectName the name of the aspect
 	 * @return {@code null} if the method is not an AspectJ advice method
 	 * or if it is a pointcut that will be used by other advice but will not
@@ -98,7 +98,7 @@ public interface AspectJAdvisorFactory {
 	 * @see org.springframework.aop.aspectj.AspectJAfterReturningAdvice
 	 * @see org.springframework.aop.aspectj.AspectJAfterThrowingAdvice
 	 */
-	Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut pointcut,
-			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName);
+	Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut expressionPointcut,
+			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName);
 
 }

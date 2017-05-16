@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,29 +33,6 @@ import static org.junit.Assert.*;
  */
 public class OperatorOverloaderTests extends AbstractExpressionTests {
 
-	static class StringAndBooleanAddition implements OperatorOverloader {
-
-		@Override
-		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
-			if (operation==Operation.ADD) {
-				return ((String)leftOperand)+((Boolean)rightOperand).toString();
-			} else {
-				return leftOperand;
-			}
-		}
-
-		@Override
-		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
-				throws EvaluationException {
-			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
-				return true;
-			}
-			return false;
-
-		}
-
-	}
-
 	@Test
 	public void testSimpleOperations() throws Exception {
 		// no built in support for this:
@@ -73,4 +50,28 @@ public class OperatorOverloaderTests extends AbstractExpressionTests {
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
 		assertEquals("abcnull",expr.getValue(eContext));
 	}
+
+
+	static class StringAndBooleanAddition implements OperatorOverloader {
+
+		@Override
+		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+			if (operation==Operation.ADD) {
+				return ((String)leftOperand)+((Boolean)rightOperand).toString();
+			}
+			else {
+				return leftOperand;
+			}
+		}
+
+		@Override
+		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
+				return true;
+			}
+			return false;
+
+		}
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,13 +87,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
 	 * of registration, to create JDK proxy with specified order of interfaces.
 	 */
-	private List<Class<?>> interfaces = new ArrayList<Class<?>>();
+	private List<Class<?>> interfaces = new ArrayList<>();
 
 	/**
 	 * List of Advisors. If an Advice is added, it will be wrapped
 	 * in an Advisor before being added to this List.
 	 */
-	private List<Advisor> advisors = new LinkedList<Advisor>();
+	private List<Advisor> advisors = new LinkedList<>();
 
 	/**
 	 * Array updated on changes to the advisors list, which is easier
@@ -113,7 +113,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Create a AdvisedSupport instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
-	public AdvisedSupport(Class<?>[] interfaces) {
+	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
 	}
@@ -122,7 +122,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Initialize the method cache.
 	 */
 	private void initMethodCache() {
-		this.methodCache = new ConcurrentHashMap<MethodCacheKey, List<Object>>(32);
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -506,7 +506,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param other the AdvisedSupport object to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
-		copyConfigurationFrom(other, other.targetSource, new ArrayList<Advisor>(other.advisors));
+		copyConfigurationFrom(other, other.targetSource, new ArrayList<>(other.advisors));
 	}
 
 	/**
@@ -520,7 +520,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copyFrom(other);
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
-		this.interfaces = new ArrayList<Class<?>>(other.interfaces);
+		this.interfaces = new ArrayList<>(other.interfaces);
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof IntroductionAdvisor) {
 				validateIntroductionAdvisor((IntroductionAdvisor) advisor);
@@ -586,7 +586,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Simple wrapper class around a Method. Used as the key when
 	 * caching methods, for efficient equals and hashCode comparisons.
 	 */
-	private static class MethodCacheKey {
+	private static final class MethodCacheKey implements Comparable<MethodCacheKey> {
 
 		private final Method method;
 
@@ -599,16 +599,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == this) {
-				return true;
-			}
-			MethodCacheKey otherKey = (MethodCacheKey) other;
-			return (this.method == otherKey.method);
+			return (this == other || (other instanceof MethodCacheKey &&
+					this.method == ((MethodCacheKey) other).method));
 		}
 
 		@Override
 		public int hashCode() {
 			return this.hashCode;
+		}
+
+		@Override
+		public String toString() {
+			return this.method.toString();
+		}
+
+		@Override
+		public int compareTo(MethodCacheKey other) {
+			int result = this.method.getName().compareTo(other.method.getName());
+			if (result == 0) {
+				result = this.method.toString().compareTo(other.method.toString());
+			}
+			return result;
 		}
 	}
 

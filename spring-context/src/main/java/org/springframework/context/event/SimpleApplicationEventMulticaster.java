@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.context.event;
 
 import java.util.concurrent.Executor;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
@@ -160,7 +163,22 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 			}
 		}
 		else {
-			listener.onApplicationEvent(event);
+			try {
+				listener.onApplicationEvent(event);
+			}
+			catch (ClassCastException ex) {
+				String msg = ex.getMessage();
+				if (msg == null || msg.startsWith(event.getClass().getName())) {
+					// Possibly a lambda-defined listener which we could not resolve the generic event type for
+					Log logger = LogFactory.getLog(getClass());
+					if (logger.isDebugEnabled()) {
+						logger.debug("Non-matching event type for listener: " + listener, ex);
+					}
+				}
+				else {
+					throw ex;
+				}
+			}
 		}
 	}
 

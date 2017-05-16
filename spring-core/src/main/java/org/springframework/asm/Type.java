@@ -377,7 +377,16 @@ public class Type {
      */
     public static Type getReturnType(final String methodDescriptor) {
         char[] buf = methodDescriptor.toCharArray();
-        return getType(buf, methodDescriptor.indexOf(')') + 1);
+        int off = 1;
+        while (true) {
+            char car = buf[off++];
+            if (car == ')') {
+                return getType(buf, off);
+            } else if (car == 'L') {
+                while (buf[off++] != ';') {
+                }
+            }
+        }
     }
 
     /**
@@ -562,7 +571,7 @@ public class Type {
             }
             return sb.toString();
         case OBJECT:
-            return new String(buf, off, len).replace('/', '.');
+            return new String(buf, off, len).replace('/', '.').intern();
         default:
             return null;
         }
@@ -577,7 +586,7 @@ public class Type {
      * @return the internal name of the class corresponding to this object type.
      */
     public String getInternalName() {
-        return new String(buf, off, len);
+        return new String(buf, off, len).intern();
     }
 
     /**
@@ -625,9 +634,9 @@ public class Type {
      * @return the descriptor corresponding to this Java type.
      */
     public String getDescriptor() {
-        StringBuilder sb = new StringBuilder();
-        getDescriptor(sb);
-        return sb.toString();
+        StringBuilder buf = new StringBuilder();
+        getDescriptor(buf);
+        return buf.toString();
     }
 
     /**
@@ -643,34 +652,34 @@ public class Type {
      */
     public static String getMethodDescriptor(final Type returnType,
             final Type... argumentTypes) {
-		StringBuilder sb = new StringBuilder();
-        sb.append('(');
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
         for (int i = 0; i < argumentTypes.length; ++i) {
-            argumentTypes[i].getDescriptor(sb);
+            argumentTypes[i].getDescriptor(buf);
         }
-        sb.append(')');
-        returnType.getDescriptor(sb);
-        return sb.toString();
+        buf.append(')');
+        returnType.getDescriptor(buf);
+        return buf.toString();
     }
 
     /**
      * Appends the descriptor corresponding to this Java type to the given
-     * string builder.
+     * string buffer.
      * 
-     * @param sb
-     *            the string builder to which the descriptor must be appended.
+     * @param buf
+     *            the string buffer to which the descriptor must be appended.
      */
-    private void getDescriptor(final StringBuilder sb) {
+    private void getDescriptor(final StringBuilder buf) {
         if (this.buf == null) {
             // descriptor is in byte 3 of 'off' for primitive types (buf ==
             // null)
-            sb.append((char) ((off & 0xFF000000) >>> 24));
+            buf.append((char) ((off & 0xFF000000) >>> 24));
         } else if (sort == OBJECT) {
-            sb.append('L');
-            sb.append(this.buf, off, len);
-            sb.append(';');
+            buf.append('L');
+            buf.append(this.buf, off, len);
+            buf.append(';');
         } else { // sort == ARRAY || sort == METHOD
-            sb.append(this.buf, off, len);
+            buf.append(this.buf, off, len);
         }
     }
 
@@ -700,9 +709,9 @@ public class Type {
      * @return the descriptor corresponding to the given class.
      */
     public static String getDescriptor(final Class<?> c) {
-		StringBuilder sb = new StringBuilder();
-        getDescriptor(sb, c);
-        return sb.toString();
+        StringBuilder buf = new StringBuilder();
+        getDescriptor(buf, c);
+        return buf.toString();
     }
 
     /**
@@ -714,12 +723,12 @@ public class Type {
      */
     public static String getConstructorDescriptor(final Constructor<?> c) {
         Class<?>[] parameters = c.getParameterTypes();
-		StringBuilder sb = new StringBuilder();
-        sb.append('(');
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
         for (int i = 0; i < parameters.length; ++i) {
-            getDescriptor(sb, parameters[i]);
+            getDescriptor(buf, parameters[i]);
         }
-        return sb.append(")V").toString();
+        return buf.append(")V").toString();
     }
 
     /**
@@ -731,25 +740,25 @@ public class Type {
      */
     public static String getMethodDescriptor(final Method m) {
         Class<?>[] parameters = m.getParameterTypes();
-		StringBuilder sb = new StringBuilder();
-        sb.append('(');
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
         for (int i = 0; i < parameters.length; ++i) {
-            getDescriptor(sb, parameters[i]);
+            getDescriptor(buf, parameters[i]);
         }
-        sb.append(')');
-        getDescriptor(sb, m.getReturnType());
-        return sb.toString();
+        buf.append(')');
+        getDescriptor(buf, m.getReturnType());
+        return buf.toString();
     }
 
     /**
-     * Appends the descriptor of the given class to the given string builder.
+     * Appends the descriptor of the given class to the given string buffer.
      * 
-     * @param sb
+     * @param buf
      *            the string buffer to which the descriptor must be appended.
      * @param c
      *            the class whose descriptor must be computed.
      */
-    private static void getDescriptor(final StringBuilder sb, final Class<?> c) {
+    private static void getDescriptor(final StringBuilder buf, final Class<?> c) {
         Class<?> d = c;
         while (true) {
             if (d.isPrimitive()) {
@@ -773,20 +782,20 @@ public class Type {
                 } else /* if (d == Long.TYPE) */{
                     car = 'J';
                 }
-                sb.append(car);
+                buf.append(car);
                 return;
             } else if (d.isArray()) {
-                sb.append('[');
+                buf.append('[');
                 d = d.getComponentType();
             } else {
-                sb.append('L');
+                buf.append('L');
                 String name = d.getName();
                 int len = name.length();
                 for (int i = 0; i < len; ++i) {
                     char car = name.charAt(i);
-                    sb.append(car == '.' ? '/' : car);
+                    buf.append(car == '.' ? '/' : car);
                 }
-                sb.append(';');
+                buf.append(';');
                 return;
             }
         }

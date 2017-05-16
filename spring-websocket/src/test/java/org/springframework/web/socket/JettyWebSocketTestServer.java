@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package org.springframework.web.socket;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -34,35 +35,32 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Jetty based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	private Server jettyServer;
 
-	private int port = -1;
+	private int port;
+
+	private ServletContextHandler contextHandler;
 
 
 	@Override
 	public void setup() {
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.jettyServer = new Server(this.port);
+		// Let server pick its own random, available port.
+		this.jettyServer = new Server(0);
 	}
 
 	@Override
-	public int getPort() {
-		return this.port;
-	}
-
-	@Override
-	public void deployConfig(WebApplicationContext cxt, Filter... filters) {
-		Assert.state(this.port != -1, "setup() was never called.");
-		ServletContextHandler contextHandler = new ServletContextHandler();
-		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(cxt));
-		contextHandler.addServlet(servletHolder, "/");
+	public void deployConfig(WebApplicationContext wac, Filter... filters) {
+		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(wac));
+		this.contextHandler = new ServletContextHandler();
+		this.contextHandler.addServlet(servletHolder, "/");
 		for (Filter filter : filters) {
-			contextHandler.addFilter(new FilterHolder(filter), "/*", getDispatcherTypes());
+			this.contextHandler.addFilter(new FilterHolder(filter), "/*", getDispatcherTypes());
 		}
-		this.jettyServer.setHandler(contextHandler);
+		this.jettyServer.setHandler(this.contextHandler);
 	}
 
 	private EnumSet<DispatcherType> getDispatcherTypes() {
@@ -77,14 +75,36 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.jettyServer.start();
+		this.contextHandler.start();
+
+		Connector[] connectors = jettyServer.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		this.port = connector.getLocalPort();
 	}
 
 	@Override
 	public void stop() throws Exception {
-		if (this.jettyServer.isRunning()) {
-			this.jettyServer.setStopTimeout(5000);
-			this.jettyServer.stop();
+		try {
+			if (this.contextHandler.isRunning()) {
+				this.contextHandler.stop();
+			}
 		}
+		finally {
+			if (this.jettyServer.isRunning()) {
+				this.jettyServer.setStopTimeout(5000);
+				this.jettyServer.stop();
+			}
+		}
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.contextHandler.getServletContext();
 	}
 
 }

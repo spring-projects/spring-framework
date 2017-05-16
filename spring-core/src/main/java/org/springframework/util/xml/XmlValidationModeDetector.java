@@ -120,7 +120,7 @@ public class XmlValidationModeDetector {
 
 
 	/**
-	 * Does the content contain the the DTD DOCTYPE declaration?
+	 * Does the content contain the DTD DOCTYPE declaration?
 	 */
 	private boolean hasDoctype(String content) {
 		return content.contains(DOCTYPE);

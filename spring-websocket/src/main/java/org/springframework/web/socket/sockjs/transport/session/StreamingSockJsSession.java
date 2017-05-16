@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,26 +47,18 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	/**
-	 * @deprecated as of 4.2 this method is no longer used.
-	 */
-	@Override
-	@Deprecated
-	protected boolean isStreaming() {
-		return true;
-	}
-
-	/**
 	 * Get the prelude to write to the response before any other data.
 	 * @since 4.2
 	 */
 	protected abstract byte[] getPrelude(ServerHttpRequest request);
+
 
 	@Override
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
 			boolean initialRequest) throws IOException {
 
 		byte[] prelude = getPrelude(request);
-		Assert.notNull(prelude);
+		Assert.state(prelude != null, "Prelude expected");
 		response.getBody().write(prelude);
 		response.flush();
 
@@ -84,15 +76,13 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
 			writeFrame(frame);
 
-			this.byteCount += frame.getContentBytes().length + 1;
+			this.byteCount += (frame.getContentBytes().length + 1);
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.byteCount + " bytes written so far, "
-						+ getMessageCache().size() + " more messages not flushed");
+				logger.trace(this.byteCount + " bytes written so far, " +
+						getMessageCache().size() + " more messages not flushed");
 			}
 			if (this.byteCount >= getSockJsServiceConfig().getStreamBytesLimit()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Streamed bytes limit reached. Recycling current request");
-				}
+				logger.trace("Streamed bytes limit reached, recycling current request");
 				resetRequest();
 				this.byteCount = 0;
 				break;

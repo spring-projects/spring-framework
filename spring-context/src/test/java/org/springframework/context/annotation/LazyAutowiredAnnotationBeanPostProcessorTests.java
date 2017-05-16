@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,28 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		}
 	}
 
+	@Test
+	public void testLazyOptionalResourceInjectionWithNonExistingTarget() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(OptionalFieldResourceInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+
+		OptionalFieldResourceInjectionBean bean = (OptionalFieldResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNotNull(bean.getTestBean());
+		try {
+			bean.getTestBean().getName();
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// expected;
+		}
+	}
+
 
 	public interface TestBeanHolder {
 
@@ -128,6 +150,17 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 	public static class FieldResourceInjectionBean implements TestBeanHolder {
 
 		@Autowired @Lazy
+		private TestBean testBean;
+
+		public TestBean getTestBean() {
+			return this.testBean;
+		}
+	}
+
+
+	public static class OptionalFieldResourceInjectionBean implements TestBeanHolder {
+
+		@Autowired(required = false) @Lazy
 		private TestBean testBean;
 
 		public TestBean getTestBean() {

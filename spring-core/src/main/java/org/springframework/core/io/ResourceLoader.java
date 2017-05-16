@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ public interface ResourceLoader {
 
 
 	/**
-	 * Return a Resource handle for the specified resource.
-	 * The handle should always be a reusable resource descriptor,
+	 * Return a Resource handle for the specified resource location.
+	 * <p>The handle should always be a reusable resource descriptor,
 	 * allowing for multiple {@link Resource#getInputStream()} calls.
 	 * <p><ul>
 	 * <li>Must support fully qualified URLs, e.g. "file:C:/test.dat".
@@ -58,10 +58,10 @@ public interface ResourceLoader {
 	 * <p>Note that a Resource handle does not imply an existing resource;
 	 * you need to invoke {@link Resource#exists} to check for existence.
 	 * @param location the resource location
-	 * @return a corresponding Resource handle
+	 * @return a corresponding Resource handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
-	 * @see org.springframework.core.io.Resource#exists
-	 * @see org.springframework.core.io.Resource#getInputStream
+	 * @see Resource#exists()
+	 * @see Resource#getInputStream()
 	 */
 	Resource getResource(String location);
 

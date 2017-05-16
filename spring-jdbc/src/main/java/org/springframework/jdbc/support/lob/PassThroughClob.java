@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.Clob;
 import java.sql.SQLException;
 
@@ -91,11 +92,11 @@ class PassThroughClob implements Clob {
 	public InputStream getAsciiStream() throws SQLException {
 		try {
 			if (this.content != null) {
-				return new ByteArrayInputStream(this.content.getBytes("US-ASCII"));
+				return new ByteArrayInputStream(this.content.getBytes(StandardCharsets.US_ASCII));
 			}
 			else if (this.characterStream != null) {
 				String tempContent = FileCopyUtils.copyToString(this.characterStream);
-				return new ByteArrayInputStream(tempContent.getBytes("US-ASCII"));
+				return new ByteArrayInputStream(tempContent.getBytes(StandardCharsets.US_ASCII));
 			}
 			else {
 				return this.asciiStream;

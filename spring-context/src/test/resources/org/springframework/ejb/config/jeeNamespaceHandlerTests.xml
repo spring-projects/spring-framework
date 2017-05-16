@@ -67,7 +67,7 @@
       cache-session-bean="true">
 		<jee:environment>foo=bar</jee:environment>
 	</jee:remote-slsb>
-	
+
 	<!-- Lazy beans Tests-->
 	<jee:jndi-lookup id="lazyDataSource" jndi-name="jdbc/MyDataSource" lazy-init="true" />
 	<jee:local-slsb id="lazyLocalBean" jndi-name="ejb/MyLocalBean"

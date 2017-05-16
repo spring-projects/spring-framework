@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,6 @@ public abstract class AbstractPropertyAccessorTests {
 	public void getNestedDeepProperty() {
 		Person target = createPerson("John", "London", "UK");
 		AbstractPropertyAccessor accessor = createAccessor(target);
-
 		assertThat(accessor.getPropertyValue("address.country.name"), is("UK"));
 	}
 
@@ -441,7 +440,7 @@ public abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setConversionService(new DefaultConversionService());
 		accessor.setAutoGrowNestedPaths(true);
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("favoriteNumber", "9");
 		accessor.setPropertyValue("list[0]", map);
 		assertEquals(map, target.list.get(0));
@@ -821,7 +820,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertTrue("correct values", target.stringArray[0].equals("foo") && target.stringArray[1].equals("fi") &&
 				target.stringArray[2].equals("fi") && target.stringArray[3].equals("fum"));
 
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("foo");
 		list.add("fi");
 		list.add("fi");
@@ -831,7 +830,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertTrue("correct values", target.stringArray[0].equals("foo") && target.stringArray[1].equals("fi") &&
 				target.stringArray[2].equals("fi") && target.stringArray[3].equals("fum"));
 
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		set.add("foo");
 		set.add("fi");
 		set.add("fum");
@@ -864,7 +863,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertTrue("correct values", target.stringArray[0].equals("foo") && target.stringArray[1].equals("fi") &&
 				target.stringArray[2].equals("fi") && target.stringArray[3].equals("fum"));
 
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("4foo");
 		list.add("7fi");
 		list.add("6fi");
@@ -874,7 +873,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertTrue("correct values", target.stringArray[0].equals("foo") && target.stringArray[1].equals("fi") &&
 				target.stringArray[2].equals("fi") && target.stringArray[3].equals("fum"));
 
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		set.add("4foo");
 		set.add("7fi");
 		set.add("6fum");
@@ -1143,7 +1142,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setGenericArrayProperty() {
 		SkipReaderStub target = new SkipReaderStub();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> values = new LinkedList<String>();
+		List<String> values = new LinkedList<>();
 		values.add("1");
 		values.add("2");
 		values.add("3");
@@ -1176,16 +1175,16 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionProperty() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Collection<String> coll = new HashSet<String>();
+		Collection<String> coll = new HashSet<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll);
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set);
-		SortedSet<String> sortedSet = new TreeSet<String>();
+		SortedSet<String> sortedSet = new TreeSet<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", sortedSet);
-		List<String> list = new LinkedList<String>();
+		List<String> list = new LinkedList<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", list);
 		assertSame(coll, target.getCollection());
@@ -1199,16 +1198,16 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyNonMatchingType() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Collection<String> coll = new ArrayList<String>();
+		Collection<String> coll = new ArrayList<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll);
-		List<String> set = new LinkedList<String>();
+		List<String> set = new LinkedList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set);
-		List<String> sortedSet = new ArrayList<String>();
+		List<String> sortedSet = new ArrayList<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", sortedSet);
-		Set<String> list = new HashSet<String>();
+		Set<String> list = new HashSet<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", list);
 		assertEquals(1, target.getCollection().size());
@@ -1226,16 +1225,16 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithArrayValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Collection<String> coll = new HashSet<String>();
+		Collection<String> coll = new HashSet<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll.toArray());
-		List<String> set = new LinkedList<String>();
+		List<String> set = new LinkedList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set.toArray());
-		List<String> sortedSet = new ArrayList<String>();
+		List<String> sortedSet = new ArrayList<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", sortedSet.toArray());
-		Set<String> list = new HashSet<String>();
+		Set<String> list = new HashSet<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", list.toArray());
 		assertEquals(1, target.getCollection().size());
@@ -1253,16 +1252,16 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithIntArrayValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Collection<Integer> coll = new HashSet<Integer>();
+		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", new int[] {0});
-		List<Integer> set = new LinkedList<Integer>();
+		List<Integer> set = new LinkedList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", new int[] {1});
-		List<Integer> sortedSet = new ArrayList<Integer>();
+		List<Integer> sortedSet = new ArrayList<>();
 		sortedSet.add(2);
 		accessor.setPropertyValue("sortedSet", new int[] {2});
-		Set<Integer> list = new HashSet<Integer>();
+		Set<Integer> list = new HashSet<>();
 		list.add(3);
 		accessor.setPropertyValue("list", new int[] {3});
 		assertEquals(1, target.getCollection().size());
@@ -1280,16 +1279,16 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithIntegerValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Collection<Integer> coll = new HashSet<Integer>();
+		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", new Integer(0));
-		List<Integer> set = new LinkedList<Integer>();
+		List<Integer> set = new LinkedList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", new Integer(1));
-		List<Integer> sortedSet = new ArrayList<Integer>();
+		List<Integer> sortedSet = new ArrayList<>();
 		sortedSet.add(2);
 		accessor.setPropertyValue("sortedSet", new Integer(2));
-		Set<Integer> list = new HashSet<Integer>();
+		Set<Integer> list = new HashSet<>();
 		list.add(3);
 		accessor.setPropertyValue("list", new Integer(3));
 		assertEquals(1, target.getCollection().size());
@@ -1307,13 +1306,13 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithStringValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> set = new LinkedList<String>();
+		List<String> set = new LinkedList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", "set1");
-		List<String> sortedSet = new ArrayList<String>();
+		List<String> sortedSet = new ArrayList<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", "sortedSet1");
-		Set<String> list = new HashSet<String>();
+		Set<String> list = new HashSet<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", "list1");
 		assertEquals(1, target.getSet().size());
@@ -1349,7 +1348,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setMapProperty() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 		accessor.setPropertyValue("map", map);
 		SortedMap<?, ?> sortedMap = new TreeMap<>();
@@ -1363,10 +1362,10 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setMapPropertyNonMatchingType() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		Map<String, String> map = new TreeMap<String, String>();
+		Map<String, String> map = new TreeMap<>();
 		map.put("key", "value");
 		accessor.setPropertyValue("map", map);
-		Map<String, String> sortedMap = new TreeMap<String, String>();
+		Map<String, String> sortedMap = new TreeMap<>();
 		sortedMap.put("sortedKey", "sortedValue");
 		accessor.setPropertyValue("sortedMap", sortedMap);
 		assertEquals(1, target.getMap().size());
@@ -1423,7 +1422,7 @@ public abstract class AbstractPropertyAccessorTests {
 			}
 		});
 
-		Map<Integer, String> inputMap = new HashMap<Integer, String>();
+		Map<Integer, String> inputMap = new HashMap<>();
 		inputMap.put(1, "rod");
 		inputMap.put(2, "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -1447,7 +1446,7 @@ public abstract class AbstractPropertyAccessorTests {
 			}
 		});
 
-		Map<Object, Object> inputMap = new HashMap<Object, Object>();
+		Map<Object, Object> inputMap = new HashMap<>();
 		inputMap.put(1, "rod");
 		inputMap.put(2, "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -1762,6 +1761,14 @@ public abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setPropertyValue("prop1", "val1");
 		assertEquals("val1", Spr10115Bean.prop1);
+	}
+
+	@Test
+	public void cornerSpr13837() {
+		Spr13837Bean target = new Spr13837Bean();
+		AbstractPropertyAccessor accessor = createAccessor(target);
+		accessor.setPropertyValue("something", 42);
+		assertEquals(Integer.valueOf(42), target.something);
 	}
 
 
@@ -2199,6 +2206,30 @@ public abstract class AbstractPropertyAccessorTests {
 
 		public static void setProp1(String prop1) {
 			Spr10115Bean.prop1 = prop1;
+		}
+	}
+
+	interface Spr13837 {
+
+		Integer getSomething();
+
+		<T extends Spr13837> T setSomething(Integer something);
+
+	}
+
+	static class Spr13837Bean implements Spr13837 {
+
+		protected Integer something;
+
+		@Override
+		public Integer getSomething() {
+			return this.something;
+		}
+
+		@Override
+		public Spr13837Bean setSomething(final Integer something) {
+			this.something = something;
+			return this;
 		}
 	}
 

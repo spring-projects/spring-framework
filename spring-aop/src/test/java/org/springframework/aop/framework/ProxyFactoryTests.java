@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.accessibility.Accessible;
 import javax.swing.JFrame;
 import javax.swing.RootPaneContainer;
@@ -31,6 +33,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.Order;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
@@ -49,7 +53,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 14.05.2003
  */
-public final class ProxyFactoryTests {
+public class ProxyFactoryTests {
 
 	@Test
 	public void testIndexOfMethods() {
@@ -337,6 +341,34 @@ public final class ProxyFactoryTests {
 		assertTrue(proxy instanceof Accessible);
 	}
 
+	@Test
+	public void testInterfaceProxiesCanBeOrderedThroughAnnotations() {
+		Object proxy1 = new ProxyFactory(new A()).getProxy();
+		Object proxy2 = new ProxyFactory(new B()).getProxy();
+		List<Object> list = new ArrayList<>(2);
+		list.add(proxy1);
+		list.add(proxy2);
+		AnnotationAwareOrderComparator.sort(list);
+		assertSame(proxy2, list.get(0));
+		assertSame(proxy1, list.get(1));
+	}
+
+	@Test
+	public void testTargetClassProxiesCanBeOrderedThroughAnnotations() {
+		ProxyFactory pf1 = new ProxyFactory(new A());
+		pf1.setProxyTargetClass(true);
+		ProxyFactory pf2 = new ProxyFactory(new B());
+		pf2.setProxyTargetClass(true);
+		Object proxy1 = pf1.getProxy();
+		Object proxy2 = pf2.getProxy();
+		List<Object> list = new ArrayList<>(2);
+		list.add(proxy1);
+		list.add(proxy2);
+		AnnotationAwareOrderComparator.sort(list);
+		assertSame(proxy2, list.get(0));
+		assertSame(proxy1, list.get(1));
+	}
+
 
 	@SuppressWarnings("serial")
 	private static class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
@@ -358,6 +390,24 @@ public final class ProxyFactoryTests {
 		@Override
 		public long getTimeStamp() {
 			return ts;
+		}
+	}
+
+
+	@Order(2)
+	public static class A implements Runnable {
+
+		@Override
+		public void run() {
+		}
+	}
+
+
+	@Order(1)
+	public static class B implements Runnable{
+
+		@Override
+		public void run() {
 		}
 	}
 

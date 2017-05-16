@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.scheduling.aspectj;
 import java.lang.reflect.Method;
 import java.util.concurrent.Future;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -33,9 +33,17 @@ import org.springframework.scheduling.annotation.Async;
  * on the return type. If, however, a class marked with {@code @Async} contains a method
  * that violates this constraint, it produces only a warning.
  *
+ * <p>This aspect needs to be injected with an implementation of a task-oriented
+ * {@link java.util.concurrent.Executor} to activate it for a specific thread pool,
+ * or with a {@link org.springframework.beans.factory.BeanFactory} for default
+ * executor lookup. Otherwise it will simply delegate all calls synchronously.
+ *
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @since 3.0.5
+ * @see #setExecutor
+ * @see #setBeanFactory
+ * @see #getDefaultExecutor
  */
 public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspect {
 
@@ -60,9 +68,9 @@ public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspec
 	protected String getExecutorQualifier(Method method) {
 		// Maintainer's note: changes made here should also be made in
 		// AnnotationAsyncExecutionInterceptor#getExecutorQualifier
-		Async async = AnnotationUtils.findAnnotation(method, Async.class);
+		Async async = AnnotatedElementUtils.findMergedAnnotation(method, Async.class);
 		if (async == null) {
-			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
+			async = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), Async.class);
 		}
 		return (async != null ? async.value() : null);
 	}
@@ -74,7 +82,6 @@ public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspec
 
 	declare warning:
 		execution(!(void || Future+) (@Async *).*(..)):
-		"Methods in a class marked with @Async that do not return void or Future will " +
-		"be routed synchronously";
+		"Methods in a class marked with @Async that do not return void or Future will be routed synchronously";
 
 }

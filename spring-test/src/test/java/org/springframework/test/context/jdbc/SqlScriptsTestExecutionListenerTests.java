@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ public class SqlScriptsTestExecutionListenerTests {
 
 
 	@Test
-	public void missingValueAndScriptsAtClassLevel() throws Exception {
-		Class<?> clazz = MissingValueAndScriptsAtClassLevel.class;
+	public void missingValueAndScriptsAndStatementsAtClassLevel() throws Exception {
+		Class<?> clazz = MissingValueAndScriptsAndStatementsAtClassLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
@@ -59,8 +59,8 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void missingValueAndScriptsAtMethodLevel() throws Exception {
-		Class<?> clazz = MissingValueAndScriptsAtMethodLevel.class;
+	public void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
+		Class<?> clazz = MissingValueAndScriptsAndStatementsAtMethodLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
@@ -75,8 +75,8 @@ public class SqlScriptsTestExecutionListenerTests {
 
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(either(
-				containsString("attribute [value] and its alias [scripts]")).or(
-				containsString("attribute [scripts] and its alias [value]")));
+				containsString("attribute 'value' and its alias 'scripts'")).or(
+				containsString("attribute 'scripts' and its alias 'value'")));
 		exception.expectMessage(either(containsString("values of [{foo}] and [{bar}]")).or(
 				containsString("values of [{bar}] and [{foo}]")));
 		exception.expectMessage(containsString("but only one is permitted"));
@@ -126,13 +126,13 @@ public class SqlScriptsTestExecutionListenerTests {
 	// -------------------------------------------------------------------------
 
 	@Sql
-	static class MissingValueAndScriptsAtClassLevel {
+	static class MissingValueAndScriptsAndStatementsAtClassLevel {
 
 		public void foo() {
 		}
 	}
 
-	static class MissingValueAndScriptsAtMethodLevel {
+	static class MissingValueAndScriptsAndStatementsAtMethodLevel {
 
 		@Sql
 		public void foo() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,10 +58,11 @@ public enum Propagation {
 	/**
 	 * Create a new transaction, and suspend the current transaction if one exists.
 	 * Analogous to the EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work out-of-the-box on
-	 * all transaction managers. This in particular applies to JtaTransactionManager,
+	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
+	 * on all transaction managers. This in particular applies to
+	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the {@code javax.transaction.TransactionManager} to be
-	 * made available it to it (which is server-specific in standard J2EE).
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
@@ -69,10 +70,11 @@ public enum Propagation {
 	/**
 	 * Execute non-transactionally, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
-	 * on all transaction managers. This in particular applies to JtaTransactionManager,
+	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
+	 * on all transaction managers. This in particular applies to
+	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the {@code javax.transaction.TransactionManager} to be
-	 * made available it to it (which is server-specific in standard J2EE).
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	NOT_SUPPORTED(TransactionDefinition.PROPAGATION_NOT_SUPPORTED),

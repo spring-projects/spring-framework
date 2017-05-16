@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,26 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.MatcherAssert.*;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Static, factory methods for {@link RequestMatcher} classes. Typically used to
+ * Static factory methods for {@link RequestMatcher} classes. Typically used to
  * provide input for {@link MockRestServiceServer#expect(RequestMatcher)}.
  *
- * <p><strong>Eclipse users:</strong> Consider adding this class as a Java editor
- * favorite. To navigate, open the Preferences and type "favorites".
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -55,6 +58,21 @@ public abstract class MockRestRequestMatchers {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) throws AssertionError {
+			}
+		};
+	}
+
+	/**
+	 * Assert the {@link HttpMethod} of the request.
+	 * @param method the HTTP method
+	 * @return the request matcher
+	 */
+	public static RequestMatcher method(final HttpMethod method) {
+		Assert.notNull(method, "'method' must not be null");
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) throws AssertionError {
+				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
 			}
 		};
 	}
@@ -90,21 +108,6 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert the {@link HttpMethod} of the request.
-	 * @param method the HTTP method
-	 * @return the request matcher
-	 */
-	public static RequestMatcher method(final HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws AssertionError {
-				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
-			}
-		};
-	}
-
-	/**
 	 * Expect a request to the given URI.
 	 * @param uri the expected URI
 	 * @return the request matcher
@@ -120,14 +123,63 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
+	 * Assert request query parameter values with the given Hamcrest matcher.
+	 */
+	@SafeVarargs
+	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> params = getQueryParams(request);
+				assertValueCount("query param", name, params, matchers.length);
+				for (int i = 0 ; i < matchers.length; i++) {
+					assertThat("Query param", params.get(name).get(i), matchers[i]);
+				}
+			}
+		};
+	}
+
+	/**
+	 * Assert request query parameter values.
+	 */
+	public static RequestMatcher queryParam(final String name, final String... expectedValues) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> params = getQueryParams(request);
+				assertValueCount("query param", name, params, expectedValues.length);
+				for (int i = 0 ; i < expectedValues.length; i++) {
+					assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
+				}
+			}
+		};
+	}
+
+	private static MultiValueMap<String, String> getQueryParams(ClientHttpRequest request) {
+		return UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+	}
+
+	private static void assertValueCount(String valueType, final String name,
+			MultiValueMap<String, String> map, int count) {
+
+		List<String> values = map.get(name);
+
+		String message = "Expected " + valueType + " <" + name + ">";
+		assertNotNull(message, values);
+
+		assertTrue(message + " to have at least <" + count + "> values but found " + values,
+				count <= values.size());
+	}
+
+	/**
 	 * Assert request header values with the given Hamcrest matcher.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				assertHeaderValueCount(name, request.getHeaders(), matchers.length);
+				assertValueCount("header", name, request.getHeaders(), matchers.length);
 				for (int i = 0 ; i < matchers.length; i++) {
 					assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
 				}
@@ -142,20 +194,13 @@ public abstract class MockRestRequestMatchers {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				assertHeaderValueCount(name, request.getHeaders(), expectedValues.length);
+				assertValueCount("header", name, request.getHeaders(), expectedValues.length);
 				for (int i = 0 ; i < expectedValues.length; i++) {
 					assertEquals("Request header + [" + name + "]",
 							expectedValues[i], request.getHeaders().get(name).get(i));
 				}
 			}
 		};
-	}
-
-	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
-		List<String> actualValues = headers.get(name);
-		AssertionErrors.assertTrue("Expected header <" + name + ">", actualValues != null);
-		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount
-				+ "> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
 	/**
@@ -166,8 +211,8 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression to
 	 * inspect a specific subset of the body. The JSON path expression can be a
 	 * parameterized string using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
@@ -179,8 +224,8 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression to
 	 * inspect a specific subset of the body and a Hamcrest match for asserting
 	 * the value found at the JSON path.
 	 * @param expression the JSON path expression

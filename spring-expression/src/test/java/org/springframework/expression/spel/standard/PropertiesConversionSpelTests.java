@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class PropertiesConversionSpelTests {
 
 	@Test
 	public void mapWithAllStringValues() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", "2");
 		map.put("z", "3");
@@ -63,7 +63,7 @@ public class PropertiesConversionSpelTests {
 
 	@Test
 	public void mapWithNonStringValue() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", 2);
 		map.put("z", "3");

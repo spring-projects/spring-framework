@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique result object from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
-	 * of if the unique result object is not convertable to the
+	 * of if the unique result object is not convertible to the
 	 * specified required type.
 	 * @param results the result Collection (can be {@code null})
 	 * @return the unique result object
@@ -162,7 +162,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique int result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
-	 * of if the unique result object is not convertable to an int.
+	 * of if the unique result object is not convertible to an int.
 	 * @param results the result Collection (can be {@code null})
 	 * @return the unique int result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
@@ -170,7 +170,7 @@ public abstract class DataAccessUtils {
 	 * @throws EmptyResultDataAccessException if no result object
 	 * at all has been found in the given Collection
 	 * @throws TypeMismatchDataAccessException if the unique object
-	 * in the collection is not convertable to an int
+	 * in the collection is not convertible to an int
 	 */
 	public static int intResult(Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
@@ -181,7 +181,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique long result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
-	 * of if the unique result object is not convertable to a long.
+	 * of if the unique result object is not convertible to a long.
 	 * @param results the result Collection (can be {@code null})
 	 * @return the unique long result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
@@ -189,7 +189,7 @@ public abstract class DataAccessUtils {
 	 * @throws EmptyResultDataAccessException if no result object
 	 * at all has been found in the given Collection
 	 * @throws TypeMismatchDataAccessException if the unique object
-	 * in the collection is not convertable to a long
+	 * in the collection is not convertible to a long
 	 */
 	public static long longResult(Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,18 @@ import org.springframework.util.StringUtils;
  * attributes declared via {@link ContextConfiguration @ContextConfiguration}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.1
  * @see ContextConfiguration
  * @see SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
  * @see MergedContextConfiguration
  */
 public class ContextConfigurationAttributes {
+
+	private static final String[] EMPTY_LOCATIONS = new String[0];
+
+	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
 
 	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
 
@@ -59,6 +65,17 @@ public class ContextConfigurationAttributes {
 
 	private final Class<? extends ContextLoader> contextLoaderClass;
 
+
+	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance with default values.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration},
+	 * either explicitly or implicitly
+	 * @since 4.3
+	 */
+	@SuppressWarnings("unchecked")
+	public ContextConfigurationAttributes(Class<?> declaringClass) {
+		this(declaringClass, EMPTY_LOCATIONS, EMPTY_CLASSES, false, (Class[]) EMPTY_CLASSES, true, ContextLoader.class);
+	}
 
 	/**
 	 * Construct a new {@link ContextConfigurationAttributes} instance for the
@@ -84,8 +101,8 @@ public class ContextConfigurationAttributes {
 	@SuppressWarnings("unchecked")
 	public ContextConfigurationAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
 		this(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getClassArray("classes"), annAttrs.getBoolean("inheritLocations"),
-			(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
-			annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"), (Class<? extends ContextLoader>) annAttrs.getClass("loader"));
+				(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
+				annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"), (Class<? extends ContextLoader>) annAttrs.getClass("loader"));
 	}
 
 	/**
@@ -139,8 +156,8 @@ public class ContextConfigurationAttributes {
 		if (!ObjectUtils.isEmpty(locations) && !ObjectUtils.isEmpty(classes) && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') %s " +
-							"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
-							"only one declaration of resources per @ContextConfiguration annotation.",
+					"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
+					"only one declaration of resources per @ContextConfiguration annotation.",
 					declaringClass.getName(), ObjectUtils.nullSafeToString(locations),
 					ObjectUtils.nullSafeToString(classes)));
 		}
@@ -158,7 +175,8 @@ public class ContextConfigurationAttributes {
 
 	/**
 	 * Get the {@linkplain Class class} that declared the
-	 * {@link ContextConfiguration @ContextConfiguration} annotation.
+	 * {@link ContextConfiguration @ContextConfiguration} annotation, either explicitly
+	 * or implicitly.
 	 * @return the declaring class (never {@code null})
 	 */
 	public Class<?> getDeclaringClass() {

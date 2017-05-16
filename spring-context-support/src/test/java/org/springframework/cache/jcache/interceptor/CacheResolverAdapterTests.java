@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.jcache.AbstractJCacheTests;
-import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -46,7 +44,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 
 
 	@Test
-	public void resolveSimpleCache() {
+	public void resolveSimpleCache() throws Exception {
 		DefaultCacheInvocationContext<?> dummyContext = createDummyContext();
 		CacheResolverAdapter adapter = new CacheResolverAdapter(getCacheResolver(dummyContext, "testCache"));
 		Collection<? extends Cache> caches = adapter.resolveCaches(dummyContext);
@@ -56,7 +54,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void resolveUnknownCache() {
+	public void resolveUnknownCache() throws Exception {
 		DefaultCacheInvocationContext<?> dummyContext = createDummyContext();
 		CacheResolverAdapter adapter = new CacheResolverAdapter(getCacheResolver(dummyContext, null));
 
@@ -66,7 +64,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 
 	protected CacheResolver getCacheResolver(CacheInvocationContext<? extends Annotation> context, String cacheName) {
 		CacheResolver cacheResolver = mock(CacheResolver.class);
-		final javax.cache.Cache cache;
+		javax.cache.Cache cache;
 		if (cacheName == null) {
 			cache = null;
 		}
@@ -78,22 +76,21 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 		return cacheResolver;
 	}
 
-	protected DefaultCacheInvocationContext<?> createDummyContext() {
-		Method method = ReflectionUtils.findMethod(Sample.class, "get", String.class);
-		Assert.notNull(method);
+	protected DefaultCacheInvocationContext<?> createDummyContext() throws Exception {
+		Method method = Sample.class.getMethod("get", String.class);
 		CacheResult cacheAnnotation = method.getAnnotation(CacheResult.class);
 		CacheMethodDetails<CacheResult> methodDetails =
 				new DefaultCacheMethodDetails<>(method, cacheAnnotation, "test");
 		CacheResultOperation operation = new CacheResultOperation(methodDetails,
 				defaultCacheResolver, defaultKeyGenerator, defaultExceptionCacheResolver);
-		return new DefaultCacheInvocationContext<CacheResult>(operation, new Sample(), new Object[] {"id"});
+		return new DefaultCacheInvocationContext<>(operation, new Sample(), new Object[] {"id"});
 	}
 
 
 	static class Sample {
 
 		@CacheResult
-		private Object get(String id) {
+		public Object get(String id) {
 			return null;
 		}
 	}

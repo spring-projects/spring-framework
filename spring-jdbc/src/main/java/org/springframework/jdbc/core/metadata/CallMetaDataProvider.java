@@ -45,8 +45,8 @@ public interface CallMetaDataProvider {
 	 * This is only called for databases that are supported. This initialization
 	 * can be turned off by specifying that column meta data should not be used.
 	 * @param databaseMetaData used to retrieve database specific information
-	 * @param catalogName name of catalog to use or null
-	 * @param schemaName name of schema name to use or null
+	 * @param catalogName name of catalog to use (or {@code null} if none)
+	 * @param schemaName name of schema name to use (or {@code null} if none)
 	 * @param procedureName name of the stored procedure
 	 * @throws SQLException in case of initialization failure
 	 * @see	org.springframework.jdbc.core.simple.SimpleJdbcCall#withoutProcedureColumnMetaDataAccess()

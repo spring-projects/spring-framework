@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,21 @@ package org.springframework.jmx.export.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  */
-public class IdentityNamingStrategyTests extends TestCase {
+public class IdentityNamingStrategyTests {
 
-	public void testNaming() throws MalformedObjectNameException {
+	@Test
+	public void naming() throws MalformedObjectNameException {
 		JmxTestBean bean = new JmxTestBean();
 		IdentityNamingStrategy strategy = new IdentityNamingStrategy();
 		ObjectName objectName = strategy.getObjectName(bean, "null");

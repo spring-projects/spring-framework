@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.GenericTypeAwareAutowireCandidateResolver;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -47,6 +50,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5
  * @see AutowireCandidateQualifier
  * @see Qualifier
@@ -54,7 +58,7 @@ import org.springframework.util.StringUtils;
  */
 public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwareAutowireCandidateResolver {
 
-	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<Class<? extends Annotation>>(2);
+	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<>(2);
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
@@ -223,8 +227,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			qualifier = bd.getQualifier(ClassUtils.getShortName(type));
 		}
 		if (qualifier == null) {
-			// First, check annotation on factory method, if applicable
-			Annotation targetAnnotation = getFactoryMethodAnnotation(bd, type);
+			// First, check annotation on qualified element, if any
+			Annotation targetAnnotation = getQualifiedElementAnnotation(bd, type);
+			// Then, check annotation on factory method, if applicable
+			if (targetAnnotation == null) {
+				targetAnnotation = getFactoryMethodAnnotation(bd, type);
+			}
 			if (targetAnnotation == null) {
 				RootBeanDefinition dbd = getResolvedDecoratedDefinition(bd);
 				if (dbd != null) {
@@ -289,6 +297,11 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		return true;
 	}
 
+	protected Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
+		AnnotatedElement qualifiedElement = bd.getQualifiedElement();
+		return (qualifiedElement != null ? AnnotationUtils.getAnnotation(qualifiedElement, type) : null);
+	}
+
 	protected Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		Method resolvedFactoryMethod = bd.getResolvedFactoryMethod();
 		return (resolvedFactoryMethod != null ? AnnotationUtils.getAnnotation(resolvedFactoryMethod, type) : null);
@@ -296,7 +309,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 
 
 	/**
-	 * Determine whether the given dependency carries a value annotation.
+	 * Determine whether the given dependency declares an autowired annotation,
+	 * checking its required flag.
+	 * @see Autowired#required()
+	 */
+	@Override
+	public boolean isRequired(DependencyDescriptor descriptor) {
+		if (!super.isRequired(descriptor)) {
+			return false;
+		}
+		Autowired autowired = descriptor.getAnnotation(Autowired.class);
+		return (autowired == null || autowired.required());
+	}
+
+	/**
+	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */
 	@Override
@@ -315,25 +342,20 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
 	protected Object findValue(Annotation[] annotationsToSearch) {
-		for (Annotation annotation : annotationsToSearch) {
-			if (this.valueAnnotationType.isInstance(annotation)) {
-				return extractValue(annotation);
-			}
-		}
-		for (Annotation annotation : annotationsToSearch) {
-			Annotation metaAnn = annotation.annotationType().getAnnotation(this.valueAnnotationType);
-			if (metaAnn != null) {
-				return extractValue(metaAnn);
-			}
+		AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
+				AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
+		if (attr != null) {
+			return extractValue(attr);
 		}
 		return null;
 	}
 
 	/**
 	 * Extract the value attribute from the given annotation.
+	 * @since 4.3
 	 */
-	protected Object extractValue(Annotation valueAnnotation) {
-		Object value = AnnotationUtils.getValue(valueAnnotation);
+	protected Object extractValue(AnnotationAttributes attr) {
+		Object value = attr.get(AnnotationUtils.VALUE);
 		if (value == null) {
 			throw new IllegalStateException("Value annotation must have a value attribute");
 		}

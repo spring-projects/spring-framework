@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,6 @@ import java.net.URLConnection;
  * object, which in turn allows one to obtain a {@code java.io.File} in the
  * file system through its {@code getFile()} method.
  *
- * <p>The main reason for these utility methods for resource location handling
- * is to support {@link Log4jConfigurer}, which must be able to resolve
- * resource locations <i>before the logging system has been initialized</i>.
- * Spring's {@code Resource} abstraction in the core package, on the other hand,
- * already expects the logging system to be available.
- *
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see org.springframework.core.io.Resource
@@ -57,14 +51,20 @@ public abstract class ResourceUtils {
 	/** URL prefix for loading from the file system: "file:" */
 	public static final String FILE_URL_PREFIX = "file:";
 
-	/** URL prefix for loading from the file system: "jar:" */
+	/** URL prefix for loading from a jar file: "jar:" */
 	public static final String JAR_URL_PREFIX = "jar:";
+
+	/** URL prefix for loading from a war file on Tomcat: "war:" */
+	public static final String WAR_URL_PREFIX = "war:";
 
 	/** URL protocol for a file in the file system: "file" */
 	public static final String URL_PROTOCOL_FILE = "file";
 
 	/** URL protocol for an entry from a jar file: "jar" */
 	public static final String URL_PROTOCOL_JAR = "jar";
+
+	/** URL protocol for an entry from a war file: "war" */
+	public static final String URL_PROTOCOL_WAR = "war";
 
 	/** URL protocol for an entry from a zip file: "zip" */
 	public static final String URL_PROTOCOL_ZIP = "zip";
@@ -86,6 +86,9 @@ public abstract class ResourceUtils {
 
 	/** Separator between JAR URL and file path within the JAR: "!/" */
 	public static final String JAR_URL_SEPARATOR = "!/";
+
+	/** Special separator between WAR URL and jar part on Tomcat */
+	public static final String WAR_URL_SEPARATOR = "*/";
 
 
 	/**
@@ -229,6 +232,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri) throws FileNotFoundException {
 		return getFile(resourceUri, "URI");
@@ -243,6 +247,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri, String description) throws FileNotFoundException {
 		Assert.notNull(resourceUri, "Resource URI must not be null");
@@ -256,7 +261,7 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Determine whether the given URL points to a resource in the file system,
-	 * that is, has protocol "file", "vfsfile" or "vfs".
+	 * i.e. has protocol "file", "vfsfile" or "vfs".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a file system URL
 	 */
@@ -267,15 +272,16 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Determine whether the given URL points to a resource in a jar file,
-	 * that is, has protocol "jar", "zip", "vfszip" or "wsjar".
+	 * Determine whether the given URL points to a resource in a jar file.
+	 * i.e. has protocol "jar", "war, ""zip", "vfszip" or "wsjar".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
 		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
+		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_WAR.equals(protocol) ||
+				URL_PROTOCOL_ZIP.equals(protocol) || URL_PROTOCOL_VFSZIP.equals(protocol) ||
+				URL_PROTOCOL_WSJAR.equals(protocol));
 	}
 
 	/**
@@ -317,6 +323,34 @@ public abstract class ResourceUtils {
 		else {
 			return jarUrl;
 		}
+	}
+
+	/**
+	 * Extract the URL for the outermost archive from the given jar/war URL
+	 * (which may point to a resource in a jar file or to a jar file itself).
+	 * <p>In the case of a jar file nested within a war file, this will return
+	 * a URL to the war file since that is the one resolvable in the file system.
+	 * @param jarUrl the original URL
+	 * @return the URL for the actual jar file
+	 * @throws MalformedURLException if no valid jar file URL could be extracted
+	 * @since 4.1.8
+	 * @see #extractJarFileURL(URL)
+	 */
+	public static URL extractArchiveURL(URL jarUrl) throws MalformedURLException {
+		String urlFile = jarUrl.getFile();
+
+		int endIndex = urlFile.indexOf(WAR_URL_SEPARATOR);
+		if (endIndex != -1) {
+			// Tomcat's "jar:war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
+			String warFile = urlFile.substring(0, endIndex);
+			int startIndex = warFile.indexOf(WAR_URL_PREFIX);
+			if (startIndex != -1) {
+				return new URL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
+			}
+		}
+
+		// Regular "jar:file:...myjar.jar!/myentry.txt"
+		return extractJarFileURL(jarUrl);
 	}
 
 	/**

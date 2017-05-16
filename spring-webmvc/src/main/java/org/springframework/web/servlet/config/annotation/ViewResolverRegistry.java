@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,6 @@ import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
-import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 /**
  * Assist with the configuration of a chain of
@@ -57,7 +55,7 @@ public class ViewResolverRegistry {
 
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
-	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
+	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private Integer order;
 
@@ -86,10 +84,8 @@ public class ViewResolverRegistry {
 	 * Enable use of a {@link ContentNegotiatingViewResolver} to front all other
 	 * configured view resolvers and select among all selected Views based on
 	 * media types requested by the client (e.g. in the Accept header).
-	 *
 	 * <p>If invoked multiple times the provided default views will be added to
 	 * any other default views that may have been configured already.
-	 *
 	 * @see ContentNegotiatingViewResolver#setDefaultViews
 	 */
 	public void enableContentNegotiation(View... defaultViews) {
@@ -100,7 +96,6 @@ public class ViewResolverRegistry {
 	 * Enable use of a {@link ContentNegotiatingViewResolver} to front all other
 	 * configured view resolvers and select among all selected Views based on
 	 * media types requested by the client (e.g. in the Accept header).
-	 *
 	 * <p>If invoked multiple times the provided default views will be added to
 	 * any other default views that may have been configured already.
 	 *
@@ -112,14 +107,13 @@ public class ViewResolverRegistry {
 	}
 
 	private void initContentNegotiatingViewResolver(View[] defaultViews) {
-
 		// ContentNegotiatingResolver in the registry: elevate its precedence!
-		this.order = (this.order == null ? Ordered.HIGHEST_PRECEDENCE : this.order);
+		this.order = (this.order != null ? this.order : Ordered.HIGHEST_PRECEDENCE);
 
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews)) {
 				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<View>(this.contentNegotiatingResolver.getDefaultViews());
+					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
 					views.addAll(Arrays.asList(defaultViews));
 					this.contentNegotiatingResolver.setDefaultViews(views);
 				}
@@ -136,7 +130,6 @@ public class ViewResolverRegistry {
 	/**
 	 * Register JSP view resolver using a default view name prefix of "/WEB-INF/"
 	 * and a default suffix of ".jsp".
-	 *
 	 * <p>When this method is invoked more than once, each call will register a
 	 * new ViewResolver instance. Note that since it's not easy to determine
 	 * if a JSP exists without forwarding to it, using multiple JSP-based view
@@ -149,7 +142,6 @@ public class ViewResolverRegistry {
 
 	/**
 	 * Register JSP view resolver with the specified prefix and suffix.
-	 *
 	 * <p>When this method is invoked more than once, each call will register a
 	 * new ViewResolver instance. Note that since it's not easy to determine
 	 * if a JSP exists without forwarding to it, using multiple JSP-based view
@@ -166,7 +158,6 @@ public class ViewResolverRegistry {
 
 	/**
 	 * Register Tiles 3.x view resolver.
-	 *
 	 * <p><strong>Note</strong> that you must also configure Tiles by adding a
 	 * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer} bean.
 	 */
@@ -184,7 +175,6 @@ public class ViewResolverRegistry {
 	/**
 	 * Register a FreeMarker view resolver with an empty default view name
 	 * prefix and a default suffix of ".ftl".
-	 *
 	 * <p><strong>Note</strong> that you must also configure FreeMarker by adding a
 	 * {@link org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer} bean.
 	 */
@@ -196,25 +186,6 @@ public class ViewResolverRegistry {
 					"This bean may be given any name.");
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
-		this.viewResolvers.add(registration.getViewResolver());
-		return registration;
-	}
-
-	/**
-	 * Register Velocity view resolver with an empty default view name
-	 * prefix and a default suffix of ".vm".
-	 *
-	 * <p><strong>Note</strong> that you must also configure Velocity by adding a
-	 * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer} bean.
-	 */
-	public UrlBasedViewResolverRegistration velocity() {
-		if (this.applicationContext != null && !hasBeanOfType(VelocityConfigurer.class)) {
-			throw new BeanInitializationException("In addition to a Velocity view resolver " +
-					"there must also be a single VelocityConfig bean in this web application context " +
-					"(or its parent): VelocityConfigurer is the usual implementation. " +
-					"This bean may be given any name.");
-		}
-		VelocityRegistration registration = new VelocityRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
 		return registration;
 	}
@@ -313,22 +284,14 @@ public class ViewResolverRegistry {
 
 	private static class TilesRegistration extends UrlBasedViewResolverRegistration {
 
-		private TilesRegistration() {
+		public TilesRegistration() {
 			super(new TilesViewResolver());
-		}
-	}
-
-	private static class VelocityRegistration extends UrlBasedViewResolverRegistration {
-
-		private VelocityRegistration() {
-			super(new VelocityViewResolver());
-			getViewResolver().setSuffix(".vm");
 		}
 	}
 
 	private static class FreeMarkerRegistration extends UrlBasedViewResolverRegistration {
 
-		private FreeMarkerRegistration() {
+		public FreeMarkerRegistration() {
 			super(new FreeMarkerViewResolver());
 			getViewResolver().setSuffix(".ftl");
 		}
@@ -336,7 +299,7 @@ public class ViewResolverRegistry {
 
 	private static class GroovyMarkupRegistration extends UrlBasedViewResolverRegistration {
 
-		private GroovyMarkupRegistration() {
+		public GroovyMarkupRegistration() {
 			super(new GroovyMarkupViewResolver());
 			getViewResolver().setSuffix(".tpl");
 		}
@@ -344,7 +307,7 @@ public class ViewResolverRegistry {
 
 	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
 
-		private ScriptRegistration() {
+		public ScriptRegistration() {
 			super(new ScriptTemplateViewResolver());
 			getViewResolver();
 		}

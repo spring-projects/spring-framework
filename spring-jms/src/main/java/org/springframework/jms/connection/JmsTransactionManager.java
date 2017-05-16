@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Application code is required to retrieve the transactional JMS Session via
  * {@link ConnectionFactoryUtils#getTransactionalSession} instead of a standard
- * J2EE-style {@link ConnectionFactory#createConnection()} call with subsequent
+ * Java EE-style {@link ConnectionFactory#createConnection()} call with subsequent
  * Session creation. Spring's {@link org.springframework.jms.core.JmsTemplate}
  * will autodetect a thread-bound Session and automatically participate in it.
  *
  * <p>Alternatively, you can allow application code to work with the standard
- * J2EE-style lookup pattern on a ConnectionFactory, for example for legacy code
+ * Java EE-style lookup pattern on a ConnectionFactory, for example for legacy code
  * that is not aware of Spring at all. In that case, define a
  * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
  * which will automatically participate in Spring-managed transactions.
@@ -226,8 +226,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
-		JmsResourceHolder conHolder = (JmsResourceHolder) suspendedResources;
-		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
+		TransactionSynchronizationManager.bindResource(getConnectionFactory(), suspendedResources);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class PropertyPlaceholderHelper {
 
 	private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
-	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<String, String>(4);
+	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<>(4);
 
 	static {
 		wellKnownSimplePrefixes.put("}", "{");
@@ -123,15 +123,15 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
-		return parseStringValue(value, placeholderResolver, new HashSet<String>());
+		return parseStringValue(value, placeholderResolver, new HashSet<>());
 	}
 
 	protected String parseStringValue(
-			String strVal, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+			String value, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
 
-		StringBuilder result = new StringBuilder(strVal);
+		StringBuilder result = new StringBuilder(value);
 
-		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		int startIndex = value.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
@@ -172,7 +172,7 @@ public class PropertyPlaceholderHelper {
 				}
 				else {
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in string value \"" + strVal + "\"");
+							placeholder + "'" + " in value \"" + value + "\"");
 				}
 				visitedPlaceholders.remove(originalPlaceholder);
 			}
@@ -212,7 +212,8 @@ public class PropertyPlaceholderHelper {
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.
 	 */
-	public static interface PlaceholderResolver {
+	@FunctionalInterface
+	public interface PlaceholderResolver {
 
 		/**
 		 * Resolve the supplied placeholder name to the replacement value.

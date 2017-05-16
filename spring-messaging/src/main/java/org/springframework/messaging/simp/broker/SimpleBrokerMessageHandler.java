@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -42,17 +44,20 @@ import org.springframework.util.PathMatcher;
  * {@link SubscriptionRegistry} and sends messages to subscribers.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<String, SessionInfo>();
+	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 	private SubscriptionRegistry subscriptionRegistry;
 
 	private PathMatcher pathMatcher;
+
+	private Integer cacheLimit;
 
 	private TaskScheduler taskScheduler;
 
@@ -90,14 +95,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		Assert.notNull(subscriptionRegistry, "SubscriptionRegistry must not be null");
 		this.subscriptionRegistry = subscriptionRegistry;
 		initPathMatcherToUse();
-	}
-
-	private void initPathMatcherToUse() {
-		if (this.pathMatcher != null) {
-			if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-				((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
-			}
-		}
+		initCacheLimitToUse();
 	}
 
 	public SubscriptionRegistry getSubscriptionRegistry() {
@@ -105,12 +103,44 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	/**
-	 * When configured, the given PathMatcher is passed down to the
+	 * When configured, the given PathMatcher is passed down to the underlying
 	 * SubscriptionRegistry to use for matching destination to subscriptions.
+	 * <p>Default is a standard {@link org.springframework.util.AntPathMatcher}.
+	 * @since 4.1
+	 * @see #setSubscriptionRegistry
+	 * @see DefaultSubscriptionRegistry#setPathMatcher
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		initPathMatcherToUse();
+	}
+
+	private void initPathMatcherToUse() {
+		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+		}
+	}
+
+	/**
+	 * When configured, the specified cache limit is passed down to the
+	 * underlying SubscriptionRegistry, overriding any default there.
+	 * <p>With a standard {@link DefaultSubscriptionRegistry}, the default
+	 * cache limit is 1024.
+	 * @since 4.3.2
+	 * @see #setSubscriptionRegistry
+	 * @see DefaultSubscriptionRegistry#setCacheLimit
+	 * @see DefaultSubscriptionRegistry#DEFAULT_CACHE_LIMIT
+	 */
+	public void setCacheLimit(Integer cacheLimit) {
+		this.cacheLimit = cacheLimit;
+		initCacheLimitToUse();
+	}
+
+	private void initCacheLimitToUse() {
+		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setCacheLimit(this.cacheLimit);
+		}
 	}
 
 	/**
@@ -121,7 +151,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
-		Assert.notNull(taskScheduler);
+		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		this.taskScheduler = taskScheduler;
 		if (this.heartbeatValue == null) {
 			this.heartbeatValue = new long[] {10000, 10000};
@@ -130,6 +160,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Return the configured TaskScheduler.
+	 * @since 4.2
 	 */
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
@@ -145,12 +176,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setHeartbeatValue(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+		if (heartbeat == null || heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
+		}
 		this.heartbeatValue = heartbeat;
 	}
 
 	/**
 	 * The configured value for the heart-beat settings.
+	 * @since 4.2
 	 */
 	public long[] getHeartbeatValue() {
 		return this.heartbeatValue;
@@ -160,6 +194,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers
 	 * of all messages sent to the client outbound channel.
 	 * <p>By default this property is not set.
+	 * @since 4.1
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
@@ -167,6 +202,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Return the configured header initializer.
+	 * @since 4.1
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
@@ -185,7 +221,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else {
 			Assert.isTrue(getHeartbeatValue() == null ||
 					(getHeartbeatValue()[0] == 0 && getHeartbeatValue()[1] == 0),
-					"Heartbeat values configured but no TaskScheduler is provided.");
+					"Heartbeat values configured but no TaskScheduler provided");
 		}
 	}
 
@@ -223,12 +259,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return;
 		}
 
-		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
-		if (accessor == null) {
-			throw new IllegalStateException(
-					"No header accessor (not using the SimpMessagingTemplate?): " + message);
-		}
-
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			logMessage(message);
 			sendMessageToSubscribers(destination, message);
@@ -249,7 +279,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			logMessage(message);
-			handleDisconnect(sessionId, user);
+			handleDisconnect(sessionId, user, message);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			logMessage(message);
@@ -284,12 +314,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private void handleDisconnect(String sessionId, Principal user) {
+	private void handleDisconnect(String sessionId, Principal user, Message<?> origMessage) {
 		this.sessions.remove(sessionId);
 		this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 		accessor.setSessionId(sessionId);
 		accessor.setUser(user);
+		if (origMessage != null) {
+			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
+		}
 		initHeaders(accessor);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		getClientOutboundChannel().send(message);
@@ -301,11 +334,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			logger.debug("Broadcasting to " + subscriptions.size() + " sessions.");
 		}
 		long now = System.currentTimeMillis();
-		for (String sessionId : subscriptions.keySet()) {
-			for (String subscriptionId : subscriptions.get(sessionId)) {
+		for (Map.Entry<String, List<String>> subscriptionEntry : subscriptions.entrySet()) {
+			for (String subscriptionId : subscriptionEntry.getValue()) {
 				SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 				initHeaders(headerAccessor);
-				headerAccessor.setSessionId(sessionId);
+				headerAccessor.setSessionId(subscriptionEntry.getKey());
 				headerAccessor.setSubscriptionId(subscriptionId);
 				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
 				Object payload = message.getPayload();
@@ -317,7 +350,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 					logger.error("Failed to send " + message, ex);
 				}
 				finally {
-					SessionInfo info = this.sessions.get(sessionId);
+					SessionInfo info = this.sessions.get(subscriptionEntry.getKey());
 					if (info != null) {
 						info.setLastWriteTime(now);
 					}
@@ -328,7 +361,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	@Override
 	public String toString() {
-		return "SimpleBroker[" + this.subscriptionRegistry + "]";
+		return "SimpleBrokerMessageHandler [" + this.subscriptionRegistry + "]";
 	}
 
 
@@ -336,7 +369,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		/* STOMP spec: receiver SHOULD take into account an error margin */
 		private static final long HEARTBEAT_MULTIPLIER = 3;
-
 
 		private final String sessiondId;
 
@@ -349,7 +381,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		private volatile long lastReadTime;
 
 		private volatile long lastWriteTime;
-
 
 		public SessionInfo(String sessiondId, Principal user, long[] clientHeartbeat, long[] serverHeartbeat) {
 			this.sessiondId = sessiondId;
@@ -400,6 +431,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
+
 	private class HeartbeatTask implements Runnable {
 
 		@Override
@@ -407,7 +439,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			long now = System.currentTimeMillis();
 			for (SessionInfo info : sessions.values()) {
 				if (info.getReadInterval() > 0 && (now - info.getLastReadTime()) > info.getReadInterval()) {
-					handleDisconnect(info.getSessiondId(), info.getUser());
+					handleDisconnect(info.getSessiondId(), info.getUser(), null);
 				}
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
@@ -420,4 +452,5 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			}
 		}
 	}
+
 }

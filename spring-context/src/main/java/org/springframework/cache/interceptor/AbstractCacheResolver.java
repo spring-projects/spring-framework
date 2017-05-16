@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractCacheResolver implements CacheResolver, Initializi
 			return Collections.emptyList();
 		}
 		else {
-			Collection<Cache> result = new ArrayList<Cache>();
+			Collection<Cache> result = new ArrayList<>();
 			for (String cacheName : cacheNames) {
 				Cache cache = this.cacheManager.getCache(cacheName);
 				if (cache == null) {

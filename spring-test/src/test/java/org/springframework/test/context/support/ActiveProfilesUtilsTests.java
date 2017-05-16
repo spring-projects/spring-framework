@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -47,32 +45,32 @@ import static org.springframework.test.context.support.ActiveProfilesUtils.*;
 public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 
 	private void assertResolvedProfiles(Class<?> testClass, String... expected) {
-		assertNotNull(testClass);
-		assertNotNull(expected);
-		String[] actual = resolveActiveProfiles(testClass);
-		Set<String> expectedSet = new HashSet<String>(Arrays.asList(expected));
-		Set<String> actualSet = new HashSet<String>(Arrays.asList(actual));
-		assertEquals(expectedSet, actualSet);
+		assertArrayEquals(expected, resolveActiveProfiles(testClass));
 	}
 
 	@Test
 	public void resolveActiveProfilesWithoutAnnotation() {
-		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(Enigma.class));
+		assertResolvedProfiles(Enigma.class, EMPTY_STRING_ARRAY);
 	}
 
 	@Test
 	public void resolveActiveProfilesWithNoProfilesDeclared() {
-		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(BareAnnotations.class));
+		assertResolvedProfiles(BareAnnotations.class, EMPTY_STRING_ARRAY);
 	}
 
 	@Test
 	public void resolveActiveProfilesWithEmptyProfiles() {
-		assertArrayEquals(EMPTY_STRING_ARRAY, resolveActiveProfiles(EmptyProfiles.class));
+		assertResolvedProfiles(EmptyProfiles.class, EMPTY_STRING_ARRAY);
 	}
 
 	@Test
 	public void resolveActiveProfilesWithDuplicatedProfiles() {
 		assertResolvedProfiles(DuplicatedProfiles.class, "foo", "bar", "baz");
+	}
+
+	@Test
+	public void resolveActiveProfilesWithLocalAndInheritedDuplicatedProfiles() {
+		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "foo", "bar", "baz", "cat", "dog");
 	}
 
 	@Test
@@ -252,6 +250,10 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	private static class DuplicatedProfiles {
 	}
 
+	@ActiveProfiles({ "cat", "dog", "  foo", "bar  ", "cat" })
+	private static class ExtendedDuplicatedProfiles extends DuplicatedProfiles {
+	}
+
 	@ActiveProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
 	private static class Animals extends LocationsBar {
 	}
@@ -376,7 +378,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 
 		@Override
 		public String[] resolve(Class<?> testClass) {
-			List<String> profiles = new ArrayList<String>(Arrays.asList(super.resolve(testClass)));
+			List<String> profiles = new ArrayList<>(Arrays.asList(super.resolve(testClass)));
 			profiles.add("foo");
 			return StringUtils.toStringArray(profiles);
 		}

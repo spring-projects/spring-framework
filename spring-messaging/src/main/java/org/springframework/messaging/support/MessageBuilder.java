@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public final class MessageBuilder<T> {
 			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
 		}
 		else {
-			return new GenericMessage<T>(this.payload, headersToUse);
+			return new GenericMessage<>(this.payload, headersToUse);
 		}
 	}
 
@@ -165,7 +165,7 @@ public final class MessageBuilder<T> {
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
-		return new MessageBuilder<T>(message);
+		return new MessageBuilder<>(message);
 	}
 
 	/**
@@ -173,7 +173,7 @@ public final class MessageBuilder<T> {
 	 * @param payload the payload
 	 */
 	public static <T> MessageBuilder<T> withPayload(T payload) {
-		return new MessageBuilder<T>(payload, new MessageHeaderAccessor());
+		return new MessageBuilder<>(payload, new MessageHeaderAccessor());
 	}
 
 	/**
@@ -194,7 +194,7 @@ public final class MessageBuilder<T> {
 			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
 		}
 		else {
-			return new GenericMessage<T>(payload, messageHeaders);
+			return new GenericMessage<>(payload, messageHeaders);
 		}
 	}
 

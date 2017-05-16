@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import java.util.Set;
  */
 class CommandLineArgs {
 
-	private final Map<String, List<String>> optionArgs = new HashMap<String, List<String>>();
-	private final List<String> nonOptionArgs = new ArrayList<String>();
+	private final Map<String, List<String>> optionArgs = new HashMap<>();
+	private final List<String> nonOptionArgs = new ArrayList<>();
 
 	/**
 	 * Add an option argument for the given option name and add the given value to the
@@ -44,7 +44,7 @@ class CommandLineArgs {
 	 */
 	public void addOptionArg(String optionName, String optionValue) {
 		if (!this.optionArgs.containsKey(optionName)) {
-			this.optionArgs.put(optionName, new ArrayList<String>());
+			this.optionArgs.put(optionName, new ArrayList<>());
 		}
 		if (optionValue != null) {
 			this.optionArgs.get(optionName).add(optionValue);

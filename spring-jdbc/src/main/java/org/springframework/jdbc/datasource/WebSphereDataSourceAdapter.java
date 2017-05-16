@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,12 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 			Class<?> wsrraFactoryClass = getClass().getClassLoader().loadClass("com.ibm.websphere.rsadapter.WSRRAFactory");
 			this.newJdbcConnSpecMethod = wsrraFactoryClass.getMethod("createJDBCConnectionSpec", (Class<?>[]) null);
 			this.wsDataSourceGetConnectionMethod =
-					this.wsDataSourceClass.getMethod("getConnection", new Class<?>[] {jdbcConnSpecClass});
+					this.wsDataSourceClass.getMethod("getConnection", jdbcConnSpecClass);
 			this.setTransactionIsolationMethod =
-					jdbcConnSpecClass.getMethod("setTransactionIsolation", new Class<?>[] {int.class});
-			this.setReadOnlyMethod = jdbcConnSpecClass.getMethod("setReadOnly", new Class<?>[] {Boolean.class});
-			this.setUserNameMethod = jdbcConnSpecClass.getMethod("setUserName", new Class<?>[] {String.class});
-			this.setPasswordMethod = jdbcConnSpecClass.getMethod("setPassword", new Class<?>[] {String.class});
+					jdbcConnSpecClass.getMethod("setTransactionIsolation", int.class);
+			this.setReadOnlyMethod = jdbcConnSpecClass.getMethod("setReadOnly", Boolean.class);
+			this.setUserNameMethod = jdbcConnSpecClass.getMethod("setUserName", String.class);
+			this.setPasswordMethod = jdbcConnSpecClass.getMethod("setPassword", String.class);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
@@ -144,7 +144,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	}
 
 	/**
-	 * Create a WebSphere {@code JDBCConnectionSpec} object for the given charateristics.
+	 * Create a WebSphere {@code JDBCConnectionSpec} object for the given characteristics.
 	 * <p>The default implementation uses reflection to apply the given settings.
 	 * Can be overridden in subclasses to customize the JDBCConnectionSpec object
 	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;

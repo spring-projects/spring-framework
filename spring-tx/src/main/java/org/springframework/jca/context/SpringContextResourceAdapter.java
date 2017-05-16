@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * JCA 1.5 {@link javax.resource.spi.ResourceAdapter} implementation
+ * JCA 1.7 {@link javax.resource.spi.ResourceAdapter} implementation
  * that loads a Spring {@link org.springframework.context.ApplicationContext},
  * starting and stopping Spring-managed beans as part of the ResourceAdapter's
  * lifecycle.
@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * to such components.
  *
  * <p>This ResourceAdapter is to be defined in a "META-INF/ra.xml" file
- * within a J2EE ".rar" deployment unit like as follows:
+ * within a Java EE ".rar" deployment unit like as follows:
  *
  * <pre class="code">
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 
 /**
- * Provides a convenient implementation of the {@link HttpRequest} interface that can be overridden to adapt the
- * request. Methods default to calling through to the wrapped request object.
+ * Provides a convenient implementation of the {@link HttpRequest} interface
+ * that can be overridden to adapt the request.
+ *
+ * <p>These methods default to calling through to the wrapped request object.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -36,24 +38,24 @@ public class HttpRequestWrapper implements HttpRequest {
 
 
 	/**
-	 * Creates a new {@code HttpRequest} wrapping the given request object.
-	 *
+	 * Create a new {@code HttpRequest} wrapping the given request object.
 	 * @param request the request object to be wrapped
 	 */
 	public HttpRequestWrapper(HttpRequest request) {
-		Assert.notNull(request, "'request' must not be null");
+		Assert.notNull(request, "HttpRequest must not be null");
 		this.request = request;
 	}
 
+
 	/**
-	 * Returns the wrapped request.
+	 * Return the wrapped request.
 	 */
 	public HttpRequest getRequest() {
-		return request;
+		return this.request;
 	}
 
 	/**
-	 * Returns the method of the wrapped request.
+	 * Return the method of the wrapped request.
 	 */
 	@Override
 	public HttpMethod getMethod() {
@@ -61,7 +63,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	}
 
 	/**
-	 * Returns the URI of the wrapped request.
+	 * Return the URI of the wrapped request.
 	 */
 	@Override
 	public URI getURI() {
@@ -69,7 +71,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	}
 
 	/**
-	 * Returns the headers of the wrapped request.
+	 * Return the headers of the wrapped request.
 	 */
 	@Override
 	public HttpHeaders getHeaders() {

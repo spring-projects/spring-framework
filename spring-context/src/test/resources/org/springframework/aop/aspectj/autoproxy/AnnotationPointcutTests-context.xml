@@ -16,7 +16,7 @@
 	</bean>
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.autoproxy.AnnotationBindingTestAspect"/>
-	
+
 	<bean id="testBean" class="org.springframework.aop.aspectj.autoproxy.AnnotatedTestBeanImpl"/>
-	
+
 </beans>

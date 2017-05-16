@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
  * &#064;IfProfileValue} and {@link ProfileValueSourceConfiguration
  * &#064;ProfileValueSourceConfiguration} (with an
  * <em>explicit, custom defined {@link ProfileValueSource}</em>) annotations in
- * conjunction with the {@link SpringJUnit4ClassRunner}.
+ * conjunction with the {@link SpringRunner}.
  * </p>
  *
  * @author Sam Brannen

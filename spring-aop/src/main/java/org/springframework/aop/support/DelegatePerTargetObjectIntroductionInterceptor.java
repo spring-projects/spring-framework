@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Convenient implementation of the
@@ -57,7 +58,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	/**
 	 * Hold weak references to keys as we don't want to interfere with garbage collection..
 	 */
-	private final Map<Object, Object> delegateMap = new WeakHashMap<Object, Object>();
+	private final Map<Object, Object> delegateMap = new WeakHashMap<>();
 
 	private Class<?> defaultImplType;
 
@@ -131,7 +132,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 
 	private Object createNewDelegate() {
 		try {
-			return this.defaultImplType.newInstance();
+			return ReflectionUtils.accessibleConstructor(this.defaultImplType).newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalArgumentException("Cannot create default implementation for '" +

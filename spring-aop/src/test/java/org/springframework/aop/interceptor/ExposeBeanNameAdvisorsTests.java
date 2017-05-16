@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class ExposeBeanNameAdvisorsTests {
+public class ExposeBeanNameAdvisorsTests {
 
 	private class RequiresBeanNameBoundTestBean extends TestBean {
 		private final String beanName;

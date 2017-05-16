@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.test.web.servlet;
 
 /**
- * Builds a {@link MockMvc}.
+ * Builds a {@link MockMvc} instance.
  *
- * <p>See static, factory methods in
- * {@code org.springframework.test.web.server.setup.MockMvcBuilders}.
+ * <p>See static factory methods in
+ * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders MockMvcBuilders}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

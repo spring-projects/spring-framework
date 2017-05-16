@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -126,6 +125,11 @@ public class SimpleServletPostProcessor implements
 		}
 	}
 
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return (bean instanceof Servlet);
+	}
+
 
 	/**
 	 * Internal implementation of the {@link ServletConfig} interface,
@@ -159,7 +163,7 @@ public class SimpleServletPostProcessor implements
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(new HashSet<String>());
+			return Collections.enumeration(Collections.emptySet());
 		}
 	}
 

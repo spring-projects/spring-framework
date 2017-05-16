@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.dao.annotation;
 
 import javax.persistence.PersistenceException;
 
-import junit.framework.TestCase;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.junit.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -38,13 +38,17 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class PersistenceExceptionTranslationPostProcessorTests extends TestCase {
+public class PersistenceExceptionTranslationPostProcessorTests {
 
-	public void testProxiesCorrectly() {
+	@Test
+	@SuppressWarnings("resource")
+	public void proxiesCorrectly() {
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.registerBeanDefinition("translator",
 				new RootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));
@@ -122,7 +126,6 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 
 	public static class MyPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 
-
 		@Override
 		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 			if (ex instanceof PersistenceException) {
@@ -136,8 +139,7 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 	@Aspect
 	public static class LogAllAspect {
 
-		//@Before("execution(* *())")
-		@Before("execution(void *.additionalMethod())")
+		@Before("execution(void *.additionalMethod(*))")
 		public void log(JoinPoint jp) {
 			System.out.println("Before " + jp.getSignature().getName());
 		}

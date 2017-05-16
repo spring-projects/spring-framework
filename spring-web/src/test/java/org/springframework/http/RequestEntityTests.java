@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriTemplate;
 
 import static org.junit.Assert.*;
@@ -91,7 +94,6 @@ public class RequestEntityTests {
 	@Test
 	public void headers() throws URISyntaxException {
 		MediaType accept = MediaType.TEXT_PLAIN;
-		Charset charset = Charset.forName("UTF-8");
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
 		long contentLength = 67890;
@@ -99,7 +101,7 @@ public class RequestEntityTests {
 
 		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("http://example.com")).
 				accept(accept).
-				acceptCharset(charset).
+				acceptCharset(StandardCharsets.UTF_8).
 				ifModifiedSince(ifModifiedSince).
 				ifNoneMatch(ifNoneMatch).
 				contentLength(contentLength).
@@ -146,6 +148,16 @@ public class RequestEntityTests {
 		entity = RequestEntity.delete(url).build();
 		assertEquals(HttpMethod.DELETE, entity.getMethod());
 
+	}
+
+	@Test  // SPR-13154
+	public void types() throws URISyntaxException {
+		URI url = new URI("http://example.com");
+		List<String> body = Arrays.asList("foo", "bar");
+		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};
+
+		RequestEntity<?> entity = RequestEntity.post(url).body(body, typeReference.getType());
+		assertEquals(typeReference.getType(), entity.getType());
 	}
 
 }

@@ -10,6 +10,10 @@ The framework also serves as the foundation for [Spring Integration][], [Spring 
 and the rest of the Spring [family of projects][]. Browse the repositories under
 the [Spring organization][] on GitHub for a full list.
 
+## Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 ## Downloading Artifacts
 See [downloading Spring artifacts][] for Maven repository information. Unable to
 use Maven or other transitive dependency management tools?
@@ -88,7 +92,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Git]: http://help.github.com/set-up-git-redirect
 [JDK8 build]: http://www.oracle.com/technetwork/java/javase/downloads
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
-[Pull requests]: http://help.github.com/send-pull-requests
+[Pull requests]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
 [@SpringFramework]: https://twitter.com/springframework
 [@SpringCentral]: https://twitter.com/springcentral

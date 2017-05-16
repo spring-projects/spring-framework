@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  * override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @since 5.0
  * @see ServerEndpointExporter
  */
 public class ServerEndpointRegistration extends ServerEndpointConfig.Configurator
@@ -60,15 +60,15 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	private final Endpoint endpoint;
 
-    private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
+    private List<Class<? extends Encoder>> encoders = new ArrayList<>();
 
-    private List<Class<? extends Decoder>> decoders = new ArrayList<Class<? extends Decoder>>();
+    private List<Class<? extends Decoder>> decoders = new ArrayList<>();
 
-	private List<String> protocols = new ArrayList<String>();
+	private List<String> protocols = new ArrayList<>();
 
-	private List<Extension> extensions = new ArrayList<Extension>();
+	private List<Extension> extensions = new ArrayList<>();
 
-	private final Map<String, Object> userProperties = new HashMap<String, Object>();
+	private final Map<String, Object> userProperties = new HashMap<>();
 
 
 	/**
@@ -81,7 +81,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpointClass, "endpointClass must not be null");
 		this.path = path;
-		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
 	}
 
@@ -107,8 +107,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
-		return (this.endpoint != null) ?
-				this.endpoint.getClass() : ((Class<? extends Endpoint>) this.endpointProvider.getHandlerType());
+		return (this.endpoint != null ? this.endpoint.getClass() : this.endpointProvider.getHandlerType());
 	}
 
 	public Endpoint getEndpoint() {

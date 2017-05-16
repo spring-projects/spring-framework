@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
+import org.springframework.test.util.subpackage.PersonEntity;
 import org.springframework.test.util.subpackage.StaticFields;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -41,11 +44,14 @@ public class ReflectionTestUtilsTests {
 
 	private static final Float PI = new Float((float) 22 / 7);
 
-	private final Person person = new Person();
+	private final Person person = new PersonEntity();
+
 	private final Component component = new Component();
 
+	private final LegacyEntity entity = new LegacyEntity();
+
 	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Before
@@ -91,7 +97,7 @@ public class ReflectionTestUtilsTests {
 	@Test
 	public void setFieldWithBogusName() throws Exception {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field [bogus]"));
+		exception.expectMessage(startsWith("Could not find field 'bogus'"));
 		setField(person, "bogus", new Long(99), long.class);
 	}
 
@@ -104,6 +110,29 @@ public class ReflectionTestUtilsTests {
 
 	@Test
 	public void setFieldAndGetFieldForStandardUseCases() throws Exception {
+		assertSetFieldAndGetFieldBehavior(this.person);
+	}
+
+	@Test
+	public void setFieldAndGetFieldViaJdkDynamicProxy() throws Exception {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.addInterface(Person.class);
+		Person proxy = (Person) pf.getProxy();
+		assertTrue("Proxy is a JDK dynamic proxy", AopUtils.isJdkDynamicProxy(proxy));
+		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
+	}
+
+	@Test
+	public void setFieldAndGetFieldViaCglibProxy() throws Exception {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		Person proxy = (Person) pf.getProxy();
+		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
+		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
+	}
+
+	private static void assertSetFieldAndGetFieldBehavior(Person person) {
+		// Set reflectively
 		setField(person, "id", new Long(99), long.class);
 		setField(person, "name", "Tom");
 		setField(person, "age", new Integer(42));
@@ -111,19 +140,33 @@ public class ReflectionTestUtilsTests {
 		setField(person, "likesPets", Boolean.TRUE);
 		setField(person, "favoriteNumber", PI, Number.class);
 
-		assertEquals("ID (private field in a superclass)", 99, person.getId());
-		assertEquals("name (protected field)", "Tom", person.getName());
-		assertEquals("age (private field)", 42, person.getAge());
-		assertEquals("eye color (package private field)", "blue", person.getEyeColor());
-		assertEquals("'likes pets' flag (package private boolean field)", true, person.likesPets());
-		assertEquals("'favorite number' (package field)", PI, person.getFavoriteNumber());
-
+		// Get reflectively
 		assertEquals(new Long(99), getField(person, "id"));
 		assertEquals("Tom", getField(person, "name"));
 		assertEquals(new Integer(42), getField(person, "age"));
 		assertEquals("blue", getField(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
 		assertEquals(PI, getField(person, "favoriteNumber"));
+
+		// Get directly
+		assertEquals("ID (private field in a superclass)", 99, person.getId());
+		assertEquals("name (protected field)", "Tom", person.getName());
+		assertEquals("age (private field)", 42, person.getAge());
+		assertEquals("eye color (package private field)", "blue", person.getEyeColor());
+		assertEquals("'likes pets' flag (package private boolean field)", true, person.likesPets());
+		assertEquals("'favorite number' (package field)", PI, person.getFavoriteNumber());
+	}
+
+	private static void assertSetFieldAndGetFieldBehaviorForProxy(Person proxy, Person target) {
+		assertSetFieldAndGetFieldBehavior(proxy);
+
+		// Get directly from Target
+		assertEquals("ID (private field in a superclass)", 99, target.getId());
+		assertEquals("name (protected field)", "Tom", target.getName());
+		assertEquals("age (private field)", 42, target.getAge());
+		assertEquals("eye color (package private field)", "blue", target.getEyeColor());
+		assertEquals("'likes pets' flag (package private boolean field)", true, target.likesPets());
+		assertEquals("'favorite number' (package field)", PI, target.getFavoriteNumber());
 	}
 
 	@Test
@@ -159,17 +202,6 @@ public class ReflectionTestUtilsTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
 		setField(person, "likesPets", null, boolean.class);
-	}
-
-	/**
-	 * Verifies behavior requested in <a href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
-	 */
-	@Test
-	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
-		String testCollaborator = "test collaborator";
-		LegacyEntity entity = new LegacyEntity();
-		setField(entity, "collaborator", testCollaborator, Object.class);
-		assertTrue(entity.toString().contains(testCollaborator));
 	}
 
 	@Test
@@ -355,6 +387,39 @@ public class ReflectionTestUtilsTests {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("Method not found"));
 		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
+	}
+
+	@Test // SPR-14363
+	public void getFieldOnLegacyEntityWithSideEffectsInToString() {
+		Object collaborator = getField(entity, "collaborator");
+		assertNotNull(collaborator);
+	}
+
+	@Test // SPR-9571 and SPR-14363
+	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
+		String testCollaborator = "test collaborator";
+		setField(entity, "collaborator", testCollaborator, Object.class);
+		assertTrue(entity.toString().contains(testCollaborator));
+	}
+
+	@Test // SPR-14363
+	public void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
+		invokeMethod(entity, "configure", new Integer(42), "enigma");
+		assertEquals("number should have been configured", new Integer(42), entity.getNumber());
+		assertEquals("text should have been configured", "enigma", entity.getText());
+	}
+
+	@Test // SPR-14363
+	public void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
+		Object collaborator = invokeGetterMethod(entity, "collaborator");
+		assertNotNull(collaborator);
+	}
+
+	@Test // SPR-14363
+	public void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
+		String testCollaborator = "test collaborator";
+		invokeSetterMethod(entity, "collaborator", testCollaborator);
+		assertTrue(entity.toString().contains(testCollaborator));
 	}
 
 }

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  *
  * @author Jose Luis Martin
  * @author Chris Beams
- * @@author Stephane Nicoll
+ * @author Stephane Nicoll
  */
 public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 
@@ -39,14 +39,17 @@ public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 
 	@Test
 	public void withShadowedField() throws Exception {
+		final StringBuilder sb = new StringBuilder();
+
 		@SuppressWarnings("serial")
 		TestBean target = new TestBean() {
 			@SuppressWarnings("unused")
-			StringBuilder name = new StringBuilder();
+			StringBuilder name = sb;
 		};
 
 		DirectFieldAccessor dfa = createAccessor(target);
 		assertEquals(StringBuilder.class, dfa.getPropertyType("name"));
+		assertEquals(sb, dfa.getPropertyValue("name"));
 	}
 
 }

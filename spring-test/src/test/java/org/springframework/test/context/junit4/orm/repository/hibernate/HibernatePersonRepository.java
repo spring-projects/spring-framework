@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class HibernatePersonRepository implements PersonRepository {
 	@Override
 	public Person findByName(String name) {
 		return (Person) this.sessionFactory.getCurrentSession().createQuery(
-			"from Person person where person.name = :name").setString("name", name).uniqueResult();
+			"from Person person where person.name = :name").setParameter("name", name).getSingleResult();
 	}
+
 }

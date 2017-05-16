@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 	/**
 	 * Set the WebSphere UOWManager to use as direct reference.
-	 * <p>Typically just used for test setups; in a J2EE environment,
+	 * <p>Typically just used for test setups; in a Java EE environment,
 	 * the UOWManager will always be fetched from JNDI.
 	 * @see #setUserTransactionName
 	 */
@@ -285,7 +285,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			if (debug) {
 				logger.debug("Invoking WebSphere UOW action: type=" + uowType + ", join=" + joinTx);
 			}
-			UOWActionAdapter<T> action = new UOWActionAdapter<T>(
+			UOWActionAdapter<T> action = new UOWActionAdapter<>(
 					definition, callback, (uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION), !joinTx, newSynch, debug);
 			this.uowManager.runUnderUOW(uowType, joinTx, action);
 			if (debug) {

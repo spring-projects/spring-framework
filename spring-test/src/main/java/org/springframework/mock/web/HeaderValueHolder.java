@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
  */
 class HeaderValueHolder {
 
-	private final List<Object> values = new LinkedList<Object>();
+	private final List<Object> values = new LinkedList<>();
 
 
 	public void setValue(Object value) {
@@ -60,7 +60,7 @@ class HeaderValueHolder {
 	}
 
 	public List<String> getStringValues() {
-		List<String> stringList = new ArrayList<String>(this.values.size());
+		List<String> stringList = new ArrayList<>(this.values.size());
 		for (Object value : this.values) {
 			stringList.add(value.toString());
 		}
@@ -72,7 +72,12 @@ class HeaderValueHolder {
 	}
 
 	public String getStringValue() {
-		return (!this.values.isEmpty() ? this.values.get(0).toString() : null);
+		return (!this.values.isEmpty() ? String.valueOf(this.values.get(0)) : null);
+	}
+
+	@Override
+	public String toString() {
+		return this.values.toString();
 	}
 
 

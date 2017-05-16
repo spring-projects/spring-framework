@@ -72,7 +72,6 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
  */
 public class WebSocketMessageBrokerConfigurationSupportTests {
 
-
 	@Test
 	public void handlerMapping() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
@@ -204,7 +203,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@Controller
 	static class TestController {
 
@@ -220,7 +218,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@Configuration
 	static class TestConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 

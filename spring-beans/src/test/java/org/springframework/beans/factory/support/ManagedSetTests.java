@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,20 @@ package org.springframework.beans.factory.support;
 
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class ManagedSetTests extends TestCase {
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class ManagedSetTests {
 
-	public void testMergeSunnyDay() {
+	@Test
+	public void mergeSunnyDay() {
 		ManagedSet parent = new ManagedSet();
 		parent.add("one");
 		parent.add("two");
@@ -37,36 +42,29 @@ public class ManagedSetTests extends TestCase {
 		assertEquals("merge() obviously did not work.", 3, mergedSet.size());
 	}
 
-	public void testMergeWithNullParent() {
+	@Test
+	public void mergeWithNullParent() {
 		ManagedSet child = new ManagedSet();
 		child.add("one");
 		child.setMergeEnabled(true);
 		assertSame(child, child.merge(null));
 	}
 
-	public void testMergeNotAllowedWhenMergeNotEnabled() {
-		ManagedSet child = new ManagedSet();
-		try {
-			child.merge(null);
-			fail("Must have failed by this point (cannot merge() when the mergeEnabled property is false.");
-		}
-		catch (IllegalStateException expected) {
-		}
+	@Test(expected = IllegalStateException.class)
+	public void mergeNotAllowedWhenMergeNotEnabled() {
+		new ManagedSet().merge(null);
 	}
 
-	public void testMergeWithNonCompatibleParentType() {
+	@Test(expected = IllegalArgumentException.class)
+	public void mergeWithNonCompatibleParentType() {
 		ManagedSet child = new ManagedSet();
 		child.add("one");
 		child.setMergeEnabled(true);
-		try {
-			child.merge("hello");
-			fail("Must have failed by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		child.merge("hello");
 	}
 
-	public void testMergeEmptyChild() {
+	@Test
+	public void mergeEmptyChild() {
 		ManagedSet parent = new ManagedSet();
 		parent.add("one");
 		parent.add("two");
@@ -76,7 +74,8 @@ public class ManagedSetTests extends TestCase {
 		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
 	}
 
-	public void testMergeChildValuesOverrideTheParents() {
+	@Test
+	public void mergeChildValuesOverrideTheParents() {
 		// asserts that the set contract is not violated during a merge() operation...
 		ManagedSet parent = new ManagedSet();
 		parent.add("one");

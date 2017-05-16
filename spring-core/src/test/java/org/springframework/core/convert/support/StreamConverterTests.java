@@ -49,6 +49,7 @@ public class StreamConverterTests {
 
 	private final StreamConverter streamConverter = new StreamConverter(this.conversionService);
 
+
 	@Before
 	public void setup() {
 		this.conversionService.addConverter(new CollectionToCollectionConverter(this.conversionService));
@@ -57,13 +58,15 @@ public class StreamConverterTests {
 		this.conversionService.addConverter(this.streamConverter);
 	}
 
+
 	@Test
 	public void convertFromStreamToList() throws NoSuchFieldException {
 		this.conversionService.addConverter(Number.class, String.class, new ObjectToStringConverter());
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor listOfStrings = new TypeDescriptor(Types.class.getField("listOfStrings")); ;
 		Object result = this.conversionService.convert(stream, listOfStrings);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be a list", result instanceof List);
 		@SuppressWarnings("unchecked")
 		List<String> content = (List<String>) result;
@@ -79,7 +82,8 @@ public class StreamConverterTests {
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor arrayOfLongs = new TypeDescriptor(Types.class.getField("arrayOfLongs")); ;
 		Object result = this.conversionService.convert(stream, arrayOfLongs);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be an array", result.getClass().isArray());
 		Long[] content = (Long[]) result;
 		assertEquals(Long.valueOf(1L), content[0]);
@@ -93,7 +97,8 @@ public class StreamConverterTests {
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor listOfStrings = new TypeDescriptor(Types.class.getField("rawList")); ;
 		Object result = this.conversionService.convert(stream, listOfStrings);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be a list", result instanceof List);
 		@SuppressWarnings("unchecked")
 		List<Object> content = (List<Object>) result;
@@ -120,7 +125,8 @@ public class StreamConverterTests {
 		List<String> stream = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("streamOfIntegers")); ;
 		Object result = this.conversionService.convert(stream, streamOfInteger);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be a stream", result instanceof Stream);
 		@SuppressWarnings("unchecked")
 		Stream<Integer> content = (Stream<Integer>) result;
@@ -139,7 +145,8 @@ public class StreamConverterTests {
 		});
 		TypeDescriptor streamOfBoolean = new TypeDescriptor(Types.class.getField("streamOfBooleans")); ;
 		Object result = this.conversionService.convert(stream, streamOfBoolean);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be a stream", result instanceof Stream);
 		@SuppressWarnings("unchecked")
 		Stream<Boolean> content = (Stream<Boolean>) result;
@@ -152,7 +159,8 @@ public class StreamConverterTests {
 		List<String> stream = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("rawStream")); ;
 		Object result = this.conversionService.convert(stream, streamOfInteger);
-		assertNotNull("converted object must not be null", result);
+
+		assertNotNull("Converted object must not be null", result);
 		assertTrue("Converted object must be a stream", result instanceof Stream);
 		@SuppressWarnings("unchecked")
 		Stream<Object> content = (Stream<Object>) result;
@@ -174,6 +182,7 @@ public class StreamConverterTests {
 		this.streamConverter.convert(new Object(), new TypeDescriptor(Types.class.getField("listOfStrings")),
 				new TypeDescriptor(Types.class.getField("arrayOfLongs")));
 	}
+
 
 	@SuppressWarnings({ "rawtypes" })
 	static class Types {

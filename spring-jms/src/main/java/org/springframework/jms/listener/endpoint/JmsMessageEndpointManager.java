@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.resource.ResourceException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 
@@ -217,4 +218,12 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 		throw new IllegalStateException("Could not determine reply pubSubDomain - no activation spec config is set");
 	}
 
+	@Override
+	public QosSettings getReplyQosSettings() {
+		JmsActivationSpecConfig config = getActivationSpecConfig();
+		if (config != null) {
+			return config.getReplyQosSettings();
+		}
+		throw new IllegalStateException("Could not determine reply qosSettings - no activation spec config is set");
+	}
 }

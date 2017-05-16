@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,10 @@ public abstract class OrderUtils {
 
 	/**
 	 * Return the order on the specified {@code type}.
-	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
 	 * @param type the type to handle
 	 * @return the order value, or {@code null} if none can be found
+	 * @see #getPriority(Class)
 	 */
 	public static Integer getOrder(Class<?> type) {
 		return getOrder(type, null);
@@ -59,9 +60,10 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order on the specified {@code type}, or the specified
 	 * default value if none can be found.
-	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
 	 * @param type the type to handle
 	 * @return the priority value, or the specified default order if none can be found
+	 * @see #getPriority(Class)
 	 */
 	public static Integer getOrder(Class<?> type, Integer defaultOrder) {
 		Order order = AnnotationUtils.findAnnotation(type, Order.class);

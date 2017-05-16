@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.user;
 
 /**
@@ -21,12 +22,13 @@ package org.springframework.messaging.simp.user;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
+@FunctionalInterface
 public interface SimpSubscriptionMatcher {
 
 	/**
 	 * Match the given subscription.
 	 * @param subscription the subscription to match
-	 * @return {@code true} in case of match, {@code false} otherwise.
+	 * @return {@code true} in case of a match, {@code false} otherwise
 	 */
 	boolean match(SimpSubscription subscription);
 

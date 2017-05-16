@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.security.PrivilegedAction;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -61,12 +61,15 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	private final ConfigurableApplicationContext applicationContext;
 
+	private final StringValueResolver embeddedValueResolver;
+
 
 	/**
 	 * Create a new ApplicationContextAwareProcessor for the given context.
 	 */
 	public ApplicationContextAwareProcessor(ConfigurableApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+		this.embeddedValueResolver = new EmbeddedValueResolver(applicationContext.getBeanFactory());
 	}
 
 
@@ -103,8 +106,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 			}
 			if (bean instanceof EmbeddedValueResolverAware) {
-				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
-						new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
+				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
 			}
 			if (bean instanceof ResourceLoaderAware) {
 				((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
@@ -124,21 +126,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
-	}
-
-
-	private static class EmbeddedValueResolver implements StringValueResolver {
-
-		private final ConfigurableBeanFactory beanFactory;
-
-		public EmbeddedValueResolver(ConfigurableBeanFactory beanFactory) {
-			this.beanFactory = beanFactory;
-		}
-
-		@Override
-		public String resolveStringValue(String strVal) {
-			return this.beanFactory.resolveEmbeddedValue(strVal);
-		}
 	}
 
 }

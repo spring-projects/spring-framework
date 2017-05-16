@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, byte value) {
-		return append(fieldName, new Byte(value));
+		return append(fieldName, Byte.valueOf(value));
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, short value) {
-		return append(fieldName, new Short(value));
+		return append(fieldName, Short.valueOf(value));
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, int value) {
-		return append(fieldName, new Integer(value));
+		return append(fieldName, Integer.valueOf(value));
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, long value) {
-		return append(fieldName, new Long(value));
+		return append(fieldName, Long.valueOf(value));
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, float value) {
-		return append(fieldName, new Float(value));
+		return append(fieldName, Float.valueOf(value));
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class ToStringCreator {
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, double value) {
-		return append(fieldName, new Double(value));
+		return append(fieldName, Double.valueOf(value));
 	}
 
 	/**

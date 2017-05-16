@@ -15,7 +15,7 @@
 					<constructor-arg index="0" value="amount"/>
 					<constructor-arg index="1">
 						<util:constant static-field="java.sql.Types.INTEGER"/>
-					</constructor-arg> 
+					</constructor-arg>
 				</bean>
 				<bean class="org.springframework.jdbc.core.SqlParameter">
 					<constructor-arg index="0" value="custid"/>

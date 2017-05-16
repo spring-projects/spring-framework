@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,25 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Configures the JSR-310 <code>java.time</code> formatting system for use with Spring.
@@ -47,25 +50,23 @@ import org.springframework.lang.UsesJava8;
  * @see org.springframework.format.datetime.DateFormatterRegistrar
  * @see org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean
  */
-@UsesJava8
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
-	private static enum Type {DATE, TIME, DATE_TIME}
+	private enum Type {DATE, TIME, DATE_TIME}
 
 
 	/**
-	 * User defined formatters.
+	 * User-defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<Type, DateTimeFormatter>();
+	private final Map<Type, DateTimeFormatter> formatters = new EnumMap<>(Type.class);
 
 	/**
 	 * Factories used when specific formatters have not been specified.
 	 */
-	private final Map<Type, DateTimeFormatterFactory> factories;
+	private final Map<Type, DateTimeFormatterFactory> factories = new EnumMap<>(Type.class);
 
 
 	public DateTimeFormatterRegistrar() {
-		this.factories = new HashMap<Type, DateTimeFormatterFactory>();
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}
@@ -153,35 +154,44 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 	public void registerFormatters(FormatterRegistry registry) {
 		DateTimeConverters.registerConverters(registry);
 
-		DateTimeFormatter dateFormatter = getFormatter(Type.DATE);
-		DateTimeFormatter timeFormatter = getFormatter(Type.TIME);
-		DateTimeFormatter dateTimeFormatter = getFormatter(Type.DATE_TIME);
+		DateTimeFormatter df = getFormatter(Type.DATE);
+		DateTimeFormatter tf = getFormatter(Type.TIME);
+		DateTimeFormatter dtf = getFormatter(Type.DATE_TIME);
+
+		// Efficient ISO_LOCAL_* variants for printing since they are twice as fast...
 
 		registry.addFormatterForFieldType(LocalDate.class,
-				new TemporalAccessorPrinter(dateFormatter),
-				new TemporalAccessorParser(LocalDate.class, dateFormatter));
+				new TemporalAccessorPrinter(
+						df == DateTimeFormatter.ISO_DATE ? DateTimeFormatter.ISO_LOCAL_DATE : df),
+				new TemporalAccessorParser(LocalDate.class, df));
 
 		registry.addFormatterForFieldType(LocalTime.class,
-				new TemporalAccessorPrinter(timeFormatter),
-				new TemporalAccessorParser(LocalTime.class, timeFormatter));
+				new TemporalAccessorPrinter(
+						tf == DateTimeFormatter.ISO_TIME ? DateTimeFormatter.ISO_LOCAL_TIME : tf),
+				new TemporalAccessorParser(LocalTime.class, tf));
 
 		registry.addFormatterForFieldType(LocalDateTime.class,
-				new TemporalAccessorPrinter(dateTimeFormatter),
-				new TemporalAccessorParser(LocalDateTime.class, dateTimeFormatter));
+				new TemporalAccessorPrinter(
+						dtf == DateTimeFormatter.ISO_DATE_TIME ? DateTimeFormatter.ISO_LOCAL_DATE_TIME : dtf),
+				new TemporalAccessorParser(LocalDateTime.class, dtf));
 
 		registry.addFormatterForFieldType(ZonedDateTime.class,
-				new TemporalAccessorPrinter(dateTimeFormatter),
-				new TemporalAccessorParser(ZonedDateTime.class, dateTimeFormatter));
+				new TemporalAccessorPrinter(dtf),
+				new TemporalAccessorParser(ZonedDateTime.class, dtf));
 
 		registry.addFormatterForFieldType(OffsetDateTime.class,
-				new TemporalAccessorPrinter(dateTimeFormatter),
-				new TemporalAccessorParser(OffsetDateTime.class, dateTimeFormatter));
+				new TemporalAccessorPrinter(dtf),
+				new TemporalAccessorParser(OffsetDateTime.class, dtf));
 
 		registry.addFormatterForFieldType(OffsetTime.class,
-				new TemporalAccessorPrinter(timeFormatter),
-				new TemporalAccessorParser(OffsetTime.class, timeFormatter));
+				new TemporalAccessorPrinter(tf),
+				new TemporalAccessorParser(OffsetTime.class, tf));
 
 		registry.addFormatterForFieldType(Instant.class, new InstantFormatter());
+		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
+		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
+		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new Jsr310DateTimeFormatAnnotationFormatterFactory());
 	}

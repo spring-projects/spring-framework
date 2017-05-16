@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -33,27 +32,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Abstract base class for {@link MessageConverter} implementations including support
- * for common properties and a partial implementation of the conversion methods,
+ * Abstract base class for {@link SmartMessageConverter} implementations including
+ * support for common properties and a partial implementation of the conversion methods,
  * mainly to check if the converter supports the conversion based on the payload class
  * and MIME type.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
-public abstract class AbstractMessageConverter implements MessageConverter {
-
-	/**
-	 * Name of the header that can be set to provide further information
-	 * ({@link MethodParameter} instance) about the origin of the payload (for
-	 * {@link #toMessage(Object, MessageHeaders)}) or about the target of the payload
-	 * ({@link #fromMessage(Message, Class)}).
-	 *
-	 * @since 4.2
-	 */
-	public static final String METHOD_PARAMETER_HINT_HEADER = "methodParameterHint";
-
+public abstract class AbstractMessageConverter implements SmartMessageConverter {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -81,7 +70,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
 		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
-		this.supportedMimeTypes = new ArrayList<MimeType>(supportedMimeTypes);
+		this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
 	}
 
 
@@ -175,10 +164,15 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	@Override
 	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
+		return fromMessage(message, targetClass, null);
+	}
+
+	@Override
+	public final Object fromMessage(Message<?> message, Class<?> targetClass, Object conversionHint) {
 		if (!canConvertFrom(message, targetClass)) {
 			return null;
 		}
-		return convertFromInternal(message, targetClass);
+		return convertFromInternal(message, targetClass, conversionHint);
 	}
 
 	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
@@ -187,13 +181,21 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	@Override
 	public final Message<?> toMessage(Object payload, MessageHeaders headers) {
+		return toMessage(payload, headers, null);
+	}
+
+	@Override
+	public final Message<?> toMessage(Object payload, MessageHeaders headers, Object conversionHint) {
 		if (!canConvertTo(payload, headers)) {
 			return null;
 		}
 
-		payload = convertToInternal(payload, headers);
-		MimeType mimeType = getDefaultContentType(payload);
+		payload = convertToInternal(payload, headers, conversionHint);
+		if (payload == null) {
+			return null;
+		}
 
+		MimeType mimeType = getDefaultContentType(payload);
 		if (headers != null) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
 			if (accessor != null && accessor.isMutable()) {
@@ -221,12 +223,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 		}
 		MimeType mimeType = getMimeType(headers);
 		if (mimeType == null) {
-			if (isStrictContentTypeMatch()) {
-				return false;
-			}
-			else {
-				return true;
-			}
+			return !isStrictContentTypeMatch();
 		}
 		for (MimeType current : getSupportedMimeTypes()) {
 			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
@@ -250,13 +247,30 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 
 	/**
 	 * Convert the message payload from serialized form to an Object.
+	 * @param message the input message
+	 * @param targetClass the target class for the conversion
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return the result of the conversion, or {@code null} if the converter cannot
+	 * perform the conversion
+	 * @since 4.2
 	 */
-	public abstract Object convertFromInternal(Message<?> message, Class<?> targetClass);
-
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+		return null;
+	}
 
 	/**
 	 * Convert the payload object to serialized form.
+	 * @param payload the Object to convert
+	 * @param headers optional headers for the message (may be {@code null})
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return the resulting payload for the message, or {@code null} if the converter
+	 * cannot perform the conversion
+	 * @since 4.2
 	 */
-	public abstract Object convertToInternal(Object payload, MessageHeaders headers);
+	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+		return null;
+	}
 
 }

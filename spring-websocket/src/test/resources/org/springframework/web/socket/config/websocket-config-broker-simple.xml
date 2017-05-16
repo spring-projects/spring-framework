@@ -33,6 +33,8 @@
 			<websocket:sockjs/>
 		</websocket:stomp-endpoint>
 
+		<websocket:stomp-error-handler ref="errorHandler" />
+
 		<websocket:simple-broker prefix="/topic, /queue" heartbeat="15000,15000" scheduler="scheduler" />
 
 	</websocket:message-broker>
@@ -47,6 +49,7 @@
 
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
 	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
+	<bean id="errorHandler" class="org.springframework.web.socket.config.TestStompErrorHandler"/>
 	<bean id="scheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler"/>
 
 </beans>

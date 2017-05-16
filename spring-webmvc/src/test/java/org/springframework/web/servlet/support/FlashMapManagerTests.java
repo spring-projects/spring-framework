@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,8 @@ public class FlashMapManagerTests {
 
 	@Test
 	public void retrieveAndUpdateRemoveExpired() throws InterruptedException {
-		List<FlashMap> flashMaps = new ArrayList<FlashMap>();
-		for (int i=0; i < 5; i++) {
+		List<FlashMap> flashMaps = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
 			FlashMap expiredFlashMap = new FlashMap();
 			expiredFlashMap.startExpirationPeriod(-1);
 			flashMaps.add(expiredFlashMap);

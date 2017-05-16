@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import java.util.concurrent.TimeoutException;
 import org.springframework.util.Assert;
 
 /**
- * Abstract class that adapts a {@link Future} parameterized over S into a {@code
- * Future} parameterized over T. All methods are delegated to the adaptee, where {@link
- * #get()} and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's
- * result.
+ * Abstract class that adapts a {@link Future} parameterized over S into a {@code Future}
+ * parameterized over T. All methods are delegated to the adaptee, where {@link #get()}
+ * and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's result.
  *
  * @author Arjen Poutsma
  * @since 4.0
@@ -59,27 +58,27 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	 * Returns the adaptee.
 	 */
 	protected Future<S> getAdaptee() {
-		return adaptee;
+		return this.adaptee;
 	}
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return adaptee.cancel(mayInterruptIfRunning);
+		return this.adaptee.cancel(mayInterruptIfRunning);
 	}
 
 	@Override
 	public boolean isCancelled() {
-		return adaptee.isCancelled();
+		return this.adaptee.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return adaptee.isDone();
+		return this.adaptee.isDone();
 	}
 
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
-		return adaptInternal(adaptee.get());
+		return adaptInternal(this.adaptee.get());
 	}
 
 	@Override
@@ -107,7 +106,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 						this.state = State.FAILURE;
 						throw ex;
 					}
-					catch (RuntimeException ex) {
+					catch (Throwable ex) {
 						ExecutionException execEx = new ExecutionException(ex);
 						this.result = execEx;
 						this.state = State.FAILURE;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsTemplate} to use.
 	 */
 	public JmsMessagingTemplate(JmsTemplate jmsTemplate) {
-		Assert.notNull("JmsTemplate must not be null");
+		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
 		this.jmsTemplate = jmsTemplate;
 	}
 
@@ -120,7 +120,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * to convert the payload of the message.
 	 * <p>Consider configuring a {@link MessagingMessageConverter} with a different
 	 * {@link MessagingMessageConverter#setPayloadConverter(MessageConverter) payload converter}
-	 * for more advanced scenario.
+	 * for more advanced scenarios.
 	 * @see org.springframework.jms.support.converter.MessagingMessageConverter
 	 */
 	public void setJmsMessageConverter(MessageConverter jmsMessageConverter) {

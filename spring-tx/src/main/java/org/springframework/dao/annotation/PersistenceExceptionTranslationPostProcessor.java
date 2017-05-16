@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.dao.annotation;
 
 import java.lang.annotation.Annotation;
 
-import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
+import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -57,8 +56,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
 @SuppressWarnings("serial")
-public class PersistenceExceptionTranslationPostProcessor extends AbstractAdvisingBeanPostProcessor
-		implements BeanFactoryAware {
+public class PersistenceExceptionTranslationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
 
 	private Class<? extends Annotation> repositoryAnnotationType = Repository.class;
 
@@ -78,6 +76,8 @@ public class PersistenceExceptionTranslationPostProcessor extends AbstractAdvisi
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new IllegalArgumentException(
 					"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");

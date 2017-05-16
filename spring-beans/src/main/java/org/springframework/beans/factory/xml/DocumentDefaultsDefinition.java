@@ -19,7 +19,7 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
 
 /**
- * Simple JavaBean that holds the defaults specified at the {@code &lt;beans&gt;}
+ * Simple JavaBean that holds the defaults specified at the {@code <beans>}
  * level in a standard Spring XML bean definition document:
  * {@code default-lazy-init}, {@code default-autowire}, etc.
  *
@@ -33,8 +33,6 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	private String merge;
 
 	private String autowire;
-
-	private String dependencyCheck;
 
 	private String autowireCandidates;
 
@@ -85,20 +83,6 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	 */
 	public String getAutowire() {
 		return this.autowire;
-	}
-
-	/**
-	 * Set the default dependency-check setting for the document that's currently parsed.
-	 */
-	public void setDependencyCheck(String dependencyCheck) {
-		this.dependencyCheck = dependencyCheck;
-	}
-
-	/**
-	 * Return the default dependency-check setting for the document that's currently parsed.
-	 */
-	public String getDependencyCheck() {
-		return this.dependencyCheck;
 	}
 
 	/**

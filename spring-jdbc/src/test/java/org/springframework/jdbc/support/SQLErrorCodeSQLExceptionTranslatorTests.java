@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.sql.BatchUpdateException;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
@@ -32,11 +34,14 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
+public class SQLErrorCodeSQLExceptionTranslatorTests {
 
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 	static {
@@ -50,7 +55,12 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		ERROR_CODES.setCannotSerializeTransactionCodes(new String[] { "9" });
 	}
 
-	public void testErrorCodeTranslation() {
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Test
+	public void errorCodeTranslation() {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException badSqlEx = new SQLException("", "", 1);
@@ -90,7 +100,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertTrue(ex.getCause() == sex);
 	}
 
-	public void testBatchExceptionTranslation() {
+	@Test
+	public void batchExceptionTranslation() {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException badSqlEx = new SQLException("", "", 1);
@@ -101,7 +112,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertEquals(badSqlEx, bsgex.getSQLException());
 	}
 
-	public void testDataTruncationTranslation() {
+	@Test
+	public void dataTruncationTranslation() {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException dataAccessEx = new SQLException("", "", 5);
@@ -111,7 +123,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 	}
 
 	@SuppressWarnings("serial")
-	public void testCustomTranslateMethodTranslation() {
+	@Test
+	public void customTranslateMethodTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
 		final DataAccessException customDex = new DataAccessException("") {};
@@ -135,7 +148,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertEquals(intVioEx, diex.getCause());
 	}
 
-	public void testCustomExceptionTranslation() {
+	@Test
+	public void customExceptionTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
 		final SQLErrorCodes customErrorCodes = new SQLErrorCodes();
@@ -161,13 +175,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertEquals(invResEx, diex.getCause());
 
 		// Shouldn't custom translate this - invalid class
-		try {
-			customTranslation.setExceptionClass(String.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		exception.expect(IllegalArgumentException.class);
+		customTranslation.setExceptionClass(String.class);
 	}
 
 }

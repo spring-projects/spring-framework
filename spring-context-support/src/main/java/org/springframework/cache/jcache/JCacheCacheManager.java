@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		Collection<Cache> caches = new LinkedHashSet<Cache>();
+		Collection<Cache> caches = new LinkedHashSet<>();
 		for (String cacheName : getCacheManager().getCacheNames()) {
 			javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(cacheName);
 			caches.add(new JCacheCache(jcache, isAllowNullValues()));

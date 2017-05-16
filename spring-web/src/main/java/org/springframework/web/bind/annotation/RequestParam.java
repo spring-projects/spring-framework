@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,6 @@ import org.springframework.core.annotation.AliasFor;
  * @see RequestMapping
  * @see RequestHeader
  * @see CookieValue
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
- * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
@@ -59,30 +56,32 @@ public @interface RequestParam {
 	/**
 	 * Alias for {@link #name}.
 	 */
-	@AliasFor(attribute = "name")
+	@AliasFor("name")
 	String value() default "";
 
 	/**
 	 * The name of the request parameter to bind to.
 	 * @since 4.2
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String name() default "";
 
 	/**
 	 * Whether the parameter is required.
-	 * <p>Default is {@code true}, leading to an exception thrown in case
-	 * of the parameter missing in the request. Switch this to {@code false}
-	 * if you prefer a {@code null} in case of the parameter missing.
-	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitly sets this flag to {@code false}.
+	 * <p>Defaults to {@code true}, leading to an exception being thrown
+	 * if the parameter is missing in the request. Switch this to
+	 * {@code false} if you prefer a {@code null} value if the parameter is
+	 * not present in the request.
+	 * <p>Alternatively, provide a {@link #defaultValue}, which implicitly
+	 * sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 
 	/**
-	 * The default value to use as a fallback when the request parameter value
-	 * is not provided or empty. Supplying a default value implicitly sets
-	 * {@link #required()} to false.
+	 * The default value to use as a fallback when the request parameter is
+	 * not provided or has an empty value.
+	 * <p>Supplying a default value implicitly sets {@link #required} to
+	 * {@code false}.
 	 */
 	String defaultValue() default ValueConstants.DEFAULT_NONE;
 

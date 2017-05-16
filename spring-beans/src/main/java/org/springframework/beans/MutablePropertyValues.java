@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #add(String, Object)
 	 */
 	public MutablePropertyValues() {
-		this.propertyValueList = new ArrayList<PropertyValue>(0);
+		this.propertyValueList = new ArrayList<>(0);
 	}
 
 	/**
@@ -66,13 +66,13 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		// There is no replacement of existing property values.
 		if (original != null) {
 			PropertyValue[] pvs = original.getPropertyValues();
-			this.propertyValueList = new ArrayList<PropertyValue>(pvs.length);
+			this.propertyValueList = new ArrayList<>(pvs.length);
 			for (PropertyValue pv : pvs) {
 				this.propertyValueList.add(new PropertyValue(pv));
 			}
 		}
 		else {
-			this.propertyValueList = new ArrayList<PropertyValue>(0);
+			this.propertyValueList = new ArrayList<>(0);
 		}
 	}
 
@@ -85,13 +85,13 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		// We can optimize this because it's all new:
 		// There is no replacement of existing property values.
 		if (original != null) {
-			this.propertyValueList = new ArrayList<PropertyValue>(original.size());
+			this.propertyValueList = new ArrayList<>(original.size());
 			for (Map.Entry<?, ?> entry : original.entrySet()) {
 				this.propertyValueList.add(new PropertyValue(entry.getKey().toString(), entry.getValue()));
 			}
 		}
 		else {
-			this.propertyValueList = new ArrayList<PropertyValue>(0);
+			this.propertyValueList = new ArrayList<>(0);
 		}
 	}
 
@@ -104,7 +104,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public MutablePropertyValues(List<PropertyValue> propertyValueList) {
 		this.propertyValueList =
-				(propertyValueList != null ? propertyValueList : new ArrayList<PropertyValue>());
+				(propertyValueList != null ? propertyValueList : new ArrayList<>());
 	}
 
 
@@ -316,7 +316,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public void registerProcessedProperty(String propertyName) {
 		if (this.processedProperties == null) {
-			this.processedProperties = new HashSet<String>();
+			this.processedProperties = new HashSet<>();
 		}
 		this.processedProperties.add(propertyName);
 	}

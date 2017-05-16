@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.client;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	 */
 	public MockClientHttpResponse(byte[] body, HttpStatus statusCode) {
 		super(body);
-		Assert.notNull(statusCode, "statisCode is required");
+		Assert.notNull(statusCode, "HttpStatus is required");
 		this.status = statusCode;
 	}
 
@@ -48,9 +49,10 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	 */
 	public MockClientHttpResponse(InputStream body, HttpStatus statusCode) {
 		super(body);
-		Assert.notNull(statusCode, "statisCode is required");
+		Assert.notNull(statusCode, "HttpStatus is required");
 		this.status = statusCode;
 	}
+
 
 	@Override
 	public HttpStatus getStatusCode() throws IOException {
@@ -69,6 +71,15 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 
 	@Override
 	public void close() {
+		try {
+			InputStream body = getBody();
+			if (body != null) {
+				body.close();
+			}
+		}
+		catch (IOException ex) {
+			// ignore
+		}
 	}
 
 }

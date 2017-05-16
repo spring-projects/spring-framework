@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,35 +48,34 @@ public class MatrixVariablesMethodArgumentResolverTests {
 
 	private MatrixVariableMethodArgumentResolver resolver;
 
-	private MethodParameter paramString;
-	private MethodParameter paramColors;
-	private MethodParameter paramYear;
-
 	private ModelAndViewContainer mavContainer;
 
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest request;
 
+	private MethodParameter paramString;
+	private MethodParameter paramColors;
+	private MethodParameter paramYear;
+
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolver = new MatrixVariableMethodArgumentResolver();
-
-		Method method = getClass().getMethod("handle", String.class, List.class, int.class);
-		this.paramString = new MethodParameter(method, 0);
-		this.paramColors = new MethodParameter(method, 1);
-		this.paramYear = new MethodParameter(method, 2);
-
-		this.paramColors.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-
 		this.mavContainer = new ModelAndViewContainer();
 		this.request = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
-		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<String, MultiValueMap<String, String>>();
+		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<>();
 		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
+
+		Method method = getClass().getMethod("handle", String.class, List.class, int.class);
+		this.paramString = new MethodParameter(method, 0);
+		this.paramColors = new MethodParameter(method, 1);
+		this.paramColors.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		this.paramYear = new MethodParameter(method, 2);
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -87,7 +86,6 @@ public class MatrixVariablesMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
-
 		MultiValueMap<String, String> params = getMatrixVariables("cars");
 		params.add("colors", "red");
 		params.add("colors", "green");
@@ -99,7 +97,6 @@ public class MatrixVariablesMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentPathVariable() throws Exception {
-
 		getMatrixVariables("cars").add("year", "2006");
 		getMatrixVariables("bikes").add("year", "2005");
 
@@ -111,23 +108,21 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		assertEquals("2013", resolver.resolveArgument(this.paramYear, this.mavContainer, this.webRequest, null));
 	}
 
-	@Test(expected=ServletRequestBindingException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void resolveArgumentMultipleMatches() throws Exception {
-
 		getMatrixVariables("var1").add("colors", "red");
 		getMatrixVariables("var2").add("colors", "green");
 
 		this.resolver.resolveArgument(this.paramColors, this.mavContainer, this.webRequest, null);
 	}
 
-	@Test(expected=ServletRequestBindingException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void resolveArgumentRequired() throws Exception {
 		resolver.resolveArgument(this.paramColors, this.mavContainer, this.webRequest, null);
 	}
 
 	@Test
 	public void resolveArgumentNoMatch() throws Exception {
-
 		MultiValueMap<String, String> params = getMatrixVariables("cars");
 		params.add("anotherYear", "2012");
 
@@ -137,12 +132,11 @@ public class MatrixVariablesMethodArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getMatrixVariables(String pathVarName) {
-
 		Map<String, MultiValueMap<String, String>> matrixVariables =
 				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		matrixVariables.put(pathVarName, params);
 
 		return params;

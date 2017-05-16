@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.junit.After;
@@ -36,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
 import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class CustomInterceptorTests {
@@ -47,18 +47,18 @@ public class CustomInterceptorTests {
 
 	@Before
 	public void setup() {
-		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
-		cs = ctx.getBean("service", CacheableService.class);
+		this.ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
+		this.cs = ctx.getBean("service", CacheableService.class);
 	}
 
 	@After
 	public void tearDown() {
-		ctx.close();
+		this.ctx.close();
 	}
 
 	@Test
 	public void onlyOneInterceptorIsAvailable() {
-		Map<String, CacheInterceptor> interceptors = ctx.getBeansOfType(CacheInterceptor.class);
+		Map<String, CacheInterceptor> interceptors = this.ctx.getBeansOfType(CacheInterceptor.class);
 		assertEquals("Only one interceptor should be defined", 1, interceptors.size());
 		CacheInterceptor interceptor = interceptors.values().iterator().next();
 		assertEquals("Custom interceptor not defined", TestCacheInterceptor.class, interceptor.getClass());
@@ -66,19 +66,19 @@ public class CustomInterceptorTests {
 
 	@Test
 	public void customInterceptorAppliesWithRuntimeException() {
-		Object o = cs.throwUnchecked(0L);
+		Object o = this.cs.throwUnchecked(0L);
 		assertEquals(55L, o); // See TestCacheInterceptor
 	}
 
 	@Test
 	public void customInterceptorAppliesWithCheckedException() {
 		try {
-			cs.throwChecked(0L);
+			this.cs.throwChecked(0L);
 			fail("Should have failed");
 		}
 		catch (RuntimeException e) {
 			assertNotNull("missing original exception", e.getCause());
-			assertEquals(Exception.class, e.getCause().getClass());
+			assertEquals(IOException.class, e.getCause().getClass());
 		}
 		catch (Exception e) {
 			fail("Wrong exception type " + e);

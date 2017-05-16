@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 /** @author Arjen Poutsma */
 public class HttpStatusTests {
 
-	private Map<Integer, String> statusCodes = new LinkedHashMap<Integer, String>();
+	private Map<Integer, String> statusCodes = new LinkedHashMap<>();
 
 	@Before
 	public void createStatusCodes() {
@@ -85,6 +85,7 @@ public class HttpStatusTests {
 		statusCodes.put(428, "PRECONDITION_REQUIRED");
 		statusCodes.put(429, "TOO_MANY_REQUESTS");
 		statusCodes.put(431, "REQUEST_HEADER_FIELDS_TOO_LARGE");
+		statusCodes.put(451, "UNAVAILABLE_FOR_LEGAL_REASONS");
 
 		statusCodes.put(500, "INTERNAL_SERVER_ERROR");
 		statusCodes.put(501, "NOT_IMPLEMENTED");

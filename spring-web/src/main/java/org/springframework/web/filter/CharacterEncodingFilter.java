@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.util.Assert;
 
 /**
  * Servlet Filter that allows one to specify a character encoding for requests.
@@ -44,7 +46,60 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	private String encoding;
 
-	private boolean forceEncoding = false;
+	private boolean forceRequestEncoding = false;
+
+	private boolean forceResponseEncoding = false;
+
+
+	/**
+	 * Create a default {@code CharacterEncodingFilter},
+	 * with the encoding to be set via {@link #setEncoding}.
+	 * @see #setEncoding
+	 */
+	public CharacterEncodingFilter() {
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given encoding.
+	 * @param encoding the encoding to apply
+	 * @since 4.2.3
+	 * @see #setEncoding
+	 */
+	public CharacterEncodingFilter(String encoding) {
+		this(encoding, false);
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given encoding.
+	 * @param encoding the encoding to apply
+	 * @param forceEncoding whether the specified encoding is supposed to
+	 * override existing request and response encodings
+	 * @since 4.2.3
+	 * @see #setEncoding
+	 * @see #setForceEncoding
+	 */
+	public CharacterEncodingFilter(String encoding, boolean forceEncoding) {
+		this(encoding, forceEncoding, forceEncoding);
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given encoding.
+	 * @param encoding the encoding to apply
+	 * @param forceRequestEncoding whether the specified encoding is supposed to
+	 * override existing request encodings
+	 * @param forceResponseEncoding whether the specified encoding is supposed to
+	 * override existing response encodings
+	 * @since 4.3
+	 * @see #setEncoding
+	 * @see #setForceRequestEncoding(boolean)
+	 * @see #setForceResponseEncoding(boolean)
+	 */
+	public CharacterEncodingFilter(String encoding, boolean forceRequestEncoding, boolean forceResponseEncoding) {
+		Assert.hasLength(encoding, "Encoding must not be empty");
+		this.encoding = encoding;
+		this.forceRequestEncoding = forceRequestEncoding;
+		this.forceResponseEncoding = forceResponseEncoding;
+	}
 
 
 	/**
@@ -59,15 +114,69 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Return the configured encoding for requests and/or responses
+	 * @since 4.3
+	 */
+	public String getEncoding() {
+		return this.encoding;
+	}
+
+	/**
 	 * Set whether the configured {@link #setEncoding encoding} of this filter
 	 * is supposed to override existing request and response encodings.
 	 * <p>Default is "false", i.e. do not modify the encoding if
 	 * {@link javax.servlet.http.HttpServletRequest#getCharacterEncoding()}
 	 * returns a non-null value. Switch this to "true" to enforce the specified
 	 * encoding in any case, applying it as default response encoding as well.
+	 * <p>This is the equivalent to setting both {@link #setForceRequestEncoding(boolean)}
+	 * and {@link #setForceResponseEncoding(boolean)}.
+	 * @see #setForceRequestEncoding(boolean)
+	 * @see #setForceResponseEncoding(boolean)
 	 */
 	public void setForceEncoding(boolean forceEncoding) {
-		this.forceEncoding = forceEncoding;
+		this.forceRequestEncoding = forceEncoding;
+		this.forceResponseEncoding = forceEncoding;
+	}
+
+	/**
+	 * Set whether the configured {@link #setEncoding encoding} of this filter
+	 * is supposed to override existing request encodings.
+	 * <p>Default is "false", i.e. do not modify the encoding if
+	 * {@link javax.servlet.http.HttpServletRequest#getCharacterEncoding()}
+	 * returns a non-null value. Switch this to "true" to enforce the specified
+	 * encoding in any case.
+	 * @since 4.3
+	 */
+	public void setForceRequestEncoding(boolean forceRequestEncoding) {
+		this.forceRequestEncoding = forceRequestEncoding;
+	}
+
+	/**
+	 * Return whether the encoding should be forced on requests
+	 * @since 4.3
+	 */
+	public boolean isForceRequestEncoding() {
+		return this.forceRequestEncoding;
+	}
+
+	/**
+	 * Set whether the configured {@link #setEncoding encoding} of this filter
+	 * is supposed to override existing response encodings.
+	 * <p>Default is "false", i.e. do not modify the encoding.
+	 * Switch this to "true" to enforce the specified encoding
+	 * for responses in any case.
+	 * @since 4.3
+	 */
+	public void setForceResponseEncoding(boolean forceResponseEncoding) {
+		this.forceResponseEncoding = forceResponseEncoding;
+	}
+
+	/**
+	 * Return whether the encoding should be forced on responses.
+	 * @since 4.3
+	 */
+	public boolean isForceResponseEncoding() {
+		return this.forceResponseEncoding;
 	}
 
 
@@ -76,10 +185,13 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		if (this.encoding != null && (this.forceEncoding || request.getCharacterEncoding() == null)) {
-			request.setCharacterEncoding(this.encoding);
-			if (this.forceEncoding) {
-				response.setCharacterEncoding(this.encoding);
+		String encoding = getEncoding();
+		if (encoding != null) {
+			if (isForceRequestEncoding() || request.getCharacterEncoding() == null) {
+				request.setCharacterEncoding(encoding);
+			}
+			if (isForceResponseEncoding()) {
+				response.setCharacterEncoding(encoding);
 			}
 		}
 		filterChain.doFilter(request, response);

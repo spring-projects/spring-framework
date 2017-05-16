@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.cache.CacheManager;
  */
 public class CompositeCacheManager implements CacheManager, InitializingBean {
 
-	private final List<CacheManager> cacheManagers = new ArrayList<CacheManager>();
+	private final List<CacheManager> cacheManagers = new ArrayList<>();
 
 	private boolean fallbackToNoOpCache = false;
 
@@ -110,7 +110,7 @@ public class CompositeCacheManager implements CacheManager, InitializingBean {
 
 	@Override
 	public Collection<String> getCacheNames() {
-		Set<String> names = new LinkedHashSet<String>();
+		Set<String> names = new LinkedHashSet<>();
 		for (CacheManager manager : this.cacheManagers) {
 			names.addAll(manager.getCacheNames());
 		}

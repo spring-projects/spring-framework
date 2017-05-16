@@ -9,7 +9,7 @@
 	<context:component-scan base-package="org.springframework.context.annotation"
             use-default-filters="false"
             annotation-config="false">
-        <context:include-filter type="assignable" 
+        <context:include-filter type="assignable"
                 expression="org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests$DefaultsTestBean"/>
     </context:component-scan>
 

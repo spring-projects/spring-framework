@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ import org.springframework.util.Assert;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.
  *
- * <p>If you need a "real" connection pool outside of a J2EE container, consider
+ * <p>If you need a "real" connection pool outside of a Java EE container, consider
  * <a href="http://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
  * or <a href="http://sourceforge.net/projects/c3p0">C3P0</a>.
  * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full

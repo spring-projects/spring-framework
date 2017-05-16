@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,9 +236,9 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		Assert.notNull(clazz, "'clazz' must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		if (this.targetClass != null) {
-			return this.targetClass.equals(clazz);
+			return (this.targetClass == clazz);
 		}
 		String[] mappedClasses = this.bindingFactory.getMappedClasses();
 		String className = clazz.getName();
@@ -461,7 +461,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since JiBX itself does not make this distinction in its exception hierarchy.
-	 * @param ex {@code JiBXException} that occured
+	 * @param ex {@code JiBXException} that occurred
 	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
 	 * or unmarshalling ({@code false})
 	 * @return the corresponding {@code XmlMappingException}

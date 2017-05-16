@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.context.expression;
 
 import java.util.Map;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
@@ -28,18 +30,21 @@ import org.springframework.util.ObjectUtils;
  * are defined on {@link java.lang.reflect.AnnotatedElement}.
  *
  * @author Stephane Nicoll
- * @since 4.2.0
+ * @since 4.2
  * @see AnnotatedElementKey
  */
 public abstract class CachedExpressionEvaluator {
 
 	private final SpelExpressionParser parser;
 
+	private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
+
 	/**
 	 * Create a new instance with the specified {@link SpelExpressionParser}.
 	 */
 	protected CachedExpressionEvaluator(SpelExpressionParser parser) {
-		Assert.notNull(parser, "Parser must not be null");
+		Assert.notNull(parser, "SpelExpressionParser must not be null");
 		this.parser = parser;
 	}
 
@@ -50,12 +55,22 @@ public abstract class CachedExpressionEvaluator {
 		this(new SpelExpressionParser());
 	}
 
+
 	/**
 	 * Return the {@link SpelExpressionParser} to use.
 	 */
 	protected SpelExpressionParser getParser() {
 		return this.parser;
 	}
+
+	/**
+	 * Return a shared parameter name discoverer which caches data internally.
+	 * @since 4.3
+	 */
+	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
+	}
+
 
 	/**
 	 * Return the {@link Expression} for the specified SpEL value
@@ -66,6 +81,7 @@ public abstract class CachedExpressionEvaluator {
 	 */
 	protected Expression getExpression(Map<ExpressionKey, Expression> cache,
 			AnnotatedElementKey elementKey, String expression) {
+
 		ExpressionKey expressionKey = createKey(elementKey, expression);
 		Expression expr = cache.get(expressionKey);
 		if (expr == null) {
@@ -79,14 +95,15 @@ public abstract class CachedExpressionEvaluator {
 		return new ExpressionKey(elementKey, expression);
 	}
 
-	protected static class ExpressionKey {
 
-		private final AnnotatedElementKey key;
+	protected static class ExpressionKey implements Comparable<ExpressionKey> {
+
+		private final AnnotatedElementKey element;
 
 		private final String expression;
 
-		protected ExpressionKey(AnnotatedElementKey key, String expression) {
-			this.key = key;
+		protected ExpressionKey(AnnotatedElementKey element, String expression) {
+			this.element = element;
 			this.expression = expression;
 		}
 
@@ -99,13 +116,27 @@ public abstract class CachedExpressionEvaluator {
 				return false;
 			}
 			ExpressionKey otherKey = (ExpressionKey) other;
-			return (this.key.equals(otherKey.key) &&
+			return (this.element.equals(otherKey.element) &&
 					ObjectUtils.nullSafeEquals(this.expression, otherKey.expression));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.key.hashCode() * 29 + (this.expression != null ? this.expression.hashCode() : 0);
+			return this.element.hashCode() + (this.expression != null ? this.expression.hashCode() * 29 : 0);
+		}
+
+		@Override
+		public String toString() {
+			return this.element + (this.expression != null ? " with expression \"" + this.expression : "\"");
+		}
+
+		@Override
+		public int compareTo(ExpressionKey other) {
+			int result = this.element.toString().compareTo(other.element.toString());
+			if (result == 0 && this.expression != null) {
+				result = this.expression.compareTo(other.expression);
+			}
+			return result;
 		}
 	}
 

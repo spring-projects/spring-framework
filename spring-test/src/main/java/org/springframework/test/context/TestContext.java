@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,14 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 /**
  * {@code TestContext} encapsulates the context in which a test is executed,
  * agnostic of the actual testing framework in use.
+ *
+ * <p>As of Spring Framework 5.0, concrete implementations are highly encouraged
+ * to implement a <em>copy constructor</em> in order to allow the immutable state
+ * and attributes of a {@code TestContext} to be used as a template for additional
+ * contexts created for parallel test execution. The copy constructor must accept a
+ * single argument of the type of the concrete implementation. Any implementation
+ * that does not provide a copy constructor will likely fail in an environment
+ * that executes tests concurrently.
  *
  * @author Sam Brannen
  * @since 2.5

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.ServletException;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -28,17 +29,20 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class BeanNameUrlHandlerMappingTests extends TestCase {
+public class BeanNameUrlHandlerMappingTests {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
 
 	private ConfigurableWebApplicationContext wac;
 
-	@Override
+
+	@Before
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();
@@ -47,7 +51,8 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		wac.refresh();
 	}
 
-	public void testRequestsWithoutHandlers() throws Exception {
+	@Test
+	public void requestsWithoutHandlers() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/nonsense.html");
@@ -60,12 +65,14 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is null", h == null);
 	}
 
-	public void testRequestsWithSubPaths() throws Exception {
+	@Test
+	public void requestsWithSubPaths() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		doTestRequestsWithSubPaths(hm);
 	}
 
-	public void testRequestsWithSubPathsInParentContext() throws Exception {
+	@Test
+	public void requestsWithSubPathsInParentContext() throws Exception {
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 		hm.setDetectHandlersInAncestorContexts(true);
 		hm.setApplicationContext(new StaticApplicationContext(wac));
@@ -111,7 +118,8 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
-	public void testRequestsWithFullPaths() throws Exception {
+	@Test
+	public void requestsWithFullPaths() throws Exception {
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 		hm.setAlwaysUseFullPath(true);
 		hm.setApplicationContext(wac);
@@ -143,7 +151,8 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
-	public void testAsteriskMatches() throws Exception {
+	@Test
+	public void asteriskMatches() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 
@@ -160,7 +169,8 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec == null);
 	}
 
-	public void testOverlappingMappings() throws Exception {
+	@Test
+	public void overlappingMappings() throws Exception {
 		BeanNameUrlHandlerMapping hm = (BeanNameUrlHandlerMapping) wac.getBean("handlerMapping");
 		Object anotherHandler = new Object();
 		hm.registerHandler("/mypath/testaross*", anotherHandler);
@@ -179,7 +189,8 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec == null);
 	}
 
-	public void testDoubleMappings() throws ServletException {
+	@Test
+	public void doubleMappings() throws ServletException {
 		BeanNameUrlHandlerMapping hm = (BeanNameUrlHandlerMapping) wac.getBean("handlerMapping");
 		try {
 			hm.registerHandler("/mypath/welcome.html", new Object());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,6 +29,7 @@ import org.springframework.cache.annotation.Caching;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
@@ -38,6 +40,24 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Cacheable("testCache")
 	public Long cache(Object arg1) {
 		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable("testCache")
+	public Long cacheNull(Object arg1) {
+		return null;
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Long cacheSync(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Long cacheSyncNull(Object arg1) {
+		return null;
 	}
 
 	@Override
@@ -74,8 +94,14 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
-	@Cacheable(cacheNames = "testCache", condition = "#classField == 3")
+	@Cacheable(cacheNames = "testCache", condition = "#p0 == 3")
 	public Long conditional(int classField) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true, condition = "#p0 == 3")
+	public Long conditionalSync(int field) {
 		return counter.getAndIncrement();
 	}
 
@@ -92,7 +118,7 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
-	@Cacheable("testCache")
+	@Cacheable(cacheNames = "testCache")
 	public Long varArgsKey(Object... args) {
 		return counter.getAndIncrement();
 	}
@@ -160,12 +186,24 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable("testCache")
 	public Long throwChecked(Object arg1) throws Exception {
-		throw new Exception(arg1.toString());
+		throw new IOException(arg1.toString());
 	}
 
 	@Override
 	@Cacheable("testCache")
 	public Long throwUnchecked(Object arg1) {
+		throw new UnsupportedOperationException(arg1.toString());
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Long throwCheckedSync(Object arg1) throws Exception {
+		throw new IOException(arg1.toString());
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Long throwUncheckedSync(Object arg1) {
 		throw new UnsupportedOperationException(arg1.toString());
 	}
 
@@ -178,8 +216,7 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
-//FIXME	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#p0"), @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#p0"), @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
 	public Long multiEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class BeanNamePointcutTests {
+public class BeanNamePointcutTests {
 
 	private ITestBean testBean1;
 	private ITestBean testBean2;
@@ -68,6 +68,7 @@ public final class BeanNamePointcutTests {
 
 		counterAspect.reset();
 	}
+
 
 	// We don't need to test all combination of pointcuts due to BeanNamePointcutMatchingTests
 

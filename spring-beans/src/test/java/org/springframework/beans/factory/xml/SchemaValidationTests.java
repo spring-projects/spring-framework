@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,24 @@
 
 package org.springframework.beans.factory.xml;
 
-import junit.framework.TestCase;
-import org.xml.sax.SAXParseException;
+import org.junit.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import org.xml.sax.SAXParseException;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  */
-public class SchemaValidationTests extends TestCase {
+public class SchemaValidationTests {
 
-	public void testWithAutodetection() throws Exception {
+	@Test
+	public void withAutodetection() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		try {
@@ -41,7 +45,8 @@ public class SchemaValidationTests extends TestCase {
 		}
 	}
 
-	public void testWithExplicitValidationMode() throws Exception {
+	@Test
+	public void withExplicitValidationMode() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
@@ -54,7 +59,8 @@ public class SchemaValidationTests extends TestCase {
 		}
 	}
 
-	public void testLoadDefinitions() throws Exception {
+	@Test
+	public void loadDefinitions() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);

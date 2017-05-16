@@ -18,7 +18,7 @@
 	>
 		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
 
-		<property name="target"><ref local="test"/></property>
+		<property name="target"><ref bean="test"/></property>
 		<property name="interceptorNames"><value>debugInterceptor</value></property>
 		<property name="frozen"><value>true</value></property>
 		<property name="optimize"><value>true</value></property>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@ package org.springframework.core;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class NestedExceptionTests extends TestCase {
+@SuppressWarnings("serial")
+public class NestedExceptionTests {
 
-	@SuppressWarnings("serial")
-	public void testNestedRuntimeExceptionWithNoRootCause() {
+	@Test
+	public void nestedRuntimeExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedRuntimeException nex = new NestedRuntimeException(mesg) {};
@@ -44,8 +47,8 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(mesg) == -1);
 	}
 
-	@SuppressWarnings("serial")
-	public void testNestedRuntimeExceptionWithRootCause() {
+	@Test
+	public void nestedRuntimeExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";
 		Exception rootCause = new Exception(rootCauseMesg);
@@ -65,8 +68,8 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(rootCauseMesg) == -1);
 	}
 
-	@SuppressWarnings("serial")
-	public void testNestedCheckedExceptionWithNoRootCause() {
+	@Test
+	public void nestedCheckedExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nex = new NestedCheckedException(mesg) {};
@@ -82,8 +85,8 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(mesg) == -1);
 	}
 
-	@SuppressWarnings("serial")
-	public void testNestedCheckedExceptionWithRootCause() {
+	@Test
+	public void nestedCheckedExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";
 		Exception rootCause = new Exception(rootCauseMesg);

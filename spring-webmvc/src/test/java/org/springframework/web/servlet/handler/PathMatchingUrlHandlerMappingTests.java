@@ -81,7 +81,7 @@ public class PathMatchingUrlHandlerMappingTests {
 		HandlerExecutionChain hec = getHandler(req);
 		assertTrue("Handler is null", hec != null);
 		assertTrue("Handler is correct bean", hec.getHandler() == bean);
-		assertEquals("pathmatchingTest.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertEquals("/pathmatchingTest.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// no match, no forward slash included
 		req = new MockHttpServletRequest("GET", "welcome.html");
@@ -121,12 +121,7 @@ public class PathMatchingUrlHandlerMappingTests {
 		hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		// this as well, because there's a **/in there as well
-		req = new MockHttpServletRequest("GET", "/testing/bla.jsp");
-		hec = getHandler(req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-
-		// should match because because exact pattern is there
+		// should match because exact pattern is there
 		req = new MockHttpServletRequest("GET", "/administrator/another/bla.xml");
 		hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);

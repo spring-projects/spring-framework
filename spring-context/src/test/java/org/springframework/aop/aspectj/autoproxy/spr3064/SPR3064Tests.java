@@ -1,5 +1,5 @@
 /**
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj.autoproxy.spr3064;
 
 import java.lang.annotation.Retention;
@@ -31,9 +32,10 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class SPR3064Tests {
+public class SPR3064Tests {
 
 	private Service service;
+
 
 	@Test
 	public void testServiceIsAdvised() {
@@ -46,7 +48,7 @@ public final class SPR3064Tests {
 			this.service.serveMe();
 			fail("service operation has not been advised by transaction interceptor");
 		}
-		catch(RuntimeException ex) {
+		catch (RuntimeException ex) {
 			assertEquals("advice invoked",ex.getMessage());
 		}
 	}
@@ -56,7 +58,6 @@ public final class SPR3064Tests {
 
 @Retention(RetentionPolicy.RUNTIME)
 @interface Transaction {
-
 }
 
 
@@ -68,14 +69,12 @@ class TransactionInterceptor {
 		throw new RuntimeException("advice invoked");
 		//return pjp.proceed();
 	}
-
 }
 
 
 interface Service {
 
 	void serveMe();
-
 }
 
 
@@ -85,5 +84,4 @@ class ServiceImpl implements Service {
 	@Transaction
 	public void serveMe() {
 	}
-
 }

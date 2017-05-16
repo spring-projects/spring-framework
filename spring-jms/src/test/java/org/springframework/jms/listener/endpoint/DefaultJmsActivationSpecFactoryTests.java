@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +19,34 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.Destination;
 import javax.jms.Session;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.jca.StubResourceAdapter;
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.support.destination.DestinationResolver;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Agim Emruli
  * @author Juergen Hoeller
  */
-public class DefaultJmsActivationSpecFactoryTests extends TestCase {
+public class DefaultJmsActivationSpecFactoryTests {
 
-	private JmsActivationSpecConfig activationSpecConfig;
+	private final JmsActivationSpecConfig activationSpecConfig = new JmsActivationSpecConfig() {{
+		setMaxConcurrency(5);
+		setPrefetchSize(3);
+		setAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+		setClientId("clientid");
+		setDestinationName("destinationname");
+		setDurableSubscriptionName("durableSubscriptionName");
+		setMessageSelector("selector");
+	}};
 
-	@Override
-	protected void setUp() throws Exception {
-		activationSpecConfig = new JmsActivationSpecConfig();
-		activationSpecConfig.setMaxConcurrency(5);
-		activationSpecConfig.setPrefetchSize(3);
-		activationSpecConfig.setAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
-		activationSpecConfig.setClientId("clientid");
-		activationSpecConfig.setDestinationName("destinationname");
-		activationSpecConfig.setDurableSubscriptionName("durableSubscriptionName");
-		activationSpecConfig.setMessageSelector("selector");
-	}
 
-	public void testActiveMQResourceAdapterSetup() {
+	@Test
+	public void activeMQResourceAdapterSetup() {
 		activationSpecConfig.setAcknowledgeMode(Session.SESSION_TRANSACTED);
 		JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 		StubActiveMQActivationSpec spec = (StubActiveMQActivationSpec) activationSpecFactory.createActivationSpec(
@@ -58,7 +57,8 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 		assertTrue(spec.isUseRAManagedTransaction());
 	}
 
-	public void testWebSphereResourceAdapterSetup() throws Exception {
+	@Test
+	public void webSphereResourceAdapterSetup() throws Exception {
 		Destination destination = new StubQueue();
 
 		DestinationResolver destinationResolver = mock(DestinationResolver.class);

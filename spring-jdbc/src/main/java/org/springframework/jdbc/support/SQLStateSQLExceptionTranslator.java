@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,15 @@ import org.springframework.jdbc.BadSqlGrammarException;
  */
 public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLExceptionTranslator {
 
-	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<String>(8);
+	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<>(8);
 
-	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<String>(8);
+	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<>(8);
 
-	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<String>(4);
+	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<>(4);
 
 
 	static {

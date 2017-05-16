@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.time.ZoneId;
 import java.util.TimeZone;
 
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Simple converter from Java 8's {@link java.time.ZoneId} to {@link java.util.TimeZone}.
@@ -35,7 +34,6 @@ import org.springframework.lang.UsesJava8;
  * @since 4.0
  * @see TimeZone#getTimeZone(java.time.ZoneId)
  */
-@UsesJava8
 final class ZoneIdToTimeZoneConverter implements Converter<ZoneId, TimeZone> {
 
 	@Override

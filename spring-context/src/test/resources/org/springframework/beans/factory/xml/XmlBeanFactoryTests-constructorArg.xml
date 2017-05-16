@@ -81,7 +81,7 @@
 	</bean>
 
 	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
-		<constructor-arg index="0"><ref local="kerry2"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod12" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
@@ -225,6 +225,14 @@
 		<constructor-arg>
 			<array value-type="java.lang.String"/>
 		</constructor-arg>
+	</bean>
+
+	<bean id="constructorUnresolvableName" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg name="initialValue" value="1"/>
+	</bean>
+
+	<bean id="constructorUnresolvableNameWithIndex" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg index="0" name="initialValue" value="1"/>
 	</bean>
 
 </beans>

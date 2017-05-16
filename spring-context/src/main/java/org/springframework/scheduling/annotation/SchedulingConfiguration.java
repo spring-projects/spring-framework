@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,12 @@ import org.springframework.context.annotation.Role;
 import org.springframework.scheduling.config.TaskManagementConfigUtils;
 
 /**
- * {@code @Configuration} class that registers a {@link
- * ScheduledAnnotationBeanPostProcessor} bean capable of processing Spring's @{@link
- * Scheduled} annotation.
+ * {@code @Configuration} class that registers a {@link ScheduledAnnotationBeanPostProcessor}
+ * bean capable of processing Spring's @{@link Scheduled} annotation.
  *
- * <p>This configuration class is automatically imported when using the @{@link
- * EnableScheduling} annotation.  See {@code @EnableScheduling} Javadoc for complete usage
- * details.
+ * <p>This configuration class is automatically imported when using the
+ * {@link EnableScheduling @EnableScheduling} annotation. See
+ * {@code @EnableScheduling}'s javadoc for complete usage details.
  *
  * @author Chris Beams
  * @since 3.1

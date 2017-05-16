@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scripting.groovy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -51,11 +52,31 @@ public class GroovyScriptEvaluatorTests {
 	@Test
 	public void testGroovyScriptWithArguments() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
-		Map<String, Object> arguments = new HashMap<String, Object>();
+		Map<String, Object> arguments = new HashMap<>();
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b"), arguments);
 		assertEquals(6, result);
+	}
+
+	@Test
+	public void testGroovyScriptWithCompilerConfiguration() {
+		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
+		MyBytecodeProcessor processor = new MyBytecodeProcessor();
+		evaluator.getCompilerConfiguration().setBytecodePostprocessor(processor);
+		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
+		assertEquals(6, result);
+		assertTrue(processor.processed.contains("Script1"));
+	}
+
+	@Test
+	public void testGroovyScriptWithImportCustomizer() {
+		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
+		ImportCustomizer importCustomizer = new ImportCustomizer();
+		importCustomizer.addStarImports("org.springframework.util");
+		evaluator.setCompilationCustomizers(importCustomizer);
+		Object result = evaluator.evaluate(new StaticScriptSource("return ResourceUtils.CLASSPATH_URL_PREFIX"));
+		assertEquals("classpath:", result);
 	}
 
 	@Test
@@ -77,7 +98,7 @@ public class GroovyScriptEvaluatorTests {
 	public void testGroovyScriptWithArgumentsUsingJsr223() {
 		StandardScriptEvaluator evaluator = new StandardScriptEvaluator();
 		evaluator.setLanguage("Groovy");
-		Map<String, Object> arguments = new HashMap<String, Object>();
+		Map<String, Object> arguments = new HashMap<>();
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b"), arguments);

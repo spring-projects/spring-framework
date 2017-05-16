@@ -66,7 +66,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -77,7 +77,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -89,7 +89,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void actualRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/cors");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -103,7 +103,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void preflightRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/cors");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -118,10 +118,10 @@ public class CorsAbstractHandlerMappingTests {
 	public void actualRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
-		this.handlerMapping.setCorsConfiguration(Collections.singletonMap("/foo", config));
+		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -135,10 +135,10 @@ public class CorsAbstractHandlerMappingTests {
 	public void preflightRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
-		this.handlerMapping.setCorsConfiguration(Collections.singletonMap("/foo", config));
+		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com/test.html");
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class StandardTypeLocator implements TypeLocator {
 
 	private final ClassLoader classLoader;
 
-	private final List<String> knownPackagePrefixes = new LinkedList<String>();
+	private final List<String> knownPackagePrefixes = new LinkedList<>();
 
 
 	/**
@@ -105,7 +105,7 @@ public class StandardTypeLocator implements TypeLocator {
 		}
 		for (String prefix : this.knownPackagePrefixes) {
 			try {
-				nameToLookup = prefix + "." + typeName;
+				nameToLookup = prefix + '.' + typeName;
 				return ClassUtils.forName(nameToLookup, this.classLoader);
 			}
 			catch (ClassNotFoundException ex) {

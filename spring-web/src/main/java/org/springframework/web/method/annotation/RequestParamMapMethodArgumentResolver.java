@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
 			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 				for (String value : entry.getValue()) {
 					result.add(entry.getKey(), value);
@@ -75,7 +75,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>(parameterMap.size());
+			Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
 			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 				if (entry.getValue().length > 0) {
 					result.put(entry.getKey(), entry.getValue()[0]);

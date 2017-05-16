@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 			Map<String, String[]> actualParams) {
 
 		super("");
-		Assert.isTrue(!CollectionUtils.isEmpty(paramConditions));
+		Assert.notEmpty(paramConditions, "Parameter conditions must not be empty");
 		this.paramConditions = paramConditions;
 		this.actualParams = actualParams;
 	}
@@ -86,18 +86,6 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 		sb.append(" not met for actual request parameters: ");
 		sb.append(requestParameterMapToString(this.actualParams));
 		return sb.toString();
-	}
-
-	private static String requestParameterMapToString(Map<String, String[]> actualParams) {
-		StringBuilder result = new StringBuilder();
-		for (Iterator<Map.Entry<String, String[]>> it = actualParams.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<String, String[]> entry = it.next();
-			result.append(entry.getKey()).append('=').append(ObjectUtils.nullSafeToString(entry.getValue()));
-			if (it.hasNext()) {
-				result.append(", ");
-			}
-		}
-		return result.toString();
 	}
 
 	/**
@@ -124,6 +112,19 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 */
 	public final Map<String, String[]> getActualParams() {
 		return this.actualParams;
+	}
+
+
+	private static String requestParameterMapToString(Map<String, String[]> actualParams) {
+		StringBuilder result = new StringBuilder();
+		for (Iterator<Map.Entry<String, String[]>> it = actualParams.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String[]> entry = it.next();
+			result.append(entry.getKey()).append('=').append(ObjectUtils.nullSafeToString(entry.getValue()));
+			if (it.hasNext()) {
+				result.append(", ");
+			}
+		}
+		return result.toString();
 	}
 
 }

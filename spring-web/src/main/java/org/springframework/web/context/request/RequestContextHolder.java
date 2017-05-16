@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import org.springframework.util.ClassUtils;
  * <p>Use {@link RequestContextListener} or
  * {@link org.springframework.web.filter.RequestContextFilter} to expose
  * the current web request. Note that
- * {@link org.springframework.web.servlet.DispatcherServlet} and
- * {@link org.springframework.web.portlet.DispatcherPortlet} already
- * expose the current request by default.
+ * {@link org.springframework.web.servlet.DispatcherServlet}
+ * already exposes the current request by default.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -41,7 +40,6 @@ import org.springframework.util.ClassUtils;
  * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class RequestContextHolder  {
 
@@ -49,10 +47,10 @@ public abstract class RequestContextHolder  {
 			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 	private static final ThreadLocal<RequestAttributes> requestAttributesHolder =
-			new NamedThreadLocal<RequestAttributes>("Request attributes");
+			new NamedThreadLocal<>("Request attributes");
 
 	private static final ThreadLocal<RequestAttributes> inheritableRequestAttributesHolder =
-			new NamedInheritableThreadLocal<RequestAttributes>("Request context");
+			new NamedInheritableThreadLocal<>("Request context");
 
 
 	/**

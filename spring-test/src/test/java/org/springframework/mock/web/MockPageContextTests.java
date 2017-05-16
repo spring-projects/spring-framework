@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,25 @@ package org.springframework.mock.web;
 
 import javax.servlet.jsp.PageContext;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@code MockPageContext} class.
  *
  * @author Rick Evans
  */
-public final class MockPageContextTests extends TestCase {
+public class MockPageContextTests {
 
-	public void testSetAttributeWithNoScopeUsesPageScope() throws Exception {
-		String key = "foo";
-		String value = "bar";
+	private final String key = "foo";
 
-		MockPageContext ctx = new MockPageContext();
+	private final String value = "bar";
+
+	private final MockPageContext ctx = new MockPageContext();
+
+	@Test
+	public void setAttributeWithNoScopeUsesPageScope() throws Exception {
 		ctx.setAttribute(key, value);
 		assertEquals(value, ctx.getAttribute(key, PageContext.PAGE_SCOPE));
 		assertNull(ctx.getAttribute(key, PageContext.APPLICATION_SCOPE));
@@ -39,11 +44,8 @@ public final class MockPageContextTests extends TestCase {
 		assertNull(ctx.getAttribute(key, PageContext.SESSION_SCOPE));
 	}
 
-	public void testRemoveAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
-		String key = "foo";
-		String value = "bar";
-
-		MockPageContext ctx = new MockPageContext();
+	@Test
+	public void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
 		ctx.setAttribute(key, value, PageContext.APPLICATION_SCOPE);
 		ctx.removeAttribute(key);
 

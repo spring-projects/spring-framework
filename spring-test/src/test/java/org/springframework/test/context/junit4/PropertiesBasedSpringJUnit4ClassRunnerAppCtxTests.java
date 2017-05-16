@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 /**
  * <p>
  * JUnit 4 based test class, which verifies the expected functionality of
- * {@link SpringJUnit4ClassRunner} in conjunction with support for application contexts
+ * {@link SpringRunner} in conjunction with support for application contexts
  * loaded from Java {@link Properties} files. Specifically, the
  * {@link ContextConfiguration#loader() loader} attribute of {@code ContextConfiguration}
  * and the
@@ -54,7 +54,7 @@ import static org.junit.Assert.*;
  * @see GenericPropertiesContextLoader
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(loader = GenericPropertiesContextLoader.class)
 public class PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 

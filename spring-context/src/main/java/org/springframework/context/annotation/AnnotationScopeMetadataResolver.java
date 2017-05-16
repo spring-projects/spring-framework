@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @see ScopedProxyMode#NO
 	 */
 	public AnnotationScopeMetadataResolver() {
-		this(ScopedProxyMode.NO);
+		this.defaultProxyMode = ScopedProxyMode.NO;
 	}
 
 	/**
@@ -62,6 +62,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.defaultProxyMode = defaultProxyMode;
 	}
 
+
 	/**
 	 * Set the type of annotation that is checked for by this
 	 * {@code AnnotationScopeMetadataResolver}.
@@ -72,16 +73,18 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 
+
 	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
 		if (definition instanceof AnnotatedBeanDefinition) {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
-			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
+			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(
+					annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
-				metadata.setScopeName(attributes.getAliasedString("value", this.scopeAnnotationType, definition.getSource()));
+				metadata.setScopeName(attributes.getString("value"));
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
-				if ((proxyMode == null) || (proxyMode == ScopedProxyMode.DEFAULT)) {
+				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}
 				metadata.setScopedProxyMode(proxyMode);

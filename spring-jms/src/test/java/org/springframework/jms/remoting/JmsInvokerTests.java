@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -215,6 +216,15 @@ public class JmsInvokerTests {
 		}
 
 		@Override
+		public void setDeliveryDelay(long deliveryDelay) throws JMSException {
+		}
+
+		@Override
+		public long getDeliveryDelay() throws JMSException {
+			return 0;
+		}
+
+		@Override
 		public Destination getDestination() throws JMSException {
 			return null;
 		}
@@ -239,6 +249,22 @@ public class JmsInvokerTests {
 
 		@Override
 		public void send(Destination destination, Message message, int i, int i1, long l) throws JMSException {
+		}
+
+		@Override
+		public void send(Message message, CompletionListener completionListener) throws JMSException {
+		}
+
+		@Override
+		public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {
+		}
+
+		@Override
+		public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {
+		}
+
+		@Override
+		public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {
 		}
 	}
 
@@ -361,6 +387,25 @@ public class JmsInvokerTests {
 
 		@Override
 		public void setJMSPriority(int i) throws JMSException {
+		}
+
+		@Override
+		public long getJMSDeliveryTime() throws JMSException {
+			return 0;
+		}
+
+		@Override
+		public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
+		}
+
+		@Override
+		public <T> T getBody(Class<T> c) throws JMSException {
+			return null;
+		}
+
+		@Override
+		public boolean isBodyAssignableTo(Class c) throws JMSException {
+			return false;
 		}
 
 		@Override

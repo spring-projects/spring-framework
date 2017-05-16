@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private static final Set<ConvertiblePair> CONVERTIBLE_PAIRS;
 
 	static {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>(4);
+		Set<ConvertiblePair> convertiblePairs = new HashSet<>(4);
 		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, byte[].class));
 		convertiblePairs.add(new ConvertiblePair(byte[].class, ByteBuffer.class));
 		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, Object.class));

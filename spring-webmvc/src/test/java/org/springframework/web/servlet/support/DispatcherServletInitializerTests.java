@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockServletContext;
@@ -46,21 +45,15 @@ public class DispatcherServletInitializerTests {
 
 	private static final String SERVLET_MAPPING = "/myservlet";
 
-	private AbstractDispatcherServletInitializer initializer;
 
-	private MockServletContext servletContext;
+	private final MockServletContext servletContext = new MyMockServletContext();
 
-	private Map<String, Servlet> servlets;
+	private final AbstractDispatcherServletInitializer initializer = new MyDispatcherServletInitializer();
 
-	private Map<String, MockServletRegistration> registrations;
+	private final Map<String, Servlet> servlets = new LinkedHashMap<>(2);
 
-	@Before
-	public void setUp() throws Exception {
-		servletContext = new MyMockServletContext();
-		initializer = new MyDispatcherServletInitializer();
-		servlets = new LinkedHashMap<String, Servlet>(2);
-		registrations = new LinkedHashMap<String, MockServletRegistration>(2);
-	}
+	private final Map<String, MockServletRegistration> registrations = new LinkedHashMap<>(2);
+
 
 	@Test
 	public void register() throws ServletException {
@@ -70,6 +63,7 @@ public class DispatcherServletInitializerTests {
 		assertNotNull(servlets.get(SERVLET_NAME));
 
 		DispatcherServlet servlet = (DispatcherServlet) servlets.get(SERVLET_NAME);
+		assertEquals(MyDispatcherServlet.class, servlet.getClass());
 		WebApplicationContext servletContext = servlet.getWebApplicationContext();
 
 		assertTrue(servletContext.containsBean("bean"));
@@ -84,11 +78,11 @@ public class DispatcherServletInitializerTests {
 		assertEquals(ROLE_NAME, registration.getRunAsRole());
 	}
 
+
 	private class MyMockServletContext extends MockServletContext {
 
 		@Override
-		public ServletRegistration.Dynamic addServlet(String servletName,
-													  Servlet servlet) {
+		public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
 			servlets.put(servletName, servlet);
 			MockServletRegistration registration = new MockServletRegistration();
 			registrations.put(servletName, registration);
@@ -96,8 +90,7 @@ public class DispatcherServletInitializerTests {
 		}
 	}
 
-	private static class MyDispatcherServletInitializer
-			extends AbstractDispatcherServletInitializer {
+	private static class MyDispatcherServletInitializer extends AbstractDispatcherServletInitializer {
 
 		@Override
 		protected String getServletName() {
@@ -105,16 +98,20 @@ public class DispatcherServletInitializerTests {
 		}
 
 		@Override
+		protected DispatcherServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
+			return new MyDispatcherServlet(servletAppContext);
+		}
+
+		@Override
 		protected WebApplicationContext createServletApplicationContext() {
-			StaticWebApplicationContext servletContext =
-					new StaticWebApplicationContext();
+			StaticWebApplicationContext servletContext = new StaticWebApplicationContext();
 			servletContext.registerSingleton("bean", MyBean.class);
 			return servletContext;
 		}
 
 		@Override
 		protected String[] getServletMappings() {
-			return new String[]{"/myservlet"};
+			return new String[] { SERVLET_MAPPING };
 		}
 
 		@Override
@@ -129,7 +126,13 @@ public class DispatcherServletInitializerTests {
 	}
 
 	private static class MyBean {
+	}
 
+	@SuppressWarnings("serial")
+	private static class MyDispatcherServlet extends DispatcherServlet {
+		public MyDispatcherServlet(WebApplicationContext webApplicationContext) {
+			super(webApplicationContext);
+		}
 	}
 
 }

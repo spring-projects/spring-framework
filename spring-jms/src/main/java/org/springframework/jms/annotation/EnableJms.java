@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableJms
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public DefaultJmsListenerContainerFactory myJmsListenerContainerFactory() {
  *       DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.Import;
  *       factory.setConcurrency("5");
  *       return factory;
  *     }
+ *
  *     // other &#064;Bean definitions
  * }</pre>
  *
@@ -59,6 +61,7 @@ import org.springframework.context.annotation.Import;
  * package com.acme.foo;
  *
  * public class MyService {
+ *
  *     &#064;JmsListener(containerFactory = "myJmsListenerContainerFactory", destination="myQueue")
  *     public void process(String msg) {
  *         // process incoming message
@@ -78,6 +81,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableJms
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public MyService myService() {
  *         return new MyService();
@@ -104,7 +108,7 @@ import org.springframework.context.annotation.Import;
  * <p>Annotated methods can use flexible signature; in particular, it is possible to use
  * the {@link org.springframework.messaging.Message Message} abstraction and related annotations,
  * see {@link JmsListener} Javadoc for more details. For instance, the following would
- * inject the content of the message and a a custom "myCounter" JMS header:
+ * inject the content of the message and a custom "myCounter" JMS header:
  *
  * <pre class="code">
  * &#064;JmsListener(containerFactory = "myJmsListenerContainerFactory", destination="myQueue")
@@ -112,10 +116,9 @@ import org.springframework.context.annotation.Import;
  *     // process incoming message
  * }</pre>
  *
- * These features are abstracted by the {@link org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory
- * MessageHandlerMethodFactory} that is responsible to build the necessary invoker to process
- * the annotated method. By default, {@link org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
- * DefaultMessageHandlerMethodFactory} is used.
+ * These features are abstracted by the {@link org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory}
+ * that is responsible to build the necessary invoker to process the annotated method. By default,
+ * {@link org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory} is used.
  *
  * <p>When more control is desired, a {@code @Configuration} class may implement
  * {@link JmsListenerConfigurer}. This allows access to the underlying
@@ -127,6 +130,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableJms
  * public class AppConfig implements JmsListenerConfigurer {
+ *
  *     &#064;Override
  *     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
  *         registrar.setContainerFactory(myJmsListenerContainerFactory());
@@ -145,16 +149,18 @@ import org.springframework.context.annotation.Import;
  *
  * For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code <beans>
+ *
  *     <jms:annotation-driven container-factory="myJmsListenerContainerFactory"/>
  *
- *     <bean id="myJmsListenerContainerFactory"
- *           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+ *     <bean id="myJmsListenerContainerFactory" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
  *           // factory settings
  *     </bean>
  *
  *     <bean id="myService" class="com.acme.foo.MyService"/>
+ *
  * </beans>
  * }</pre>
  *
@@ -169,6 +175,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableJms
  * public class AppConfig implements JmsListenerConfigurer {
+ *
  *     &#064;Override
  *     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
  *         registrar.setEndpointRegistry(myJmsListenerEndpointRegistry());
@@ -197,6 +204,7 @@ import org.springframework.context.annotation.Import;
  * configuration:
  * <pre class="code">
  * {@code <beans>
+ *
  *     <jms:annotation-driven registry="myJmsListenerEndpointRegistry"
  *         handler-method-factory="myJmsHandlerMethodFactory"/&gt;
  *
@@ -211,6 +219,7 @@ import org.springframework.context.annotation.Import;
  *     </bean>
  *
  *     <bean id="myService" class="com.acme.foo.MyService"/>
+ *
  * </beans>
  * }</pre>
  *
@@ -222,6 +231,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableJms
  * public class AppConfig implements JmsListenerConfigurer {
+ *
  *     &#064;Override
  *     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
  *         SimpleJmsListenerEndpoint myEndpoint = new SimpleJmsListenerEndpoint();

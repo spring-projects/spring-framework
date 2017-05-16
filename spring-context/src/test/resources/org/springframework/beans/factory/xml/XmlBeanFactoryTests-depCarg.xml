@@ -4,8 +4,8 @@
 <beans>
 
 	<bean id="dependingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DependingBean">
-		<constructor-arg index="0"><ref local="preparingBean1"/></constructor-arg>
-		<constructor-arg index="1"><ref local="preparingBean2"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="preparingBean1"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="preparingBean2"/></constructor-arg>
 	</bean>
 
 	<bean id="preparingBean1" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$PreparingBean1"/>

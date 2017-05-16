@@ -11,7 +11,7 @@
 			</bean>
 		</property>
   </bean>
-	
+
 	<bean id="otb" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="age"><value>98</value></property>
 		<property name="spouse">

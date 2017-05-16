@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 package org.springframework.web.servlet.view;
 
 /**
- * Abstract base class for template view resolvers,
- * in particular for Velocity and FreeMarker views.
+ * Abstract base class for template view resolvers, in particular for FreeMarker views.
  *
- * <p>Provides a convenient way to specify {@link AbstractTemplateView}'s
- * exposure flags for request attributes, session attributes,
- * and Spring's macro helpers.
+ * <p>Provides a convenient way to specify {@link AbstractTemplateView}'s exposure
+ * flags for request attributes, session attributes, and Spring's macro helpers.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see AbstractTemplateView
- * @see org.springframework.web.servlet.view.velocity.VelocityViewResolver
  * @see org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
  */
 public class AbstractTemplateViewResolver extends UrlBasedViewResolver {

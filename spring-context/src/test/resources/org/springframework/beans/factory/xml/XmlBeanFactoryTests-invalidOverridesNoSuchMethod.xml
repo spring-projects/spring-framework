@@ -5,20 +5,20 @@
 
 	<bean id="constructorOverrides" class="org.springframework.beans.factory.xml.ConstructorInjectedOverrides"
 		autowire="autodetect">
-		
+	
 		<!-- No such lookup method -->
 		<lookup-method name="bogusMethod" bean="dummyBo" />
-	
+
 	</bean>
 
 	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="singleton">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 	</bean>
-	
+
 	<bean id="factoryMethods"  class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" scope="prototype">
-		<constructor-arg index="0"><ref local="jenny"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="jenny"/></constructor-arg>
 	</bean>
 
 </beans>

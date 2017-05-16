@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	public void setJobDetails(JobDetail... jobDetails) {
 		// Use modifiable ArrayList here, to allow for further adding of
 		// JobDetail objects during autodetection of JobDetail-aware Triggers.
-		this.jobDetails = new ArrayList<JobDetail>(Arrays.asList(jobDetails));
+		this.jobDetails = new ArrayList<>(Arrays.asList(jobDetails));
 	}
 
 	/**
@@ -218,7 +218,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			}
 			else {
 				// Create empty list for easier checks when registering triggers.
-				this.jobDetails = new LinkedList<JobDetail>();
+				this.jobDetails = new LinkedList<>();
 			}
 
 			// Register Calendars.

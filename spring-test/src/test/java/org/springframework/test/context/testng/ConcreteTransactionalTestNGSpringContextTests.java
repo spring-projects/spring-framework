@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@BeforeClass
-	public void beforeClass() {
+	void beforeClass() {
 		numSetUpCalls = 0;
 		numSetUpCallsInTransaction = 0;
 		numTearDownCalls = 0;
@@ -125,7 +125,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@AfterClass
-	public void afterClass() {
+	void afterClass() {
 		assertEquals(numSetUpCalls, NUM_TESTS, "number of calls to setUp().");
 		assertEquals(numSetUpCallsInTransaction, NUM_TX_TESTS, "number of calls to setUp() within a transaction.");
 		assertEquals(numTearDownCalls, NUM_TESTS, "number of calls to tearDown().");
@@ -134,7 +134,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyApplicationContextSet() {
+	void verifyApplicationContextSet() {
 		assertInTransaction(false);
 		assertNotNull(super.applicationContext,
 			"The application context should have been set due to ApplicationContextAware semantics.");
@@ -144,7 +144,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyBeanInitialized() {
+	void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue(beanInitialized,
 			"This test instance should have been initialized due to InitializingBean semantics.");
@@ -152,7 +152,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyBeanNameSet() {
+	void verifyBeanNameSet() {
 		assertInTransaction(false);
 		assertEquals(beanName, getClass().getName(),
 			"The bean name of this test instance should have been set due to BeanNameAware semantics.");
@@ -160,7 +160,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyAnnotationAutowiredFields() {
+	void verifyAnnotationAutowiredFields() {
 		assertInTransaction(false);
 		assertNull(nonrequiredLong, "The nonrequiredLong field should NOT have been autowired.");
 		assertNotNull(pet, "The pet field should have been autowired.");
@@ -169,7 +169,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyAnnotationAutowiredMethods() {
+	void verifyAnnotationAutowiredMethods() {
 		assertInTransaction(false);
 		assertNotNull(employee, "The setEmployee() method should have been autowired.");
 		assertEquals(employee.getName(), "John Smith", "employee's name.");
@@ -177,26 +177,26 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyResourceAnnotationInjectedFields() {
+	void verifyResourceAnnotationInjectedFields() {
 		assertInTransaction(false);
 		assertEquals(foo, "Foo", "The foo field should have been injected via @Resource.");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyResourceAnnotationInjectedMethods() {
+	void verifyResourceAnnotationInjectedMethods() {
 		assertInTransaction(false);
 		assertEquals(bar, "Bar", "The setBar() method should have been injected via @Resource.");
 	}
 
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		assertNumRowsInPersonTable(1, "before a transactional test method");
 		assertAddPerson(YODA);
 	}
 
 	@BeforeMethod
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		numSetUpCalls++;
 		if (inTransaction()) {
 			numSetUpCallsInTransaction++;
@@ -205,7 +205,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	public void modifyTestDataWithinTransaction() {
+	void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
@@ -213,7 +213,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@AfterMethod
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		numTearDownCalls++;
 		if (inTransaction()) {
 			numTearDownCallsInTransaction++;
@@ -222,7 +222,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
+	void afterTransaction() {
 		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
 		assertNumRowsInPersonTable(1, "after a transactional test method");
 	}

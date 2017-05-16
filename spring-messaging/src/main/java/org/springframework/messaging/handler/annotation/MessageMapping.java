@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,12 @@ import org.springframework.messaging.Message;
  * HTTP handshake that initiates WebSocket sessions.</li>
  * </ul>
  *
- * <p>By default the return value is wrapped as a message and sent to the destination
- * specified with an {@link SendTo @SendTo} method-level annotation.
+ * <p>A return value will get wrapped as a message and sent to a default response
+ * destination or to a custom destination specified with an {@link SendTo @SendTo}
+ * method-level annotation. Such a response may also be provided asynchronously
+ * via a {@link org.springframework.util.concurrent.ListenableFuture} return type
+ * or a corresponding JDK 8 {@link java.util.concurrent.CompletableFuture} /
+ * {@link java.util.concurrent.CompletionStage} handle.
  *
  * <h3>STOMP over WebSocket</h3>
  * <p>An {@link SendTo @SendTo} annotation is not strictly required &mdash; by default
@@ -76,6 +80,11 @@ import org.springframework.messaging.Message;
  * {@link org.springframework.messaging.simp.annotation.SendToUser} annotation to
  * have the message directed to a specific user if connected. The return value is
  * converted with a {@link org.springframework.messaging.converter.MessageConverter}.
+ *
+ * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * make sure to consistently put <i>all</i> your mapping annotations - such as
+ * {@code @MessageMapping} and {@code @SubscribeMapping} - on
+ * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

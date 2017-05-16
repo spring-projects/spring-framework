@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
 	void setPropertyValue(String propertyName, Object value) throws BeansException;
 
@@ -130,7 +130,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
 	void setPropertyValue(PropertyValue pv) throws BeansException;
 
@@ -144,7 +144,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */
@@ -164,7 +164,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
@@ -185,7 +185,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
@@ -208,7 +208,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */

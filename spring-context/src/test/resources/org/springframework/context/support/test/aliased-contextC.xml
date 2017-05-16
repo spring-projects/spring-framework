@@ -11,7 +11,7 @@
 		<!--<property name="assembler"><ref bean="assemblerOne"/></property>-->
 		<property name="assembler"><ref bean="myTarget"/></property>
 	</bean>
-	
+
 	<alias name="${targetName}" alias="myTarget"/>
 
 	<alias name="${realLogicName}" alias="${logicName}"/>

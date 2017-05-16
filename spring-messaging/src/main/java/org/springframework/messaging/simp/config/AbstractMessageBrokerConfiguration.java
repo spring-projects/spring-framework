@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
@@ -85,7 +86,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present= ClassUtils.isPresent(
+	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
@@ -142,7 +143,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize the message channel for inbound messages
+	 * A hook for subclasses to customize the message channel for inbound messages
 	 * from WebSocket clients.
 	 */
 	protected void configureClientInboundChannel(ChannelRegistration registration) {
@@ -175,7 +176,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize the message channel for messages from
+	 * A hook for subclasses to customize the message channel for messages from
 	 * the application or message broker to WebSocket clients.
 	 */
 	protected void configureClientOutboundChannel(ChannelRegistration registration) {
@@ -223,7 +224,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize message broker configuration through the
+	 * A hook for subclasses to customize message broker configuration through the
 	 * provided {@link MessageBrokerRegistry} instance.
 	 */
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -244,15 +245,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
-		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 		addArgumentResolvers(argumentResolvers);
 		handler.setCustomArgumentResolvers(argumentResolvers);
 
-		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 		addReturnValueHandlers(returnValueHandlers);
 		handler.setCustomReturnValueHandlers(returnValueHandlers);
 
-		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
+		PathMatcher pathMatcher = getBrokerRegistry().getPathMatcher();
 		if (pathMatcher != null) {
 			handler.setPathMatcher(pathMatcher);
 		}
@@ -260,7 +261,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * Protected method for plugging in a custom sub-class of
+	 * Protected method for plugging in a custom subclass of
 	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
 	 * SimpAnnotationMethodMessageHandler}.
 	 * @since 4.2
@@ -288,7 +289,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (handler == null) {
 			return new NoOpBrokerMessageHandler();
 		}
-		Map<String, MessageHandler> subscriptions = new HashMap<String, MessageHandler>(1);
+		Map<String, MessageHandler> subscriptions = new HashMap<>(1);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination != null) {
 			subscriptions.put(destination, userDestinationMessageHandler());
@@ -315,13 +316,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
 			return new NoOpMessageHandler();
 		}
-		return new UserRegistryMessageHandler(userRegistry(), brokerMessagingTemplate(),
-				getBrokerRegistry().getUserRegistryBroadcast(), messageBrokerTaskScheduler());
+		SimpUserRegistry userRegistry = userRegistry();
+		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
+		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
+				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
+				messageBrokerTaskScheduler());
 	}
 
 	// Expose alias for 4.1 compatibility
-
-	@Bean(name={"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
+	@Bean(name = {"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
 	public ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("MessageBroker-");
@@ -343,7 +346,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public CompositeMessageConverter brokerMessageConverter() {
-		List<MessageConverter> converters = new ArrayList<MessageConverter>();
+		List<MessageConverter> converters = new ArrayList<>();
 		boolean registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
@@ -380,6 +383,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
+		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
 		return resolver;
 	}
 
@@ -393,18 +397,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Create the user registry that provides access to the local users.
 	 */
 	protected abstract SimpUserRegistry createLocalUserRegistry();
-
-	/**
-	 * As of 4.2, UserSessionRegistry is deprecated in favor of SimpUserRegistry
-	 * exposing information about all connected users. The MultiServerUserRegistry
-	 * implementation in combination with UserRegistryMessageHandler can be used
-	 * to share user registries across multiple servers.
-	 */
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	protected org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry() {
-		return null;
-	}
 
 	/**
 	 * Return a {@link org.springframework.validation.Validator}s instance for validating
@@ -434,7 +426,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				catch (Throwable ex) {
 					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new Validator() {
@@ -465,8 +457,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		@Override
 		public void handleMessage(Message<?> message) {
 		}
-
 	}
+
 
 	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
 

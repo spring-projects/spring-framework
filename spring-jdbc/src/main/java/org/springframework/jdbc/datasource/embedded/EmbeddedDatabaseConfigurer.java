@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,8 @@ import javax.sql.DataSource;
 
 /**
  * {@code EmbeddedDatabaseConfigurer} encapsulates the configuration required to
- * create, connect to, and shutdown a specific type of embedded database such as
- * HSQL or H2.
- * <p>Create an implementation for each database type you wish to support; for
- * example HSQL, H2, or some other type.
+ * create, connect to, and shut down a specific type of embedded database such as
+ * HSQL, H2, or Derby.
  *
  * @author Keith Donald
  * @author Sam Brannen
@@ -40,9 +38,9 @@ public interface EmbeddedDatabaseConfigurer {
 	void configureConnectionProperties(ConnectionProperties properties, String databaseName);
 
 	/**
-	 * Shutdown the embedded database instance that backs the supplied {@link DataSource}.
+	 * Shut down the embedded database instance that backs the supplied {@link DataSource}.
 	 * @param dataSource the data source
-	 * @param databaseName the name of the database being shutdown
+	 * @param databaseName the name of the database being shut down
 	 */
 	void shutdown(DataSource dataSource, String databaseName);
 

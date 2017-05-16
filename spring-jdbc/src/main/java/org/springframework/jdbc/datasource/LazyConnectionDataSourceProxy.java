@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.core.Constants;
  * without paying a performance penalty if no actual data access happens.
  *
  * <p>This DataSource proxy gives you behavior analogous to JTA and a
- * transactional JNDI DataSource (as provided by the J2EE server), even
+ * transactional JNDI DataSource (as provided by the Java EE server), even
  * with a local transaction strategy like DataSourceTransactionManager or
  * HibernateTransactionManager. It does not add value with Spring's
  * JtaTransactionManager as transaction strategy.
@@ -68,11 +68,8 @@ import org.springframework.core.Constants;
  *
  * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections
  * (which implement the {@link ConnectionProxy} interface) in order to handle
- * lazy fetching of an actual JDBC Connection. Therefore, the returned Connections
- * cannot be cast to a native JDBC Connection type such as OracleConnection or
- * to a connection pool implementation type. Use a corresponding
- * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
- * or JDBC 4's {@link Connection#unwrap} to retrieve the native JDBC Connection.
+ * lazy fetching of an actual JDBC Connection. Use {@link Connection#unwrap}
+ * to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
  * @since 1.1.4

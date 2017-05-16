@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.apache.tiles.preparer.factory.NoSuchPreparerException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Tiles3 {@link org.apache.tiles.preparer.PreparerFactory} implementation
+ * Tiles {@link org.apache.tiles.preparer.PreparerFactory} implementation
  * that expects preparer class names and builds preparer instances for those,
  * creating them through the Spring ApplicationContext in order to apply
  * Spring container callbacks and configured Spring BeanPostProcessors.
@@ -39,7 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 
 	/** Cache of shared ViewPreparer instances: bean name -> bean instance */
-	private final Map<String, ViewPreparer> sharedPreparers = new ConcurrentHashMap<String, ViewPreparer>(16);
+	private final Map<String, ViewPreparer> sharedPreparers = new ConcurrentHashMap<>(16);
 
 
 	@Override

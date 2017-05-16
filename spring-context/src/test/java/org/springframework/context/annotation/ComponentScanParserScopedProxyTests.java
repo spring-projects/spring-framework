@@ -42,11 +42,13 @@ public class ComponentScanParserScopedProxyTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void testDefaultScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
@@ -58,6 +60,7 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
@@ -69,6 +72,7 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		// should cast to the interface
 		FooService bean = (FooService) context.getBean("scopedProxyTestBean");
 		// should be dynamic proxy
@@ -86,6 +90,7 @@ public class ComponentScanParserScopedProxyTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
+
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
 		assertTrue(AopUtils.isCglibProxy(bean));
@@ -103,6 +108,7 @@ public class ComponentScanParserScopedProxyTests {
 		exception.expect(BeanDefinitionParsingException.class);
 		exception.expectMessage(containsString("Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag"));
 		exception.expectMessage(containsString("Offending resource: class path resource [org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml]"));
+
 		new ClassPathXmlApplicationContext("org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml");
 	}
 

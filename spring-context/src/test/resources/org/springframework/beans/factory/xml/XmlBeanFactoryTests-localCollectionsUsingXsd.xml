@@ -5,8 +5,8 @@
 	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
-	<!-- just ensures that one can use <ref local=""/> to refer to the various <util:collections/> types -->
-	
+	<!-- just ensures that one can use <ref bean=""/> to refer to the various <util:collections/> types -->
+
 	<util:map id="map"/>
 	<util:list id="list"/>
 	<util:set id="set"/>
@@ -16,20 +16,20 @@
 		<property name="someMap">
 			<map>
 				<entry key="map">
-					<ref local="map"/>
+					<ref bean="map"/>
 				</entry>
 			</map>
 		</property>
 		<property name="someList">
 			<list>
-				<ref local="list"/>
+				<ref bean="list"/>
 			</list>
 		</property>
 		<property name="someProperties">
-			<ref local="properties"/>
+			<ref bean="properties"/>
 		</property>
 		<property name="someSet">
-			<ref local="set"/>
+			<ref bean="set"/>
 		</property>
 	</bean>
 

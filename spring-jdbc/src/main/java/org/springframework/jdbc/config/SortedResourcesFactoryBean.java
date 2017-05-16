@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,9 +72,9 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 
 	@Override
 	protected Resource[] createInstance() throws Exception {
-		List<Resource> scripts = new ArrayList<Resource>();
+		List<Resource> scripts = new ArrayList<>();
 		for (String location : this.locations) {
-			List<Resource> resources = new ArrayList<Resource>(
+			List<Resource> resources = new ArrayList<>(
 					Arrays.asList(this.resourcePatternResolver.getResources(location)));
 			Collections.sort(resources, new Comparator<Resource>() {
 				@Override

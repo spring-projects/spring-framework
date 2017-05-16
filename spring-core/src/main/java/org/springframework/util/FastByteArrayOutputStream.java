@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * A speedy alternative to {@link java.io.ByteArrayOutputStream}.
+ * A speedy alternative to {@link java.io.ByteArrayOutputStream}. Note that
+ * this variant does <i>not</i> extend {@code ByteArrayOutputStream}, unlike
+ * its sibling {@link ResizableByteArrayOutputStream}.
  *
  * <p>Unlike {@link java.io.ByteArrayOutputStream}, this implementation is backed
  * by a {@link java.util.LinkedList} of {@code byte[]} instead of 1 constantly
@@ -35,20 +37,23 @@ import java.util.LinkedList;
  * with the {@link #writeTo(OutputStream)} method.
  *
  * @author Craig Andrews
+ * @author Juergen Hoeller
  * @since 4.2
+ * @see #resize
+ * @see ResizableByteArrayOutputStream
  */
-public final class FastByteArrayOutputStream extends OutputStream {
+public class FastByteArrayOutputStream extends OutputStream {
 
 	private static final int DEFAULT_BLOCK_SIZE = 256;
 
 
 	// The buffers used to store the content bytes
-	private final LinkedList<byte[]> buffers = new LinkedList<byte[]>();
+	private final LinkedList<byte[]> buffers = new LinkedList<>();
 
 	// The size, in bytes, to use when allocating the first byte[]
 	private final int initialBlockSize;
 
-	// The size, in bytes, to use when allocating the next next byte[]
+	// The size, in bytes, to use when allocating the next byte[]
 	private int nextBlockSize = 0;
 
 	// The number of bytes in previous buffers.
@@ -258,7 +263,7 @@ public final class FastByteArrayOutputStream extends OutputStream {
 	 */
 	public void resize(int targetCapacity) {
 		Assert.isTrue(targetCapacity >= size(), "New capacity must not be smaller than current size");
-		if (buffers.peekFirst() == null) {
+		if (this.buffers.peekFirst() == null) {
 			this.nextBlockSize = targetCapacity - size();
 		}
 		else if (size() == targetCapacity && this.buffers.getFirst().length == targetCapacity) {
@@ -356,7 +361,7 @@ public final class FastByteArrayOutputStream extends OutputStream {
 		@Override
 		public int read() {
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return -1;
 			}
 			else {
@@ -407,8 +412,8 @@ public final class FastByteArrayOutputStream extends OutputStream {
 			}
 			else {
 				if (this.currentBuffer == null) {
-					// this stream doesn't have any data in it
-					return 0;
+					// This stream doesn't have any data in it...
+					return -1;
 				}
 				else {
 					if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
@@ -416,7 +421,8 @@ public final class FastByteArrayOutputStream extends OutputStream {
 						System.arraycopy(this.currentBuffer, this.nextIndexInCurrentBuffer, b, off, bytesToCopy);
 						this.totalBytesRead += bytesToCopy;
 						this.nextIndexInCurrentBuffer += bytesToCopy;
-						return (bytesToCopy + read(b, off + bytesToCopy, len - bytesToCopy));
+						int remaining = read(b, off + bytesToCopy, len - bytesToCopy);
+						return bytesToCopy + Math.max(remaining, 0);
 					}
 					else {
 						if (this.buffersIterator.hasNext()) {
@@ -451,7 +457,7 @@ public final class FastByteArrayOutputStream extends OutputStream {
 			}
 			int len = (int) n;
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return 0;
 			}
 			else {
@@ -501,7 +507,7 @@ public final class FastByteArrayOutputStream extends OutputStream {
 		 */
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return;
 			}
 			else if (len == 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,7 +298,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	@Override
 	public void send(SimpleMailMessage... simpleMessages) throws MailException {
-		List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(simpleMessages.length);
+		List<MimeMessage> mimeMessages = new ArrayList<>(simpleMessages.length);
 		for (SimpleMailMessage simpleMessage : simpleMessages) {
 			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
 			simpleMessage.copyTo(message);
@@ -353,7 +353,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	@Override
 	public void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException {
 		try {
-			List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(mimeMessagePreparators.length);
+			List<MimeMessage> mimeMessages = new ArrayList<>(mimeMessagePreparators.length);
 			for (MimeMessagePreparator preparator : mimeMessagePreparators) {
 				MimeMessage mimeMessage = createMimeMessage();
 				preparator.prepare(mimeMessage);
@@ -400,7 +400,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * in case of failure when sending a message
 	 */
 	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
-		Map<Object, Exception> failedMessages = new LinkedHashMap<Object, Exception>();
+		Map<Object, Exception> failedMessages = new LinkedHashMap<>();
 		Transport transport = null;
 
 		try {

@@ -32,7 +32,7 @@ import org.springframework.util.StopWatch;
  * @author Chris Beams
  * @since 2.0
  */
-public final class IntroductionBenchmarkTests {
+public class IntroductionBenchmarkTests {
 
 	private static final int EXPECTED_COMPARE = 13;
 

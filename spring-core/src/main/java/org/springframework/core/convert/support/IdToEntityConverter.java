@@ -88,7 +88,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 		}
 		for (Method method : methods) {
 			if (Modifier.isStatic(method.getModifiers()) && method.getName().equals(finderMethod) &&
-					method.getParameterTypes().length == 1 && method.getReturnType().equals(entityClass) &&
+					method.getParameterCount() == 1 && method.getReturnType().equals(entityClass) &&
 					(localOnlyFiltered || method.getDeclaringClass().equals(entityClass))) {
 				return method;
 			}

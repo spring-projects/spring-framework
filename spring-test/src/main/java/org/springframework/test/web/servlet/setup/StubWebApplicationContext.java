@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -43,20 +45,22 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
- * A mock WebApplicationContext that accepts registrations of object instances.
+ * A stub WebApplicationContext that accepts registrations of object instances.
  *
- * <p>As registered object instances are instantiated and initialized
- * externally, there is no wiring, bean initialization, lifecycle events, as
- * well as no pre-processing and post-processing hooks typically associated with
- * beans managed by an {@link ApplicationContext}. Just a simple lookup into a
+ * <p>As registered object instances are instantiated and initialized externally,
+ * there is no wiring, bean initialization, lifecycle events, as well as no
+ * pre-processing and post-processing hooks typically associated with beans
+ * managed by an {@link ApplicationContext}. Just a simple lookup into a
  * {@link StaticListableBeanFactory}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 class StubWebApplicationContext implements WebApplicationContext {
@@ -78,9 +82,6 @@ class StubWebApplicationContext implements WebApplicationContext {
 	private final ResourcePatternResolver resourcePatternResolver;
 
 
-	/**
-	 * Class constructor.
-	 */
 	public StubWebApplicationContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		this.resourcePatternResolver = new ServletContextResourcePatternResolver(servletContext);
@@ -322,7 +323,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return null;
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	@Override
@@ -366,65 +367,64 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public <T> T createBean(Class<T> beanClass) {
-			throw new UnsupportedOperationException();
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
 		public void autowireBean(Object existingBean) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object configureBean(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
-			throw new UnsupportedOperationException();
+		public <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException {
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) {
+			throw new UnsupportedOperationException("Dependency resolution not supported");
+		}
+
+		@Override
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public void destroyBean(Object existingBean) {
-			throw new UnsupportedOperationException();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -69,23 +70,22 @@ public class SpelCompiler implements Opcodes {
 
 	private static final Log logger = LogFactory.getLog(SpelCompiler.class);
 
+	private final static int CLASSES_DEFINED_LIMIT = 100;
+
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
 	private static final Map<ClassLoader, SpelCompiler> compilers =
-			new ConcurrentReferenceHashMap<ClassLoader, SpelCompiler>();
-
+			new ConcurrentReferenceHashMap<>();
 
 	// The child ClassLoader used to load the compiled expression classes
-	private final ChildClassLoader ccl;
+	private ChildClassLoader ccl;
 
 	// Counter suffix for generated classes within this SpelCompiler instance
 	private final AtomicInteger suffixId = new AtomicInteger(1);
 
-
 	private SpelCompiler(ClassLoader classloader) {
 		this.ccl = new ChildClassLoader(classloader);
 	}
-
 
 	/**
 	 * Attempt compilation of the supplied expression. A check is
@@ -105,7 +105,7 @@ public class SpelCompiler implements Opcodes {
 			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
 			if (clazz != null) {
 				try {
-					return clazz.newInstance();
+					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
@@ -130,11 +130,10 @@ public class SpelCompiler implements Opcodes {
 	 * @return the expression call, or {@code null} if the decision was to opt out of
 	 * compilation during code generation
 	 */
-	@SuppressWarnings("unchecked")
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String clazzName = "spel/Ex" + getNextSuffix();
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS|ClassWriter.COMPUTE_FRAMES);
+		ClassWriter cw = new ExpressionClassWriter();
 		cw.visit(V1_5, ACC_PUBLIC, clazzName, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
@@ -182,9 +181,26 @@ public class SpelCompiler implements Opcodes {
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
-		return (Class<? extends CompiledExpression>) this.ccl.defineClass(clazzName.replaceAll("/", "."), data);
+		return loadClass(clazzName.replaceAll("/", "."), data);
 	}
 
+	/**
+	 * Load a compiled expression class. Makes sure the classloaders aren't used too much
+	 * because they anchor compiled classes in memory and prevent GC.  If you have expressions
+	 * continually recompiling over time then by replacing the classloader periodically
+	 * at least some of the older variants can be garbage collected.
+	 * 
+	 * @param name name of the class
+	 * @param bytes bytecode for the class
+	 * @return the Class object for the compiled expression
+	 */
+	@SuppressWarnings("unchecked")
+	private Class<? extends CompiledExpression> loadClass(String name, byte[] bytes) {
+		if (this.ccl.getClassesDefinedCount() > CLASSES_DEFINED_LIMIT) {
+			this.ccl = new ChildClassLoader(this.ccl.getParent());
+		}
+		return (Class<? extends CompiledExpression>) this.ccl.defineClass(name, bytes);
+	}
 
 	/**
 	 * Factory method for compiler instances. The returned SpelCompiler will
@@ -256,24 +272,45 @@ public class SpelCompiler implements Opcodes {
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException(
-					"Unexpected problem dumping class " + nameToUse + " into " + dumpLocation, ex);
+					"Unexpected problem dumping class '" + nameToUse + "' into " + dumpLocation, ex);
 		}
 	}
 
 
 	/**
-	 * A ChildClassLoader will load the generated compiled expression classes
+	 * A ChildClassLoader will load the generated compiled expression classes.
 	 */
-	public static class ChildClassLoader extends URLClassLoader {
+	private static class ChildClassLoader extends URLClassLoader {
 
 		private static final URL[] NO_URLS = new URL[0];
 
-		public ChildClassLoader(ClassLoader classloader) {
-			super(NO_URLS, classloader);
+		private int classesDefinedCount = 0;
+
+		public ChildClassLoader(ClassLoader classLoader) {
+			super(NO_URLS, classLoader);
+		}
+
+		int getClassesDefinedCount() {
+			return classesDefinedCount;
 		}
 
 		public Class<?> defineClass(String name, byte[] bytes) {
-			return super.defineClass(name, bytes, 0, bytes.length);
+			Class<?> clazz = super.defineClass(name, bytes, 0, bytes.length);
+			classesDefinedCount++;
+			return clazz;
+		}
+	}
+
+
+	private class ExpressionClassWriter extends ClassWriter {
+
+		public ExpressionClassWriter() {
+			super(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		}
+
+		@Override
+		protected ClassLoader getClassLoader() {
+			return ccl;
 		}
 	}
 

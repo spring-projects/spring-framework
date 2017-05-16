@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
@@ -65,6 +66,9 @@ public class ViewControllerRegistration {
 		this.controller.setViewName(viewName);
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.controller.setApplicationContext(applicationContext);
+	}
 
 	protected String getUrlPath() {
 		return this.urlPath;

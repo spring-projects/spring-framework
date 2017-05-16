@@ -64,7 +64,7 @@ public @interface SessionAttributes {
 	/**
 	 * Alias for {@link #names}.
 	 */
-	@AliasFor(attribute = "names")
+	@AliasFor("names")
 	String[] value() default {};
 
 	/**
@@ -76,7 +76,7 @@ public @interface SessionAttributes {
 	 * names but rather operate on the model only.
 	 * @since 4.2
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] names() default {};
 
 	/**

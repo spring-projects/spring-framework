@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,15 +293,14 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	private class SpringTilesContainerFactory extends BasicTilesContainerFactory {
 
 		@Override
-		public TilesContainer createContainer(ApplicationContext context) {
-			TilesContainer container = super.createContainer(context);
-			return (useMutableTilesContainer ? new CachingTilesContainer(container) : container);
+		protected TilesContainer createDecoratedContainer(TilesContainer originalContainer, ApplicationContext context) {
+			return (useMutableTilesContainer ? new CachingTilesContainer(originalContainer) : originalContainer);
 		}
 
 		@Override
 		protected List<ApplicationResource> getSources(ApplicationContext applicationContext) {
 			if (definitions != null) {
-				List<ApplicationResource> result = new LinkedList<ApplicationResource>();
+				List<ApplicationResource> result = new LinkedList<>();
 				for (String definition : definitions) {
 					Collection<ApplicationResource> resources = applicationContext.getResources(definition);
 					if (resources != null) {
@@ -337,7 +336,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				LocaleResolver resolver) {
 
 			if (definitionsFactoryClass != null) {
-				DefinitionsFactory factory = BeanUtils.instantiate(definitionsFactoryClass);
+				DefinitionsFactory factory = BeanUtils.instantiateClass(definitionsFactoryClass);
 				if (factory instanceof ApplicationContextAware) {
 					((ApplicationContextAware) factory).setApplicationContext(applicationContext);
 				}
@@ -358,7 +357,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		@Override
 		protected PreparerFactory createPreparerFactory(ApplicationContext context) {
 			if (preparerFactoryClass != null) {
-				return BeanUtils.instantiate(preparerFactoryClass);
+				return BeanUtils.instantiateClass(preparerFactoryClass);
 			}
 			else {
 				return super.createPreparerFactory(context);

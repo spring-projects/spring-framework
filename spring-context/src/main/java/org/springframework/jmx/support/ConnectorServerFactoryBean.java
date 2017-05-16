@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.springframework.util.CollectionUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
- * @see    FactoryBean
  * @see JMXConnectorServer
  * @see MBeanServer
  */
@@ -62,7 +61,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
-	private Map<String, Object> environment = new HashMap<String, Object>();
+	private Map<String, Object> environment = new HashMap<>();
 
 	private MBeanServerForwarder forwarder;
 
@@ -138,7 +137,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * the {@code JMXConnectorServer} will be started in a separate thread.
 	 * If the {@code daemon} flag is set to {@code true}, that thread will be
 	 * started as a daemon thread.
-	 * @throws JMException if a problem occured when registering the connector server
+	 * @throws JMException if a problem occurred when registering the connector server
 	 * with the {@code MBeanServer}
 	 * @throws IOException if there is a problem starting the connector server
 	 */

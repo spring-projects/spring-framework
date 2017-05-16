@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public class GenericApplicationContextTests {
 		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class));
 		ac.refresh();
 
+		assertEquals("", ac.getBean("testBean"));
 		assertSame(ac.getBean("testBean"), ac.getBean(String.class));
 		assertSame(ac.getBean("testBean"), ac.getBean(CharSequence.class));
 
@@ -53,6 +54,31 @@ public class GenericApplicationContextTests {
 		catch (NoUniqueBeanDefinitionException ex) {
 			// expected
 		}
+	}
+
+	@Test
+	public void withSingletonSupplier() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class, ac::toString));
+		ac.refresh();
+
+		assertSame(ac.getBean("testBean"), ac.getBean("testBean"));
+		assertSame(ac.getBean("testBean"), ac.getBean(String.class));
+		assertSame(ac.getBean("testBean"), ac.getBean(CharSequence.class));
+		assertEquals(ac.toString(), ac.getBean("testBean"));
+	}
+
+	@Test
+	public void withScopedSupplier() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		ac.registerBeanDefinition("testBean",
+				new RootBeanDefinition(String.class, RootBeanDefinition.SCOPE_PROTOTYPE, ac::toString));
+		ac.refresh();
+
+		assertNotSame(ac.getBean("testBean"), ac.getBean("testBean"));
+		assertEquals(ac.getBean("testBean"), ac.getBean(String.class));
+		assertEquals(ac.getBean("testBean"), ac.getBean(CharSequence.class));
+		assertEquals(ac.toString(), ac.getBean("testBean"));
 	}
 
 	@Test

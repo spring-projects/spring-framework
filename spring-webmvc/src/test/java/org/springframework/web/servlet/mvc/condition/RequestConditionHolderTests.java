@@ -51,7 +51,7 @@ public class RequestConditionHolderTests {
 		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
-	@Test(expected=ClassCastException.class)
+	@Test(expected = ClassCastException.class)
 	public void combineIncompatible() {
 		RequestConditionHolder params = new RequestConditionHolder(new ParamsRequestCondition("name"));
 		RequestConditionHolder headers = new RequestConditionHolder(new HeadersRequestCondition("name"));
@@ -110,7 +110,7 @@ public class RequestConditionHolderTests {
 		assertEquals(1, empty.compareTo(notEmpty, request));
 	}
 
-	@Test(expected=ClassCastException.class)
+	@Test(expected = ClassCastException.class)
 	public void compareIncompatible() {
 		RequestConditionHolder params = new RequestConditionHolder(new ParamsRequestCondition("name"));
 		RequestConditionHolder headers = new RequestConditionHolder(new HeadersRequestCondition("name"));

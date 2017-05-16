@@ -32,8 +32,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * custom nested tags.
  *
  * <p>The parser will call {@link #parse} when it encounters a custom tag
- * directly under the {@code &lt;beans&gt;} tags and {@link #decorate} when
- * it encounters a custom tag directly under a {@code &lt;bean&gt;} tag.
+ * directly under the {@code <beans>} tags and {@link #decorate} when
+ * it encounters a custom tag directly under a {@code <bean>} tag.
  *
  * <p>Developers writing their own custom element extensions typically will
  * not implement this interface directly, but rather make use of the provided
@@ -61,7 +61,7 @@ public interface NamespaceHandler {
 	 * that is embedded in the supplied {@link ParserContext}.
 	 * <p>Implementations should return the primary {@code BeanDefinition}
 	 * that results from the parse phase if they wish to be used nested
-	 * inside (for example) a {@code &lt;property&gt;} tag.
+	 * inside (for example) a {@code <property>} tag.
 	 * <p>Implementations may return {@code null} if they will
 	 * <strong>not</strong> be used in a nested scenario.
 	 * @param element the element that is to be parsed into one or more {@code BeanDefinitions}

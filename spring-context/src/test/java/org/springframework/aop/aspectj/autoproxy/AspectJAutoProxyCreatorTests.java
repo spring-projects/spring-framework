@@ -68,7 +68,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public final class AspectJAutoProxyCreatorTests {
+public class AspectJAutoProxyCreatorTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
@@ -513,11 +513,13 @@ class RetryAspect {
 				try {
 					o = jp.proceed();
 					this.commitCalls++;
-				} catch (RetryableException e) {
-					this.rollbackCalls++;
-					throw e;
 				}
-			} catch (RetryableException re) {
+				catch (RetryableException re) {
+					this.rollbackCalls++;
+					throw re;
+				}
+			}
+			catch (RetryableException re) {
 				retry = true;
 			}
 		}

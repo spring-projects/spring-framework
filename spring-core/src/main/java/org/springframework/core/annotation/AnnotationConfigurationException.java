@@ -16,6 +16,8 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Thrown by {@link AnnotationUtils} and <em>synthesized annotations</em>
  * if an annotation is improperly configured.
@@ -26,7 +28,7 @@ package org.springframework.core.annotation;
  * @see SynthesizedAnnotation
  */
 @SuppressWarnings("serial")
-public class AnnotationConfigurationException extends RuntimeException {
+public class AnnotationConfigurationException extends NestedRuntimeException {
 
 	/**
 	 * Construct a new {@code AnnotationConfigurationException} with the

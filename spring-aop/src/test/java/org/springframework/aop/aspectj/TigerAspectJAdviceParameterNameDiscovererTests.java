@@ -27,7 +27,7 @@ import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.Ambi
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class TigerAspectJAdviceParameterNameDiscovererTests
+public class TigerAspectJAdviceParameterNameDiscovererTests
 		extends AspectJAdviceParameterNameDiscovererTests {
 
 	@Test

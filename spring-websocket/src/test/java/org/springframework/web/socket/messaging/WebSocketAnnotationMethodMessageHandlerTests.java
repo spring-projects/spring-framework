@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.socket.messaging;
 
-import static org.junit.Assert.*;
+package org.springframework.web.socket.messaging;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.mockito.Mockito;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -36,6 +36,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link WebSocketAnnotationMethodMessageHandler}.
@@ -81,7 +82,6 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 	private static class TestController {
 
 		@MessageMapping("/exception")
-		@SuppressWarnings("unused")
 		public void handleWithSimulatedException() {
 			throw new IllegalStateException("simulated exception");
 		}
@@ -103,18 +103,12 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 		}
 	}
 
-
 	private static class TestWebSocketAnnotationMethodMessageHandler extends WebSocketAnnotationMethodMessageHandler {
-
 
 		public TestWebSocketAnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
 				SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
 
 			super(clientInboundChannel, clientOutboundChannel, brokerTemplate);
-		}
-
-		public void registerHandler(Object handler) {
-			super.detectHandlerMethods(handler);
 		}
 	}
 

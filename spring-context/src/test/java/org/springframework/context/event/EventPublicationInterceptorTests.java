@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,36 +46,36 @@ public class EventPublicationInterceptorTests {
 
 	@Before
 	public void setUp() {
-		publisher = mock(ApplicationEventPublisher.class);
+		this.publisher = mock(ApplicationEventPublisher.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(getClass());
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(ApplicationEvent.class);
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(TestEventWithNoValidOneArgObjectCtor.class);
 		interceptor.afterPropertiesSet();
 	}

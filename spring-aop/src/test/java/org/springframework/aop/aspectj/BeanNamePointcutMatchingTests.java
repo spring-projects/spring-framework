@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class BeanNamePointcutMatchingTests {
+public class BeanNamePointcutMatchingTests {
 
 	@Test
 	public void testMatchingPointcuts() {

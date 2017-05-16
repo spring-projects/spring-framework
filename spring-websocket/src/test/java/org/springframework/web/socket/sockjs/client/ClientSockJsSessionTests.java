@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class ClientSockJsSessionTests {
 	public void setup() throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
 		Transport transport = mock(Transport.class);
-		TransportRequest request = new DefaultTransportRequest(urlInfo, null, transport, TransportType.XHR, CODEC);
+		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);
 		this.connectFuture = new SettableListenableFuture<>();
 		this.session = new TestClientSockJsSession(request, this.handler, this.connectFuture);

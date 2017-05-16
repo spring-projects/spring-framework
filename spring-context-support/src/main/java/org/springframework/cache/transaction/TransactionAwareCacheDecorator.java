@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cache.transaction;
+
+import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -51,6 +53,12 @@ public class TransactionAwareCacheDecorator implements Cache {
 		this.targetCache = targetCache;
 	}
 
+	/**
+	 * Return the target Cache that this Cache should delegate to.
+	 */
+	public Cache getTargetCache() {
+		return this.targetCache;
+	}
 
 	@Override
 	public String getName() {
@@ -73,12 +81,17 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		return this.targetCache.get(key, valueLoader);
+	}
+
+	@Override
 	public void put(final Object key, final Object value) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
-					targetCache.put(key, value);
+					TransactionAwareCacheDecorator.this.targetCache.put(key, value);
 				}
 			});
 		}
@@ -98,7 +111,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
-					targetCache.evict(key);
+					TransactionAwareCacheDecorator.this.targetCache.evict(key);
 				}
 			});
 		}

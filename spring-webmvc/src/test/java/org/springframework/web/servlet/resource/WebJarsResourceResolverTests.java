@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,8 @@
 
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -34,6 +26,9 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for
@@ -51,13 +46,15 @@ public class WebJarsResourceResolverTests {
 
 	private HttpServletRequest request = new MockHttpServletRequest();
 
+
 	@Before
 	public void setup() {
 		// for this to work, an actual WebJar must be on the test classpath
-		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/"));
+		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars"));
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
 	}
+
 
 	@Test
 	public void resolveUrlExisting() {
@@ -74,20 +71,20 @@ public class WebJarsResourceResolverTests {
 	@Test
 	public void resolveUrlExistingNotInJarFile() {
 		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/", getClass()));
-		String file = "/foo/foo.txt";
+		String file = "foo/foo.txt";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
-		verify(this.chain, never()).resolveUrlPath("/foo/2.3/foo.txt", this.locations);
+		verify(this.chain, never()).resolveUrlPath("foo/2.3/foo.txt", this.locations);
 	}
 
 	@Test
 	public void resolveUrlWebJarResource() {
-		String file = "/underscorejs/underscore.js";
-		String expected = "/underscorejs/1.8.2/underscore.js";
+		String file = "underscorejs/underscore.js";
+		String expected = "underscorejs/1.8.3/underscore.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(expected);
 
@@ -99,21 +96,22 @@ public class WebJarsResourceResolverTests {
 	}
 
 	@Test
-	public void resolverUrlWebJarResourceNotFound() {
-		String file = "/something/something.js";
+	public void resolveUrlWebJarResourceNotFound() {
+		String file = "something/something.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
+		verify(this.chain, never()).resolveUrlPath(null, this.locations);
 	}
 
 	@Test
 	public void resolveResourceExisting() {
 		Resource expected = mock(Resource.class);
 		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/", getClass()));
-		String file = "/foo/2.3/foo.txt";
+		String file = "foo/2.3/foo.txt";
 		given(this.chain.resolveResource(this.request, file, this.locations)).willReturn(expected);
 
 		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
@@ -123,10 +121,22 @@ public class WebJarsResourceResolverTests {
 	}
 
 	@Test
+	public void resolveResourceNotFound() {
+		String file = "something/something.js";
+		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
+
+		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+
+		assertNull(actual);
+		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
+		verify(this.chain, never()).resolveResource(this.request, null, this.locations);
+	}
+
+	@Test
 	public void resolveResourceWebJar() {
 		Resource expected = mock(Resource.class);
-		String file = "/underscorejs/underscore.js";
-		String expectedPath = "/underscorejs/1.8.2/underscore.js";
+		String file = "underscorejs/underscore.js";
+		String expectedPath = "underscorejs/1.8.3/underscore.js";
 		this.locations = Collections.singletonList(new ClassPathResource("/META-INF/resources/webjars/", getClass()));
 		given(this.chain.resolveResource(this.request, expectedPath, this.locations)).willReturn(expected);
 

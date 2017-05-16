@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.stomp;
 
+package org.springframework.messaging.simp.stomp;
 
 /**
  * A contract for client STOMP session lifecycle events including a callback

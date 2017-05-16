@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
-import org.springframework.objenesis.Objenesis;
-import org.springframework.objenesis.ObjenesisException;
-import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.objenesis.SpringObjenesis;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Objenesis-based extension of {@link CglibAopProxy} to create proxy instances
@@ -40,9 +40,7 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 
 	private static final Log logger = LogFactory.getLog(ObjenesisCglibAopProxy.class);
 
-	private static final Objenesis cachedObjenesis = new SpringObjenesis();
-
-	private static final Objenesis nonCachedObjenesis = new ObjenesisStd(false);
+	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 
 	/**
@@ -57,17 +55,37 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
-		try {
-			Objenesis objenesis = (enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
-			Factory factory = (Factory) objenesis.newInstance(enhancer.createClass());
-			factory.setCallbacks(callbacks);
-			return factory;
+		Class<?> proxyClass = enhancer.createClass();
+		Object proxyInstance = null;
+
+		if (objenesis.isWorthTrying()) {
+			try {
+				proxyInstance = objenesis.newInstance(proxyClass, enhancer.getUseCache());
+			}
+			catch (Throwable ex) {
+				logger.debug("Unable to instantiate proxy using Objenesis, " +
+						"falling back to regular proxy construction", ex);
+			}
 		}
-		catch (ObjenesisException ex) {
-			// Fallback to regular proxy construction on unsupported JVMs
-			logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular proxy construction", ex);
-			return super.createProxyClassAndInstance(enhancer, callbacks);
+
+		if (proxyInstance == null) {
+			// Regular instantiation via default constructor...
+			try {
+				Constructor<?> ctor = (this.constructorArgs != null ?
+						proxyClass.getDeclaredConstructor(this.constructorArgTypes) :
+						proxyClass.getDeclaredConstructor());
+				ReflectionUtils.makeAccessible(ctor);
+				proxyInstance = (this.constructorArgs != null ?
+						ctor.newInstance(this.constructorArgs) : ctor.newInstance());
+			}
+			catch (Throwable ex) {
+				throw new AopConfigException("Unable to instantiate proxy using Objenesis, " +
+						"and regular proxy instantiation via default constructor fails as well", ex);
+			}
 		}
+
+		((Factory) proxyInstance).setCallbacks(callbacks);
+		return proxyInstance;
 	}
 
 }

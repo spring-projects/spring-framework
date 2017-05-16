@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class DomUtils {
 		Assert.notNull(childEleNames, "Element names collection must not be null");
 		List<String> childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && nodeNameMatch(node, childEleNameList)) {
@@ -123,7 +123,7 @@ public abstract class DomUtils {
 	public static List<Element> getChildElements(Element ele) {
 		Assert.notNull(ele, "Element must not be null");
 		NodeList nl = ele.getChildNodes();
-		List<Element> childEles = new ArrayList<Element>();
+		List<Element> childEles = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {

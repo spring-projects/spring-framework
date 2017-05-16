@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -57,19 +58,21 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
-		paramMap = new MethodParameter(method, 0);
-		paramMultiValueMap = new MethodParameter(method, 1);
-		paramHttpHeaders = new MethodParameter(method, 2);
-		paramUnsupported = new MethodParameter(method, 3);
+		paramMap = new SynthesizingMethodParameter(method, 0);
+		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
+		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
+		paramUnsupported = new SynthesizingMethodParameter(method, 3);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -101,7 +104,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		request.addHeader(name, value1);
 		request.addHeader(name, value2);
 
-		MultiValueMap<String, String> expected = new LinkedMultiValueMap<String, String>(1);
+		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);
 
@@ -129,6 +132,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);
 	}
+
 
 	public void params(@RequestHeader Map<?, ?> param1,
 					   @RequestHeader MultiValueMap<?, ?> param2,

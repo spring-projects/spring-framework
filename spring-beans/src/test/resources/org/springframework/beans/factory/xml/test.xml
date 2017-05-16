@@ -55,7 +55,7 @@
 	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Ker<!-- a comment -->ry</value></property>
 		<property name="age"><value>34</value></property>
-		<property name="spouse"><ref local="rod"/></property>
+		<property name="spouse"><ref bean="rod"/></property>
 		<property name="touchy"><value></value></property>
 	</bean>
 
@@ -68,7 +68,7 @@
 	<bean id="typeMismatch" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
-		<property name="spouse"><ref local="rod"/></property>
+		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
 	<!-- Test of lifecycle callbacks -->
@@ -96,20 +96,20 @@
 	     repeated references to the same FactoryBean -->
 	<bean id="factoryReferencer" class="org.springframework.beans.factory.xml.DummyReferencer">
 		<property name="testBean1"><ref bean="singletonFactory"/></property>
-		<property name="testBean2"><ref local="singletonFactory"/></property>
+		<property name="testBean2"><ref bean="singletonFactory"/></property>
 		<property name="dummyFactory"><ref bean="&amp;singletonFactory"/></property>
 	</bean>
 
 	<bean id="factoryReferencerWithConstructor" class="org.springframework.beans.factory.xml.DummyReferencer">
 		<constructor-arg><ref bean="&amp;singletonFactory"/></constructor-arg>
 		<property name="testBean1"><ref bean="singletonFactory"/></property>
-		<property name="testBean2"><ref local="singletonFactory"/></property>
+		<property name="testBean2"><ref bean="singletonFactory"/></property>
 	</bean>
 
 	<!-- Check that the circular reference resolution mechanism doesn't break
 	     prototype instantiation -->
 	<bean id="prototypeReferencer" class="org.springframework.beans.factory.xml.DummyReferencer" scope="prototype">
-		<property name="testBean1"><ref local="kathy"/></property>
+		<property name="testBean1"><ref bean="kathy"/></property>
 		<property name="testBean2"><ref bean="kathy"/></property>
 	</bean>
 

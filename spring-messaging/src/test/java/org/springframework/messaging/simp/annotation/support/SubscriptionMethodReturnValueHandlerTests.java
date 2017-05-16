@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
@@ -34,7 +33,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -58,7 +56,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class SubscriptionMethodReturnValueHandlerTests {
 
-	public static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
+	public static final MimeType MIME_TYPE = new MimeType("text", "plain", StandardCharsets.UTF_8);
 
 	private static final String PAYLOAD = "payload";
 
@@ -82,7 +80,6 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
@@ -116,7 +113,6 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	public void testMessageSentToChannel() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -138,13 +134,12 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
 		assertEquals(destination, headerAccessor.getDestination());
 		assertEquals(MIME_TYPE, headerAccessor.getContentType());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHeadersPassedToMessagingTemplate() throws Exception {
-
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";
@@ -165,12 +160,11 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertTrue(headerAccessor.isMutable());
 		assertEquals(sessionId, headerAccessor.getSessionId());
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void testJsonView() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -184,7 +178,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		Message<?> message = this.messageCaptor.getValue();
 		assertNotNull(message);
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[])message.getPayload(), StandardCharsets.UTF_8));
+		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 

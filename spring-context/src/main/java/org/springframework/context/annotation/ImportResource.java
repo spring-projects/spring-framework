@@ -59,7 +59,7 @@ public @interface ImportResource {
 	 * @see #locations
 	 * @see #reader
 	 */
-	@AliasFor(attribute = "locations")
+	@AliasFor("locations")
 	String[] value() default {};
 
 	/**
@@ -72,7 +72,7 @@ public @interface ImportResource {
 	 * @see #value
 	 * @see #reader
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] locations() default {};
 
 	/**

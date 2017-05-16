@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.web;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextBootstrapper;
@@ -45,12 +45,12 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 	 */
 	@Override
 	protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
-		if (AnnotationUtils.findAnnotation(testClass, WebAppConfiguration.class) != null) {
+		if (AnnotatedElementUtils.hasAnnotation(testClass, WebAppConfiguration.class)) {
 			return WebDelegatingSmartContextLoader.class;
 		}
-
-		// else...
-		return super.getDefaultContextLoaderClass(testClass);
+		else {
+			return super.getDefaultContextLoaderClass(testClass);
+		}
 	}
 
 	/**
@@ -61,14 +61,14 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 	 */
 	@Override
 	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
-		WebAppConfiguration webAppConfiguration = AnnotationUtils.findAnnotation(mergedConfig.getTestClass(),
-			WebAppConfiguration.class);
+		WebAppConfiguration webAppConfiguration =
+				AnnotatedElementUtils.findMergedAnnotation(mergedConfig.getTestClass(), WebAppConfiguration.class);
 		if (webAppConfiguration != null) {
 			return new WebMergedContextConfiguration(mergedConfig, webAppConfiguration.value());
 		}
-
-		// else...
-		return mergedConfig;
+		else {
+			return mergedConfig;
+		}
 	}
 
 }

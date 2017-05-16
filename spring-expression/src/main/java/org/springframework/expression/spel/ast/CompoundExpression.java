@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class CompoundExpression extends SpelNodeImpl {
 			}
 			try {
 				state.pushActiveContextObject(result);
-				nextNode = this.children[cc-1];
+				nextNode = this.children[cc - 1];
 				return nextNode.getValueRef(state);
 			}
 			finally {
@@ -124,14 +124,8 @@ public class CompoundExpression extends SpelNodeImpl {
 	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		// TODO could optimize T(SomeType).staticMethod - no need to generate the T() part
 		for (int i = 0; i < this.children.length;i++) {
-			SpelNodeImpl child = this.children[i];
-			if (child instanceof TypeReference && (i + 1) < this.children.length &&
-					this.children[i + 1] instanceof MethodReference) {
-				continue;
-			}
-			child.generateCode(mv, cf);
+			this.children[i].generateCode(mv, cf);
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

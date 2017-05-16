@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,21 @@ package org.springframework.test.web.servlet.setup;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
- * Allows a sub-class to encapsulate logic for pre-configuring a
- * {@code ConfigurableMockMvcBuilder} for some specific purpose. A 3rd party
- * library may use this to provide shortcuts for setting up MockMvc.
+ * Contract for customizing a {@code ConfigurableMockMvcBuilder} in some
+ * specific way, e.g. a 3rd party library that wants to provide shortcuts for
+ * setting up a MockMvc.
  *
- * <p>Can be plugged in via {@link ConfigurableMockMvcBuilder#apply} with
- * instances of this type likely created via static methods, e.g.:
+ * <p>An implementation of this interface can be plugged in via
+ * {@link ConfigurableMockMvcBuilder#apply} with instances of this type likely
+ * created via static methods, e.g.:
  *
  * <pre class="code">
- * 	MockMvcBuilders.webAppContextSetup(context).apply(mySetup("foo","bar")).build();
+ * import static org.example.ExampleSetup.mySetup;
+ *
+ * // ...
+ *
+ * MockMvcBuilders.webAppContextSetup(context).apply(mySetup("foo","bar")).build();
  * </pre>
  *
  * @author Rossen Stoyanchev
@@ -39,16 +43,22 @@ import org.springframework.web.context.WebApplicationContext;
 public interface MockMvcConfigurer {
 
 	/**
-	 * Invoked immediately after a {@code MockMvcConfigurer} is added via
+	 * Invoked immediately when this {@code MockMvcConfigurer} is added via
 	 * {@link ConfigurableMockMvcBuilder#apply}.
+	 * @param builder the builder for the MockMvc
 	 */
 	void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder);
 
 	/**
-	 * Invoked just before the MockMvc instance is created. Implementations may
-	 * return a RequestPostProcessor to be applied to every request performed
-	 * through the created {@code MockMvc} instance.
+	 * Invoked when the MockMvc instance is about to be created with the MockMvc
+	 * builder and the Spring WebApplicationContext that will be passed to the
+	 * {@code DispatcherServlet}.
+	 * @param builder the builder for the MockMvc
+	 * @param context the Spring configuration
+	 * @return a post processor to be applied to every request performed
+	 * through the {@code MockMvc} instance.
 	 */
-	RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context);
+	RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
+			WebApplicationContext context);
 
 }

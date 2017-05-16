@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 19.05.2003
  */
-public final class BeanUtilsTests {
+public class BeanUtilsTests {
 
 	@Test
 	public void testInstantiateClass() {

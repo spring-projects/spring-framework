@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit4;
 
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,12 +25,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,12 +47,9 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests
 		implements BeanNameAware, InitializingBean {
 
-	protected static final String BOB = "bob";
-	protected static final String JANE = "jane";
-	protected static final String SUE = "sue";
-	protected static final String LUKE = "luke";
-	protected static final String LEIA = "leia";
-	protected static final String YODA = "yoda";
+	private static final String JANE = "jane";
+	private static final String SUE = "sue";
+	private static final String YODA = "yoda";
 
 	private boolean beanInitialized = false;
 
@@ -68,52 +61,21 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	private Pet pet;
 
 	@Autowired(required = false)
-	protected Long nonrequiredLong;
+	private Long nonrequiredLong;
 
 	@Resource
-	protected String foo;
+	private String foo;
 
-	protected String bar;
+	private String bar;
 
-
-	protected static int clearPersonTable(final JdbcTemplate jdbcTemplate) {
-		return JdbcTestUtils.deleteFromTables(jdbcTemplate, "person");
-	}
-
-	protected static void createPersonTable(final JdbcTemplate jdbcTemplate) {
-		try {
-			jdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
-		}
-		catch (DataAccessException dae) {
-			/* ignore */
-		}
-	}
-
-	protected static int countRowsInPersonTable(final JdbcTemplate jdbcTemplate) {
-		return JdbcTestUtils.countRowsInTable(jdbcTemplate, "person");
-	}
-
-	protected static int addPerson(final JdbcTemplate jdbcTemplate, final String name) {
-		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
-	}
-
-	protected static int deletePerson(final JdbcTemplate jdbcTemplate, final String name) {
-		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
-	}
-
-	@Override
-	@Resource
-	public void setDataSource(DataSource dataSource) {
-		super.setDataSource(dataSource);
-	}
 
 	@Autowired
-	protected final void setEmployee(final Employee employee) {
+	private final void setEmployee(final Employee employee) {
 		this.employee = employee;
 	}
 
 	@Resource
-	protected final void setBar(final String bar) {
+	private final void setBar(final String bar) {
 		this.bar = bar;
 	}
 
@@ -185,48 +147,48 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@BeforeTransaction
 	public void beforeTransaction() {
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-				countRowsInPersonTable(super.jdbcTemplate));
-		assertEquals("Adding yoda", 1, addPerson(super.jdbcTemplate, YODA));
+			countRowsInPersonTable());
+		assertEquals("Adding yoda", 1, addPerson(YODA));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		assertEquals("Verifying the number of rows in the person table before a test method.",
-				(inTransaction() ? 2 : 1), countRowsInPersonTable(super.jdbcTemplate));
+			(inTransaction() ? 2 : 1), countRowsInPersonTable());
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(super.jdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(super.jdbcTemplate, SUE));
+		assertEquals("Adding jane", 1, addPerson(JANE));
+		assertEquals("Adding sue", 1, addPerson(SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,
-				countRowsInPersonTable(super.jdbcTemplate));
+			countRowsInPersonTable());
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		assertEquals("Verifying the number of rows in the person table after a test method.",
-				(inTransaction() ? 4 : 1), countRowsInPersonTable(super.jdbcTemplate));
+			(inTransaction() ? 4 : 1), countRowsInPersonTable());
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(super.jdbcTemplate, YODA));
+		assertEquals("Deleting yoda", 1, deletePerson(YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-				countRowsInPersonTable(super.jdbcTemplate));
+			countRowsInPersonTable());
 	}
 
+	private int addPerson(final String name) {
+		return super.jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+	}
 
-	public static class DatabaseSetup {
+	private int deletePerson(final String name) {
+		return super.jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+	}
 
-		@Resource
-		public void setDataSource(DataSource dataSource) {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-			createPersonTable(jdbcTemplate);
-			clearPersonTable(jdbcTemplate);
-			addPerson(jdbcTemplate, BOB);
-		}
+	private int countRowsInPersonTable() {
+		return countRowsInTable("person");
 	}
 
 }

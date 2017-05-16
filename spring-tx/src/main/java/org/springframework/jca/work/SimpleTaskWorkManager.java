@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.util.Assert;
 
 /**
- * Simple JCA 1.5 {@link javax.resource.spi.work.WorkManager} implementation that
+ * Simple JCA 1.7 {@link javax.resource.spi.work.WorkManager} implementation that
  * delegates to a Spring {@link org.springframework.core.task.TaskExecutor}.
  * Provides simple task execution including start timeouts, but without support
  * for a JCA ExecutionContext (i.e. without support for imported transactions).

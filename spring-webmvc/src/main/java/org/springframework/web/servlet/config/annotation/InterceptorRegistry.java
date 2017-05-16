@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
  */
 public class InterceptorRegistry {
 
-	private final List<InterceptorRegistration> registrations = new ArrayList<InterceptorRegistration>();
+	private final List<InterceptorRegistration> registrations = new ArrayList<>();
 
 	/**
 	 * Adds the provided {@link HandlerInterceptor}.
@@ -64,7 +64,7 @@ public class InterceptorRegistry {
 	 * Returns all registered interceptors.
 	 */
 	protected List<Object> getInterceptors() {
-		List<Object> interceptors = new ArrayList<Object>();
+		List<Object> interceptors = new ArrayList<>();
 		for (InterceptorRegistration registration : registrations) {
 			interceptors.add(registration.getInterceptor());
 		}

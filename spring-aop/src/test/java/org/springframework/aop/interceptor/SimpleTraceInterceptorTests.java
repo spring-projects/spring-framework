@@ -29,7 +29,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class SimpleTraceInterceptorTests {
+public class SimpleTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
@@ -60,7 +60,8 @@ public final class SimpleTraceInterceptorTests {
 		try {
 			interceptor.invokeUnderTrace(mi, log);
 			fail("Must have propagated the IllegalArgumentException.");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 
 		verify(log).trace(anyString());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	private static final String DESTROY_METHOD = "destroyMethod";
 	private static final String SINGLETON = "singleton";
 
-	private static final List<String> dynamicProperties = new ArrayList<String>(8);
+	private static final List<String> dynamicProperties = new ArrayList<>(8);
 
 	static {
 		dynamicProperties.add(PARENT);

@@ -6,9 +6,9 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="proxiedXmlBean" class="org.springframework.tests.sample.beans.TestBean"/>
-	
+
 	<bean id="anAspect" class="org.springframework.context.annotation.configuration.ImportResourceTests$AnAspect"/>
-	
+
 	<aop:aspectj-autoproxy>
 		<aop:include name="anAspect"/>
 	</aop:aspectj-autoproxy>

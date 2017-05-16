@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * <h3>Usage Example</h3>
  * <pre class="code">
  * EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+ *     .generateUniqueName(true)
  *     .setType(H2)
  *     .setScriptEncoding("UTF-8")
  *     .ignoreFailedDrops(true)
@@ -37,7 +38,7 @@ import org.springframework.util.Assert;
  *     .addScripts("user_data.sql", "country_data.sql")
  *     .build();
  *
- * // ...
+ * // perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
  *
  * db.shutdown();
  * </pre>

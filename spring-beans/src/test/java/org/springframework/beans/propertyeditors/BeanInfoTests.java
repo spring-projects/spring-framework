@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,22 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.SimpleBeanInfo;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.Assert;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @since 06.03.2006
  */
-public class BeanInfoTests extends TestCase {
+public class BeanInfoTests {
 
+	@Test
 	public void testComplexObject() {
 		ValueBean bean = new ValueBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -99,9 +101,7 @@ public class BeanInfoTests extends TestCase {
 
 		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
-			if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-				Assert.isTrue(this.target instanceof ValueBean, "Target must be available on JDK 1.5+");
-			}
+			Assert.isTrue(this.target instanceof ValueBean, "Target must be available");
 			super.setAsText(text);
 		}
 

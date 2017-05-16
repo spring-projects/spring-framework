@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * JDK 1.5+ class-level annotation that indicates to register instances of a
- * class with a JMX server, corresponding to the ManagedResource attribute.
+ * Class-level annotation that indicates to register instances of a class
+ * with a JMX server, corresponding to the {@code ManagedResource} attribute.
  *
  * <p><b>Note:</b> This annotation is marked as inherited, allowing for generic
  * management-aware base classes. In such a scenario, it is recommended to
@@ -49,10 +49,10 @@ public @interface ManagedResource {
 	/**
 	 * Alias for the {@link #objectName} attribute, for simple default usage.
 	 */
-	@AliasFor(attribute = "objectName")
+	@AliasFor("objectName")
 	String value() default "";
 
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String objectName() default "";
 
 	String description() default "";

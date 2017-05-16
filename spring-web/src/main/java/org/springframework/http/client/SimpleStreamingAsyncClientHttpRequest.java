@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @author Arjen Poutsma
  * @since 3.0
  * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHttpRequest {
 
 	private final HttpURLConnection connection;
@@ -63,7 +65,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+		return HttpMethod.resolve(this.connection.getRequestMethod());
 	}
 
 	@Override
@@ -108,6 +110,8 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 					else {
 						SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
 						connection.connect();
+						// Immediately trigger the request in a no-output scenario as well
+						connection.getResponseCode();
 					}
 				}
 				catch (IOException ex) {

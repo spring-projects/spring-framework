@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  * A SockJS session for use with the WebSocket transport.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class WebSocketServerSockJsSession extends AbstractSockJsSession implements NativeWebSocketSession {
@@ -50,9 +51,11 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	private volatile boolean openFrameSent;
 
-	private final Queue<String> initSessionCache = new LinkedBlockingDeque<String>();
+	private final Queue<String> initSessionCache = new LinkedBlockingDeque<>();
 
 	private final Object initSessionLock = new Object();
+
+	private final Object disconnectLock = new Object();
 
 	private volatile boolean disconnected;
 
@@ -136,18 +139,14 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	public Object getNativeSession() {
-		if ((this.webSocketSession != null) && (this.webSocketSession instanceof NativeWebSocketSession)) {
-			return ((NativeWebSocketSession) this.webSocketSession).getNativeSession();
-		}
-		return null;
+		return (this.webSocketSession instanceof NativeWebSocketSession ?
+				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : null);
 	}
 
 	@Override
 	public <T> T getNativeSession(Class<T> requiredType) {
-		if ((this.webSocketSession != null) && (this.webSocketSession instanceof NativeWebSocketSession)) {
-			return ((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType);
-		}
-		return null;
+		return (this.webSocketSession instanceof NativeWebSocketSession ?
+				((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType) : null);
 	}
 
 
@@ -166,7 +165,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 				scheduleHeartbeat();
 				this.openFrameSent = true;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			}
 		}
@@ -196,10 +195,8 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	public void sendMessageInternal(String message) throws SockJsTransportFailureException {
-
 		// Open frame not sent yet?
 		// If in the session initialization thread, then cache, otherwise wait.
-
 		if (!this.openFrameSent) {
 			synchronized (this.initSessionLock) {
 				if (!this.openFrameSent) {
@@ -208,6 +205,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 				}
 			}
 		}
+
 		cancelHeartbeat();
 		writeFrame(SockJsFrame.messageFrame(getMessageCodec(), message));
 		scheduleHeartbeat();
@@ -224,10 +222,12 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 	@Override
 	protected void disconnect(CloseStatus status) throws IOException {
-		synchronized (this) {
-			if (isActive()) {
-				this.disconnected = true;
-				this.webSocketSession.close(status);
+		if (isActive()) {
+			synchronized (this.disconnectLock) {
+				if (isActive()) {
+					this.disconnected = true;
+					this.webSocketSession.close(status);
+				}
 			}
 		}
 	}

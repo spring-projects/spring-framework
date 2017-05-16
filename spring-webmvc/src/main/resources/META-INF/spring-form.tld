@@ -5,12 +5,13 @@
 		version="2.0">
 
 	<description>Spring Framework JSP Form Tag Library</description>
-	<tlib-version>4.0</tlib-version>
+	<tlib-version>4.3</tlib-version>
 	<short-name>form</short-name>
 	<uri>http://www.springframework.org/tags/form</uri>
 
 	<tag>
-		<description>Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.</description>
+		<description>Renders an HTML 'form' tag and exposes a binding path to inner tags
+		for binding.</description>
 		<name>form</name>
 		<tag-class>org.springframework.web.servlet.tags.form.FormTag</tag-class>
 		<body-content>JSP</body-content>
@@ -124,14 +125,13 @@
 		</attribute>
 		<attribute>
 			<description>Name of the model attribute under which the form object is exposed.
-				Defaults to 'command'.</description>
+			Defaults to 'command'.</description>
 			<name>modelAttribute</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Name of the model attribute under which the form object is exposed.
-				Defaults to 'command'.</description>
+			<description>DEPRECATED: Use "modelAttribute" instead.</description>
 			<name>commandName</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -143,7 +143,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Required Attribute</description>
+			<description>Action reference to be appended to the current servlet path</description>
 			<name>servletRelativeAction</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -167,7 +167,10 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Specifies the list of character encodings for input data that is accepted by the server processing this form. The value is a space- and/or comma-delimited list of charset values. The client must interpret this list as an exclusive-or list, i.e., the server is able to accept any single character encoding per entity received.</description>
+			<description>Specifies the list of character encodings for input data that is accepted
+			by the server processing this form. The value is a space- and/or comma-delimited list of
+			charset values. The client must interpret this list as an exclusive-or list, i.e. the
+			server is able to accept any single character encoding per entity received.</description>
 			<name>acceptCharset</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -191,7 +194,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The parameter name used for HTTP methods other then GET and POST. Default is '_method'</description>
+			<description>The parameter name used for HTTP methods other then GET and POST.
+			Default is '_method'.</description>
 			<name>methodParam</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -229,7 +233,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -265,7 +270,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -379,7 +385,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will make the HTML element readonly.</description>
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -423,7 +430,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -459,7 +467,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -573,7 +582,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will make the HTML element readonly.</description>
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -623,7 +633,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -659,7 +670,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-		<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -728,7 +740,8 @@
 	</tag>
 
 	<tag>
-		<description>Renders an HTML 'select' element. Supports databinding to the selected option.</description>
+		<description>Renders an HTML 'select' element. Supports data binding to the
+		selected option.</description>
 		<name>select</name>
 		<tag-class>org.springframework.web.servlet.tags.form.SelectTag</tag-class>
 		<body-content>JSP</body-content>
@@ -757,7 +770,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -793,7 +807,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -883,19 +898,22 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The Collection, Map or array of objects used to generate the inner 'option' tags</description>
+			<description>The Collection, Map or array of objects used to generate the
+			inner 'option' tags</description>
 			<name>items</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Name of the property mapped to 'value' attribute of the 'option' tag</description>
+			<description>Name of the property mapped to 'value' attribute of the
+			'option' tag</description>
 			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Name of the property mapped to the inner text of the 'option' tag</description>
+			<description>Name of the property mapped to the inner text of the
+			'option' tag</description>
 			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -916,7 +934,8 @@
 	</tag>
 
 	<tag>
-		<description>Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound value.</description>
+		<description>Renders a single HTML 'option'.
+		Sets 'selected' as appropriate based on bound value.</description>
 		<name>option</name>
 		<tag-class>org.springframework.web.servlet.tags.form.OptionTag</tag-class>
 		<body-content>JSP</body-content>
@@ -926,8 +945,9 @@
 			<variable-class>java.lang.Object</variable-class>
 		</variable>
 		<variable>
-			<description>The String representation of thr value bound to the 'value' attribute, taking into consideration
-				any PropertyEditor associated with the enclosing 'select' tag.</description>
+			<description>The String representation of thr value bound to the 'value'
+			attribute, taking into consideration any PropertyEditor associated with
+			the enclosing 'select' tag.</description>
 			<name-given>displayValue</name-given>
 			<variable-class>java.lang.String</variable-class>
 		</variable>
@@ -962,7 +982,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -998,7 +1019,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1067,7 +1089,8 @@
 	</tag>
 
 	<tag>
-		<description>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.</description>
+		<description>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate
+		based on bound value.</description>
 		<name>options</name>
 		<tag-class>org.springframework.web.servlet.tags.form.OptionsTag</tag-class>
 		<body-content>empty</body-content>
@@ -1078,7 +1101,9 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The Collection, Map or array of objects used to generate the inner 'option' tags. This attribute is required unless the containing select's property for data binding is an Enum, in which case the enum's values are used.</description>
+			<description>The Collection, Map or array of objects used to generate the inner
+			'option' tags. This attribute is required unless the containing select's property
+			for data binding is an Enum, in which case the enum's values are used.</description>
 			<name>items</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1108,7 +1133,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1144,7 +1170,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1242,7 +1269,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1278,7 +1306,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1412,7 +1441,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1448,7 +1478,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1538,31 +1569,37 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'radio'. This attribute is required unless the property for data binding is an Enum, in which case the enum's values are used.</description>
+			<description>The Collection, Map or array of objects used to generate the 'input'
+			tags with type 'radio'. This attribute is required unless the property for data
+			binding is an Enum, in which case the enum's values are used.</description>
 			<name>items</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Name of the property mapped to 'value' attribute of the 'input' tags with type 'radio'</description>
+			<description>Name of the property mapped to 'value' attribute of the 'input'
+			tags with type 'radio'</description>
 			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Value to be displayed as part of the 'input' tags with type 'radio'</description>
+			<description>Value to be displayed as part of the 'input' tags with type
+			'radio'</description>
 			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Delimiter to use between each 'input' tag with type 'radio'. There is no delimiter by default.</description>
+			<description>Delimiter to use between each 'input' tag with type 'radio'.
+			There is no delimiter by default.</description>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Specifies the HTML element that is used to enclose each 'input' tag with type 'radio'. Defaults to 'span'.</description>
+			<description>Specifies the HTML element that is used to enclose each 'input'
+			tag with type 'radio'. Defaults to 'span'.</description>
 			<name>element</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1600,7 +1637,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1636,7 +1674,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1770,7 +1809,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1806,7 +1846,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1896,31 +1937,36 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'checkbox'</description>
+			<description>The Collection, Map or array of objects used to generate the
+			'input' tags with type 'checkbox'</description>
 			<name>items</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Name of the property mapped to 'value' attribute of the 'input' tags with type 'checkbox'</description>
+			<description>Name of the property mapped to 'value' attribute of the 'input'
+			tags with type 'checkbox'</description>
 			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Value to be displayed as part of the 'input' tags with type 'checkbox'</description>
+			<description>Value to be displayed as part of the 'input' tags with type
+			'checkbox'</description>
 			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Delimiter to use between each 'input' tag with type 'checkbox'. There is no delimiter by default.</description>
+			<description>Delimiter to use between each 'input' tag with type 'checkbox'.
+			There is no delimiter by default.</description>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Specifies the HTML element that is used to enclose each 'input' tag with type 'checkbox'. Defaults to 'span'.</description>
+			<description>Specifies the HTML element that is used to enclose each 'input'
+			tag with type 'checkbox'. Defaults to 'span'.</description>
 			<name>element</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1958,7 +2004,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used when the bound field has errors.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1994,7 +2041,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2102,7 +2150,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will make the HTML element readonly.</description>
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2138,7 +2187,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Delimiter for displaying multiple error messages. Defaults to the br tag.</description>
+			<description>Delimiter for displaying multiple error messages.
+			Defaults to the HTML br tag.</description>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2284,7 +2334,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Equivalent to "class" - HTML Optional Attribute. Used only when errors are present.</description>
+			<description>Equivalent to "class" - HTML Optional Attribute.
+			Used only when errors are present.</description>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2406,7 +2457,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will disable the HTML element.</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true'
+			will disable the HTML element.</description>
 			<name>disabled</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

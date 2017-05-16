@@ -25,8 +25,9 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Given the base URL to a SockJS server endpoint, also provides methods to
- * generate and obtain session and a server id used for construct a transport URL.
+ * Container for the base URL of a SockJS endpoint with additional helper methods
+ * to derive related SockJS URLs as the {@link #getInfoUrl() info} URL and
+ * {@link #getTransportUrl(TransportType) transport} URLs.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

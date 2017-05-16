@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class PrototypeBasedTargetSourceTests {
+public class PrototypeBasedTargetSourceTests {
 
 	@Test
 	public void testSerializability() throws Exception {

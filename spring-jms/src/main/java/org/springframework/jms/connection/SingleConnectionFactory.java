@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -270,6 +271,32 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	@Override
+	public JMSContext createContext() {
+		return obtainTargetConnectionFactory().createContext();
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password) {
+		return obtainTargetConnectionFactory().createContext(userName, password);
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password, int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(userName, password, sessionMode);
+	}
+
+	@Override
+	public JMSContext createContext(int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(sessionMode);
+	}
+
+	private ConnectionFactory obtainTargetConnectionFactory() {
+		ConnectionFactory target = getTargetConnectionFactory();
+		Assert.state(target != null, "'targetConnectionFactory' is required");
+		return target;
+	}
+
 
 	/**
 	 * Obtain an initialized shared Connection.
@@ -473,7 +500,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * @return the wrapped Connection
 	 */
 	protected Connection getSharedConnectionProxy(Connection target) {
-		List<Class<?>> classes = new ArrayList<Class<?>>(3);
+		List<Class<?>> classes = new ArrayList<>(3);
 		classes.add(Connection.class);
 		if (target instanceof QueueConnection) {
 			classes.add(QueueConnection.class);
@@ -662,12 +689,14 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	private class AggregatedExceptionListener implements ExceptionListener {
 
-		final Set<ExceptionListener> delegates = new LinkedHashSet<ExceptionListener>(2);
+		final Set<ExceptionListener> delegates = new LinkedHashSet<>(2);
 
 		@Override
 		public void onException(JMSException ex) {
 			synchronized (connectionMonitor) {
-				for (ExceptionListener listener : this.delegates) {
+				// Iterate over temporary copy in order to avoid ConcurrentModificationException,
+				// since listener invocations may in turn trigger registration of listeners...
+				for (ExceptionListener listener : new LinkedHashSet<>(this.delegates)) {
 					listener.onException(ex);
 				}
 			}

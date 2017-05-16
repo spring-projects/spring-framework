@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,10 @@ public interface TransactionStatus extends SavepointManager, Flushable {
 	/**
 	 * Flush the underlying session to the datastore, if applicable:
 	 * for example, all affected Hibernate/JPA sessions.
+	 * <p>This is effectively just a hint and may be a no-op if the underlying
+	 * transaction manager does not have a flush concept. A flush signal may
+	 * get applied to the primary resource or to transaction synchronizations,
+	 * depending on the underlying resource.
 	 */
 	@Override
 	void flush();

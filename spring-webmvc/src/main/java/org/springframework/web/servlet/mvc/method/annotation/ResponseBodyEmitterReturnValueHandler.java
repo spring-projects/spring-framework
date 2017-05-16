@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,7 +26,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -44,8 +46,12 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Supports return values of type {@link ResponseBodyEmitter} and also
- * {@code ResponseEntity<ResponseBodyEmitter>}.
+ * Handler for return values of type {@link ResponseBodyEmitter} and sub-classes
+ * such as {@link SseEmitter} including the same types wrapped with
+ * {@link ResponseEntity}.
+ *
+ * <p>As of 5.0 also supports reactive return value types for any reactive
+ * library with registered adapters in {@link ReactiveAdapterRegistry}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -54,25 +60,53 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	private static final Log logger = LogFactory.getLog(ResponseBodyEmitterReturnValueHandler.class);
 
+
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	private final ReactiveTypeHandler reactiveHandler;
 
+
+	/**
+	 * Simple constructor with reactive type support based on a default instance of
+	 * {@link ReactiveAdapterRegistry},
+	 * {@link org.springframework.core.task.SyncTaskExecutor}, and
+	 * {@link ContentNegotiationManager} with an Accept header strategy.
+	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
+		this.reactiveHandler = new ReactiveTypeHandler();
+	}
+
+	/**
+	 * Complete constructor with pluggable "reactive" type support.
+	 *
+	 * @param messageConverters converters to write emitted objects with
+	 * @param reactiveRegistry for reactive return value type support
+	 * @param executor for blocking I/O writes of items emitted from reactive types
+	 * @param manager for detecting streaming media types
+	 *
+	 * @since 5.0
+	 */
+	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
+			ReactiveAdapterRegistry reactiveRegistry, TaskExecutor executor,
+			ContentNegotiationManager manager) {
+
+		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
+		this.messageConverters = messageConverters;
+		this.reactiveHandler = new ReactiveTypeHandler(reactiveRegistry, executor, manager);
 	}
 
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if (ResponseBodyEmitter.class.isAssignableFrom(returnType.getParameterType())) {
-			return true;
-		}
-		else if (ResponseEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			Class<?> bodyType = ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve();
-			return (bodyType != null && ResponseBodyEmitter.class.isAssignableFrom(bodyType));
-		}
-		return false;
+
+		Class<?> bodyType = ResponseEntity.class.isAssignableFrom(returnType.getParameterType()) ?
+				ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve() :
+				returnType.getParameterType();
+
+		return bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
+				this.reactiveHandler.isReactiveType(bodyType));
 	}
 
 	@Override
@@ -87,13 +121,15 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
-		if (ResponseEntity.class.isAssignableFrom(returnValue.getClass())) {
+		if (returnValue instanceof ResponseEntity) {
 			ResponseEntity<?> responseEntity = (ResponseEntity<?>) returnValue;
-			outputMessage.setStatusCode(responseEntity.getStatusCode());
+			response.setStatus(responseEntity.getStatusCodeValue());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
+			returnType = returnType.nested();
 			if (returnValue == null) {
 				mavContainer.setRequestHandled(true);
+				outputMessage.flush();
 				return;
 			}
 		}
@@ -101,15 +137,27 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
-		Assert.isInstanceOf(ResponseBodyEmitter.class, returnValue);
-		ResponseBodyEmitter emitter = (ResponseBodyEmitter) returnValue;
+		ResponseBodyEmitter emitter;
+
+		if (returnValue instanceof ResponseBodyEmitter) {
+			emitter = (ResponseBodyEmitter) returnValue;
+		}
+		else {
+			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+		}
+
+		if (emitter == null) {
+			return;
+		}
+
 		emitter.extendResponse(outputMessage);
 
 		// Commit the response and wrap to ignore further header changes
 		outputMessage.getBody();
+		outputMessage.flush();
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
-		DeferredResult<?> deferredResult = new DeferredResult<Object>(emitter.getTimeout());
+		DeferredResult<?> deferredResult = new DeferredResult<>(emitter.getTimeout());
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
 
 		HttpMessageConvertingHandler handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);
@@ -138,13 +186,13 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		@SuppressWarnings("unchecked")
 		private <T> void sendInternal(T data, MediaType mediaType) throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Writing [" + data + "]");
+			}
 			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {
 					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);
 					this.outputMessage.flush();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Written [" + data + "] using [" + converter + "]");
-					}
 					return;
 				}
 			}

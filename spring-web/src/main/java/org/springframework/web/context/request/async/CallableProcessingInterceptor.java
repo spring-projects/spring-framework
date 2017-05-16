@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
@@ -51,16 +52,12 @@ public interface CallableProcessingInterceptor {
 	/**
 	 * Invoked <em>before</em> the start of concurrent handling in the original
 	 * thread in which the {@code Callable} is submitted for concurrent handling.
-	 *
-	 * <p>
-	 * This is useful for capturing the state of the current thread just prior to
+	 * <p>This is useful for capturing the state of the current thread just prior to
 	 * invoking the {@link Callable}. Once the state is captured, it can then be
 	 * transferred to the new {@link Thread} in
 	 * {@link #preProcess(NativeWebRequest, Callable)}. Capturing the state of
 	 * Spring Security's SecurityContextHolder and migrating it to the new Thread
 	 * is a concrete example of where this is useful.
-	 * </p>
-	 *
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -71,7 +68,6 @@ public interface CallableProcessingInterceptor {
 	 * Invoked <em>after</em> the start of concurrent handling in the async
 	 * thread in which the {@code Callable} is executed and <em>before</em> the
 	 * actual invocation of the {@code Callable}.
-	 *
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -83,7 +79,6 @@ public interface CallableProcessingInterceptor {
 	 * async thread in which the {@code Callable} is executed. This method may
 	 * be invoked later than {@code afterTimeout} or {@code afterCompletion}
 	 * depending on when the {@code Callable} finishes processing.
-	 *
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @param concurrentResult the result of concurrent processing, which could
@@ -97,7 +92,6 @@ public interface CallableProcessingInterceptor {
 	 * the {@code Callable} task completes. Implementations may return a value,
 	 * including an {@link Exception}, to use instead of the value the
 	 * {@link Callable} did not return in time.
-	 *
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @return a concurrent result value; if the value is anything other than
@@ -110,7 +104,6 @@ public interface CallableProcessingInterceptor {
 	/**
 	 * Invoked from a container thread when async processing completes for any
 	 * reason including timeout or network error.
-	 *
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors

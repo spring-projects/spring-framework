@@ -26,10 +26,10 @@ import org.springframework.test.context.TestContextManager;
  * by calling {@link TestContextManager#beforeTestClass() beforeTestClass()} on the
  * supplied {@link TestContextManager}.
  *
- * @see #evaluate()
- * @see RunAfterTestMethodCallbacks
  * @author Sam Brannen
  * @since 3.0
+ * @see #evaluate()
+ * @see RunAfterTestMethodCallbacks
  */
 public class RunBeforeTestClassCallbacks extends Statement {
 
@@ -40,7 +40,6 @@ public class RunBeforeTestClassCallbacks extends Statement {
 
 	/**
 	 * Construct a new {@code RunBeforeTestClassCallbacks} statement.
-	 *
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testContextManager the TestContextManager upon which to call
 	 * {@code beforeTestClass()}
@@ -49,6 +48,7 @@ public class RunBeforeTestClassCallbacks extends Statement {
 		this.next = next;
 		this.testContextManager = testContextManager;
 	}
+
 
 	/**
 	 * Invoke {@link TestContextManager#beforeTestClass()} and then evaluate

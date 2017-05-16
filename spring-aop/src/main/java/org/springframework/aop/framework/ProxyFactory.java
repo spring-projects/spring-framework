@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.ClassUtils;
 
 /**
- * Factory for AOP proxies for programmatic use, rather than via a bean
- * factory. This class provides a simple way of obtaining and configuring
- * AOP proxies in code.
+ * Factory for AOP proxies for programmatic use, rather than via declarative
+ * setup in a bean factory. This class provides a simple way of obtaining
+ * and configuring AOP proxy instances in custom user code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
 	version="1.0">
-	
+
 	<persistence-unit name="pu1" transaction-type="RESOURCE_LOCAL">
 		<description>
 			This unit manages inventory for auto parts. It depends on

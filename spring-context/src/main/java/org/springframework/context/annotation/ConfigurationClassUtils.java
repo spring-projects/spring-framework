@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ abstract class ConfigurationClassUtils {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
 
-	private static final Set<String> candidateIndicators = new HashSet<String>(4);
+	private static final Set<String> candidateIndicators = new HashSet<>(4);
 
 	static {
 		candidateIndicators.add(Component.class.getName());
@@ -108,22 +108,23 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
-		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
-		if (orderAttributes != null) {
-			beanDef.setAttribute(ORDER_ATTRIBUTE, orderAttributes.get(AnnotationUtils.VALUE));
-		}
-
 		if (isFullConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-			return true;
 		}
 		else if (isLiteConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-			return true;
 		}
 		else {
 			return false;
 		}
+
+		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		Integer order = getOrder(metadata);
+		if (order != null) {
+			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
+		}
+
+		return true;
 	}
 
 	/**
@@ -198,11 +199,24 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
+	 * Determine the order for the given configuration class metadata.
+	 * @param metadata the metadata of the annotated class
+	 * @return the {@link @Order} annotation value on the configuration class,
+	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @since 5.0
+	 */
+	public static Integer getOrder(AnnotationMetadata metadata) {
+		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
+		return (orderAttributes != null ? ((Integer) orderAttributes.get(AnnotationUtils.VALUE)) : null);
+	}
+
+	/**
 	 * Determine the order for the given configuration class bean definition,
 	 * as set by {@link #checkConfigurationClassCandidate}.
 	 * @param beanDef the bean definition to check
 	 * @return the {@link @Order} annotation value on the configuration class,
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @since 4.2
 	 */
 	public static int getOrder(BeanDefinition beanDef) {
 		Integer order = (Integer) beanDef.getAttribute(ORDER_ATTRIBUTE);

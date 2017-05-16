@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	private static final boolean jsr107Present = ClassUtils.isPresent(
 			"javax.cache.Cache", CachingConfigurationSelector.class.getClassLoader());
 
-	private static final boolean jCacheImplPresent = ClassUtils.isPresent(
+	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
 			PROXY_JCACHE_CONFIGURATION_CLASS, CachingConfigurationSelector.class.getClassLoader());
 
 
@@ -78,10 +78,10 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getProxyImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
-		if (jsr107Present && jCacheImplPresent) {
+		if (jsr107Present && jcacheImplPresent) {
 			result.add(PROXY_JCACHE_CONFIGURATION_CLASS);
 		}
 		return result.toArray(new String[result.size()]);
@@ -92,9 +92,9 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getAspectJImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add(CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
-		if (jsr107Present && jCacheImplPresent) {
+		if (jsr107Present && jcacheImplPresent) {
 			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		}
 		return result.toArray(new String[result.size()]);

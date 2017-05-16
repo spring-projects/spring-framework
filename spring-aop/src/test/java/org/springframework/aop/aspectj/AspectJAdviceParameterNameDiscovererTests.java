@@ -270,7 +270,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 
 	protected void assertParameterNames(Method m, String pointcut, String returning, String throwing, String[] parameterNames) {
 		assertEquals("bad test specification, must have same number of parameter names as method arguments",
-				m.getParameterTypes().length, parameterNames.length);
+				m.getParameterCount(), parameterNames.length);
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
@@ -307,7 +307,8 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		try {
 			discoverer.getParameterNames(m);
 			fail("Expecting " + exceptionType.getName() + " with message '" + message + "'");
-		} catch (RuntimeException expected) {
+		}
+		catch (RuntimeException expected) {
 			assertEquals("Expecting exception of type " + exceptionType.getName(),
 					exceptionType, expected.getClass());
 			assertEquals("Exception message does not match expected", message, expected.getMessage());

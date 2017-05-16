@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,18 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * &#064;Configuration
  * &#064;EnableScheduling
  * public class AppConfig {
+ *
  *     // various &#064;Bean definitions
  * }</pre>
  *
  * This enables detection of @{@link Scheduled} annotations on any Spring-managed
- * bean in the container.  For example, given a class {@code MyTask}
+ * bean in the container. For example, given a class {@code MyTask}
  *
  * <pre class="code">
  * package com.myco.tasks;
  *
  * public class MyTask {
+ *
  *     &#064;Scheduled(fixedRate=1000)
  *     public void work() {
  *         // task execution logic
@@ -60,6 +62,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * &#064;Configuration
  * &#064;EnableScheduling
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public MyTask task() {
  *         return new MyTask();
@@ -72,6 +75,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <pre class="code">
  * &#064;Configuration
+ * &#064;EnableScheduling
  * &#064;ComponentScan(basePackages="com.myco.tasks")
  * public class AppConfig {
  * }</pre>
@@ -83,14 +87,21 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * &#064;Configuration
  * &#064;EnableScheduling
  * public class AppConfig {
+ *
  *     &#064;Scheduled(fixedRate=1000)
  *     public void work() {
  *         // task execution logic
  *     }
  * }</pre>
  *
- * In all of the above scenarios, a default single-threaded task executor is used.
- * When more control is desired, a {@code @Configuration} class may implement
+ * <p>By default, will be searching for an associated scheduler definition: either
+ * a unique {@link org.springframework.scheduling.TaskScheduler} bean in the context,
+ * or a {@code TaskScheduler} bean named "taskScheduler" otherwise; the same lookup
+ * will also be performed for a {@link java.util.concurrent.ScheduledExecutorService}
+ * bean. If neither of the two is resolvable, a local single-threaded default
+ * scheduler will be created and used within the registrar.
+ *
+ * <p>When more control is desired, a {@code @Configuration} class may implement
  * {@link SchedulingConfigurer}. This allows access to the underlying
  * {@link ScheduledTaskRegistrar} instance. For example, the following example
  * demonstrates how to customize the {@link Executor} used to execute scheduled
@@ -100,6 +111,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * &#064;Configuration
  * &#064;EnableScheduling
  * public class AppConfig implements SchedulingConfigurer {
+ *
  *     &#064;Override
  *     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
  *         taskRegistrar.setScheduler(taskExecutor());
@@ -111,11 +123,11 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     }
  * }</pre>
  *
- * Note in the example above the use of {@code @Bean(destroyMethod="shutdown")}. This
- * ensures that the task executor is properly shut down when the Spring application
- * context itself is closed.
+ * <p>Note in the example above the use of {@code @Bean(destroyMethod="shutdown")}.
+ * This ensures that the task executor is properly shut down when the Spring
+ * application context itself is closed.
  *
- * Implementing {@code SchedulingConfigurer} also allows for fine-grained
+ * <p>Implementing {@code SchedulingConfigurer} also allows for fine-grained
  * control over task registration via the {@code ScheduledTaskRegistrar}.
  * For example, the following configures the execution of a particular bean
  * method per a custom {@code Trigger} implementation:
@@ -124,6 +136,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * &#064;Configuration
  * &#064;EnableScheduling
  * public class AppConfig implements SchedulingConfigurer {
+ *
  *     &#064;Override
  *     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
  *         taskRegistrar.setScheduler(taskScheduler());
@@ -150,22 +163,32 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <task:annotation-driven scheduler="taskScheduler"/>
+ *
  *     <task:scheduler id="taskScheduler" pool-size="42"/>
- *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *
+ *     <task:scheduled-tasks scheduler="taskScheduler">
+ *         <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *     </task:scheduled-tasks>
+ *
  *     <bean id="myTask" class="com.foo.MyTask"/>
+ *
  * </beans>
  * }</pre>
- * the examples are equivalent save that in XML a <em>fixed-rate</em> period is used
+ *
+ * The examples are equivalent save that in XML a <em>fixed-rate</em> period is used
  * instead of a custom <em>{@code Trigger}</em> implementation; this is because the
  * {@code task:} namespace {@code scheduled} cannot easily expose such support. This is
  * but one demonstration how the code-based approach allows for maximum configurability
  * through direct access to actual componentry.<p>
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see Scheduled
  * @see SchedulingConfiguration

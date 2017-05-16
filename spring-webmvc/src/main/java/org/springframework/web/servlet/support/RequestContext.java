@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +53,18 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Context holder for request-specific state, like current web application context, current locale, current theme,
- * and potential binding errors. Provides easy access to localized messages and Errors instances.
+ * Context holder for request-specific state, like current web application context, current locale,
+ * current theme, and potential binding errors. Provides easy access to localized messages and
+ * Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within JSP's "useBean" tag, JSP scriptlets, JSTL EL, Velocity
- * templates, etc. Necessary for views that do not have access to the servlet request, like Velocity templates.
+ * <p>Suitable for exposition to views, and usage within JSP's "useBean" tag, JSP scriptlets, JSTL EL,
+ * etc. Necessary for views that do not have access to the servlet request, like FreeMarker templates.
  *
  * <p>Can be instantiated manually, or automatically exposed to views as model attribute via AbstractView's
  * "requestContextAttribute" property.
  *
- * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext and using
- * an appropriate fallback for the locale (the HttpServletRequest's primary locale).
+ * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext
+ * and using an appropriate fallback for the locale (the HttpServletRequest's primary locale).
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -88,12 +89,6 @@ public class RequestContext {
 	 * By default, the DispatcherServlet's context (or the root context as fallback) is exposed.
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
-
-	/**
-	 * The name of the bean to use to look up in an implementation of
-	 * {@link RequestDataValueProcessor} has been configured.
-	 */
-	private static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
 
 	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
@@ -236,7 +231,11 @@ public class RequestContext {
 		// ServletContext needs to be specified to be able to fall back to the root context!
 		this.webApplicationContext = (WebApplicationContext) request.getAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (this.webApplicationContext == null) {
-			this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
+			this.webApplicationContext = RequestContextUtils.findWebApplicationContext(request, servletContext);
+			if (this.webApplicationContext == null) {
+				throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet " +
+						"request and no ContextLoaderListener registered?");
+			}
 		}
 
 		// Determine locale to use for this RequestContext.
@@ -271,9 +270,9 @@ public class RequestContext {
 
 		this.urlPathHelper = new UrlPathHelper();
 
-		if (this.webApplicationContext.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+		if (this.webApplicationContext.containsBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
 			this.requestDataValueProcessor = this.webApplicationContext.getBean(
-					REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
+					RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
 		}
 	}
 
@@ -469,7 +468,7 @@ public class RequestContext {
 	/**
 	 * (De)activate default HTML escaping for messages and errors, for the scope of this RequestContext.
 	 * <p>The default is the application-wide setting (the "defaultHtmlEscape" context-param in web.xml).
-	 * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
+	 * @see org.springframework.web.util.WebUtils#getDefaultHtmlEscape
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
@@ -841,7 +840,7 @@ public class RequestContext {
 	 */
 	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
-			this.errorsMap = new HashMap<String, Errors>();
+			this.errorsMap = new HashMap<>();
 		}
 		Errors errors = this.errorsMap.get(name);
 		boolean put = false;

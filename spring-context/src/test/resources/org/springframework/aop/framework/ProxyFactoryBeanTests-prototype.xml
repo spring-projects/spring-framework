@@ -10,7 +10,7 @@
 	<bean id="test" class="org.springframework.tests.sample.beans.SideEffectBean">
 		<property name="count"><value>10</value></property>
 	</bean>
-	
+
 	<bean id="prototypeTarget" class="org.springframework.tests.sample.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
@@ -25,7 +25,7 @@
 		<property name="interceptorNames"><value>debugInterceptor,prototypeTarget</value></property>
 		<property name="singleton"><value>false</value></property>
 	</bean>
-	
+
 	<bean id="cglibPrototype"
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>debugInterceptor,prototypeTarget</value></property>

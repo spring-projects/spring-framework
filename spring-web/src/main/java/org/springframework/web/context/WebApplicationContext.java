@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,12 +64,6 @@ public interface WebApplicationContext extends ApplicationContext {
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
 	 */
 	String SCOPE_SESSION = "session";
-
-	/**
-	 * Scope identifier for global session scope: "globalSession".
-	 * Supported in addition to the standard scopes "singleton" and "prototype".
-	 */
-	String SCOPE_GLOBAL_SESSION = "globalSession";
 
 	/**
 	 * Scope identifier for the global web application scope: "application".

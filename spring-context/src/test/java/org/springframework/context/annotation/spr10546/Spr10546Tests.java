@@ -37,7 +37,7 @@ public class Spr10546Tests {
 
 	@After
 	public void closeContext() {
-		if(context != null) {
+		if (context != null) {
 			context.close();
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,7 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testJspOnly() throws Exception {
-
-		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-		viewResolver.setPrefix("/WEB-INF/");
-		viewResolver.setSuffix(".jsp");
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/WEB-INF/", ".jsp");
 
 		standaloneSetup(new PersonController()).setViewResolvers(viewResolver).build()
 			.perform(get("/person/Corea"))
@@ -68,7 +65,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testJsonOnly() throws Exception {
-
 		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
@@ -78,7 +74,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testXmlOnly() throws Exception {
-
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -91,11 +86,10 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testContentNegotiation() throws Exception {
-
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
-		List<View> viewList = new ArrayList<View>();
+		List<View> viewList = new ArrayList<>();
 		viewList.add(new MappingJackson2JsonView());
 		viewList.add(new MarshallingView(marshaller));
 
@@ -131,7 +125,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void defaultViewResolver() throws Exception {
-
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(model().attribute("person", hasProperty("name", equalTo("Corea"))))

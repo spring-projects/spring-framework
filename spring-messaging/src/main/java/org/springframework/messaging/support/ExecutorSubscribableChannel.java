@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 	private final Executor executor;
 
-	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<ExecutorChannelInterceptor>(4);
+	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<>(4);
 
 
 	/**
@@ -99,7 +99,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 
 	/**
-	 * Invoke a MessageHandler with ExecutorChannelInterceptor's.
+	 * Invoke a MessageHandler with ExecutorChannelInterceptors.
 	 */
 	private class SendTask implements MessageHandlingRunnable {
 
@@ -143,10 +143,11 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				throw new MessageDeliveryException(message, description, ex);
 			}
-			catch (Error ex) {
+			catch (Throwable err) {
 				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
-				triggerAfterMessageHandled(message, new MessageDeliveryException(message, description, ex));
-				throw ex;
+				MessageDeliveryException ex2 = new MessageDeliveryException(message, description, err);
+				triggerAfterMessageHandled(message, ex2);
+				throw ex2;
 			}
 		}
 

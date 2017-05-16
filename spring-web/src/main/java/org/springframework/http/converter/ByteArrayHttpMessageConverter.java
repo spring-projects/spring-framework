@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,18 @@ import org.springframework.util.StreamUtils;
  * overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<byte[]> {
 
-	/** Creates a new instance of the {@code ByteArrayHttpMessageConverter}. */
+	/**
+	 * Create a new instance of the {@code ByteArrayHttpMessageConverter}.
+	 */
 	public ByteArrayHttpMessageConverter() {
 		super(new MediaType("application", "octet-stream"), MediaType.ALL);
 	}
+
 
 	@Override
 	public boolean supports(Class<?> clazz) {

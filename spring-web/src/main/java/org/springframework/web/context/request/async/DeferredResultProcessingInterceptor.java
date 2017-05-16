@@ -25,7 +25,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * <p>A {@code DeferredResultProcessingInterceptor} is invoked before the start
  * of async processing, after the {@code DeferredResult} is set as well as on
- * timeout, or or after completing for any reason including a timeout or network
+ * timeout, or after completing for any reason including a timeout or network
  * error.
  *
  * <p>As a general rule exceptions raised by interceptor methods will cause

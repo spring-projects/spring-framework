@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,11 @@ public abstract class TypeUtils {
 			return true;
 		}
 
-		if (lhsType instanceof Class<?>) {
+		if (lhsType instanceof Class) {
 			Class<?> lhsClass = (Class<?>) lhsType;
 
 			// just comparing two classes
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsType);
 			}
 
@@ -60,7 +60,7 @@ public abstract class TypeUtils {
 				Type rhsRaw = ((ParameterizedType) rhsType).getRawType();
 
 				// a parameterized type is always assignable to its raw class type
-				if (rhsRaw instanceof Class<?>) {
+				if (rhsRaw instanceof Class) {
 					return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsRaw);
 				}
 			}
@@ -73,10 +73,10 @@ public abstract class TypeUtils {
 
 		// parameterized types are only assignable to other parameterized types and class types
 		if (lhsType instanceof ParameterizedType) {
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				Type lhsRaw = ((ParameterizedType) lhsType).getRawType();
 
-				if (lhsRaw instanceof Class<?>) {
+				if (lhsRaw instanceof Class) {
 					return ClassUtils.isAssignable((Class<?>) lhsRaw, (Class<?>) rhsType);
 				}
 			}
@@ -88,7 +88,7 @@ public abstract class TypeUtils {
 		if (lhsType instanceof GenericArrayType) {
 			Type lhsComponent = ((GenericArrayType) lhsType).getGenericComponentType();
 
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				Class<?> rhsClass = (Class<?>) rhsType;
 
 				if (rhsClass.isArray()) {

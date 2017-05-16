@@ -31,7 +31,7 @@ import org.springframework.web.util.HtmlUtils;
 
 /**
  * Simple adapter to expose the bind status of a field or object.
- * Set as a variable both by the JSP bind tag and Velocity/FreeMarker macros.
+ * Set as a variable both by the JSP bind tag and FreeMarker macros.
  *
  * <p>Obviously, object status representations (i.e. errors at the object level
  * rather than the field level) do not have an expression and a value but only

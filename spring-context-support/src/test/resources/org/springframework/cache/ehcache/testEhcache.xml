@@ -38,7 +38,7 @@
         timeToLiveSeconds="120"
         overflowToDisk="true"
         />
-        
+       
     <cache name="myCache1"
         maxElementsInMemory="300"
         eternal="false"
@@ -46,5 +46,5 @@
         timeToLiveSeconds="500"
         overflowToDisk="true"
         />
-        
+       
 </ehcache>

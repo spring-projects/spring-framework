@@ -29,51 +29,51 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class CustomizableTraceInterceptorTests {
+public class CustomizableTraceInterceptorTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEmptyEnterMessage() {
 		// Must not be able to set empty enter message
 		new CustomizableTraceInterceptor().setEnterMessage("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEnterMessageWithReturnValuePlaceholder() {
 		// Must not be able to set enter message with return value placeholder
 		new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEnterMessageWithExceptionPlaceholder() {
 		// Must not be able to set enter message with exception placeholder
 		new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEnterMessageWithInvocationTimePlaceholder() {
 		// Must not be able to set enter message with invocation time placeholder
 		new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEmptyExitMessage() {
 		// Must not be able to set empty exit message
 		new CustomizableTraceInterceptor().setExitMessage("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetExitMessageWithExceptionPlaceholder() {
 		// Must not be able to set exit message with exception placeholder
 		new CustomizableTraceInterceptor().setExitMessage(CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetEmptyExceptionMessage() {
 		// Must not be able to set empty exception message
 		new CustomizableTraceInterceptor().setExceptionMessage("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetExceptionMethodWithReturnValuePlaceholder() {
 		// Must not be able to set exception message with return value placeholder
 		new CustomizableTraceInterceptor().setExceptionMessage(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE);

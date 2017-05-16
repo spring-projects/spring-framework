@@ -7,7 +7,7 @@
 		<lookup-method name="getPrototypeDependency" bean="jenny"/>
 		<lookup-method name="protectedOverrideSingleton" bean="david"/>
 	</bean>
-	
+
 	<!--
 		Test that overrides work on an inherited method
 	-->
@@ -15,7 +15,7 @@
 		<lookup-method name="getPrototypeDependency" bean="jenny"/>
 		<lookup-method name="protectedOverrideSingleton" bean="david"/>
 	</bean>
-	
+
 	<!--
 		We can use this to test the construction cost of beans with method overrides
 	-->
@@ -33,19 +33,19 @@
 		<lookup-method name="getPrototypeDependency" bean="david"/>
 		<lookup-method name="protectedOverrideSingleton" bean="jenny"/>
 	</bean>
-	
-	
+
+
 	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 		<property name="friends">
 			<bean class="org.springframework.tests.sample.beans.TestBean"/>
 		</property>
 	</bean>
-	
+
 	<bean id="jennyParent" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
@@ -56,7 +56,7 @@
 
 	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" scope="prototype">
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 
@@ -70,12 +70,12 @@
 		</property>
 		<property name="age"><value>27</value></property>
 	</bean>
-	
+
 	<bean id="magicDavid" class="org.springframework.tests.sample.beans.TestBean" autowire="byName"/>
-	
+
 	<!--  this should be autowired as well! -->
 	<bean id="magicDavidDerived" parent="magicDavid" />
-	
+
 	<bean id="spouse" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name" value="Linda"/>
 	</bean>

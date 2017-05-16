@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
@@ -53,13 +54,14 @@ import static org.junit.Assert.*;
  */
 public class DefaultMessageHandlerMethodFactoryTests {
 
+	private final SampleBean sample = new SampleBean();
+
 	@Rule
 	public final TestName name = new TestName();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private final SampleBean sample = new SampleBean();
 
 	@Test
 	public void customConversion() throws Exception {
@@ -114,7 +116,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 	@Test
 	public void customArgumentResolver() throws Exception {
 		DefaultMessageHandlerMethodFactory instance = createInstance();
-		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new CustomHandlerMethodArgumentResolver());
 		instance.setCustomArgumentResolvers(customResolvers);
 		instance.afterPropertiesSet();
@@ -129,7 +131,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 	@Test
 	public void overrideArgumentResolvers() throws Exception {
 		DefaultMessageHandlerMethodFactory instance = createInstance();
-		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new CustomHandlerMethodArgumentResolver());
 		instance.setArgumentResolvers(customResolvers);
 		instance.afterPropertiesSet();
@@ -146,7 +148,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 		InvocableHandlerMethod invocableHandlerMethod2 =
 				createInvocableHandlerMethod(instance, "simpleString", String.class);
 
-		thrown.expect(IllegalStateException.class);
+		thrown.expect(MethodArgumentResolutionException.class);
 		thrown.expectMessage("No suitable resolver for");
 		invocableHandlerMethod2.invoke(message);
 	}
@@ -211,7 +213,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 
 	static class SampleBean {
 
-		private final Map<String, Boolean> invocations = new HashMap<String, Boolean>();
+		private final Map<String, Boolean> invocations = new HashMap<>();
 
 		public void simpleString(String value) {
 			invocations.put("simpleString", true);
@@ -240,4 +242,5 @@ public class DefaultMessageHandlerMethodFactoryTests {
 			return Locale.getDefault();
 		}
 	}
+
 }

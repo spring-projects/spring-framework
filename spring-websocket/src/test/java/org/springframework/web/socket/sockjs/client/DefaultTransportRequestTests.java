@@ -127,7 +127,7 @@ public class DefaultTransportRequestTests {
 
 	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
-		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), transport, type, CODEC);
+		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 
 }

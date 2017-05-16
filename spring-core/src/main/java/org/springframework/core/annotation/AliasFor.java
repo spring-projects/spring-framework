@@ -29,10 +29,10 @@ import java.lang.annotation.Target;
  *
  * <h3>Usage Scenarios</h3>
  * <ul>
- * <li><strong>Aliases within an annotation</strong>: within a single
+ * <li><strong>Explicit aliases within an annotation</strong>: within a single
  * annotation, {@code @AliasFor} can be declared on a pair of attributes to
  * signal that they are interchangeable aliases for each other.</li>
- * <li><strong>Alias for attribute in meta-annotation</strong>: if the
+ * <li><strong>Explicit alias for attribute in meta-annotation</strong>: if the
  * {@link #annotation} attribute of {@code @AliasFor} is set to a different
  * annotation than the one that declares it, the {@link #attribute} is
  * interpreted as an alias for an attribute in a meta-annotation (i.e., an
@@ -40,6 +40,12 @@ import java.lang.annotation.Target;
  * control over exactly which attributes are overridden within an annotation
  * hierarchy. In fact, with {@code @AliasFor} it is even possible to declare
  * an alias for the {@code value} attribute of a meta-annotation.</li>
+ * <li><strong>Implicit aliases within an annotation</strong>: if one or
+ * more attributes within an annotation are declared as attribute overrides
+ * for the same meta-annotation attribute (either directly or transitively),
+ * those attributes will be treated as a set of <em>implicit</em> aliases
+ * for each other, resulting in behavior analogous to that for explicit
+ * aliases within an annotation.</li>
  * </ul>
  *
  * <h3>Usage Requirements</h3>
@@ -57,64 +63,116 @@ import java.lang.annotation.Target;
  *
  * <h3>Implementation Requirements</h3>
  * <ul>
- * <li><strong>Aliases within an annotation</strong>:
+ * <li><strong>Explicit aliases within an annotation</strong>:
  * <ol>
  * <li>Each attribute that makes up an aliased pair must be annotated with
- * {@code @AliasFor}, and the {@link #attribute} must reference the
- * <em>other</em> attribute in the pair.</li>
+ * {@code @AliasFor}, and either {@link #attribute} or {@link #value} must
+ * reference the <em>other</em> attribute in the pair.</li>
  * <li>Aliased attributes must declare the same return type.</li>
  * <li>Aliased attributes must declare a default value.</li>
  * <li>Aliased attributes must declare the same default value.</li>
- * <li>The {@link #annotation} attribute may remain set to the default,
- * although setting it to the declaring class for both attributes in the
- * pair is also valid.</li>
+ * <li>{@link #annotation} should not be declared.</li>
  * </ol>
  * </li>
- * <li><strong>Alias for attribute in meta-annotation</strong>:
+ * <li><strong>Explicit alias for attribute in meta-annotation</strong>:
  * <ol>
  * <li>The attribute that is an alias for an attribute in a meta-annotation
- * must be annotated with {@code @AliasFor}; the {@link #attribute} must
- * reference the aliased attribute in the meta-annotation; and the
- * {@link #annotation} must reference the meta-annotation.</li>
+ * must be annotated with {@code @AliasFor}, and {@link #attribute} must
+ * reference the attribute in the meta-annotation.</li>
  * <li>Aliased attributes must declare the same return type.</li>
+ * <li>{@link #annotation} must reference the meta-annotation.</li>
+ * <li>The referenced meta-annotation must be <em>meta-present</em> on the
+ * annotation class that declares {@code @AliasFor}.</li>
+ * </ol>
+ * </li>
+ * <li><strong>Implicit aliases within an annotation</strong>:
+ * <ol>
+ * <li>Each attribute that belongs to a set of implicit aliases must be
+ * annotated with {@code @AliasFor}, and {@link #attribute} must reference
+ * the same attribute in the same meta-annotation (either directly or
+ * transitively via other explicit meta-annotation attribute overrides
+ * within the annotation hierarchy).</li>
+ * <li>Aliased attributes must declare the same return type.</li>
+ * <li>Aliased attributes must declare a default value.</li>
+ * <li>Aliased attributes must declare the same default value.</li>
+ * <li>{@link #annotation} must reference an appropriate meta-annotation.</li>
+ * <li>The referenced meta-annotation must be <em>meta-present</em> on the
+ * annotation class that declares {@code @AliasFor}.</li>
  * </ol>
  * </li>
  * </ul>
  *
- * <h3>Example: Aliases within an Annotation</h3>
+ * <h3>Example: Explicit Aliases within an Annotation</h3>
+ * <p>In {@code @ContextConfiguration}, {@code value} and {@code locations}
+ * are explicit aliases for each other.
+ *
  * <pre class="code"> public &#064;interface ContextConfiguration {
  *
- *    &#064;AliasFor(attribute = "locations")
+ *    &#064;AliasFor("locations")
  *    String[] value() default {};
  *
- *    &#064;AliasFor(attribute = "value")
+ *    &#064;AliasFor("value")
  *    String[] locations() default {};
  *
  *    // ...
  * }</pre>
  *
- * <h3>Example: Alias for Attribute in Meta-annotation</h3>
+ * <h3>Example: Explicit Alias for Attribute in Meta-annotation</h3>
+ * <p>In {@code @XmlTestConfig}, {@code xmlFiles} is an explicit alias for
+ * {@code locations} in {@code @ContextConfiguration}. In other words,
+ * {@code xmlFiles} overrides the {@code locations} attribute in
+ * {@code @ContextConfiguration}.
+ *
  * <pre class="code"> &#064;ContextConfiguration
- * public &#064;interface MyTestConfig {
+ * public &#064;interface XmlTestConfig {
  *
  *    &#064;AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
  *    String[] xmlFiles();
  * }</pre>
  *
+ * <h3>Example: Implicit Aliases within an Annotation</h3>
+ * <p>In {@code @MyTestConfig}, {@code value}, {@code groovyScripts}, and
+ * {@code xmlFiles} are all explicit meta-annotation attribute overrides for
+ * the {@code locations} attribute in {@code @ContextConfiguration}. These
+ * three attributes are therefore also implicit aliases for each other.
+ *
+ * <pre class="code"> &#064;ContextConfiguration
+ * public &#064;interface MyTestConfig {
+ *
+ *    &#064;AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+ *    String[] value() default {};
+ *
+ *    &#064;AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+ *    String[] groovyScripts() default {};
+ *
+ *    &#064;AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+ *    String[] xmlFiles() default {};
+ * }</pre>
+ *
+ * <h3>Example: Transitive Implicit Aliases within an Annotation</h3>
+ * <p>In {@code @GroovyOrXmlTestConfig}, {@code groovy} is an explicit
+ * override for the {@code groovyScripts} attribute in {@code @MyTestConfig};
+ * whereas, {@code xml} is an explicit override for the {@code locations}
+ * attribute in {@code @ContextConfiguration}. Furthermore, {@code groovy}
+ * and {@code xml} are transitive implicit aliases for each other, since they
+ * both effectively override the {@code locations} attribute in
+ * {@code @ContextConfiguration}.
+ *
+ * <pre class="code"> &#064;MyTestConfig
+ * public &#064;interface GroovyOrXmlTestConfig {
+ *
+ *    &#064;AliasFor(annotation = MyTestConfig.class, attribute = "groovyScripts")
+ *    String[] groovy() default {};
+ *
+ *    &#064;AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+ *    String[] xml() default {};
+ * }</pre>
+ *
  * <h3>Spring Annotations Supporting Attribute Aliases</h3>
- * <p>As of Spring Framework 4.2, the following annotations within core
- * Spring have been updated to use {@code @AliasFor} to configure their
- * internal attribute aliases.
- * <ul>
- * <li>{@link org.springframework.jmx.export.annotation.ManagedResource}</li>
- * <li>{@link org.springframework.test.context.ActiveProfiles}</li>
- * <li>{@link org.springframework.test.context.ContextConfiguration}</li>
- * <li>{@link org.springframework.test.context.TestExecutionListeners}</li>
- * <li>{@link org.springframework.test.context.TestPropertySource}</li>
- * <li>{@link org.springframework.test.context.jdbc.Sql}</li>
- * <li>{@link org.springframework.web.bind.annotation.ControllerAdvice}</li>
- * <li>{@link org.springframework.web.bind.annotation.RequestMapping}</li>
- * </ul>
+ * <p>As of Spring Framework 4.2, several annotations within core Spring
+ * have been updated to use {@code @AliasFor} to configure their internal
+ * attribute aliases. Consult the Javadoc for individual annotations as well
+ * as the reference manual for details.
  *
  * @author Sam Brannen
  * @since 4.2
@@ -129,9 +187,20 @@ import java.lang.annotation.Target;
 public @interface AliasFor {
 
 	/**
-	 * The name of the attribute that <em>this</em> attribute is an alias for.
+	 * Alias for {@link #attribute}.
+	 * <p>Intended to be used instead of {@link #attribute} when {@link #annotation}
+	 * is not declared &mdash; for example: {@code @AliasFor("value")} instead of
+	 * {@code @AliasFor(attribute = "value")}.
 	 */
-	String attribute();
+	@AliasFor("attribute")
+	String value() default "";
+
+	/**
+	 * The name of the attribute that <em>this</em> attribute is an alias for.
+	 * @see #value
+	 */
+	@AliasFor("value")
+	String attribute() default "";
 
 	/**
 	 * The type of annotation in which the aliased {@link #attribute} is declared.

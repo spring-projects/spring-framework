@@ -30,7 +30,7 @@ import org.springframework.tests.sample.beans.TestBean;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class ImplicitJPArgumentMatchingAtAspectJTests {
+public class ImplicitJPArgumentMatchingAtAspectJTests {
 
 	@Test
 	public void testAspect() {

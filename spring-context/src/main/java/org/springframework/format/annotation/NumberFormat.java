@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares that a field should be formatted as a number.
+ * Declares that a field or method parameter should be formatted as a number.
  *
  * <p>Supports formatting by style or custom pattern string.
  * Can be applied to any JDK {@code java.lang.Number} type.
@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * When the {@link #pattern} attribute is specified, it takes precedence over
  * the {@link #style} attribute. When no annotation attributes are specified,
  * the default format applied is style-based for either number of currency,
- * depending on the annotated field type.
+ * depending on the annotated field or method parameter type.
  *
  * @author Keith Donald
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.test.context.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -88,20 +90,36 @@ public abstract class TestContextResourceUtils {
 	}
 
 	/**
-	 * Convert the supplied paths to {@link Resource} handles using the given
-	 * {@link ResourceLoader}.
+	 * Convert the supplied paths to an array of {@link Resource} handles using
+	 * the given {@link ResourceLoader}.
 	 *
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
 	 * @return a new array of resources
+	 * @see #convertToResourceList(ResourceLoader, String...)
 	 * @see #convertToClasspathResourcePaths
 	 */
 	public static Resource[] convertToResources(ResourceLoader resourceLoader, String... paths) {
-		List<Resource> list = new ArrayList<Resource>();
-		for (String path : paths) {
-			list.add(resourceLoader.getResource(path));
-		}
-		return list.toArray(new Resource[list.size()]);
+		return stream(resourceLoader, paths).toArray(Resource[]::new);
+	}
+
+	/**
+	 * Convert the supplied paths to a list of {@link Resource} handles using
+	 * the given {@link ResourceLoader}.
+	 *
+	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
+	 * @param paths the paths to be converted
+	 * @return a new list of resources
+	 * @since 4.2
+	 * @see #convertToResources(ResourceLoader, String...)
+	 * @see #convertToClasspathResourcePaths
+	 */
+	public static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {
+		return stream(resourceLoader, paths).collect(Collectors.toList());
+	}
+
+	private static Stream<Resource> stream(ResourceLoader resourceLoader, String... paths) {
+		return Arrays.stream(paths).map(resourceLoader::getResource);
 	}
 
 }
