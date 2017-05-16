@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -66,11 +67,12 @@ public class MockServerRequest implements ServerRequest {
 
 	private final WebSession session;
 
+	private Principal principal;
 
 	private MockServerRequest(HttpMethod method, URI uri,
 			MockHeaders headers, Object body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables, WebSession session) {
+			Map<String, String> pathVariables, WebSession session, Principal principal) {
 
 		this.method = method;
 		this.uri = uri;
@@ -80,6 +82,7 @@ public class MockServerRequest implements ServerRequest {
 		this.queryParams = queryParams;
 		this.pathVariables = pathVariables;
 		this.session = session;
+		this.principal = principal;
 	}
 
 
@@ -148,6 +151,10 @@ public class MockServerRequest implements ServerRequest {
 		return Mono.justOrEmpty(this.session);
 	}
 
+	@Override
+	public Mono<? extends Principal> principal() {
+		return Mono.justOrEmpty(this.principal);
+	}
 
 	public static Builder builder() {
 		return new BuilderImpl();
@@ -178,6 +185,8 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder session(WebSession session);
 
+		Builder session(Principal principal);
+
 		MockServerRequest body(Object body);
 
 		MockServerRequest build();
@@ -201,6 +210,8 @@ public class MockServerRequest implements ServerRequest {
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
 
 		private WebSession session;
+
+		private Principal principal;
 
 		@Override
 		public Builder method(HttpMethod method) {
@@ -284,16 +295,25 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		public Builder session(Principal principal) {
+			Assert.notNull(principal, "'principal' must not be null");
+			this.principal = principal;
+			return this;
+		}
+
+		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
 			return new MockServerRequest(this.method, this.uri, this.headers, this.body,
-					this.attributes, this.queryParams, this.pathVariables, this.session);
+					this.attributes, this.queryParams, this.pathVariables, this.session,
+					this.principal);
 		}
 
 		@Override
 		public MockServerRequest build() {
 			return new MockServerRequest(this.method, this.uri, this.headers, null,
-					this.attributes, this.queryParams, this.pathVariables, this.session);
+					this.attributes, this.queryParams, this.pathVariables, this.session,
+					this.principal);
 		}
 	}
 

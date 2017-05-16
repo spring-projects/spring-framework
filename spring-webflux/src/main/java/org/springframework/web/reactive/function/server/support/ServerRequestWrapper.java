@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server.support;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -144,6 +145,10 @@ public class ServerRequestWrapper implements ServerRequest {
 		return this.delegate.session();
 	}
 
+	@Override
+	public Mono<? extends Principal> principal() {
+		return this.delegate.principal();
+	}
 
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed

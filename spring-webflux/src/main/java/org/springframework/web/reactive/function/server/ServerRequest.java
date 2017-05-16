@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -167,6 +168,11 @@ public interface ServerRequest {
 	 * method does not automatically create a session.
 	 */
 	Mono<WebSession> session();
+
+	/**
+	 * Return the authenticated user for the request, if any.
+	 */
+	Mono<? extends Principal> principal();
 
 
 	/**

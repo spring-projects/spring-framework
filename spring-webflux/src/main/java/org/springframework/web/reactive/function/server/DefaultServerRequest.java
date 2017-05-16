@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -155,6 +156,11 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public Mono<WebSession> session() {
 		return this.exchange.getSession();
+	}
+
+	@Override
+	public Mono<? extends Principal> principal() {
+		return this.exchange.getPrincipal();
 	}
 
 	private ServerHttpRequest request() {

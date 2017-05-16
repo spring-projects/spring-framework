@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -541,6 +542,11 @@ public abstract class RequestPredicates {
 		@Override
 		public Mono<WebSession> session() {
 			return this.request.session();
+		}
+
+		@Override
+		public Mono<? extends Principal> principal() {
+			return this.request.principal();
 		}
 
 		@Override
