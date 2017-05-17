@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A wildcard path element. In the pattern '/foo/&ast;/goo' the * is
@@ -32,6 +32,7 @@ class WildcardPathElement extends PathElement {
 		super(pos, separator);
 	}
 
+
 	/**
 	 * Matching on a WildcardPathElement is quite straight forward. Scan the 
 	 * candidate from the candidateIndex onwards for the next separator or the end of the
@@ -40,7 +41,7 @@ class WildcardPathElement extends PathElement {
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
-		if (next == null) {
+		if (this.next == null) {
 			if (matchingContext.determineRemainingPath) {
 				matchingContext.remainingPathIndex = nextPos;
 				return true;
@@ -50,10 +51,10 @@ class WildcardPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return matchingContext.isAllowOptionalTrailingSlash() && // if optional slash is on...
-						   nextPos > candidateIndex && // and there is at least one character to match the *...
-						   (nextPos + 1) == matchingContext.candidateLength &&  // and the nextPos is the end of the candidate...
-						   matchingContext.candidate[nextPos] == separator; // and the final character is a separator
+					return (matchingContext.isAllowOptionalTrailingSlash() &&  // if optional slash is on...
+							nextPos > candidateIndex &&  // and there is at least one character to match the *...
+							(nextPos + 1) == matchingContext.candidateLength &&   // and the nextPos is the end of the candidate...
+							matchingContext.candidate[nextPos] == separator);  // and the final character is a separator
 				}
 			}
 		}
@@ -65,17 +66,13 @@ class WildcardPathElement extends PathElement {
 			if (nextPos == candidateIndex) {
 				return false;
 			}
-			return next.matches(nextPos, matchingContext);
+			return this.next.matches(nextPos, matchingContext);
 		}
 	}
 
 	@Override
 	public int getNormalizedLength() {
 		return 1;
-	}
-
-	public String toString() {
-		return "Wildcard(*)";
 	}
 
 	@Override
@@ -86,6 +83,11 @@ class WildcardPathElement extends PathElement {
 	@Override
 	public int getScore() {
 		return WILDCARD_WEIGHT;
+	}
+
+
+	public String toString() {
+		return "Wildcard(*)";
 	}
 
 }

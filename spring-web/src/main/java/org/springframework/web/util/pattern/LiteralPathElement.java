@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A literal path element. In the pattern '/foo/bar/goo' there are three
@@ -51,11 +51,12 @@ class LiteralPathElement extends PathElement {
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		if ((candidateIndex + text.length) > matchingContext.candidateLength) {
-			return false; // not enough data, cannot be a match
+			return false;  // not enough data, cannot be a match
 		}
-		if (caseSensitive) {
+
+		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
-				if (matchingContext.candidate[candidateIndex++] != text[i]) {
+				if (matchingContext.candidate[candidateIndex++] != this.text[i]) {
 					return false;
 				}
 			}
@@ -63,12 +64,13 @@ class LiteralPathElement extends PathElement {
 		else {
 			for (int i = 0; i < len; i++) {
 				// TODO revisit performance if doing a lot of case insensitive matching
-				if (Character.toLowerCase(matchingContext.candidate[candidateIndex++]) != text[i]) {
+				if (Character.toLowerCase(matchingContext.candidate[candidateIndex++]) != this.text[i]) {
 					return false;
 				}
 			}
 		}
-		if (next == null) {
+
+		if (this.next == null) {
 			if (matchingContext.determineRemainingPath && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
 				matchingContext.remainingPathIndex = candidateIndex;
 				return true;
@@ -78,17 +80,17 @@ class LiteralPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return matchingContext.isAllowOptionalTrailingSlash() &&
-						   (candidateIndex + 1) == matchingContext.candidateLength && 
-						   matchingContext.candidate[candidateIndex] == separator;
+					return (matchingContext.isAllowOptionalTrailingSlash() &&
+							(candidateIndex + 1) == matchingContext.candidateLength &&
+							matchingContext.candidate[candidateIndex] == separator);
 				}
 			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
-				return true; // no more data but everything matched so far
+				return true;  // no more data but everything matched so far
 			}
-			return next.matches(candidateIndex, matchingContext);
+			return this.next.matches(candidateIndex, matchingContext);
 		}
 	}
 
@@ -97,8 +99,9 @@ class LiteralPathElement extends PathElement {
 		return len;
 	}
 
+
 	public String toString() {
-		return "Literal(" + new String(text) + ")";
+		return "Literal(" + String.valueOf(this.text) + ")";
 	}
 
 }

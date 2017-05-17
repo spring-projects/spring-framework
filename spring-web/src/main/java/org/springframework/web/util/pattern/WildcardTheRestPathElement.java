@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
-
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+package org.springframework.web.util.pattern;
 
 /**
  * A path element representing wildcarding the rest of a path. In the pattern
@@ -31,8 +29,9 @@ class WildcardTheRestPathElement extends PathElement {
 		super(pos, separator);
 	}
 
+
 	@Override
-	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
+	public boolean matches(int candidateIndex, PathPattern.MatchingContext matchingContext) {
 		// If there is more data, it must start with the separator
 		if (candidateIndex < matchingContext.candidateLength &&
 				matchingContext.candidate[candidateIndex] != separator) {
@@ -44,10 +43,6 @@ class WildcardTheRestPathElement extends PathElement {
 		return true;
 	}
 
-	public String toString() {
-		return "WildcardTheRest(" + separator + "**)";
-	}
-
 	@Override
 	public int getNormalizedLength() {
 		return 1;
@@ -56,6 +51,11 @@ class WildcardTheRestPathElement extends PathElement {
 	@Override
 	public int getWildcardCount() {
 		return 1;
+	}
+
+
+	public String toString() {
+		return "WildcardTheRest(" + this.separator + "**)";
 	}
 
 }

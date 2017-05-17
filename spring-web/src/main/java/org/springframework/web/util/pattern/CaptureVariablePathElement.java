@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
 import java.util.regex.Matcher;
-
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import java.util.regex.Pattern;
 
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern
@@ -26,12 +25,14 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  * must be at least one character to bind to the variable.
  *
  * @author Andy Clement
+ * @since 5.0
  */
 class CaptureVariablePathElement extends PathElement {
 
-	private String variableName;
+	private final String variableName;
 
-	private java.util.regex.Pattern constraintPattern;
+	private Pattern constraintPattern;
+
 
 	/**
 	 * @param pos the position in the pattern of this capture element
@@ -48,43 +49,47 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		if (colon == -1) {
 			// no constraint
-			variableName = new String(captureDescriptor, 1, captureDescriptor.length - 2);
+			this.variableName = new String(captureDescriptor, 1, captureDescriptor.length - 2);
 		}
 		else {
-			variableName = new String(captureDescriptor, 1, colon - 1);
+			this.variableName = new String(captureDescriptor, 1, colon - 1);
 			if (caseSensitive) {
-				constraintPattern = java.util.regex.Pattern
-						.compile(new String(captureDescriptor, colon + 1, captureDescriptor.length - colon - 2));
+				this.constraintPattern = Pattern.compile(
+						new String(captureDescriptor, colon + 1, captureDescriptor.length - colon - 2));
 			}
 			else {
-				constraintPattern = java.util.regex.Pattern.compile(
+				this.constraintPattern = Pattern.compile(
 						new String(captureDescriptor, colon + 1, captureDescriptor.length - colon - 2),
-						java.util.regex.Pattern.CASE_INSENSITIVE);
+						Pattern.CASE_INSENSITIVE);
 			}
 		}
 	}
 
+
 	@Override
-	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
+	public boolean matches(int candidateIndex, PathPattern.MatchingContext matchingContext) {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
 		// There must be at least one character to capture:
 		if (nextPos == candidateIndex) {
 			return false;
 		}
+
 		CharSequence candidateCapture = null;
-		if (constraintPattern != null) {
+		if (this.constraintPattern != null) {
 			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
 			candidateCapture = new SubSequence(matchingContext.candidate, candidateIndex, nextPos);
-			Matcher m = constraintPattern.matcher(candidateCapture);
-			if (m.groupCount() != 0) {
-				throw new IllegalArgumentException("No capture groups allowed in the constraint regex: " + constraintPattern.pattern());
+			Matcher matcher = constraintPattern.matcher(candidateCapture);
+			if (matcher.groupCount() != 0) {
+				throw new IllegalArgumentException(
+						"No capture groups allowed in the constraint regex: " + this.constraintPattern.pattern());
 			}
-			if (!m.matches()) {
+			if (!matcher.matches()) {
 				return false;
 			}
 		}
+
 		boolean match = false;
-		if (next == null) {
+		if (this.next == null) {
 			if (matchingContext.determineRemainingPath && nextPos > candidateIndex) {
 				matchingContext.remainingPathIndex = nextPos;
 				match = true;
@@ -101,24 +106,22 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {
-				match = true; // no more data but matches up to this point
+				match = true;  // no more data but matches up to this point
 			}
 			else {
-				match = next.matches(nextPos, matchingContext);
+				match = this.next.matches(nextPos, matchingContext);
 			}
 		}
+
 		if (match && matchingContext.extractingVariables) {
-			matchingContext.set(variableName, new String(matchingContext.candidate, candidateIndex, nextPos - candidateIndex));
+			matchingContext.set(this.variableName,
+					new String(matchingContext.candidate, candidateIndex, nextPos - candidateIndex));
 		}
 		return match;
 	}
 
 	public String getVariableName() {
 		return this.variableName;
-	}
-
-	public String toString() {
-		return "CaptureVariable({" + variableName + (constraintPattern == null ? "" : ":" + constraintPattern.pattern()) + "})";
 	}
 
 	@Override
@@ -140,4 +143,11 @@ class CaptureVariablePathElement extends PathElement {
 	public int getScore() {
 		return CAPTURE_VARIABLE_WEIGHT;
 	}
+
+
+	public String toString() {
+		return "CaptureVariable({" + this.variableName +
+				(this.constraintPattern != null ? ":" + this.constraintPattern.pattern() : "") + "})";
+	}
+
 }

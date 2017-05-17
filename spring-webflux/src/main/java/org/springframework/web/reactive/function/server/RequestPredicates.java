@@ -41,8 +41,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
@@ -33,33 +34,36 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  */
 class RegexPathElement extends PathElement {
 
-	private final java.util.regex.Pattern GLOB_PATTERN = java.util.regex.Pattern
-			.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+	private final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
 
 	private final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
-	private final List<String> variableNames = new LinkedList<>();
 
-	private char[] regex;
+	private final char[] regex;
 
-	private java.util.regex.Pattern pattern;
+	private final boolean caseSensitive;
 
-	private boolean caseSensitive;
+	private final Pattern pattern;
 
 	private int wildcardCount;
+
+	private final List<String> variableNames = new LinkedList<>();
+
 
 	RegexPathElement(int pos, char[] regex, boolean caseSensitive, char[] completePattern, char separator) {
 		super(pos, separator);
 		this.regex = regex;
 		this.caseSensitive = caseSensitive;
-		buildPattern(regex, completePattern);
+		this.pattern = buildPattern(regex, completePattern);
 	}
 
-	public void buildPattern(char[] regex, char[] completePattern) {
+
+	public Pattern buildPattern(char[] regex, char[] completePattern) {
 		StringBuilder patternBuilder = new StringBuilder();
 		String text = new String(regex);
 		Matcher matcher = GLOB_PATTERN.matcher(text);
 		int end = 0;
+
 		while (matcher.find()) {
 			patternBuilder.append(quote(text, end, matcher.start()));
 			String match = matcher.group();
@@ -68,16 +72,16 @@ class RegexPathElement extends PathElement {
 			}
 			else if ("*".equals(match)) {
 				patternBuilder.append(".*");
-				wildcardCount++;
+				this.wildcardCount++;
 			}
 			else if (match.startsWith("{") && match.endsWith("}")) {
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
 					String variableName = matcher.group(1);
-					if (variableNames.contains(variableName)) {
-						throw new PatternParseException(pos, completePattern, PatternMessage.ILLEGAL_DOUBLE_CAPTURE,
-								variableName);
+					if (this.variableNames.contains(variableName)) {
+						throw new PatternParseException(this.pos, completePattern,
+								PatternParseException.PatternMessage.ILLEGAL_DOUBLE_CAPTURE, variableName);
 					}
 					this.variableNames.add(variableName);
 				}
@@ -87,109 +91,112 @@ class RegexPathElement extends PathElement {
 					patternBuilder.append(variablePattern);
 					patternBuilder.append(')');
 					String variableName = match.substring(1, colonIdx);
-					if (variableNames.contains(variableName)) {
-						throw new PatternParseException(pos, completePattern, PatternMessage.ILLEGAL_DOUBLE_CAPTURE,
-								variableName);
+					if (this.variableNames.contains(variableName)) {
+						throw new PatternParseException(this.pos, completePattern,
+								PatternParseException.PatternMessage.ILLEGAL_DOUBLE_CAPTURE, variableName);
 					}
 					this.variableNames.add(variableName);
 				}
 			}
 			end = matcher.end();
 		}
+
 		patternBuilder.append(quote(text, end, text.length()));
-		if (caseSensitive) {
-			pattern = java.util.regex.Pattern.compile(patternBuilder.toString());
+		if (this.caseSensitive) {
+			return Pattern.compile(patternBuilder.toString());
 		}
 		else {
-			pattern = java.util.regex.Pattern.compile(patternBuilder.toString(),
-					java.util.regex.Pattern.CASE_INSENSITIVE);
+			return Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
 		}
 	}
 
 	public List<String> getVariableNames() {
-		return variableNames;
+		return this.variableNames;
 	}
 
 	private String quote(String s, int start, int end) {
 		if (start == end) {
 			return "";
 		}
-		return java.util.regex.Pattern.quote(s.substring(start, end));
+		return Pattern.quote(s.substring(start, end));
 	}
 
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
-		int p = matchingContext.scanAhead(candidateIndex);
-		Matcher m = pattern.matcher(new SubSequence(matchingContext.candidate, candidateIndex, p));
-		boolean matches = m.matches();
+		int pos = matchingContext.scanAhead(candidateIndex);
+		Matcher matcher = this.pattern.matcher(new SubSequence(matchingContext.candidate, candidateIndex, pos));
+		boolean matches = matcher.matches();
+
 		if (matches) {
-			if (next == null) {
+			if (this.next == null) {
 				if (matchingContext.determineRemainingPath && 
-					((this.variableNames.size() == 0) ? true : p > candidateIndex)) {
-					matchingContext.remainingPathIndex = p;
+					((this.variableNames.size() == 0) ? true : pos > candidateIndex)) {
+					matchingContext.remainingPathIndex = pos;
 					matches = true;
 				}
 				else {
 					// No more pattern, is there more data?
 					// If pattern is capturing variables there must be some actual data to bind to them
-					matches = (p == matchingContext.candidateLength && 
-							   ((this.variableNames.size() == 0) ? true : p > candidateIndex));
+					matches = (pos == matchingContext.candidateLength &&
+							   ((this.variableNames.size() == 0) ? true : pos > candidateIndex));
 					if (!matches && matchingContext.isAllowOptionalTrailingSlash()) {
-						matches = ((this.variableNames.size() == 0) ? true : p > candidateIndex) &&
-							      (p + 1) == matchingContext.candidateLength && 
-							      matchingContext.candidate[p] == separator;
+						matches = ((this.variableNames.size() == 0) ? true : pos > candidateIndex) &&
+							      (pos + 1) == matchingContext.candidateLength &&
+							      matchingContext.candidate[pos] == separator;
 					}
 				}
 			}
 			else {
-				if (matchingContext.isMatchStartMatching && p == matchingContext.candidateLength) {
+				if (matchingContext.isMatchStartMatching && pos == matchingContext.candidateLength) {
 					return true; // no more data but matches up to this point
 				}
-				matches = next.matches(p, matchingContext);
+				matches = this.next.matches(pos, matchingContext);
 			}
 		}
+
 		if (matches && matchingContext.extractingVariables) {
 			// Process captures
-			if (this.variableNames.size() != m.groupCount()) { // SPR-8455
+			if (this.variableNames.size() != matcher.groupCount()) { // SPR-8455
 				throw new IllegalArgumentException("The number of capturing groups in the pattern segment "
 						+ this.pattern + " does not match the number of URI template variables it defines, "
 						+ "which can occur if capturing groups are used in a URI template regex. "
 						+ "Use non-capturing groups instead.");
 			}
-			for (int i = 1; i <= m.groupCount(); i++) {
+			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String name = this.variableNames.get(i - 1);
-				String value = m.group(i);
+				String value = matcher.group(i);
 				matchingContext.set(name, value);
 			}
 		}
 		return matches;
 	}
 
-	public String toString() {
-		return "Regex(" + new String(regex) + ")";
-	}
-
 	@Override
 	public int getNormalizedLength() {
 		int varsLength = 0;
-		for (String variableName : variableNames) {
+		for (String variableName : this.variableNames) {
 			varsLength += variableName.length();
 		}
-		return regex.length - varsLength - variableNames.size();
+		return (this.regex.length - varsLength - this.variableNames.size());
 	}
 
 	public int getCaptureCount() {
-		return variableNames.size();
+		return this.variableNames.size();
 	}
 
 	@Override
 	public int getWildcardCount() {
-		return wildcardCount;
+		return this.wildcardCount;
 	}
 
 	@Override
 	public int getScore() {
-		return getCaptureCount() * CAPTURE_VARIABLE_WEIGHT + getWildcardCount() * WILDCARD_WEIGHT;
+		return (getCaptureCount() * CAPTURE_VARIABLE_WEIGHT + getWildcardCount() * WILDCARD_WEIGHT);
+	}
+
+
+	public String toString() {
+		return "Regex(" + String.valueOf(this.regex) + ")";
 	}
 
 }

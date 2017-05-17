@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A separator path element. In the pattern '/foo/bar' the two occurrences
@@ -32,6 +32,7 @@ class SeparatorPathElement extends PathElement {
 		super(pos, separator);
 	}
 
+
 	/**
 	 * Matching a separator is easy, basically the character at candidateIndex
 	 * must be the separator.
@@ -41,7 +42,7 @@ class SeparatorPathElement extends PathElement {
 		boolean matched = false;
 		if (candidateIndex < matchingContext.candidateLength &&
 			matchingContext.candidate[candidateIndex] == separator) {
-			if (next == null) {
+			if (this.next == null) {
 				if (matchingContext.determineRemainingPath) {
 					matchingContext.remainingPathIndex = candidateIndex + 1;
 					matched = true;
@@ -55,19 +56,20 @@ class SeparatorPathElement extends PathElement {
 				if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
 					return true; // no more data but matches up to this point
 				}
-				matched = next.matches(candidateIndex, matchingContext);
+				matched = this.next.matches(candidateIndex, matchingContext);
 			}
 		}
 		return matched;
 	}
 
-	public String toString() {
-		return "Separator(" + separator + ")";
-	}
-
 	@Override
 	public int getNormalizedLength() {
 		return 1;
+	}
+
+
+	public String toString() {
+		return "Separator(" + this.separator + ")";
 	}
 
 }

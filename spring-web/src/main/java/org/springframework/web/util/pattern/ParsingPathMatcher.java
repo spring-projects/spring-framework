@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util;
+package org.springframework.web.util.pattern;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -22,10 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternParser;
-import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
-
 
 /**
  * {@link PathMatcher} implementation for path patterns parsed
@@ -35,38 +31,50 @@ import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
  * and quick comparison.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 5.0
  * @see PathPattern
  */
 public class ParsingPathMatcher implements PathMatcher {
 
-	private final ConcurrentMap<String, PathPattern> cache =
-			new ConcurrentHashMap<>(64);
-
 	private final PathPatternParser parser = new PathPatternParser();
+
+	private final ConcurrentMap<String, PathPattern> cache = new ConcurrentHashMap<>(256);
+
+
+	@Override
+	public boolean isPattern(String path) {
+		// TODO crude, should be smarter, lookup pattern and ask it
+		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
+	}
 
 	@Override
 	public boolean match(String pattern, String path) {
-		PathPattern p = getPathPattern(pattern);
-		return p.matches(path);
+		PathPattern pathPattern = getPathPattern(pattern);
+		return pathPattern.matches(path);
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
-		PathPattern p = getPathPattern(pattern);
-		return p.matchStart(path);
+		PathPattern pathPattern = getPathPattern(pattern);
+		return pathPattern.matchStart(path);
 	}
 
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
-		PathPattern p = getPathPattern(pattern);
-		return p.extractPathWithinPattern(path);
+		PathPattern pathPattern = getPathPattern(pattern);
+		return pathPattern.extractPathWithinPattern(path);
 	}
 
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
-		PathPattern p = getPathPattern(pattern);
-		return p.matchAndExtract(path);
+		PathPattern pathPattern = getPathPattern(pattern);
+		return pathPattern.matchAndExtract(path);
+	}
+
+	@Override
+	public Comparator<String> getPatternComparator(String path) {
+		return new PathPatternStringComparatorConsideringPath(path);
 	}
 
 	@Override
@@ -75,12 +83,17 @@ public class ParsingPathMatcher implements PathMatcher {
 		return pathPattern.combine(pattern2);
 	}
 
-	@Override
-	public Comparator<String> getPatternComparator(String path) {
-		return new PathPatternStringComparatorConsideringPath(path);
+	private PathPattern getPathPattern(String pattern) {
+		PathPattern pathPattern = this.cache.get(pattern);
+		if (pathPattern == null) {
+			pathPattern = this.parser.parse(pattern);
+			this.cache.put(pattern, pathPattern);
+		}
+		return pathPattern;
 	}
 
-	class PathPatternStringComparatorConsideringPath implements Comparator<String> {
+
+	private class PathPatternStringComparatorConsideringPath implements Comparator<String> {
 
 		private final PatternComparatorConsideringPath ppcp;
 
@@ -100,22 +113,38 @@ public class ParsingPathMatcher implements PathMatcher {
 			PathPattern p2 = getPathPattern(o2);
 			return this.ppcp.compare(p1, p2);
 		}
-
 	}
 
-	@Override
-	public boolean isPattern(String path) {
-		// TODO crude, should be smarter, lookup pattern and ask it
-		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
-	}
 
-	private PathPattern getPathPattern(String pattern) {
-		PathPattern pathPattern = this.cache.get(pattern);
-		if (pathPattern == null) {
-			pathPattern = this.parser.parse(pattern);
-			this.cache.put(pattern, pathPattern);
+	/**
+	 * {@link PathPattern} comparator that takes account of a specified
+	 * path and sorts anything that exactly matches it to be first.
+	 */
+	static class PatternComparatorConsideringPath implements Comparator<PathPattern> {
+
+		private final String path;
+
+		public PatternComparatorConsideringPath(String path) {
+			this.path = path;
 		}
-		return pathPattern;
+
+		@Override
+		public int compare(PathPattern o1, PathPattern o2) {
+			// Nulls get sorted to the end
+			if (o1 == null) {
+				return (o2 == null ? 0 : +1);
+			}
+			else if (o2 == null) {
+				return -1;
+			}
+			if (o1.getPatternString().equals(this.path)) {
+				return (o2.getPatternString().equals(this.path)) ? 0 : -1;
+			}
+			else if (o2.getPatternString().equals(this.path)) {
+				return +1;
+			}
+			return o1.compareTo(o2);
+		}
 	}
 
 }

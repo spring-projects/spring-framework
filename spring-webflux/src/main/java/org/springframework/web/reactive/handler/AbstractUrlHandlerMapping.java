@@ -37,7 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
  * both "/test" and "/team", "/test/*" matches all paths under "/test",
  * "/test/**" matches all paths below "/test". For details, see the
- * {@link org.springframework.web.util.ParsingPathMatcher ParsingPathMatcher} javadoc.
+ * {@link org.springframework.web.util.pattern.ParsingPathMatcher} javadoc.
  *
  * <p>Will search all path patterns to find the most exact match for the
  * current request path. The most exact match is defined as the longest
@@ -119,18 +119,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Look up a handler instance for the given URL path.
-	 *
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
-	 *
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
-	 *
 	 * @param urlPath URL the bean is mapped to
 	 * @param exchange the current exchange
 	 * @return the associated handler instance, or {@code null} if not found
-	 * @see org.springframework.web.util.ParsingPathMatcher
+	 * @see org.springframework.web.util.pattern.ParsingPathMatcher
 	 */
 	protected Object lookupHandler(String urlPath, ServerWebExchange exchange) throws Exception {
 		// Direct match?

@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.*;
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * Common supertype for the Ast nodes created to represent a path pattern.
@@ -31,25 +31,19 @@ abstract class PathElement {
 
 	protected static final int CAPTURE_VARIABLE_WEIGHT = 1;
 
-	/**
-	 * Position in the pattern where this path element starts
-	 */
-	protected int pos;
 
-	/**
-	 * The next path element in the chain
-	 */
+	// Position in the pattern where this path element starts
+	protected final int pos;
+
+	// The separator used in this path pattern
+	protected final char separator;
+
+	// The next path element in the chain
 	protected PathElement next;
 
-	/**
-	 * The previous path element in the chain
-	 */
+	// The previous path element in the chain
 	protected PathElement prev;
-	
-	/**
-	 * The separator used in this path pattern
-	 */
-	protected char separator;
+
 
 	/**
 	 * Create a new path element.
@@ -61,46 +55,47 @@ abstract class PathElement {
 		this.separator = separator;
 	}
 
+
 	/**
 	 * Attempt to match this path element.
-	 *
 	 * @param candidatePos the current position within the candidate path
 	 * @param matchingContext encapsulates context for the match including the candidate
-	 * @return true if matches, otherwise false
+	 * @return {@code true} if it matches, otherwise {@code false}
 	 */
 	public abstract boolean matches(int candidatePos, MatchingContext matchingContext);
 
 	/**
-	 * @return the length of the path element where captures are considered to be one character long
+	 * Return the length of the path element where captures are considered to be one character long.
 	 */
 	public abstract int getNormalizedLength();
 
 	/**
-	 * @return the number of variables captured by the path element
+	 * Return the number of variables captured by the path element.
 	 */
 	public int getCaptureCount() {
 		return 0;
 	}
 
 	/**
-	 * @return the number of wildcard elements (*, ?) in the path element
+	 * Return the number of wildcard elements (*, ?) in the path element.
 	 */
 	public int getWildcardCount() {
 		return 0;
 	}
 
 	/**
-	 * @return the score for this PathElement, combined score is used to compare parsed patterns.
+	 * Return the score for this PathElement, combined score is used to compare parsed patterns.
 	 */
 	public int getScore() {
 		return 0;
 	}
 
 	/**
-	 * @return true if there is no next character, or if there is then it is a separator
+	 * Return {@code true} if there is no next character, or if there is then it is a separator.
 	 */
 	protected boolean nextIfExistsIsSeparator(int nextIndex, MatchingContext matchingContext) {
 		return (nextIndex >= matchingContext.candidateLength ||
-				matchingContext.candidate[nextIndex] == separator);
+				matchingContext.candidate[nextIndex] == this.separator);
 	}
+
 }

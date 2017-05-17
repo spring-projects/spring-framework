@@ -33,11 +33,9 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.ParsingPathMatcher;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.

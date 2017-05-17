@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A path element representing capturing the rest of a path. In the pattern
  * '/foo/{*foobar}' the /{*foobar} is represented as a {@link CaptureTheRestPathElement}.
  *
  * @author Andy Clement
+ * @since 5.0
  */
 class CaptureTheRestPathElement extends PathElement {
 
-	private String variableName;
+	private final String variableName;
+
 
 	/**
 	 * @param pos position of the path element within the path pattern text
@@ -35,8 +37,9 @@ class CaptureTheRestPathElement extends PathElement {
 	 */
 	CaptureTheRestPathElement(int pos, char[] captureDescriptor, char separator) {
 		super(pos, separator);
-		variableName = new String(captureDescriptor, 2, captureDescriptor.length - 3);
+		this.variableName = new String(captureDescriptor, 2, captureDescriptor.length - 3);
 	}
+
 
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
@@ -59,10 +62,6 @@ class CaptureTheRestPathElement extends PathElement {
 		return true;
 	}
 
-	public String toString() {
-		return "CaptureTheRest(/{*" + variableName + "})";
-	}
-
 	@Override
 	public int getNormalizedLength() {
 		return 1;
@@ -77,4 +76,10 @@ class CaptureTheRestPathElement extends PathElement {
 	public int getCaptureCount() {
 		return 1;
 	}
+
+
+	public String toString() {
+		return "CaptureTheRest(/{*" + this.variableName + "})";
+	}
+
 }

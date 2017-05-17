@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.patterns.PathPattern.MatchingContext;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A literal path element that does includes the single character wildcard '?' one
@@ -27,15 +27,18 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  */
 class SingleCharWildcardedPathElement extends PathElement {
 
-	private char[] text;
+	private final char[] text;
 
-	private int len;
+	private final int len;
 
-	private int questionMarkCount;
+	private final int questionMarkCount;
 
-	private boolean caseSensitive;
+	private final boolean caseSensitive;
 
-	public SingleCharWildcardedPathElement(int pos, char[] literalText, int questionMarkCount, boolean caseSensitive, char separator) {
+
+	public SingleCharWildcardedPathElement(
+			int pos, char[] literalText, int questionMarkCount, boolean caseSensitive, char separator) {
+
 		super(pos, separator);
 		this.len = literalText.length;
 		this.questionMarkCount = questionMarkCount;
@@ -51,15 +54,17 @@ class SingleCharWildcardedPathElement extends PathElement {
 		}
 	}
 
+
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		if (matchingContext.candidateLength < (candidateIndex + len)) {
-			return false; // There isn't enough data to match
+			return false;  // there isn't enough data to match
 		}
+
 		char[] candidate = matchingContext.candidate;
-		if (caseSensitive) {
-			for (int i = 0; i < len; i++) {
-				char t = text[i];
+		if (this.caseSensitive) {
+			for (int i = 0; i <this.len; i++) {
+				char t = this.text[i];
 				if (t != '?' && candidate[candidateIndex] != t) {
 					return false;
 				}
@@ -67,15 +72,16 @@ class SingleCharWildcardedPathElement extends PathElement {
 			}
 		}
 		else {
-			for (int i = 0; i < len; i++) {
-				char t = text[i];
+			for (int i = 0; i < this.len; i++) {
+				char t = this.text[i];
 				if (t != '?' && Character.toLowerCase(candidate[candidateIndex]) != t) {
 					return false;
 				}
 				candidateIndex++;
 			}
 		}
-		if (next == null) {
+
+		if (this.next == null) {
 			if (matchingContext.determineRemainingPath && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
 				matchingContext.remainingPathIndex = candidateIndex;
 				return true;
@@ -85,32 +91,33 @@ class SingleCharWildcardedPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return matchingContext.isAllowOptionalTrailingSlash() &&
-						   (candidateIndex + 1) == matchingContext.candidateLength && 
-						   matchingContext.candidate[candidateIndex] == separator;
+					return (matchingContext.isAllowOptionalTrailingSlash() &&
+							(candidateIndex + 1) == matchingContext.candidateLength &&
+							matchingContext.candidate[candidateIndex] == separator);
 				}
 			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
-				return true; // no more data but matches up to this point
+				return true;  // no more data but matches up to this point
 			}
-			return next.matches(candidateIndex, matchingContext);
+			return this.next.matches(candidateIndex, matchingContext);
 		}
 	}
 
 	@Override
 	public int getWildcardCount() {
-		return questionMarkCount;
-	}
-
-	public String toString() {
-		return "SingleCharWildcarding(" + new String(text) + ")";
+		return this.questionMarkCount;
 	}
 
 	@Override
 	public int getNormalizedLength() {
 		return len;
+	}
+
+
+	public String toString() {
+		return "SingleCharWildcarding(" + String.valueOf(this.text) + ")";
 	}
 
 }

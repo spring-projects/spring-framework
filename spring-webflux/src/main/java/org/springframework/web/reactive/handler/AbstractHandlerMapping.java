@@ -34,7 +34,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.ParsingPathMatcher;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * Abstract base class for {@link org.springframework.web.reactive.HandlerMapping}
@@ -103,8 +103,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	/**
 	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns. Default is ParsingPathMatcher.
-	 * @see org.springframework.web.util.ParsingPathMatcher
+	 * against registered URL patterns.
+	 * <p>The default is a {@link ParsingPathMatcher}.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");

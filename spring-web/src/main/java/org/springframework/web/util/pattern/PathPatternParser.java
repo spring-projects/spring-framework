@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util.patterns;
+package org.springframework.web.util.pattern;
 
 /** 
- * Parser for URI template patterns. It breaks the path pattern into a number of
- * {@link PathElement}s in a linked list.
+ * Parser for URI template patterns. It breaks the path pattern into a number
+ * of {@link PathElement}s in a linked list.
  * 
  * @author Andy Clement
  * @since 5.0
@@ -27,48 +27,54 @@ public class PathPatternParser {
 
 	public final static char DEFAULT_SEPARATOR = '/';
 
-	// Is the parser producing case sensitive PathPattern matchers, default true
-	private boolean caseSensitive = true;
 
-	// The expected path separator to split path elements during parsing, default '/'
+	// The expected path separator to split path elements during parsing.
 	private char separator = DEFAULT_SEPARATOR;
 	
-	// If true the PathPatterns produced by the parser will allow patterns
-	// that don't have a trailing slash to match paths that may or may not
-	// have a trailing slash
+	// Whether the PathPatterns produced by the parser will allow patterns that don't
+	// have a trailing slash to match paths that may or may not have a trailing slash.
 	private boolean matchOptionalTrailingSlash = false;
 
+	// If the parser produces case-sensitive PathPattern matchers.
+	private boolean caseSensitive = true;
+
+
 	/**
-	 * Create a path pattern parser that will use the default separator '/' when
-	 * parsing patterns.
+	 * Create a path pattern parser that will use the default separator '/'
+	 * when parsing patterns.
+	 * @see #DEFAULT_SEPARATOR
 	 */
 	public PathPatternParser() {
 	}
-	
-	/**
-	 * Control behavior of the path patterns produced by this parser. The default
-	 * value for matchOptionalTrailingSlash is true but here it can be set to false.
-	 * If true then PathPatterns without a trailing slash will match paths with or
-	 * without a trailing slash.
-	 * 
-	 * @param matchOptionalTrailingSlash boolean value to override the default value of true
-	 */
-	public void setMatchOptionalTrailingSlash(boolean matchOptionalTrailingSlash) {
-		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
-	}
-	
+
 	/**
 	 * Create a path pattern parser that will use the supplied separator when
 	 * parsing patterns.
-	 * @param separator the separator expected to divide pattern elements parsed by this parser
+	 * @param separator the separator expected to divide pattern elements
 	 */
 	public PathPatternParser(char separator) {
 		this.separator = separator;
 	}
 
+
+	/**
+	 * Control behavior of the path patterns produced by this parser: if {@code true}
+	 * then PathPatterns without a trailing slash will match paths with or without
+	 * a trailing slash.
+	 * <p>The default is {@code true} but here this flag can be set to {@code false}.
+	 */
+	public void setMatchOptionalTrailingSlash(boolean matchOptionalTrailingSlash) {
+		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
+	}
+
+	/**
+	 * Set whether path patterns are case-sensitive.
+	 * <p>The default is {@code true}.
+	 */
 	public void setCaseSensitive(boolean caseSensitive) {
 		this.caseSensitive = caseSensitive;
 	}
+
 
 	/**
 	 * Process the path pattern data, a character at a time, breaking it into
@@ -76,13 +82,14 @@ public class PathPatternParser {
 	 * stage. Produces a PathPattern object that can be used for fast matching
 	 * against paths. Each invocation of this method delegates to a new instance of
 	 * the {@link InternalPathPatternParser} because that class is not thread-safe.
-	 *
 	 * @param pathPattern the input path pattern, e.g. /foo/{bar}
 	 * @return a PathPattern for quickly matching paths against the specified path pattern
+	 * @throws PatternParseException in case of parse errors
 	 */
-	public PathPattern parse(String pathPattern) {
-		InternalPathPatternParser ippp = new InternalPathPatternParser(separator, caseSensitive, matchOptionalTrailingSlash);
-		return ippp.parse(pathPattern);
+	public PathPattern parse(String pathPattern) throws PatternParseException {
+		InternalPathPatternParser parserDelegate =
+				new InternalPathPatternParser(this.separator, this.caseSensitive, this.matchOptionalTrailingSlash);
+		return parserDelegate.parse(pathPattern);
 	}
 
 }

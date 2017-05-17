@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class PathMatchConfigurer {
 
 	/**
 	 * Set the PathMatcher for matching URL paths against registered URL patterns.
-	 * <p>Default is {@link org.springframework.web.util.ParsingPathMatcher ParsingPathMatcher}.
+	 * <p>The default is a {@link org.springframework.web.util.pattern.ParsingPathMatcher}.
 	 */
 	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;

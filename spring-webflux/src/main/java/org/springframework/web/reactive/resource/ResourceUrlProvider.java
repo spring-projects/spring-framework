@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.ParsingPathMatcher;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * A central component to use to obtain the public URL path that clients should
@@ -54,7 +54,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private HttpRequestPathHelper urlPathHelper = new HttpRequestPathHelper();
+	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
 	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
@@ -64,19 +64,19 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 
 	/**
-	 * Configure a {@code UrlPathHelper} to use in
+	 * Configure a {@code HttpRequestPathHelper} to use in
 	 * {@link #getForRequestUrl(ServerWebExchange, String)}
 	 * in order to derive the lookup path for a target request URL path.
 	 */
-	public void setUrlPathHelper(HttpRequestPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
+	public void setPathHelper(HttpRequestPathHelper pathHelper) {
+		this.pathHelper = pathHelper;
 	}
 
 	/**
-	 * Return the configured {@code UrlPathHelper}.
+	 * Return the configured {@code HttpRequestPathHelper}.
 	 */
-	public HttpRequestPathHelper getUrlPathHelper() {
-		return this.urlPathHelper;
+	public HttpRequestPathHelper getPathHelper() {
+		return this.pathHelper;
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String requestPath = request.getURI().getPath();
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(exchange);
+		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
 		return requestPath.indexOf(lookupPath);
 	}
 
