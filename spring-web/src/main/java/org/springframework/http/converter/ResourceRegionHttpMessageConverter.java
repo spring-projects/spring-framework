@@ -40,6 +40,7 @@ import org.springframework.util.StreamUtils;
  * or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
@@ -58,7 +59,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-			if (regions.size() > 0) {
+			if (!regions.isEmpty()) {
 				resource = regions.iterator().next().getResource();
 			}
 		}
@@ -141,6 +142,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
 		Assert.notNull(region, "ResourceRegion must not be null");
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
+
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
 		Long resourceLength = region.getResource().contentLength();
@@ -148,6 +150,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		long rangeLength = end - start + 1;
 		responseHeaders.add("Content-Range", "bytes " + start + '-' + end + '/' + resourceLength);
 		responseHeaders.setContentLength(rangeLength);
+
 		InputStream in = region.getResource().getInputStream();
 		try {
 			StreamUtils.copyRange(in, outputMessage.getBody(), start, end);
@@ -167,30 +170,43 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 		Assert.notNull(resourceRegions, "Collection of ResourceRegion should not be null");
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
+
 		MediaType contentType = responseHeaders.getContentType();
 		String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
 		responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
 		OutputStream out = outputMessage.getBody();
+
 		for (ResourceRegion region : resourceRegions) {
 			long start = region.getPosition();
 			long end = start + region.getCount() - 1;
 			InputStream in = region.getResource().getInputStream();
-			// Writing MIME header.
-			println(out);
-			print(out, "--" + boundaryString);
-			println(out);
-			if (contentType != null) {
-				print(out, "Content-Type: " + contentType.toString());
+			try {
+				// Writing MIME header.
 				println(out);
+				print(out, "--" + boundaryString);
+				println(out);
+				if (contentType != null) {
+					print(out, "Content-Type: " + contentType.toString());
+					println(out);
+				}
+				Long resourceLength = region.getResource().contentLength();
+				end = Math.min(end, resourceLength - 1);
+				print(out, "Content-Range: bytes " + start + '-' + end + '/' + resourceLength);
+				println(out);
+				println(out);
+				// Printing content
+				StreamUtils.copyRange(in, out, start, end);
 			}
-			Long resourceLength = region.getResource().contentLength();
-			end = Math.min(end, resourceLength - 1);
-			print(out, "Content-Range: bytes " + start + '-' + end + '/' + resourceLength);
-			println(out);
-			println(out);
-			// Printing content
-			StreamUtils.copyRange(in, out, start, end);
+			finally {
+				try {
+					in.close();
+				}
+				catch (IOException ex) {
+					// ignore
+				}
+			}
 		}
+
 		println(out);
 		print(out, "--" + boundaryString + "--");
 	}
