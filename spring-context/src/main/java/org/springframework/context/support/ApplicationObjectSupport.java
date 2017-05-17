@@ -67,7 +67,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 			// Initialize with passed-in context.
 			if (!requiredContextClass().isInstance(context)) {
 				throw new ApplicationContextException(
-						"Invalid application context: needs to be of type [" + requiredContextClass().getName() + "]");
+						"Invalid application context: needs to be of type [" + requiredContextClass().getName() + "], and not null");
 			}
 			this.applicationContext = context;
 			this.messageSourceAccessor = new MessageSourceAccessor(context);
