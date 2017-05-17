@@ -68,6 +68,16 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	}
 
 	/**
+	 * Overrides the base class behavior to ensure any context passed to
+	 * {@code setApplicationContext()} must be an instance of.
+	 * @see #setApplicationContext()
+	 */
+	@Override
+	protected Class<?> requiredContextClass() {
+		return WebApplicationContext.class;
+	}
+	
+	/**
 	 * Calls {@link #initServletContext(javax.servlet.ServletContext)} if the
 	 * given ApplicationContext is a {@link WebApplicationContext}.
 	 */
