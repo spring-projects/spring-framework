@@ -27,6 +27,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -51,8 +52,9 @@ import static org.junit.Assert.*;
  */
 public class SpringValidatorAdapterTests {
 
-	private final SpringValidatorAdapter validatorAdapter = new SpringValidatorAdapter(
-			Validation.buildDefaultValidatorFactory().getValidator());
+	private final Validator nativeValidator = Validation.buildDefaultValidatorFactory().getValidator();
+
+	private final SpringValidatorAdapter validatorAdapter = new SpringValidatorAdapter(nativeValidator);
 
 	private final StaticMessageSource messageSource = new StaticMessageSource();
 
@@ -65,6 +67,12 @@ public class SpringValidatorAdapterTests {
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
 	}
 
+
+	@Test
+	public void testUnwrap() {
+		Validator nativeValidator = validatorAdapter.unwrap(Validator.class);
+		assertSame(this.nativeValidator, nativeValidator);
+	}
 
 	@Test  // SPR-13406
 	public void testNoStringArgumentValue() {

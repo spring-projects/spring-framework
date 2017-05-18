@@ -40,12 +40,15 @@ import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 
 /**
- * Adapter that takes a JSR-303 {@code javax.validator.Validator}
- * and exposes it as a Spring {@link org.springframework.validation.Validator}
+ * Adapter that takes a JSR-303 {@code javax.validator.Validator} and
+ * exposes it as a Spring {@link org.springframework.validation.Validator}
  * while also exposing the original JSR-303 Validator interface itself.
  *
  * <p>Can be used as a programmatic wrapper. Also serves as base class for
  * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean}.
+ *
+ * <p>As of Spring Framework 5.0, this adapter is fully compatible with
+ * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
  * @since 3.0

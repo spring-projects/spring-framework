@@ -30,6 +30,7 @@ import javax.validation.MessageInterpolator;
 import javax.validation.ParameterNameProvider;
 import javax.validation.TraversableResolver;
 import javax.validation.Validation;
+import javax.validation.ValidationException;
 import javax.validation.ValidationProviderResolver;
 import javax.validation.Validator;
 import javax.validation.ValidatorContext;
@@ -64,8 +65,12 @@ import org.springframework.util.ReflectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
- * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1, with special support
+ * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1+, with special support
  * for Hibernate Validator 5.x</b> (see {@link #setValidationMessageSource}).
+ * This class is also runtime-compatible with Bean Validation 2.0 and Hibernate Validator 6.0,
+ * with one special note: If you'd like to call BV 2.0's {@code getClockProvider()} method,
+ * obtain the native {@code ValidatorFactory} through {@code #unwrap(ValidatorFactory.class)}
+ * and call the {@code getClockProvider()} method on the returned native reference there.
  *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
  * {@code javax.validation} API being present but no explicit Validator having been configured.
@@ -293,7 +298,6 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
-		// TODO: inner class
 		final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
 		configuration.parameterNameProvider(new ParameterNameProvider() {
@@ -357,6 +361,32 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	public ParameterNameProvider getParameterNameProvider() {
 		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getParameterNameProvider();
+	}
+
+	// Bean Validation 2.0: currently not implemented here since it would imply
+	// a hard dependency on the new javax.validation.ClockProvider interface.
+	// To be resolved once Spring Framework requires Bean Validation 2.0+.
+	// Obtain the native ValidatorFactory through unwrap(ValidatorFactory.class)
+	// instead which will fully support a getClockProvider() call as well.
+	/*
+	@Override
+	public javax.validation.ClockProvider getClockProvider() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		return this.validatorFactory.getClockProvider();
+	}
+	*/
+
+	@Override
+	public <T> T unwrap(Class<T> type) {
+		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
+			try {
+				return super.unwrap(type);
+			}
+			catch (ValidationException ex) {
+				// ignore - we'll try ValidatorFactory unwrapping next
+			}
+		}
+		return this.validatorFactory.unwrap(type);
 	}
 
 	public void close() {

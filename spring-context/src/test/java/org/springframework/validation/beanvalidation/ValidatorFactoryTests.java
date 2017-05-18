@@ -33,9 +33,12 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
 import javax.validation.Valid;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.HibernateValidator;
+import org.hibernate.validator.HibernateValidatorFactory;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,12 @@ public class ValidatorFactoryTests {
 				fail("Invalid constraint violation with path '" + path + "'");
 			}
 		}
+
+		Validator nativeValidator = validator.unwrap(Validator.class);
+		assertTrue(nativeValidator.getClass().getName().startsWith("org.hibernate"));
+		assertTrue(validator.unwrap(ValidatorFactory.class) instanceof HibernateValidatorFactory);
+		assertTrue(validator.unwrap(HibernateValidatorFactory.class) instanceof HibernateValidatorFactory);
+
 		validator.destroy();
 	}
 
@@ -96,6 +105,12 @@ public class ValidatorFactoryTests {
 				fail("Invalid constraint violation with path '" + path + "'");
 			}
 		}
+
+		Validator nativeValidator = validator.unwrap(Validator.class);
+		assertTrue(nativeValidator.getClass().getName().startsWith("org.hibernate"));
+		assertTrue(validator.unwrap(ValidatorFactory.class) instanceof HibernateValidatorFactory);
+		assertTrue(validator.unwrap(HibernateValidatorFactory.class) instanceof HibernateValidatorFactory);
+
 		validator.destroy();
 	}
 
@@ -465,7 +480,7 @@ public class ValidatorFactoryTests {
 
 		String message() default "Should not be X";
 
-		Class<?>[] groups() default { };
+		Class<?>[] groups() default {};
 
 		Class<? extends Payload>[] payload() default {};
 	}
