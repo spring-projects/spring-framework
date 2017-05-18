@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
 import javax.validation.TraversableResolver;
 import javax.validation.Validation;
+import javax.validation.ValidationException;
 import javax.validation.ValidationProviderResolver;
 import javax.validation.Validator;
 import javax.validation.ValidatorContext;
@@ -74,6 +75,7 @@ import org.springframework.util.ReflectionUtils;
  * instead. If you really need programmatic {@code #forExecutables} access, inject this class as
  * a {@link ValidatorFactory} and call {@link #getValidator()} on it, then {@code #forExecutables}
  * on the returned native {@link Validator} reference instead of directly on this class.
+ * Alternatively, call {@code #unwrap(Validator.class) which will also provide the native object.
  *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
  * {@code javax.validation} API being present but no explicit Validator having been configured.
@@ -396,6 +398,30 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(Class<T> type) {
+		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
+			try {
+				return super.unwrap(type);
+			}
+			catch (ValidationException ex) {
+				// ignore - we'll try ValidatorFactory unwrapping next
+			}
+		}
+		try {
+			return this.validatorFactory.unwrap(type);
+		}
+		catch (ValidationException ex) {
+			// ignore if just being asked for ValidatorFactory
+			if (ValidatorFactory.class == type) {
+				return (T) this.validatorFactory;
+			}
+			throw ex;
+		}
+	}
+
 
 	public void close() {
 		if (closeMethod != null && this.validatorFactory != null) {

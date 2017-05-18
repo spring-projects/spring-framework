@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,12 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
 import javax.validation.Valid;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.HibernateValidator;
+import org.hibernate.validator.HibernateValidatorFactory;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,12 @@ public class ValidatorFactoryTests {
 				fail("Invalid constraint violation with path '" + path + "'");
 			}
 		}
+
+		Validator nativeValidator = validator.unwrap(Validator.class);
+		assertTrue(nativeValidator.getClass().getName().startsWith("org.hibernate"));
+		assertTrue(validator.unwrap(ValidatorFactory.class) instanceof HibernateValidatorFactory);
+		assertTrue(validator.unwrap(HibernateValidatorFactory.class) instanceof HibernateValidatorFactory);
+
 		validator.destroy();
 	}
 
@@ -98,6 +107,12 @@ public class ValidatorFactoryTests {
 				fail("Invalid constraint violation with path '" + path + "'");
 			}
 		}
+
+		Validator nativeValidator = validator.unwrap(Validator.class);
+		assertTrue(nativeValidator.getClass().getName().startsWith("org.hibernate"));
+		assertTrue(validator.unwrap(ValidatorFactory.class) instanceof HibernateValidatorFactory);
+		assertTrue(validator.unwrap(HibernateValidatorFactory.class) instanceof HibernateValidatorFactory);
+
 		validator.destroy();
 	}
 
@@ -269,10 +284,10 @@ public class ValidatorFactoryTests {
 		private ValidAddress address = new ValidAddress();
 
 		@Valid
-		private List<ValidAddress> addressList = new LinkedList<ValidAddress>();
+		private List<ValidAddress> addressList = new LinkedList<>();
 
 		@Valid
-		private Set<ValidAddress> addressSet = new LinkedHashSet<ValidAddress>();
+		private Set<ValidAddress> addressSet = new LinkedHashSet<>();
 
 		public boolean expectsAutowiredValidator = false;
 
