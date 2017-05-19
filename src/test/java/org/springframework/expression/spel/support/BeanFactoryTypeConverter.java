@@ -36,14 +36,16 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 
 	private SimpleTypeConverter delegate = new SimpleTypeConverter();
 
-	private static ConversionService defaultConversionService;
+	private static volatile ConversionService defaultConversionService;
 
 	private ConversionService conversionService;
 
 	public BeanFactoryTypeConverter() {
-		synchronized (this) {
-			if (defaultConversionService == null) {
-				defaultConversionService = new DefaultConversionService();
+		if (defaultConversionService == null) {
+			synchronized (BeanFactoryTypeConverter.class) {
+				if (defaultConversionService == null) {
+					defaultConversionService = new DefaultConversionService();
+				}
 			}
 		}
 		this.conversionService = defaultConversionService;
