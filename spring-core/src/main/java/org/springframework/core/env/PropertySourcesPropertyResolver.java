@@ -29,7 +29,7 @@ package org.springframework.core.env;
  */
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
-	private final PropertySources propertySources;
+	protected final PropertySources propertySources;
 
 
 	/**
