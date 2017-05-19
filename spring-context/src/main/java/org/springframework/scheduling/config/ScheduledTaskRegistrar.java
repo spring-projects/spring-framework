@@ -321,7 +321,38 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 				!CollectionUtils.isEmpty(this.fixedDelayTasks));
 	}
 
-
+	/**
+	 * Return whether this {@code ScheduledTaskRegistrar} has trigger tasks registered.
+	 * @since 4.3
+	 */
+	public boolean hasTriggerTasks() {
+		return (!CollectionUtils.isEmpty(this.triggerTasks));
+	}
+	
+	/**
+	 * Return whether this {@code ScheduledTaskRegistrar} has cron tasks registered.
+	 * @since 4.3
+	 */
+	public boolean hasCronTasks() {
+		return (!CollectionUtils.isEmpty(this.cronTasks));
+	}
+	
+	/**
+	 * Return whether this {@code ScheduledTaskRegistrar} has fixed rate tasks registered.
+	 * @since 4.3
+	 */
+	public boolean hasFixedRateTasks() {
+		return (!CollectionUtils.isEmpty(this.fixedRateTasks));
+	}
+	
+	/**
+	 * Return whether this {@code ScheduledTaskRegistrar} has fixed delay tasks registered.
+	 * @since 4.3 
+	 */
+	public boolean hasFixedDelayTasks() {
+		return (!CollectionUtils.isEmpty(this.fixedDelayTasks));
+	}
+	
 	/**
 	 * Calls {@link #scheduleTasks()} at bean construction time.
 	 */
