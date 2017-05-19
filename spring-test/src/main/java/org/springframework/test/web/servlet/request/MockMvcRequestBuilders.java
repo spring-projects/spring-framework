@@ -155,6 +155,25 @@ public abstract class MockMvcRequestBuilders {
 		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, uri);
 	}
 
+    /**
+     * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
+     * @param urlTemplate a URL template; the resulting URL will be encoded
+     * @param urlVariables zero or more URL variables
+     * @since 4.0.7
+     */
+    public static MockHttpServletRequestBuilder head(String urlTemplate, Object... urlVariables) {
+        return new MockHttpServletRequestBuilder(HttpMethod.HEAD, urlTemplate, urlVariables);
+    }
+
+    /**
+     * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
+     * @param uri the URL
+     * @since 4.0.7
+     */
+    public static MockHttpServletRequestBuilder head(URI uri) {
+        return new MockHttpServletRequestBuilder(HttpMethod.HEAD, uri);
+    }
+
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
