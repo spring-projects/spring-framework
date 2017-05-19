@@ -38,6 +38,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juan Carlos García
  * @since 22.11.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  */
@@ -244,6 +245,8 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 				deepest = depth;
 				dominantMapping = exceptionMapping;
 				viewName = exceptionMappings.getProperty(exceptionMapping);
+			} else if (ex.getCause() instanceof Exception) {
+				return findMatchingViewName(exceptionMappings, (Exception) ex.getCause());
 			}
 		}
 		if (viewName != null && logger.isDebugEnabled()) {
