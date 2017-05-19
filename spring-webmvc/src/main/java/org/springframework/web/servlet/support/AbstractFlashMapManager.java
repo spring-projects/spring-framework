@@ -167,13 +167,14 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 */
 	protected boolean isFlashMapForRequest(FlashMap flashMap, HttpServletRequest request) {
 		String expectedPath = flashMap.getTargetRequestPath();
+		String requestUri = getUrlPathHelper().getOriginatingRequestUri(request);
 		if (expectedPath != null) {
-			String requestUri = getUrlPathHelper().getOriginatingRequestUri(request);
 			if (!requestUri.equals(expectedPath) && !requestUri.equals(expectedPath + "/")) {
 				return false;
 			}
 		}
-		UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(request).build();
+		String queryString = getUrlPathHelper().getOriginatingQueryString(request);
+		UriComponents uriComponents = ServletUriComponentsBuilder.fromUriString(requestUri).query(queryString).build();
 		MultiValueMap<String, String> actualParams = uriComponents.getQueryParams();
 		MultiValueMap<String, String> expectedParams = flashMap.getTargetRequestParams();
 		for (String expectedName : expectedParams.keySet()) {
