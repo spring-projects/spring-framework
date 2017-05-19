@@ -34,6 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static java.util.Objects.isNull;
+
 /**
  * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
  *
@@ -58,8 +60,19 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private static URI initUri(HttpServerRequest channel) {
 		Assert.notNull(channel, "'channel' must not be null");
 		InetSocketAddress address = channel.remoteAddress();
-		String requestUri = channel.uri();
+		String requestUri = squashSlashes(channel.uri());
 		return (address != null ? getBaseUrl(address).resolve(requestUri) : URI.create(requestUri));
+	}
+
+	/**
+	 * Remove redundant slashes from request URI-string
+	 *
+	 * <p>
+	 *   http://example.com/// -> http://example.com/
+	 * </p>
+	 */
+	private static String squashSlashes(String uri) {
+		return isNull(uri) ? uri : uri.replaceAll("/{2,}", "/");
 	}
 
 	private static URI getBaseUrl(InetSocketAddress address) {
