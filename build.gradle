@@ -1,5 +1,5 @@
 buildscript {
-	ext.kotlinVersion = '1.1.2-3'
+	ext.kotlinVersion = '1.1.2-4'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
@@ -94,7 +94,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.15"
 	ext.tyrusVersion           = "1.13.1"
-	ext.undertowVersion        = "1.4.14.Final"
+	ext.undertowVersion        = "1.4.15.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
