@@ -988,6 +988,7 @@ project("spring-websocket") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
+	apply plugin: "groovy"
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -1068,6 +1069,21 @@ project("spring-test") {
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
+	}
+
+	// this module's Java and Groovy sources need to be compiled together
+	compileTestJava.enabled=false
+	sourceSets {
+		test {
+			groovy {
+				srcDirs = ["src/test/java", "src/test/groovy"]
+			}
+		}
+	}
+
+	compileGroovy {
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	task testNG(type: Test) {
