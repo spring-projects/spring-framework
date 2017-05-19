@@ -19,10 +19,13 @@ package org.springframework.web.servlet.resource;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.DigestUtils;
 
 /**
  * A {@link org.springframework.web.servlet.resource.ResourceResolver} that
@@ -102,7 +105,8 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	protected String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String key = RESOLVED_URL_PATH_CACHE_KEY_PREFIX + resourceUrlPath;
+		String locationDigest = computeLocationDerivedDigest(locations);
+		String key = RESOLVED_URL_PATH_CACHE_KEY_PREFIX + resourceUrlPath + "+locationDigest=" + locationDigest;
 		String resolvedUrlPath = this.cache.get(key, String.class);
 
 		if (resolvedUrlPath != null) {
@@ -121,6 +125,17 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		}
 
 		return resolvedUrlPath;
+	}
+
+	@VisibleForTesting
+	protected String computeLocationDerivedDigest(List<? extends Resource> locations) {
+		StringBuilder builder = new StringBuilder();
+		for (Resource res : locations) {
+			builder.append(res.getDescription());
+			builder.append(",");
+		}
+
+		return DigestUtils.md5DigestAsHex(builder.toString().getBytes());
 	}
 
 }
