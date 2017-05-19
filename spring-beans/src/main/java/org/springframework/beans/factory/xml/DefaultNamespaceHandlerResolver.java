@@ -129,7 +129,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				}
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
 				namespaceHandler.init();
-				handlerMappings.put(namespaceUri, namespaceHandler);
+				this.handlerMappings.put(namespaceUri, namespaceHandler);
 				return namespaceHandler;
 			}
 			catch (ClassNotFoundException ex) {
