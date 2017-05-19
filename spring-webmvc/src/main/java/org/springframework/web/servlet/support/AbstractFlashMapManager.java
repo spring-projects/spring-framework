@@ -33,7 +33,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UrlPathHelper;
 
 
@@ -173,8 +172,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 				return false;
 			}
 		}
-		UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(request).build();
-		MultiValueMap<String, String> actualParams = uriComponents.getQueryParams();
+		MultiValueMap<String, String> actualParams = getOriginatingRequestParams(request);
 		MultiValueMap<String, String> expectedParams = flashMap.getTargetRequestParams();
 		for (String expectedName : expectedParams.keySet()) {
 			List<String> actualValues = actualParams.get(expectedName);
@@ -188,6 +186,11 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 			}
 		}
 		return true;
+	}
+
+	private MultiValueMap<String, String> getOriginatingRequestParams(HttpServletRequest request) {
+		String query = getUrlPathHelper().getOriginatingQueryString(request);
+		return ServletUriComponentsBuilder.fromPath("/").query(query).build().getQueryParams();
 	}
 
 	@Override
