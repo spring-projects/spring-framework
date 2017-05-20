@@ -48,28 +48,25 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory) {
+	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
+			throws URISyntaxException {
+
 		super(initUri(request), initHeaders(request));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
-	private static URI initUri(HttpServerRequest channel) {
+	private static URI initUri(HttpServerRequest channel) throws URISyntaxException {
 		Assert.notNull(channel, "'channel' must not be null");
 		InetSocketAddress address = channel.remoteAddress();
 		String requestUri = channel.uri();
-		return (address != null ? getBaseUrl(address).resolve(requestUri) : URI.create(requestUri));
+		return (address != null ? createUrl(address, requestUri) : new URI(requestUri));
 	}
 
-	private static URI getBaseUrl(InetSocketAddress address) {
-		try {
-			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
-		}
-		catch (URISyntaxException ex) {
-			// Should not happen...
-			throw new IllegalStateException(ex);
-		}
+	private static URI createUrl(InetSocketAddress address, String requestUri) throws URISyntaxException {
+		URI baseUrl = new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
+		return new URI(baseUrl.toString() + requestUri);
 	}
 
 	private static HttpHeaders initHeaders(HttpServerRequest channel) {

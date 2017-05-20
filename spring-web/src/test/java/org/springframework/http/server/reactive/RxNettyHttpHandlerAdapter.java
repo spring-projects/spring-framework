@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,8 +64,17 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.alloc());
 		InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();
 
-		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
-		RxNettyServerHttpResponse response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
+		RxNettyServerHttpRequest request;
+		RxNettyServerHttpResponse response;
+		try {
+			request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
+			response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
+		}
+		catch (URISyntaxException ex) {
+			logger.error("Could not complete request", ex);
+			nativeResponse.setStatus(HttpResponseStatus.BAD_REQUEST);
+			return Observable.empty();
+		}
 
 		Publisher<Void> result = this.httpHandler.handle(request, response)
 				.onErrorResume(ex -> {
