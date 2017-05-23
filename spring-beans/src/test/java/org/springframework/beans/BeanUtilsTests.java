@@ -21,6 +21,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.Test;
 
@@ -275,6 +276,42 @@ public class BeanUtilsTests {
 		}
 	}
 
+	@Test
+	public void testCopyPropertiesWithValuePredicate1() throws Exception {
+		Configuration target = new Configuration("Original", "Original", "Original");
+		Configuration source = new Configuration("Foo", "Bar", null);
+
+		BeanUtils.copyProperties(source, target, Objects::nonNull);
+
+		assertEquals("Foo", target.getFoo());
+		assertEquals("Bar", target.getBar());
+		assertEquals("Original", target.getFooBar());
+	}
+
+	@Test
+	public void testCopyPropertiesWithValuePredicate2() throws Exception {
+		Configuration target = new Configuration("Original", "Original", "Original");
+		Configuration source = new Configuration("Foo", "Bar", null);
+
+		BeanUtils.copyProperties(source, target, Configuration.class, Objects::nonNull);
+
+		assertEquals("Foo", target.getFoo());
+		assertEquals("Bar", target.getBar());
+		assertEquals("Original", target.getFooBar());
+	}
+
+	@Test
+	public void testCopyPropertiesWithValuePredicate3() throws Exception {
+		Configuration target = new Configuration("Original", "Original", "Original");
+		Configuration source = new Configuration("Foo", "Bar", null);
+
+		BeanUtils.copyProperties(source, target, Objects::nonNull, "bar");
+
+		assertEquals("Foo", target.getFoo());
+		assertEquals("Original", target.getBar());
+		assertEquals("Original", target.getFooBar());
+	}
+
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
 	}
@@ -442,6 +479,48 @@ public class BeanUtilsTests {
 		@Override
 		public void setValue(String aValue) {
 			value = aValue;
+		}
+	}
+
+	private static class Configuration {
+
+		private String foo;
+
+		private String bar;
+
+		private String fooBar;
+
+		public Configuration(String foo, String bar, String fooBar) {
+			this.foo = foo;
+			this.bar = bar;
+			this.fooBar = fooBar;
+		}
+
+		public Configuration() {
+		}
+
+		public String getFoo() {
+			return foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
+		public String getBar() {
+			return bar;
+		}
+
+		public void setBar(String bar) {
+			this.bar = bar;
+		}
+
+		public String getFooBar() {
+			return fooBar;
+		}
+
+		public void setFooBar(String fooBar) {
+			this.fooBar = fooBar;
 		}
 	}
 
