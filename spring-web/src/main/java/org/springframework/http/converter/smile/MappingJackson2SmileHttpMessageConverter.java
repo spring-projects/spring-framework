@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.6 and higher.
+ * <p>Compatible with Jackson 2.9 and higher.
  *
  * @author Sebastien Deleuze
  * @since 5.0
