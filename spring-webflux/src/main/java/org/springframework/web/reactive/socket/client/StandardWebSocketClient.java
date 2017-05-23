@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.websocket.ClientEndpointConfig;
@@ -94,10 +93,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 		MonoProcessor<Void> completionMono = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					String[] subProtocols = beforeHandshake(url, requestHeaders, handler);
+					List<String> protocols = beforeHandshake(url, requestHeaders, handler);
 					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
 					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
-					ClientEndpointConfig config = createEndpointConfig(configurator, subProtocols);
+					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
 					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
 				.subscribeOn(Schedulers.elastic()) // connectToServer is blocking
@@ -114,10 +113,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 		});
 	}
 
-	private ClientEndpointConfig createEndpointConfig(Configurator configurator, String[] subProtocols) {
+	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
 		return ClientEndpointConfig.Builder.create()
 				.configurator(configurator)
-				.preferredSubprotocols(Arrays.asList(subProtocols))
+				.preferredSubprotocols(subProtocols)
 				.build();
 	}
 
@@ -128,11 +127,9 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 
 		private final HttpHeaders responseHeaders = new HttpHeaders();
 
-
 		public DefaultConfigurator(HttpHeaders requestHeaders) {
 			this.requestHeaders = requestHeaders;
 		}
-
 
 		public HttpHeaders getResponseHeaders() {
 			return this.responseHeaders;

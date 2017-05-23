@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.socket.server;
 
-import java.util.Optional;
+package org.springframework.web.reactive.socket.server;
 
 import reactor.core.publisher.Mono;
 
@@ -46,8 +45,6 @@ public interface RequestUpgradeStrategy {
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
 	 * WebSocket session handling.
 	 */
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
-			Optional<String> subProtocol);
+	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler, String subProtocol);
 
 }

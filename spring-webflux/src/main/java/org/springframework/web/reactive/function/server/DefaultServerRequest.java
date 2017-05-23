@@ -57,10 +57,10 @@ import org.springframework.web.server.WebSession;
 class DefaultServerRequest implements ServerRequest {
 
 	private static final Function<UnsupportedMediaTypeException, UnsupportedMediaTypeStatusException> ERROR_MAPPER =
-			ex -> ex.getContentType()
-					.map(contentType -> new UnsupportedMediaTypeStatusException(contentType,
-							ex.getSupportedMediaTypes()))
-					.orElseGet(() -> new UnsupportedMediaTypeStatusException(ex.getMessage()));
+			ex -> (ex.getContentType() != null ?
+					new UnsupportedMediaTypeStatusException(ex.getContentType(), ex.getSupportedMediaTypes()) :
+					new UnsupportedMediaTypeStatusException(ex.getMessage()));
+
 
 	private final ServerWebExchange exchange;
 
@@ -69,8 +69,7 @@ class DefaultServerRequest implements ServerRequest {
 	private final Supplier<Stream<HttpMessageReader<?>>> messageReaders;
 
 
-	DefaultServerRequest(ServerWebExchange exchange,
-			Supplier<Stream<HttpMessageReader<?>>> messageReaders) {
+	DefaultServerRequest(ServerWebExchange exchange, Supplier<Stream<HttpMessageReader<?>>> messageReaders) {
 		this.exchange = exchange;
 		this.messageReaders = messageReaders;
 		this.headers = new DefaultHeaders();
@@ -106,12 +105,10 @@ class DefaultServerRequest implements ServerRequest {
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 						return DefaultServerRequest.this.messageReaders;
 					}
-
 					@Override
 					public Optional<ServerHttpResponse> serverResponse() {
 						return Optional.of(exchange().getResponse());
 					}
-
 					@Override
 					public Map<String, Object> hints() {
 						return hints;

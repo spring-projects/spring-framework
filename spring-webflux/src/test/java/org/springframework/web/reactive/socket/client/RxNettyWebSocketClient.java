@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.client.HttpClient;
 import io.reactivex.netty.protocol.http.client.HttpClientRequest;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
@@ -39,11 +41,10 @@ import rx.RxReactiveStreams;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
-
-import static io.reactivex.netty.protocol.http.HttpHandlerNames.WsClientDecoder;
 
 /**
  * {@link WebSocketClient} implementation for use with RxNetty.
@@ -125,7 +126,7 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 
 	@SuppressWarnings("cast")
 	private Observable<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		String[] protocols = beforeHandshake(url, headers, handler);
+		List<String> protocols = beforeHandshake(url, headers, handler);
 		return createRequest(url, headers, protocols)
 				.flatMap(response -> {
 					Observable<WebSocketConnection> conn = response.getWebSocketConnection();
@@ -141,13 +142,13 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
 					RxNettyWebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
-					session.aggregateFrames(response.unsafeNettyChannel(), WsClientDecoder.getName());
+					session.aggregateFrames(response.unsafeNettyChannel(), HttpHandlerNames.WsClientDecoder.getName());
 
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 	}
 
-	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, String[] protocols) {
+	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, List<String> protocols) {
 		String query = url.getRawQuery();
 		String requestUrl = url.getRawPath() + (query != null ? "?" + query : "");
 		HttpClientRequest<ByteBuf, ByteBuf> request = getHttpClient(url).createGet(requestUrl);
@@ -158,9 +159,8 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 			request = request.setHeaders(map);
 		}
 
-		return (ObjectUtils.isEmpty(protocols) ?
-				request.requestWebSocketUpgrade() :
-				request.requestWebSocketUpgrade().requestSubProtocols(protocols));
+		return (ObjectUtils.isEmpty(protocols) ? request.requestWebSocketUpgrade() :
+				request.requestWebSocketUpgrade().requestSubProtocols(StringUtils.toStringArray(protocols)));
 	}
 
 	private HttpHeaders toHttpHeaders(WebSocketResponse<ByteBuf> response) {

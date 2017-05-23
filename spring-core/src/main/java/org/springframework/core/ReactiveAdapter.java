@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -106,7 +105,6 @@ public class ReactiveAdapter {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Publisher<T> toPublisher(Object source) {
-		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		if (source == null) {
 			source = getDescriptor().getEmptyValue();
 		}

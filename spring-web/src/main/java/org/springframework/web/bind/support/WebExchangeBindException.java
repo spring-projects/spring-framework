@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,9 +263,8 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	 * Returns diagnostic information about the errors held in this object.
 	 */
 	@Override
-	@SuppressWarnings("OptionalGetWithoutIsPresent")
 	public String getMessage() {
-		MethodParameter parameter = getMethodParameter().get();
+		MethodParameter parameter = getMethodParameter();
 		StringBuilder sb = new StringBuilder("Validation failed for argument at index ")
 				.append(parameter.getParameterIndex()).append(" in method: ")
 				.append(parameter.getMethod().toGenericString())

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
@@ -50,7 +51,6 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
-
 /**
  * Private helper class to assist with handling "reactive" return values types
  * that can be adapted to a Reactive Streams {@link Publisher} through the
@@ -69,9 +69,6 @@ import org.springframework.web.servlet.HandlerMapping;
 class ReactiveTypeHandler {
 
 	private static Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
-
-	private static final MediaType JSON_TYPE = new MediaType("application", "*+json");
-
 
 	private final ReactiveAdapterRegistry reactiveRegistry;
 
@@ -100,14 +97,13 @@ class ReactiveTypeHandler {
 	 * Whether the type can be adapted to a Reactive Streams {@link Publisher}.
 	 */
 	public boolean isReactiveType(Class<?> type) {
-		return this.reactiveRegistry.hasAdapters() && this.reactiveRegistry.getAdapter(type) != null;
+		return (this.reactiveRegistry.hasAdapters() && this.reactiveRegistry.getAdapter(type) != null);
 	}
 
 
 	/**
 	 * Process the given reactive return value and decide whether to adapt it
 	 * to a {@link ResponseBodyEmitter} or a {@link DeferredResult}.
-	 *
 	 * @return an emitter for streaming or {@code null} if handled internally
 	 * with a {@link DeferredResult}.
 	 */
@@ -164,7 +160,6 @@ class ReactiveTypeHandler {
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
 		return new ResponseBodyEmitter() {
-
 			@Override
 			protected void extendResponse(ServerHttpResponse outputMessage) {
 				outputMessage.getHeaders().setContentType(mediaType);
@@ -191,23 +186,19 @@ class ReactiveTypeHandler {
 
 		private volatile boolean done;
 
-
 		protected AbstractEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
 			this.emitter = emitter;
 			this.taskExecutor = executor;
 		}
-
 
 		public void connect(ReactiveAdapter adapter, Object returnValue) {
 			Publisher<Object> publisher = adapter.toPublisher(returnValue);
 			publisher.subscribe(this);
 		}
 
-
 		protected ResponseBodyEmitter getEmitter() {
 			return this.emitter;
 		}
-
 
 		@Override
 		public final void onSubscribe(Subscription subscription) {
@@ -344,10 +335,18 @@ class ReactiveTypeHandler {
 
 		private SseEmitter.SseEventBuilder adapt(ServerSentEvent<?> event) {
 			SseEmitter.SseEventBuilder builder = SseEmitter.event();
-			event.id().ifPresent(builder::id);
-			event.comment().ifPresent(builder::comment);
-			event.data().ifPresent(builder::data);
-			event.retry().ifPresent(duration -> builder.reconnectTime(duration.toMillis()));
+			if (event.id() != null) {
+				builder.id(event.id());
+			}
+			if (event.comment() != null) {
+				builder.comment(event.comment());
+			}
+			if (event.data() != null) {
+				builder.data(event.data());
+			}
+			if (event.retry() != null) {
+				builder.reconnectTime(event.retry().toMillis());
+			}
 			return builder;
 		}
 	}

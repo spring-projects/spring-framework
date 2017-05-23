@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TimeZone;
 
 import org.springframework.context.MessageSource;
@@ -170,8 +169,8 @@ public class RequestContext {
 	 * Return the {@link RequestDataValueProcessor} instance to apply to in form
 	 * tag libraries and to redirect URLs.
 	 */
-	public Optional<RequestDataValueProcessor> getRequestDataValueProcessor() {
-		return Optional.ofNullable(this.dataValueProcessor);
+	public RequestDataValueProcessor getRequestDataValueProcessor() {
+		return this.dataValueProcessor;
 	}
 
 	/**
@@ -346,7 +345,7 @@ public class RequestContext {
 	 * @param name name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	public Optional<Errors> getErrors(String name) {
+	public Errors getErrors(String name) {
 		return getErrors(name, isDefaultHtmlEscape());
 	}
 
@@ -356,34 +355,28 @@ public class RequestContext {
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	public Optional<Errors> getErrors(String name, boolean htmlEscape) {
+	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap<>();
 		}
 
-		// Since there is no Optional orElse + flatMap...
-		Optional<Errors> optional = Optional.ofNullable(this.errorsMap.get(name));
-		optional = optional.isPresent() ? optional : getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+		Errors errors = this.errorsMap.get(name);
+		if (errors == null) {
+			errors = getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+		}
+		if (errors instanceof BindException) {
+			errors = ((BindException) errors).getBindingResult();
+		}
 
-		return optional
-				.map(errors -> {
-					if (errors instanceof BindException) {
-						return ((BindException) errors).getBindingResult();
-					}
-					else {
-						return errors;
-					}
-				})
-				.map(errors -> {
-					if (htmlEscape && !(errors instanceof EscapedErrors)) {
-						errors = new EscapedErrors(errors);
-					}
-					else if (!htmlEscape && errors instanceof EscapedErrors) {
-						errors = ((EscapedErrors) errors).getSource();
-					}
-					this.errorsMap.put(name, errors);
-					return errors;
-				});
+		if (htmlEscape && !(errors instanceof EscapedErrors)) {
+			errors = new EscapedErrors(errors);
+		}
+		else if (!htmlEscape && errors instanceof EscapedErrors) {
+			errors = ((EscapedErrors) errors).getSource();
+		}
+
+		this.errorsMap.put(name, errors);
+		return errors;
 	}
 
 	/**
@@ -393,10 +386,12 @@ public class RequestContext {
 	 * @return the model object
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Optional<T> getModelObject(String modelName) {
-		return Optional.ofNullable(this.model)
-				.map(model -> Optional.ofNullable((T) model.get(modelName)))
-				.orElse(this.exchange.getAttribute(modelName));
+	protected <T> T getModelObject(String modelName) {
+		T modelObject = (T) this.model.get(modelName);
+		if (modelObject == null) {
+			modelObject = (T) this.exchange.getAttribute(modelName);
+		}
+		return modelObject;
 	}
 
 	/**

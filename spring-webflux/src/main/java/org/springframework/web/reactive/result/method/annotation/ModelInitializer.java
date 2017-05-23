@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
  * default model initialization through {@code @ModelAttribute} methods.
@@ -54,24 +54,16 @@ class ModelInitializer {
 	}
 
 
-	private ReactiveAdapterRegistry getAdapterRegistry() {
-		return this.adapterRegistry;
-	}
-
-
 	/**
 	 * Initialize the default model in the given {@code BindingContext} through
 	 * the {@code @ModelAttribute} methods and indicate when complete.
-	 *
 	 * <p>This will wait for {@code @ModelAttribute} methods that return
 	 * {@code Mono<Void>} since those may be adding attributes asynchronously.
 	 * However if methods return async attributes, those will be added to the
 	 * model as-is and without waiting for them to be resolved.
-	 *
 	 * @param bindingContext the BindingContext with the default model
 	 * @param attributeMethods the {@code @ModelAttribute} methods
 	 * @param exchange the current exchange
-	 *
 	 * @return a {@code Mono} for when the model is populated.
 	 */
 	@SuppressWarnings("Convert2MethodRef")
@@ -90,28 +82,20 @@ class ModelInitializer {
 	}
 
 	private Mono<Void> handleResult(HandlerResult handlerResult, BindingContext bindingContext) {
-
-		return handlerResult.getReturnValue()
-				.map(value -> {
-					ResolvableType type = handlerResult.getReturnType();
-					ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.getRawClass(), value);
-
-					Class<?> attributeType;
-					if (adapter != null) {
-						attributeType = adapter.isNoValue() ? Void.class : type.resolveGeneric(0);
-						if (attributeType.equals(Void.class)) {
-							return Mono.<Void>from(adapter.toPublisher(value));
-						}
-					}
-					else {
-						attributeType = type.resolve();
-					}
-
-					String name = getAttributeName(handlerResult.getReturnTypeSource());
-					bindingContext.getModel().asMap().putIfAbsent(name, value);
-					return Mono.<Void>empty();
-				})
-				.orElse(Mono.empty());
+		Object value = handlerResult.getReturnValue();
+		if (value != null) {
+			ResolvableType type = handlerResult.getReturnType();
+			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.getRawClass(), value);
+			if (adapter != null) {
+				Class<?> attributeType = (adapter.isNoValue() ? Void.class : type.resolveGeneric());
+				if (attributeType == Void.class) {
+					return Mono.from(adapter.toPublisher(value));
+				}
+			}
+			String name = getAttributeName(handlerResult.getReturnTypeSource());
+			bindingContext.getModel().asMap().putIfAbsent(name, value);
+		}
+		return Mono.empty();
 	}
 
 	private String getAttributeName(MethodParameter param) {

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Optional;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,7 +47,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle {
 
 	private static final ThreadLocal<WebSocketHandlerContainer> adapterHolder =
@@ -73,7 +71,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 					this.factory = new WebSocketServerFactory(this.servletContext);
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
-						String protocol = container.getProtocol().orElse(null);
+						String protocol = container.getProtocol();
 						if (protocol != null) {
 							response.setAcceptedSubProtocol(protocol);
 						}
@@ -110,9 +108,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			Optional<String> subProtocol) {
-
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -155,7 +151,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
@@ -178,9 +174,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final JettyWebSocketHandlerAdapter adapter;
 
-		private final Optional<String> protocol;
+		private final String protocol;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, Optional<String> protocol) {
+		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, String protocol) {
 			this.adapter = adapter;
 			this.protocol = protocol;
 		}
@@ -189,7 +185,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			return this.adapter;
 		}
 
-		public Optional<String> getProtocol() {
+		public String getProtocol() {
 			return this.protocol;
 		}
 	}

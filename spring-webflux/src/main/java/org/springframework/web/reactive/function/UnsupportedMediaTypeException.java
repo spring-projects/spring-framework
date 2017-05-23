@@ -57,10 +57,11 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 
 
 	/**
-	 * Return the request Content-Type header if it was parsed successfully.
+	 * Return the request Content-Type header if it was parsed successfully,
+	 * or {@code null} otherwise.
 	 */
-	public Optional<MediaType> getContentType() {
-		return Optional.ofNullable(this.contentType);
+	public MediaType getContentType() {
+		return this.contentType;
 	}
 
 	/**

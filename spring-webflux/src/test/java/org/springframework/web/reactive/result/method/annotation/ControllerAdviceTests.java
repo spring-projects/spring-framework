@@ -91,7 +91,7 @@ public class ControllerAdviceTests {
 		TestController controller = context.getBean(TestController.class);
 		controller.setException(exception);
 
-		Object actual = handle(adapter, controller, "handle").getReturnValue().orElse(null);
+		Object actual = handle(adapter, controller, "handle").getReturnValue();
 		assertEquals(expected, actual);
 	}
 

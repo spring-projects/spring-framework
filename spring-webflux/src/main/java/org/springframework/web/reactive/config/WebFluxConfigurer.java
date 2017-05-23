@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.Optional;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -104,17 +102,16 @@ public interface WebFluxConfigurer {
 	 * <p>By default a validator for standard bean validation is created if
 	 * bean validation api is present on the classpath.
 	 */
-	default Optional<Validator> getValidator() {
-		return Optional.empty();
+	default Validator getValidator() {
+		return null;
 	}
 
 	/**
-	 * Provide a custom {@link MessageCodesResolver} to use for data binding
-	 * instead of the one created by default in
-	 * {@link org.springframework.validation.DataBinder}.
+	 * Provide a custom {@link MessageCodesResolver} to use for data binding instead
+	 * of the one created by default in {@link org.springframework.validation.DataBinder}.
 	 */
-	default Optional<MessageCodesResolver> getMessageCodesResolver() {
-		return Optional.empty();
+	default MessageCodesResolver getMessageCodesResolver() {
+		return null;
 	}
 
 	/**

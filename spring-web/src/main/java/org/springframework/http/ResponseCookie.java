@@ -17,13 +17,12 @@
 package org.springframework.http;
 
 import java.time.Duration;
-import java.util.Optional;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * An {@code HttpCookie} sub-class with the additional attributes allowed in
+ * An {@code HttpCookie} subclass with the additional attributes allowed in
  * the "Set-Cookie" response header. To build an instance use the {@link #from}
  * static method.
  *
@@ -35,9 +34,9 @@ public final class ResponseCookie extends HttpCookie {
 
 	private final Duration maxAge;
 
-	private final Optional<String> domain;
+	private final String domain;
 
-	private final Optional<String> path;
+	private final String path;
 
 	private final boolean secure;
 
@@ -53,8 +52,8 @@ public final class ResponseCookie extends HttpCookie {
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
 		this.maxAge = maxAge;
-		this.domain = Optional.ofNullable(domain);
-		this.path = Optional.ofNullable(path);
+		this.domain = domain;
+		this.path = path;
 		this.secure = secure;
 		this.httpOnly = httpOnly;
 	}
@@ -72,16 +71,16 @@ public final class ResponseCookie extends HttpCookie {
 	}
 
 	/**
-	 * Return the cookie "Domain" attribute.
+	 * Return the cookie "Domain" attribute, or {@code null} if not set.
 	 */
-	public Optional<String> getDomain() {
+	public String getDomain() {
 		return this.domain;
 	}
 
 	/**
-	 * Return the cookie "Path" attribute.
+	 * Return the cookie "Path" attribute, or {@code null} if not set.
 	 */
-	public Optional<String> getPath() {
+	public String getPath() {
 		return this.path;
 	}
 

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,13 +47,13 @@ class DefaultRendering implements Rendering {
 		this.view = view;
 		this.model = (model != null ? model.asMap() : Collections.emptyMap());
 		this.status = status;
-		this.headers = headers != null ? headers : EMPTY_HEADERS;
+		this.headers = (headers != null ? headers : EMPTY_HEADERS);
 	}
 
 
 	@Override
-	public Optional<Object> view() {
-		return Optional.ofNullable(this.view);
+	public Object view() {
+		return this.view;
 	}
 
 	@Override
@@ -62,8 +62,8 @@ class DefaultRendering implements Rendering {
 	}
 
 	@Override
-	public Optional<HttpStatus> status() {
-		return Optional.ofNullable(this.status);
+	public HttpStatus status() {
+		return this.status;
 	}
 
 	@Override

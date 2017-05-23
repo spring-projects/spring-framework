@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.support;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,7 +92,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	 * @param upgradeStrategy the strategy to use
 	 */
 	public HandshakeWebSocketService(RequestUpgradeStrategy upgradeStrategy) {
-		Assert.notNull(upgradeStrategy, "'upgradeStrategy' is required");
+		Assert.notNull(upgradeStrategy, "RequestUpgradeStrategy is required");
 		this.upgradeStrategy = upgradeStrategy;
 	}
 
@@ -197,7 +196,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			return handleBadRequest("Missing \"Sec-WebSocket-Key\" header");
 		}
 
-		Optional<String> protocol = selectProtocol(headers, handler);
+		String protocol = selectProtocol(headers, handler);
 		return this.upgradeStrategy.upgrade(exchange, handler, protocol);
 	}
 
@@ -208,15 +207,17 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return Mono.error(new ServerWebInputException(reason));
 	}
 
-	private Optional<String> selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
+	private String selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
 		String protocolHeader = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
-		if (protocolHeader == null) {
-			return Optional.empty();
+		if (protocolHeader != null) {
+			List<String> supportedProtocols = handler.getSubProtocols();
+			for (String protocol : StringUtils.commaDelimitedListToStringArray(protocolHeader)) {
+				if (supportedProtocols.contains(protocol)) {
+					return protocol;
+				}
+			}
 		}
-		String[] protocols = handler.getSubProtocols();
-		return StringUtils.commaDelimitedListToSet(protocolHeader).stream()
-				.filter(protocol -> Arrays.stream(protocols).anyMatch(protocol::equals))
-				.findFirst();
+		return null;
 	}
 
 }

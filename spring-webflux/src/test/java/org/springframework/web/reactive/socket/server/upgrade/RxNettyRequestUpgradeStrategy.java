@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.security.Principal;
@@ -40,14 +41,10 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			Optional<String> subProtocol) {
-
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
 		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
 		HttpServerResponse<?> rxNettyResponse = response.getRxNettyResponse();
 
@@ -62,18 +59,18 @@ public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 
-		if (subProtocol.isPresent()) {
-			handshaker = handshaker.subprotocol(subProtocol.get());
+		if (subProtocol != null) {
+			handshaker = handshaker.subprotocol(subProtocol);
 		}
 		else {
 			// TODO: https://github.com/reactor/reactor-netty/issues/20
-			handshaker = handshaker.subprotocol(new String[0]);
+			handshaker = handshaker.subprotocol();
 		}
 
 		return Mono.from(RxReactiveStreams.toPublisher(handshaker));
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	/**
-	 * Constructor with JSON {@code Encoder} for encoding objects. Support for
-	 * {@code String} event data is built-in.
+	 * Constructor with JSON {@code Encoder} for encoding objects.
+	 * Support for {@code String} event data is built-in.
+	 * @param encoder the Encoder to use (may be {@code null})
 	 */
 	public ServerSentEventHttpMessageWriter(Encoder<?> encoder) {
 		this.encoder = encoder;
@@ -71,7 +72,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 
 	/**
-	 * Return the configured {@code Encoder}, possibly {@code null}.
+	 * Return the configured {@code Encoder}, if any.
 	 */
 	public Encoder<?> getEncoder() {
 		return this.encoder;
@@ -85,8 +86,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
-				ServerSentEvent.class.isAssignableFrom(elementType.resolve(Object.class));
+		return (mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
+				ServerSentEvent.class.isAssignableFrom(elementType.resolve(Object.class)));
 	}
 
 	@Override
@@ -100,23 +101,33 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, DataBufferFactory factory,
 			ResolvableType elementType, Map<String, Object> hints) {
 
-		ResolvableType valueType = ServerSentEvent.class.isAssignableFrom(elementType.getRawClass()) ?
-				elementType.getGeneric(0) : elementType;
+		ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.getRawClass()) ?
+				elementType.getGeneric() : elementType);
 
 		return Flux.from(input).map(element -> {
 
-			ServerSentEvent<?> sse = element instanceof ServerSentEvent ?
-					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build();
+			ServerSentEvent<?> sse = (element instanceof ServerSentEvent ?
+					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
 
 			StringBuilder sb = new StringBuilder();
-			sse.id().ifPresent(v -> writeField("id", v, sb));
-			sse.event().ifPresent(v -> writeField("event", v, sb));
-			sse.retry().ifPresent(v -> writeField("retry", v.toMillis(), sb));
-			sse.comment().ifPresent(v -> sb.append(':').append(v.replaceAll("\\n", "\n:")).append("\n"));
-			sse.data().ifPresent(v -> sb.append("data:"));
+			if (sse.id() != null) {
+				writeField("id", sse.id(), sb);
+			}
+			if (sse.event() != null) {
+				writeField("event", sse.event(), sb);
+			}
+			if (sse.retry() != null) {
+				writeField("retry", sse.retry().toMillis(), sb);
+			}
+			if (sse.comment() != null) {
+				sb.append(':').append(sse.comment().replaceAll("\\n", "\n:")).append("\n");
+			}
+			if (sse.data() != null) {
+				sb.append("data:");
+			}
 
 			return Flux.concat(encodeText(sb, factory),
-					encodeData(sse, valueType, factory, hints),
+					encodeData(sse.data(), valueType, factory, hints),
 					encodeText("\n", factory));
 		});
 	}
@@ -129,10 +140,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeData(ServerSentEvent<?> event, ResolvableType valueType,
+	private <T> Flux<DataBuffer> encodeData(T data, ResolvableType valueType,
 			DataBufferFactory factory, Map<String, Object> hints) {
 
-		Object data = event.data().orElse(null);
 		if (data == null) {
 			return Flux.empty();
 		}
@@ -147,7 +157,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		}
 
 		return ((Encoder<T>) this.encoder)
-				.encode(Mono.just((T) data), factory, valueType, MediaType.TEXT_EVENT_STREAM, hints)
+				.encode(Mono.just(data), factory, valueType, MediaType.TEXT_EVENT_STREAM, hints)
 				.concatWith(encodeText("\n", factory));
 	}
 

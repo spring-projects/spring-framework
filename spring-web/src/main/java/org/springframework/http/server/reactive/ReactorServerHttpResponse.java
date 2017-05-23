@@ -42,15 +42,14 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactorServerHttpResponse extends AbstractServerHttpResponse
-		implements ZeroCopyHttpOutputMessage {
+public class ReactorServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
 
 	private final HttpServerResponse response;
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
-		Assert.notNull(response, "'response' must not be null.");
+		Assert.notNull(response, "HttpServerResponse must not be null");
 		this.response = response;
 	}
 
@@ -98,8 +97,12 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());
 				}
-				httpCookie.getDomain().ifPresent(cookie::setDomain);
-				httpCookie.getPath().ifPresent(cookie::setPath);
+				if (httpCookie.getDomain() != null) {
+					cookie.setDomain(httpCookie.getDomain());
+				}
+				if (httpCookie.getPath() != null) {
+					cookie.setPath(httpCookie.getPath());
+				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);
@@ -115,7 +118,5 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
 		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
-
-
 
 }

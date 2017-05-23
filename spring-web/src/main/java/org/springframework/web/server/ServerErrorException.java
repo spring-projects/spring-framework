@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.server;
-
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -61,8 +59,8 @@ public class ServerErrorException extends ResponseStatusException {
 	/**
 	 * Return the {@code MethodParameter} associated with this error, if any.
 	 */
-	public Optional<MethodParameter> getMethodParameter() {
-		return Optional.ofNullable(this.parameter);
+	public MethodParameter getMethodParameter() {
+		return this.parameter;
 	}
 
 }

@@ -17,7 +17,9 @@
 package org.springframework.web.reactive.socket;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -69,19 +71,16 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 	@Test
 	public void subProtocol() throws Exception {
-
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
 		MonoProcessor<Object> output = MonoProcessor.create();
 
 		client.execute(getUrl("/sub-protocol"),
 				new WebSocketHandler() {
-
 					@Override
-					public String[] getSubProtocols() {
-						return new String[] {protocol};
+					public List<String> getSubProtocols() {
+						return Collections.singletonList(protocol);
 					}
-
 					@Override
 					public Mono<Void> handle(WebSocketSession session) {
 						infoRef.set(session.getHandshakeInfo());
@@ -96,7 +95,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		HandshakeInfo info = infoRef.get();
 		assertThat(info.getHeaders().getFirst("Upgrade"), Matchers.equalToIgnoringCase("websocket"));
 		assertEquals(protocol, info.getHeaders().getFirst("Sec-WebSocket-Protocol"));
-		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol().orElse("none"));
+		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol());
 		assertEquals("Wrong protocol detected on the server side", protocol, output.block(Duration.ofMillis(5000)));
 	}
 
@@ -122,7 +121,6 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 		@Bean
 		public HandlerMapping handlerMapping() {
-
 			Map<String, WebSocketHandler> map = new HashMap<>();
 			map.put("/echo", new EchoWebSocketHandler());
 			map.put("/sub-protocol", new SubProtocolWebSocketHandler());
@@ -149,13 +147,13 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	private static class SubProtocolWebSocketHandler implements WebSocketHandler {
 
 		@Override
-		public String[] getSubProtocols() {
-			return new String[] {"echo-v1"};
+		public List<String> getSubProtocols() {
+			return Collections.singletonList("echo-v1");
 		}
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			String protocol = session.getHandshakeInfo().getSubProtocol().orElse("none");
+			String protocol = session.getHandshakeInfo().getSubProtocol();
 			WebSocketMessage message = session.textMessage(protocol);
 			return doSend(session, Mono.just(message));
 		}

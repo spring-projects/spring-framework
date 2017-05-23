@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -59,19 +58,20 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(initUri(request, remoteAddress), initHeaders(request));
-
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.request = request;
+
+		Assert.notNull(dataBufferFactory, "NettyDataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
+
 		this.remoteAddress = remoteAddress;
 	}
 
 	private static URI initUri(HttpServerRequest<ByteBuf> request, InetSocketAddress remoteAddress)
 			throws URISyntaxException {
 
-		Assert.notNull(request, "'request' must not be null");
+		Assert.notNull(request, "HttpServerRequest must not be null");
 		String requestUri = request.getUri();
-		return remoteAddress != null ? createUrl(remoteAddress, requestUri) : URI.create(requestUri);
+		return (remoteAddress != null ? createUrl(remoteAddress, requestUri) : URI.create(requestUri));
 	}
 
 	private static URI createUrl(InetSocketAddress address, String requestUri) throws URISyntaxException {
@@ -110,8 +110,8 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.remoteAddress);
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
@@ -100,8 +99,8 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.exchange.getSourceAddress());
+	public InetSocketAddress getRemoteAddress() {
+		return this.exchange.getSourceAddress();
 	}
 
 	@Override

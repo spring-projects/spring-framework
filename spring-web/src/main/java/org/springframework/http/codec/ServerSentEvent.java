@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 package org.springframework.http.codec;
 
 import java.time.Duration;
-import java.util.Optional;
 
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
- * Representation for a Server-Sent Event for use with Spring's reactive Web
- * support. {@code Flux<ServerSentEvent>} or {@code Observable<ServerSentEvent>} is the
+ * Representation for a Server-Sent Event for use with Spring's reactive Web support.
+ * {@code Flux<ServerSentEvent>} or {@code Observable<ServerSentEvent>} is the
  * reactive equivalent to Spring MVC's {@code SseEmitter}.
  *
  * @param <T> the type of data that this event contains
+ *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  * @see ServerSentEventHttpMessageWriter
  * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
- * @since 5.0
  */
 public class ServerSentEvent<T> {
 
@@ -54,67 +54,68 @@ public class ServerSentEvent<T> {
         this.comment = comment;
     }
 
-    /**
-     * Return a builder for a {@code SseEvent}.
-     *
-     * @param <T> the type of data that this event contains
-     * @return the builder
-     */
-    public static <T> Builder<T> builder() {
-        return new BuilderImpl<>();
-    }
-
-    /**
-     * Return a builder for a {@code SseEvent}, populated with the give {@linkplain #data() data}.
-     *
-     * @param <T> the type of data that this event contains
-     * @return the builder
-     */
-    public static <T> Builder<T> builder(T data) {
-        return new BuilderImpl<>(data);
-    }
 
     /**
      * Return the {@code id} field of this event, if available.
      */
-    public Optional<String> id() {
-        return Optional.ofNullable(this.id);
+    public String id() {
+        return this.id;
     }
 
     /**
      * Return the {@code event} field of this event, if available.
      */
-    public Optional<String> event() {
-        return Optional.ofNullable(this.event);
+    public String event() {
+        return this.event;
     }
 
     /**
      * Return the {@code data} field of this event, if available.
      */
-    public Optional<T> data() {
-        return Optional.ofNullable(this.data);
+    public T data() {
+        return this.data;
     }
 
     /**
      * Return the {@code retry} field of this event, if available.
      */
-    public Optional<Duration> retry() {
-        return Optional.ofNullable(this.retry);
+    public Duration retry() {
+        return this.retry;
     }
 
     /**
      * Return the comment of this event, if available.
      */
-    public Optional<String> comment() {
-        return Optional.ofNullable(this.comment);
+    public String comment() {
+        return this.comment;
     }
+
 
     @Override
     public String toString() {
-        return "ServerSentEvent [id = '" + id + '\'' + ", event='" + event + '\'' +
-                ", data=" + data + ", retry=" + retry + ", comment='" + comment + '\'' +
-                ']';
+        return ("ServerSentEvent [id = '" + this.id + '\'' + ", event='" + this.event + '\'' +
+                ", data=" + this.data + ", retry=" + this.retry + ", comment='" + this.comment + '\'' + ']');
     }
+
+
+	/**
+	 * Return a builder for a {@code SseEvent}.
+	 * @param <T> the type of data that this event contains
+	 * @return the builder
+	 */
+	public static <T> Builder<T> builder() {
+		return new BuilderImpl<>();
+	}
+
+	/**
+	 * Return a builder for a {@code SseEvent}, populated with the give {@linkplain #data() data}.
+	 * @param <T> the type of data that this event contains
+	 * @return the builder
+	 */
+	public static <T> Builder<T> builder(T data) {
+		return new BuilderImpl<>(data);
+	}
+
 
     /**
      * A mutable builder for a {@code SseEvent}.

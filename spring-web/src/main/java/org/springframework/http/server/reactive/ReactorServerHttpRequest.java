@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
@@ -100,8 +99,8 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.request.remoteAddress());
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
 	}
 
 	@Override

@@ -19,7 +19,6 @@ package org.springframework.test.web.reactive.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.springframework.context.ApplicationContext;
@@ -199,8 +198,8 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		}
 
 		@Override
-		public Optional<Validator> getValidator() {
-			return Optional.ofNullable(this.validator);
+		public Validator getValidator() {
+			return this.validator;
 		}
 
 		@Override

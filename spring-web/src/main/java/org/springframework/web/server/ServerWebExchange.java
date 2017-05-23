@@ -126,12 +126,10 @@ public interface ServerWebExchange {
 	 * status, and adding "ETag" and "Last-Modified" headers when applicable.
 	 * This method works with conditional GET/HEAD requests as well as with
 	 * conditional POST/PUT/DELETE requests.
-	 *
 	 * <p><strong>Note:</strong> The HTTP specification recommends setting both
 	 * ETag and Last-Modified values, but you can also use
 	 * {@code #checkNotModified(String)} or
 	 * {@link #checkNotModified(Instant)}.
-	 *
 	 * @param etag the entity tag that the application determined for the
 	 * underlying resource. This parameter will be padded with quotes (")
 	 * if necessary.

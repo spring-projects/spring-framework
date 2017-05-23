@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * {@code HandlerResultHandler} that handles return values from methods annotated
  * with {@code @ResponseBody} writing to the body of the request or response with
@@ -47,9 +46,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandler
-		implements HandlerResultHandler {
-
+public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
 	/**
 	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
@@ -86,7 +83,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Object body = result.getReturnValue().orElse(null);
+		Object body = result.getReturnValue();
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
 		return writeBody(body, bodyTypeParameter, exchange);
 	}

@@ -60,7 +60,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
-		Assert.notNull(exchange, "HttpServerExchange is required");
+		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		this.exchange = exchange;
 	}
 
@@ -120,8 +120,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
 				}
-				httpCookie.getDomain().ifPresent(cookie::setDomain);
-				httpCookie.getPath().ifPresent(cookie::setPath);
+				if (httpCookie.getDomain() != null) {
+					cookie.setDomain(httpCookie.getDomain());
+				}
+				if (httpCookie.getPath() != null) {
+					cookie.setPath(httpCookie.getPath());
+				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);

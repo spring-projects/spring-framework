@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
@@ -35,11 +34,10 @@ import org.springframework.util.MultiValueMap;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
-	 * Returns the portion of the URL path that represents the context path for
-	 * the current {@link HttpHandler}. The context path is always at the
-	 * beginning of the request path. It starts with "/" but but does not end
-	 * with "/". This method may return an empty string if no context path is
-	 * configured.
+	 * Returns the portion of the URL path that represents the context path for the
+	 * current {@link HttpHandler}. The context path is always at the beginning of
+	 * the request path. It starts with "/" but but does not end with "/".
+	 * <p>This method may return an empty string if no context path is configured.
 	 * @return the context path (not decoded) or an empty string
 	 */
 	default String getContextPath() {
@@ -57,10 +55,9 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	MultiValueMap<String, HttpCookie> getCookies();
 
 	/**
-	 * Returns the remote address where this request is connected to.
-	 * @return remote address if available
+	 * Return the remote address where this request is connected to, if available.
 	 */
-	Optional<InetSocketAddress> getRemoteAddress();
+	InetSocketAddress getRemoteAddress();
 
 
 	/**

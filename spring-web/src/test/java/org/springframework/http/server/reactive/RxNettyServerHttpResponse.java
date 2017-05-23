@@ -47,18 +47,18 @@ import org.springframework.util.Assert;
  */
 public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
-	private final HttpServerResponse<ByteBuf> response;
-
 	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
 
 	// 8 Kb flush threshold to avoid blocking RxNetty when the send buffer has reached the high watermark
 	private static final long FLUSH_THRESHOLD = 8192;
 
-	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
-			NettyDataBufferFactory dataBufferFactory) {
-		super(dataBufferFactory);
-		Assert.notNull(response, "'response' must not be null.");
 
+	private final HttpServerResponse<ByteBuf> response;
+
+
+	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response, NettyDataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory);
+		Assert.notNull(response, "HttpServerResponse must not be null");
 		this.response = response;
 	}
 
@@ -113,8 +113,12 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());
 				}
-				httpCookie.getDomain().ifPresent(cookie::setDomain);
-				httpCookie.getPath().ifPresent(cookie::setPath);
+				if (httpCookie.getDomain() != null) {
+					cookie.setDomain(httpCookie.getDomain());
+				}
+				if (httpCookie.getPath() != null) {
+					cookie.setPath(httpCookie.getPath());
+				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);

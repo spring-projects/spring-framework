@@ -18,7 +18,6 @@ package org.springframework.web.reactive.config;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +36,8 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.doAnswer;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link DelegatingWebFluxConfiguration} tests.
@@ -72,8 +66,8 @@ public class DelegatingWebFluxConfigurationTests {
 		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
-		given(webFluxConfigurer.getValidator()).willReturn(Optional.empty());
-		given(webFluxConfigurer.getMessageCodesResolver()).willReturn(Optional.empty());
+		given(webFluxConfigurer.getValidator()).willReturn(null);
+		given(webFluxConfigurer.getMessageCodesResolver()).willReturn(null);
 	}
 
 

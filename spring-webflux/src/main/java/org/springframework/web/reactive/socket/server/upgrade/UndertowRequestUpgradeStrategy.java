@@ -20,7 +20,6 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import io.undertow.server.HttpServerExchange;
@@ -50,16 +49,15 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Violeta Georgieva
  * @since 5.0
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, Optional<String> subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Assert.isInstanceOf(UndertowServerHttpRequest.class, request, "UndertowServerHttpRequest required");
 		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();
 
-		Set<String> protocols = subProtocol.map(Collections::singleton).orElse(Collections.emptySet());
+		Set<String> protocols = (subProtocol != null ? Collections.singleton(subProtocol) : Collections.emptySet());
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
 		List<Handshake> handshakes = Collections.singletonList(handshake);
 

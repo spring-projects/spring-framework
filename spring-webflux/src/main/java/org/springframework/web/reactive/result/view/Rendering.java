@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
-
 
 /**
  * Public API for HTML rendering. Supported as a return value in Spring WebFlux
@@ -46,7 +45,7 @@ public interface Rendering {
 	/**
 	 * Return the selected {@link String} view name or {@link View} object.
 	 */
-	Optional<Object> view();
+	Object view();
 
 	/**
 	 * Return attributes to add to the model.
@@ -56,7 +55,7 @@ public interface Rendering {
 	/**
 	 * Return the HTTP status to set the response to.
 	 */
-	Optional<HttpStatus> status();
+	HttpStatus status();
 
 	/**
 	 * Return headers to add to the response.

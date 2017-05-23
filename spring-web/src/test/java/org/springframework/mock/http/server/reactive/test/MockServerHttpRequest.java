@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.server.reactive.test;
 
 import java.net.InetSocketAddress;
@@ -22,7 +23,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -66,8 +66,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			InetSocketAddress remoteAddress,
-			Publisher<? extends DataBuffer> body) {
+			InetSocketAddress remoteAddress, Publisher<? extends DataBuffer> body) {
 
 		super(uri, headers);
 		this.httpMethod = httpMethod;
@@ -89,8 +88,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.remoteAddress);
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
 	}
 
 	@Override

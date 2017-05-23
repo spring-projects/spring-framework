@@ -98,18 +98,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("0", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("1", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.expectComplete()
 				.verify(Duration.ofSeconds(5L));

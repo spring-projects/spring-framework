@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -59,7 +58,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invokeMethodWithNoValue() throws Exception {
-
 		Mono<Object> resolvedValue = Mono.empty();
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method, resolverFor(resolvedValue));
@@ -69,7 +67,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invokeMethodWithValue() throws Exception {
-
 		Mono<Object> resolvedValue = Mono.just("value1");
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method, resolverFor(resolvedValue));
@@ -79,7 +76,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void noMatchingResolver() throws Exception {
-
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
@@ -95,7 +91,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolverThrowsException() throws Exception {
-
 		Mono<Object> resolvedValue = Mono.error(new UnsupportedMediaTypeStatusException("boo"));
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method, resolverFor(resolvedValue));
@@ -111,7 +106,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void illegalArgumentExceptionIsWrappedWithInvocationDetails() throws Exception {
-
 		Mono<Object> resolvedValue = Mono.just(1);
 		Method method = on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method, resolverFor(resolvedValue));
@@ -129,7 +123,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invocationTargetExceptionIsUnwrapped() throws Exception {
-
 		Method method = on(TestController.class).mockCall(TestController::exceptionMethod).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
@@ -144,7 +137,6 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invokeMethodWithResponseStatus() throws Exception {
-
 		Method method = on(TestController.class).annotPresent(ResponseStatus.class).resolveMethod();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
@@ -175,9 +167,7 @@ public class InvocableHandlerMethodTests {
 	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected) {
 		StepVerifier.create(mono)
 				.consumeNextWith(result -> {
-					Optional<?> optional = result.getReturnValue();
-					assertTrue(optional.isPresent());
-					assertEquals(expected, optional.get());
+					assertEquals(expected, result.getReturnValue());
 				})
 				.expectComplete()
 				.verify();

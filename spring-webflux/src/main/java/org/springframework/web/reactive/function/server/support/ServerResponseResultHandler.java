@@ -54,14 +54,13 @@ public class ServerResponseResultHandler implements HandlerResultHandler {
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		return result.getReturnValue()
-				.filter(o -> o instanceof ServerResponse)
-				.isPresent();
+		return (result.getReturnValue() instanceof ServerResponse);
 	}
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		ServerResponse response = (ServerResponse) result.getReturnValue().orElseThrow(IllegalStateException::new);
+		ServerResponse response = (ServerResponse) result.getReturnValue();
+		Assert.state(response != null, "No ServerResponse");
 		return response.writeTo(exchange, this.strategies);
 	}
 

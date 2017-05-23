@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -69,17 +68,15 @@ class InitBinderBindingContext extends BindingContext {
 	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
 			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
 
-		Optional<Object> returnValue = binderMethod
-				.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder)
+		Object returnValue = binderMethod.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder)
 				.getReturnValue();
 
-		if (returnValue.isPresent()) {
+		if (returnValue != null) {
 			throw new IllegalStateException(
 					"@InitBinder methods should return void: " + binderMethod);
 		}
 
 		// Should not happen (no Model argument resolution) ...
-
 		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
 			throw new IllegalStateException(
 					"@InitBinder methods should not add model attributes: " + binderMethod);

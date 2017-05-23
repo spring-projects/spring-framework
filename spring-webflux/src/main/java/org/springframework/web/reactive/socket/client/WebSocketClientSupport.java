@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.Optional;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +41,7 @@ public class WebSocketClientSupport {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
-	protected String[] beforeHandshake(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
+	protected List<String> beforeHandshake(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing handshake to " + url);
 		}
@@ -52,7 +53,7 @@ public class WebSocketClientSupport {
 			logger.debug("Handshake response: " + url + ", " + responseHeaders);
 		}
 		String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
-		return new HandshakeInfo(url, responseHeaders, Mono.empty(), Optional.ofNullable(protocol));
+		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
 }

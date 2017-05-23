@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.server;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,10 +56,11 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 
 
 	/**
-	 * Return the request Content-Type header if it was parsed successfully.
+	 * Return the request Content-Type header if it was parsed successfully,
+	 * or {@code null} otherwise.
 	 */
-	public Optional<MediaType> getContentType() {
-		return Optional.ofNullable(this.contentType);
+	public MediaType getContentType() {
+		return this.contentType;
 	}
 
 	/**

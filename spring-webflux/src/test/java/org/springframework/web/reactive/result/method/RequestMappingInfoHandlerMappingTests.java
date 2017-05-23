@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -353,10 +352,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		HandlerResult result = mono.block();
 		assertNotNull(result);
 
-		Optional<Object> value = result.getReturnValue();
-		assertTrue(value.isPresent());
-		assertEquals(HttpHeaders.class, value.get().getClass());
-		assertEquals(allowedMethods, ((HttpHeaders) value.get()).getAllow());
+		Object value = result.getReturnValue();
+		assertNotNull(value);
+		assertEquals(HttpHeaders.class, value.getClass());
+		assertEquals(allowedMethods, ((HttpHeaders) value).getAllow());
 	}
 
 	private void testMediaTypeNotAcceptable(String url) throws Exception {

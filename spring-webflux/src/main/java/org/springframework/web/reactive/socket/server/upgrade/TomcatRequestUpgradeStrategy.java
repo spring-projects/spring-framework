@@ -19,7 +19,6 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
-import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,14 +46,13 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Violeta Georgieva
  * @since 5.0
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	private static final String SERVER_CONTAINER_ATTR = "javax.websocket.server.ServerContainer";
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, Optional<String> subProtocol){
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol){
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -70,7 +68,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		String requestURI = servletRequest.getRequestURI();
 		DefaultServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);
-		config.setSubprotocols(subProtocol.map(Collections::singletonList).orElse(Collections.emptyList()));
+		config.setSubprotocols(subProtocol != null ? Collections.singletonList(subProtocol) : Collections.emptyList());
 
 		try {
 			WsServerContainer container = getContainer(servletRequest);
@@ -93,7 +91,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
