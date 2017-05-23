@@ -22,7 +22,8 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a function that evaluates on a given {@link ServerRequest}.
- * Instances of this function that evaluate on common request properties can be found in {@link RequestPredicates}.
+ * Instances of this function that evaluate on common request properties
+ * can be found in {@link RequestPredicates}.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -74,17 +75,17 @@ public interface RequestPredicate {
 
 	/**
 	 * Transform the given request into a request used for a nested route. For instance,
-	 * a path-based predicate can return a {@code ServerRequest} with a the path remaining after a
-	 * match.
+	 * a path-based predicate can return a {@code ServerRequest} with a the path remaining
+	 * after a match.
 	 * <p>The default implementation returns an {@code Optional} wrapping the given path if
-	 * {@link #test(ServerRequest)} evaluates to {@code true}; or {@link Optional#empty()} if it
-	 * evaluates to {@code false}.
+	 * {@link #test(ServerRequest)} evaluates to {@code true}; or {@link Optional#empty()}
+	 * if it evaluates to {@code false}.
 	 * @param request the request to be nested
 	 * @return the nested request
 	 * @see RouterFunctions#nest(RequestPredicate, RouterFunction)
 	 */
 	default Optional<ServerRequest> nest(ServerRequest request) {
-		return test(request) ? Optional.of(request) : Optional.empty();
+		return (test(request) ? Optional.of(request) : Optional.empty());
 	}
 
 }

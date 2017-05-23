@@ -75,7 +75,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 		this.headers = new HttpHeaders();
 		this.cookies = new LinkedMultiValueMap<>();

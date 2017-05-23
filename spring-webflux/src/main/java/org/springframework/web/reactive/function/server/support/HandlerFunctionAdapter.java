@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,10 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 			HANDLER_FUNCTION_RETURN_TYPE = new MethodParameter(method, -1);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new Error(ex);
+			throw new IllegalStateException(ex);
 		}
 	}
+
 
 	@Override
 	public boolean supports(Object handler) {

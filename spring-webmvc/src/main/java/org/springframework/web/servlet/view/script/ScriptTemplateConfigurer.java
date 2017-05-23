@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import javax.script.ScriptEngine;
  * a {@code ScriptEngine} for use in a web application.
  *
  * <pre class="code">
- *
  * // Add the following to an &#64;Configuration class
  * &#64;Bean
  * public ScriptTemplateConfigurer mustacheConfigurer() {
@@ -157,7 +156,6 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
 	/**
 	 * Set the render function name (mandatory).
-	 *
 	 * <p>This function will be called with the following parameters:
 	 * <ol>
 	 * <li>{@code String template}: the template content</li>
