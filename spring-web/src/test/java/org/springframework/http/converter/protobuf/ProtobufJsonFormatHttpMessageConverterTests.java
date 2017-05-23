@@ -19,6 +19,7 @@ package org.springframework.http.converter.protobuf;
 import java.io.IOException;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,12 +33,11 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test suite for {@link ProtobufHttpMessageConverter}.
+ * Test suite for {@link ProtobufJsonFormatHttpMessageConverter}.
  *
- * @author Alex Antonov
  * @author Juergen Hoeller
  */
-public class ProtobufHttpMessageConverterTests {
+public class ProtobufJsonFormatHttpMessageConverterTests {
 
 	private ProtobufHttpMessageConverter converter;
 
@@ -49,7 +49,8 @@ public class ProtobufHttpMessageConverterTests {
 	@Before
 	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
-		this.converter = new ProtobufHttpMessageConverter(this.registryInitializer);
+		this.converter = new ProtobufJsonFormatHttpMessageConverter(
+				JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 	}
 
@@ -69,11 +70,7 @@ public class ProtobufHttpMessageConverterTests {
 		assertTrue(this.converter.canRead(Msg.class, null));
 		assertTrue(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF));
 		assertTrue(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON));
-		assertTrue(this.converter.canRead(Msg.class, MediaType.APPLICATION_XML));
 		assertTrue(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN));
-
-		// only supported as an output format
-		assertFalse(this.converter.canRead(Msg.class, MediaType.TEXT_HTML));
 	}
 
 	@Test
@@ -81,9 +78,7 @@ public class ProtobufHttpMessageConverterTests {
 		assertTrue(this.converter.canWrite(Msg.class, null));
 		assertTrue(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF));
 		assertTrue(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON));
-		assertTrue(this.converter.canWrite(Msg.class, MediaType.APPLICATION_XML));
 		assertTrue(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN));
-		assertTrue(this.converter.canWrite(Msg.class, MediaType.TEXT_HTML));
 	}
 
 	@Test
