@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,6 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -116,25 +114,26 @@ public class HttpMessageWriterView implements View {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange) {
-		return getObjectToRender(model)
-				.map(value -> write(value, contentType, exchange))
-				.orElseGet(() -> exchange.getResponse().setComplete());
+		Object value = getObjectToRender(model);
+		return (value != null) ?
+				write(value, contentType, exchange) :
+				exchange.getResponse().setComplete();
 	}
 
-	private Optional<Object> getObjectToRender(Map<String, ?> model) {
+	private Object getObjectToRender(Map<String, ?> model) {
 
 		Map<String, ?> result = model.entrySet().stream()
 				.filter(this::isMatch)
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		if (result.isEmpty()) {
-			return Optional.empty();
+			return null;
 		}
 		else if (result.size() == 1) {
-			return Optional.of(result.values().iterator().next());
+			return result.values().iterator().next();
 		}
 		else if (this.canWriteMap) {
-			return Optional.of(result);
+			return result;
 		}
 		else {
 			throw new IllegalStateException("Multiple matches found: " + result + " but " +

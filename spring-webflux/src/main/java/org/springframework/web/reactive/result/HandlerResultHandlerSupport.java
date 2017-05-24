@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -150,12 +149,9 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	private List<MediaType> getProducibleTypes(ServerWebExchange exchange,
 			Supplier<List<MediaType>> producibleTypesSupplier) {
 
-		Optional<Object> optional = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		if (optional.isPresent()) {
-			Set<MediaType> set = (Set<MediaType>) optional.get();
-			return new ArrayList<>(set);
-		}
-		return producibleTypesSupplier.get();
+		return exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE)
+				.map(attribute -> (List<MediaType>) new ArrayList<>((Set<MediaType>) attribute))
+				.orElseGet(producibleTypesSupplier);
 	}
 
 	private MediaType selectMoreSpecificMediaType(MediaType acceptable, MediaType producible) {

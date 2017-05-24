@@ -42,6 +42,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.util.MimeType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -177,7 +178,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 
 		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {
-			Charset charset = getCharset(contentType).orElse(getDefaultCharset());
+			Charset charset = getCharset(contentType);
 			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
 			getTemplate(locale).process(freeMarkerModel, writer);
 		}
@@ -191,8 +192,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
 	}
 
-	private Optional<Charset> getCharset(MediaType mediaType) {
-		return (mediaType != null ? Optional.ofNullable(mediaType.getCharset()) : Optional.empty());
+	private Charset getCharset(MediaType mediaType) {
+		return Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(getDefaultCharset());
 	}
 
 	/**
