@@ -19,9 +19,11 @@ package org.springframework.test.web.reactive.server.samples.bind;
 import java.security.Principal;
 import java.util.function.UnaryOperator;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
+import org.springframework.test.web.reactive.server.MockServerExchangeMutator;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -39,11 +41,25 @@ import static org.junit.Assert.assertEquals;
  */
 public class ControllerTests {
 
-	private final WebTestClient client = WebTestClient.bindToController(new TestController())
-			.exchangeMutator(principal("Pablo"))
-			.webFilter(prefixFilter("Mr."))
-			.build();
+	private WebTestClient client;
 
+	private MockServerExchangeMutator exchangeMutator;
+
+
+	@Before
+	public void setUp() throws Exception {
+
+		this.exchangeMutator = new MockServerExchangeMutator(principal("Pablo"));
+
+		WebFilter userPrefixFilter = (exchange, chain) -> {
+			Mono<Principal> user = exchange.getPrincipal().map(p -> new TestUser("Mr. " + p.getName()));
+			return chain.filter(exchange.mutate().principal(user).build());
+		};
+
+		this.client = WebTestClient.bindToController(new TestController())
+				.webFilter(this.exchangeMutator, userPrefixFilter)
+				.build();
+	}
 
 	@Test
 	public void bodyContent() throws Exception {
@@ -63,7 +79,7 @@ public class ControllerTests {
 
 	@Test
 	public void perRequestExchangeMutator() throws Exception {
-		this.client.exchangeMutator(principal("Giovanni"))
+		this.exchangeMutator.filterClient(this.client, principal("Giovanni"))
 				.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
@@ -72,9 +88,8 @@ public class ControllerTests {
 
 	@Test
 	public void perRequestMultipleExchangeMutators() throws Exception {
-		this.client
-				.exchangeMutator(attribute("attr1", "foo"))
-				.exchangeMutator(attribute("attr2", "bar"))
+		this.exchangeMutator
+				.filterClient(this.client, attribute("attr1", "foo"), attribute("attr2", "bar"))
 				.get().uri("/attributes")
 				.exchange()
 				.expectStatus().isOk()
@@ -84,13 +99,6 @@ public class ControllerTests {
 
 	private UnaryOperator<ServerWebExchange> principal(String userName) {
 		return exchange -> exchange.mutate().principal(Mono.just(new TestUser(userName))).build();
-	}
-
-	private WebFilter prefixFilter(String prefix) {
-		return (exchange, chain) -> {
-			Mono<Principal> user = exchange.getPrincipal().map(p -> new TestUser(prefix + " " + p.getName()));
-			return chain.filter(exchange.mutate().principal(user).build());
-		};
 	}
 
 	private UnaryOperator<ServerWebExchange> attribute(String attrName, String attrValue) {

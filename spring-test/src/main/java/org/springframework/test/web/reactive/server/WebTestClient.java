@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
 
@@ -51,7 +50,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
@@ -128,16 +126,6 @@ public interface WebTestClient {
 	 */
 	WebTestClient filter(ExchangeFilterFunction filterFunction);
 
-	/**
-	 * Filter the client applying the given transformation function on the
-	 * {@code ServerWebExchange} to every request.
-	 * <p><strong>Note:</strong> this option is applicable only when testing
-	 * without an actual running server.
-	 * @param mutator the transformation function
-	 * @return the filtered client
-	 */
-	WebTestClient exchangeMutator(UnaryOperator<ServerWebExchange> mutator);
-
 
 	// Static, factory methods
 
@@ -180,7 +168,7 @@ public interface WebTestClient {
 	 * @return the {@link WebTestClient} builder
 	 */
 	static Builder bindToHttpHandler(HttpHandler httpHandler) {
-		return new DefaultWebTestClientBuilder(httpHandler, null);
+		return new DefaultWebTestClientBuilder(httpHandler);
 	}
 
 	/**
@@ -198,16 +186,15 @@ public interface WebTestClient {
 	interface MockServerSpec<B extends MockServerSpec<B>> {
 
 		/**
-		 * Configure a transformation function on {@code ServerWebExchange} to
-		 * be applied at the start of server-side, request processing.
-		 * @param mutator the transforming function.
-		 * @see ServerWebExchange#mutate()
-		 */
-		<T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator);
-
-		/**
-		 * Configure {@link WebFilter}'s for server request processing.
+		 * Register one or more {@link WebFilter} instances to apply to the
+		 * mock server.
+		 *
+		 * <p>This could be used for example to apply {@code ServerWebExchange}
+		 * transformations such as setting the Principal (for all requests or a
+		 * subset) via {@link MockServerExchangeMutator}.
+		 *
 		 * @param filter one or more filters
+		 * @see MockServerExchangeMutator
 		 */
 		<T extends B> T webFilter(WebFilter... filter);
 

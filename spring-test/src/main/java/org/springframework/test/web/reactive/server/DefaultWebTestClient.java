@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -48,7 +47,6 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -69,28 +67,21 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
 
-	private final ExchangeMutatingWebFilter exchangeMutatingWebFilter;
-
 	private final Duration timeout;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector,
-			ExchangeMutatingWebFilter filter, Duration timeout) {
-
-		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
-
+	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector, Duration timeout) {
+		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
-		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
-		this.exchangeMutatingWebFilter = (filter != null ? filter : new ExchangeMutatingWebFilter());
+		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
 	}
 
 	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
 		this.webClient = webTestClient.webClient.filter(filter);
 		this.wiretapConnector = webTestClient.wiretapConnector;
-		this.exchangeMutatingWebFilter = webTestClient.exchangeMutatingWebFilter;
 		this.timeout = webTestClient.timeout;
 	}
 
@@ -145,20 +136,6 @@ class DefaultWebTestClient implements WebTestClient {
 	@Override
 	public WebTestClient filter(ExchangeFilterFunction filter) {
 		return new DefaultWebTestClient(this, filter);
-	}
-
-	@Override
-	public WebTestClient exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
-
-		Assert.notNull(this.exchangeMutatingWebFilter,
-				"This option is applicable only for tests without an actual running server");
-
-		return filter((request, next) -> {
-			String requestId = request.headers().getFirst(WiretapConnector.REQUEST_ID_HEADER_NAME);
-			Assert.notNull(requestId, "No request-id header");
-			this.exchangeMutatingWebFilter.registerPerRequestMutator(requestId, mutator);
-			return next.exchange(request);
-		});
 	}
 
 

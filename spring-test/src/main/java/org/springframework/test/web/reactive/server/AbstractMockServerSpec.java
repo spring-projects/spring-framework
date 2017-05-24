@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
@@ -35,21 +33,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		implements WebTestClient.MockServerSpec<B> {
 
-	private final ExchangeMutatingWebFilter exchangeMutatingWebFilter = new ExchangeMutatingWebFilter();
-
 	private final List<WebFilter> filters = new ArrayList<>(4);
 
-
-	AbstractMockServerSpec() {
-		this.filters.add(this.exchangeMutatingWebFilter);
-	}
-
-
-	@Override
-	public <T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
-		this.exchangeMutatingWebFilter.registerGlobalMutator(mutator);
-		return self();
-	}
 
 	@Override
 	public <T extends B> T webFilter(WebFilter... filter) {
@@ -67,7 +52,7 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 	public WebTestClient.Builder configureClient() {
 		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
 		filtersInReverse().forEach(builder::prependFilter);
-		return new DefaultWebTestClientBuilder(builder.build(), this.exchangeMutatingWebFilter);
+		return new DefaultWebTestClientBuilder(builder.build());
 	}
 
 	/**
