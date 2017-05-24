@@ -33,9 +33,10 @@ import org.springframework.web.server.WebFilterChain;
  * transformations during requests from the {@code WebTestClient} to a mock
  * server -- i.e. when one of the following is in use:
  * <ul>
- * <li>{@link WebTestClient#bindToController},
+ * <li>{@link WebTestClient#bindToController}
  * <li>{@link WebTestClient#bindToRouterFunction}
- * <li>{@link WebTestClient#bindToApplicationContext}.
+ * <li>{@link WebTestClient#bindToApplicationContext}
+ * <li>{@link WebTestClient#bindToWebHandler}
  * </ul>
  *
  * <p>Example of registering a "global" transformation:

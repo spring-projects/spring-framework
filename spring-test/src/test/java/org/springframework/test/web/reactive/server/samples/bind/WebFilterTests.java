@@ -17,39 +17,35 @@
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
- * Bind to an {@link HttpHandler}.
+ * Tests for a {@link WebFilter}.
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerTests {
-
+public class WebFilterTests {
 
 	@Test
 	public void testWebFilter() throws Exception {
 
-		WebFilter myFilter = (exchange, chain) -> {
+		WebFilter filter = (exchange, chain) -> {
 			DataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer();
 			buffer.write("It works!".getBytes(StandardCharsets.UTF_8));
 			return exchange.getResponse().writeWith(Mono.just(buffer));
 		};
 
-		HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(exchange -> Mono.empty())
-				.filters(Collections.singletonList(myFilter)).build();
+		WebTestClient client = WebTestClient.bindToWebHandler(exchange -> Mono.empty())
+				.webFilter(filter)
+				.build();
 
-		WebTestClient.bindToHttpHandler(httpHandler).build()
-				.get().uri("/")
+		client.get().uri("/")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("It works!");

@@ -34,7 +34,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -51,6 +50,7 @@ import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -130,7 +130,7 @@ public interface WebTestClient {
 	// Static, factory methods
 
 	/**
-	 * Integration testing without a server targeting specific annotated,
+	 * Integration testing with a "mock" server targeting specific annotated,
 	 * WebFlux controllers. The default configuration is the same as for
 	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
 	 * but can also be further customized through the returned spec.
@@ -142,9 +142,9 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Integration testing without a server with WebFlux infrastructure detected
-	 * from an {@link ApplicationContext} such as {@code @EnableWebFlux}
-	 * Java config and annotated controller Spring beans.
+	 * Integration testing with a "mock" server with WebFlux infrastructure
+	 * detected from an {@link ApplicationContext} such as
+	 * {@code @EnableWebFlux} Java config and annotated controller Spring beans.
 	 * @param applicationContext the context
 	 * @return the {@link WebTestClient} builder
 	 * @see org.springframework.web.reactive.config.EnableWebFlux
@@ -163,12 +163,12 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Integration testing without a server targeting the given HttpHandler.
-	 * @param httpHandler the handler to test
+	 * Integration testing with a "mock" server targeting the given WebHandler.
+	 * @param webHandler the handler to test
 	 * @return the {@link WebTestClient} builder
 	 */
-	static Builder bindToHttpHandler(HttpHandler httpHandler) {
-		return new DefaultWebTestClientBuilder(httpHandler);
+	static MockServerSpec<?> bindToWebHandler(WebHandler webHandler) {
+		return new DefaultMockServerSpec(webHandler);
 	}
 
 	/**
