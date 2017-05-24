@@ -50,7 +50,7 @@ public class WebTestClientConnectorTests {
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		ClientRequest clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test"))
-				.header(WiretapConnector.REQUEST_ID_HEADER_NAME, "1").build();
+				.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, "1").build();
 
 		WiretapConnector wiretapConnector = new WiretapConnector(connector);
 		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);

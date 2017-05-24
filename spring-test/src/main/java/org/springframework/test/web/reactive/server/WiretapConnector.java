@@ -24,7 +24,6 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -42,15 +41,12 @@ import org.springframework.util.Assert;
  */
 class WiretapConnector implements ClientHttpConnector {
 
-	public static final String REQUEST_ID_HEADER_NAME = "webtestclient-request-id";
-
-
 	private final ClientHttpConnector delegate;
 
 	private final Map<String, ExchangeResult> exchanges = new ConcurrentHashMap<>();
 
 
-	public WiretapConnector(ClientHttpConnector delegate) {
+	WiretapConnector(ClientHttpConnector delegate) {
 		this.delegate = delegate;
 	}
 
@@ -69,7 +65,8 @@ class WiretapConnector implements ClientHttpConnector {
 				})
 				.map(response ->  {
 					WiretapClientHttpRequest wrappedRequest = requestRef.get();
-					String requestId = getRequestIdHeader(wrappedRequest.getHeaders());
+					String requestId = wrappedRequest.getHeaders().getFirst(WebTestClient.WEBTESTCLIENT_REQUEST_ID);
+					Assert.notNull(requestId, "No \"" + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "\" header");
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
 					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
 					this.exchanges.put(requestId, result);
@@ -77,18 +74,12 @@ class WiretapConnector implements ClientHttpConnector {
 				});
 	}
 
-	public static String getRequestIdHeader(HttpHeaders headers) {
-		String requestId = headers.getFirst(REQUEST_ID_HEADER_NAME);
-		Assert.notNull(requestId, "No \"" + REQUEST_ID_HEADER_NAME + "\" header");
-		return requestId;
-	}
-
 	/**
 	 * Retrieve the {@code ExchangeResult} for the given "request-id" header value.
 	 */
 	public ExchangeResult claimRequest(String requestId) {
 		ExchangeResult result = this.exchanges.get(requestId);
-		Assert.notNull(result, "No match for request with header " + REQUEST_ID_HEADER_NAME + "=" + requestId);
+		Assert.notNull(result, "No match for " + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "=" + requestId);
 		return result;
 	}
 

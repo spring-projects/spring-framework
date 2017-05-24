@@ -180,7 +180,7 @@ class DefaultWebTestClient implements WebTestClient {
 		DefaultRequestBodySpec(WebClient.RequestBodySpec spec) {
 			this.bodySpec = spec;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.bodySpec.header(WiretapConnector.REQUEST_ID_HEADER_NAME, this.requestId);
+			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
 
 

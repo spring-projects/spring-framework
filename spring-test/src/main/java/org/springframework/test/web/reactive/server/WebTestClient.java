@@ -76,6 +76,16 @@ import org.springframework.web.util.UriBuilderFactory;
 public interface WebTestClient {
 
 	/**
+	 * The name of a request header used to assign a unique id to every request
+	 * performed through the {@code WebTestClient}. This can be useful for
+	 * storing contextual information at all phases of request processing (e.g.
+	 * from a server-side component) under that id and later to look up
+	 * that information once an {@link ExchangeResult} is available.
+	 */
+	String WEBTESTCLIENT_REQUEST_ID = "WebTestClient-Request-Id";
+
+
+	/**
 	 * Prepare an HTTP GET request.
 	 * @return a spec for specifying the target URL
 	 */

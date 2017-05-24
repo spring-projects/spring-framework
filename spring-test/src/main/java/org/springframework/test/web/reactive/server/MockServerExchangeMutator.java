@@ -23,6 +23,7 @@ import java.util.function.UnaryOperator;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -82,9 +83,15 @@ public class MockServerExchangeMutator implements WebFilter {
 	}
 
 	private Function<ServerWebExchange, ServerWebExchange> getMutatorsFor(ServerWebExchange exchange) {
-		String id = WiretapConnector.getRequestIdHeader(exchange.getRequest().getHeaders());
-		Function<ServerWebExchange, ServerWebExchange> m = this.perRequestMutators.remove(id);
-		return (m != null ? this.mutator.andThen(m) : this.mutator);
+		String id = getRequestId(exchange.getRequest().getHeaders());
+		Function<ServerWebExchange, ServerWebExchange> clientMutator = this.perRequestMutators.remove(id);
+		return (clientMutator != null ? this.mutator.andThen(clientMutator) : this.mutator);
+	}
+
+	private String getRequestId(HttpHeaders headers) {
+		String id = headers.getFirst(WebTestClient.WEBTESTCLIENT_REQUEST_ID);
+		Assert.notNull(id, "No \"" + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "\" header");
+		return id;
 	}
 
 
@@ -103,8 +110,7 @@ public class MockServerExchangeMutator implements WebFilter {
 			UnaryOperator<ServerWebExchange> mutator, UnaryOperator<ServerWebExchange>... mutators) {
 
 		return client.filter((request, next) -> {
-			String id = request.headers().getFirst(WiretapConnector.REQUEST_ID_HEADER_NAME);
-			Assert.notNull(id, "No request-id header");
+			String id = getRequestId(request.headers());
 			registerPerRequestMutator(id, mutator);
 			for (UnaryOperator<ServerWebExchange> current : mutators) {
 				registerPerRequestMutator(id, current);
