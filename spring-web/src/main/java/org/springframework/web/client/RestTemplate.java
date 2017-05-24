@@ -726,7 +726,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 		}
 		if (hasError) {
-			errorHandler.handleError(response);
+			errorHandler.handleError(url, method, response);
 		}
 	}
 

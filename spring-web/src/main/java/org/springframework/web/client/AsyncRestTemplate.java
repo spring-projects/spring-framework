@@ -539,7 +539,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 				// ignore
 			}
 		}
-		getErrorHandler().handleError(response);
+		getErrorHandler().handleError(url, method, response);
 	}
 
 	/**
