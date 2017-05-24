@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import rx.Completable;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -42,6 +43,7 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
@@ -194,11 +196,10 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void handleWithMultipleResolvers() throws Exception {
-		Object returnValue = "profile";
-		MethodParameter returnType = on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class);
-		ViewResolver[] resolvers = {new TestViewResolver("account"), new TestViewResolver("profile")};
-
-		testHandle("/account", returnType, returnValue, "profile: {id=123}", resolvers);
+		testHandle("/account",
+				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
+				"profile", "profile: {id=123}",
+				new TestViewResolver("account"), new TestViewResolver("profile"));
 	}
 
 	@Test
@@ -278,6 +279,25 @@ public class ViewResolutionResultHandlerTests {
 				.expectNextCount(0)
 				.expectError(NotAcceptableStatusException.class)
 				.verify();
+	}
+
+	@Test // SPR-15291
+	public void contentNegotiationWithRedirect() throws Exception {
+
+		HandlerResult handlerResult = new HandlerResult(new Object(), "redirect:/",
+				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
+				this.bindingContext);
+
+		UrlBasedViewResolver viewResolver = new UrlBasedViewResolver();
+		viewResolver.setApplicationContext(new StaticApplicationContext());
+		ViewResolutionResultHandler resultHandler = resultHandler(viewResolver);
+
+		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
+		resultHandler.handleResult(exchange, handlerResult).block(Duration.ZERO);
+
+		MockServerHttpResponse response = exchange.getResponse();
+		assertEquals(303, response.getStatusCode().value());
+		assertEquals("/", response.getHeaders().getLocation().toString());
 	}
 
 

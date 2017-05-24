@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,13 @@ public interface View {
 	 * Return the list of media types this View supports, or an empty list.
 	 */
 	List<MediaType> getSupportedMediaTypes();
+
+	/**
+	 * Whether this View does rendering by performing a redirect.
+	 */
+	default boolean isRedirectView() {
+		return false;
+	}
 
 	/**
 	 * Render the view based on the given {@link HandlerResult}. Implementations
