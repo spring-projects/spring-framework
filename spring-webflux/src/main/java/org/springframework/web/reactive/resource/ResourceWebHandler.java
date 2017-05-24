@@ -283,7 +283,7 @@ public class ResourceWebHandler
 				}))
 				.flatMap(resource -> {
 					try {
-						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+						if (HttpMethod.OPTIONS.matches(exchange.getRequest().getMethodValue())) {
 							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
 							return Mono.empty();
 						}
@@ -323,7 +323,7 @@ public class ResourceWebHandler
 						}
 
 						// Content phase
-						if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
+						if (HttpMethod.HEAD.matches(exchange.getRequest().getMethodValue())) {
 							setHeaders(exchange, resource, mediaType);
 							exchange.getResponse().getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 							logger.trace("HEAD request - skipping content");

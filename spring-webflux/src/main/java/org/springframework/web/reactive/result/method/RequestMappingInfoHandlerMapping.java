@@ -218,9 +218,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		ServerHttpRequest request = exchange.getRequest();
 
 		if (helper.hasMethodsMismatch()) {
-			HttpMethod httpMethod = request.getMethod();
+			String httpMethod = request.getMethodValue();
 			Set<HttpMethod> methods = helper.getAllowedMethods();
-			if (HttpMethod.OPTIONS.matches(httpMethod.name())) {
+			if (HttpMethod.OPTIONS.matches(httpMethod)) {
 				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
