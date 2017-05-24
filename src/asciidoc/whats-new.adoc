@@ -1,6 +1,8 @@
 [[spring-whats-new]]
 = What's New in Spring Framework 4.x
 
+This chapter provides an overview of the new features and improvements that have been introduced with Spring Framework 4.3. If you are interested in more details, please see the link:https://jira.spring.io/issues/?jql=project%20%3D%20SPR%20AND%20fixVersion%20in%20(%224.3%20RC1%22%2C%20%224.3%20RC2%22%2C%20%224.3%20GA%22)%20ORDER%20BY%20issuetype%20DESC&startIndex=50[Issue Tracker tickets] that were resolved as part of the 4.3 development process.
+
 
 [[new-in-4.0]]
 == New Features and Enhancements in Spring Framework 4.0
@@ -220,7 +222,15 @@ Framework 4.0 introduces several new features for use in unit and integration te
 [[new-in-4.1]]
 == New Features and Enhancements in Spring Framework 4.1
 
-=== JMS Improvements
+Version 4.1 included a number of improvements, as described in the following sections:
+
+* <<v4_1-JMS-Improvements>>
+* <<v4_1-Caching-Improvements>>
+* <<v4_1-Web-Improvements>>
+* <<v4_1-WebSocket-Messaging-Improvements>>
+* <<v4_1-Testing-Improvements>>
+
+=== JMS Improvements [[v4_1-JMS-Improvements]]
 Spring 4.1 introduces a much simpler infrastructure <<jms-annotated,to register JMS
 listener endpoints>> by annotating bean methods with
 {api-spring-framework}/jms/annotation/JmsListener.html[`@JmsListener`].
@@ -250,7 +260,7 @@ Finally, Spring 4.1 provides additional miscellaneous improvements:
   {api-spring-framework}/util/backoff/BackOff.html[`BackOff`] implementation
 * JMS 2.0 shared consumers are supported
 
-=== Caching Improvements
+=== Caching Improvements [[v4_1-Caching-Improvements]]
 
 Spring 4.1 supports <<cache-jsr-107,JCache (JSR-107) annotations>> using Spring's
 existing cache configuration and infrastructure abstraction; no changes are required
@@ -270,7 +280,7 @@ Spring 4.1 also improves its own caching abstraction significantly:
 Spring 4.1 also has a breaking change in the `Cache` interface as a new `putIfAbsent`
 method has been added.
 
-=== Web Improvements
+=== Web Improvements [[v4_1-Web-Improvements]]
 
 * The existing support for resource handling based on the `ResourceHttpRequestHandler`
   has been expanded with new abstractions `ResourceResolver`, `ResourceTransformer`,
@@ -327,7 +337,7 @@ method has been added.
   support (based on Groovy 2.3). See the `GroovyMarkupConfigurer` and respecitve
   `ViewResolver` and `View' implementations.
 
-=== WebSocket Messaging Improvements
+=== WebSocket Messaging Improvements [[v4_1-WebSocket-Messaging-Improvements]]
 
 * SockJS (Java) client-side support. See `SockJsClient` and classes in same package.
 * New application context events `SessionSubscribeEvent` and `SessionUnsubscribeEvent` published
@@ -345,7 +355,7 @@ method has been added.
 * Close STOMP/WebSocket connections that have no activity within 60 seconds after the
   WebSocket session is established. See https://jira.spring.io/browse/SPR-11884[SPR-11884].
 
-=== Testing Improvements
+=== Testing Improvements [[v4_1-Testing-Improvements]]
 
 * Groovy scripts can now be used to configure the `ApplicationContext` loaded for
   integration tests in the TestContext framework.
@@ -384,7 +394,16 @@ method has been added.
 [[new-in-4.2]]
 == New Features and Enhancements in Spring Framework 4.2
 
-=== Core Container Improvements
+Version 4.2 included a number of improvements, as described in the following sections:
+
+* <<v4_2-Core-Container-Improvements>>
+* <<v4_2-Data-Access-Improvements>>
+* <<v4_2-JMS-Improvements>>
+* <<v4_2-Web-Improvements>>
+* <<v4_2-WebSocket-Messaging-Improvements>>
+* <<v4_2-Testing-Improvements>>
+
+=== Core Container Improvements [[v4_2-Core-Container-Improvements]]
 
 * Annotations such as `@Bean` get detected and processed on Java 8 default methods as well,
   allowing for composing a configuration class from interfaces with default `@Bean` methods.
@@ -488,7 +507,7 @@ public @interface MyTestConfig {
   exposed through the `lang:std` element in XML. Supports e.g. JavaScript and JRuby.
   (Note: JRubyScriptFactory and `lang:jruby` are deprecated now, in favor of using JSR-223.)
 
-=== Data Access Improvements
+=== Data Access Improvements [[v4_2-Data-Access-Improvements]]
 
 * `javax.transaction.Transactional` is now supported via AspectJ.
 * `SimpleJdbcCallOperations` now supports named binding.
@@ -498,7 +517,7 @@ public @interface MyTestConfig {
   `<jdbc:embedded-database>` supports a new `database-name` attribute.
   See "Testing Improvements" below for further details.
 
-=== JMS Improvements
+=== JMS Improvements [[v4_2-JMS-Improvements]]
 
 * The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
 * The type of the reply `Destination` can now be configured per listener container.
@@ -507,7 +526,7 @@ public @interface MyTestConfig {
 * `@JmsListener` is now a repeatable annotation to declare several JMS containers on the same
   method (use the newly introduced `@JmsListeners` if you're not using Java8 yet).
 
-=== Web Improvements
+=== Web Improvements [[v4_2-Web-Improvements]]
 
 * HTTP Streaming and Server-Sent Events support, see <<mvc-ann-async-http-streaming>>.
 * Built-in support for CORS including global (MVC Java config and XML namespace) and
@@ -540,7 +559,7 @@ public @interface MyTestConfig {
 * Introduced `ScriptTemplateView` as a JSR-223 based mechanism for scripted web views,
   with a focus on JavaScript view templating on Nashorn (JDK 8).
 
-=== WebSocket Messaging Improvements
+=== WebSocket Messaging Improvements [[v4_2-WebSocket-Messaging-Improvements]]
 
 * Expose presence information about connected users and subscriptions:
 ** new `SimpUserRegistry` exposed as a bean named "userRegistry".
@@ -556,7 +575,7 @@ public @interface MyTestConfig {
   `@MessageMapping` and `@SubscribeMapping` methods.
 * `MarshallingMessageConverter` for XML payloads.
 
-=== Testing Improvements
+=== Testing Improvements [[v4_2-Testing-Improvements]]
 
 * JUnit-based integration tests can now be executed with JUnit rules instead of the
   `SpringJUnit4ClassRunner`. This allows Spring-based integration tests to be run with
@@ -620,7 +639,18 @@ public @interface MyTestConfig {
 [[new-in-4.3]]
 == New Features and Enhancements in Spring Framework 4.3
 
-=== Core Container Improvements
+Version 4.3 included a number of improvements, as described in the following sections:
+
+* <<v4_3-Core-Container-Improvements>>
+* <<v4_3-Data-Access-Improvements>>
+* <<v4_3-Caching-Improvements>>
+* <<v4_3-JMS-Improvements>>
+* <<v4_3-Web-Improvements>>
+* <<v4_3-WebSocket-Messaging-Improvements>>
+* <<v4_3-Testing-Improvements>>
+* <<v4_3-Support-for-new-library-and-server-generations>>
+
+=== Core Container Improvements [[v4_3-Core-Container-Improvements]]
 
 * Core container exceptions provide richer metadata to evaluate programmatically.
 * Java 8 default methods get detected as bean property getters/setters.
@@ -640,12 +670,12 @@ public @interface MyTestConfig {
   custom _composed annotations_ with attribute overrides.
 * `@Scheduled` is properly supported on beans of any scope.
 
-=== Data Access Improvements
+=== Data Access Improvements [[v4_3-Data-Access-Improvements]]
 
 * `jdbc:initialize-database` and `jdbc:embedded-database` support a configurable
   separator to be applied to each script.
 
-=== Caching Improvements
+=== Caching Improvements [[v4_3-Caching-Improvements]]
 
 Spring 4.3 allows concurrent calls on a given key to be synchronized so that the
 value is only computed once. This is an opt-in feature that should be enabled via
@@ -662,13 +692,13 @@ Spring 4.3 also improves the caching abstraction as follows:
 * `@Cacheable`, `@CacheEvict`, `@CachePut`, and `@Caching` may now be used as
   _meta-annotations_ to create custom _composed annotations_ with attribute overrides.
 
-=== JMS Improvements
+=== JMS Improvements [[v4_3-JMS-Improvements]]
 
 * `@SendTo` can now be specified at the class level to share a common reply destination.
 * `@JmsListener` and `@JmsListeners` may now be used as _meta-annotations_ to create
   custom _composed annotations_ with attribute overrides.
 
-=== Web Improvements
+=== Web Improvements [[v4_3-Web-Improvements]]
 
 * Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
 * New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
@@ -691,11 +721,11 @@ Spring 4.3 also improves the caching abstraction as follows:
 * `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
 * `AsyncRestTemplate` supports request interception.
 
-=== WebSocket Messaging Improvements
+=== WebSocket Messaging Improvements [[v4_3-WebSocket-Messaging-Improvements]]
 
 * `@SendTo` and `@SendToUser` can now be specified at class-level to share a common destination.
 
-=== Testing Improvements
+=== Testing Improvements [[v4_3-Testing-Improvements]]
 
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
 * New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
@@ -724,7 +754,7 @@ Spring 4.3 also improves the caching abstraction as follows:
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
 
-=== Support for new library and server generations
+=== Support for new library and server generations [[v4_3-Support-for-new-library-and-server-generations]]
 
 * Hibernate ORM 5.2 (still supporting 4.2/4.3 and 5.0/5.1 as well, with 3.6 deprecated now)
 * Hibernate Validator 5.3 (minimum remains at 4.3)
