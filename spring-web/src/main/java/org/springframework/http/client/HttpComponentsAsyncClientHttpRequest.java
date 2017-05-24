@@ -30,7 +30,6 @@ import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.FutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -69,8 +68,8 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpRequest.getMethod());
+	public String getMethodValue() {
+		return this.httpRequest.getMethod();
 	}
 
 	@Override

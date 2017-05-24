@@ -662,6 +662,10 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 						return request.getMethod();
 					}
 					@Override
+					public String getMethodValue() {
+						return request.getMethodValue();
+					}
+					@Override
 					public URI getURI() {
 						return request.getURI();
 					}

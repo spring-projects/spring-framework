@@ -83,8 +83,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.servletRequest.getMethod());
+	public String getMethodValue() {
+		return this.servletRequest.getMethod();
 	}
 
 	@Override

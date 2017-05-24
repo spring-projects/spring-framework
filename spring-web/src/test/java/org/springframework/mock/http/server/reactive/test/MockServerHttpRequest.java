@@ -83,6 +83,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public String getMethodValue() {
+		return this.httpMethod.name();
+	}
+
+	@Override
 	public String getContextPath() {
 		return this.contextPath;
 	}

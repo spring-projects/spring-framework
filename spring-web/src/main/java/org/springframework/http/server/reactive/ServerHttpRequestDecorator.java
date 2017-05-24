@@ -59,6 +59,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
+	public String getMethodValue() {
+		return getDelegate().getMethodValue();
+	}
+
+	@Override
 	public URI getURI() {
 		return getDelegate().getURI();
 	}

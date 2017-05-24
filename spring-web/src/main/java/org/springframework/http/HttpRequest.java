@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,15 @@ public interface HttpRequest extends HttpMessage {
 	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
 	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	HttpMethod getMethod();
+	default HttpMethod getMethod() {
+		return HttpMethod.resolve(getMethodValue());
+	}
+
+	/**
+	 * Return the HTTP method of the request as a String
+	 * @return the HTTP method as a String
+	 */
+	String getMethodValue();
 
 	/**
 	 * Return the URI of the request.

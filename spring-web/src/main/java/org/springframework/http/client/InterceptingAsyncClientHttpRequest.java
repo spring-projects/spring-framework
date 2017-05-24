@@ -75,7 +75,12 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 
 	@Override
 	public HttpMethod getMethod() {
-		return httpMethod;
+		return this.httpMethod;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.httpMethod.name();
 	}
 
 	@Override
