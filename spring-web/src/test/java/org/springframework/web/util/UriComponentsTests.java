@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,13 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
  * @author Arjen Poutsma
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  */
 public class UriComponentsTests {
 
@@ -177,6 +179,13 @@ public class UriComponentsTests {
 		assertThat(uriComponents1, equalTo(uriComponents1));
 		assertThat(uriComponents1, equalTo(uriComponents2));
 		assertThat(uriComponents1, not(equalTo(uriComponents3)));
+	}
+
+	@Test
+	public void trailingSlash() {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo/bar/").build();
+		assertArrayEquals(new String[]{"foo", "bar", ""}, uriComponents.getPathSegments().toArray(new String[0]));
+		assertEquals("http://example.com/foo/bar/", uriComponents.toUriString());
 	}
 
 }

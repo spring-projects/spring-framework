@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
  * @author Oliver Gierke
  * @author David Eckel
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 public class UriComponentsBuilderTests {
 
@@ -545,6 +546,15 @@ public class UriComponentsBuilderTests {
 
 		assertEquals("/foo/bar", result.getPath());
 		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
+	}
+
+	@Test
+	public void pathSegmentsLastEmpty() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("foo", "bar", "");
+		UriComponents result = builder.build();
+
+		assertEquals("/foo/bar/", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar", ""), result.getPathSegments());
 	}
 
 	@Test // SPR-12398
