@@ -57,7 +57,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	@After
 	@Override
 	public void tearDown() throws Exception {
-		Assume.group(TestGroup.JMXMP, () -> super.tearDown());
+		Assume.group(TestGroup.JMXMP, super::tearDown);
 	}
 
 

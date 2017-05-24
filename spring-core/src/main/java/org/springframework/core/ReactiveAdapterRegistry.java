@@ -203,7 +203,7 @@ public class ReactiveAdapterRegistry {
 			registry.registerReactiveType(
 					multiValue(io.reactivex.Flowable.class, io.reactivex.Flowable::empty),
 					source -> (io.reactivex.Flowable<?>) source,
-					source-> io.reactivex.Flowable.fromPublisher(source)
+					io.reactivex.Flowable::fromPublisher
 			);
 			registry.registerReactiveType(
 					multiValue(io.reactivex.Observable.class, io.reactivex.Observable::empty),

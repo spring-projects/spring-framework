@@ -81,7 +81,7 @@ public class HiddenHttpMethodFilter implements WebFilter {
 					String method = formData.getFirst(this.methodParamName);
 					return StringUtils.hasLength(method) ? mapExchange(exchange, method) : exchange;
 				})
-				.flatMap((exchange1) -> chain.filter(exchange1));
+				.flatMap(chain::filter);
 	}
 
 	private ServerWebExchange mapExchange(ServerWebExchange exchange, String methodParamValue) {

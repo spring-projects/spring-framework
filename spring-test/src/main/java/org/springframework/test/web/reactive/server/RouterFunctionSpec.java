@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Supplier;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -51,10 +53,10 @@ public class RouterFunctionSpec extends AbstractMockServerSpec<RouterFunctionSpe
 
 	private ApplicationContext initApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.registerBean("webHandler", DispatcherHandler.class, () -> new DispatcherHandler());
+		context.registerBean("webHandler", DispatcherHandler.class, (Supplier<DispatcherHandler>) DispatcherHandler::new);
 		context.registerBean(HandlerMapping.class, () -> RouterFunctions.toHandlerMapping(this.routerFunction));
-		context.registerBean(HandlerAdapter.class, () -> new HandlerFunctionAdapter());
-		context.registerBean(HandlerResultHandler.class, () -> new ServerResponseResultHandler());
+		context.registerBean(HandlerAdapter.class, HandlerFunctionAdapter::new);
+		context.registerBean(HandlerResultHandler.class, (Supplier<HandlerResultHandler>) ServerResponseResultHandler::new);
 		context.refresh();
 		return context;
 	}
