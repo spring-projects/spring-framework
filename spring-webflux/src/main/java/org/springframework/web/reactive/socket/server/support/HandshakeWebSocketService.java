@@ -62,12 +62,12 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
-			"reactor.ipc.netty.http.server.HttpServerResponse",
-			HandshakeWebSocketService.class.getClassLoader());
-
 	private static final boolean undertowPresent = ClassUtils.isPresent(
 			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
+			HandshakeWebSocketService.class.getClassLoader());
+
+	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
+			"reactor.ipc.netty.http.server.HttpServerResponse",
 			HandshakeWebSocketService.class.getClassLoader());
 
 
@@ -104,11 +104,12 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		else if (jettyPresent) {
 			className = "JettyRequestUpgradeStrategy";
 		}
-		else if (reactorNettyPresent) {
-			className = "ReactorNettyRequestUpgradeStrategy";
-		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";
+		}
+		else if (reactorNettyPresent) {
+			// As late as possible (Reactor Netty commonly used for WebClient)
+			className = "ReactorNettyRequestUpgradeStrategy";
 		}
 		else {
 			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
