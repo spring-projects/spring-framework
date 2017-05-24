@@ -187,7 +187,7 @@ public interface ServerRequest {
 	static ServerRequest create(ServerWebExchange exchange,
 			List<HttpMessageReader<?>> messageReaders) {
 
-		return new DefaultServerRequest(exchange, messageReaders::stream);
+		return new DefaultServerRequest(exchange, messageReaders);
 	}
 
 	/**

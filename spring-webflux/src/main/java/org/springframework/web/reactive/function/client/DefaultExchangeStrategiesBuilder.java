@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
@@ -88,13 +86,13 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-			return this.messageReaders::stream;
+		public List<HttpMessageReader<?>> messageReaders() {
+			return this.messageReaders;
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-			return this.messageWriters::stream;
+		public List<HttpMessageWriter<?>> messageWriters() {
+			return this.messageWriters;
 		}
 	}
 

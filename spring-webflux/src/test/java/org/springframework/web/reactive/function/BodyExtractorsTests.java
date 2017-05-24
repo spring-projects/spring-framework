@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
@@ -86,8 +84,8 @@ public class BodyExtractorsTests {
 
 		this.context = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return messageReaders::stream;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return messageReaders;
 			}
 
 			@Override
@@ -209,8 +207,8 @@ public class BodyExtractorsTests {
 
 		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return Stream::empty;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return Collections.emptyList();
 			}
 
 			@Override

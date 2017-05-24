@@ -33,8 +33,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -119,7 +118,7 @@ public class DefaultRenderingResponseTests {
 		viewResolvers.add(viewResolver);
 
 		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
-		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
+		when(mockConfig.viewResolvers()).thenReturn(viewResolvers);
 
 		StepVerifier.create(result)
 				.expectNextMatches(response -> "view".equals(response.name()) &&

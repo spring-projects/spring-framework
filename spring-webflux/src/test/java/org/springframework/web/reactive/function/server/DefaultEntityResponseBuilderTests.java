@@ -23,8 +23,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -196,13 +194,13 @@ public class DefaultEntityResponseBuilderTests {
 
 		ServerResponse.Context context = new ServerResponse.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return Collections.<HttpMessageWriter<?>>singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()))::stream;
+			public List<HttpMessageWriter<?>> messageWriters() {
+				return Collections.<HttpMessageWriter<?>>singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 			}
 
 			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
-				return Collections.<ViewResolver>emptyList()::stream;
+			public List<ViewResolver> viewResolvers() {
+				return Collections.<ViewResolver>emptyList();
 			}
 		};
 		HandlerStrategies strategies = HandlerStrategies.empty()

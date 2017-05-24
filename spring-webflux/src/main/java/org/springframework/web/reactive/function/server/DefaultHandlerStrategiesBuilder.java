@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
@@ -135,28 +133,28 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-			return this.messageReaders::stream;
+		public List<HttpMessageReader<?>> messageReaders() {
+			return this.messageReaders;
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-			return this.messageWriters::stream;
+		public List<HttpMessageWriter<?>> messageWriters() {
+			return this.messageWriters;
 		}
 
 		@Override
-		public Supplier<Stream<ViewResolver>> viewResolvers() {
-			return this.viewResolvers::stream;
+		public List<ViewResolver> viewResolvers() {
+			return this.viewResolvers;
 		}
 
 		@Override
-		public Supplier<Stream<WebFilter>> webFilters() {
-			return this.webFilters::stream;
+		public List<WebFilter> webFilters() {
+			return this.webFilters;
 		}
 
 		@Override
-		public Supplier<Stream<WebExceptionHandler>> exceptionHandlers() {
-			return this.exceptionHandlers::stream;
+		public List<WebExceptionHandler> exceptionHandlers() {
+			return this.exceptionHandlers;
 		}
 	}
 

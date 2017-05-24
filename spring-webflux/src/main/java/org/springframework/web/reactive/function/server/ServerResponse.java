@@ -19,11 +19,10 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -395,18 +394,16 @@ public interface ServerResponse {
 	interface Context {
 
 		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s
-		 * to be used for response body conversion.
+		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
 		 * @return the stream of message writers
 		 */
-		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+		List<HttpMessageWriter<?>> messageWriters();
 
 		/**
-		 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
-		 * resolution.
+		 * Return the  {@link ViewResolver}s to be used for view name resolution.
 		 * @return the stream of view resolvers
 		 */
-		Supplier<Stream<ViewResolver>> viewResolvers();
+		List<ViewResolver> viewResolvers();
 	}
 
 

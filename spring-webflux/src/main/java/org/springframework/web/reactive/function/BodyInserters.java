@@ -18,9 +18,7 @@ package org.springframework.web.reactive.function;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -141,7 +139,7 @@ public abstract class BodyInserters {
 	}
 
 	private static HttpMessageWriter<Resource> resourceHttpMessageWriter(BodyInserter.Context context) {
-		return context.messageWriters().get()
+		return context.messageWriters().stream()
 				.filter(messageWriter -> messageWriter.canWrite(RESOURCE_TYPE, null))
 				.findFirst()
 				.map(BodyInserters::<Resource>cast)
@@ -288,8 +286,8 @@ public abstract class BodyInserters {
 
 		return (outputMessage, context) -> {
 			MediaType contentType = outputMessage.getHeaders().getContentType();
-			Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
-			return messageWriters.get()
+			List<HttpMessageWriter<?>> messageWriters = context.messageWriters();
+			return messageWriters.stream()
 					.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
 					.findFirst()
 					.map(BodyInserters::cast)
@@ -305,7 +303,7 @@ public abstract class BodyInserters {
 						}
 					})
 					.orElseGet(() -> {
-						List<MediaType> supportedMediaTypes = messageWriters.get()
+						List<MediaType> supportedMediaTypes = messageWriters.stream()
 								.flatMap(reader -> reader.getWritableMediaTypes().stream())
 								.collect(Collectors.toList());
 						UnsupportedMediaTypeException error =
@@ -318,7 +316,7 @@ public abstract class BodyInserters {
 	private static <T> HttpMessageWriter<T> findMessageWriter(
 			BodyInserter.Context context, ResolvableType type, MediaType mediaType) {
 
-		return context.messageWriters().get()
+		return context.messageWriters().stream()
 				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
 				.findFirst()
 				.map(BodyInserters::<T>cast)

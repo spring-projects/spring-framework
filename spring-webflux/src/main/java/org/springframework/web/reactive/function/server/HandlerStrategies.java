@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -43,39 +42,34 @@ public interface HandlerStrategies {
 	// Instance methods
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for request
-	 * body conversion.
-	 * @return the stream of message readers
+	 * Return the {@link HttpMessageReader}s to be used for request body conversion.
+	 * @return the message readers
 	 */
-	Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+	List<HttpMessageReader<?>> messageReaders();
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
-	 * body conversion.
-	 * @return the stream of message writers
+	 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+	 * @return the message writers
 	 */
-	Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+	List<HttpMessageWriter<?>> messageWriters();
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
-	 * resolution.
-	 * @return the stream of view resolvers
+	 * Return the {@link ViewResolver}s to be used for view name resolution.
+	 * @return the view resolvers
 	 */
-	Supplier<Stream<ViewResolver>> viewResolvers();
+	List<ViewResolver> viewResolvers();
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link WebFilter}s to be used for filtering the
-	 * request and response.
-	 * @return the stream of web filters
+	 * Return the {@link WebFilter}s to be used for filtering the request and response.
+	 * @return the web filters
 	 */
-	Supplier<Stream<WebFilter>> webFilters();
+	List<WebFilter> webFilters();
 
 	/**
-	 * Supply a {@linkplain Stream stream} of {@link WebExceptionHandler}s to be used for handling
-	 * exceptions.
-	 * @return the stream of exception handlers
+	 * Return the {@link WebExceptionHandler}s to be used for handling exceptions.
+	 * @return the exception handlers
 	 */
-	Supplier<Stream<WebExceptionHandler>> exceptionHandlers();
+	List<WebExceptionHandler> exceptionHandlers();
 
 
 	// Static methods

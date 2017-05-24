@@ -18,10 +18,9 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -187,7 +186,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			return this.inserter.insert(request, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				public List<HttpMessageWriter<?>> messageWriters() {
 					return strategies.messageWriters();
 				}
 

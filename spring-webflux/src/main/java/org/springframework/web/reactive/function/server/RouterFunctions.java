@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,9 +45,6 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
  * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
  * Reactor, or Undertow.
- * And it can {@linkplain #toHandlerMapping(RouterFunction, HandlerStrategies) transform} a
- * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
- * {@code DispatcherHandler}.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -199,10 +196,10 @@ public abstract class RouterFunctions {
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);
-		WebHttpHandlerBuilder handlerBuilder = WebHttpHandlerBuilder.webHandler(webHandler);
-		strategies.webFilters().get().forEach(handlerBuilder::filter);
-		strategies.exceptionHandlers().get().forEach(handlerBuilder::exceptionHandler);
-		return handlerBuilder.build();
+		return WebHttpHandlerBuilder.webHandler(webHandler)
+				.filters(strategies.webFilters())
+				.exceptionHandlers(strategies.exceptionHandlers())
+				.build();
 	}
 
 	/**
@@ -222,7 +219,8 @@ public abstract class RouterFunctions {
 			return routerFunction.route(request)
 					.defaultIfEmpty(notFound())
 					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-					.flatMap(response -> wrapException(() -> response.writeTo(exchange, toContext(strategies))));
+					.flatMap(response -> wrapException(() -> response.writeTo(exchange,
+							new HandlerStrategiesResponseContext(strategies))));
 		};
 	}
 
@@ -233,20 +231,6 @@ public abstract class RouterFunctions {
 		catch (Throwable t) {
 			return Mono.error(t);
 		}
-	}
-
-	private static ServerResponse.Context toContext(HandlerStrategies strategies) {
-		return new ServerResponse.Context() {
-			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return strategies.messageWriters();
-			}
-
-			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
-				return strategies.viewResolvers();
-			}
-		};
 	}
 
 	private static void addAttributes(ServerWebExchange exchange, ServerRequest request) {
@@ -331,5 +315,24 @@ public abstract class RouterFunctions {
 			return String.format("%s -> %s", this.predicate, this.routerFunction);
 		}
 
+	}
+
+	private static class HandlerStrategiesResponseContext implements ServerResponse.Context {
+
+		private final HandlerStrategies strategies;
+
+		public HandlerStrategiesResponseContext(HandlerStrategies strategies) {
+			this.strategies = strategies;
+		}
+
+		@Override
+		public List<HttpMessageWriter<?>> messageWriters() {
+			return this.strategies.messageWriters();
+		}
+
+		@Override
+		public List<ViewResolver> viewResolvers() {
+			return this.strategies.viewResolvers();
+		}
 	}
 }

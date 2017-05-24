@@ -19,8 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.EnumSet;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,12 +55,12 @@ public class ResourceHandlerFunctionTests {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
 		context = new ServerResponse.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+			public List<HttpMessageWriter<?>> messageWriters() {
 				return strategies.messageWriters();
 			}
 
 			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
+			public List<ViewResolver> viewResolvers() {
 				return strategies.viewResolvers();
 			}
 		};

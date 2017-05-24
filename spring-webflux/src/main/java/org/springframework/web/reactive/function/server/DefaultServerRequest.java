@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -27,8 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -66,14 +65,19 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final Headers headers;
 
-	private final Supplier<Stream<HttpMessageReader<?>>> messageReaders;
+	private final List<HttpMessageReader<?>> messageReaders;
 
 
-	DefaultServerRequest(ServerWebExchange exchange, Supplier<Stream<HttpMessageReader<?>>> messageReaders) {
+	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		this.exchange = exchange;
-		this.messageReaders = messageReaders;
+		this.messageReaders = unmodifiableCopy(messageReaders);
 		this.headers = new DefaultHeaders();
 	}
+
+	private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
+		return Collections.unmodifiableList(new ArrayList<>(list));
+	}
+
 
 
 	@Override
@@ -102,8 +106,8 @@ class DefaultServerRequest implements ServerRequest {
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
-					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-						return DefaultServerRequest.this.messageReaders;
+					public List<HttpMessageReader<?>> messageReaders() {
+						return messageReaders;
 					}
 					@Override
 					public Optional<ServerHttpResponse> serverResponse() {

@@ -23,12 +23,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -314,7 +313,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			writeStatusAndHeaders(response);
 			return this.inserter.insert(response, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				public List<HttpMessageWriter<?>> messageWriters() {
 					return context.messageWriters();
 				}
 

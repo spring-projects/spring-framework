@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -79,7 +77,7 @@ class DefaultClientResponse implements ClientResponse {
 	public <T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor) {
 		return extractor.extract(this.response, new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
+			public List<HttpMessageReader<?>> messageReaders() {
 				return strategies.messageReaders();
 			}
 

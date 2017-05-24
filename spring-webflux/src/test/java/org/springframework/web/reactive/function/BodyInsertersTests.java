@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
@@ -93,8 +91,8 @@ public class BodyInsertersTests {
 
 		this.context = new BodyInserter.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return messageWriters::stream;
+			public List<HttpMessageWriter<?>> messageWriters() {
+				return messageWriters;
 			}
 
 			@Override
@@ -207,8 +205,8 @@ public class BodyInsertersTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, new BodyInserter.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return Collections.<HttpMessageWriter<?>>singleton(new ResourceHttpMessageWriter())::stream;
+			public List<HttpMessageWriter<?>> messageWriters() {
+				return Collections.singletonList(new ResourceHttpMessageWriter());
 			}
 
 			@Override

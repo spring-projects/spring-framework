@@ -18,8 +18,6 @@ package org.springframework.web.reactive.function.server.support;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
@@ -99,13 +97,13 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 		Assert.state(response != null, "No ServerResponse");
 		return response.writeTo(exchange, new ServerResponse.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return messageCodecConfigurer.getWriters()::stream;
+			public List<HttpMessageWriter<?>> messageWriters() {
+				return messageCodecConfigurer.getWriters();
 			}
 
 			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
-				return viewResolvers::stream;
+			public List<ViewResolver> viewResolvers() {
+				return viewResolvers;
 			}
 		});
 	}

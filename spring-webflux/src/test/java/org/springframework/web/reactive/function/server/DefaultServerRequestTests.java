@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +64,7 @@ public class DefaultServerRequestTests {
 
 	private ServerWebExchange mockExchange;
 
-	Supplier<Stream<HttpMessageReader<?>>> messageReaders;
+	List<HttpMessageReader<?>> messageReaders;
 
 	private DefaultServerRequest defaultRequest;
 
@@ -80,7 +78,7 @@ public class DefaultServerRequestTests {
 		when(mockExchange.getRequest()).thenReturn(mockRequest);
 		when(mockExchange.getResponse()).thenReturn(mockResponse);
 
-		this.messageReaders = Collections.<HttpMessageReader<?>>singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)))::stream;
+		this.messageReaders = Collections.<HttpMessageReader<?>>singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 
 		defaultRequest = new DefaultServerRequest(mockExchange, messageReaders);
 	}
@@ -238,7 +236,7 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
 
-		this.messageReaders = Collections.<HttpMessageReader<?>>emptySet()::stream;
+		this.messageReaders = Collections.emptyList();
 		this.defaultRequest = new DefaultServerRequest(mockExchange, messageReaders);
 
 		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);

@@ -164,7 +164,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = resolveLocale(exchange);
-			Stream<ViewResolver> viewResolverStream = context.viewResolvers().get();
+			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))

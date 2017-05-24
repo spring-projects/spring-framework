@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -121,9 +120,9 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
 		when(mockResponse.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		List<HttpMessageReader<?>> messageReaders = Collections
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Mono<String> resultMono = defaultClientResponse.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());
@@ -142,9 +141,9 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		List<HttpMessageReader<?>> messageReaders = Collections
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
 		assertEquals("foo", resultMono.block());
@@ -163,9 +162,9 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.getBody()).thenReturn(body);
 
-		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		List<HttpMessageReader<?>> messageReaders = Collections
+				.singletonList(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
 		Mono<List<String>> result = resultFlux.collectList();

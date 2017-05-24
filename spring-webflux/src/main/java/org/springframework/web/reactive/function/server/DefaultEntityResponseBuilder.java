@@ -23,11 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
@@ -208,7 +207,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 			writeStatusAndHeaders(response);
 			return inserter().insert(response, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				public List<HttpMessageWriter<?>> messageWriters() {
 					return context.messageWriters();
 				}
 

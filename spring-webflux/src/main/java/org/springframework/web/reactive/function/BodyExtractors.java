@@ -19,9 +19,7 @@ package org.springframework.web.reactive.function;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -197,14 +195,14 @@ public abstract class BodyExtractors {
 			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError) {
 
 		MediaType contentType = contentType(inputMessage);
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders = context.messageReaders();
-		return messageReaders.get()
+		List<HttpMessageReader<?>> messageReaders = context.messageReaders();
+		return messageReaders.stream()
 				.filter(r -> r.canRead(elementType, contentType))
 				.findFirst()
 				.map(BodyExtractors::<T>cast)
 				.map(readerFunction)
 				.orElseGet(() -> {
-					List<MediaType> supportedMediaTypes = messageReaders.get()
+					List<MediaType> supportedMediaTypes = messageReaders.stream()
 							.flatMap(reader -> reader.getReadableMediaTypes().stream())
 							.collect(Collectors.toList());
 					UnsupportedMediaTypeException error =
@@ -215,7 +213,7 @@ public abstract class BodyExtractors {
 
 	private static <T> HttpMessageReader<T> messageReader(ResolvableType elementType,
 			MediaType mediaType, BodyExtractor.Context context) {
-		return context.messageReaders().get()
+		return context.messageReaders().stream()
 				.filter(messageReader -> messageReader.canRead(elementType, mediaType))
 				.findFirst()
 				.map(BodyExtractors::<T>cast)
