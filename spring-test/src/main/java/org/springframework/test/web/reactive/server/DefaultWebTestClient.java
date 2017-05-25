@@ -151,22 +151,22 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public S uri(URI uri) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uri));
+			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uri), null);
 		}
 
 		@Override
 		public S uri(String uriTemplate, Object... uriVariables) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables));
+			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables), uriTemplate);
 		}
 
 		@Override
 		public S uri(String uriTemplate, Map<String, ?> uriVariables) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables));
+			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables), uriTemplate);
 		}
 
 		@Override
 		public S uri(Function<UriBuilder, URI> uriBuilder) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriBuilder));
+			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriBuilder), null);
 		}
 	}
 
@@ -174,11 +174,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final WebClient.RequestBodySpec bodySpec;
 
+		private final String uriTemplate;
+
 		private final String requestId;
 
 
-		DefaultRequestBodySpec(WebClient.RequestBodySpec spec) {
+		DefaultRequestBodySpec(WebClient.RequestBodySpec spec, String uriTemplate) {
 			this.bodySpec = spec;
+			this.uriTemplate = uriTemplate;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
 			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
@@ -270,7 +273,7 @@ class DefaultWebTestClient implements WebTestClient {
 		private DefaultResponseSpec toResponseSpec(Mono<ClientResponse> mono) {
 			ClientResponse clientResponse = mono.block(getTimeout());
 			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(exchangeResult, clientResponse, getTimeout());
+			return new DefaultResponseSpec(exchangeResult, clientResponse, this.uriTemplate, getTimeout());
 		}
 
 	}
@@ -283,8 +286,10 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 
-		UndecodedExchangeResult(ExchangeResult result, ClientResponse response, Duration timeout) {
-			super(result);
+		UndecodedExchangeResult(ExchangeResult result, ClientResponse response,
+				String uriTemplate, Duration timeout) {
+
+			super(result, uriTemplate);
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -321,8 +326,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final UndecodedExchangeResult result;
 
 
-		DefaultResponseSpec(ExchangeResult result, ClientResponse response, Duration timeout) {
-			this.result = new UndecodedExchangeResult(result, response, timeout);
+		DefaultResponseSpec(ExchangeResult result, ClientResponse response, String uriTemplate, Duration timeout) {
+			this.result = new UndecodedExchangeResult(result, response, uriTemplate, timeout);
 		}
 
 		@Override

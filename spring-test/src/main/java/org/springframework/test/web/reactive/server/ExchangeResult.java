@@ -60,21 +60,36 @@ public class ExchangeResult {
 
 	private final WiretapClientHttpResponse response;
 
+	private final String uriTemplate;
+
 
 	/**
-	 * Constructor used when the {@code ClientHttpResponse} becomes available.
+	 * Constructor to use after the server response is first received in the
+	 * {@link WiretapConnector} and the {@code ClientHttpResponse} created.
 	 */
-	protected ExchangeResult(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
+	ExchangeResult(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
 		this.request = request;
 		this.response = response;
+		this.uriTemplate = null;
 	}
 
 	/**
-	 * Copy constructor used when the body is decoded or consumed.
+	 * Constructor to copy the from the yet undecoded ExchangeResult with extra
+	 * information to expose such as the original URI template used, if any.
 	 */
-	protected ExchangeResult(ExchangeResult other) {
+	ExchangeResult(ExchangeResult other, String uriTemplate) {
 		this.request = other.request;
 		this.response = other.response;
+		this.uriTemplate = uriTemplate;
+	}
+
+	/**
+	 * Copy constructor to use after body is decoded and/or consumed.
+	 */
+	ExchangeResult(ExchangeResult other) {
+		this.request = other.request;
+		this.response = other.response;
+		this.uriTemplate = other.uriTemplate;
 	}
 
 
@@ -90,6 +105,13 @@ public class ExchangeResult {
 	 */
 	public URI getUrl() {
 		return this.request.getURI();
+	}
+
+	/**
+	 * Return the original URI template used to prepare the request, if any.
+	 */
+	public String getUriTemplate() {
+		return this.uriTemplate;
 	}
 
 	/**
