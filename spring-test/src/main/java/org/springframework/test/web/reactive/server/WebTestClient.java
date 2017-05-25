@@ -201,10 +201,10 @@ public interface WebTestClient {
 		 *
 		 * <p>This could be used for example to apply {@code ServerWebExchange}
 		 * transformations such as setting the Principal (for all requests or a
-		 * subset) via {@link MockServerExchangeMutator}.
+		 * subset) via {@link ExchangeMutatorWebFilter}.
 		 *
 		 * @param filter one or more filters
-		 * @see MockServerExchangeMutator
+		 * @see ExchangeMutatorWebFilter
 		 */
 		<T extends B> T webFilter(WebFilter... filter);
 
@@ -536,7 +536,7 @@ public interface WebTestClient {
 		 */
 		<B> BodySpec<B, ?> expectBody(ResolvableType bodyType);
 
-		/**
+			/**
 		 * Declare expectations on the response body decoded to {@code List<E>}.
 		 * @param elementType the expected List element type
 		 */
