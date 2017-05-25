@@ -65,9 +65,9 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
+	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
 
-	private static final Set<String> queryTerminationMethods = new HashSet<>(3);
+	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -77,9 +77,10 @@ public abstract class SharedEntityManagerCreator {
 		transactionRequiringMethods.add("remove");
 		transactionRequiringMethods.add("refresh");
 
-		queryTerminationMethods.add("getResultList");
-		queryTerminationMethods.add("getSingleResult");
-		queryTerminationMethods.add("executeUpdate");
+		queryTerminatingMethods.add("executeUpdate");
+		queryTerminatingMethods.add("getSingleResult");
+		queryTerminatingMethods.add("getResultList");
+		queryTerminatingMethods.add("getResultStream");
 	}
 
 
@@ -376,7 +377,7 @@ public abstract class SharedEntityManagerCreator {
 				throw ex.getTargetException();
 			}
 			finally {
-				if (queryTerminationMethods.contains(method.getName())) {
+				if (queryTerminatingMethods.contains(method.getName())) {
 					// Actual execution of the query: close the EntityManager right
 					// afterwards, since that was the only reason we kept it open.
 					EntityManagerFactoryUtils.closeEntityManager(this.em);
