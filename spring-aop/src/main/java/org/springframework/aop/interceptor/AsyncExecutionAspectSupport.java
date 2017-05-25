@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,6 +221,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				return beanFactory.getBean(TaskExecutor.class);
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
+				logger.debug("Could not find unique TaskExecutor bean", ex);
 				try {
 					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
@@ -234,8 +235,14 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				logger.debug("Could not find default TaskExecutor bean", ex);
+				try {
+					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
+				}
+				catch (NoSuchBeanDefinitionException ex2) {
+					logger.info("No task executor bean found for async processing: " +
+							"no bean of type TaskExecutor and no bean named 'taskExecutor' either");
+				}
 				// Giving up -> either using local default executor or none at all...
-				logger.info("No TaskExecutor bean found for async processing");
 			}
 		}
 		return null;
