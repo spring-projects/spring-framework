@@ -29,11 +29,14 @@ public class JsonPathAssertions {
 
 	private final WebTestClient.BodyContentSpec bodySpec;
 
+	private final String content;
+
 	private final JsonPathExpectationsHelper pathHelper;
 
 
-	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String expression, Object... args) {
+	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression, Object... args) {
 		this.bodySpec = spec;
+		this.content = content;
 		this.pathHelper = new JsonPathExpectationsHelper(expression, args);
 	}
 
@@ -42,9 +45,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValue(String, Object)}.
 	 */
 	public WebTestClient.BodyContentSpec isEqualTo(Object expectedValue) {
-		this.bodySpec.consumeAsStringWith(body -> {
-			this.pathHelper.assertValue(body, expectedValue);
-		});
+		this.pathHelper.assertValue(this.content, expectedValue);
 		return this.bodySpec;
 	}
 
@@ -52,7 +53,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#exists(String)}.
 	 */
 	public WebTestClient.BodyContentSpec exists() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::exists);
+		this.pathHelper.exists(this.content);
 		return this.bodySpec;
 	}
 
@@ -60,7 +61,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#doesNotExist(String)}.
 	 */
 	public WebTestClient.BodyContentSpec doesNotExist() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::doesNotExist);
+		this.pathHelper.doesNotExist(this.content);
 		return this.bodySpec;
 	}
 
@@ -68,7 +69,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsEmpty(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isEmpty() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsEmpty);
+		this.pathHelper.assertValueIsEmpty(this.content);
 		return this.bodySpec;
 	}
 
@@ -76,7 +77,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsNotEmpty(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isNotEmpty() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsNotEmpty);
+		this.pathHelper.assertValueIsNotEmpty(this.content);
 		return this.bodySpec;
 	}
 
@@ -84,7 +85,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsBoolean(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isBoolean() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsBoolean);
+		this.pathHelper.assertValueIsBoolean(this.content);
 		return this.bodySpec;
 	}
 
@@ -92,7 +93,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsNumber(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isNumber() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsNumber);
+		this.pathHelper.assertValueIsNumber(this.content);
 		return this.bodySpec;
 	}
 
@@ -100,7 +101,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsArray(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isArray() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsArray);
+		this.pathHelper.assertValueIsArray(this.content);
 		return this.bodySpec;
 	}
 
@@ -108,7 +109,7 @@ public class JsonPathAssertions {
 	 * Applies {@link JsonPathExpectationsHelper#assertValueIsMap(String)}.
 	 */
 	public WebTestClient.BodyContentSpec isMap() {
-		this.bodySpec.consumeAsStringWith(this.pathHelper::assertValueIsMap);
+		this.pathHelper.assertValueIsMap(this.content);
 		return this.bodySpec;
 	}
 

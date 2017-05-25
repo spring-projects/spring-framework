@@ -74,7 +74,8 @@ public class ControllerTests {
 		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody().consumeAsStringWith(body -> assertEquals("Hello Mr. Pablo!", body));
+				.expectBody(String.class)
+				.consumeWith(result -> assertEquals("Hello Mr. Pablo!", result.getResponseBody()));
 	}
 
 	@Test

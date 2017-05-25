@@ -579,9 +579,9 @@ public interface WebTestClient {
 		<T extends S> T isEqualTo(B expected);
 
 		/**
-		 * Assert the extracted body with the given {@link Consumer}.
+		 * Assert the exchange result with the given {@link Consumer}.
 		 */
-		<T extends S> T consumeWith(Consumer<B> consumer);
+		<T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer);
 
 		/**
 		 * Return the exchange result with the decoded body.
@@ -649,20 +649,11 @@ public interface WebTestClient {
 		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**
-		 * Assert the response body content converted to a String with the given
-		 * {@link Consumer}. The String is created with the {@link Charset} from
-		 * the "content-type" response header or {@code UTF-8} otherwise.
-		 * @param consumer the consumer for the response body; the input String
-		 * may be {@code null} if there was no response body.
-		 */
-		BodyContentSpec consumeAsStringWith(Consumer<String> consumer);
-
-		/**
 		 * Assert the response body content with the given {@link Consumer}.
 		 * @param consumer the consumer for the response body; the input
 		 * {@code byte[]} may be {@code null} if there was no response body.
 		 */
-		BodyContentSpec consumeWith(Consumer<byte[]> consumer);
+		BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer);
 
 		/**
 		 * Return the exchange result with body content as {@code byte[]}.

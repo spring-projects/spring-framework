@@ -395,9 +395,9 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T extends S> T consumeWith(Consumer<B> consumer) {
+		public <T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer) {
 			B actual = this.result.getResponseBody();
-			this.result.assertWithDiagnostics(() -> consumer.accept(actual));
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
 			return self();
 		}
 
@@ -493,13 +493,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public JsonPathAssertions jsonPath(String expression, Object... args) {
-			return new JsonPathAssertions(this, expression, args);
-		}
-
-		@Override
-		public BodyContentSpec consumeAsStringWith(Consumer<String> consumer) {
-			this.result.assertWithDiagnostics(() -> consumer.accept(getBodyAsString()));
-			return this;
+			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
 		}
 
 		private String getBodyAsString() {
@@ -512,8 +506,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public BodyContentSpec consumeWith(Consumer<byte[]> consumer) {
-			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+		public BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
 			return this;
 		}
 

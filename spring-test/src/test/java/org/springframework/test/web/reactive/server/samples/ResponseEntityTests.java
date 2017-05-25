@@ -70,7 +70,8 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBody(Person.class).consumeWith(p -> assertEquals(new Person("John"), p));
+				.expectBody(Person.class)
+				.consumeWith(result -> assertEquals(new Person("John"), result.getResponseBody()));
 	}
 
 	@Test
