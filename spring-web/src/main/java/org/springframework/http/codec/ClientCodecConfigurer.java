@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 
 /**
  * Helps to configure a list of client-side HTTP message readers and writers
@@ -56,6 +57,13 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 	interface ClientDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
 
 		/**
+		 * Configure encoders or writers for use with
+		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter
+		 * MultipartHttpMessageWriter}.
+		 */
+		MultipartCodecsConfigurer multipartCodecs();
+
+		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
 		 * <p>By default the {@link #jackson2Decoder} override is used for SSE.
 		 * @param decoder the decoder to use
@@ -63,5 +71,25 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		void serverSentEventDecoder(Decoder<?> decoder);
 	}
 
+	/**
+	 * Registry and container for multipart HTTP message writers.
+	 */
+	interface MultipartCodecsConfigurer {
+
+		/**
+		 * Add a Part {@code Encoder}, internally wrapped with
+		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
+		 */
+		MultipartCodecsConfigurer encoder(Encoder<?> encoder);
+
+		/**
+		 * Add a Part {@link HttpMessageWriter}. For writers of type
+		 * {@link EncoderHttpMessageWriter} consider using the shortcut
+		 * {@link #encoder(Encoder)} instead.
+		 * @param writer the writer to add
+		 */
+		MultipartCodecsConfigurer writer(HttpMessageWriter<?> writer);
+	}
 
 }

@@ -108,7 +108,7 @@ public interface CodecConfigurer {
 		void reader(HttpMessageReader<?> reader);
 
 		/**
-		 * Add a custom {@link HttpMessageWriter}. For readers of type
+		 * Add a custom {@link HttpMessageWriter}. For writers of type
 		 * {@link EncoderHttpMessageWriter} consider using the shortcut
 		 * {@link #encoder(Encoder)} instead.
 		 * @param writer the writer to add

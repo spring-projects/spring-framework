@@ -16,9 +16,11 @@
 
 package org.springframework.http.codec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
@@ -48,6 +50,17 @@ class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements Cli
 			extends AbstractDefaultCodecsConfigurer
 			implements ClientCodecConfigurer.ClientDefaultCodecsConfigurer {
 
+		private DefaultMultipartCodecsConfigurer multipartCodecs;
+
+
+		@Override
+		public MultipartCodecsConfigurer multipartCodecs() {
+			if (this.multipartCodecs == null) {
+				this.multipartCodecs = new DefaultMultipartCodecsConfigurer();
+			}
+			return this.multipartCodecs;
+		}
+
 		@Override
 		public void serverSentEventDecoder(Decoder<?> decoder) {
 			HttpMessageReader<?> reader = new ServerSentEventHttpMessageReader(decoder);
@@ -58,7 +71,10 @@ class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements Cli
 		protected void addTypedWritersTo(List<HttpMessageWriter<?>> result) {
 			super.addTypedWritersTo(result);
 			addWriterTo(result, FormHttpMessageWriter::new);
-			addWriterTo(result, MultipartHttpMessageWriter::new);
+			addWriterTo(result, () -> findWriter(MultipartHttpMessageWriter.class,
+					() -> this.multipartCodecs != null ?
+							new MultipartHttpMessageWriter(this.multipartCodecs.getWriters()) :
+							new MultipartHttpMessageWriter()));
 		}
 
 		@Override
@@ -89,7 +105,28 @@ class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements Cli
 			addReaderTo(result,
 					() -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
 		}
+	}
 
+	private static class DefaultMultipartCodecsConfigurer implements MultipartCodecsConfigurer {
+
+		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
+
+
+		@Override
+		public MultipartCodecsConfigurer encoder(Encoder<?> encoder) {
+			writer(new EncoderHttpMessageWriter<>(encoder));
+			return this;
+		}
+
+		@Override
+		public MultipartCodecsConfigurer writer(HttpMessageWriter<?> writer) {
+			this.writers.add(writer);
+			return this;
+		}
+
+		public List<HttpMessageWriter<?>> getWriters() {
+			return this.writers;
+		}
 	}
 
 }
