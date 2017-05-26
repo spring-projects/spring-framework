@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -70,10 +69,9 @@ public class GenericMessagingTemplateTests {
 	@Test
 	public void sendWithTimeout() {
 		SubscribableChannel channel = mock(SubscribableChannel.class);
+		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		doAnswer(invocation -> {
-			Message<?> sent = invocation.getArgument(0);
-			assertFalse(sent.getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
-			assertFalse(sent.getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
+			sent.set(invocation.getArgument(0));
 			return true;
 		}).when(channel).send(any(Message.class), eq(30_000L));
 		Message<?> message = MessageBuilder.withPayload("request")
@@ -82,15 +80,17 @@ public class GenericMessagingTemplateTests {
 				.build();
 		this.template.send(channel, message);
 		verify(channel).send(any(Message.class), eq(30_000L));
+		assertNotNull(sent.get());
+		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
+		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
 	}
 
 	@Test
 	public void sendWithTimeoutMutable() {
 		SubscribableChannel channel = mock(SubscribableChannel.class);
+		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		doAnswer(invocation -> {
-			Message<?> sent = invocation.getArgument(0);
-			assertFalse(sent.getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
-			assertFalse(sent.getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
+			sent.set(invocation.getArgument(0));
 			return true;
 		}).when(channel).send(any(Message.class), eq(30_000L));
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
@@ -99,6 +99,9 @@ public class GenericMessagingTemplateTests {
 		accessor.setHeader(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER, 30_000L);
 		this.template.send(channel, message);
 		verify(channel).send(any(Message.class), eq(30_000L));
+		assertNotNull(sent.get());
+		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
+		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
 	}
 
 	@Test
