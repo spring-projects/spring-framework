@@ -127,7 +127,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			Charset charset = Optional.ofNullable(mediaType.getCharset()).orElse(StandardCharsets.UTF_8);
 			MultipartContext context = new MultipartContext(mediaType.toString(), length, charset.name());
 
-			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter, this.bufferFactory);
+			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter, this.bufferFactory, context);
 			NioMultipartParser parser = Multipart.multipart(context).forNIO(listener);
 
 			this.inputMessage.getBody().subscribe(buffer -> {
@@ -167,12 +167,15 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		private final DataBufferFactory bufferFactory;
 
+		private final MultipartContext context;
+
 		private final AtomicInteger terminated = new AtomicInteger(0);
 
 
-		FluxSinkAdapterListener(FluxSink<Part> sink, DataBufferFactory bufferFactory) {
+		FluxSinkAdapterListener(FluxSink<Part> sink, DataBufferFactory bufferFactory, MultipartContext context) {
 			this.sink = sink;
 			this.bufferFactory = bufferFactory;
+			this.context = context;
 		}
 
 
@@ -180,7 +183,21 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.putAll(headers);
-			this.sink.next(createPart(httpHeaders, storage));
+			this.sink.next(createPart(storage, httpHeaders));
+		}
+
+		private Part createPart(StreamStorage storage, HttpHeaders httpHeaders) {
+			String fileName = MultipartUtils.getFileName(httpHeaders);
+			if (fileName != null) {
+				return new SynchronossFilePart(httpHeaders, storage, fileName, this.bufferFactory);
+			}
+			else if (MultipartUtils.isFormField(httpHeaders, this.context)) {
+				String value = MultipartUtils.readFormParameterValue(storage, httpHeaders);
+				return new SynchronossFormFieldPart(httpHeaders, this.bufferFactory, value);
+			}
+			else {
+				return new DefaultSynchronossPart(httpHeaders, storage, this.bufferFactory);
+			}
 		}
 
 		private Part createPart(HttpHeaders httpHeaders, StreamStorage storage) {
@@ -188,13 +205,6 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			return fileName != null ?
 					new SynchronossFilePart(httpHeaders, storage, fileName, this.bufferFactory) :
 					new DefaultSynchronossPart(httpHeaders, storage, this.bufferFactory);
-		}
-
-		@Override
-		public void onFormFieldPartFinished(String name, String value, Map<String, List<String>> headers) {
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.putAll(headers);
-			this.sink.next(new SynchronossFormFieldPart(httpHeaders, this.bufferFactory, value));
 		}
 
 		@Override
