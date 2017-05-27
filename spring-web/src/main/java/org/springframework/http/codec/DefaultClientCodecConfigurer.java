@@ -100,9 +100,19 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 		}
 
 		private MultipartHttpMessageWriter getMultipartHttpMessageWriter() {
-			return this.multipartCodecs != null ?
-					new MultipartHttpMessageWriter(this.multipartCodecs.getWriters()) :
-					new MultipartHttpMessageWriter();
+			List<HttpMessageWriter<?>> partWriters;
+			if (this.multipartCodecs != null) {
+				partWriters = this.multipartCodecs.getWriters();
+			}
+			else {
+				partWriters = new ArrayList<>();
+				partWriters.addAll(super.getTypedWriters());
+				partWriters.addAll(getCustomCodecs().getTypedWriters());
+				partWriters.addAll(super.getObjectWriters());
+				partWriters.addAll(getCustomCodecs().getObjectWriters());
+				partWriters.addAll(super.getCatchAllWriters());
+			}
+			return new MultipartHttpMessageWriter(partWriters);
 		}
 	}
 

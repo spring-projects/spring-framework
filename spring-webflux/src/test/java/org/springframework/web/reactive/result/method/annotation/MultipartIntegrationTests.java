@@ -30,14 +30,11 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
@@ -55,7 +52,6 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
@@ -70,16 +66,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-
-		ExchangeStrategies strategies = ExchangeStrategies.builder().defaultCodecs(configurer ->
-				configurer.multipartCodecs()
-						.encoder(CharSequenceEncoder.allMimeTypes())
-						.writer(new ResourceHttpMessageWriter())
-						.encoder(new Jackson2JsonEncoder())).build();
-
-		this.webClient = WebClient.builder().baseUrl("http://localhost:" + this.port)
-				.exchangeStrategies(strategies)
-				.build();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 

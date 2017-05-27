@@ -65,6 +65,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	protected AbstractCodecConfigurer(AbstractDefaultCodecs defaultCodecs) {
 		Assert.notNull(defaultCodecs, "'defaultCodecs' is required.");
 		this.defaultCodecs = defaultCodecs;
+		this.defaultCodecs.setCustomCodecs(this.customCodecs);
 	}
 
 
@@ -112,13 +113,15 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	}
 
 
-	abstract static class AbstractDefaultCodecs implements DefaultCodecs {
+	abstract protected static class AbstractDefaultCodecs implements DefaultCodecs {
 
 		private boolean registerDefaults = true;
 
 		private Jackson2JsonDecoder jackson2Decoder;
 
 		private Jackson2JsonEncoder jackson2Encoder;
+
+		private DefaultCustomCodecs customCodecs;
 
 
 		public void setRegisterDefaults(boolean registerDefaults) {
@@ -127,6 +130,17 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
 		public boolean shouldRegisterDefaults() {
 			return this.registerDefaults;
+		}
+
+		/**
+		 * Access to custom codecs for sub-classes, e.g. for multipart writers.
+		 */
+		public void setCustomCodecs(DefaultCustomCodecs customCodecs) {
+			this.customCodecs = customCodecs;
+		}
+
+		public DefaultCustomCodecs getCustomCodecs() {
+			return this.customCodecs;
 		}
 
 		@Override
@@ -227,7 +241,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	}
 
 
-	private static class DefaultCustomCodecs implements CustomCodecs {
+	protected static class DefaultCustomCodecs implements CustomCodecs {
 
 		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
 		private final List<HttpMessageWriter<?>> typedWriters = new ArrayList<>();
