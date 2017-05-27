@@ -35,10 +35,7 @@ import org.springframework.core.codec.Encoder;
  */
 public interface ClientCodecConfigurer extends CodecConfigurer {
 
-	/**
-	 * {@inheritDoc}
-	 * <p>Overriden to return {@link ClientDefaultCodecs}.
-	 */
+
 	@Override
 	ClientDefaultCodecs defaultCodecs();
 
@@ -51,8 +48,9 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		return new DefaultClientCodecConfigurer();
 	}
 
+
 	/**
-	 * Extension of {@link AbstractCodecConfigurer} with extra client options.
+	 * Extension of {@link DefaultCodecs} with extra client options.
 	 */
 	interface ClientDefaultCodecs extends DefaultCodecs {
 
@@ -65,7 +63,9 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 
 		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
-		 * <p>By default the {@link #jackson2Decoder} override is used for SSE.
+		 * <p>By default if this is not set, and Jackson is available, the
+		 * {@link #jackson2Decoder} override is used instead. Use this property
+		 * if you want to further customize the SSE decoder.
 		 * @param decoder the decoder to use
 		 */
 		void serverSentEventDecoder(Decoder<?> decoder);

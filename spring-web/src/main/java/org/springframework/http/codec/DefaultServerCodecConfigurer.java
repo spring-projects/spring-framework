@@ -16,11 +16,10 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.util.ClassUtils;
@@ -55,53 +54,51 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 	private static class ServerDefaultCodecsImpl extends AbstractDefaultCodecs
 			implements ServerDefaultCodecs {
 
+		private Encoder<?> sseEncoder;
+
+
 		@Override
 		public void serverSentEventEncoder(Encoder<?> encoder) {
-			HttpMessageWriter<?> writer = new ServerSentEventHttpMessageWriter(encoder);
-			getWriters().put(ServerSentEventHttpMessageWriter.class, writer);
+			this.sseEncoder = encoder;
+		}
+
+
+		@Override
+		protected boolean splitTextOnNewLine() {
+			return true;
 		}
 
 		@Override
-		public void addTypedReadersTo(List<HttpMessageReader<?>> result) {
-			super.addTypedReadersTo(result);
-			addReaderTo(result, FormHttpMessageReader::new);
+		public List<HttpMessageReader<?>> getTypedReaders() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageReader<?>> result = super.getTypedReaders();
+			result.add(new FormHttpMessageReader());
 			if (synchronossMultipartPresent) {
 				SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
-				addReaderTo(result, () -> partReader);
-				addReaderTo(result, () -> new MultipartHttpMessageReader(partReader));
+				result.add(partReader);
+				result.add(new MultipartHttpMessageReader(partReader));
 			}
+			return result;
 		}
 
 		@Override
-		protected void addObjectWritersTo(List<HttpMessageWriter<?>> result) {
-			super.addObjectWritersTo(result);
-			addServerSentEventWriterTo(result);
+		public List<HttpMessageWriter<?>> getObjectWriters() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageWriter<?>> result = super.getObjectWriters();
+			result.add(new ServerSentEventHttpMessageWriter(getSseEncoder()));
+			return result;
 		}
 
-
-		private void addServerSentEventWriterTo(List<HttpMessageWriter<?>> result) {
-			addWriterTo(result, () -> findWriter(ServerSentEventHttpMessageWriter.class, () -> {
-				Encoder<?> encoder = null;
-				if (jackson2Present) {
-					encoder = findEncoderWriter(
-							Jackson2JsonEncoder.class, Jackson2JsonEncoder::new).getEncoder();
-				}
-				return new ServerSentEventHttpMessageWriter(encoder);
-			}));
+		private Encoder<?> getSseEncoder() {
+			if (this.sseEncoder != null) {
+				return this.sseEncoder;
+			}
+			return jackson2Present ? jackson2Encoder() : null;
 		}
-
-		@Override
-		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-		}
-
-		@Override
-		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		}
-
 	}
 
 }

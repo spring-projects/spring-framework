@@ -35,48 +35,50 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 public interface CodecConfigurer {
 
 	/**
-	 * Provide overrides for built-in HTTP message readers or writers.
+	 * Configure or customize the default HTTP message readers and writers.
 	 */
 	DefaultCodecs defaultCodecs();
 
 	/**
-	 * Whether to make default HTTP message reader and writer registrations.
-	 * <p>By default this is set to {@code "true"}.
+	 * Whether to register default HTTP message readers and writers.
+	 * <p>By default this is set to {@code "true"}; setting this to {@code false}
+	 * disables default HTTP message reader and writer registrations.
 	 */
 	void registerDefaults(boolean registerDefaults);
 
 	/**
-	 * Register a custom encoder or decoder.
+	 * Register custom HTTP message readers or writers to use in addition to
+	 * the ones registered by default.
 	 */
 	CustomCodecs customCodecs();
 
 	/**
-	 * Prepare a list of HTTP message readers.
+	 * Obtain the configured HTTP message readers.
 	 */
 	List<HttpMessageReader<?>> getReaders();
 
 	/**
-	 * Prepare a list of HTTP message writers.
+	 * Obtain the configured HTTP message writers.
 	 */
 	List<HttpMessageWriter<?>> getWriters();
 
 
 	/**
-	 * Registry and container for built-in HTTP message readers and writers.
+	 * Assists with customizing the default HTTP message readers and writers.
 	 * @see ClientCodecConfigurer.ClientDefaultCodecs
 	 * @see ServerCodecConfigurer.ServerDefaultCodecs
 	 */
 	interface DefaultCodecs {
 
 		/**
-		 * Override the default Jackson {@code Decoder}.
-		 * @param decoder the decoder to use
+		 * Override the default Jackson JSON {@code Decoder}.
+		 * @param decoder the decoder instance to use
 		 */
 		void jackson2Decoder(Jackson2JsonDecoder decoder);
 
 		/**
-		 * Override the default Jackson {@code Encoder} for JSON.
-		 * @param encoder the encoder to use
+		 * Override the default Jackson JSON {@code Encoder}.
+		 * @param encoder the encoder instance to use
 		 */
 		void jackson2Encoder(Jackson2JsonEncoder encoder);
 

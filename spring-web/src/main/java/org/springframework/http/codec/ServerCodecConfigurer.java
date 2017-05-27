@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
  * Helps to configure a list of server-side HTTP message readers and writers
@@ -34,10 +35,7 @@ import org.springframework.core.codec.Encoder;
  */
 public interface ServerCodecConfigurer extends CodecConfigurer {
 
-	/**
-	 * {@inheritDoc}
-	 * <p>Overriden to return {@link ServerDefaultCodecs}.
-	 */
+
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 
@@ -52,17 +50,17 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Extension of {@link AbstractCodecConfigurer} with extra server options.
+	 * Extension of {@link DefaultCodecs} with extra server options.
 	 */
 	interface ServerDefaultCodecs extends DefaultCodecs {
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.
-		 * <p>By default the {@link #jackson2Encoder} override is used for SSE.
-		 * @param encoder the encoder to use
+		 * <p>By default if this is not set, and Jackson is available, the
+		 * {@link #jackson2Encoder} override is used instead. Use this property
+		 * if you want to further customize the SSE encoder.
 		 */
 		void serverSentEventEncoder(Encoder<?> encoder);
-
 	}
 
 }

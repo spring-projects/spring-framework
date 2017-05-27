@@ -289,13 +289,8 @@ public class CodecConfigurerTests {
 		private static class TestDefaultCodecs extends AbstractDefaultCodecs {
 
 			@Override
-			protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-			}
-
-			@Override
-			protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+			protected boolean splitTextOnNewLine() {
+				return true;
 			}
 		}
 	}
