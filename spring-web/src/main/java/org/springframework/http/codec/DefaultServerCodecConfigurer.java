@@ -31,29 +31,29 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultServerCodecConfigurer extends DefaultCodecConfigurer implements ServerCodecConfigurer {
+class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
 
 	static final boolean synchronossMultipartPresent =
 			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
-					org.springframework.http.codec.DefaultCodecConfigurer.class.getClassLoader());
+					AbstractCodecConfigurer.class.getClassLoader());
 
 
 	public DefaultServerCodecConfigurer() {
-		super(new DefaultServerDefaultCodecsConfigurer());
+		super(new ServerDefaultCodecsImpl());
 	}
 
+
 	@Override
-	public ServerDefaultCodecsConfigurer defaultCodecs() {
-		return (ServerDefaultCodecsConfigurer) super.defaultCodecs();
+	public ServerDefaultCodecs defaultCodecs() {
+		return (ServerDefaultCodecs) super.defaultCodecs();
 	}
 
 
 	/**
-	 * Default implementation of {@link ServerCodecConfigurer.ServerDefaultCodecsConfigurer}.
+	 * Default implementation of {@link ServerDefaultCodecs}.
 	 */
-	private static class DefaultServerDefaultCodecsConfigurer
-			extends AbstractDefaultCodecsConfigurer
-			implements ServerCodecConfigurer.ServerDefaultCodecsConfigurer {
+	private static class ServerDefaultCodecsImpl extends AbstractDefaultCodecs
+			implements ServerDefaultCodecs {
 
 		@Override
 		public void serverSentEventEncoder(Encoder<?> encoder) {

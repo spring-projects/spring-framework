@@ -45,36 +45,34 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultCodecConfigurer implements CodecConfigurer {
+abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
-	static final boolean jackson2Present =
+	protected static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					org.springframework.http.codec.DefaultCodecConfigurer.class.getClassLoader()) &&
+					AbstractCodecConfigurer.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							org.springframework.http.codec.DefaultCodecConfigurer.class
-									.getClassLoader());
+							AbstractCodecConfigurer.class.getClassLoader());
 
-	static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					org.springframework.http.codec.DefaultCodecConfigurer.class.getClassLoader());
+	protected static final boolean jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder",
+			AbstractCodecConfigurer.class.getClassLoader());
 
 
-	private final AbstractDefaultCodecsConfigurer defaultCodecs;
+	private final AbstractDefaultCodecs defaultCodecs;
 
-	private final CustomCodecConfigurer customCodecs = new CustomCodecConfigurer();
+	private final DefaultCustomCodecs customCodecs = new DefaultCustomCodecs();
 
 
 	/**
 	 * Protected constructor with the configurer for default readers and writers.
 	 */
-	DefaultCodecConfigurer(AbstractDefaultCodecsConfigurer defaultCodecConfigurer) {
-		Assert.notNull(defaultCodecConfigurer, "DefaultCodecConfigurer is required.");
-		this.defaultCodecs = defaultCodecConfigurer;
+	protected AbstractCodecConfigurer(AbstractDefaultCodecs defaultCodecs) {
+		Assert.notNull(defaultCodecs, "'defaultCodecs' is required.");
+		this.defaultCodecs = defaultCodecs;
 	}
 
 
 	@Override
-	public DefaultCodecsConfigurer defaultCodecs() {
+	public DefaultCodecs defaultCodecs() {
 		return this.defaultCodecs;
 	}
 
@@ -84,7 +82,7 @@ class DefaultCodecConfigurer implements CodecConfigurer {
 	}
 
 	@Override
-	public CustomCodecsConfigurer customCodecs() {
+	public CustomCodecs customCodecs() {
 		return this.customCodecs;
 	}
 
@@ -125,10 +123,9 @@ class DefaultCodecConfigurer implements CodecConfigurer {
 
 
 	/**
-	 * Default implementation for {@link CodecConfigurer.DefaultCodecsConfigurer}.
+	 * Default implementation for {@link DefaultCodecs}.
 	 */
-	abstract static class AbstractDefaultCodecsConfigurer
-			implements CodecConfigurer.DefaultCodecsConfigurer {
+	abstract static class AbstractDefaultCodecs implements DefaultCodecs {
 
 		private boolean suppressed = false;
 
@@ -270,9 +267,9 @@ class DefaultCodecConfigurer implements CodecConfigurer {
 
 
 	/**
-	 * Default implementation of CustomCodecsConfigurer.
+	 * Default implementation of CustomCodecs.
 	 */
-	private static class CustomCodecConfigurer implements CodecConfigurer.CustomCodecsConfigurer {
+	private static class DefaultCustomCodecs implements CustomCodecs {
 
 		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
 

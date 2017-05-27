@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 
@@ -92,7 +93,7 @@ public interface ExchangeStrategies {
 		 * @return this builder
 		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ClientCodecConfigurer.ClientDefaultCodecsConfigurer> consumer);
+		Builder defaultCodecs(Consumer<ClientCodecConfigurer.ClientDefaultCodecs> consumer);
 
 		/**
 		 * Customize the list of custom client-side HTTP message readers and writers.
@@ -100,7 +101,7 @@ public interface ExchangeStrategies {
 		 * @return this builder
 		 * @see #defaultCodecs(Consumer)
 		 */
-		Builder customCodecs(Consumer<ClientCodecConfigurer.CustomCodecsConfigurer> consumer);
+		Builder customCodecs(Consumer<CodecConfigurer.CustomCodecs> consumer);
 
 		/**
 		 * Builds the {@link ExchangeStrategies}.

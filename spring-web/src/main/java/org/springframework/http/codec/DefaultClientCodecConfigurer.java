@@ -31,32 +31,33 @@ import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements ClientCodecConfigurer {
+class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements ClientCodecConfigurer {
+
 
 	public DefaultClientCodecConfigurer() {
-		super(new DefaultClientDefaultCodecsConfigurer());
+		super(new ClientDefaultCodecsImpl());
 	}
 
+
 	@Override
-	public ClientDefaultCodecsConfigurer defaultCodecs() {
-		return (ClientDefaultCodecsConfigurer) super.defaultCodecs();
+	public ClientDefaultCodecs defaultCodecs() {
+		return (ClientDefaultCodecs) super.defaultCodecs();
 	}
 
 
 	/**
-	 * Default implementation of {@link ClientCodecConfigurer.ClientDefaultCodecsConfigurer}.
+	 * Default implementation of {@link ClientDefaultCodecs}.
 	 */
-	private static class DefaultClientDefaultCodecsConfigurer
-			extends AbstractDefaultCodecsConfigurer
-			implements ClientCodecConfigurer.ClientDefaultCodecsConfigurer {
+	private static class ClientDefaultCodecsImpl extends AbstractDefaultCodecs
+			implements ClientDefaultCodecs {
 
-		private DefaultMultipartCodecsConfigurer multipartCodecs;
+		private DefaultMultipartCodecs multipartCodecs;
 
 
 		@Override
-		public MultipartCodecsConfigurer multipartCodecs() {
+		public MultipartCodecs multipartCodecs() {
 			if (this.multipartCodecs == null) {
-				this.multipartCodecs = new DefaultMultipartCodecsConfigurer();
+				this.multipartCodecs = new DefaultMultipartCodecs();
 			}
 			return this.multipartCodecs;
 		}
@@ -107,19 +108,19 @@ class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements Cli
 		}
 	}
 
-	private static class DefaultMultipartCodecsConfigurer implements MultipartCodecsConfigurer {
+	private static class DefaultMultipartCodecs implements MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
 
 
 		@Override
-		public MultipartCodecsConfigurer encoder(Encoder<?> encoder) {
+		public MultipartCodecs encoder(Encoder<?> encoder) {
 			writer(new EncoderHttpMessageWriter<>(encoder));
 			return this;
 		}
 
 		@Override
-		public MultipartCodecsConfigurer writer(HttpMessageWriter<?> writer) {
+		public MultipartCodecs writer(HttpMessageWriter<?> writer) {
 			this.writers.add(writer);
 			return this;
 		}

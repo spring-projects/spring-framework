@@ -36,10 +36,10 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Overriden to return {@link ServerDefaultCodecsConfigurer}.
+	 * <p>Overriden to return {@link ServerDefaultCodecs}.
 	 */
 	@Override
-	ServerDefaultCodecsConfigurer defaultCodecs();
+	ServerDefaultCodecs defaultCodecs();
 
 
 	/**
@@ -52,9 +52,9 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Extension of {@link DefaultCodecConfigurer} with extra server options.
+	 * Extension of {@link AbstractCodecConfigurer} with extra server options.
 	 */
-	interface ServerDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
+	interface ServerDefaultCodecs extends DefaultCodecs {
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.

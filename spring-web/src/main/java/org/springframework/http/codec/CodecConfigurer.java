@@ -24,7 +24,10 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
- * Defines the interface for client or server HTTP message reader and writer configurers.
+ * Defines a common interface for configuring either client or server HTTP
+ * message readers and writers. To obtain an instance use either
+ * {@link ClientCodecConfigurer#create()} or
+ * {@link ServerCodecConfigurer#create()}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -34,7 +37,7 @@ public interface CodecConfigurer {
 	/**
 	 * Provide overrides for built-in HTTP message readers or writers.
 	 */
-	DefaultCodecsConfigurer defaultCodecs();
+	DefaultCodecs defaultCodecs();
 
 	/**
 	 * Whether to make default HTTP message reader and writer registrations.
@@ -45,7 +48,7 @@ public interface CodecConfigurer {
 	/**
 	 * Register a custom encoder or decoder.
 	 */
-	CustomCodecsConfigurer customCodecs();
+	CustomCodecs customCodecs();
 
 	/**
 	 * Prepare a list of HTTP message readers.
@@ -60,10 +63,10 @@ public interface CodecConfigurer {
 
 	/**
 	 * Registry and container for built-in HTTP message readers and writers.
-	 * @see ClientCodecConfigurer.ClientDefaultCodecsConfigurer
-	 * @see ServerCodecConfigurer.ServerDefaultCodecsConfigurer
+	 * @see ClientCodecConfigurer.ClientDefaultCodecs
+	 * @see ServerCodecConfigurer.ServerDefaultCodecs
 	 */
-	interface DefaultCodecsConfigurer {
+	interface DefaultCodecs {
 
 		/**
 		 * Override the default Jackson {@code Decoder}.
@@ -83,7 +86,7 @@ public interface CodecConfigurer {
 	/**
 	 * Registry and container for custom HTTP message readers and writers.
 	 */
-	interface CustomCodecsConfigurer {
+	interface CustomCodecs {
 
 		/**
 		 * Add a custom {@code Decoder} internally wrapped with

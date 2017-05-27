@@ -37,10 +37,10 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Overriden to return {@link ClientDefaultCodecsConfigurer}.
+	 * <p>Overriden to return {@link ClientDefaultCodecs}.
 	 */
 	@Override
-	ClientDefaultCodecsConfigurer defaultCodecs();
+	ClientDefaultCodecs defaultCodecs();
 
 
 	/**
@@ -52,16 +52,16 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 	}
 
 	/**
-	 * Extension of {@link DefaultCodecConfigurer} with extra client options.
+	 * Extension of {@link AbstractCodecConfigurer} with extra client options.
 	 */
-	interface ClientDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
+	interface ClientDefaultCodecs extends DefaultCodecs {
 
 		/**
 		 * Configure encoders or writers for use with
 		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter
 		 * MultipartHttpMessageWriter}.
 		 */
-		MultipartCodecsConfigurer multipartCodecs();
+		MultipartCodecs multipartCodecs();
 
 		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
@@ -74,14 +74,14 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 	/**
 	 * Registry and container for multipart HTTP message writers.
 	 */
-	interface MultipartCodecsConfigurer {
+	interface MultipartCodecs {
 
 		/**
 		 * Add a Part {@code Encoder}, internally wrapped with
 		 * {@link EncoderHttpMessageWriter}.
 		 * @param encoder the encoder to add
 		 */
-		MultipartCodecsConfigurer encoder(Encoder<?> encoder);
+		MultipartCodecs encoder(Encoder<?> encoder);
 
 		/**
 		 * Add a Part {@link HttpMessageWriter}. For writers of type
@@ -89,7 +89,7 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		 * {@link #encoder(Encoder)} instead.
 		 * @param writer the writer to add
 		 */
-		MultipartCodecsConfigurer writer(HttpMessageWriter<?> writer);
+		MultipartCodecs writer(HttpMessageWriter<?> writer);
 	}
 
 }

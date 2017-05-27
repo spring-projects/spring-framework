@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -114,7 +115,7 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecsConfigurer> consumer);
+		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecs> consumer);
 
 		/**
 		 * Customize the list of custom server-side HTTP message readers and writers.
@@ -122,7 +123,7 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 * @see #defaultCodecs(Consumer)
 		 */
-		Builder customCodecs(Consumer<ServerCodecConfigurer.CustomCodecsConfigurer> consumer);
+		Builder customCodecs(Consumer<CodecConfigurer.CustomCodecs> consumer);
 
 		/**
 		 * Add the given view resolver to this builder.
