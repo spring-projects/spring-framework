@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Handy class for wrapping checked {@code Exceptions} with a root cause.
  *
@@ -79,6 +81,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * Retrieve the innermost cause of this exception, if any.
 	 * @return the innermost exception, or {@code null} if none
 	 */
+	@Nullable
 	public Throwable getRootCause() {
 		return NestedExceptionUtils.getRootCause(this);
 	}

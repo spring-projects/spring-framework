@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -71,6 +72,7 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 		}
 	}
 
+	@Nullable
 	private ResourceTransformer getNext() {
 		Assert.state(this.index <= this.transformers.size(),
 				"Current index exceeds the number of configured ResourceTransformer's");

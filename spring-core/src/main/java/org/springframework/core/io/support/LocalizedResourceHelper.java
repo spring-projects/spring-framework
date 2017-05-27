@@ -21,6 +21,7 @@ import java.util.Locale;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -86,7 +87,7 @@ public class LocalizedResourceHelper {
 	 * @return the most specific localized resource found
 	 * @see java.util.ResourceBundle
 	 */
-	public Resource findLocalizedResource(String name, String extension, Locale locale) {
+	public Resource findLocalizedResource(String name, String extension, @Nullable Locale locale) {
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(extension, "Extension must not be null");
 

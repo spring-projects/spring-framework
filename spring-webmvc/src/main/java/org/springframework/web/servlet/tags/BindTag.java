@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
+
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
 
@@ -155,6 +157,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * @return the property that this tag is currently bound to,
 	 * or {@code null} if none
 	 */
+	@Nullable
 	public final String getProperty() {
 		return this.status.getExpression();
 	}
@@ -164,6 +167,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Intended for cooperating nesting tags.
 	 * @return the current Errors instance, or {@code null} if none
 	 */
+	@Nullable
 	public final Errors getErrors() {
 		return this.status.getErrors();
 	}

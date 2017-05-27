@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import javax.persistence.Embeddable;
@@ -58,6 +59,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -101,7 +103,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
 	 * (may be {@code null})
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource) {
 		this(dataSource, new PathMatchingResourcePatternResolver());
 	}
 
@@ -111,7 +113,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param classLoader the ClassLoader to load application classes from
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ClassLoader classLoader) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ClassLoader classLoader) {
 		this(dataSource, new PathMatchingResourcePatternResolver(classLoader));
 	}
 
@@ -121,7 +123,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader) {
 		this(dataSource, resourceLoader, new MetadataSources(
 				new BootstrapServiceRegistryBuilder().applyClassLoader(resourceLoader.getClassLoader()).build()));
 	}
@@ -134,7 +136,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param metadataSources the Hibernate MetadataSources service to use (e.g. reusing an existing one)
 	 * @since 4.3
 	 */
-	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+	public LocalSessionFactoryBuilder(@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
 		super(metadataSources);
 
 		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());

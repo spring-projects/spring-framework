@@ -22,6 +22,7 @@ import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -88,6 +89,7 @@ public class HandshakeInfo {
 	 * @see <a href="https://tools.ietf.org/html/rfc6455#section-1.9">
 	 * https://tools.ietf.org/html/rfc6455#section-1.9</a>
 	 */
+	@Nullable
 	public String getSubProtocol() {
 		return this.protocol;
 	}

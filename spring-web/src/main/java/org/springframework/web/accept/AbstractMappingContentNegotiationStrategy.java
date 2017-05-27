@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -89,6 +90,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * Extract a key from the request to use to look up media types.
 	 * @return the lookup key or {@code null}.
 	 */
+	@Nullable
 	protected abstract String getMediaTypeKey(NativeWebRequest request);
 
 	/**
@@ -104,6 +106,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * determine the media type(s). If a MediaType is returned from
 	 * this method it will be added to the cache in the base class.
 	 */
+	@Nullable
 	protected MediaType handleNoMatch(NativeWebRequest request, String key)
 			throws HttpMediaTypeNotAcceptableException {
 

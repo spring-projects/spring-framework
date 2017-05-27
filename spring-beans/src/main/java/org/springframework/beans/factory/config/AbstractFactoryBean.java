@@ -33,6 +33,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -225,6 +226,7 @@ public abstract class AbstractFactoryBean<T>
 	 * or {@code null} to indicate a FactoryBeanNotInitializedException
 	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
 	 */
+	@Nullable
 	protected Class<?>[] getEarlySingletonInterfaces() {
 		Class<?> type = getObjectType();
 		return (type != null && type.isInterface() ? new Class<?>[] {type} : null);

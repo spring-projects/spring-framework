@@ -50,6 +50,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.SmartClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -372,7 +373,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Process a return value. Wraps a return of {@code this} if necessary to be the
 	 * {@code proxy} and also verifies that {@code null} is not returned as a primitive.
 	 */
-	private static Object processReturnType(Object proxy, Object target, Method method, Object retVal) {
+	@Nullable
+	private static Object processReturnType(Object proxy, Object target, Method method, @Nullable Object retVal) {
 		// Massage return value if necessary
 		if (retVal != null && retVal == target &&
 				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {

@@ -22,6 +22,7 @@ import java.util.prefs.Preferences;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Subclass of PropertyPlaceholderConfigurer that supports JDK 1.4's
@@ -113,6 +114,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 * @param preferences the Preferences to resolve against
 	 * @return the value for the placeholder, or {@code null} if none found
 	 */
+	@Nullable
 	protected String resolvePlaceholder(String path, String key, Preferences preferences) {
 		if (path != null) {
 			 // Do not create the node if it does not exist...

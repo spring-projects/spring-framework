@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -78,9 +79,9 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @param encoded whether the components are already encoded
 	 * @param verify whether the components need to be checked for illegal characters
 	 */
-	HierarchicalUriComponents(String scheme, String userInfo, String host, String port,
-			PathComponent path, MultiValueMap<String, String> queryParams,
-			String fragment, boolean encoded, boolean verify) {
+	HierarchicalUriComponents(@Nullable String scheme, @Nullable String userInfo, @Nullable String host, @Nullable String port,
+			@Nullable PathComponent path, @Nullable MultiValueMap<String, String> queryParams,
+			@Nullable String fragment, @Nullable boolean encoded, @Nullable boolean verify) {
 
 		super(scheme, fragment);
 		this.userInfo = userInfo;

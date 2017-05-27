@@ -21,6 +21,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -162,6 +163,7 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	}
 
 	@Override
+	@Nullable
 	public String getAttributeValue(String namespaceURI, String localName) {
 		for (int i = 0; i < getAttributeCount(); i++) {
 			QName name = getAttributeName(i);

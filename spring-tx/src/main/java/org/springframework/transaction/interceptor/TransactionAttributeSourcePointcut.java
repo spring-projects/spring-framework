@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -68,6 +69,7 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 	 * Obtain the underlying TransactionAttributeSource (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
+	@Nullable
 	protected abstract TransactionAttributeSource getTransactionAttributeSource();
 
 }

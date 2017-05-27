@@ -17,6 +17,7 @@
 package org.springframework.web.method.support;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -55,6 +56,7 @@ public interface HandlerMethodArgumentResolver {
 	 * @return the resolved argument value, or {@code null}
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
+	@Nullable
 	Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception;
 

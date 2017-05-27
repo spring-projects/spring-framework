@@ -20,6 +20,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that specifies a basic set of CCI operations on an EIS.
@@ -47,6 +48,7 @@ public interface CciOperations {
 	 * @return the result object returned by the action, if any
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(ConnectionCallback<T> action) throws DataAccessException;
 
 	/**
@@ -62,6 +64,7 @@ public interface CciOperations {
 	 * @return the result object returned by the action, if any
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(InteractionCallback<T> action) throws DataAccessException;
 
 	/**

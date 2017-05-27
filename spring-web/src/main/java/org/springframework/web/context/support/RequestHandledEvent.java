@@ -17,6 +17,7 @@
 package org.springframework.web.context.support;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.lang.Nullable;
 
 /**
  * Event raised when a request is handled within an ApplicationContext.
@@ -57,7 +58,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * request, if any (usually the UserPrincipal)
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 */
-	public RequestHandledEvent(Object source, String sessionId, String userName, long processingTimeMillis) {
+	public RequestHandledEvent(Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis) {
 		super(source);
 		this.sessionId = sessionId;
 		this.userName = userName;
@@ -74,7 +75,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param failureCause the cause of failure, if any
 	 */
 	public RequestHandledEvent(
-			Object source, String sessionId, String userName, long processingTimeMillis, Throwable failureCause) {
+			Object source, @Nullable String sessionId, @Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause) {
 
 		this(source, sessionId, userName, processingTimeMillis);
 		this.failureCause = failureCause;
@@ -91,6 +92,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the id of the HTTP session, if any.
 	 */
+	@Nullable
 	public String getSessionId() {
 		return this.sessionId;
 	}
@@ -100,6 +102,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * (usually the UserPrincipal).
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
+	@Nullable
 	public String getUserName() {
 		return this.userName;
 	}
@@ -114,6 +117,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the cause of failure, if any.
 	 */
+	@Nullable
 	public Throwable getFailureCause() {
 		return this.failureCause;
 	}

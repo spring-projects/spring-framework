@@ -17,6 +17,7 @@
 package org.springframework.jms.listener.endpoint;
 
 import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -29,6 +30,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Standard implementation of the {@link JmsActivationSpecFactory} interface.
@@ -124,6 +126,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * if not determinable
 	 * @see #setActivationSpecClass
 	 */
+	@Nullable
 	protected Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
 		return null;
 	}

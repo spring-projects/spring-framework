@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -187,6 +188,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * return {@code null} to indicate that no suitable arguments could be resolved and
 	 * therefore the method should not be invoked at all for the specified event.
 	 */
+	@Nullable
 	protected Object[] resolveArguments(ApplicationEvent event) {
 		ResolvableType declaredEventType = getResolvableType(event);
 		if (declaredEventType == null) {
@@ -338,7 +340,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return sb.toString();
 	}
 
-
+	@Nullable
 	private ResolvableType getResolvableType(ApplicationEvent event) {
 		ResolvableType payloadType = null;
 		if (event instanceof PayloadApplicationEvent) {

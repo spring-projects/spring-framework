@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -99,6 +100,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * @since 4.3
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T extends ContentNegotiationStrategy> T getStrategy(Class<T> strategyType) {
 		for (ContentNegotiationStrategy strategy : getStrategies()) {
 			if (strategyType.isInstance(strategy)) {

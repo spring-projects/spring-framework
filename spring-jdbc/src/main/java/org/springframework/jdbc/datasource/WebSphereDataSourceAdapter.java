@@ -19,11 +19,13 @@ package org.springframework.jdbc.datasource;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -157,7 +159,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @see com.ibm.websphere.rsadapter.JDBCConnectionSpec
 	 */
 	protected Object createConnectionSpec(
-			Integer isolationLevel, Boolean readOnlyFlag, String username, String password) throws SQLException {
+			@Nullable Integer isolationLevel, @Nullable Boolean readOnlyFlag, @Nullable String username, @Nullable String password) throws SQLException {
 
 		Object connSpec = ReflectionUtils.invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
 		if (isolationLevel != null) {

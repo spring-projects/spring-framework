@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Helper class for implementing exception classes which are capable of
  * holding nested exceptions. Necessary because we can't share a base
@@ -56,6 +58,7 @@ public abstract class NestedExceptionUtils {
 	 * @return the innermost exception, or {@code null} if none
 	 * @since 4.3.9
 	 */
+	@Nullable
 	public static Throwable getRootCause(Throwable original) {
 		if (original == null) {
 			return null;

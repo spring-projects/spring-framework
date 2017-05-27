@@ -18,6 +18,8 @@ package org.springframework.messaging.simp.user;
 
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represents a connected user.
  *
@@ -39,8 +41,9 @@ public interface SimpUser {
 	/**
 	 * Look up the session for the given id.
 	 * @param sessionId the session id
-	 * @return the matching session of {@code null}.
+	 * @return the matching session or {@code null}.
 	 */
+	@Nullable
 	SimpSession getSession(String sessionId);
 
 	/**

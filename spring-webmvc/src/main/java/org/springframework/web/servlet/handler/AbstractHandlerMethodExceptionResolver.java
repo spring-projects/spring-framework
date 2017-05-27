@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -73,7 +74,8 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
 	 */
+	@Nullable
 	protected abstract ModelAndView doResolveHandlerMethodException(
-			HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod, Exception ex);
+			HttpServletRequest request, HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception ex);
 
 }

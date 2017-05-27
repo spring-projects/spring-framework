@@ -26,6 +26,7 @@ import java.util.concurrent.RejectedExecutionException;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -167,7 +168,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 	 * @throws RejectedExecutionException if the given runnable cannot be accepted
 	 * @since 4.3
 	 */
-	protected void doExecute(Executor concurrentExecutor, TaskDecorator taskDecorator, Runnable runnable)
+	protected void doExecute(Executor concurrentExecutor, @Nullable TaskDecorator taskDecorator, Runnable runnable)
 			throws RejectedExecutionException{
 
 		concurrentExecutor.execute(taskDecorator != null ? taskDecorator.decorate(runnable) : runnable);

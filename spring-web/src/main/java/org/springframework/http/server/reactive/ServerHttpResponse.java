@@ -21,6 +21,7 @@ import java.util.function.Function;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -43,6 +44,7 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	/**
 	 * Return the HTTP status code or {@code null} if not set.
 	 */
+	@Nullable
 	HttpStatus getStatusCode();
 
 	/**

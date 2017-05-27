@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -102,7 +103,8 @@ public abstract class BridgeMethodResolver {
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or {@code null} if none found
 	 */
-	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+	@Nullable
+	private static Method searchCandidates(@Nullable List<Method> candidateMethods, Method bridgeMethod) {
 		if (candidateMethods.isEmpty()) {
 			return null;
 		}
@@ -138,6 +140,7 @@ public abstract class BridgeMethodResolver {
 	 * matches that of the supplied bridge method.
 	 * @throws IllegalStateException if the generic declaration cannot be found
 	 */
+	@Nullable
 	private static Method findGenericDeclaration(Method bridgeMethod) {
 		// Search parent types for method that has same signature as bridge.
 		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
@@ -196,6 +199,7 @@ public abstract class BridgeMethodResolver {
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
+	@Nullable
 	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}

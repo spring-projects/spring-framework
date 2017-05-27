@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -165,6 +166,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
+	@Nullable
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
 		if (getCacheMillis() >= 0) {
 			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
@@ -238,6 +240,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
+	@Nullable
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
@@ -287,6 +290,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @see ResourceBundle#getString(String)
 	 * @see ResourceBundle#containsKey(String)
 	 */
+	@Nullable
 	protected String getStringOrNull(ResourceBundle bundle, String key) {
 		if (bundle.containsKey(key)) {
 			try {

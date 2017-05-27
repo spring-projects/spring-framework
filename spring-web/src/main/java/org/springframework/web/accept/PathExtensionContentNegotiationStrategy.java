@@ -19,6 +19,7 @@ package org.springframework.web.accept;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -146,6 +148,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	 * @return the MediaType for the extension, or {@code null} if none found
 	 * @since 4.3
 	 */
+	@Nullable
 	public MediaType getMediaTypeForResource(Resource resource) {
 		Assert.notNull(resource, "Resource must not be null");
 		MediaType mediaType = null;

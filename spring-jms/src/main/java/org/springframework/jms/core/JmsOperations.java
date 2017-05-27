@@ -21,6 +21,7 @@ import javax.jms.Message;
 import javax.jms.Queue;
 
 import org.springframework.jms.JmsException;
+import org.springframework.lang.Nullable;
 
 /**
  * Specifies a basic set of JMS operations.
@@ -202,6 +203,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receive() throws JmsException;
 
 	/**
@@ -213,6 +215,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receive(Destination destination) throws JmsException;
 
 	/**
@@ -225,6 +228,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receive(String destinationName) throws JmsException;
 
 	/**
@@ -238,6 +242,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receiveSelected(String messageSelector) throws JmsException;
 
 	/**
@@ -251,6 +256,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receiveSelected(Destination destination, String messageSelector) throws JmsException;
 
 	/**
@@ -265,6 +271,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
 
 
@@ -282,6 +289,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveAndConvert() throws JmsException;
 
 	/**
@@ -294,6 +302,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveAndConvert(Destination destination) throws JmsException;
 
 	/**
@@ -307,6 +316,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveAndConvert(String destinationName) throws JmsException;
 
 	/**
@@ -321,6 +331,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveSelectedAndConvert(String messageSelector) throws JmsException;
 
 	/**
@@ -335,6 +346,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException;
 
 	/**
@@ -350,6 +362,7 @@ public interface JmsOperations {
 	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
 
 
@@ -369,6 +382,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 * @since 4.1
 	 */
+	@Nullable
 	Message sendAndReceive(MessageCreator messageCreator) throws JmsException;
 
 	/**
@@ -383,6 +397,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 * @since 4.1
 	 */
+	@Nullable
 	Message sendAndReceive(Destination destination, MessageCreator messageCreator) throws JmsException;
 
 	/**
@@ -398,6 +413,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 * @since 4.1
 	 */
+	@Nullable
 	Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException;
 
 

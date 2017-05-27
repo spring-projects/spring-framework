@@ -19,9 +19,11 @@ package org.springframework.web.servlet.tags.form;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -100,7 +102,7 @@ public class TagWriter {
 	 * or zero length.
 	 * @see #writeAttribute(String, String)
 	 */
-	public void writeOptionalAttributeValue(String attributeName, String attributeValue) throws JspException {
+	public void writeOptionalAttributeValue(String attributeName, @Nullable String attributeValue) throws JspException {
 		if (StringUtils.hasText(attributeValue)) {
 			writeAttribute(attributeName, attributeValue);
 		}

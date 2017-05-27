@@ -30,6 +30,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -179,6 +180,7 @@ abstract class SerializableTypeWrapper {
 		 * Return the source of the type, or {@code null} if not known.
 		 * <p>The default implementations returns {@code null}.
 		 */
+		@Nullable
 		default Object getSource() {
 			return null;
 		}

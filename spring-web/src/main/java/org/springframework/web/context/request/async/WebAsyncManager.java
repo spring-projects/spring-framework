@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
@@ -166,6 +168,7 @@ public final class WebAsyncManager {
 	 * @param key the key
 	 * @return the interceptor registered under that key or {@code null}
 	 */
+	@Nullable
 	public CallableProcessingInterceptor getCallableInterceptor(Object key) {
 		return this.callableInterceptors.get(key);
 	}
@@ -175,6 +178,7 @@ public final class WebAsyncManager {
 	 * @param key the key
 	 * @return the interceptor registered under that key or {@code null}
 	 */
+	@Nullable
 	public DeferredResultProcessingInterceptor getDeferredResultInterceptor(Object key) {
 		return this.deferredResultInterceptors.get(key);
 	}

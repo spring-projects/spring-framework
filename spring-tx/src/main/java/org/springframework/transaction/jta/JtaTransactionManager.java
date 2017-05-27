@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
+
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -36,6 +37,7 @@ import javax.transaction.UserTransaction;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -331,6 +333,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA TransactionManager that this transaction manager uses, if any.
 	 */
+	@Nullable
 	public TransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
@@ -383,6 +386,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA 1.1 TransactionSynchronizationRegistry that this transaction manager uses, if any.
 	 */
+	@Nullable
 	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
 		return this.transactionSynchronizationRegistry;
 	}
@@ -632,6 +636,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setUserTransaction
 	 * @see #setUserTransactionName
 	 */
+	@Nullable
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		return null;
 	}
@@ -645,6 +650,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionManager
 	 * @see #setTransactionManagerName
 	 */
+	@Nullable
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
 		return null;
 	}
@@ -657,6 +663,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * or {@code null} if none found
 	 * @throws TransactionSystemException in case of errors
 	 */
+	@Nullable
 	protected TransactionSynchronizationRegistry retrieveTransactionSynchronizationRegistry() throws TransactionSystemException {
 		return null;
 	}
@@ -667,6 +674,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return the JTA UserTransaction reference, or {@code null} if not found
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
 	 */
+	@Nullable
 	protected UserTransaction findUserTransaction() {
 		String jndiName = DEFAULT_USER_TRANSACTION_NAME;
 		try {
@@ -693,6 +701,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return the JTA TransactionManager reference, or {@code null} if not found
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
+	@Nullable
 	protected TransactionManager findTransactionManager(UserTransaction ut) {
 		if (ut instanceof TransactionManager) {
 			if (logger.isDebugEnabled()) {
@@ -732,6 +741,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * or {@code null} if none found
 	 * @throws TransactionSystemException in case of errors
 	 */
+	@Nullable
 	protected TransactionSynchronizationRegistry findTransactionSynchronizationRegistry(UserTransaction ut, TransactionManager tm)
 			throws TransactionSystemException {
 

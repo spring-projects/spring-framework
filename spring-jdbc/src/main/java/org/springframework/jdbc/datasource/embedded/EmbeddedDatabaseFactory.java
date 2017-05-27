@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -234,6 +236,7 @@ public class EmbeddedDatabaseFactory {
 	 * or if the database has been shut down. Subclasses may call this method to
 	 * access the {@code DataSource} instance directly.
 	 */
+	@Nullable
 	protected final DataSource getDataSource() {
 		return this.dataSource;
 	}

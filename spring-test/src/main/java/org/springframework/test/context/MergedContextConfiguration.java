@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -134,9 +135,10 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Generate a null-safe {@link String} representation of the supplied
 	 * {@link ContextLoader} based solely on the fully qualified name of the
-	 * loader or &quot;null&quot; if the supplied loaded is {@code null}.
+	 * loader or &quot;null&quot; if the supplied loader is {@code null}.
 	 */
-	protected static String nullSafeToString(ContextLoader contextLoader) {
+	@Nullable
+	protected static String nullSafeToString(@Nullable ContextLoader contextLoader) {
 		return (contextLoader != null ? contextLoader.getClass().getName() : "null");
 	}
 
@@ -197,7 +199,7 @@ public class MergedContextConfiguration implements Serializable {
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, contextLoader,
 			cacheAwareContextLoaderDelegate, parent);
@@ -238,11 +240,11 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.1
 	 */
-	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
-			MergedContextConfiguration parent) {
+			@Nullable MergedContextConfiguration parent) {
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles,
 				propertySourceLocations, propertySourceProperties,
 				EMPTY_CONTEXT_CUSTOMIZERS, contextLoader,
@@ -273,11 +275,11 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.3
 	 */
-	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
-			Set<ContextCustomizer> contextCustomizers, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
+			@Nullable Set<ContextCustomizer> contextCustomizers, ContextLoader contextLoader,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		this.testClass = testClass;
 		this.locations = processStrings(locations);
@@ -416,6 +418,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @see #getParentApplicationContext()
 	 * @since 3.2.2
 	 */
+	@Nullable
 	public MergedContextConfiguration getParent() {
 		return this.parent;
 	}
@@ -429,6 +432,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @see #getParent()
 	 * @since 3.2.2
 	 */
+	@Nullable
 	public ApplicationContext getParentApplicationContext() {
 		if (this.parent == null) {
 			return null;

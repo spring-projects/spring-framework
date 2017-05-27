@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -116,10 +117,11 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @param targetClass the target class (may be {@code null})
 	 * @return the cache key (never {@code null})
 	 */
-	protected Object getCacheKey(Method method, Class<?> targetClass) {
+	protected Object getCacheKey(Method method, @Nullable Class<?> targetClass) {
 		return new MethodClassKey(method, targetClass);
 	}
 
+	@Nullable
 	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
@@ -168,6 +170,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this method
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
@@ -177,6 +180,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this class
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
 
 	/**

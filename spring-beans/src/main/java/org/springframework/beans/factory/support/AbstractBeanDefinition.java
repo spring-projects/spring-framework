@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -370,6 +371,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
+	@Nullable
 	public Class<?> getBeanClass() throws IllegalStateException {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject == null) {
@@ -674,6 +676,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return a callback for creating an instance of the bean, if any.
 	 * @since 5.0
 	 */
+	@Nullable
 	public Supplier<?> getInstanceSupplier() {
 		return this.instanceSupplier;
 	}
@@ -821,6 +824,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the initializer method.
 	 */
+	@Nullable
 	public String getInitMethodName() {
 		return this.initMethodName;
 	}
@@ -853,6 +857,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the destroy method.
 	 */
+	@Nullable
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
 	}

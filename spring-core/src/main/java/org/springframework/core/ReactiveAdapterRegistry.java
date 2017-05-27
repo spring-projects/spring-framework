@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -120,7 +121,8 @@ public class ReactiveAdapterRegistry {
 	 * @param source an instance of the reactive type
 	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
 	 */
-	public ReactiveAdapter getAdapter(Class<?> reactiveType, Object source) {
+	@Nullable
+	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, Object source) {
 
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);

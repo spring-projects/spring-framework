@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -232,6 +233,7 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
+		@Nullable
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			return null;
 		}

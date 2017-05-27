@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Context information for use by {@link Condition}s.
@@ -34,6 +35,7 @@ public interface ConditionContext {
 	 * should the condition match or {@code null} if the registry is not available.
 	 * @return the registry or {@code null}
 	 */
+	@Nullable
 	BeanDefinitionRegistry getRegistry();
 
 	/**
@@ -42,6 +44,7 @@ public interface ConditionContext {
 	 * is not available.
 	 * @return the bean factory or {@code null}
 	 */
+	@Nullable
 	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
@@ -49,6 +52,7 @@ public interface ConditionContext {
 	 * or {@code null} if no environment is available.
 	 * @return the environment or {@code null}
 	 */
+	@Nullable
 	Environment getEnvironment();
 
 	/**
@@ -56,6 +60,7 @@ public interface ConditionContext {
 	 * if the resource loader cannot be obtained.
 	 * @return a resource loader or {@code null}
 	 */
+	@Nullable
 	ResourceLoader getResourceLoader();
 
 	/**
@@ -63,6 +68,7 @@ public interface ConditionContext {
 	 * classes or {@code null} if the default classloader should be used.
 	 * @return the class loader or {@code null}
 	 */
+	@Nullable
 	ClassLoader getClassLoader();
 
 }

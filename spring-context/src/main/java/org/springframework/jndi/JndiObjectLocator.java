@@ -19,6 +19,7 @@ package org.springframework.jndi;
 import javax.naming.NamingException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -81,6 +82,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Return the type that the located JNDI object is supposed
 	 * to be assignable to, if any.
 	 */
+	@Nullable
 	public Class<?> getExpectedType() {
 		return this.expectedType;
 	}

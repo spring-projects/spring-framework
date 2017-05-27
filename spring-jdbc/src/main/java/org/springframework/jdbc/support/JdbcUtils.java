@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Types;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -61,7 +63,7 @@ public abstract class JdbcUtils {
 	 * This is useful for typical finally blocks in manual JDBC code.
 	 * @param con the JDBC Connection to close (may be {@code null})
 	 */
-	public static void closeConnection(Connection con) {
+	public static void closeConnection(@Nullable Connection con) {
 		if (con != null) {
 			try {
 				con.close();
@@ -81,7 +83,7 @@ public abstract class JdbcUtils {
 	 * This is useful for typical finally blocks in manual JDBC code.
 	 * @param stmt the JDBC Statement to close (may be {@code null})
 	 */
-	public static void closeStatement(Statement stmt) {
+	public static void closeStatement(@Nullable Statement stmt) {
 		if (stmt != null) {
 			try {
 				stmt.close();
@@ -101,7 +103,7 @@ public abstract class JdbcUtils {
 	 * This is useful for typical finally blocks in manual JDBC code.
 	 * @param rs the JDBC ResultSet to close (may be {@code null})
 	 */
-	public static void closeResultSet(ResultSet rs) {
+	public static void closeResultSet(@Nullable ResultSet rs) {
 		if (rs != null) {
 			try {
 				rs.close();
@@ -131,7 +133,7 @@ public abstract class JdbcUtils {
 	 * @throws SQLException if thrown by the JDBC API
 	 * @see #getResultSetValue(ResultSet, int)
 	 */
-	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
+	public static Object getResultSetValue(ResultSet rs, int index, @Nullable Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
 		}

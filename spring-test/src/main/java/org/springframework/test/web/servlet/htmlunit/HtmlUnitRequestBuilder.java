@@ -42,6 +42,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -206,7 +207,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	 * @throws IllegalArgumentException if the contextPath is not a valid
 	 * {@link HttpServletRequest#getContextPath()}
 	 */
-	public void setContextPath(String contextPath) {
+	public void setContextPath(@Nullable String contextPath) {
 		MockMvcWebConnection.validateContextPath(contextPath);
 		this.contextPath = contextPath;
 	}

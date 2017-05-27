@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,6 +67,7 @@ public abstract class AbstractCacheInvoker {
 	 * miss in case of error.
 	 * @see Cache#get(Object)
 	 */
+	@Nullable
 	protected Cache.ValueWrapper doGet(Cache cache, Object key) {
 		try {
 			return cache.get(key);

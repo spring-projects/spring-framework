@@ -39,6 +39,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents the invocation of a constructor. Either a constructor on a regular type or
@@ -178,6 +179,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
+	@Nullable
 	private ConstructorExecutor findExecutorForConstructor(String typeName,
 			List<TypeDescriptor> argumentTypes, ExpressionState state)
 			throws SpelEvaluationException {

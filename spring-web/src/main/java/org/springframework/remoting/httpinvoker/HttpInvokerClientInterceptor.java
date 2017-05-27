@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
@@ -209,6 +210,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @return the RemoteAccessException to throw, or {@code null} to have the
 	 * original exception propagated to the caller
 	 */
+	@Nullable
 	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
 			return new RemoteConnectFailureException(

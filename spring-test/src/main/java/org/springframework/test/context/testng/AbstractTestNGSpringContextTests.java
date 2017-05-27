@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -239,6 +240,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		return testResultException;
 	}
 
+	@Nullable
 	private RuntimeException throwAsUncheckedException(Throwable t) {
 		throwAs(t);
 

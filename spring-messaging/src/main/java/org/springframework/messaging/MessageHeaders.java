@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
@@ -164,24 +165,29 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return (idGenerator != null ? idGenerator : defaultIdGenerator);
 	}
 
+	@Nullable
 	public UUID getId() {
 		return get(ID, UUID.class);
 	}
 
+	@Nullable
 	public Long getTimestamp() {
 		return get(TIMESTAMP, Long.class);
 	}
 
+	@Nullable
 	public Object getReplyChannel() {
 		return get(REPLY_CHANNEL);
 	}
 
+	@Nullable
 	public Object getErrorChannel() {
 		return get(ERROR_CHANNEL);
 	}
 
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T> T get(Object key, Class<T> type) {
 		Object value = this.headers.get(key);
 		if (value == null) {
@@ -209,6 +215,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
+	@Nullable
 	public Object get(Object key) {
 		return this.headers.get(key);
 	}

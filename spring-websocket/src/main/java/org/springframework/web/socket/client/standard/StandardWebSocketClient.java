@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -38,6 +39,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -100,6 +102,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	/**
 	 * The configured user properties, or {@code null}.
 	 */
+	@Nullable
 	public Map<String, Object> getUserProperties() {
 		return this.userProperties;
 	}
@@ -110,7 +113,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default, an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
-	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
+	public void setTaskExecutor(@Nullable AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback that allows a bean to be aware of the bean
  * {@link ClassLoader class loader}; that is, the class loader used by the
@@ -50,6 +52,6 @@ public interface BeanClassLoaderAware extends Aware {
 	 * the {@code ClassLoader} obtained via
 	 * {@link org.springframework.util.ClassUtils#getDefaultClassLoader()}
 	 */
-	void setBeanClassLoader(ClassLoader classLoader);
+	void setBeanClassLoader(@Nullable ClassLoader classLoader);
 
 }

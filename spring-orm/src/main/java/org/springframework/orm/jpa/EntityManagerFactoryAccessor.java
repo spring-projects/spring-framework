@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -29,6 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -85,6 +87,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	/**
 	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
 	 */
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -106,7 +109,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map<String, Object> jpaProperties) {
+	public void setJpaPropertyMap(@Nullable Map<String, Object> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -161,6 +164,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	 * @see EntityManagerFactoryUtils#getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see EntityManagerFactoryUtils#getTransactionalEntityManager(javax.persistence.EntityManagerFactory, java.util.Map)
 	 */
+	@Nullable
 	protected EntityManager getTransactionalEntityManager() throws IllegalStateException{
 		EntityManagerFactory emf = getEntityManagerFactory();
 		Assert.state(emf != null, "No EntityManagerFactory specified");

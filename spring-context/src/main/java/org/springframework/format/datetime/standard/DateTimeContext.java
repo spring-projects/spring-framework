@@ -24,6 +24,7 @@ import java.util.TimeZone;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings
@@ -51,6 +52,7 @@ public class DateTimeContext {
 	/**
 	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
@@ -70,6 +72,7 @@ public class DateTimeContext {
 	/**
 	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public ZoneId getTimeZone() {
 		return this.timeZone;
 	}

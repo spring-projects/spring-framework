@@ -1,4 +1,7 @@
 /**
  * Support for class instrumentation on IBM WebSphere Application Server 7+.
  */
+@NonNullApi
 package org.springframework.instrument.classloading.websphere;
+
+import org.springframework.lang.NonNullApi;

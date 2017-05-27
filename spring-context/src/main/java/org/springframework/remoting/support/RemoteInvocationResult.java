@@ -19,6 +19,8 @@ package org.springframework.remoting.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Encapsulates a remote invocation result, holding a result value or an exception.
  * Used for HTTP-based serialization invokers.
@@ -88,6 +90,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * of the target method, if any.
 	 * @see #hasException
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -108,6 +111,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * of the target method, if any.
 	 * @see #hasException
 	 */
+	@Nullable
 	public Throwable getException() {
 		return this.exception;
 	}
@@ -140,6 +144,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @return the result value, if any
 	 * @throws Throwable the exception, if any
 	 */
+	@Nullable
 	public Object recreate() throws Throwable {
 		if (this.exception != null) {
 			Throwable exToThrow = this.exception;

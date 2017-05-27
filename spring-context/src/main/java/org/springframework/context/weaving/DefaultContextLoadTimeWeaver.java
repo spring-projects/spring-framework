@@ -32,6 +32,7 @@ import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
+import org.springframework.lang.Nullable;
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
@@ -105,6 +106,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	 * of a specific method (addInstanceClassPreProcessor) for any earlier
 	 * versions even though the ClassLoader name is the same.
 	 */
+	@Nullable
 	protected LoadTimeWeaver createServerSpecificLoadTimeWeaver(ClassLoader classLoader) {
 		String name = classLoader.getClass().getName();
 		try {

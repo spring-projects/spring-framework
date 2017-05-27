@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -61,6 +62,7 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 	 * @return the first matching resolver or {@code null}.
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T extends RequestedContentTypeResolver> T findResolver(Class<T> resolverType) {
 		for (RequestedContentTypeResolver resolver : this.resolvers) {
 			if (resolverType.isInstance(resolver)) {

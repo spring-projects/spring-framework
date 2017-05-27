@@ -24,6 +24,7 @@ import java.util.Map;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.core.CollectionFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -87,7 +88,7 @@ public class WebDataBinder extends DataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public WebDataBinder(Object target) {
+	public WebDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -97,7 +98,7 @@ public class WebDataBinder extends DataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebDataBinder(Object target, String objectName) {
+	public WebDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 
@@ -258,7 +259,8 @@ public class WebDataBinder extends DataBinder {
 	 * @param fieldType the type of the field
 	 * @return the empty value (for most fields: null)
 	 */
-	protected Object getEmptyValue(String field, Class<?> fieldType) {
+	@Nullable
+	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
 		if (fieldType != null) {
 			try {
 				if (boolean.class == fieldType || Boolean.class == fieldType) {

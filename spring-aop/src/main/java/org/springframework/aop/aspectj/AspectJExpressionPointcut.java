@@ -56,6 +56,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -382,6 +383,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Get a new pointcut expression based on a target class's loader rather than the default.
 	 */
+	@Nullable
 	private PointcutExpression getFallbackPointcutExpression(Class<?> targetClass) {
 		try {
 			ClassLoader classLoader = targetClass.getClassLoader();

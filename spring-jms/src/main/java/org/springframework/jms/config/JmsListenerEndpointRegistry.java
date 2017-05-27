@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -93,6 +94,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	 * @see JmsListenerEndpoint#getId()
 	 * @see #getListenerContainerIds()
 	 */
+	@Nullable
 	public MessageListenerContainer getListenerContainer(String id) {
 		Assert.notNull(id, "Container identifier must not be null");
 		return this.listenerContainers.get(id);

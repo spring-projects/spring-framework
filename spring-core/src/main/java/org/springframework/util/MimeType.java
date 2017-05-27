@@ -28,6 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in
  * other Internet protocols including HTTP.
@@ -153,7 +155,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
-	public MimeType(MimeType other, Map<String, String> parameters) {
+	public MimeType(MimeType other, @Nullable Map<String, String> parameters) {
 		this(other.getType(), other.getSubtype(), parameters);
 	}
 
@@ -164,7 +166,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
-	public MimeType(String type, String subtype, Map<String, String> parameters) {
+	public MimeType(String type, String subtype, @Nullable Map<String, String> parameters) {
 		Assert.hasLength(type, "'type' must not be empty");
 		Assert.hasLength(subtype, "'subtype' must not be empty");
 		checkToken(type);
@@ -276,6 +278,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return the character set, or {@code null} if not available
 	 * @since 4.3
 	 */
+	@Nullable
 	public Charset getCharset() {
 		String charset = getParameter(PARAM_CHARSET);
 		return (charset != null ? Charset.forName(unquote(charset)) : null);
@@ -286,6 +289,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param name the parameter name
 	 * @return the parameter value, or {@code null} if not present
 	 */
+	@Nullable
 	public String getParameter(String name) {
 		return this.parameters.get(name);
 	}

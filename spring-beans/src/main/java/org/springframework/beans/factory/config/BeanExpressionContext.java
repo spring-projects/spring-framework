@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,6 +52,7 @@ public class BeanExpressionContext {
 				(this.scope != null && this.scope.resolveContextualObject(key) != null));
 	}
 
+	@Nullable
 	public Object getObject(String key) {
 		if (this.beanFactory.containsBean(key)) {
 			return this.beanFactory.getBean(key);

@@ -18,6 +18,7 @@ package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * The root interface for accessing a Spring bean container.
@@ -156,7 +157,7 @@ public interface BeanFactory {
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
 	 */
-	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
+	<T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException;
 
 	/**
 	 * Return the bean instance that uniquely matches the given object type, if any.
@@ -313,6 +314,7 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #isTypeMatch
 	 */
+	@Nullable
 	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
 
 	/**

@@ -23,6 +23,7 @@ import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
@@ -61,6 +62,7 @@ public abstract class Operator extends SpelNodeImpl {
 		return this.children[0];
 	}
 
+	@Nullable
 	public SpelNodeImpl getRightOperand() {
 		return this.children[1];
 	}

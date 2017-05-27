@@ -19,9 +19,11 @@ package org.springframework.jdbc.object;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.Nullable;
 
 /**
  * Reusable RDBMS query in which concrete subclasses must implement
@@ -89,7 +91,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract T mapRow(ResultSet rs, int rowNum, Object[] parameters, Map<?, ?> context)
+	protected abstract T mapRow(ResultSet rs, int rowNum, @Nullable Object[] parameters, @Nullable Map<?, ?> context)
 			throws SQLException;
 
 

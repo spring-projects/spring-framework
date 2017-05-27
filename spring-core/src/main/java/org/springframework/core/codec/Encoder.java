@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -46,7 +47,7 @@ public interface Encoder<T> {
 	 * @param mimeType the MIME type for the output stream, can be {@code null} if not specified.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canEncode(ResolvableType elementType, MimeType mimeType);
+	boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType);
 
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
@@ -63,7 +64,7 @@ public interface Encoder<T> {
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+			ResolvableType elementType, @Nullable MimeType mimeType, Map<String, Object> hints);
 
 	/**
 	 * Return the list of mime types this encoder supports.

@@ -20,6 +20,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
@@ -42,7 +44,8 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	public static byte[] encode(byte[] src) {
+	@Nullable
+	public static byte[] encode(@Nullable byte[] src) {
 		if (src == null || src.length == 0) {
 			return src;
 		}
@@ -56,7 +59,8 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	public static byte[] decode(byte[] src) {
+	@Nullable
+	public static byte[] decode(@Nullable byte[] src) {
 		if (src == null || src.length == 0) {
 			return src;
 		}
@@ -72,7 +76,8 @@ public abstract class Base64Utils {
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
-	public static byte[] encodeUrlSafe(byte[] src) {
+	@Nullable
+	public static byte[] encodeUrlSafe(@Nullable byte[] src) {
 		if (src == null || src.length == 0) {
 			return src;
 		}
@@ -88,7 +93,8 @@ public abstract class Base64Utils {
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
-	public static byte[] decodeUrlSafe(byte[] src) {
+	@Nullable
+	public static byte[] decodeUrlSafe(@Nullable byte[] src) {
 		if (src == null || src.length == 0) {
 			return src;
 		}
@@ -101,7 +107,8 @@ public abstract class Base64Utils {
 	 * @return the encoded byte array as a UTF-8 String
 	 * (or {@code null} if the input was {@code null})
 	 */
-	public static String encodeToString(byte[] src) {
+	@Nullable
+	public static String encodeToString(@Nullable byte[] src) {
 		if (src == null) {
 			return null;
 		}
@@ -116,7 +123,8 @@ public abstract class Base64Utils {
 	 * @param src the encoded UTF-8 String (may be {@code null})
 	 * @return the original byte array (or {@code null} if the input was {@code null})
 	 */
-	public static byte[] decodeFromString(String src) {
+	@Nullable
+	public static byte[] decodeFromString(@Nullable String src) {
 		if (src == null) {
 			return null;
 		}
@@ -135,7 +143,8 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	public static String encodeToUrlSafeString(byte[] src) {
+	@Nullable
+	public static String encodeToUrlSafeString(@Nullable byte[] src) {
 		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
 	}
 
@@ -147,7 +156,8 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	public static byte[] decodeFromUrlSafeString(String src) {
+	@Nullable
+	public static byte[] decodeFromUrlSafeString(@Nullable String src) {
 		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
 	}
 

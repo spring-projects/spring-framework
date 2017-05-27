@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -66,6 +67,7 @@ public class StompDecoder {
 	/**
 	 * Return the configured {@code MessageHeaderInitializer}, if any.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -80,6 +82,7 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
+	@Nullable
 	public List<Message<byte[]>> decode(ByteBuffer byteBuffer) {
 		return decode(byteBuffer, null);
 	}
@@ -285,6 +288,7 @@ public class StompDecoder {
 		return sb.toString();
 	}
 
+	@Nullable
 	private byte[] readPayload(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		Integer contentLength;
 		try {

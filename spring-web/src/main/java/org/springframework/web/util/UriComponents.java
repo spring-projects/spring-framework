@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -65,6 +66,7 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the scheme. Can be {@code null}.
 	 */
+	@Nullable
 	public final String getScheme() {
 		return this.scheme;
 	}
@@ -72,16 +74,19 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the scheme specific part. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getSchemeSpecificPart();
 
 	/**
 	 * Return the user info. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getUserInfo();
 
 	/**
 	 * Return the host. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getHost();
 
 	/**
@@ -92,6 +97,7 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the path. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getPath();
 
 	/**
@@ -102,6 +108,7 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the query. Can be {@code null}.
 	 */
+	@Nullable
 	public abstract String getQuery();
 
 	/**
@@ -112,6 +119,7 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Return the fragment. Can be {@code null}.
 	 */
+	@Nullable
 	public final String getFragment() {
 		return this.fragment;
 	}
@@ -279,7 +287,8 @@ public abstract class UriComponents implements Serializable {
 		 * @param name the variable name
 		 * @return the variable value, possibly {@code null} or {@link #SKIP_VALUE}
 		 */
-		Object getValue(String name);
+		@Nullable
+		Object getValue(@Nullable String name);
 	}
 
 

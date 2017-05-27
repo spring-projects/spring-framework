@@ -18,6 +18,7 @@ package org.springframework.messaging.support;
 
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
 
@@ -57,6 +58,7 @@ public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitial
 	/**
 	 * Return the configured {@code IdGenerator}, if any.
 	 */
+	@Nullable
 	public IdGenerator getIdGenerator() {
 		return this.idGenerator;
 	}

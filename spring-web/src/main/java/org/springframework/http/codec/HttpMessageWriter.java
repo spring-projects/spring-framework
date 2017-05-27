@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy for encoding a stream of objects of type {@code <T>} and writing
@@ -67,7 +68,7 @@ public interface HttpMessageWriter<T> {
 	 * @return indicates completion or error
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints);
+			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints);
 
 	/**
 	 * Server-side only alternative to
@@ -85,7 +86,7 @@ public interface HttpMessageWriter<T> {
 	 * @return a {@link Mono} that indicates completion of writing or error
 	 */
 	default Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		return write(inputStream, elementType, mediaType, response, hints);

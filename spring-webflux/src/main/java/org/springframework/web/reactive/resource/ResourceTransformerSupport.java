@@ -66,7 +66,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param exchange the current exchange
 	 * @param resource the resource being transformed
 	 * @param transformerChain the transformer chain
-	 * @return the resolved URL or null
+	 * @return the resolved URL or an empty {@link Mono}
 	 */
 	protected Mono<String> resolveUrlPath(String resourcePath, ServerWebExchange exchange,
 			Resource resource, ResourceTransformerChain transformerChain) {

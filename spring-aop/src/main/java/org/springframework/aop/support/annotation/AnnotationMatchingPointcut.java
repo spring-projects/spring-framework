@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -69,7 +70,7 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	 * (can be {@code null})
 	 */
 	public AnnotationMatchingPointcut(
-			Class<? extends Annotation> classAnnotationType, Class<? extends Annotation> methodAnnotationType) {
+			@Nullable Class<? extends Annotation> classAnnotationType, @Nullable Class<? extends Annotation> methodAnnotationType) {
 
 		this(classAnnotationType, methodAnnotationType, false);
 	}

@@ -19,6 +19,8 @@ package org.springframework.ui;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Java-5-specific interface that defines a holder for model attributes.
  * Primarily designed for adding attributes to the model.
@@ -34,7 +36,7 @@ public interface Model {
 	 * @param attributeName the name of the model attribute (never {@code null})
 	 * @param attributeValue the model attribute value (can be {@code null})
 	 */
-	Model addAttribute(String attributeName, Object attributeValue);
+	Model addAttribute(String attributeName, @Nullable Object attributeValue);
 
 	/**
 	 * Add the supplied attribute to this {@code Map} using a
@@ -45,7 +47,7 @@ public interface Model {
 	 * than for empty collections as is already done by JSTL tags.</emphasis>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
-	Model addAttribute(Object attributeValue);
+	Model addAttribute(@Nullable Object attributeValue);
 
 	/**
 	 * Copy all attributes in the supplied {@code Collection} into this

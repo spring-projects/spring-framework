@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -41,6 +42,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -370,7 +372,7 @@ public class MockHttpServletRequestBuilder
 	 * @param locale the locale, or {@code null} to reset it
 	 * @see #locale(Locale...)
 	 */
-	public MockHttpServletRequestBuilder locale(Locale locale) {
+	public MockHttpServletRequestBuilder locale(@Nullable Locale locale) {
 		this.locales.clear();
 		if (locale != null) {
 			this.locales.add(locale);

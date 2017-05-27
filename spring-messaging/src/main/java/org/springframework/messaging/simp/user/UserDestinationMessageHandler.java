@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
@@ -253,6 +254,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			return this.broadcastDestination;
 		}
 
+		@Nullable
 		public Message<?> preHandle(Message<?> message) throws MessagingException {
 			String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 			if (!getBroadcastDestination().equals(destination)) {

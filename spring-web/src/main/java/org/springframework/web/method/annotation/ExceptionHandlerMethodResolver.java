@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -124,6 +125,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
+	@Nullable
 	public Method resolveMethod(Exception exception) {
 		return resolveMethodByThrowable(exception);
 	}
@@ -135,6 +137,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 5.0
 	 */
+	@Nullable
 	public Method resolveMethodByThrowable(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
 		if (method == null) {
@@ -152,6 +155,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
+	@Nullable
 	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
@@ -164,6 +168,7 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
+	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {

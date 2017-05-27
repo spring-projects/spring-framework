@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -95,6 +96,7 @@ public class ModelAndViewContainer {
 	 * Return the view name to be resolved by the DispatcherServlet via a
 	 * ViewResolver, or {@code null} if a View object is set.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -111,6 +113,7 @@ public class ModelAndViewContainer {
 	 * Return the View object, or {@code null} if we using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
+	@Nullable
 	public Object getView() {
 		return this.view;
 	}
@@ -219,6 +222,7 @@ public class ModelAndViewContainer {
 	 * Return the configured HTTP status, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public HttpStatus getStatus() {
 		return this.status;
 	}

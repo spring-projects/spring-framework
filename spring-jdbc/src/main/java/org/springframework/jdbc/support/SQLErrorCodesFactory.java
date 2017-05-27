@@ -18,6 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.util.Collections;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
@@ -145,6 +147,7 @@ public class SQLErrorCodesFactory {
 	 * @return the resource, or {@code null} if the resource wasn't found
 	 * @see #getInstance
 	 */
+	@Nullable
 	protected Resource loadResource(String path) {
 		return new ClassPathResource(path, getClass().getClassLoader());
 	}
@@ -255,6 +258,7 @@ public class SQLErrorCodesFactory {
 	 * @since 4.3.5
 	 * @see #registerDatabase(DataSource, String)
 	 */
+	@Nullable
 	public SQLErrorCodes unregisterDatabase(DataSource dataSource) {
 		return this.dataSourceCache.remove(dataSource);
 	}

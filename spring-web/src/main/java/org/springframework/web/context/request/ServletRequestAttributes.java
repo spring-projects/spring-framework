@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -98,6 +99,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	/**
 	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
 	 */
+	@Nullable
 	public final HttpServletResponse getResponse() {
 		return this.response;
 	}

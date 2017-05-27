@@ -61,6 +61,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -224,6 +225,7 @@ public class MBeanClientInterceptor
 	 * Return the management interface of the target MBean,
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	protected final Class<?> getManagementInterface() {
 		return this.managementInterface;
 	}
@@ -460,6 +462,7 @@ public class MBeanClientInterceptor
 		}
 	}
 
+	@Nullable
 	private Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation)
 			throws JMException, IOException {
 
@@ -527,7 +530,8 @@ public class MBeanClientInterceptor
 	 * @return the converted result object, or the passed-in object if no conversion
 	 * is necessary
 	 */
-	protected Object convertResultValueIfNecessary(Object result, MethodParameter parameter) {
+	@Nullable
+	protected Object convertResultValueIfNecessary(@Nullable Object result, MethodParameter parameter) {
 		Class<?> targetClass = parameter.getParameterType();
 		try {
 			if (result == null) {

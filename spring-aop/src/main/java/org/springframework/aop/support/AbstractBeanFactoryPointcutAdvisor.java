@@ -24,6 +24,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,6 +67,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	/**
 	 * Return the name of the advice bean that this advisor refers to, if any.
 	 */
+	@Nullable
 	public String getAdviceBeanName() {
 		return this.adviceBeanName;
 	}

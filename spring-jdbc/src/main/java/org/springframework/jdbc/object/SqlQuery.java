@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -26,6 +27,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
+import org.springframework.lang.Nullable;
 
 /**
  * Reusable operation object representing a SQL query.
@@ -247,6 +249,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#singleResult
 	 */
+	@Nullable
 	public T findObject(Object[] params, Map<?, ?> context) throws DataAccessException {
 		List<T> results = execute(params, context);
 		return DataAccessUtils.singleResult(results);
@@ -357,6 +360,6 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute
 	 */
-	protected abstract RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context);
+	protected abstract RowMapper<T> newRowMapper(@Nullable Object[] parameters, Map<?, ?> context);
 
 }

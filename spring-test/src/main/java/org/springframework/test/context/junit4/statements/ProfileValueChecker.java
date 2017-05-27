@@ -23,6 +23,7 @@ import org.junit.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.util.Assert;
@@ -56,7 +57,7 @@ public class ProfileValueChecker extends Statement {
 	 * @param testMethod the test method to check; may be {@code null} if
 	 * this {@code ProfileValueChecker} is being applied at the class level
 	 */
-	public ProfileValueChecker(Statement next, Class<?> testClass, Method testMethod) {
+	public ProfileValueChecker(Statement next, Class<?> testClass, @Nullable Method testMethod) {
 		Assert.notNull(next, "The next statement must not be null");
 		Assert.notNull(testClass, "The test class must not be null");
 		this.next = next;

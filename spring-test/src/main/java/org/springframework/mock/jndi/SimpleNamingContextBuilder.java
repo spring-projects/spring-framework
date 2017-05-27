@@ -17,6 +17,7 @@
 package org.springframework.mock.jndi;
 
 import java.util.Hashtable;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
@@ -26,6 +27,7 @@ import javax.naming.spi.NamingManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -95,6 +97,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * @return the current SimpleNamingContextBuilder instance,
 	 * or {@code null} if none
 	 */
+	@Nullable
 	public static SimpleNamingContextBuilder getCurrentContextBuilder() {
 		return activated;
 	}

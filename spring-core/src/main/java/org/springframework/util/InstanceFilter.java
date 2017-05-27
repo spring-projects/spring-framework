@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A simple instance filter that checks if a given instance match based on
  * a collection of includes and excludes element.
@@ -101,7 +103,7 @@ public class InstanceFilter<T> {
 	 * @param candidates a list of candidates
 	 * @return {@code true} if the instance match or the candidates collection is null
 	 */
-	protected boolean match(T instance, Collection<? extends T> candidates) {
+	protected boolean match(@Nullable T instance, Collection<? extends T> candidates) {
 		for (T candidate : candidates) {
 			if (match(instance, candidate)) {
 				return true;

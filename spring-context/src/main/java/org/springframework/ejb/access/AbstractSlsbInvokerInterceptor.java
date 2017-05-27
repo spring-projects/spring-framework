@@ -25,6 +25,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.jndi.JndiObjectLocator;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for AOP interceptors invoking local or remote Stateless Session Beans.
@@ -132,6 +133,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @return the create method
 	 * @throws EjbAccessException if the method couldn't be retrieved
 	 */
+	@Nullable
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		try {
 			// Cache the EJB create() method that must be declared on the home interface.
@@ -201,6 +203,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
+	@Nullable
 	protected abstract Object invokeInContext(MethodInvocation invocation) throws Throwable;
 
 

@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -176,7 +177,7 @@ public abstract class ProfileValueUtils {
 	 * {@code null}
 	 */
 	private static boolean isTestEnabledInThisEnvironment(ProfileValueSource profileValueSource,
-			IfProfileValue ifProfileValue) {
+			@Nullable IfProfileValue ifProfileValue) {
 
 		if (ifProfileValue == null) {
 			return true;

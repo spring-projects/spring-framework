@@ -23,6 +23,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -187,7 +188,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable Object... constructorArguments) {
 		registerBean(null, annotatedClass, constructorArguments);
 	}
 
@@ -203,7 +204,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public <T> void registerBean(String beanName, Class<T> annotatedClass, Object... constructorArguments) {
+	public <T> void registerBean(@Nullable String beanName, Class<T> annotatedClass, @Nullable Object... constructorArguments) {
 		this.reader.doRegisterBean(annotatedClass, null, beanName, null,
 				bd -> {
 					for (Object arg : constructorArguments) {

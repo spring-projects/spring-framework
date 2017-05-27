@@ -23,6 +23,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -337,6 +338,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
+	@Nullable
 	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) throws BeansException;
 
 	/**
@@ -353,6 +355,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see DependencyDescriptor
 	 */
+	@Nullable
 	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
 

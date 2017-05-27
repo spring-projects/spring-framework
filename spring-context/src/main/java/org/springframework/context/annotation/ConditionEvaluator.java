@@ -31,6 +31,7 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -141,6 +142,7 @@ class ConditionEvaluator {
 			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));
 		}
 
+		@Nullable
 		private ConfigurableListableBeanFactory deduceBeanFactory(BeanDefinitionRegistry source) {
 			if (source instanceof ConfigurableListableBeanFactory) {
 				return (ConfigurableListableBeanFactory) source;
@@ -151,6 +153,7 @@ class ConditionEvaluator {
 			return null;
 		}
 
+		@Nullable
 		private Environment deduceEnvironment(BeanDefinitionRegistry source) {
 			if (source instanceof EnvironmentCapable) {
 				return ((EnvironmentCapable) source).getEnvironment();
@@ -158,6 +161,7 @@ class ConditionEvaluator {
 			return null;
 		}
 
+		@Nullable
 		private ResourceLoader deduceResourceLoader(BeanDefinitionRegistry source) {
 			if (source instanceof ResourceLoader) {
 				return (ResourceLoader) source;

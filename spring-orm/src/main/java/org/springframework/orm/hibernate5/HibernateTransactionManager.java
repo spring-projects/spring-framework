@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -41,6 +42,7 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -313,6 +315,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see #setEntityInterceptorBeanName
 	 * @see #setBeanFactory
 	 */
+	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor) {
 			return (Interceptor) entityInterceptor;

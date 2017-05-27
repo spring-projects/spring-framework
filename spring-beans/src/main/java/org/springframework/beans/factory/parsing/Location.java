@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,7 +54,7 @@ public class Location {
 	 * @param source the actual location within the associated resource
 	 * (may be {@code null})
 	 */
-	public Location(Resource resource, Object source) {
+	public Location(Resource resource, @Nullable Object source) {
 		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
 		this.source = source;
@@ -73,6 +74,7 @@ public class Location {
 	 * <p>See the {@link Location class level javadoc for this class} for examples
 	 * of what the actual type of the returned object may be.
 	 */
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

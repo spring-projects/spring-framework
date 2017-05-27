@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -105,6 +106,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isSynchronizationActive()
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
 	 */
+	@Nullable
 	protected static TransactionInfo currentTransactionInfo() throws NoTransactionException {
 		return transactionInfoHolder.get();
 	}
@@ -167,6 +169,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Return the default transaction manager, or {@code null} if unknown.
 	 */
+	@Nullable
 	public PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
@@ -264,6 +267,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return the return value of the method, if any
 	 * @throws Throwable propagated from the target invocation
 	 */
+	@Nullable
 	protected Object invokeWithinTransaction(Method method, Class<?> targetClass, final InvocationCallback invocation)
 			throws Throwable {
 
@@ -411,6 +415,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return a String representation identifying this method
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
+	@Nullable
 	protected String methodIdentification(Method method, Class<?> targetClass) {
 		return null;
 	}
@@ -429,7 +434,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	@SuppressWarnings("serial")
 	protected TransactionInfo createTransactionIfNecessary(
-			PlatformTransactionManager tm, TransactionAttribute txAttr, final String joinpointIdentification) {
+			PlatformTransactionManager tm, @Nullable TransactionAttribute txAttr, final String joinpointIdentification) {
 
 		// If no name specified, apply method identification as transaction name.
 		if (txAttr != null && txAttr.getName() == null) {
@@ -465,7 +470,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @return the prepared TransactionInfo object
 	 */
 	protected TransactionInfo prepareTransactionInfo(PlatformTransactionManager tm,
-			TransactionAttribute txAttr, String joinpointIdentification, TransactionStatus status) {
+			@Nullable TransactionAttribute txAttr, String joinpointIdentification, TransactionStatus status) {
 
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
@@ -563,7 +568,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * <p>Call this in all cases: exception or normal return!
 	 * @param txInfo information about the current transaction (may be {@code null})
 	 */
-	protected void cleanupTransactionInfo(TransactionInfo txInfo) {
+	protected void cleanupTransactionInfo(@Nullable TransactionInfo txInfo) {
 		if (txInfo != null) {
 			txInfo.restoreThreadLocalStatus();
 		}

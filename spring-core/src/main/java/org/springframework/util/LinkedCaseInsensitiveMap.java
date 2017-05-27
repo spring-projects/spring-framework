@@ -24,6 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link LinkedHashMap} variant that stores String keys in a case-insensitive
  * manner, for example for key-based access in a results table.
@@ -134,6 +136,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 	@Override
+	@Nullable
 	public V get(Object key) {
 		if (key instanceof String) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
@@ -173,6 +176,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 	@Override
+	@Nullable
 	public V remove(Object key) {
 		if (key instanceof String) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.remove(convertKey((String) key));

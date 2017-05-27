@@ -27,6 +27,7 @@ import org.quartz.spi.ClassLoadHelper;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Wrapper that adapts from the Quartz {@link ClassLoadHelper} interface
@@ -82,6 +83,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
+	@Nullable
 	public URL getResource(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {
@@ -101,6 +103,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
+	@Nullable
 	public InputStream getResourceAsStream(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {

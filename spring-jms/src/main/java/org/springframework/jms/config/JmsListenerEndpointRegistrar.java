@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
@@ -65,6 +66,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * Return the {@link JmsListenerEndpointRegistry} instance for this
 	 * registrar, may be {@code null}.
 	 */
+	@Nullable
 	public JmsListenerEndpointRegistry getEndpointRegistry() {
 		return this.endpointRegistry;
 	}
@@ -84,6 +86,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	/**
 	 * Return the custom {@link MessageHandlerMethodFactory} to use, if any.
 	 */
+	@Nullable
 	public MessageHandlerMethodFactory getMessageHandlerMethodFactory() {
 		return this.messageHandlerMethodFactory;
 	}
@@ -164,7 +167,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * <p>The {@code factory} may be {@code null} if the default factory has to be
 	 * used for that endpoint.
 	 */
-	public void registerEndpoint(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
+	public void registerEndpoint(JmsListenerEndpoint endpoint, @Nullable JmsListenerContainerFactory<?> factory) {
 		Assert.notNull(endpoint, "Endpoint must be set");
 		Assert.hasText(endpoint.getId(), "Endpoint id must be set");
 

@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -85,7 +86,7 @@ public abstract class SpringFactoriesLoader {
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
 	 */
-	public static <T> List<T> loadFactories(Class<T> factoryClass, ClassLoader classLoader) {
+	public static <T> List<T> loadFactories(Class<T> factoryClass, @Nullable ClassLoader classLoader) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
 		ClassLoader classLoaderToUse = classLoader;
 		if (classLoaderToUse == null) {
@@ -113,7 +114,7 @@ public abstract class SpringFactoriesLoader {
 	 * @see #loadFactories
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
 	 */
-	public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader classLoader) {
+	public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
 		return loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
 	}

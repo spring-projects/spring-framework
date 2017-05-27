@@ -44,6 +44,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
@@ -489,6 +490,7 @@ public class MvcUriComponentsBuilder {
 		});
 	}
 
+	@Nullable
 	private static CompositeUriComponentsContributor getConfiguredUriComponentsContributor() {
 		WebApplicationContext wac = getWebApplicationContext();
 		if (wac == null) {

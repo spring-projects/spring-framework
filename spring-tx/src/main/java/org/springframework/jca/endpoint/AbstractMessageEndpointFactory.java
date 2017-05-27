@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.SimpleTransactionFactory;
 import org.springframework.transaction.jta.TransactionFactory;
 
@@ -135,6 +136,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * @see #setBeanName
 	 */
 	@Override
+	@Nullable
 	public String getActivationName() {
 		return this.beanName;
 	}
@@ -144,6 +146,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * returning {@code} null in order to indicate a synthetic endpoint type.
 	 */
 	@Override
+	@Nullable
 	public Class<?> getEndpointClass() {
 		return null;
 	}

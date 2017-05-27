@@ -18,9 +18,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -39,7 +41,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(Object target) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -50,7 +52,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * @param objectName the name of the target object
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(Object target, String objectName) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

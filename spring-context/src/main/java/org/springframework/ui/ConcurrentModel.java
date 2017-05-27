@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,7 +70,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 * @param attributeName the name of the model attribute (never {@code null})
 	 * @param attributeValue the model attribute value (can be {@code null})
 	 */
-	public ConcurrentModel addAttribute(String attributeName, Object attributeValue) {
+	public ConcurrentModel addAttribute(String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
 		put(attributeName, attributeValue);
 		return this;

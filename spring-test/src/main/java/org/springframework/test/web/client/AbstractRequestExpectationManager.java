@@ -27,6 +27,7 @@ import java.util.Set;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -172,6 +173,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			}
 		}
 
+		@Nullable
 		public RequestExpectation findExpectation(ClientHttpRequest request) throws IOException {
 			for (RequestExpectation expectation : getExpectations()) {
 				try {

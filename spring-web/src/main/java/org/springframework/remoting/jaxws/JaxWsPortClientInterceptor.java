@@ -37,6 +37,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -112,6 +113,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return a reference to an existing JAX-WS Service instance, if any.
 	 */
+	@Nullable
 	public Service getJaxWsService() {
 		return this.jaxWsService;
 	}
@@ -491,6 +493,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #getPortStub()
 	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, Object)
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation, getPortStub());
@@ -516,6 +519,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @throws Throwable in case of invocation failure
 	 * @see #getPortStub()
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation, Object portStub) throws Throwable {
 		Method method = invocation.getMethod();
 		try {

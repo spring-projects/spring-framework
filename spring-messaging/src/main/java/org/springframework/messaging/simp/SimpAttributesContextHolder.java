@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp;
 
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 
@@ -66,6 +67,7 @@ public abstract class SimpAttributesContextHolder {
 	 * Return the SimpAttributes currently bound to the thread.
 	 * @return the attributes or {@code null} if not bound
 	 */
+	@Nullable
 	public static SimpAttributes getAttributes() {
 		return attributesHolder.get();
 	}

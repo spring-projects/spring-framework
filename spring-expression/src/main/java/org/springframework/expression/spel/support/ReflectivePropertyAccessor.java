@@ -40,6 +40,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -367,6 +368,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				"set", clazz, mustBeStatic, 1, ANY_TYPES);
 	}
 
+	@Nullable
 	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 
@@ -427,6 +429,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a field of a certain name on a specified class.
 	 */
+	@Nullable
 	protected Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {

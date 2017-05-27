@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 
@@ -96,7 +97,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
 	 */
-	public ModelAndView(String viewName, Map<String, ?> model) {
+	public ModelAndView(String viewName, @Nullable Map<String, ?> model) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -113,7 +114,7 @@ public class ModelAndView {
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
 	 */
-	public ModelAndView(View view, Map<String, ?> model) {
+	public ModelAndView(View view, @Nullable Map<String, ?> model) {
 		this.view = view;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -144,7 +145,7 @@ public class ModelAndView {
 	 * (to be set just prior to View rendering)
 	 * @since 4.3
 	 */
-	public ModelAndView(String viewName, Map<String, ?> model, HttpStatus status) {
+	public ModelAndView(String viewName, @Nullable Map<String, ?> model, HttpStatus status) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -189,6 +190,7 @@ public class ModelAndView {
 	 * Return the view name to be resolved by the DispatcherServlet
 	 * via a ViewResolver, or {@code null} if we are using a View object.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -205,6 +207,7 @@ public class ModelAndView {
 	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
+	@Nullable
 	public View getView() {
 		return (this.view instanceof View ? (View) this.view : null);
 	}
@@ -230,6 +233,7 @@ public class ModelAndView {
 	 * Return the model map. May return {@code null}.
 	 * Called by DispatcherServlet for evaluation of the model.
 	 */
+	@Nullable
 	protected Map<String, Object> getModelInternal() {
 		return this.model;
 	}
@@ -265,6 +269,7 @@ public class ModelAndView {
 	 * Return the configured HTTP status for the response, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public HttpStatus getStatus() {
 		return this.status;
 	}

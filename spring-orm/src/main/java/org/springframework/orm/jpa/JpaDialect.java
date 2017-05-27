@@ -17,11 +17,13 @@
 package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
@@ -78,6 +80,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see javax.persistence.EntityTransaction#begin
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
 	 */
+	@Nullable
 	Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException;
 
@@ -100,6 +103,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @see #cleanupTransaction
 	 */
+	@Nullable
 	Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
 			throws PersistenceException;
 
@@ -114,7 +118,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see #beginTransaction
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
 	 */
-	void cleanupTransaction(Object transactionData);
+	void cleanupTransaction(@Nullable Object transactionData);
 
 	/**
 	 * Retrieve the JDBC Connection that the given JPA EntityManager uses underneath,
@@ -146,6 +150,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see org.springframework.jdbc.datasource.SimpleConnectionHandle
 	 * @see JpaTransactionManager#setDataSource
 	 */
+	@Nullable
 	ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException;
 

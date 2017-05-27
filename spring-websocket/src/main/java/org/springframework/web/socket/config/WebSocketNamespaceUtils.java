@@ -27,6 +27,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -61,6 +62,7 @@ class WebSocketNamespaceUtils {
 		return handlerRef;
 	}
 
+	@Nullable
 	public static RuntimeBeanReference registerSockJsService(Element element, String schedulerName,
 			ParserContext context, Object source) {
 

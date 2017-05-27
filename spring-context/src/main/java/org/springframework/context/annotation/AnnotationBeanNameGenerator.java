@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -82,6 +83,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @param annotatedDef the annotation-aware bean definition
 	 * @return the bean name, or {@code null} if none is found
 	 */
+	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata amd = annotatedDef.getMetadata();
 		Set<String> types = amd.getAnnotationTypes();
@@ -131,6 +133,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @param registry the registry that the given bean definition is being registered with
 	 * @return the default bean name (never {@code null})
 	 */
+	@Nullable
 	protected String buildDefaultBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		return buildDefaultBeanName(definition);
 	}
@@ -145,6 +148,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @param definition the bean definition to build a bean name for
 	 * @return the default bean name (never {@code null})
 	 */
+	@Nullable
 	protected String buildDefaultBeanName(BeanDefinition definition) {
 		String shortClassName = ClassUtils.getShortName(definition.getBeanClassName());
 		return Introspector.decapitalize(shortClassName);

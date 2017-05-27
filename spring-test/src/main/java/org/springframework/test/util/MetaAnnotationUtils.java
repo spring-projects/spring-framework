@@ -24,6 +24,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -80,6 +81,7 @@ public abstract class MetaAnnotationUtils {
 	 * @see AnnotationUtils#findAnnotationDeclaringClass(Class, Class)
 	 * @see #findAnnotationDescriptorForTypes(Class, Class...)
 	 */
+	@Nullable
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
@@ -96,6 +98,7 @@ public abstract class MetaAnnotationUtils {
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
+	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
@@ -165,6 +168,7 @@ public abstract class MetaAnnotationUtils {
 	 * @see #findAnnotationDescriptor(Class, Class)
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
@@ -182,6 +186,7 @@ public abstract class MetaAnnotationUtils {
 	 * was found; otherwise {@code null}
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
 			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 

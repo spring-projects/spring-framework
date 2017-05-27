@@ -53,6 +53,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.ClassUtils;
@@ -557,7 +558,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the generated proxy
 	 * @see RefreshableScriptTargetSource
 	 */
-	protected Object createRefreshableProxy(TargetSource ts, Class<?>[] interfaces, boolean proxyTargetClass) {
+	protected Object createRefreshableProxy(TargetSource ts, @Nullable Class<?>[] interfaces, boolean proxyTargetClass) {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(ts);
 		ClassLoader classLoader = this.beanClassLoader;

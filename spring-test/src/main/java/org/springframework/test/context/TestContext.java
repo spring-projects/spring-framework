@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 
 /**
@@ -64,6 +65,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the current test instance (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
+	@Nullable
 	Object getTestInstance();
 
 	/**
@@ -72,6 +74,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the current test method (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
+	@Nullable
 	Method getTestMethod();
 
 	/**
@@ -82,6 +85,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
 	 */
+	@Nullable
 	Throwable getTestException();
 
 	/**
@@ -94,7 +98,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @param hierarchyMode the context cache clearing mode to be applied if the
 	 * context is part of a hierarchy (may be {@code null})
 	 */
-	void markApplicationContextDirty(HierarchyMode hierarchyMode);
+	void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode);
 
 	/**
 	 * Update this test context to reflect the state of the currently executing
@@ -106,6 +110,6 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @param testException the exception that was thrown in the test method, or
 	 * {@code null} if no exception was thrown
 	 */
-	void updateState(Object testInstance, Method testMethod, Throwable testException);
+	void updateState(@Nullable Object testInstance, @Nullable Method testMethod, @Nullable Throwable testException);
 
 }

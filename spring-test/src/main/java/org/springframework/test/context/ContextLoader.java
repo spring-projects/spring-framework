@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for loading an {@link ApplicationContext application context}
@@ -59,7 +60,7 @@ public interface ContextLoader {
 	 * application context (can be {@code null} or empty)
 	 * @return an array of application context resource locations
 	 */
-	String[] processLocations(Class<?> clazz, String... locations);
+	String[] processLocations(Class<?> clazz, @Nullable String... locations);
 
 	/**
 	 * Loads a new {@link ApplicationContext context} based on the supplied

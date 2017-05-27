@@ -17,6 +17,7 @@
 package org.springframework.beans;
 
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that encapsulates configuration methods for a PropertyAccessor.
@@ -41,6 +42,7 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	/**
 	 * Return the associated ConversionService, if any.
 	 */
+	@Nullable
 	ConversionService getConversionService();
 
 	/**

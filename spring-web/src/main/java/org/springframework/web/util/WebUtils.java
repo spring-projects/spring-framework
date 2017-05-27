@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -191,6 +193,7 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled for the given application
 	 * ({@code null} = no explicit default)
 	 */
+	@Nullable
 	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
@@ -213,6 +216,7 @@ public abstract class WebUtils {
 	 * ({@code null} = no explicit default)
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
@@ -265,6 +269,7 @@ public abstract class WebUtils {
 	 * @param request current HTTP request
 	 * @return the session id, or {@code null} if none
 	 */
+	@Nullable
 	public static String getSessionId(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
@@ -279,6 +284,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute, or {@code null} if not found
 	 */
+	@Nullable
 	public static Object getSessionAttribute(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
@@ -294,6 +300,7 @@ public abstract class WebUtils {
 	 * @return the value of the session attribute, or {@code null} if not found
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
+	@Nullable
 	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
 			throws IllegalStateException {
 
@@ -364,6 +371,7 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <T> T getNativeRequest(ServletRequest request, Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(request)) {
@@ -385,6 +393,7 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <T> T getNativeResponse(ServletResponse response, Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(response)) {
@@ -476,6 +485,7 @@ public abstract class WebUtils {
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or {@code null} if none is found
 	 */
+	@Nullable
 	public static Cookie getCookie(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
 		Cookie cookies[] = request.getCookies();
@@ -520,6 +530,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
+	@Nullable
 	public static String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}
@@ -547,6 +558,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
+	@Nullable
 	public static String findParameterValue(Map<String, ?> parameters, String name) {
 		// First try to get it as a normal name=value parameter
 		Object value = parameters.get(name);

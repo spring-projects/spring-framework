@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -233,6 +234,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Extract and return the CORS configuration for the mapping.
 	 */
+	@Nullable
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, T mapping) {
 		return null;
 	}
@@ -293,6 +295,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handleMatch(Object, String,  ServerWebExchange)
 	 * @see #handleNoMatch(Set, String, ServerWebExchange)
 	 */
+	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
@@ -360,6 +363,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @return an alternative HandlerMethod or {@code null}
 	 * @throws Exception provides details that can be translated into an error status code
 	 */
+	@Nullable
 	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
@@ -398,6 +402,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
+	@Nullable
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
@@ -412,6 +417,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 * @return the match, or {@code null} if the mapping doesn't match
 	 */
+	@Nullable
 	protected abstract T getMatchingMapping(T mapping, ServerWebExchange exchange);
 
 	/**
@@ -420,6 +426,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 * @return the comparator (never {@code null})
 	 */
+	@Nullable
 	protected abstract Comparator<T> getMappingComparator(ServerWebExchange exchange);
 
 

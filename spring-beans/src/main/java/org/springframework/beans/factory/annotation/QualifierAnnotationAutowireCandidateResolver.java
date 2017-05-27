@@ -36,6 +36,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -341,6 +342,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	/**
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
+	@Nullable
 	protected Object findValue(Annotation[] annotationsToSearch) {
 		AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
 				AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);

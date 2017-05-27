@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -740,7 +741,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #setContentDisposition(ContentDisposition)
 	 * @see #getContentDisposition()
 	 */
-	public void setContentDispositionFormData(String name, String filename) {
+	public void setContentDispositionFormData(String name, @Nullable String filename) {
 		setContentDispositionFormData(name, filename, null);
 	}
 
@@ -756,7 +757,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #getContentDisposition()
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
 	 */
-	public void setContentDispositionFormData(String name, String filename, Charset charset) {
+	public void setContentDispositionFormData(String name, @Nullable String filename, @Nullable Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
 		ContentDisposition disposition = ContentDisposition.builder("form-data")
 				.name(name).filename(filename, charset).build();
@@ -811,6 +812,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * to get multiple content languages.</p>
 	 * @since 5.0
 	 */
+	@Nullable
 	public Locale getContentLanguage() {
 		return getValuesAsList(CONTENT_LANGUAGE)
 				.stream()
@@ -852,6 +854,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * by the {@code Content-Type} header.
 	 * <p>Returns {@code null} when the content-type is unknown.
 	 */
+	@Nullable
 	public MediaType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MediaType.parseMediaType(value) : null);
@@ -936,6 +939,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
 	 * @since 5.0
 	 */
+	@Nullable
 	public InetSocketAddress getHost() {
 		String value = getFirst(HOST);
 		if (value == null) {
@@ -1076,6 +1080,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Location} header.
 	 * <p>Returns {@code null} when the location is unknown.
 	 */
+	@Nullable
 	public URI getLocation() {
 		String value = getFirst(LOCATION);
 		return (value != null ? URI.create(value) : null);

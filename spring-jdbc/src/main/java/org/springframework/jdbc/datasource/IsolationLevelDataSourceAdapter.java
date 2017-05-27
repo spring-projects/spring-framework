@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -111,6 +112,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * Return the statically specified isolation level,
 	 * or {@code null} if none.
 	 */
+	@Nullable
 	protected Integer getIsolationLevel() {
 		return this.isolationLevel;
 	}
@@ -143,6 +145,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()
 	 * @see #setIsolationLevel
 	 */
+	@Nullable
 	protected Integer getCurrentIsolationLevel() {
 		Integer isolationLevelToUse = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 		if (isolationLevelToUse == null) {

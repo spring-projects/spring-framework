@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -152,6 +153,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 		private int receiveInterceptorIndex = -1;
 
+		@Nullable
 		public Message<?> applyPreSend(Message<?> message, MessageChannel channel) {
 			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
@@ -199,6 +201,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			return true;
 		}
 
+		@Nullable
 		public Message<?> applyPostReceive(Message<?> message, MessageChannel channel) {
 			for (ChannelInterceptor interceptor : interceptors) {
 				message = interceptor.postReceive(message, channel);

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -89,6 +90,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
 	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
+	@Nullable
 	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
 	}
@@ -118,7 +120,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * Typically called by an aspect, for all bean instances matched by a pointcut.
 	 * @param beanInstance the bean instance to configure (must <b>not</b> be {@code null})
 	 */
-	public void configureBean(Object beanInstance) {
+	public void configureBean(@Nullable Object beanInstance) {
 		if (this.beanFactory == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +

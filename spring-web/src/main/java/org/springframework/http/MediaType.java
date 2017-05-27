@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
@@ -380,7 +381,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
-	public MediaType(MediaType other, Map<String, String> parameters) {
+	public MediaType(MediaType other, @Nullable Map<String, String> parameters) {
 		super(other.getType(), other.getSubtype(), parameters);
 	}
 
@@ -391,7 +392,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
-	public MediaType(String type, String subtype, Map<String, String> parameters) {
+	public MediaType(String type, String subtype, @Nullable Map<String, String> parameters) {
 		super(type, subtype, parameters);
 	}
 

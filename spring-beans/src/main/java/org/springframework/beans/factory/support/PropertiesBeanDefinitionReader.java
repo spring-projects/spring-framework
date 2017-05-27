@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -217,7 +218,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(Resource resource, String prefix) throws BeanDefinitionStoreException {
+	public int loadBeanDefinitions(Resource resource, @Nullable String prefix) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource), prefix);
 	}
 
@@ -241,7 +242,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(EncodedResource encodedResource, String prefix)
+	public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
 			throws BeanDefinitionStoreException {
 
 		Properties props = new Properties();
@@ -287,7 +288,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
+	public int registerBeanDefinitions(ResourceBundle rb, @Nullable String prefix) throws BeanDefinitionStoreException {
 		// Simply create a map and call overloaded method.
 		Map<String, Object> map = new HashMap<>();
 		Enumeration<String> keys = rb.getKeys();
@@ -324,7 +325,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public int registerBeanDefinitions(Map<?, ?> map, String prefix) throws BeansException {
+	public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix) throws BeansException {
 		return registerBeanDefinitions(map, prefix, "Map " + map);
 	}
 
@@ -342,7 +343,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(Map, String)
 	 */
-	public int registerBeanDefinitions(Map<?, ?> map, String prefix, String resourceDescription)
+	public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, String resourceDescription)
 			throws BeansException {
 
 		if (prefix == null) {

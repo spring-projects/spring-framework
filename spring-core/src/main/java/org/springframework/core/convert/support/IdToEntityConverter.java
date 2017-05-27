@@ -24,6 +24,7 @@ import java.util.Set;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -71,7 +72,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 		return ReflectionUtils.invokeMethod(finder, source, id);
 	}
 
-
+	@Nullable
 	private Method getFinder(Class<?> entityClass) {
 		String finderMethod = "find" + getEntityName(entityClass);
 		Method[] methods;

@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,7 +70,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * Create a new MapSqlParameterSource based on a Map.
 	 * @param values a Map holding existing parameter values (can be {@code null})
 	 */
-	public MapSqlParameterSource(Map<String, ?> values) {
+	public MapSqlParameterSource(@Nullable Map<String, ?> values) {
 		addValues(values);
 	}
 
@@ -128,7 +129,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValues(Map<String, ?> values) {
+	public MapSqlParameterSource addValues(@Nullable Map<String, ?> values) {
 		if (values != null) {
 			for (Map.Entry<String, ?> entry : values.entrySet()) {
 				this.values.put(entry.getKey(), entry.getValue());

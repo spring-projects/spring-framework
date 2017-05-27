@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -40,6 +41,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException;
 
 	/**
@@ -54,6 +56,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
 			throws MessagingException;
 
@@ -70,6 +73,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
 			Class<T> targetClass) throws MessagingException;
 
@@ -87,6 +91,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request,
 			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
 
@@ -105,6 +110,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
 			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
 

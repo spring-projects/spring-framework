@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.resource;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A strategy for extracting and embedding a resource version in its URL path.
  *
@@ -30,6 +32,7 @@ public interface VersionPathStrategy {
 	 * @param requestPath the request path to check
 	 * @return the version string or {@code null} if none was found
 	 */
+	@Nullable
 	String extractVersion(String requestPath);
 
 	/**

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -57,7 +58,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] includePatterns, HandlerInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, HandlerInterceptor interceptor) {
 		this(includePatterns, null, interceptor);
 	}
 
@@ -67,7 +68,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param excludePatterns the path patterns to exclude
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {
 		this.includePatterns = includePatterns;
 		this.excludePatterns = excludePatterns;
 		this.interceptor = interceptor;
@@ -79,7 +80,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] includePatterns, WebRequestInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, WebRequestInterceptor interceptor) {
 		this(includePatterns, null, interceptor);
 	}
 
@@ -88,7 +89,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, WebRequestInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, String[] excludePatterns, WebRequestInterceptor interceptor) {
 		this(includePatterns, excludePatterns, new WebRequestHandlerInterceptorAdapter(interceptor));
 	}
 
@@ -109,6 +110,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	/**
 	 * The configured PathMatcher, or {@code null}.
 	 */
+	@Nullable
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}

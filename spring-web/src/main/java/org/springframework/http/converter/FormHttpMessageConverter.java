@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
@@ -38,6 +39,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
@@ -431,6 +433,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * @param part the part to determine the file name for
 	 * @return the filename, or {@code null} if not known
 	 */
+	@Nullable
 	protected String getFilename(Object part) {
 		if (part instanceof Resource) {
 			Resource resource = (Resource) part;

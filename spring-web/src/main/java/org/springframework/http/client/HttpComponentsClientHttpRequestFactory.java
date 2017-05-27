@@ -38,6 +38,7 @@ import org.apache.http.protocol.HttpContext;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -204,6 +205,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @since 4.2
 	 * @see #mergeRequestConfig(RequestConfig)
 	 */
+	@Nullable
 	protected RequestConfig createRequestConfig(Object client) {
 		if (client instanceof Configurable) {
 			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
@@ -220,7 +222,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * (may be {@code null} if the given client config is {@code null})
 	 * @since 4.2
 	 */
-	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
+	@Nullable
+	protected RequestConfig mergeRequestConfig(@Nullable RequestConfig clientConfig) {
 		if (this.requestConfig == null) {  // nothing to merge
 			return clientConfig;
 		}
@@ -286,6 +289,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @param uri the URI
 	 * @return the http context
 	 */
+	@Nullable
 	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
 		return null;
 	}

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface responsible for creating instances corresponding to a root bean definition.
@@ -44,7 +45,7 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner)
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner)
 			throws BeansException;
 
 	/**
@@ -60,7 +61,7 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
 			Constructor<?> ctor, Object... args) throws BeansException;
 
 	/**
@@ -78,7 +79,7 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
-			Object factoryBean, Method factoryMethod, Object... args) throws BeansException;
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
+			@Nullable Object factoryBean, Method factoryMethod, Object... args) throws BeansException;
 
 }

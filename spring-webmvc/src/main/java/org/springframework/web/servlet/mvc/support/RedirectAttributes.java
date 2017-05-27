@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.support;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.FlashMap;
 
@@ -76,7 +77,7 @@ public interface RedirectAttributes extends Model {
 	 * @param attributeName the attribute name; never {@code null}
 	 * @param attributeValue the attribute value; may be {@code null}
 	 */
-	RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue);
+	RedirectAttributes addFlashAttribute(String attributeName, @Nullable Object attributeValue);
 
 	/**
 	 * Add the given flash storage using a

@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
+import org.springframework.lang.Nullable;
 
 /**
  * Operation object representing a SQL-based operation such as a query or update,
@@ -91,7 +92,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+	protected final PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
 
@@ -100,7 +101,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 
@@ -111,7 +112,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}
 

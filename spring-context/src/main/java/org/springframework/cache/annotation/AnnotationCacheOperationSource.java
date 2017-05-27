@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource;
 import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -135,6 +136,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	 * @param provider the cache operation provider to use
 	 * @return the configured caching operations, or {@code null} if none found
 	 */
+	@Nullable
 	protected Collection<CacheOperation> determineCacheOperations(CacheOperationProvider provider) {
 		Collection<CacheOperation> ops = null;
 		for (CacheAnnotationParser annotationParser : this.annotationParsers) {
@@ -189,6 +191,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		 * @param parser the parser to use
 		 * @return the cache operations, or {@code null} if none found
 		 */
+		@Nullable
 		Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
 	}
 

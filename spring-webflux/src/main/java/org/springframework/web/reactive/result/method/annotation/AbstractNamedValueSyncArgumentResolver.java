@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,7 +46,7 @@ public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNam
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	protected AbstractNamedValueSyncArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	protected AbstractNamedValueSyncArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 

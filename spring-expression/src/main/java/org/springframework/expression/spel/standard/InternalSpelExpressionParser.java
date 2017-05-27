@@ -72,6 +72,7 @@ import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -374,6 +375,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	// nonDottedNode: indexer;
+	@Nullable
 	private SpelNodeImpl maybeEatNonDottedNode() {
 		if (peekToken(TokenKind.LSQUARE)) {
 			if (maybeEatIndexer()) {
@@ -392,6 +394,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//    | lastSelection
 	//    ))
 	//	;
+	@Nullable
 	private SpelNodeImpl eatDottedNode() {
 		Token t = nextToken();  // it was a '.' or a '?.'
 		boolean nullSafeNavigation = (t.kind == TokenKind.SAFE_NAVI);
@@ -434,6 +437,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	// methodArgs : LPAREN! (argument (COMMA! argument)* (COMMA!)?)? RPAREN!;
+	@Nullable
 	private SpelNodeImpl[] maybeEatMethodArgs() {
 		if (!peekToken(TokenKind.LPAREN)) {
 			return null;
@@ -497,6 +501,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//	    | lastSelection
 	//	    | indexer
 	//	    | constructor
+	@Nullable
 	private SpelNodeImpl eatStartNode() {
 		if (maybeEatLiteral()) {
 			return pop();
@@ -888,6 +893,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// relationalOperator
 	// : EQUAL | NOT_EQUAL | LESS_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN
 	// | GREATER_THAN_OR_EQUAL | INSTANCEOF | BETWEEN | MATCHES
+	@Nullable
 	private Token maybeEatRelationalOperator() {
 		Token t = peekToken();
 		if (t == null) {
@@ -988,6 +994,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return this.tokenStreamPointer<this.tokenStream.size();
 	}
 
+	@Nullable
 	private Token nextToken() {
 		if (this.tokenStreamPointer >= this.tokenStreamLength) {
 			return null;
@@ -995,6 +1002,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return this.tokenStream.get(this.tokenStreamPointer++);
 	}
 
+	@Nullable
 	private Token peekToken() {
 		if (this.tokenStreamPointer >= this.tokenStreamLength) {
 			return null;

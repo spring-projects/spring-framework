@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -125,7 +126,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * <p>Used for releasing the Connection on suspend (with a {@code null}
 	 * argument) and setting a fresh Connection on resume.
 	 */
-	protected void setConnection(Connection connection) {
+	protected void setConnection(@Nullable Connection connection) {
 		if (this.currentConnection != null) {
 			this.connectionHandle.releaseConnection(this.currentConnection);
 			this.currentConnection = null;

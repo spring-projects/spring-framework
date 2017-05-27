@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.jdbc.support.SqlValue;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
@@ -111,6 +112,7 @@ public abstract class StatementCreatorUtils {
 	 * @param javaType the Java type to translate
 	 * @return the corresponding SQL type, or {@code null} if none found
 	 */
+	@Nullable
 	public static int javaTypeToSqlParameterType(Class<?> javaType) {
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {
@@ -422,7 +424,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Object... paramValues) {
+	public static void cleanupParameters(@Nullable Object... paramValues) {
 		if (paramValues != null) {
 			cleanupParameters(Arrays.asList(paramValues));
 		}
@@ -435,7 +437,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Collection<?> paramValues) {
+	public static void cleanupParameters(@Nullable Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
 				if (inValue instanceof DisposableSqlTypeValue) {

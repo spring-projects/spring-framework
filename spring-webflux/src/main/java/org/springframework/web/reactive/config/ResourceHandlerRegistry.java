@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
@@ -127,6 +128,7 @@ public class ResourceHandlerRegistry {
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
 	 * of no registrations.
 	 */
+	@Nullable
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;

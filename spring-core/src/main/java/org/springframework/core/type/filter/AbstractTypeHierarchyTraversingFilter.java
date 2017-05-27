@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Type filter that is aware of traversing over hierarchy.
@@ -140,6 +141,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	/**
 	 * Override this to match on super type name.
 	 */
+	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {
 		return null;
 	}
@@ -147,6 +149,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	/**
 	 * Override this to match on interface type name.
 	 */
+	@Nullable
 	protected Boolean matchInterface(String interfaceName) {
 		return null;
 	}

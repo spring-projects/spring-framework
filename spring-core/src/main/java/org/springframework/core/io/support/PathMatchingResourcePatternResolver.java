@@ -44,6 +44,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.VfsResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -229,7 +230,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * at the time of actual resource access
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
-	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
+	public PathMatchingResourcePatternResolver(@Nullable ClassLoader classLoader) {
 		this.resourceLoader = new DefaultResourceLoader(classLoader);
 	}
 
@@ -817,6 +818,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class == method.getDeclaringClass()) {

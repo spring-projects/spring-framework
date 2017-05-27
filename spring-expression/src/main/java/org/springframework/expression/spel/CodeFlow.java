@@ -25,6 +25,7 @@ import java.util.Stack;
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -148,6 +149,7 @@ public class CodeFlow implements Opcodes {
 	/**
 	 * Return the descriptor for the item currently on top of the stack (in the current scope).
 	 */
+	@Nullable
 	public String lastDescriptor() {
 		if (this.compilationScopes.peek().isEmpty()) {
 			return null;
@@ -508,7 +510,8 @@ public class CodeFlow implements Opcodes {
 	 * @return the type descriptor for the object
 	 * (descriptor is "Ljava/lang/Object" for {@code null} value)
 	 */
-	public static String toDescriptorFromObject(Object value) {
+	@Nullable
+	public static String toDescriptorFromObject(@Nullable Object value) {
 		if (value == null) {
 			return "Ljava/lang/Object";
 		}
@@ -768,6 +771,7 @@ public class CodeFlow implements Opcodes {
 	 * @param type the type (may be primitive) for which to determine the descriptor
 	 * @return the descriptor
 	 */
+	@Nullable
 	public static String toDescriptor(Class<?> type) {
 		String name = type.getName();
 		if (type.isPrimitive()) {

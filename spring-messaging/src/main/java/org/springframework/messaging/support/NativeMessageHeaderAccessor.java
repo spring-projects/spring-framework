@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +63,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * A protected constructor to create new headers.
 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
-	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
+	protected NativeMessageHeaderAccessor(@Nullable Map<String, List<String>> nativeHeaders) {
 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
 			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 		}
@@ -121,14 +122,16 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * @return all values for the specified native header or {@code null}.
 	 */
+	@Nullable
 	public List<String> getNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		return (map != null ? map.get(headerName) : null);
 	}
 
 	/**
-	 * @return the first value for the specified native header of {@code null}.
+	 * @return the first value for the specified native header or {@code null}.
 	 */
+	@Nullable
 	public String getFirstNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		if (map != null) {
@@ -198,6 +201,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 	}
 
+	@Nullable
 	public List<String> removeNativeHeader(String name) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
@@ -208,6 +212,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
 		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
 		if (map != null) {

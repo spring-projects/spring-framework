@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Internal helper class for managing a JMX connector.
@@ -49,7 +50,7 @@ class ConnectorDelegate {
 	 * @param environment the JMX environment for the connector (may be {@code null})
 	 * @param agentId the local JMX MBeanServer's agent id (may be {@code null})
 	 */
-	public MBeanServerConnection connect(JMXServiceURL serviceUrl, Map<String, ?> environment, String agentId)
+	public MBeanServerConnection connect(@Nullable JMXServiceURL serviceUrl, @Nullable Map<String, ?> environment, @Nullable String agentId)
 			throws MBeanServerNotFoundException {
 
 		if (serviceUrl != null) {

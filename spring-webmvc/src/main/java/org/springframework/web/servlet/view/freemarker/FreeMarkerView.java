@@ -52,6 +52,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
@@ -399,6 +400,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		}
 
 		@Override
+		@Nullable
 		public String getInitParameter(String paramName) {
 			return null;
 		}

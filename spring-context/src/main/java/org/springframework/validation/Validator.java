@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A validator for application-specific objects.
  *
@@ -89,6 +91,6 @@ public interface Validator {
 	 * @param errors contextual state about the validation process (never {@code null})
 	 * @see ValidationUtils
 	 */
-	void validate(Object target, Errors errors);
+	void validate(@Nullable Object target, Errors errors);
 
 }

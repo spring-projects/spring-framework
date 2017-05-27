@@ -19,6 +19,7 @@ package org.springframework.web.filter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -42,6 +43,7 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -274,6 +276,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @return the FilterConfig instance, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletConfig()
 	 */
+	@Nullable
 	public final FilterConfig getFilterConfig() {
 		return this.filterConfig;
 	}
@@ -289,6 +292,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @see javax.servlet.FilterConfig#getFilterName()
 	 * @see #setBeanName
 	 */
+	@Nullable
 	protected final String getFilterName() {
 		return (this.filterConfig != null ? this.filterConfig.getFilterName() : this.beanName);
 	}
@@ -304,6 +308,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @see javax.servlet.FilterConfig#getServletContext()
 	 * @see #setServletContext
 	 */
+	@Nullable
 	protected final ServletContext getServletContext() {
 		return (this.filterConfig != null ? this.filterConfig.getServletContext() : this.servletContext);
 	}

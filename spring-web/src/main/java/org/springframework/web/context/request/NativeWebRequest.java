@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Extension of the {@link WebRequest} interface, exposing the
  * native request and response objects in a generic fashion.
@@ -47,6 +49,7 @@ public interface NativeWebRequest extends WebRequest {
 	 * of that type is available
 	 * @see javax.servlet.http.HttpServletRequest
 	 */
+	@Nullable
 	<T> T getNativeRequest(Class<T> requiredType);
 
 	/**
@@ -56,6 +59,7 @@ public interface NativeWebRequest extends WebRequest {
 	 * of that type is available
 	 * @see javax.servlet.http.HttpServletResponse
 	 */
+	@Nullable
 	<T> T getNativeResponse(Class<T> requiredType);
 
 }

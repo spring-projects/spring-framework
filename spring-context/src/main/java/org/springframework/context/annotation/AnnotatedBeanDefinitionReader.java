@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -153,7 +154,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, Supplier<T> instanceSupplier) {
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier) {
 		doRegisterBean(annotatedClass, instanceSupplier, null, null);
 	}
 
@@ -167,7 +168,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * (may be {@code null})
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, String name, Supplier<T> instanceSupplier) {
+	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier) {
 		doRegisterBean(annotatedClass, instanceSupplier, name, null);
 	}
 
@@ -209,8 +210,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	<T> void doRegisterBean(Class<T> annotatedClass, Supplier<T> instanceSupplier, String name,
-			Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
+	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, String name,
+			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {

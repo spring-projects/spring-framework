@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -171,7 +172,7 @@ public abstract class Conventions {
 	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
-	public static String getVariableNameForReturnType(Method method, Object value) {
+	public static String getVariableNameForReturnType(Method method, @Nullable Object value) {
 		return getVariableNameForReturnType(method, method.getReturnType(), value);
 	}
 
@@ -191,7 +192,7 @@ public abstract class Conventions {
 	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
-	public static String getVariableNameForReturnType(Method method, Class<?> resolvedType, Object value) {
+	public static String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value) {
 		Assert.notNull(method, "Method must not be null");
 
 		if (Object.class == resolvedType) {

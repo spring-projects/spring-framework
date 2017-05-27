@@ -18,6 +18,7 @@ package org.springframework.web.jsf.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
+
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -66,6 +68,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 
 
 	@Override
+	@Nullable
 	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext) {
@@ -103,6 +106,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(ELContext elContext, Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext) {
@@ -153,6 +157,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	}
 
 	@Override
+	@Nullable
 	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, Object base) {
 		return null;
 	}
@@ -171,6 +176,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	 * @return the Spring web application context
 	 * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext
 	 */
+	@Nullable
 	protected WebApplicationContext getWebApplicationContext(ELContext elContext) {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		return FacesContextUtils.getRequiredWebApplicationContext(facesContext);

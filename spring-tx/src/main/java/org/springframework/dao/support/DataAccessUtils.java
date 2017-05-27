@@ -22,6 +22,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
@@ -44,6 +45,7 @@ public abstract class DataAccessUtils {
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Collection
 	 */
+	@Nullable
 	public static <T> T singleResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
@@ -65,7 +67,7 @@ public abstract class DataAccessUtils {
 	 * @throws EmptyResultDataAccessException if no element at all
 	 * has been found in the given Collection
 	 */
-	public static <T> T requiredSingleResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T> T requiredSingleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
 			throw new EmptyResultDataAccessException(1);
@@ -86,7 +88,8 @@ public abstract class DataAccessUtils {
 	 * result object has been found in the given Collection
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
-	public static <T> T uniqueResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	@Nullable
+	public static <T> T uniqueResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
 			return null;
@@ -108,7 +111,7 @@ public abstract class DataAccessUtils {
 	 * has been found in the given Collection
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
-	public static <T> T requiredUniqueResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T> T requiredUniqueResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
 			throw new EmptyResultDataAccessException(1);
@@ -134,7 +137,7 @@ public abstract class DataAccessUtils {
 	 * not match the specified required type
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T objectResult(Collection<?> results, Class<T> requiredType)
+	public static <T> T objectResult(@Nullable Collection<?> results, Class<T> requiredType)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		Object result = requiredUniqueResult(results);
@@ -172,7 +175,7 @@ public abstract class DataAccessUtils {
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertible to an int
 	 */
-	public static int intResult(Collection<?> results)
+	public static int intResult(@Nullable Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		return objectResult(results, Number.class).intValue();
@@ -191,7 +194,7 @@ public abstract class DataAccessUtils {
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertible to a long
 	 */
-	public static long longResult(Collection<?> results)
+	public static long longResult(@Nullable Collection<?> results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		return objectResult(results, Number.class).longValue();

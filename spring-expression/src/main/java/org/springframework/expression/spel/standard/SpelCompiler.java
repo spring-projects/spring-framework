@@ -35,6 +35,7 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompiledExpression;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -97,6 +98,7 @@ public class SpelCompiler implements Opcodes {
 	 * @return an instance of the class implementing the compiled expression, or null
 	 * if compilation is not possible
 	 */
+	@Nullable
 	public CompiledExpression compile(SpelNodeImpl expression) {
 		if (expression.isCompilable()) {
 			if (logger.isDebugEnabled()) {
@@ -130,6 +132,7 @@ public class SpelCompiler implements Opcodes {
 	 * @return the expression call, or {@code null} if the decision was to opt out of
 	 * compilation during code generation
 	 */
+	@Nullable
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String clazzName = "spel/Ex" + getNextSuffix();

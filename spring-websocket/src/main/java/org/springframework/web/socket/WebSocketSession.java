@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket
@@ -71,6 +72,7 @@ public interface WebSocketSession extends Closeable {
 	/**
 	 * Return the address on which the request was received.
 	 */
+	@Nullable
 	InetSocketAddress getLocalAddress();
 
 	/**
@@ -83,6 +85,7 @@ public interface WebSocketSession extends Closeable {
 	 * @return the protocol identifier, or {@code null} if no protocol
 	 * was specified or negotiated successfully
 	 */
+	@Nullable
 	String getAcceptedProtocol();
 
 	/**

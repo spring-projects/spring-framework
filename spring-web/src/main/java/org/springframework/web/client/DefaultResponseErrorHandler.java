@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -110,6 +111,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @return the associated charset, or {@code null} if none
 	 * @since 4.3.8
 	 */
+	@Nullable
 	protected Charset getCharset(ClientHttpResponse response) {
 		HttpHeaders headers = response.getHeaders();
 		MediaType contentType = headers.getContentType();

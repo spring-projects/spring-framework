@@ -38,6 +38,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -143,6 +144,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
+	@Nullable
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
 		AsyncTaskExecutor executor = this.executors.get(method);
 		if (executor == null) {
@@ -183,6 +185,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #determineAsyncExecutor(Method)
 	 * @see #findQualifiedExecutor(BeanFactory, String)
 	 */
+	@Nullable
 	protected abstract String getExecutorQualifier(Method method);
 
 	/**
@@ -192,6 +195,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @since 4.2.6
 	 * @see #getExecutorQualifier(Method)
 	 */
+	@Nullable
 	protected Executor findQualifiedExecutor(BeanFactory beanFactory, String qualifier) {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
@@ -212,6 +216,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #findQualifiedExecutor(BeanFactory, String)
 	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
+	@Nullable
 	protected Executor getDefaultExecutor(BeanFactory beanFactory) {
 		if (beanFactory != null) {
 			try {
@@ -256,6 +261,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param returnType the declared return type (potentially a {@link Future} variant)
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
+	@Nullable
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
 			return CompletableFuture.supplyAsync(new Supplier<Object>() {

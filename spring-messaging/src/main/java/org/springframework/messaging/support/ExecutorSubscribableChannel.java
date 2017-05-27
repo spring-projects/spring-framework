@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
@@ -54,7 +55,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	 * @param executor the executor used to send the message,
 	 * or {@code null} to execute in the callers thread.
 	 */
-	public ExecutorSubscribableChannel(Executor executor) {
+	public ExecutorSubscribableChannel(@Nullable Executor executor) {
 		this.executor = executor;
 	}
 
@@ -151,6 +152,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			}
 		}
 
+		@Nullable
 		private Message<?> applyBeforeHandle(Message<?> message) {
 			for (ExecutorChannelInterceptor interceptor : executorInterceptors) {
 				message = interceptor.beforeHandle(message, ExecutorSubscribableChannel.this, this.messageHandler);

@@ -22,6 +22,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -214,6 +215,7 @@ public interface WebMvcConfigurer {
 	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
 	 * Leave the return value as {@code null} to keep the default.
 	 */
+	@Nullable
 	default Validator getValidator() {
 		return null;
 	}
@@ -223,6 +225,7 @@ public interface WebMvcConfigurer {
 	 * from data binding and validation error codes. Leave the return value as
 	 * {@code null} to keep the default.
 	 */
+	@Nullable
 	default MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}

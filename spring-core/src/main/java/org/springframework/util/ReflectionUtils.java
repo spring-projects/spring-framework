@@ -29,6 +29,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple utility class for working with the reflection API and handling
  * reflection exceptions.
@@ -75,6 +77,7 @@ public abstract class ReflectionUtils {
 	 * @param name the name of the field
 	 * @return the corresponding Field object, or {@code null} if not found
 	 */
+	@Nullable
 	public static Field findField(Class<?> clazz, String name) {
 		return findField(clazz, name, null);
 	}
@@ -88,7 +91,8 @@ public abstract class ReflectionUtils {
 	 * @param type the type of the field (may be {@code null} if name is specified)
 	 * @return the corresponding Field object, or {@code null} if not found
 	 */
-	public static Field findField(Class<?> clazz, String name, Class<?> type) {
+	@Nullable
+	public static Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
 		Class<?> searchType = clazz;
@@ -115,6 +119,7 @@ public abstract class ReflectionUtils {
 	 * @param target the target object on which to set the field
 	 * @param value the value to set (may be {@code null})
 	 */
+	@Nullable
 	public static void setField(Field field, Object target, Object value) {
 		try {
 			field.set(target, value);
@@ -155,6 +160,7 @@ public abstract class ReflectionUtils {
 	 * @param name the name of the method
 	 * @return the Method object, or {@code null} if none found
 	 */
+	@Nullable
 	public static Method findMethod(Class<?> clazz, String name) {
 		return findMethod(clazz, name, new Class<?>[0]);
 	}
@@ -169,7 +175,8 @@ public abstract class ReflectionUtils {
 	 * (may be {@code null} to indicate any signature)
 	 * @return the Method object, or {@code null} if none found
 	 */
-	public static Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
+	@Nullable
+	public static Method findMethod(Class<?> clazz, String name, @Nullable Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
@@ -195,7 +202,8 @@ public abstract class ReflectionUtils {
 	 * @return the invocation result, if any
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
-	public static Object invokeMethod(Method method, Object target) {
+	@Nullable
+	public static Object invokeMethod(Method method, @Nullable Object target) {
 		return invokeMethod(method, target, new Object[0]);
 	}
 
@@ -209,7 +217,8 @@ public abstract class ReflectionUtils {
 	 * @param args the invocation arguments (may be {@code null})
 	 * @return the invocation result, if any
 	 */
-	public static Object invokeMethod(Method method, Object target, Object... args) {
+	@Nullable
+	public static Object invokeMethod(Method method, @Nullable Object target, @Nullable Object... args) {
 		try {
 			return method.invoke(target, args);
 		}
@@ -228,6 +237,7 @@ public abstract class ReflectionUtils {
 	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
 	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
 	 */
+	@Nullable
 	public static Object invokeJdbcMethod(Method method, Object target) throws SQLException {
 		return invokeJdbcMethod(method, target, new Object[0]);
 	}
@@ -242,7 +252,8 @@ public abstract class ReflectionUtils {
 	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
-	public static Object invokeJdbcMethod(Method method, Object target, Object... args) throws SQLException {
+	@Nullable
+	public static Object invokeJdbcMethod(Method method, Object target, @Nullable Object... args) throws SQLException {
 		try {
 			return method.invoke(target, args);
 		}

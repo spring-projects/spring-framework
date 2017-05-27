@@ -23,6 +23,7 @@ import org.webjars.WebJarAssetLocator;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -102,6 +103,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 				}));
 	}
 
+	@Nullable
 	protected String findWebJarResourcePath(String path) {
 		try {
 			int startOffset = (path.startsWith("/") ? 1 : 0);

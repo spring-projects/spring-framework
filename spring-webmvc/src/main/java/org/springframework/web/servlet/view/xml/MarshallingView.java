@@ -18,11 +18,13 @@ package org.springframework.web.servlet.view.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
 
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
@@ -123,6 +125,7 @@ public class MarshallingView extends AbstractView {
 	 * {@linkplain #setModelKey(String) model key} is not supported by the marshaller
 	 * @see #setModelKey(String)
 	 */
+	@Nullable
 	protected Object locateToBeMarshalled(Map<String, Object> model) throws IllegalStateException {
 		if (this.modelKey != null) {
 			Object value = model.get(this.modelKey);

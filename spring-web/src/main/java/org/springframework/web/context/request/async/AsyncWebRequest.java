@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request.async;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -33,7 +34,7 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	 * @param timeout amount of time in milliseconds; {@code null} means no
 	 * 	timeout, i.e. rely on the default timeout of the container.
 	 */
-	void setTimeout(Long timeout);
+	void setTimeout(@Nullable Long timeout);
 
 	/**
 	 * Add a handler to invoke when concurrent handling has timed out.

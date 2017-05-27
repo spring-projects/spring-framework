@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a BeanFactory encounters an error when
@@ -109,6 +110,7 @@ public class BeanCreationException extends FatalBeanException {
 	/**
 	 * Return the name of the bean requested, if any.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -117,6 +119,7 @@ public class BeanCreationException extends FatalBeanException {
 	 * Return the description of the resource that the bean
 	 * definition came from, if any.
 	 */
+	@Nullable
 	public String getResourceDescription() {
 		return this.resourceDescription;
 	}
@@ -138,6 +141,7 @@ public class BeanCreationException extends FatalBeanException {
 	 * Return the related causes, if any.
 	 * @return the array of related causes, or {@code null} if none
 	 */
+	@Nullable
 	public Throwable[] getRelatedCauses() {
 		if (this.relatedCauses == null) {
 			return null;

@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -237,6 +238,7 @@ public abstract class UriUtils {
 	 * @return the extracted file extension (e.g. "html")
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public static String extractFileExtension(String path) {
 		int end = path.indexOf('?');
 		if (end == -1) {

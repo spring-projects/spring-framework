@@ -22,6 +22,7 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
+import org.springframework.lang.Nullable;
 
 /**
  * Base model for a JMS listener endpoint
@@ -64,6 +65,7 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	/**
 	 * Return the name of the destination for this endpoint.
 	 */
+	@Nullable
 	public String getDestination() {
 		return this.destination;
 	}
@@ -78,6 +80,7 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	/**
 	 * Return the name for the durable subscription, if any.
 	 */
+	@Nullable
 	public String getSubscription() {
 		return this.subscription;
 	}
@@ -93,6 +96,7 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	/**
 	 * Return the JMS message selector expression, if any.
 	 */
+	@Nullable
 	public String getSelector() {
 		return this.selector;
 	}
@@ -111,6 +115,7 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	/**
 	 * Return the concurrency for the listener, if any.
 	 */
+	@Nullable
 	public String getConcurrency() {
 		return this.concurrency;
 	}

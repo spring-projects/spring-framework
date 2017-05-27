@@ -22,6 +22,7 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -55,7 +56,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 * ignored if there is no corresponding property found on the particular
 	 * job class (all other unknown properties will still trigger an exception).
 	 */
-	public void setIgnoredUnknownProperties(String... ignoredUnknownProperties) {
+	public void setIgnoredUnknownProperties(@Nullable String... ignoredUnknownProperties) {
 		this.ignoredUnknownProperties = ignoredUnknownProperties;
 	}
 

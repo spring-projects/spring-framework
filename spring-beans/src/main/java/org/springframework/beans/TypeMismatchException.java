@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,7 +56,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class<?> requiredType, Throwable cause) {
+	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super(propertyChangeEvent,
 				"Failed to convert property value of type '" +
 				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
@@ -73,7 +74,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 */
-	public TypeMismatchException(Object value, Class<?> requiredType) {
+	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType) {
 		this(value, requiredType, null);
 	}
 
@@ -83,7 +84,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public TypeMismatchException(Object value, Class<?> requiredType, Throwable cause) {
+	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
 				(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
 				cause);
@@ -103,6 +104,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Return the required target type, if any.
 	 */
+	@Nullable
 	public Class<?> getRequiredType() {
 		return this.requiredType;
 	}

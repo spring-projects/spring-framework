@@ -27,6 +27,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.DecoratingProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -52,6 +53,7 @@ public abstract class AopProxyUtils {
 	 * @see Advised#getTargetSource()
 	 * @see SingletonTargetSource#getTarget()
 	 */
+	@Nullable
 	public static Object getSingletonTarget(Object candidate) {
 		if (candidate instanceof Advised) {
 			TargetSource targetSource = ((Advised) candidate).getTargetSource();

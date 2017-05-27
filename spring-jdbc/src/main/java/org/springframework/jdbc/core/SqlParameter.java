@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -127,6 +128,7 @@ public class SqlParameter {
 	/**
 	 * Return the name of the parameter, or {@code null} if anonymous.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -141,6 +143,7 @@ public class SqlParameter {
 	/**
 	 * Return the type name of the parameter, if any.
 	 */
+	@Nullable
 	public String getTypeName() {
 		return this.typeName;
 	}
@@ -148,6 +151,7 @@ public class SqlParameter {
 	/**
 	 * Return the scale of the parameter, if any.
 	 */
+	@Nullable
 	public Integer getScale() {
 		return this.scale;
 	}

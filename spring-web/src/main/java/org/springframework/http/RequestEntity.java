@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -159,6 +160,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the request's body type, or {@code null} if not known
 	 * @since 4.3
 	 */
+	@Nullable
 	public Type getType() {
 		if (this.type == null) {
 			T body = getBody();

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -96,7 +97,7 @@ public abstract class MessageSourceSupport {
 	 * @return the rendered default message (with resolved arguments)
 	 * @see #formatMessage(String, Object[], java.util.Locale)
 	 */
-	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
+	protected String renderDefaultMessage(String defaultMessage, @Nullable Object[] args, Locale locale) {
 		return formatMessage(defaultMessage, args, locale);
 	}
 

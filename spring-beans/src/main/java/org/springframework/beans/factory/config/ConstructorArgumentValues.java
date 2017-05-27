@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -146,7 +147,8 @@ public class ConstructorArgumentValues {
 	 * untyped values only)
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
-	public ValueHolder getIndexedArgumentValue(int index, Class<?> requiredType) {
+	@Nullable
+	public ValueHolder getIndexedArgumentValue(int index, @Nullable Class<?> requiredType) {
 		return getIndexedArgumentValue(index, requiredType, null);
 	}
 
@@ -159,7 +161,8 @@ public class ConstructorArgumentValues {
 	 * unnamed values only, or empty String to match any name)
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
-	public ValueHolder getIndexedArgumentValue(int index, Class<?> requiredType, String requiredName) {
+	@Nullable
+	public ValueHolder getIndexedArgumentValue(int index, @Nullable Class<?> requiredType, @Nullable String requiredName) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = this.indexedArgumentValues.get(index);
 		if (valueHolder != null &&
@@ -247,6 +250,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the type to match
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
+	@Nullable
 	public ValueHolder getGenericArgumentValue(Class<?> requiredType) {
 		return getGenericArgumentValue(requiredType, null, null);
 	}
@@ -257,6 +261,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredName the name to match
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
+	@Nullable
 	public ValueHolder getGenericArgumentValue(Class<?> requiredType, String requiredName) {
 		return getGenericArgumentValue(requiredType, requiredName, null);
 	}
@@ -273,7 +278,8 @@ public class ConstructorArgumentValues {
 	 * in the current resolution process and should therefore not be returned again
 	 * @return the ValueHolder for the argument, or {@code null} if none found
 	 */
-	public ValueHolder getGenericArgumentValue(Class<?> requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
+	@Nullable
+	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName, Set<ValueHolder> usedValueHolders) {
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
@@ -312,6 +318,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the parameter type to match
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
+	@Nullable
 	public ValueHolder getArgumentValue(int index, Class<?> requiredType) {
 		return getArgumentValue(index, requiredType, null, null);
 	}
@@ -324,6 +331,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredName the parameter name to match
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
+	@Nullable
 	public ValueHolder getArgumentValue(int index, Class<?> requiredType, String requiredName) {
 		return getArgumentValue(index, requiredType, requiredName, null);
 	}
@@ -342,7 +350,8 @@ public class ConstructorArgumentValues {
 	 * in case of multiple generic argument values of the same type)
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
-	public ValueHolder getArgumentValue(int index, Class<?> requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
+	@Nullable
+	public ValueHolder getArgumentValue(int index, @Nullable Class<?> requiredType, @Nullable String requiredName, Set<ValueHolder> usedValueHolders) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType, requiredName);
 		if (valueHolder == null) {

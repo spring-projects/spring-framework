@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -47,7 +48,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	 * binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public WebExchangeDataBinder(Object target) {
+	public WebExchangeDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -57,7 +58,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	 * binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebExchangeDataBinder(Object target, String objectName) {
+	public WebExchangeDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

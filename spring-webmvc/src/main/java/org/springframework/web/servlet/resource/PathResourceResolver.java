@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
@@ -85,6 +87,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		return (StringUtils.hasText(resourcePath) && getResource(resourcePath, locations) != null ? resourcePath : null);
 	}
 
+	@Nullable
 	private Resource getResource(String resourcePath, List<? extends Resource> locations) {
 		for (Resource location : locations) {
 			try {
@@ -117,6 +120,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @param location the location to check
 	 * @return the resource, or {@code null} if none found
 	 */
+	@Nullable
 	protected Resource getResource(String resourcePath, Resource location) throws IOException {
 		Resource resource = location.createRelative(resourcePath);
 		if (resource.exists() && resource.isReadable()) {

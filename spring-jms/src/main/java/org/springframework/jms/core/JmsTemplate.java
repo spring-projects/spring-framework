@@ -17,6 +17,7 @@
 package org.springframework.jms.core;
 
 import java.lang.reflect.Method;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
@@ -38,6 +39,7 @@ import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -786,7 +788,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	protected Message doReceive(Session session, Destination destination, String messageSelector)
+	@Nullable
+	protected Message doReceive(Session session, Destination destination, @Nullable String messageSelector)
 			throws JMSException {
 
 		return doReceive(session, createConsumer(session, destination, messageSelector));
@@ -799,6 +802,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
+	@Nullable
 	protected Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
 		try {
 			// Use transaction timeout (if available).
@@ -869,7 +873,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @param message the JMS Message to convert (can be {@code null})
 	 * @return the content of the message, or {@code null} if none
 	 */
-	protected Object doConvertFromMessage(Message message) {
+	@Nullable
+	protected Object doConvertFromMessage(@Nullable Message message) {
 		if (message != null) {
 			try {
 				return getRequiredMessageConverter().fromMessage(message);
@@ -924,6 +929,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>Return the response message or {@code null} if no message has
 	 * @throws JMSException if thrown by JMS API methods
 	 */
+	@Nullable
 	protected Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
 
@@ -1065,6 +1071,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return an appropriate Connection fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
 	}
@@ -1076,6 +1083,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return an appropriate Session fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
 	}
@@ -1141,7 +1149,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return the new JMS MessageConsumer
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
+	protected MessageConsumer createConsumer(Session session, Destination destination, @Nullable String messageSelector)
 			throws JMSException {
 
 		// Only pass in the NoLocal flag in case of a Topic:
@@ -1168,7 +1176,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #setMessageIdEnabled
 	 * @see #setMessageTimestampEnabled
 	 */
-	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector)
+	protected QueueBrowser createBrowser(Session session, Queue queue, @Nullable String messageSelector)
 			throws JMSException {
 
 		return session.createBrowser(queue, messageSelector);

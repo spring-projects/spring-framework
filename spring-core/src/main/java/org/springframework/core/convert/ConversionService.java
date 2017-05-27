@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
@@ -40,7 +42,7 @@ public interface ConversionService {
 	 * @return {@code true} if a conversion can be performed, {@code false} if not
 	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
 	 */
-	boolean canConvert(Class<?> sourceType, Class<?> targetType);
+	boolean canConvert(@Nullable Class<?> sourceType, Class<?> targetType);
 
 	/**
 	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
@@ -60,7 +62,7 @@ public interface ConversionService {
 	 * {@code false} if not
 	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
 	 */
-	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
 	 * Convert the given {@code source} to the specified {@code targetType}.
@@ -70,7 +72,7 @@ public interface ConversionService {
 	 * @throws ConversionException if a conversion exception occurred
 	 * @throws IllegalArgumentException if targetType is {@code null}
 	 */
-	<T> T convert(Object source, Class<T> targetType);
+	<T> T convert(@Nullable Object source, Class<T> targetType);
 
 	/**
 	 * Convert the given {@code source} to the specified {@code targetType}.
@@ -85,6 +87,6 @@ public interface ConversionService {
 	 * @throws IllegalArgumentException if targetType is {@code null},
 	 * or {@code sourceType} is {@code null} but source is not {@code null}
 	 */
-	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

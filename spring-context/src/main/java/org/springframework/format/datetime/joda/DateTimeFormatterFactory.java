@@ -24,6 +24,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -129,7 +130,7 @@ public class DateTimeFormatterFactory {
 	 * factory properties have been set (can be {@code null}).
 	 * @return a new date time formatter
 	 */
-	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
+	public DateTimeFormatter createDateTimeFormatter(@Nullable DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = null;
 		if (StringUtils.hasLength(this.pattern)) {
 			dateTimeFormatter = DateTimeFormat.forPattern(this.pattern);

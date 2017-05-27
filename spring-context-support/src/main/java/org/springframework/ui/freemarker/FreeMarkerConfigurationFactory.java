@@ -38,6 +38,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -380,6 +381,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @param templateLoaders the final List of TemplateLoader instances
 	 * @return the aggregate TemplateLoader
 	 */
+	@Nullable
 	protected TemplateLoader getAggregateTemplateLoader(List<TemplateLoader> templateLoaders) {
 		int loaderCount = templateLoaders.size();
 		switch (loaderCount) {

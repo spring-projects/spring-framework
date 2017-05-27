@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -42,7 +43,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,6 +29,7 @@ import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
 
 /**
  * Helper class for preparing JSTL views,
@@ -77,7 +79,7 @@ public abstract class JstlUtils {
 	 * typically the current ApplicationContext (may be {@code null})
 	 * @see #exposeLocalizationContext(RequestContext)
 	 */
-	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
+	public static void exposeLocalizationContext(HttpServletRequest request, @Nullable MessageSource messageSource) {
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		Config.set(request, Config.FMT_LOCALE, jstlLocale);
 		TimeZone timeZone = RequestContextUtils.getTimeZone(request);

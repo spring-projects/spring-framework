@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -70,7 +71,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * @param attributeName the name of the model attribute (never {@code null})
 	 * @param attributeValue the model attribute value (can be {@code null})
 	 */
-	public ModelMap addAttribute(String attributeName, Object attributeValue) {
+	public ModelMap addAttribute(String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
 		put(attributeName, attributeValue);
 		return this;

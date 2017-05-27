@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.time.Duration;
 
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.lang.Nullable;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -58,6 +59,7 @@ public class ServerSentEvent<T> {
     /**
      * Return the {@code id} field of this event, if available.
      */
+    @Nullable
     public String id() {
         return this.id;
     }
@@ -65,6 +67,7 @@ public class ServerSentEvent<T> {
     /**
      * Return the {@code event} field of this event, if available.
      */
+	@Nullable
     public String event() {
         return this.event;
     }
@@ -72,6 +75,7 @@ public class ServerSentEvent<T> {
     /**
      * Return the {@code data} field of this event, if available.
      */
+	@Nullable
     public T data() {
         return this.data;
     }
@@ -79,6 +83,7 @@ public class ServerSentEvent<T> {
     /**
      * Return the {@code retry} field of this event, if available.
      */
+	@Nullable
     public Duration retry() {
         return this.retry;
     }
@@ -86,6 +91,7 @@ public class ServerSentEvent<T> {
     /**
      * Return the comment of this event, if available.
      */
+	@Nullable
     public String comment() {
         return this.comment;
     }

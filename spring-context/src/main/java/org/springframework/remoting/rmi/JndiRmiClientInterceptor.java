@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -338,6 +339,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @throws Throwable in case of invocation failure
 	 * @see #invoke
 	 */
+	@Nullable
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Object freshStub;
 		synchronized (this.stubMonitor) {
@@ -358,6 +360,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation, Object stub) throws Throwable {
 		if (stub instanceof RmiInvocationHandler) {
 			// RMI invoker

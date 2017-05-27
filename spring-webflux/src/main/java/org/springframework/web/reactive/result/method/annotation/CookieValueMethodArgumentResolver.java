@@ -22,6 +22,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -44,7 +45,7 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArg
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public CookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 

@@ -34,6 +34,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -350,7 +351,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see MergedContextConfiguration
 	 */
 	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
-			List<ContextConfigurationAttributes> configAttributesList, MergedContextConfiguration parentConfig,
+			List<ContextConfigurationAttributes> configAttributesList, @Nullable MergedContextConfiguration parentConfig,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			boolean requireLocationsClassesOrInitializers) {
 
@@ -490,6 +491,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
+	@Nullable
 	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 

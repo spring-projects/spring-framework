@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 
 /**
  * A variant of {@link ObjectFactory} designed specifically for injection points,
@@ -48,6 +49,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfAvailable() throws BeansException;
 
 	/**
@@ -74,6 +76,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfUnique() throws BeansException;
 
 	/**

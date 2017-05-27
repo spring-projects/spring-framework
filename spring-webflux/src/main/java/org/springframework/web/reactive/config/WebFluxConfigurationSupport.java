@@ -36,6 +36,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -373,6 +374,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 */
+	@Nullable
 	protected Validator getValidator() {
 		return null;
 	}
@@ -380,6 +382,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link MessageCodesResolver}.
 	 */
+	@Nullable
 	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}

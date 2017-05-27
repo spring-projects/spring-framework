@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -66,6 +67,7 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 	 * Obtain the underlying {@link CacheOperationSource} (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
+	@Nullable
 	protected abstract CacheOperationSource getCacheOperationSource();
 
 }

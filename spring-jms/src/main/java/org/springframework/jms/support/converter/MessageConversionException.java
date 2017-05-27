@@ -17,6 +17,7 @@
 package org.springframework.jms.support.converter;
 
 import org.springframework.jms.JmsException;
+import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link MessageConverter} implementations when the conversion
@@ -42,7 +43,7 @@ public class MessageConversionException extends JmsException {
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public MessageConversionException(String msg, Throwable cause) {
+	public MessageConversionException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

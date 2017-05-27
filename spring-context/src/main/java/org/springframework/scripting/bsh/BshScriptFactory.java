@@ -21,6 +21,7 @@ import java.io.IOException;
 import bsh.EvalError;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -81,7 +82,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement (may be {@code null})
 	 */
-	public BshScriptFactory(String scriptSourceLocator, Class<?>... scriptInterfaces) {
+	public BshScriptFactory(String scriptSourceLocator, @Nullable Class<?>... scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;

@@ -23,6 +23,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -84,6 +85,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	 * The configured default locale, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public Locale getDefaultLocale() {
 		return this.defaultLocale;
 	}
@@ -111,6 +113,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		return (supportedLocales.isEmpty() || supportedLocales.contains(locale));
 	}
 
+	@Nullable
 	private Locale findSupportedLocale(HttpServletRequest request) {
 		Enumeration<Locale> requestLocales = request.getLocales();
 		while (requestLocales.hasMoreElements()) {

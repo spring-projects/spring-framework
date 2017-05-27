@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Handy class for wrapping runtime {@code Exceptions} with a root cause.
  *
@@ -80,6 +82,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @return the innermost exception, or {@code null} if none
 	 * @since 2.0
 	 */
+	@Nullable
 	public Throwable getRootCause() {
 		return NestedExceptionUtils.getRootCause(this);
 	}

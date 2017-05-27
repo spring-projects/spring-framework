@@ -20,10 +20,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.servlet.View;
@@ -200,6 +202,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the content type for all views, if any.
 	 */
+	@Nullable
 	protected String getContentType() {
 		return this.contentType;
 	}
@@ -288,6 +291,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the name of the RequestContext attribute for all views, if any.
 	 */
+	@Nullable
 	protected String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}
@@ -343,7 +347,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * <ul>
 	 * @see AbstractView#setExposePathVariables
 	 */
-	public void setExposePathVariables(Boolean exposePathVariables) {
+	public void setExposePathVariables(@Nullable Boolean exposePathVariables) {
 		this.exposePathVariables = exposePathVariables;
 	}
 

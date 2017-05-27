@@ -44,6 +44,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -473,6 +474,7 @@ public class ResourceWebHandler
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
+	@Nullable
 	protected MediaType getMediaType(ServerWebExchange exchange, Resource resource) {
 		return this.pathExtensionResolver.resolveMediaTypeForResource(resource);
 	}

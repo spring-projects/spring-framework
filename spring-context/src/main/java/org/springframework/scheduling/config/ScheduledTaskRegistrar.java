@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -101,6 +102,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	/**
 	 * Return the {@link TaskScheduler} instance for this registrar (may be {@code null}).
 	 */
+	@Nullable
 	public TaskScheduler getScheduler() {
 		return this.taskScheduler;
 	}
@@ -398,6 +400,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
 	 */
+	@Nullable
 	public ScheduledTask scheduleCronTask(CronTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
@@ -422,6 +425,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
 	 */
+	@Nullable
 	public ScheduledTask scheduleFixedRateTask(IntervalTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
@@ -454,6 +458,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
 	 */
+	@Nullable
 	public ScheduledTask scheduleFixedDelayTask(IntervalTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;

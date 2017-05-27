@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 
 /**
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
@@ -271,6 +272,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

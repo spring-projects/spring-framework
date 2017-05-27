@@ -20,6 +20,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface specifying the API to be implemented by a class providing table metadata.
  * This is intended for internal use by the Simple JDBC classes.
@@ -46,7 +48,7 @@ public interface TableMetaDataProvider {
 	 * @throws SQLException in case of initialization failure
 	 */
 	void initializeWithTableColumnMetaData(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName)
+			DatabaseMetaData databaseMetaData, @Nullable String catalogName, @Nullable String schemaName, String tableName)
 			throws SQLException;
 
 	/**
@@ -99,6 +101,7 @@ public interface TableMetaDataProvider {
 	/**
 	 * Get the simple query to retrieve a generated key
 	 */
+	@Nullable
 	String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName);
 
 	/**

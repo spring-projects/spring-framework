@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -63,6 +64,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -161,7 +163,7 @@ public abstract class SessionFactoryUtils {
 	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @see Session#close()
 	 */
-	public static void closeSession(Session session) {
+	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
 				session.close();
@@ -181,6 +183,7 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
+	@Nullable
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
 		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
 		if (getProperties != null) {

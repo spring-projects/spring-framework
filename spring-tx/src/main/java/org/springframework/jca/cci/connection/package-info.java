@@ -3,4 +3,7 @@
  * a PlatformTransactionManager for local CCI transactions,
  * and various simple ConnectionFactory proxies/adapters.
  */
+@NonNullApi
 package org.springframework.jca.cci.connection;
+
+import org.springframework.lang.NonNullApi;

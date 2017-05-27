@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
@@ -189,7 +190,8 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * @param headers the headers to send (or {@code null} if none)
 	 * @return the actual headers to send (or {@code null} if none)
 	 */
-	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
+	@Nullable
+	protected Map<String, Object> processHeadersToSend(@Nullable Map<String, Object> headers) {
 		return headers;
 	}
 

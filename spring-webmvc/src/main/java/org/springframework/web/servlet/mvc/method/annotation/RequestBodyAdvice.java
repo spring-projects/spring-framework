@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Allows customizing the request before its body is read and converted into an
@@ -60,7 +61,8 @@ public interface RequestBodyAdvice {
 	 * @return the value to use or {@code null} which may then raise an
 	 * {@code HttpMessageNotReadableException} if the argument is required.
 	 */
-	Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+	@Nullable
+	Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**

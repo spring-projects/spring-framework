@@ -23,6 +23,8 @@ import javax.xml.transform.sax.SAXResult;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Implementation of the {@code Result} tagging interface for StAX writers. Can be constructed with
  * an {@code XMLEventConsumer} or an {@code XMLStreamWriter}.
@@ -80,6 +82,7 @@ class StaxResult extends SAXResult {
 	 * @return the StAX event writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLEventWriter)
 	 */
+	@Nullable
 	public XMLEventWriter getXMLEventWriter() {
 		return this.eventWriter;
 	}
@@ -90,6 +93,7 @@ class StaxResult extends SAXResult {
 	 * @return the StAX stream writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLStreamWriter)
 	 */
+	@Nullable
 	public XMLStreamWriter getXMLStreamWriter() {
 		return this.streamWriter;
 	}

@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -88,7 +89,7 @@ final class ConfigurationClass {
 	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(MetadataReader metadataReader, ConfigurationClass importedBy) {
+	public ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.importedBy.add(importedBy);
@@ -115,7 +116,7 @@ final class ConfigurationClass {
 	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
+	public ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);

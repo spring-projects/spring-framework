@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Miscellaneous {@link String} utility methods.
  *
@@ -83,7 +85,7 @@ public abstract class StringUtils {
 	 * @param str the candidate String
 	 * @since 3.2.1
 	 */
-	public static boolean isEmpty(Object str) {
+	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
 	}
 
@@ -102,7 +104,7 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
 	 * @see #hasText(String)
 	 */
-	public static boolean hasLength(CharSequence str) {
+	public static boolean hasLength(@Nullable CharSequence str) {
 		return (str != null && str.length() > 0);
 	}
 
@@ -115,7 +117,7 @@ public abstract class StringUtils {
 	 * @see #hasLength(CharSequence)
 	 * @see #hasText(String)
 	 */
-	public static boolean hasLength(String str) {
+	public static boolean hasLength(@Nullable String str) {
 		return hasLength((CharSequence) str);
 	}
 
@@ -136,7 +138,7 @@ public abstract class StringUtils {
 	 * its length is greater than 0, and it does not contain whitespace only
 	 * @see Character#isWhitespace
 	 */
-	public static boolean hasText(CharSequence str) {
+	public static boolean hasText(@Nullable CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
 		}
@@ -160,7 +162,7 @@ public abstract class StringUtils {
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
 	 */
-	public static boolean hasText(String str) {
+	public static boolean hasText(@Nullable String str) {
 		return hasText((CharSequence) str);
 	}
 
@@ -171,7 +173,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see Character#isWhitespace
 	 */
-	public static boolean containsWhitespace(CharSequence str) {
+	public static boolean containsWhitespace(@Nullable CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
 		}
@@ -192,7 +194,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see #containsWhitespace(CharSequence)
 	 */
-	public static boolean containsWhitespace(String str) {
+	public static boolean containsWhitespace(@Nullable String str) {
 		return containsWhitespace((CharSequence) str);
 	}
 
@@ -381,7 +383,7 @@ public abstract class StringUtils {
 	 * @param str string to search in. Return 0 if this is {@code null}.
 	 * @param sub string to search for. Return 0 if this is {@code null}.
 	 */
-	public static int countOccurrencesOf(String str, String sub) {
+	public static int countOccurrencesOf(@Nullable String str, @Nullable String sub) {
 		if (!hasLength(str) || !hasLength(sub)) {
 			return 0;
 		}
@@ -477,7 +479,8 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (e.g. "'myString'"),
 	 * or {@code null} if the input was {@code null}
 	 */
-	public static String quote(String str) {
+	@Nullable
+	public static String quote(@Nullable String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
 
@@ -519,7 +522,8 @@ public abstract class StringUtils {
 	 * @return the capitalized {@code String}, or {@code null} if the supplied
 	 * string is {@code null}
 	 */
-	public static String capitalize(String str) {
+	@Nullable
+	public static String capitalize(@Nullable String str) {
 		return changeFirstCharacterCase(str, true);
 	}
 
@@ -531,7 +535,8 @@ public abstract class StringUtils {
 	 * @return the uncapitalized {@code String}, or {@code null} if the supplied
 	 * string is {@code null}
 	 */
-	public static String uncapitalize(String str) {
+	@Nullable
+	public static String uncapitalize(@Nullable String str) {
 		return changeFirstCharacterCase(str, false);
 	}
 
@@ -563,7 +568,8 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
 	 */
-	public static String getFilename(String path) {
+	@Nullable
+	public static String getFilename(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -578,7 +584,8 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename extension, or {@code null} if none
 	 */
-	public static String getFilenameExtension(String path) {
+	@Nullable
+	public static String getFilenameExtension(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -603,7 +610,8 @@ public abstract class StringUtils {
 	 * @return the path with stripped filename extension,
 	 * or {@code null} if none
 	 */
-	public static String stripFilenameExtension(String path) {
+	@Nullable
+	public static String stripFilenameExtension(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -735,7 +743,8 @@ public abstract class StringUtils {
 	 * @since 5.0
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
-	public static String uriDecode(String source, Charset charset) {
+	@Nullable
+	public static String uriDecode(@Nullable String source, Charset charset) {
 		if (source == null) {
 			return null;
 		}
@@ -853,7 +862,7 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to append
 	 * @return the new array (never {@code null})
 	 */
-	public static String[] addStringToArray(String[] array, String str) {
+	public static String[] addStringToArray(@Nullable String[] array, String str) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[] {str};
 		}
@@ -872,7 +881,8 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
-	public static String[] concatenateStringArrays(String[] array1, String[] array2) {
+	@Nullable
+	public static String[] concatenateStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -896,7 +906,8 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
-	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+	@Nullable
+	public static String[] mergeStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -935,7 +946,8 @@ public abstract class StringUtils {
 	 * @return the {@code String} array ({@code null} if the supplied
 	 * {@code Collection} was {@code null})
 	 */
-	public static String[] toStringArray(Collection<String> collection) {
+	@Nullable
+	public static String[] toStringArray(@Nullable Collection<String> collection) {
 		if (collection == null) {
 			return null;
 		}
@@ -950,7 +962,8 @@ public abstract class StringUtils {
 	 * @return the {@code String} array ({@code null} if the passed-in
 	 * Enumeration was {@code null})
 	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
+	@Nullable
+	public static String[] toStringArray(@Nullable Enumeration<String> enumeration) {
 		if (enumeration == null) {
 			return null;
 		}
@@ -1005,6 +1018,7 @@ public abstract class StringUtils {
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or {@code null} if the delimiter wasn't found in the given input {@code String}
 	 */
+	@Nullable
 	public static String[] split(String toSplit, String delimiter) {
 		if (!hasLength(toSplit) || !hasLength(delimiter)) {
 			return null;
@@ -1030,6 +1044,7 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
+	@Nullable
 	public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
 		return splitArrayElementsIntoProperties(array, delimiter, null);
 	}
@@ -1048,6 +1063,7 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
+	@Nullable
 	public static Properties splitArrayElementsIntoProperties(
 			String[] array, String delimiter, String charsToDelete) {
 
@@ -1109,8 +1125,9 @@ public abstract class StringUtils {
 	 * @see String#trim()
 	 * @see #delimitedListToStringArray
 	 */
+	@Nullable
 	public static String[] tokenizeToStringArray(
-			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+			@Nullable String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
 		if (str == null) {
 			return null;

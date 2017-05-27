@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -112,6 +113,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
 
 
+	@Nullable
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();

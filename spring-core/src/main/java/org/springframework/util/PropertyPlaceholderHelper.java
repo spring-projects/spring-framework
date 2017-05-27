@@ -25,6 +25,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
  * {@code ${name}}. Using {@code PropertyPlaceholderHelper} these placeholders can be substituted for
@@ -79,7 +81,7 @@ public class PropertyPlaceholderHelper {
 	 * be ignored ({@code true}) or cause an exception ({@code false})
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
@@ -220,6 +222,7 @@ public class PropertyPlaceholderHelper {
 		 * @param placeholderName the name of the placeholder to resolve
 		 * @return the replacement value, or {@code null} if no replacement is to be made
 		 */
+		@Nullable
 		String resolvePlaceholder(String placeholderName);
 	}
 

@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -61,6 +62,7 @@ public class ContentDisposition {
 	 * Return the disposition type, like for example {@literal inline}, {@literal attachment},
 	 * {@literal form-data}, or {@code null} if not defined.
 	 */
+	@Nullable
 	public String getType() {
 		return this.type;
 	}
@@ -68,6 +70,7 @@ public class ContentDisposition {
 	/**
 	 * Return the value of the {@literal name} parameter, or {@code null} if not defined.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -76,6 +79,7 @@ public class ContentDisposition {
 	 * Return the value of the {@literal filename} parameter (or the value of the
 	 * {@literal filename*} one decoded as defined in the RFC 5987), or {@code null} if not defined.
 	 */
+	@Nullable
 	public String getFilename() {
 		return this.filename;
 	}
@@ -83,6 +87,7 @@ public class ContentDisposition {
 	/**
 	 * Return the charset defined in {@literal filename*} parameter, or {@code null} if not defined.
 	 */
+	@Nullable
 	public Charset getCharset() {
 		return this.charset;
 	}
@@ -90,6 +95,7 @@ public class ContentDisposition {
 	/**
 	 * Return the value of the {@literal size} parameter, or {@code null} if not defined.
 	 */
+	@Nullable
 	public Long getSize() {
 		return this.size;
 	}

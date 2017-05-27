@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -186,6 +187,7 @@ public class BindStatus {
 	 * Note that the complete bind path as required by the bind tag is
 	 * "customer.address.street", if bound to a "customer" bean.
 	 */
+	@Nullable
 	public String getExpression() {
 		return this.expression;
 	}
@@ -196,6 +198,7 @@ public class BindStatus {
 	 * <p>This value will be an HTML-escaped String if the original value
 	 * already was a String.
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -205,6 +208,7 @@ public class BindStatus {
 	 * '{@code getValue().getClass()}' since '{@code getValue()}' may
 	 * return '{@code null}'.
 	 */
+	@Nullable
 	public Class<?> getValueType() {
 		return this.valueType;
 	}
@@ -213,6 +217,7 @@ public class BindStatus {
 	 * Return the actual value of the field, i.e. the raw property value,
 	 * or {@code null} if not available.
 	 */
+	@Nullable
 	public Object getActualValue() {
 		return this.actualValue;
 	}
@@ -246,6 +251,7 @@ public class BindStatus {
 	 * Return the error codes for the field or object, if any.
 	 * Returns an empty array instead of null if none.
 	 */
+	@Nullable
 	public String[] getErrorCodes() {
 		return this.errorCodes;
 	}
@@ -304,6 +310,7 @@ public class BindStatus {
 	 * @return the current Errors instance, or {@code null} if none
 	 * @see org.springframework.validation.BindingResult
 	 */
+	@Nullable
 	public Errors getErrors() {
 		return this.errors;
 	}
@@ -313,6 +320,7 @@ public class BindStatus {
 	 * is currently bound to.
 	 * @return the current PropertyEditor, or {@code null} if none
 	 */
+	@Nullable
 	public PropertyEditor getEditor() {
 		return this.editor;
 	}
@@ -323,6 +331,7 @@ public class BindStatus {
 	 * @param valueClass the value class that an editor is needed for
 	 * @return the associated PropertyEditor, or {@code null} if none
 	 */
+	@Nullable
 	public PropertyEditor findEditor(Class<?> valueClass) {
 		return (this.bindingResult != null ?
 				this.bindingResult.findEditor(this.expression, valueClass) : null);

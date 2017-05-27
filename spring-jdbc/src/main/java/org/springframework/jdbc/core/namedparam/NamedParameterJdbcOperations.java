@@ -27,6 +27,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of JDBC operations allowing the use
@@ -67,6 +68,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException;
 
@@ -85,6 +87,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException;
 
@@ -101,6 +104,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException;
 
 	/**
@@ -267,6 +271,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException;
 
@@ -286,6 +291,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException;
 

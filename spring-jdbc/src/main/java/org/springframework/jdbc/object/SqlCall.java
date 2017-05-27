@@ -18,12 +18,14 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -180,7 +182,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with this parameters.
 	 * @param inParams parameters. May be {@code null}.
 	 */
-	protected CallableStatementCreator newCallableStatementCreator(Map<String, ?> inParams) {
+	protected CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
 	}
 

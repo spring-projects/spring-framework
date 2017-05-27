@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +38,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -504,6 +506,7 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 * @return the parent application context, or {@code null} if none
 	 */
+	@Nullable
 	protected ApplicationContext loadParentContext(ServletContext servletContext) {
 		return null;
 	}
@@ -542,6 +545,7 @@ public class ContextLoader {
 	 * if none found
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
+	@Nullable
 	public static WebApplicationContext getCurrentWebApplicationContext() {
 		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 		if (ccl != null) {

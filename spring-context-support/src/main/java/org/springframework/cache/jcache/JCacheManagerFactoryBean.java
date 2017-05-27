@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} for a JCache {@link javax.cache.CacheManager},
@@ -54,7 +55,7 @@ public class JCacheManagerFactoryBean
 	 * Specify the URI for the desired CacheManager.
 	 * Default is {@code null} (i.e. JCache's default).
 	 */
-	public void setCacheManagerUri(URI cacheManagerUri) {
+	public void setCacheManagerUri(@Nullable URI cacheManagerUri) {
 		this.cacheManagerUri = cacheManagerUri;
 	}
 
@@ -63,7 +64,7 @@ public class JCacheManagerFactoryBean
 	 * Default is {@code null} (i.e. no special properties to apply).
 	 * @see javax.cache.spi.CachingProvider#getCacheManager(URI, ClassLoader, Properties)
 	 */
-	public void setCacheManagerProperties(Properties cacheManagerProperties) {
+	public void setCacheManagerProperties(@Nullable Properties cacheManagerProperties) {
 		this.cacheManagerProperties = cacheManagerProperties;
 	}
 

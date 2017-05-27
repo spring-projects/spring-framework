@@ -23,6 +23,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ReflectionUtils;
 
@@ -127,6 +128,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @param arguments the argument values to match against method parameters
 	 * @return a matching method, or {@code null} if none
 	 */
+	@Nullable
 	protected Method doFindMatchingMethod(Object[] arguments) {
 		TypeConverter converter = getTypeConverter();
 		if (converter != null) {

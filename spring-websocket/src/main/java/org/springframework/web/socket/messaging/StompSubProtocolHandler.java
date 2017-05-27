@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpAttributes;
@@ -531,6 +532,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return connectedHeaders;
 	}
 
+	@Nullable
 	private String getDisconnectReceipt(SimpMessageHeaderAccessor simpHeaders) {
 		String name = StompHeaderAccessor.DISCONNECT_MESSAGE_HEADER;
 		Message<?> message = (Message<?>) simpHeaders.getHeader(name);

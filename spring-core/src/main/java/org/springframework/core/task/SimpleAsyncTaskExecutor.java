@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
@@ -107,6 +108,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	/**
 	 * Return the external factory to use for creating new Threads, if any.
 	 */
+	@Nullable
 	public final ThreadFactory getThreadFactory() {
 		return this.threadFactory;
 	}

@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -120,6 +121,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 
 	@Override
+	@Nullable
 	public String getAsText() {
 		Resource value = (Resource) getValue();
 		try {

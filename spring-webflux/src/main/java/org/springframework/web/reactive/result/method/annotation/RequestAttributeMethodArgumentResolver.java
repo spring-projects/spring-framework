@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -41,7 +42,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestAttributeMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 

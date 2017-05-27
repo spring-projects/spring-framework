@@ -19,6 +19,7 @@ package org.springframework.aop.framework.autoproxy;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 
 /**
  * Utilities for auto-proxy aware components.
@@ -79,6 +80,7 @@ public abstract class AutoProxyUtils {
 	 * @since 4.2.3
 	 * @see org.springframework.beans.factory.BeanFactory#getType(String)
 	 */
+	@Nullable
 	public static Class<?> determineTargetClass(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		if (beanName == null) {
 			return null;

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -89,6 +90,7 @@ public class CookieGenerator {
 	/**
 	 * Return the domain for cookies created by this generator, if any.
 	 */
+	@Nullable
 	public String getCookieDomain() {
 		return this.cookieDomain;
 	}

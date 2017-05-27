@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
@@ -47,18 +48,21 @@ public interface MvcResult {
 	 * Return the executed handler.
 	 * @return the handler, possibly {@code null} if none were executed
 	 */
+	@Nullable
 	Object getHandler();
 
 	/**
 	 * Return interceptors around the handler.
 	 * @return interceptors, or {@code null} if none were selected
 	 */
+	@Nullable
 	HandlerInterceptor[] getInterceptors();
 
 	/**
 	 * Return the {@code ModelAndView} prepared by the handler.
 	 * @return a {@code ModelAndView}, or {@code null}
 	 */
+	@Nullable
 	ModelAndView getModelAndView();
 
 	/**
@@ -66,6 +70,7 @@ public interface MvcResult {
 	 * through a {@link HandlerExceptionResolver}.
 	 * @return an exception, possibly {@code null}
 	 */
+	@Nullable
  	Exception getResolvedException();
 
 	/**

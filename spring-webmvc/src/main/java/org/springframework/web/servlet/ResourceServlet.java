@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -235,6 +236,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * @return the URL of the target resource, or {@code null} if none found
 	 * @see #RESOURCE_PARAM_NAME
 	 */
+	@Nullable
 	protected String determineResourceUrl(HttpServletRequest request) {
 		return request.getParameter(RESOURCE_PARAM_NAME);
 	}

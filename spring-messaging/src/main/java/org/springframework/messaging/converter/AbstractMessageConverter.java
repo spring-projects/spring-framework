@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -157,6 +158,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @param payload the payload being converted to message
 	 * @return the content type, or {@code null} if not known
 	 */
+	@Nullable
 	protected MimeType getDefaultContentType(Object payload) {
 		List<MimeType> mimeTypes = getSupportedMimeTypes();
 		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
@@ -255,7 +257,8 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * perform the conversion
 	 * @since 4.2
 	 */
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	@Nullable
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		return null;
 	}
 
@@ -269,7 +272,8 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * cannot perform the conversion
 	 * @since 4.2
 	 */
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+	@Nullable
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		return null;
 	}
 

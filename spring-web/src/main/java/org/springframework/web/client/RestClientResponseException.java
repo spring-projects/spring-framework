@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * Common base class for exceptions that contain actual HTTP response data.
@@ -54,7 +55,7 @@ public class RestClientResponseException extends RestClientException {
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(message);
 		this.rawStatusCode = statusCode;

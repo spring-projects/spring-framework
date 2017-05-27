@@ -20,6 +20,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by configurable web application contexts.
@@ -69,6 +70,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	/**
 	 * Return the ServletConfig for this web application context, if any.
 	 */
+	@Nullable
 	ServletConfig getServletConfig();
 
 	/**
@@ -81,6 +83,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	/**
 	 * Return the namespace for this web application context, if any.
 	 */
+	@Nullable
 	String getNamespace();
 
 	/**
@@ -102,6 +105,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	 * Return the config locations for this web application context,
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	String[] getConfigLocations();
 
 }

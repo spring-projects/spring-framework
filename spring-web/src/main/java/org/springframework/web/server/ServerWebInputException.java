@@ -18,6 +18,7 @@ package org.springframework.web.server;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 400 (bad request) for use in
@@ -59,6 +60,7 @@ public class ServerWebInputException extends ResponseStatusException {
 	/**
 	 * Return the {@code MethodParameter} associated with this error, if any.
 	 */
+	@Nullable
 	public MethodParameter getMethodParameter() {
 		return this.parameter;
 	}

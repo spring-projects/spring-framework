@@ -18,6 +18,7 @@ package org.springframework.web.cors.reactive;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -43,6 +44,6 @@ public interface CorsProcessor {
 	 * @param exchange the current HTTP request / response
 	 * @return a {@link Mono} emitting {@code false} if the request is rejected, {@code true} otherwise
 	 */
-	boolean processRequest(CorsConfiguration configuration, ServerWebExchange exchange);
+	boolean processRequest(@Nullable CorsConfiguration configuration, ServerWebExchange exchange);
 
 }

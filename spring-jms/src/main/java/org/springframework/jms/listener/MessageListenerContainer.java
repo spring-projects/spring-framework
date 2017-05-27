@@ -20,6 +20,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Internal abstraction used by the framework representing a message
@@ -41,12 +42,14 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	 * Return the {@link MessageConverter} that can be used to
 	 * convert {@link javax.jms.Message}, if any.
 	 */
+	@Nullable
 	MessageConverter getMessageConverter();
 
 	/**
 	 * Return the {@link DestinationResolver} to use to resolve
 	 * destinations by names.
 	 */
+	@Nullable
 	DestinationResolver getDestinationResolver();
 
 	/**
@@ -68,6 +71,7 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	 * if the broker's defaults should be used.
 	 * @since 5.0
 	 */
+	@Nullable
 	QosSettings getReplyQosSettings();
 
 }

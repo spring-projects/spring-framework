@@ -19,6 +19,8 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * An {@code AnnotationAttributeExtractor} is responsible for
  * {@linkplain #getAttributeValue extracting} annotation attribute values
@@ -43,6 +45,7 @@ interface AnnotationAttributeExtractor<S> {
 	 * type supported by this extractor.
 	 * @return the annotated element, or {@code null} if unknown
 	 */
+	@Nullable
 	Object getAnnotatedElement();
 
 	/**

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -214,6 +215,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the associated {@code CacheControl}, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
+	@Nullable
 	protected CacheControl lookupCacheControl(String urlPath) {
 		// Direct match?
 		CacheControl cacheControl = this.cacheControlMappings.get(urlPath);
@@ -238,6 +240,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the cacheSeconds integer value, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
+	@Nullable
 	protected Integer lookupCacheSeconds(String urlPath) {
 		// Direct match?
 		Integer cacheSeconds = this.cacheMappings.get(urlPath);

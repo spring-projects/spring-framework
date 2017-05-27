@@ -33,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 
 /**
  * Common base class for plain JSON converters, e.g. Gson and JSON-B.
@@ -142,7 +143,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 	 * @param writer the {@code} Writer to use
 	 * @throws Exception in case of write failures
 	 */
-	protected abstract void writeInternal(Object o, Type type, Writer writer) throws Exception;
+	protected abstract void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception;
 
 
 	private static Reader getReader(HttpInputMessage inputMessage) throws IOException {

@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
@@ -103,6 +104,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 * @see #getApplicationContext()
 	 */
+	@Nullable
 	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (ctx instanceof WebApplicationContext) {
@@ -121,6 +123,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * Return the current ServletContext.
 	 * @throws IllegalStateException if not running within a ServletContext
 	 */
+	@Nullable
 	protected final ServletContext getServletContext() throws IllegalStateException {
 		if (this.servletContext != null) {
 			return this.servletContext;

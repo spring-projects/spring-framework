@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -85,7 +86,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanClassLoader the class loader to use,
 	 * or {@code null} to suggest the default class loader
 	 */
-	void setBeanClassLoader(ClassLoader beanClassLoader);
+	void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
 
 	/**
 	 * Return this factory's class loader for loading bean classes.
@@ -108,6 +109,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * if any.
 	 * @since 2.5
 	 */
+	@Nullable
 	ClassLoader getTempClassLoader();
 
 	/**
@@ -151,6 +153,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the associated ConversionService, if any.
 	 * @since 3.0
 	 */
+	@Nullable
 	ConversionService getConversionService();
 
 	/**
@@ -222,6 +225,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the resolved value (may be the original value as-is)
 	 * @since 3.0
 	 */
+	@Nullable
 	String resolveEmbeddedValue(String value);
 
 	/**
@@ -265,6 +269,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the registered Scope implementation, or {@code null} if none
 	 * @see #registerScope
 	 */
+	@Nullable
 	Scope getRegisteredScope(String scopeName);
 
 	/**

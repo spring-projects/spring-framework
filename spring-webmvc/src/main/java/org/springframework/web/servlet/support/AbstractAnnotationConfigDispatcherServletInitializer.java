@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -49,6 +50,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * Returns {@code null} if {@link #getRootConfigClasses()} returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	protected WebApplicationContext createRootApplicationContext() {
 		Class<?>[] configClasses = getRootConfigClasses();
 		if (!ObjectUtils.isEmpty(configClasses)) {
@@ -83,6 +85,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * @return the configuration classes for the root application context, or {@code null}
 	 * if creation and registration of a root context is not desired
 	 */
+	@Nullable
 	protected abstract Class<?>[] getRootConfigClasses();
 
 	/**
@@ -93,6 +96,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * @return the configuration classes for the dispatcher servlet application context or
 	 * {@code null} if all configuration is specified through root config classes.
 	 */
+	@Nullable
 	protected abstract Class<?>[] getServletConfigClasses();
 
 }

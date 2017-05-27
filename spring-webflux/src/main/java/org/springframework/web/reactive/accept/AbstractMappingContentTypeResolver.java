@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -73,6 +74,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * @param key the key converted to lower case
 	 * @return a MediaType or {@code null}
 	 */
+	@Nullable
 	protected MediaType getMediaType(String key) {
 		return this.mediaTypeLookup.get(key.toLowerCase(Locale.ENGLISH));
 	}
@@ -125,6 +127,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * e.g. file extension, query parameter, etc.
 	 * @return the key or {@code null}
 	 */
+	@Nullable
 	protected abstract String extractKey(ServerWebExchange exchange);
 
 	/**
@@ -141,6 +144,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * this method it will be added to the mappings.
 	 */
 	@SuppressWarnings("UnusedParameters")
+	@Nullable
 	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
 		return null;
 	}

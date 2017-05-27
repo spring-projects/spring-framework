@@ -27,6 +27,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -111,6 +112,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * in case of an invalid message that will simply be ignored)
 	 * @throws javax.jms.JMSException in case of message access failure
 	 */
+	@Nullable
 	protected RemoteInvocation readRemoteInvocation(Message requestMessage) throws JMSException {
 		Object content = this.messageConverter.fromMessage(requestMessage);
 		if (content instanceof RemoteInvocation) {
@@ -178,6 +180,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @see #readRemoteInvocation
 	 * @see #setIgnoreInvalidRequests
 	 */
+	@Nullable
 	protected RemoteInvocation onInvalidRequest(Message requestMessage) throws JMSException {
 		if (this.ignoreInvalidRequests) {
 			if (logger.isWarnEnabled()) {

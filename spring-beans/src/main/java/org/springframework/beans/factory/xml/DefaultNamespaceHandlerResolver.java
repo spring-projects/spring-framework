@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -85,7 +86,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * (may be {@code null}, in which case the thread context ClassLoader will be used)
 	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
-	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
+	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader) {
 		this(classLoader, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
@@ -96,7 +97,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * may be {@code null}, in which case the thread context ClassLoader will be used)
 	 * @param handlerMappingsLocation the mapping file location
 	 */
-	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
+	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		this.handlerMappingsLocation = handlerMappingsLocation;

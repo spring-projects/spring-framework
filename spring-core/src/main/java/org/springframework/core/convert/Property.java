@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -171,6 +172,7 @@ public final class Property {
 		return write;
 	}
 
+	@Nullable
 	private MethodParameter resolveReadMethodParameter() {
 		if (getReadMethod() == null) {
 			return null;
@@ -178,6 +180,7 @@ public final class Property {
 		return resolveParameterType(new MethodParameter(getReadMethod(), -1));
 	}
 
+	@Nullable
 	private MethodParameter resolveWriteMethodParameter() {
 		if (getWriteMethod() == null) {
 			return null;
@@ -214,6 +217,7 @@ public final class Property {
 		}
 	}
 
+	@Nullable
 	private Field getField() {
 		String name = getName();
 		if (!StringUtils.hasLength(name)) {

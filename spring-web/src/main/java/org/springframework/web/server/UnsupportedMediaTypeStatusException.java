@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 416 (unsupported media type).
@@ -59,6 +60,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * Return the request Content-Type header if it was parsed successfully,
 	 * or {@code null} otherwise.
 	 */
+	@Nullable
 	public MediaType getContentType() {
 		return this.contentType;
 	}

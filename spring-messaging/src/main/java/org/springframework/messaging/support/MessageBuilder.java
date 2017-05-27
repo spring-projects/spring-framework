@@ -18,6 +18,7 @@ package org.springframework.messaging.support;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -73,7 +74,7 @@ public final class MessageBuilder<T> {
 	 * Set the value for the given header name. If the provided value is {@code null},
 	 * the header will be removed.
 	 */
-	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
+	public MessageBuilder<T> setHeader(String headerName, @Nullable Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
@@ -187,7 +188,7 @@ public final class MessageBuilder<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
+	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
 		if (payload instanceof Throwable) {

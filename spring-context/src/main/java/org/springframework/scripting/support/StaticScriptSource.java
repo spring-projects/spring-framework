@@ -16,6 +16,7 @@
 
 package org.springframework.scripting.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
@@ -52,7 +53,7 @@ public class StaticScriptSource implements ScriptSource {
 	 * @param className the suggested class name for the script
 	 * (may be {@code null})
 	 */
-	public StaticScriptSource(String script, String className) {
+	public StaticScriptSource(String script, @Nullable String className) {
 		setScript(script);
 		this.className = className;
 	}

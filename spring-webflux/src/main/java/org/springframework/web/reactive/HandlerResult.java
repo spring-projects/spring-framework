@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 
@@ -50,7 +51,7 @@ public class HandlerResult {
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnType the return value type
 	 */
-	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType) {
+	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType) {
 		this(handler, returnValue, returnType, null);
 	}
 
@@ -61,7 +62,7 @@ public class HandlerResult {
 	 * @param returnType the return value type
 	 * @param context the binding context used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType,
+	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType,
 			BindingContext context) {
 
 		Assert.notNull(handler, "'handler' is required");
@@ -83,6 +84,7 @@ public class HandlerResult {
 	/**
 	 * Return the value returned from the handler, if any.
 	 */
+	@Nullable
 	public Object getReturnValue() {
 		return this.returnValue;
 	}

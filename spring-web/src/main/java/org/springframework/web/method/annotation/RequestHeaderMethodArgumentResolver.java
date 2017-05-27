@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -48,7 +49,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 */
-	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 

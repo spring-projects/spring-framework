@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -176,6 +177,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	/**
 	 * Return the name of the RequestContext attribute for all views, if any.
 	 */
+	@Nullable
 	protected String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}

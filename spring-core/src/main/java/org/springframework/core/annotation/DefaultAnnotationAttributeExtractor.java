@@ -19,6 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -41,7 +42,7 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotation; may be {@code null} if unknown
 	 */
-	DefaultAnnotationAttributeExtractor(Annotation annotation, Object annotatedElement) {
+	DefaultAnnotationAttributeExtractor(Annotation annotation, @Nullable Object annotatedElement) {
 		super(annotation.annotationType(), annotatedElement, annotation);
 	}
 

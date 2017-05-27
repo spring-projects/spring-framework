@@ -21,6 +21,7 @@ import javax.jms.Session;
 import org.springframework.core.Constants;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
@@ -267,6 +268,7 @@ public class JmsActivationSpecConfig {
 	/**
 	 * Return the {@link MessageConverter} to use, if any.
 	 */
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}

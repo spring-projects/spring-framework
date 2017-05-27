@@ -47,6 +47,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -207,6 +208,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * Return the owning {@link BeanFactory}.
 	 * May be {@code null}, as this post-processor doesn't need to belong to a bean factory.
 	 */
+	@Nullable
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
@@ -400,6 +402,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a TargetSource for this bean
 	 * @see #setCustomTargetSourceCreators
 	 */
+	@Nullable
 	protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
 		// We can't create fancy target sources for directly registered singletons.
 		if (this.customTargetSourceCreators != null &&
@@ -578,7 +581,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
+	@Nullable
 	protected abstract Object[] getAdvicesAndAdvisorsForBean(
-			Class<?> beanClass, String beanName, TargetSource customTargetSource) throws BeansException;
+			Class<?> beanClass, String beanName, @Nullable TargetSource customTargetSource) throws BeansException;
 
 }

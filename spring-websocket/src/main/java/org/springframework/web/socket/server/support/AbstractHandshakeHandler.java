@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -340,6 +341,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @return the selected protocols or {@code null}
 	 * @see #determineHandlerSupportedProtocols(WebSocketHandler)
 	 */
+	@Nullable
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
 		if (requestedProtocols != null) {
 			List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
@@ -402,6 +404,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @param attributes handshake attributes to pass to the WebSocket session
 	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
+	@Nullable
 	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) {
 

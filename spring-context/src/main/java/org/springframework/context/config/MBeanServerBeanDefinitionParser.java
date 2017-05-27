@@ -26,6 +26,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jmx.support.MBeanServerFactoryBean;
 import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
 import org.springframework.jndi.JndiObjectFactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -82,6 +83,7 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		return bd;
 	}
 
+	@Nullable
 	static AbstractBeanDefinition findServerForSpecialEnvironment() {
 		if (weblogicPresent) {
 			RootBeanDefinition bd = new RootBeanDefinition(JndiObjectFactoryBean.class);

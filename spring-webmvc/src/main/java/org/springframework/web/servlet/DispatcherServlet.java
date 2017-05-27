@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +47,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -767,6 +769,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the ThemeSource, if any
 	 * @see #getWebApplicationContext()
 	 */
+	@Nullable
 	public final ThemeSource getThemeSource() {
 		if (getWebApplicationContext() instanceof ThemeSource) {
 			return (ThemeSource) getWebApplicationContext();
@@ -781,6 +784,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the MultipartResolver used by this servlet, or {@code null} if none
 	 * (indicating that no multipart support is available)
 	 */
+	@Nullable
 	public final MultipartResolver getMultipartResolver() {
 		return this.multipartResolver;
 	}
@@ -1151,6 +1155,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
 	 */
+	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
 			if (logger.isTraceEnabled()) {
@@ -1213,8 +1218,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return a corresponding ModelAndView to forward to
 	 * @throws Exception if no error ModelAndView found
 	 */
+	@Nullable
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) throws Exception {
+			@Nullable Object handler, Exception ex) throws Exception {
 
 		// Check registered HandlerExceptionResolvers...
 		ModelAndView exMv = null;
@@ -1300,6 +1306,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the view name (or {@code null} if no default found)
 	 * @throws Exception if view name translation failed
 	 */
+	@Nullable
 	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
 		return this.viewNameTranslator.getViewName(request);
 	}
@@ -1318,6 +1325,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
+	@Nullable
 	protected View resolveViewName(String viewName, Map<String, Object> model, Locale locale,
 			HttpServletRequest request) throws Exception {
 

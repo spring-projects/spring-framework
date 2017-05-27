@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -41,7 +42,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 	 * @param targetClass the target class that the method will be invoked
 	 * on (may be {@code null} if identical to the declaring class)
 	 */
-	public MethodClassKey(Method method, Class<?> targetClass) {
+	public MethodClassKey(Method method, @Nullable Class<?> targetClass) {
 		this.method = method;
 		this.targetClass = targetClass;
 	}

@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -94,6 +95,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * @see #getResources
 	 * @see #getResourcePatternResolver
 	 */
+	@Nullable
 	protected String[] getConfigLocations() {
 		return (this.configLocations != null ? this.configLocations : getDefaultConfigLocations());
 	}
@@ -106,6 +108,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * @return an array of default config locations, if any
 	 * @see #setConfigLocations
 	 */
+	@Nullable
 	protected String[] getDefaultConfigLocations() {
 		return null;
 	}

@@ -24,12 +24,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
 import javax.websocket.Session;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -89,7 +91,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * 	fallback on the user available in the underlying WebSocket session
 	 */
 	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> attributes,
-			InetSocketAddress localAddress, InetSocketAddress remoteAddress, Principal user) {
+			InetSocketAddress localAddress, InetSocketAddress remoteAddress, @Nullable Principal user) {
 
 		super(attributes);
 		headers = (headers != null) ? headers : new HttpHeaders();

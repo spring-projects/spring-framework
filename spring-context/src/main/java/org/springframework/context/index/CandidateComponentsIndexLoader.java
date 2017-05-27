@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -75,7 +76,8 @@ public class CandidateComponentsIndexLoader {
 	 * @throws IllegalArgumentException if any module index cannot
 	 * be loaded or if an error occurs while creating {@link CandidateComponentsIndex}
 	 */
-	public static CandidateComponentsIndex loadIndex(ClassLoader classLoader) {
+	@Nullable
+	public static CandidateComponentsIndex loadIndex(@Nullable ClassLoader classLoader) {
 		ClassLoader classLoaderToUse = classLoader;
 		if (classLoaderToUse == null) {
 			classLoaderToUse = CandidateComponentsIndexLoader.class.getClassLoader();
@@ -83,6 +85,7 @@ public class CandidateComponentsIndexLoader {
 		return cache.computeIfAbsent(classLoaderToUse, CandidateComponentsIndexLoader::doLoadIndex);
 	}
 
+	@Nullable
 	private static CandidateComponentsIndex doLoadIndex(ClassLoader classLoader) {
 		if (shouldIgnoreIndex) {
 			return null;

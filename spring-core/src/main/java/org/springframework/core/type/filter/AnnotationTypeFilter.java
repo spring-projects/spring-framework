@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -102,6 +103,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		return hasAnnotation(interfaceName);
 	}
 
+	@Nullable
 	protected Boolean hasAnnotation(String typeName) {
 		if (Object.class.getName().equals(typeName)) {
 			return false;

@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -44,7 +45,7 @@ public abstract class AnnotationBeanUtils {
 	 * @param excludedProperties the names of excluded properties, if any
 	 * @see org.springframework.beans.BeanWrapper
 	 */
-	public static void copyPropertiesToBean(Annotation ann, Object bean, String... excludedProperties) {
+	public static void copyPropertiesToBean(Annotation ann, Object bean, @Nullable String... excludedProperties) {
 		copyPropertiesToBean(ann, bean, null, excludedProperties);
 	}
 
@@ -58,7 +59,7 @@ public abstract class AnnotationBeanUtils {
 	 * @param excludedProperties the names of excluded properties, if any
 	 * @see org.springframework.beans.BeanWrapper
 	 */
-	public static void copyPropertiesToBean(Annotation ann, Object bean, StringValueResolver valueResolver, String... excludedProperties) {
+	public static void copyPropertiesToBean(Annotation ann, Object bean, @Nullable StringValueResolver valueResolver, @Nullable String... excludedProperties) {
 		Set<String> excluded = new HashSet<>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);

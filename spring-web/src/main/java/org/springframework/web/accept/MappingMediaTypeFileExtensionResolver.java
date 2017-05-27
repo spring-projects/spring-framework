@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -102,6 +103,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	 * Use this method for a reverse lookup from extension to MediaType.
 	 * @return a MediaType for the key, or {@code null} if none found
 	 */
+	@Nullable
 	protected MediaType lookupMediaType(String extension) {
 		return this.mediaTypes.get(extension.toLowerCase(Locale.ENGLISH));
 	}

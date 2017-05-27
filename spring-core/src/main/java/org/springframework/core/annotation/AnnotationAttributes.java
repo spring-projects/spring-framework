@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -120,7 +121,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * or {@code null} to just store the annotation type name
 	 * @since 4.3.2
 	 */
-	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
+	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
 		this.annotationType = getAnnotationType(annotationType, classLoader);
 		this.displayName = annotationType;
@@ -146,6 +147,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * @return the annotation type, or {@code null} if unknown
 	 * @since 4.2
 	 */
+	@Nullable
 	public Class<? extends Annotation> annotationType() {
 		return this.annotationType;
 	}

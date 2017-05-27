@@ -31,6 +31,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
@@ -218,6 +219,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the username for the account at the mail host.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -240,6 +242,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the password for the account at the mail host.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}
@@ -257,6 +260,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default encoding for {@link MimeMessage MimeMessages},
 	 * or {@code null} if none.
 	 */
+	@Nullable
 	public String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
@@ -282,6 +286,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default Java Activation {@link FileTypeMap} for
 	 * {@link MimeMessage MimeMessages}, or {@code null} if none.
 	 */
+	@Nullable
 	public FileTypeMap getDefaultFileTypeMap() {
 		return this.defaultFileTypeMap;
 	}

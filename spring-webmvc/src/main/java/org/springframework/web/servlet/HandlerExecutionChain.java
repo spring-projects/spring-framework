@@ -18,12 +18,14 @@ package org.springframework.web.servlet;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -81,6 +83,7 @@ public class HandlerExecutionChain {
 	 * Return the handler object to execute.
 	 * @return the handler object (may be {@code null})
 	 */
+	@Nullable
 	public Object getHandler() {
 		return this.handler;
 	}
@@ -111,6 +114,7 @@ public class HandlerExecutionChain {
 	 * Return the array of interceptors to apply (in the given order).
 	 * @return the array of HandlerInterceptors instances (may be {@code null})
 	 */
+	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
 			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);

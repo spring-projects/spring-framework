@@ -20,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface that specifies a converter between Java objects and JMS messages.
  *
@@ -54,6 +56,7 @@ public interface MessageConverter {
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 */
+	@Nullable
 	Object fromMessage(Message message) throws JMSException, MessageConversionException;
 
 }

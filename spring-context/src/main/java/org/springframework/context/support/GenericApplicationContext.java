@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -384,7 +385,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
-	public final <T> void registerBean(String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+	public final <T> void registerBean(@Nullable String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
 		registerBean(beanName, beanClass, null, customizers);
 	}
 
@@ -418,7 +419,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	public <T> void registerBean(String beanName, Class<T> beanClass, Supplier<T> supplier,
+	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, Supplier<T> supplier,
 			BeanDefinitionCustomizer... customizers) {
 
 		Assert.isTrue(beanName != null || beanClass != null, "Either bean name or bean class must be specified");

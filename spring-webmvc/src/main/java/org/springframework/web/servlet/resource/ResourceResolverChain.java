@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * A contract for invoking a chain of {@link ResourceResolver}s where each resolver
@@ -40,6 +42,7 @@ public interface ResourceResolverChain {
 	 * @param locations the locations to search in when looking up resources
 	 * @return the resolved resource or {@code null} if unresolved
 	 */
+	@Nullable
 	Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations);
 
 	/**
@@ -51,6 +54,7 @@ public interface ResourceResolverChain {
 	 * @param locations the locations to search in when looking up resources
 	 * @return the resolved public URL path or {@code null} if unresolved
 	 */
+	@Nullable
 	String resolveUrlPath(String resourcePath, List<? extends Resource> locations);
 
 }

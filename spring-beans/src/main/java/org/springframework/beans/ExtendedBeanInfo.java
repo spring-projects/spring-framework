@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -188,6 +189,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 	}
 
+	@Nullable
 	private PropertyDescriptor findExistingPropertyDescriptor(String propertyName, Class<?> propertyType) {
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
 			final Class<?> candidateType;

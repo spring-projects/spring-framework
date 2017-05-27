@@ -25,6 +25,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -105,6 +106,7 @@ public class RequestContext {
 	 * Return the model Map that this RequestContext encapsulates, if any.
 	 * @return the populated model Map, or {@code null} if none available
 	 */
+	@Nullable
 	public Map<String, Object> getModel() {
 		return this.model;
 	}
@@ -169,6 +171,7 @@ public class RequestContext {
 	 * Return the {@link RequestDataValueProcessor} instance to apply to in form
 	 * tag libraries and to redirect URLs.
 	 */
+	@Nullable
 	public RequestDataValueProcessor getRequestDataValueProcessor() {
 		return this.dataValueProcessor;
 	}
@@ -244,7 +247,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
 		return getMessage(code, args, defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -255,7 +258,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, List<?> args, String defaultMessage) {
+	public String getMessage(String code, @Nullable List<?> args, String defaultMessage) {
 		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -267,7 +270,7 @@ public class RequestContext {
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage, boolean htmlEscape) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
 		String msg = this.messageSource.getMessage(code, args, defaultMessage, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
@@ -289,7 +292,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
 		return getMessage(code, args, isDefaultHtmlEscape());
 	}
 
@@ -300,7 +303,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, List<?> args) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable List<?> args) throws NoSuchMessageException {
 		return getMessage(code, (args != null ? args.toArray() : null), isDefaultHtmlEscape());
 	}
 
@@ -312,7 +315,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args, boolean htmlEscape) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.messageSource.getMessage(code, args, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
@@ -345,6 +348,7 @@ public class RequestContext {
 	 * @param name name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
+	@Nullable
 	public Errors getErrors(String name) {
 		return getErrors(name, isDefaultHtmlEscape());
 	}
@@ -355,6 +359,7 @@ public class RequestContext {
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */
+	@Nullable
 	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap<>();
@@ -386,6 +391,7 @@ public class RequestContext {
 	 * @return the model object
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected <T> T getModelObject(String modelName) {
 		T modelObject = (T) this.model.get(modelName);
 		if (modelObject == null) {

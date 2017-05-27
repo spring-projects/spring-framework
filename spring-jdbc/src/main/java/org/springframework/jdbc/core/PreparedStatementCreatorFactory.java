@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -135,7 +136,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(List<?> params) {
+	public PreparedStatementSetter newPreparedStatementSetter(@Nullable List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
@@ -143,7 +144,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+	public PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
@@ -151,7 +152,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(List<?> params) {
+	public PreparedStatementCreator newPreparedStatementCreator(@Nullable List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
@@ -159,7 +160,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	public PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
@@ -169,7 +170,7 @@ public class PreparedStatementCreatorFactory {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(
 				sqlToUse, params != null ? Arrays.asList(params) : Collections.emptyList());
 	}

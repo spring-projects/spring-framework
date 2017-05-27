@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +44,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -321,6 +323,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Return the custom WebApplicationContext id, if any.
 	 */
+	@Nullable
 	public String getContextId() {
 		return this.contextId;
 	}
@@ -353,6 +356,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Return the explicit context config location, if any.
 	 */
+	@Nullable
 	public String getContextConfigLocation() {
 		return this.contextConfigLocation;
 	}
@@ -578,6 +582,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @return the WebApplicationContext for this servlet, or {@code null} if not found
 	 * @see #getContextAttribute()
 	 */
+	@Nullable
 	protected WebApplicationContext findWebApplicationContext() {
 		String attrName = getContextAttribute();
 		if (attrName == null) {
@@ -606,7 +611,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createWebApplicationContext(ApplicationContext parent) {
+	protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Servlet with name '" + getServletName() +
@@ -673,7 +678,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 * @see #createWebApplicationContext(ApplicationContext)
 	 */
-	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+	protected WebApplicationContext createWebApplicationContext(@Nullable WebApplicationContext parent) {
 		return createWebApplicationContext((ApplicationContext) parent);
 	}
 
@@ -1007,6 +1012,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @return the corresponding LocaleContext, or {@code null} if none to bind
 	 * @see LocaleContextHolder#setLocaleContext
 	 */
+	@Nullable
 	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
 		return new SimpleLocaleContext(request.getLocale());
 	}
@@ -1022,6 +1028,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * the previously bound instance (or not binding any, if none bound before)
 	 * @see RequestContextHolder#setRequestAttributes
 	 */
+	@Nullable
 	protected ServletRequestAttributes buildRequestAttributes(
 			HttpServletRequest request, HttpServletResponse response, RequestAttributes previousAttributes) {
 
@@ -1080,6 +1087,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @return the username, or {@code null} if none found
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
+	@Nullable
 	protected String getUsernameForRequest(HttpServletRequest request) {
 		Principal userPrincipal = request.getUserPrincipal();
 		return (userPrincipal != null ? userPrincipal.getName() : null);

@@ -29,6 +29,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -100,6 +101,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the JMS client ID for the shared Connection created and used
 	 * by this container, if any.
 	 */
+	@Nullable
 	public String getClientId() {
 		return this.clientId;
 	}
@@ -146,6 +148,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the bean name that this listener container has been assigned
 	 * in its containing bean factory, if any.
 	 */
+	@Nullable
 	protected final String getBeanName() {
 		return this.beanName;
 	}

@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,6 +41,7 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -202,6 +204,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * @see #getServletConfig()
 	 */
 	@Override
+	@Nullable
 	public final String getServletName() {
 		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
 	}
@@ -212,6 +215,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * @see #getServletConfig()
 	 */
 	@Override
+	@Nullable
 	public final ServletContext getServletContext() {
 		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
 	}

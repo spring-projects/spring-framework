@@ -38,6 +38,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectiveMethodExecutor;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Expression language AST node that represents a method reference.
@@ -168,6 +169,7 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
+	@Nullable
 	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
 			TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 

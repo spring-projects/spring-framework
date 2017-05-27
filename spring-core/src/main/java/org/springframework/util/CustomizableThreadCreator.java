@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple customizable helper class for creating new {@link Thread} instances.
  * Provides various bean properties: thread name prefix, thread priority, etc.
@@ -133,6 +135,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Return the thread group that threads should be created in
 	 * (or {@code null} for the default group).
 	 */
+	@Nullable
 	public ThreadGroup getThreadGroup() {
 		return this.threadGroup;
 	}

@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Holder containing one or more {@link PropertyValue} objects,
  * typically comprising one update for a specific target bean.
@@ -37,6 +39,7 @@ public interface PropertyValues {
 	 * @param propertyName the name to search for
 	 * @return the property value, or {@code null}
 	 */
+	@Nullable
 	PropertyValue getPropertyValue(String propertyName);
 
 	/**

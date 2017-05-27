@@ -36,6 +36,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
@@ -343,6 +344,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * <p>Can be overridden by subclasses.
 	 * @return the expected exception, or {@code null} if none was specified
 	 */
+	@Nullable
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
 		return (test != null && test.expected() != Test.None.class ? test.expected() : null);

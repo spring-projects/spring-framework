@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.user;
 
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -89,6 +90,7 @@ public class UserDestinationResult {
 	 * sessionId in place of a user name thus removing the need for a user-to-session
 	 * lookup via {@link SimpUserRegistry}.
 	 */
+	@Nullable
 	public String getUser() {
 		return this.user;
 	}

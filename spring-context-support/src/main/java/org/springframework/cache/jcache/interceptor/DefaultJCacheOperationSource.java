@@ -32,6 +32,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,6 +70,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified cache manager to use, if any.
 	 */
+	@Nullable
 	public CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
@@ -84,6 +86,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified cache resolver to use, if any.
 	 */
+	@Nullable
 	public CacheResolver getCacheResolver() {
 		return this.cacheResolver;
 	}
@@ -99,6 +102,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified exception cache resolver to use, if any.
 	 */
+	@Nullable
 	public CacheResolver getExceptionCacheResolver() {
 		return this.exceptionCacheResolver;
 	}
@@ -115,6 +119,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified key generator to use, if any.
 	 */
+	@Nullable
 	public KeyGenerator getKeyGenerator() {
 		return this.keyGenerator;
 	}

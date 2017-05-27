@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -24,6 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -156,7 +158,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see #findWebApplicationContext()
 	 * @see #setEnvironment(org.springframework.core.env.Environment)
 	 */
-	public DelegatingFilterProxy(String targetBeanName, WebApplicationContext wac) {
+	public DelegatingFilterProxy(String targetBeanName, @Nullable WebApplicationContext wac) {
 		Assert.hasText(targetBeanName, "target Filter bean name must not be null or empty");
 		this.setTargetBeanName(targetBeanName);
 		this.webApplicationContext = wac;
@@ -287,6 +289,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
 	 * @see WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
+	@Nullable
 	protected WebApplicationContext findWebApplicationContext() {
 		if (this.webApplicationContext != null) {
 			// The user has injected a context at construction time -> use it...

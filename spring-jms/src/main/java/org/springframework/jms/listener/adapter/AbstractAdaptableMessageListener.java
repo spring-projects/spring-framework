@@ -40,6 +40,7 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.converter.SmartMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
@@ -176,7 +177,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * {@code null} to use the default values.
 	 * @since 5.0
 	 */
-	public void setResponseQosSettings(QosSettings responseQosSettings) {
+	public void setResponseQosSettings(@Nullable QosSettings responseQosSettings) {
 		this.responseQosSettings = responseQosSettings;
 	}
 
@@ -184,6 +185,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * Return the {@link QosSettings} to use when sending a response or {@code null} if
 	 * the defaults should be used.
 	 */
+	@Nullable
 	protected QosSettings getResponseQosSettings() {
 		return this.responseQosSettings;
 	}
@@ -256,7 +258,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #getResponseDestination
 	 * @see #sendResponse
 	 */
-	protected void handleResult(Object result, Message request, Session session) {
+	protected void handleResult(Object result, Message request, @Nullable Session session) {
 		if (session != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Listener method returned result [" + result +
@@ -394,6 +396,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setDefaultResponseTopicName
 	 * @see #setDestinationResolver
 	 */
+	@Nullable
 	protected Destination resolveDefaultResponseDestination(Session session) throws JMSException {
 		if (this.defaultResponseDestination instanceof Destination) {
 			return (Destination) this.defaultResponseDestination;

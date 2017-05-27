@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.namedparam;
 
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines common functionality for objects that can
@@ -79,6 +80,7 @@ public interface SqlParameterSource {
 	 * @return the type name of the specified parameter,
 	 * or {@code null} if not known
 	 */
+	@Nullable
 	String getTypeName(String paramName);
 
 }

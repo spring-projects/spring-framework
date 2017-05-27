@@ -33,6 +33,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -395,7 +396,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
 	 */
-	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
+	protected PropertiesHolder refreshProperties(String filename, @Nullable PropertiesHolder propHolder) {
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
 
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
@@ -585,6 +586,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return this.refreshTimestamp;
 		}
 
+		@Nullable
 		public String getProperty(String code) {
 			if (this.properties == null) {
 				return null;
@@ -592,6 +594,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return this.properties.getProperty(code);
 		}
 
+		@Nullable
 		public MessageFormat getMessageFormat(String code, Locale locale) {
 			if (this.properties == null) {
 				return null;

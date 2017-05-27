@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
+
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -41,6 +42,7 @@ import org.springframework.jca.cci.InvalidResultSetAccessException;
 import org.springframework.jca.cci.RecordTypeNotSupportedException;
 import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
 import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -103,7 +105,7 @@ public class CciTemplate implements CciOperations {
 	 * @param connectionSpec the CCI ConnectionSpec to obtain Connections for
 	 * (may be {@code null})
 	 */
-	public CciTemplate(ConnectionFactory connectionFactory, ConnectionSpec connectionSpec) {
+	public CciTemplate(ConnectionFactory connectionFactory, @Nullable ConnectionSpec connectionSpec) {
 		setConnectionFactory(connectionFactory);
 		setConnectionSpec(connectionSpec);
 		afterPropertiesSet();
@@ -135,6 +137,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Return the CCI ConnectionSpec used by this template, if any.
 	 */
+	@Nullable
 	public ConnectionSpec getConnectionSpec() {
 		return this.connectionSpec;
 	}
@@ -158,6 +161,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Return a RecordCreator that should be used for creating default output Records.
 	 */
+	@Nullable
 	public RecordCreator getOutputRecordCreator() {
 		return this.outputRecordCreator;
 	}
@@ -267,7 +271,7 @@ public class CciTemplate implements CciOperations {
 	 * @throws DataAccessException if there is any problem
 	 */
 	protected <T> T doExecute(
-			final InteractionSpec spec, final Record inputRecord, final Record outputRecord,
+			final InteractionSpec spec, final Record inputRecord, @Nullable final Record outputRecord,
 			final RecordExtractor<T> outputExtractor) throws DataAccessException {
 
 		return execute(new InteractionCallback<T>() {

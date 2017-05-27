@@ -34,6 +34,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ReflectionUtils;
@@ -90,7 +91,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType, MethodParameter methodParam)
+	public <T> T convertIfNecessary(Object newValue, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(null, null, newValue, requiredType,
@@ -107,7 +108,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType, Field field)
+	public <T> T convertIfNecessary(Object newValue, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(null, null, newValue, requiredType,
@@ -125,7 +126,7 @@ class TypeConverterDelegate {
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	public <T> T convertIfNecessary(
-			String propertyName, Object oldValue, Object newValue, Class<T> requiredType)
+			String propertyName, @Nullable Object oldValue, Object newValue, @Nullable Class<T> requiredType)
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
@@ -144,8 +145,8 @@ class TypeConverterDelegate {
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
-			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
+	public <T> T convertIfNecessary(String propertyName, @Nullable Object oldValue, Object newValue,
+			@Nullable Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
@@ -357,6 +358,7 @@ class TypeConverterDelegate {
 	 * @param requiredType the type to find an editor for
 	 * @return the corresponding editor, or {@code null} if none
 	 */
+	@Nullable
 	private PropertyEditor findDefaultEditor(Class<?> requiredType) {
 		PropertyEditor editor = null;
 		if (requiredType != null) {
@@ -381,7 +383,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	private Object doConvertValue(Object oldValue, Object newValue, Class<?> requiredType, PropertyEditor editor) {
+	private Object doConvertValue(@Nullable Object oldValue, Object newValue, @Nullable Class<?> requiredType, PropertyEditor editor) {
 		Object convertedValue = newValue;
 
 		if (editor != null && !(convertedValue instanceof String)) {
@@ -443,7 +445,7 @@ class TypeConverterDelegate {
 	 * @param editor the PropertyEditor to use
 	 * @return the converted value
 	 */
-	private Object doConvertTextValue(Object oldValue, String newTextValue, PropertyEditor editor) {
+	private Object doConvertTextValue(@Nullable Object oldValue, String newTextValue, PropertyEditor editor) {
 		try {
 			editor.setValue(oldValue);
 		}

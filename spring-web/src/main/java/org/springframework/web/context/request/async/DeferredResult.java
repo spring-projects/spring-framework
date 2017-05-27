@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -93,7 +94,7 @@ public class DeferredResult<T> {
 	 * @param timeout timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(Long timeout, Object timeoutResult) {
+	public DeferredResult(@Nullable Long timeout, Object timeoutResult) {
 		this.timeoutResult = timeoutResult;
 		this.timeout = timeout;
 	}
@@ -125,6 +126,7 @@ public class DeferredResult<T> {
 	 * to check if there is a result prior to calling this method.
 	 * @since 4.0
 	 */
+	@Nullable
 	public Object getResult() {
 		Object resultToCheck = this.result;
 		return (resultToCheck != RESULT_NONE ? resultToCheck : null);

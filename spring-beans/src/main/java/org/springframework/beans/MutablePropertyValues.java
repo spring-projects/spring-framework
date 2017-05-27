@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -267,6 +268,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #getPropertyValue(String)
 	 * @see PropertyValue#getValue()
 	 */
+	@Nullable
 	public Object get(String propertyName) {
 		PropertyValue pv = getPropertyValue(propertyName);
 		return (pv != null ? pv.getValue() : null);

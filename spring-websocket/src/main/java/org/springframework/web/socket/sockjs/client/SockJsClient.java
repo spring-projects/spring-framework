@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -323,6 +324,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * <p>By default this method returns {@code null}.
 	 * @return the user to associate with the session (possibly {@code null})
 	 */
+	@Nullable
 	protected Principal getUser() {
 		return null;
 	}

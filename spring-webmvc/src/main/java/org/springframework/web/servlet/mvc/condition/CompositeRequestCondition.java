@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -49,7 +51,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * same number of conditions so they may be compared and combined.
 	 * It is acceptable to provide {@code null} conditions.
 	 */
-	public CompositeRequestCondition(RequestCondition<?>... requestConditions) {
+	public CompositeRequestCondition(@Nullable RequestCondition<?>... requestConditions) {
 		this.requestConditions = wrap(requestConditions);
 	}
 

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -185,6 +186,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 	}
 
+	@Nullable
 	private Object findAnnotation(MethodParameter returnType) {
 		Annotation[] anns = new Annotation[4];
 		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
@@ -221,6 +223,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		return new DestinationVariablePlaceholderResolver(vars);
 	}
 
+	@Nullable
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		if (principal != null) {

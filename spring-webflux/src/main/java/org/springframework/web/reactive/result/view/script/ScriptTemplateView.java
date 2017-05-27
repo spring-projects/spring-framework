@@ -39,6 +39,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
 import org.springframework.util.Assert;
@@ -258,6 +259,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+	@Nullable
 	protected Resource getResource(String location) {
 		for (String path : this.resourceLoaderPaths) {
 			Resource resource = this.resourceLoader.getResource(path + location);

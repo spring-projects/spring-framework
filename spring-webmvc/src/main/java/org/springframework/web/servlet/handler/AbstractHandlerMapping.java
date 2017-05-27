@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -111,6 +112,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return the default handler for this handler mapping,
 	 * or {@code null} if none.
 	 */
+	@Nullable
 	public Object getDefaultHandler() {
 		return this.defaultHandler;
 	}
@@ -197,7 +199,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.servlet.HandlerInterceptor
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
 	 */
-	public void setInterceptors(Object... interceptors) {
+	public void setInterceptors(@Nullable Object... interceptors) {
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
@@ -320,6 +322,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return the adapted interceptors as {@link HandlerInterceptor} array.
 	 * @return the array of {@link HandlerInterceptor}s, or {@code null} if none
 	 */
+	@Nullable
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
 		int count = this.adaptedInterceptors.size();
 		return (count > 0 ? this.adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null);
@@ -329,6 +332,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return all configured {@link MappedInterceptor}s as an array.
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
+	@Nullable
 	protected final MappedInterceptor[] getMappedInterceptors() {
 		List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
@@ -389,6 +393,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
 	 */
+	@Nullable
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
 
 	/**
@@ -437,6 +442,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the CORS configuration for the handler or {@code null}.
 	 * @since 4.2
 	 */
+	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
 		if (handler instanceof HandlerExecutionChain) {
 			handler = ((HandlerExecutionChain) handler).getHandler();
@@ -460,7 +466,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 4.2
 	 */
 	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
-			HandlerExecutionChain chain, CorsConfiguration config) {
+			HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
 
 		if (CorsUtils.isPreFlightRequest(request)) {
 			HandlerInterceptor[] interceptors = chain.getInterceptors();

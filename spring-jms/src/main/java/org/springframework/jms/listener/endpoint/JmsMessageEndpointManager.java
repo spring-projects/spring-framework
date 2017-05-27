@@ -25,6 +25,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the generic JCA 1.5
@@ -144,6 +145,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * Return the {@link JmsActivationSpecConfig} object that this endpoint manager
 	 * should use for activating its listener. Return {@code null} if none is set.
 	 */
+	@Nullable
 	public JmsActivationSpecConfig getActivationSpecConfig() {
 		return this.activationSpecConfig;
 	}

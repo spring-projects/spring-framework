@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -140,6 +141,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	 * if the application did not provide one. This should be done prior to
 	 * calling {@link #getMappings()}.
 	 */
+	@Nullable
 	protected SockJsServiceRegistration getSockJsServiceRegistration() {
 		return this.sockJsServiceRegistration;
 	}

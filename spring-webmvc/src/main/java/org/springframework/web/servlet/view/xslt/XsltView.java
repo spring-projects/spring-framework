@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -44,6 +45,7 @@ import org.w3c.dom.Node;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -194,7 +196,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(Class<? extends TransformerFactory> transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
 		if (transformerFactoryClass != null) {
 			try {
 				return ReflectionUtils.accessibleConstructor(transformerFactoryClass).newInstance();
@@ -267,6 +269,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setSourceKey
 	 * @see #convertSource
 	 */
+	@Nullable
 	protected Source locateSource(Map<String, Object> model) throws Exception {
 		if (this.sourceKey != null) {
 			return convertSource(model.get(this.sourceKey));
@@ -468,7 +471,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * <p>Only works for {@link StreamSource StreamSources}.
 	 * @param source the XSLT Source to close (may be {@code null})
 	 */
-	private void closeSourceIfNecessary(Source source) {
+	private void closeSourceIfNecessary(@Nullable Source source) {
 		if (source instanceof StreamSource) {
 			StreamSource streamSource = (StreamSource) source;
 			if (streamSource.getReader() != null) {

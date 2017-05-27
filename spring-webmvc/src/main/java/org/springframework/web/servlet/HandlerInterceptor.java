@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 
 /**
@@ -120,7 +121,7 @@ public interface HandlerInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	default void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
 			throws Exception {
 	}
 

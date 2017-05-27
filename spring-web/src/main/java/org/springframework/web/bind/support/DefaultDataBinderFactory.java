@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -36,7 +37,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @param initializer for global data binder initialization
 	 * (or {@code null} if none)
 	 */
-	public DefaultDataBinderFactory(WebBindingInitializer initializer) {
+	public DefaultDataBinderFactory(@Nullable WebBindingInitializer initializer) {
 		this.initializer = initializer;
 	}
 
@@ -67,7 +68,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @param webRequest the current request
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected WebDataBinder createBinderInstance(Object target, String objectName,
+	protected WebDataBinder createBinderInstance(@Nullable Object target, String objectName,
 			NativeWebRequest webRequest) throws Exception {
 
 		return new WebRequestDataBinder(target, objectName);

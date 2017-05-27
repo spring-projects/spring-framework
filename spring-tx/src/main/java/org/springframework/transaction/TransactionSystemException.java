@@ -16,6 +16,7 @@
 
 package org.springframework.transaction;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,6 +70,7 @@ public class TransactionSystemException extends TransactionException {
 	 * if any.
 	 * @return the application exception, or {@code null} if none set
 	 */
+	@Nullable
 	public final Throwable getApplicationException() {
 		return this.applicationException;
 	}
@@ -78,6 +80,7 @@ public class TransactionSystemException extends TransactionException {
 	 * i.e. the application exception, if any, or the TransactionSystemException's own cause.
 	 * @return the original exception, or {@code null} if there was none
 	 */
+	@Nullable
 	public Throwable getOriginalException() {
 		return (this.applicationException != null ? this.applicationException : getCause());
 	}

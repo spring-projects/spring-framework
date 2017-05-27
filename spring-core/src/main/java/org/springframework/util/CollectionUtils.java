@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Miscellaneous collection utility methods.
  * Mainly for internal use within the framework.
@@ -47,7 +49,7 @@ public abstract class CollectionUtils {
 	 * @param collection the Collection to check
 	 * @return whether the given Collection is empty
 	 */
-	public static boolean isEmpty(Collection<?> collection) {
+	public static boolean isEmpty(@Nullable Collection<?> collection) {
 		return (collection == null || collection.isEmpty());
 	}
 
@@ -57,7 +59,7 @@ public abstract class CollectionUtils {
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
-	public static boolean isEmpty(Map<?, ?> map) {
+	public static boolean isEmpty(@Nullable Map<?, ?> map) {
 		return (map == null || map.isEmpty());
 	}
 
@@ -74,7 +76,7 @@ public abstract class CollectionUtils {
 	 * @see Arrays#asList(Object[])
 	 */
 	@SuppressWarnings("rawtypes")
-	public static List arrayToList(Object source) {
+	public static List arrayToList(@Nullable Object source) {
 		return Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
@@ -84,7 +86,7 @@ public abstract class CollectionUtils {
 	 * @param collection the target Collection to merge the array into
 	 */
 	@SuppressWarnings("unchecked")
-	public static <E> void mergeArrayIntoCollection(Object array, Collection<E> collection) {
+	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		if (collection == null) {
 			throw new IllegalArgumentException("Collection must not be null");
 		}
@@ -103,7 +105,7 @@ public abstract class CollectionUtils {
 	 * @param map the target Map to merge the properties into
 	 */
 	@SuppressWarnings("unchecked")
-	public static <K, V> void mergePropertiesIntoMap(Properties props, Map<K, V> map) {
+	public static <K, V> void mergePropertiesIntoMap(@Nullable Properties props, Map<K, V> map) {
 		if (map == null) {
 			throw new IllegalArgumentException("Map must not be null");
 		}
@@ -205,6 +207,7 @@ public abstract class CollectionUtils {
 	 * @return the first present object, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
@@ -225,6 +228,7 @@ public abstract class CollectionUtils {
 	 * or {@code null} if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <T> T findValueOfType(Collection<?> collection, Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
@@ -251,6 +255,7 @@ public abstract class CollectionUtils {
 	 * @return a value of one of the given types found if there is a clear match,
 	 * or {@code null} if none or more than one such value found
 	 */
+	@Nullable
 	public static Object findValueOfType(Collection<?> collection, Class<?>[] types) {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
@@ -294,6 +299,7 @@ public abstract class CollectionUtils {
 	 * @return the common element type, or {@code null} if no clear
 	 * common type has been found (or the collection was empty)
 	 */
+	@Nullable
 	public static Class<?> findCommonElementType(Collection<?> collection) {
 		if (isEmpty(collection)) {
 			return null;

@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -119,6 +120,7 @@ abstract class AnnotationReadingVisitorUtils {
 	 * matching annotation is present in the {@code attributesMap}
 	 * @since 4.0.3
 	 */
+	@Nullable
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			LinkedMultiValueMap<String, AnnotationAttributes> attributesMap,
 			Map<String, Set<String>> metaAnnotationMap, String annotationName) {

@@ -18,6 +18,8 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract superclass for expression pointcuts,
  * offering location and expression properties.
@@ -49,6 +51,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * @return location information as a human-readable String,
 	 * or {@code null} if none is available
 	 */
+	@Nullable
 	public String getLocation() {
 		return this.location;
 	}

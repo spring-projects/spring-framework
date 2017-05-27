@@ -17,10 +17,12 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -212,6 +214,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * @return the removed path extension for possible re-use, or {@code null}
 	 * @since 4.0
 	 */
+	@Nullable
 	public String removePathExtension() {
 		String extension = null;
 		if (this.originalPath != null) {

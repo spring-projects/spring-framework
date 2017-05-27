@@ -26,6 +26,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that obtains an {@link javax.management.MBeanServer} reference
@@ -157,7 +158,7 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 	 * @see JmxUtils#locateMBeanServer(String)
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
-	protected MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
+	protected MBeanServer locateMBeanServer(@Nullable String agentId) throws MBeanServerNotFoundException {
 		return JmxUtils.locateMBeanServer(agentId);
 	}
 
@@ -170,7 +171,7 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 	 * @see javax.management.MBeanServerFactory#createMBeanServer
 	 * @see javax.management.MBeanServerFactory#newMBeanServer
 	 */
-	protected MBeanServer createMBeanServer(String defaultDomain, boolean registerWithFactory) {
+	protected MBeanServer createMBeanServer(@Nullable String defaultDomain, boolean registerWithFactory) {
 		if (registerWithFactory) {
 			return MBeanServerFactory.createMBeanServer(defaultDomain);
 		}

@@ -30,6 +30,7 @@ import org.xml.sax.InputSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -80,7 +81,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * (can be {@code null}) to use the default ClassLoader)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
-	public PluggableSchemaResolver(ClassLoader classLoader) {
+	public PluggableSchemaResolver(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 		this.schemaMappingsLocation = DEFAULT_SCHEMA_MAPPINGS_LOCATION;
 	}
@@ -94,13 +95,14 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * (must not be empty)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
-	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
+	public PluggableSchemaResolver(@Nullable ClassLoader classLoader, String schemaMappingsLocation) {
 		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' must not be empty");
 		this.classLoader = classLoader;
 		this.schemaMappingsLocation = schemaMappingsLocation;
 	}
 
 	@Override
+	@Nullable
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public id [" + publicId +

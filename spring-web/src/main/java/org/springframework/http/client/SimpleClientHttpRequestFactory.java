@@ -25,6 +25,7 @@ import java.net.URLConnection;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -180,7 +181,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * @return the opened connection
 	 * @throws IOException in case of I/O errors
 	 */
-	protected HttpURLConnection openConnection(URL url, Proxy proxy) throws IOException {
+	protected HttpURLConnection openConnection(URL url, @Nullable Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
 		if (!HttpURLConnection.class.isInstance(urlConnection)) {
 			throw new IllegalStateException("HttpURLConnection required for [" + url + "] but got: " + urlConnection);

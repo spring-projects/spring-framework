@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -83,6 +84,7 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved parameter type of the method return type, or {@code null}
 	 * if not resolvable or if the single argument is of type {@link WildcardType}.
 	 */
+	@Nullable
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
 		Assert.notNull(method, "method must not be null");
 		ResolvableType resolvableType = ResolvableType.forMethodReturnType(method).as(genericIfc);
@@ -100,6 +102,7 @@ public abstract class GenericTypeResolver {
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
+	@Nullable
 	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericIfc) {
 		ResolvableType resolvableType = ResolvableType.forClass(clazz).as(genericIfc);
 		if (!resolvableType.hasGenerics()) {
@@ -125,6 +128,7 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
+	@Nullable
 	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
 		ResolvableType type = ResolvableType.forClass(clazz).as(genericIfc);
 		if (!type.hasGenerics() || type.isEntirelyUnresolvable()) {
@@ -142,6 +146,7 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type (possibly the given generic type as-is)
 	 * @since 5.0
 	 */
+	@Nullable
 	public static Type resolveType(Type genericType, Class<?> contextClass) {
 		if (contextClass != null) {
 			if (genericType instanceof TypeVariable) {

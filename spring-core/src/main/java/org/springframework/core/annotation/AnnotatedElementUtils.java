@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -149,6 +150,7 @@ public class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, String)
 	 * @see #hasMetaAnnotationTypes
 	 */
+	@Nullable
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
@@ -170,6 +172,7 @@ public class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, Class)
 	 * @see #hasMetaAnnotationTypes
 	 */
+	@Nullable
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
@@ -312,6 +315,7 @@ public class AnnotatedElementUtils {
 	 * @see #getMergedAnnotation(AnnotatedElement, Class)
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 */
+	@Nullable
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			AnnotatedElement element, Class<? extends Annotation> annotationType) {
 
@@ -340,6 +344,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
 	 */
+	@Nullable
 	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element, String annotationName) {
 		return getMergedAnnotationAttributes(element, annotationName, false, false);
 	}
@@ -370,6 +375,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
+	@Nullable
 	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element,
 			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
@@ -398,6 +404,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
+	@Nullable
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
 
@@ -504,7 +511,7 @@ public class AnnotatedElementUtils {
 	 * is not a valid container annotation for the supplied {@code annotationType}
 	 */
 	public static <A extends Annotation> Set<A> getMergedRepeatableAnnotations(AnnotatedElement element,
-			Class<A> annotationType, Class<? extends Annotation> containerType) {
+			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
@@ -535,6 +542,7 @@ public class AnnotatedElementUtils {
 	 * attributes from all annotations found, or {@code null} if not found
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
+	@Nullable
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationName) {
 		return getAllAnnotationAttributes(element, annotationName, false, false);
 	}
@@ -557,6 +565,7 @@ public class AnnotatedElementUtils {
 	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
 	 * attributes from all annotations found, or {@code null} if not found
 	 */
+	@Nullable
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
 			String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
@@ -632,6 +641,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
+	@Nullable
 	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
@@ -668,6 +678,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
+	@Nullable
 	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
 			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
@@ -695,6 +706,7 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
+	@Nullable
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
 
@@ -800,7 +812,7 @@ public class AnnotatedElementUtils {
 	 * is not a valid container annotation for the supplied {@code annotationType}
 	 */
 	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
-			Class<A> annotationType, Class<? extends Annotation> containerType) {
+			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
@@ -828,6 +840,7 @@ public class AnnotatedElementUtils {
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor, potentially {@code null}
 	 */
+	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
 			String annotationName, Processor<T> processor) {
 
@@ -848,8 +861,9 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 * @since 4.3
 	 */
+	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Class<? extends Annotation> containerType, Processor<T> processor) {
+			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
 
 		try {
 			return searchWithGetSemantics(element, annotationType, annotationName, containerType, processor,
@@ -878,8 +892,9 @@ public class AnnotatedElementUtils {
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
 	 */
+	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Class<? extends Annotation> containerType, Processor<T> processor,
+			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
@@ -940,9 +955,10 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 * @since 4.2
 	 */
-	private static <T> T searchWithGetSemanticsInAnnotations(AnnotatedElement element,
+	@Nullable
+	private static <T> T searchWithGetSemanticsInAnnotations(@Nullable AnnotatedElement element,
 			List<Annotation> annotations, Class<? extends Annotation> annotationType, String annotationName,
-			Class<? extends Annotation> containerType, Processor<T> processor, Set<AnnotatedElement> visited,
+			@Nullable Class<? extends Annotation> containerType, Processor<T> processor, Set<AnnotatedElement> visited,
 			int metaDepth) {
 
 		// Search in annotations
@@ -1009,6 +1025,7 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 * @since 4.2
 	 */
+	@Nullable
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
 			String annotationName, Processor<T> processor) {
 
@@ -1029,8 +1046,9 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 * @since 4.3
 	 */
+	@Nullable
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Class<? extends Annotation> containerType, Processor<T> processor) {
+			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
 
 		if (containerType != null && !processor.aggregates()) {
 			throw new IllegalArgumentException(
@@ -1065,8 +1083,9 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 * @since 4.2
 	 */
+	@Nullable
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Class<? extends Annotation> containerType, Processor<T> processor,
+			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
@@ -1365,7 +1384,8 @@ public class AnnotatedElementUtils {
 		 * @return the result of the processing, or {@code null} to continue
 		 * searching for additional annotations
 		 */
-		T process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth);
+		@Nullable
+		T process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth);
 
 		/**
 		 * Post-process the result returned by the {@link #process} method.
@@ -1379,7 +1399,7 @@ public class AnnotatedElementUtils {
 		 * @param annotation the annotation to post-process
 		 * @param result the result to post-process
 		 */
-		void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result);
+		void postProcess(@Nullable AnnotatedElement annotatedElement, Annotation annotation, T result);
 
 		/**
 		 * Determine if this processor always processes annotations regardless of

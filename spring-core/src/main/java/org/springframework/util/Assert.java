@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Assertion utility class that assists in validating arguments.
  *
@@ -148,7 +150,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object is not {@code null}
 	 */
-	public static void isNull(Object object, String message) {
+	public static void isNull(@Nullable Object object, String message) {
 		if (object != null) {
 			throw new IllegalArgumentException(message);
 		}
@@ -165,7 +167,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not {@code null}
 	 * @since 5.0
 	 */
-	public static void isNull(Object object, Supplier<String> messageSupplier) {
+	public static void isNull(@Nullable Object object, Supplier<String> messageSupplier) {
 		if (object != null) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -175,7 +177,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #isNull(Object, String)}
 	 */
 	@Deprecated
-	public static void isNull(Object object) {
+	public static void isNull(@Nullable Object object) {
 		isNull(object, "[Assertion failed] - the object argument must be null");
 	}
 
@@ -186,7 +188,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object is {@code null}
 	 */
-	public static void notNull(Object object, String message) {
+	public static void notNull(@Nullable Object object, String message) {
 		if (object == null) {
 			throw new IllegalArgumentException(message);
 		}
@@ -203,7 +205,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is {@code null}
 	 * @since 5.0
 	 */
-	public static void notNull(Object object, Supplier<String> messageSupplier) {
+	public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
 		if (object == null) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -213,7 +215,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #notNull(Object, String)}
 	 */
 	@Deprecated
-	public static void notNull(Object object) {
+	public static void notNull(@Nullable Object object) {
 		notNull(object, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
@@ -226,7 +228,7 @@ public abstract class Assert {
 	 * @see StringUtils#hasLength
 	 * @throws IllegalArgumentException if the text is empty
 	 */
-	public static void hasLength(String text, String message) {
+	public static void hasLength(@Nullable String text, String message) {
 		if (!StringUtils.hasLength(text)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -245,7 +247,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the text is empty
 	 * @since 5.0
 	 */
-	public static void hasLength(String text, Supplier<String> messageSupplier) {
+	public static void hasLength(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasLength(text)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -255,7 +257,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #hasLength(String, String)}
 	 */
 	@Deprecated
-	public static void hasLength(String text) {
+	public static void hasLength(@Nullable String text) {
 		hasLength(text,
 				"[Assertion failed] - this String argument must have length; it must not be null or empty");
 	}
@@ -269,7 +271,7 @@ public abstract class Assert {
 	 * @see StringUtils#hasText
 	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 */
-	public static void hasText(String text, String message) {
+	public static void hasText(@Nullable String text, String message) {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -288,7 +290,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 * @since 5.0
 	 */
-	public static void hasText(String text, Supplier<String> messageSupplier) {
+	public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -298,7 +300,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #hasText(String, String)}
 	 */
 	@Deprecated
-	public static void hasText(String text) {
+	public static void hasText(@Nullable String text) {
 		hasText(text,
 				"[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
 	}
@@ -311,7 +313,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the text contains the substring
 	 */
-	public static void doesNotContain(String textToSearch, String substring, String message) {
+	public static void doesNotContain(@Nullable String textToSearch, String substring, String message) {
 		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
 				textToSearch.contains(substring)) {
 			throw new IllegalArgumentException(message);
@@ -330,7 +332,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the text contains the substring
 	 * @since 5.0
 	 */
-	public static void doesNotContain(String textToSearch, String substring, Supplier<String> messageSupplier) {
+	public static void doesNotContain(@Nullable String textToSearch, String substring, Supplier<String> messageSupplier) {
 		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
 				textToSearch.contains(substring)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -341,7 +343,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #doesNotContain(String, String, String)}
 	 */
 	@Deprecated
-	public static void doesNotContain(String textToSearch, String substring) {
+	public static void doesNotContain(@Nullable String textToSearch, String substring) {
 		doesNotContain(textToSearch, substring,
 				() -> "[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
 	}
@@ -354,7 +356,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object array is {@code null} or contains no elements
 	 */
-	public static void notEmpty(Object[] array, String message) {
+	public static void notEmpty(@Nullable Object[] array, String message) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -372,7 +374,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array is {@code null} or contains no elements
 	 * @since 5.0
 	 */
-	public static void notEmpty(Object[] array, Supplier<String> messageSupplier) {
+	public static void notEmpty(@Nullable Object[] array, Supplier<String> messageSupplier) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -382,7 +384,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Object[], String)}
 	 */
 	@Deprecated
-	public static void notEmpty(Object[] array) {
+	public static void notEmpty(@Nullable Object[] array) {
 		notEmpty(array, "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
 	}
 
@@ -394,7 +396,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object array contains a {@code null} element
 	 */
-	public static void noNullElements(Object[] array, String message) {
+	public static void noNullElements(@Nullable Object[] array, String message) {
 		if (array != null) {
 			for (Object element : array) {
 				if (element == null) {
@@ -416,7 +418,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array contains a {@code null} element
 	 * @since 5.0
 	 */
-	public static void noNullElements(Object[] array, Supplier<String> messageSupplier) {
+	public static void noNullElements(@Nullable Object[] array, Supplier<String> messageSupplier) {
 		if (array != null) {
 			for (Object element : array) {
 				if (element == null) {
@@ -430,7 +432,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #noNullElements(Object[], String)}
 	 */
 	@Deprecated
-	public static void noNullElements(Object[] array) {
+	public static void noNullElements(@Nullable Object[] array) {
 		noNullElements(array, "[Assertion failed] - this array must not contain any null elements");
 	}
 
@@ -443,7 +445,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the collection is {@code null} or
 	 * contains no elements
 	 */
-	public static void notEmpty(Collection<?> collection, String message) {
+	public static void notEmpty(@Nullable Collection<?> collection, String message) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -462,7 +464,7 @@ public abstract class Assert {
 	 * contains no elements
 	 * @since 5.0
 	 */
-	public static void notEmpty(Collection<?> collection, Supplier<String> messageSupplier) {
+	public static void notEmpty(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -472,7 +474,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Collection, String)}
 	 */
 	@Deprecated
-	public static void notEmpty(Collection<?> collection) {
+	public static void notEmpty(@Nullable Collection<?> collection) {
 		notEmpty(collection,
 				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
 	}
@@ -485,7 +487,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the map is {@code null} or contains no entries
 	 */
-	public static void notEmpty(Map<?, ?> map, String message) {
+	public static void notEmpty(@Nullable Map<?, ?> map, String message) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(message);
 		}
@@ -503,7 +505,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the map is {@code null} or contains no entries
 	 * @since 5.0
 	 */
-	public static void notEmpty(Map<?, ?> map, Supplier<String> messageSupplier) {
+	public static void notEmpty(@Nullable Map<?, ?> map, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
 		}
@@ -513,7 +515,7 @@ public abstract class Assert {
 	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Map, String)}
 	 */
 	@Deprecated
-	public static void notEmpty(Map<?, ?> map) {
+	public static void notEmpty(@Nullable Map<?, ?> map) {
 		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 

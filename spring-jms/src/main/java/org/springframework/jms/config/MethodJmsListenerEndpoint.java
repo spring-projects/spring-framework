@@ -31,6 +31,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -124,7 +125,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * Set the {@link BeanFactory} to use to resolve expressions (may be {@code null}).
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory) {
 			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
@@ -174,6 +175,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Return the default response destination, if any.
 	 */
+	@Nullable
 	protected String getDefaultResponseDestination() {
 		Method specificMethod = getMostSpecificMethod();
 		SendTo ann = getSendTo(specificMethod);

@@ -39,6 +39,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
@@ -107,6 +108,7 @@ class ReactiveTypeHandler {
 	 * @return an emitter for streaming or {@code null} if handled internally
 	 * with a {@link DeferredResult}.
 	 */
+	@Nullable
 	public ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -251,6 +252,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Return the target definition that is being decorated by this bean definition, if any.
 	 */
+	@Nullable
 	public BeanDefinitionHolder getDecoratedDefinition() {
 		return this.decoratedDefinition;
 	}
@@ -271,6 +273,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Otherwise, the factory method and target class will be checked.
 	 * @since 4.3.3
 	 */
+	@Nullable
 	public AnnotatedElement getQualifiedElement() {
 		return this.qualifiedElement;
 	}
@@ -323,6 +326,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Return the resolved factory method as a Java Method object, if available.
 	 * @return the factory method, or {@code null} if not found or not resolved yet
 	 */
+	@Nullable
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {
 			Executable candidate = this.resolvedConstructorOrFactoryMethod;

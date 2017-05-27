@@ -56,6 +56,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -355,6 +356,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return conversionServiceRef;
 	}
 
+	@Nullable
 	private RuntimeBeanReference getValidator(Element element, Object source, ParserContext parserContext) {
 		if (element.hasAttribute("validator")) {
 			return new RuntimeBeanReference(element.getAttribute("validator"));
@@ -450,6 +452,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return props;
 	}
 
+	@Nullable
 	private RuntimeBeanReference getMessageCodesResolver(Element element) {
 		if (element.hasAttribute("message-codes-resolver")) {
 			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
@@ -464,6 +467,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return (asyncElement != null) ? asyncElement.getAttribute("default-timeout") : null;
 	}
 
+	@Nullable
 	private RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
@@ -508,6 +512,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return interceptors;
 	}
 
+	@Nullable
 	private ManagedList<?> getArgumentResolvers(Element element, ParserContext parserContext) {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {

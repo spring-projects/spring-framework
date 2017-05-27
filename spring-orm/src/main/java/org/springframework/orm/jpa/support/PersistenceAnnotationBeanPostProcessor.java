@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -56,6 +57,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerProxy;
@@ -302,7 +304,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * such factories, either specify this default persistence unit name
 	 * or explicitly refer to named persistence units in your annotations.
 	 */
-	public void setDefaultPersistenceUnitName(String unitName) {
+	public void setDefaultPersistenceUnitName(@Nullable String unitName) {
 		this.defaultPersistenceUnitName = (unitName != null ? unitName : "");
 	}
 
@@ -456,6 +458,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * or {@code null} if none found
 	 * @see #setPersistenceUnits
 	 */
+	@Nullable
 	protected EntityManagerFactory getPersistenceUnit(String unitName) {
 		if (this.persistenceUnits != null) {
 			String unitNameForLookup = (unitName != null ? unitName : "");
@@ -487,6 +490,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @see #setPersistenceContexts
 	 * @see #setExtendedPersistenceContexts
 	 */
+	@Nullable
 	protected EntityManager getPersistenceContext(String unitName, boolean extended) {
 		Map<String, String> contexts = (extended ? this.extendedPersistenceContexts : this.persistenceContexts);
 		if (contexts != null) {
@@ -519,7 +523,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findEntityManagerFactory(String unitName, String requestingBeanName)
+	protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
 		if (this.beanFactory == null) {

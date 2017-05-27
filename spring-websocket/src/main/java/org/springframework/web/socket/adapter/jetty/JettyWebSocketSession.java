@@ -31,6 +31,7 @@ import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -81,7 +82,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	 * @param user the user associated with the session; if {@code null} we'll fallback on the
 	 * user available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
 	 */
-	public JettyWebSocketSession(Map<String, Object> attributes, Principal user) {
+	public JettyWebSocketSession(Map<String, Object> attributes, @Nullable Principal user) {
 		super(attributes);
 		this.user = user;
 	}

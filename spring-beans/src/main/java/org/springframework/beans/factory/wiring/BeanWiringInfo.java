@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.wiring;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -118,6 +119,7 @@ public class BeanWiringInfo {
 	/**
 	 * Return the specific bean name that this BeanWiringInfo points to, if any.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}

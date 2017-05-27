@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -62,6 +63,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the name of the view to delegate to, or {@code null} if using a
 	 * View instance.
 	 */
+	@Nullable
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
 	}
@@ -80,6 +82,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 * @since 4.1
 	 */
+	@Nullable
 	public View getView() {
 		return (this.view instanceof View ? (View) this.view : null);
 	}
@@ -103,6 +106,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the configured HTTP status code or {@code null}.
 	 * @since 4.1
 	 */
+	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}

@@ -39,6 +39,7 @@ import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -361,7 +362,7 @@ public class MimeMessageHelper {
 	 * will be added to (can be the same as the root multipart object, or an element
 	 * nested underneath the root multipart element)
 	 */
-	protected final void setMimeMultiparts(MimeMultipart root, MimeMultipart main) {
+	protected final void setMimeMultiparts(@Nullable MimeMultipart root, MimeMultipart main) {
 		this.rootMimeMultipart = root;
 		this.mimeMultipart = main;
 	}
@@ -423,6 +424,7 @@ public class MimeMessageHelper {
 	 * @return the default encoding associated with the MimeMessage,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected String getDefaultEncoding(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage) {
 			return ((SmartMimeMessage) mimeMessage).getDefaultEncoding();
@@ -433,6 +435,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return the specific character encoding used for this message, if any.
 	 */
+	@Nullable
 	public String getEncoding() {
 		return this.encoding;
 	}

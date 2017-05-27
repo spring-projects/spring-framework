@@ -20,6 +20,7 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,6 +66,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param transformerChain the transformer chain
 	 * @return the resolved URL or null
 	 */
+	@Nullable
 	protected String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {
 

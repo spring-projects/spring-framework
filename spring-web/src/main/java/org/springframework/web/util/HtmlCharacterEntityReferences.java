@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -121,6 +122,7 @@ class HtmlCharacterEntityReferences {
 	/**
 	 * Return the reference mapped to the given character or {@code null}.
 	 */
+	@Nullable
 	public String convertToReference(char character) {
 	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
@@ -129,6 +131,7 @@ class HtmlCharacterEntityReferences {
 	 * Return the reference mapped to the given character or {@code null}.
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public String convertToReference(char character, String encoding) {
 		if (encoding.startsWith("UTF-")){
 			switch (character){

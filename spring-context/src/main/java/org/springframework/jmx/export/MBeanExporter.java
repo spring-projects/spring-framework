@@ -63,6 +63,7 @@ import org.springframework.jmx.export.notification.ModelMBeanNotificationPublish
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -585,6 +586,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #registerBeanInstance
 	 * @see #registerLazyInit
 	 */
+	@Nullable
 	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
 			if (mapValue instanceof String) {
@@ -779,6 +781,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @return the adapted MBean, or {@code null} if not possible
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {

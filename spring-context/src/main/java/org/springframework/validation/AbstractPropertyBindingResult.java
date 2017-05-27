@@ -25,6 +25,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -133,6 +134,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @param fixedField the fully qualified field name
 	 * @return the custom PropertyEditor, or {@code null}
 	 */
+	@Nullable
 	protected PropertyEditor getCustomEditor(String fixedField) {
 		Class<?> targetType = getPropertyAccessor().getPropertyType(fixedField);
 		PropertyEditor editor = getPropertyAccessor().findCustomEditor(targetType, fixedField);

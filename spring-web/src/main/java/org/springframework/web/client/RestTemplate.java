@@ -51,6 +51,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -667,8 +668,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor) throws RestClientException {
+	@Nullable
+	protected <T> T doExecute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		Assert.notNull(url, "'url' must not be null");
 		Assert.notNull(method, "'method' must not be null");

@@ -29,6 +29,7 @@ import org.aspectj.runtime.internal.AroundClosure;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -109,6 +110,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 * Returns the Spring AOP target. May be {@code null} if there is no target.
 	 */
 	@Override
+	@Nullable
 	public Object getTarget() {
 		return this.methodInvocation.getThis();
 	}

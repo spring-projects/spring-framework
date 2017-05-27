@@ -100,7 +100,6 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 		this.corsConfigurations.put(path, config);
 	}
 
-
 	@Override
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
 		String lookupPath = this.pathHelper.getLookupPathForRequest(exchange);

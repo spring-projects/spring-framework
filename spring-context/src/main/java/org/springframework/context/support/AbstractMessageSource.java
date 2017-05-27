@@ -26,6 +26,7 @@ import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -93,6 +94,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	/**
 	 * Return a Properties object defining locale-independent common messages, if any.
 	 */
+	@Nullable
 	protected Properties getCommonMessages() {
 		return this.commonMessages;
 	}
@@ -192,6 +194,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #getMessage(MessageSourceResolvable, Locale)
 	 * @see #setUseCodeAsDefaultMessage
 	 */
+	@Nullable
 	protected String getMessageInternal(String code, Object[] args, Locale locale) {
 		if (code == null) {
 			return null;
@@ -248,6 +251,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return the resolved message, or {@code null} if not found
 	 * @see #getParentMessageSource()
 	 */
+	@Nullable
 	protected String getMessageFromParent(String code, Object[] args, Locale locale) {
 		MessageSource parent = getParentMessageSource();
 		if (parent != null) {
@@ -277,6 +281,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #renderDefaultMessage(String, Object[], Locale)
 	 * @see #getDefaultMessage(String)
 	 */
+	@Nullable
 	protected String getDefaultMessage(MessageSourceResolvable resolvable, Locale locale) {
 		String defaultMessage = resolvable.getDefaultMessage();
 		String[] codes = resolvable.getCodes();
@@ -300,6 +305,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return the default message to use, or {@code null} if none
 	 * @see #setUseCodeAsDefaultMessage
 	 */
+	@Nullable
 	protected String getDefaultMessage(String code) {
 		if (isUseCodeAsDefaultMessage()) {
 			return code;
@@ -350,6 +356,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #resolveCode
 	 * @see java.text.MessageFormat
 	 */
+	@Nullable
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
@@ -373,6 +380,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return the MessageFormat for the message, or {@code null} if not found
 	 * @see #resolveCodeWithoutArguments(String, java.util.Locale)
 	 */
+	@Nullable
 	protected abstract MessageFormat resolveCode(String code, Locale locale);
 
 }

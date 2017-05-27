@@ -27,6 +27,7 @@ import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -267,7 +268,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
 	 */
 	protected boolean doReceiveAndExecute(
-			Object invoker, Session session, MessageConsumer consumer, TransactionStatus status)
+			Object invoker, Session session, MessageConsumer consumer, @Nullable TransactionStatus status)
 			throws JMSException {
 
 		Connection conToClose = null;
@@ -443,6 +444,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Connection fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
 	}
@@ -454,6 +456,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Session fetched from the holder,
 	 * or {@code null} if none found
 	 */
+	@Nullable
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
 	}

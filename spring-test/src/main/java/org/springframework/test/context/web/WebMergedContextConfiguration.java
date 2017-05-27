@@ -21,6 +21,7 @@ import java.util.Set;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
@@ -97,11 +98,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.1
 	 */
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
+	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, propertySourceLocations,
 			propertySourceProperties, null, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parent);
@@ -133,11 +134,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 4.3
 	 */
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String[] propertySourceLocations, String[] propertySourceProperties,
-			Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
+			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
 		super(testClass, locations, classes, contextInitializerClasses, activeProfiles, propertySourceLocations,
 			propertySourceProperties, contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parent);

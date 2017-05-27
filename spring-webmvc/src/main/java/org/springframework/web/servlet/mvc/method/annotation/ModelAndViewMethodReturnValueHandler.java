@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -62,6 +63,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	/**
 	 * The configured redirect patterns, if any.
 	 */
+	@Nullable
 	public String[] getRedirectPatterns() {
 		return this.redirectPatterns;
 	}

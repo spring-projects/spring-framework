@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.StringUtils;
 
@@ -88,6 +89,7 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	 * Return the header value, or {@code null} if it does not exist
 	 * or does not match the requested {@code type}.
 	 */
+	@Nullable
 	protected <V> V getHeaderIfAvailable(Map<String, Object> headers, String name, Class<V> type) {
 		Object value = headers.get(name);
 		if (value == null) {

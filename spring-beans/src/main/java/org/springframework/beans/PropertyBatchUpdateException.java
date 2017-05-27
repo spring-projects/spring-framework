@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -71,6 +72,7 @@ public class PropertyBatchUpdateException extends BeansException {
 	/**
 	 * Return the exception for this field, or {@code null} if there isn't any.
 	 */
+	@Nullable
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
 		for (PropertyAccessException pae : this.propertyAccessExceptions) {
 			if (ObjectUtils.nullSafeEquals(propertyName, pae.getPropertyName())) {

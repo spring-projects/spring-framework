@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -79,7 +80,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
 	 * (may be {@code null} to indicate the default ClassLoader)
 	 */
-	public URIEditor(ClassLoader classLoader) {
+	public URIEditor(@Nullable ClassLoader classLoader) {
 		this(classLoader, true);
 	}
 
@@ -90,7 +91,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * (may be {@code null} to indicate the default ClassLoader)
 	 * @param encode indicates whether Strings will be encoded or not
 	 */
-	public URIEditor(ClassLoader classLoader, boolean encode) {
+	public URIEditor(@Nullable ClassLoader classLoader, boolean encode) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		this.encode = encode;
 	}

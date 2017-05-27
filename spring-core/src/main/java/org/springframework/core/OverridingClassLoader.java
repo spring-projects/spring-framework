@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -113,6 +114,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @return the Class object, or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
+	@Nullable
 	protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
 		Class<?> result = findLoadedClass(name);
 		if (result == null) {
@@ -134,6 +136,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
+	@Nullable
 	protected byte[] loadBytesForClass(String name) throws ClassNotFoundException {
 		InputStream is = openStreamForClass(name);
 		if (is == null) {

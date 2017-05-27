@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -88,7 +89,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
 
-
+	@Nullable
 	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);
 		if (resolvableType == null || !resolvableType.hasGenerics()) {

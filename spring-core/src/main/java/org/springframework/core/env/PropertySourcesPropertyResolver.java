@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link PropertyResolver} implementation that resolves property values against
  * an underlying set of {@link PropertySources}.
@@ -68,6 +70,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return getProperty(key, String.class, false);
 	}
 
+	@Nullable
 	protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
 		if (this.propertySources != null) {
 			for (PropertySource<?> propertySource : this.propertySources) {

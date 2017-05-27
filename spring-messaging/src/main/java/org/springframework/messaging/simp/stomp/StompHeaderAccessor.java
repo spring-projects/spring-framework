@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -219,6 +220,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the STOMP command, or {@code null} if not yet set.
 	 */
+	@Nullable
 	public StompCommand getCommand() {
 		return (StompCommand) getHeader(COMMAND_HEADER);
 	}
@@ -286,6 +288,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		}
 	}
 
+	@Nullable
 	public Integer getContentLength() {
 		if (containsNativeHeader(STOMP_CONTENT_LENGTH_HEADER)) {
 			return Integer.valueOf(getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER));
@@ -341,6 +344,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the passcode header value, or {@code null} if not set.
 	 */
+	@Nullable
 	public String getPasscode() {
 		StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
 		return (credentials != null ? credentials.passcode : null);
@@ -490,6 +494,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the STOMP command from the given headers, or {@code null} if not set.
 	 */
+	@Nullable
 	public static StompCommand getCommand(Map<String, Object> headers) {
 		return (StompCommand) headers.get(COMMAND_HEADER);
 	}
@@ -497,6 +502,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the passcode header value, or {@code null} if not set.
 	 */
+	@Nullable
 	public static String getPasscode(Map<String, Object> headers) {
 		StompPasscode credentials = (StompPasscode) headers.get(CREDENTIALS_HEADER);
 		return (credentials != null ? credentials.passcode : null);

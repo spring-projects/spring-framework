@@ -18,10 +18,10 @@ package org.springframework.web.reactive.function;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown to indicate that a {@code Content-Type} is not supported.
@@ -60,6 +60,7 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 	 * Return the request Content-Type header if it was parsed successfully,
 	 * or {@code null} otherwise.
 	 */
+	@Nullable
 	public MediaType getContentType() {
 		return this.contentType;
 	}

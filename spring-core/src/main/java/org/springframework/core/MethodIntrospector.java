@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -51,7 +52,7 @@ public abstract class MethodIntrospector {
 	 * @return the selected methods associated with their metadata (in the order of retrieval),
 	 * or an empty map in case of no match
 	 */
-	public static <T> Map<Method, T> selectMethods(Class<?> targetType, final MetadataLookup<T> metadataLookup) {
+	public static <T> Map<Method, T> selectMethods(Class<?> targetType, @Nullable final MetadataLookup<T> metadataLookup) {
 		final Map<Method, T> methodMap = new LinkedHashMap<>();
 		Set<Class<?>> handlerTypes = new LinkedHashSet<>();
 		Class<?> specificHandlerType = null;
@@ -155,6 +156,7 @@ public abstract class MethodIntrospector {
 		 * @return non-null metadata to be associated with a method if there is a match,
 		 * or {@code null} for no match
 		 */
+		@Nullable
 		T inspect(Method method);
 	}
 

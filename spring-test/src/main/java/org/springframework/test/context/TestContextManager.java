@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -364,7 +365,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestExecution(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestExecution(Object testInstance, Method testMethod, @Nullable Throwable exception) throws Exception {
 		String callbackName = "afterTestExecution";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
 
@@ -424,7 +425,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestMethod(Object testInstance, Method testMethod, @Nullable Throwable exception) throws Exception {
 		String callbackName = "afterTestMethod";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
 

@@ -17,4 +17,7 @@
  * <li>The {@code pagedlist} demo application uses themes</li>
  * </ul>
  */
+@NonNullApi
 package org.springframework.web.servlet.theme;
+
+import org.springframework.lang.NonNullApi;

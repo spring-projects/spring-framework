@@ -34,6 +34,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -186,7 +187,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @param writeAction the action to write the response body (may be {@code null})
 	 * @return a completion publisher
 	 */
-	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
+	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Skipping doCommit (response already committed).");

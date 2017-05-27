@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -72,7 +73,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public AbstractNamedValueArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public AbstractNamedValueArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(registry);
 		this.configurableBeanFactory = factory;
 		this.expressionContext = (factory != null ? new BeanExpressionContext(factory, null) : null);
@@ -169,7 +170,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * @param parameter the method parameter to resolve to an argument value
 	 * (pre-nested in case of a {@link java.util.Optional} declaration)
 	 * @param exchange the current exchange
-	 * @return the resolved argument (may be {@code null})
+	 * @return the resolved argument (may be empty {@link Mono})
 	 */
 	protected abstract Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange);
 
@@ -248,7 +249,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or
 	 * an exception for other primitives.
 	 */
-	private Object handleNullValue(String name, Object value, Class<?> paramType) {
+	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;

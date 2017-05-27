@@ -74,6 +74,7 @@ import org.springframework.beans.propertyeditors.ZoneIdEditor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -118,6 +119,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	/**
 	 * Return the associated ConversionService, if any.
 	 */
+	@Nullable
 	public ConversionService getConversionService() {
 		return this.conversionService;
 	}
@@ -169,6 +171,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the default editor, or {@code null} if none found
 	 * @see #registerDefaultEditors
 	 */
+	@Nullable
 	public PropertyEditor getDefaultEditor(Class<?> requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;
@@ -336,7 +339,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * can be {@code null} if not known)
 	 * @return whether a matching custom editor has been found
 	 */
-	public boolean hasCustomEditorForElement(Class<?> elementType, String propertyPath) {
+	public boolean hasCustomEditorForElement(@Nullable Class<?> elementType, @Nullable String propertyPath) {
 		if (propertyPath != null && this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
 				if (PropertyAccessorUtils.matchesProperty(entry.getKey(), propertyPath)) {
@@ -361,6 +364,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the type of the property, or {@code null} if not determinable
 	 * @see BeanWrapper#getPropertyType(String)
 	 */
+	@Nullable
 	protected Class<?> getPropertyType(String propertyPath) {
 		return null;
 	}
@@ -371,6 +375,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param requiredType the type to look for
 	 * @return the custom editor, or {@code null} if none specific for this property
 	 */
+	@Nullable
 	private PropertyEditor getCustomEditor(String propertyName, Class<?> requiredType) {
 		CustomEditorHolder holder = this.customEditorsForPath.get(propertyName);
 		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
@@ -384,6 +389,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the custom editor, or {@code null} if none found for this type
 	 * @see java.beans.PropertyEditor#getAsText()
 	 */
+	@Nullable
 	private PropertyEditor getCustomEditor(Class<?> requiredType) {
 		if (requiredType == null || this.customEditors == null) {
 			return null;
@@ -420,6 +426,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param propertyName the name of the property
 	 * @return the property type, or {@code null} if not determinable
 	 */
+	@Nullable
 	protected Class<?> guessPropertyTypeFromEditors(String propertyName) {
 		if (this.customEditorsForPath != null) {
 			CustomEditorHolder editorHolder = this.customEditorsForPath.get(propertyName);
@@ -445,7 +452,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * If this is non-null, only editors registered for a path below this nested property
 	 * will be copied. If this is null, all editors will be copied.
 	 */
-	protected void copyCustomEditorsTo(PropertyEditorRegistry target, String nestedProperty) {
+	protected void copyCustomEditorsTo(PropertyEditorRegistry target, @Nullable String nestedProperty) {
 		String actualPropertyName =
 				(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
 		if (this.customEditors != null) {

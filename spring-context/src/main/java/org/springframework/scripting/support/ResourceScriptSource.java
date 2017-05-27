@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -88,7 +89,7 @@ public class ResourceScriptSource implements ScriptSource {
 	 * <p>The default value for regular Resources is "UTF-8".
 	 * A {@code null} value implies the platform default.
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding(@Nullable String encoding) {
 		this.resource = new EncodedResource(this.resource.getResource(), encoding);
 	}
 

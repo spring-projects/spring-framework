@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
@@ -36,6 +37,7 @@ public interface ChannelInterceptor {
 	 * If this method returns {@code null} then the actual
 	 * send invocation will not occur.
 	 */
+	@Nullable
 	Message<?> preSend(Message<?> message, MessageChannel channel);
 
 	/**

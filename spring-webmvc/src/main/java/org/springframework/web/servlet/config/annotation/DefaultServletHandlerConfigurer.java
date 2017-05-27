@@ -18,8 +18,10 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -80,6 +82,7 @@ public class DefaultServletHandlerConfigurer {
 	 * {@link DefaultServletHttpRequestHandler} instance mapped to {@code "/**"}; or {@code null} if
 	 * default servlet handling was not been enabled.
 	 */
+	@Nullable
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (handler == null) {
 			return null;

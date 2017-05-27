@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -304,6 +305,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
+	@Nullable
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
@@ -409,6 +411,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>If there are no matching prefixes, return {@code null}.
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
+	@Nullable
 	protected String getLookupDestination(String destination) {
 		if (destination == null) {
 			return null;
@@ -477,6 +480,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param message the message being handled
 	 * @return the match or {@code null} if there is no match
 	 */
+	@Nullable
 	protected abstract T getMatchingMapping(T mapping, Message<?> message);
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
@@ -559,6 +563,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @return a method to handle the exception, or {@code null}
 	 * @since 4.2
 	 */
+	@Nullable
 	protected InvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching methods to handle " + exception.getClass().getSimpleName());

@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -169,6 +170,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
+	@Nullable
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
@@ -214,6 +216,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
+	@Nullable
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");

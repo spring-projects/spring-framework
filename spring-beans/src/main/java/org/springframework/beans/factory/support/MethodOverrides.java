@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
@@ -95,6 +97,7 @@ public class MethodOverrides {
 	 * @param method method to check for overrides for
 	 * @return the method override, or {@code null} if none
 	 */
+	@Nullable
 	public MethodOverride getOverride(Method method) {
 		if (!this.modified) {
 			return null;

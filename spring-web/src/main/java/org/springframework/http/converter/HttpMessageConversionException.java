@@ -17,6 +17,7 @@
 package org.springframework.http.converter;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when a conversion attempt fails.
@@ -41,7 +42,7 @@ public class HttpMessageConversionException extends NestedRuntimeException {
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
-	public HttpMessageConversionException(String msg, Throwable cause) {
+	public HttpMessageConversionException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

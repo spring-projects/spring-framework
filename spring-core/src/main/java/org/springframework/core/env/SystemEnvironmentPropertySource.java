@@ -18,6 +18,7 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -117,6 +118,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		return name;
 	}
 
+	@Nullable
 	private String checkPropertyName(String name) {
 		// Check name as-is
 		if (containsKey(name)) {

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -40,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -144,6 +146,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return the target ConnectionFactory which will be used to lazily
 	 * create a single Connection, if any.
 	 */
+	@org.springframework.lang.Nullable
 	public ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
@@ -165,6 +168,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return a JMS client ID for the single Connection created and exposed
 	 * by this ConnectionFactory, if any.
 	 */
+	@org.springframework.lang.Nullable
 	protected String getClientId() {
 		return this.clientId;
 	}
@@ -182,6 +186,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return the JMS ExceptionListener implementation that should be registered
 	 * with the single Connection created by this factory, if any.
 	 */
+	@Nullable
 	protected ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
 	}
@@ -436,6 +441,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * creation of a raw standard Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
+	@Nullable
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
 		return null;
 	}

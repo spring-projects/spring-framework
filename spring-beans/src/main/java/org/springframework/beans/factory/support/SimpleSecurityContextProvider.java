@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple {@link SecurityContextProvider} implementation.
  *
@@ -46,7 +48,7 @@ public class SimpleSecurityContextProvider implements SecurityContextProvider {
 	 * @param acc access control context (can be {@code null})
 	 * @see AccessController#getContext()
 	 */
-	public SimpleSecurityContextProvider(AccessControlContext acc) {
+	public SimpleSecurityContextProvider(@Nullable AccessControlContext acc) {
 		this.acc = acc;
 	}
 

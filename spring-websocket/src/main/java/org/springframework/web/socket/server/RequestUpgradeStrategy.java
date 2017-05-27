@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 
@@ -61,7 +62,7 @@ public interface RequestUpgradeStrategy {
 	 * handshake request.
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
+			@Nullable String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException;
 
 }

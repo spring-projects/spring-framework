@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -138,6 +139,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return new UserDestinationResult(sourceDestination, targetSet, subscribeDestination, user);
 	}
 
+	@Nullable
 	private ParseResult parse(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
@@ -215,8 +217,9 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @return a target destination, or {@code null} if none
 	 */
 	@SuppressWarnings("unused")
+	@Nullable
 	protected String getTargetDestination(String sourceDestination, String actualDestination,
-			String sessionId, String user) {
+			String sessionId, @Nullable String user) {
 
 		return actualDestination + "-user" + sessionId;
 	}

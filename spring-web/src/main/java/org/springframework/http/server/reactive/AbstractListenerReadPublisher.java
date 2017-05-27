@@ -27,6 +27,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -108,6 +109,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * Reads a data from the input, if possible.
 	 * @return the data that was read; or {@code null}
 	 */
+	@Nullable
 	protected abstract T read() throws IOException;
 
 

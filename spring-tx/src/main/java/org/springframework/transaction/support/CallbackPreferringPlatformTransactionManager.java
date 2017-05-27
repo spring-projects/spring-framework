@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -53,6 +54,7 @@ public interface CallbackPreferringPlatformTransactionManager extends PlatformTr
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
+	@Nullable
 	<T> T execute(TransactionDefinition definition, TransactionCallback<T> callback)
 			throws TransactionException;
 

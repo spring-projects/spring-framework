@@ -20,6 +20,8 @@ import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple stop watch, allowing for timing of a number of tasks,
  * exposing total running time and running time for each named task.
@@ -165,6 +167,7 @@ public class StopWatch {
 	 * @since 4.2.2
 	 * @see #isRunning()
 	 */
+	@Nullable
 	public String currentTaskName() {
 		return this.currentTaskName;
 	}

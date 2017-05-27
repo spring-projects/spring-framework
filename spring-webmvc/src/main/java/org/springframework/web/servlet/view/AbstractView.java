@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
@@ -127,6 +128,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the name of the RequestContext attribute, if any.
 	 */
+	@Nullable
 	public String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}

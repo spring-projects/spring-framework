@@ -39,6 +39,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -501,6 +502,7 @@ class DefaultWebTestClient implements WebTestClient {
 			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
 		}
 
+		@Nullable
 		private String getBodyAsString() {
 			if (this.isEmpty) {
 				return null;

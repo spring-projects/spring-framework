@@ -26,6 +26,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -69,6 +70,7 @@ public class JndiTemplate {
 	/**
 	 * Return the environment for the JNDI InitialContext, if any.
 	 */
+	@Nullable
 	public Properties getEnvironment() {
 		return this.environment;
 	}
@@ -81,6 +83,7 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by the callback implementation
 	 * @see #createInitialContext
 	 */
+	@Nullable
 	public <T> T execute(JndiCallback<T> contextCallback) throws NamingException {
 		Context ctx = getContext();
 		try {
@@ -108,7 +111,7 @@ public class JndiTemplate {
 	 * @param ctx the JNDI context to release (may be {@code null})
 	 * @see #getContext
 	 */
-	public void releaseContext(Context ctx) {
+	public void releaseContext(@Nullable Context ctx) {
 		if (ctx != null) {
 			try {
 				ctx.close();
@@ -175,7 +178,7 @@ public class JndiTemplate {
 	 * name bound to JNDI
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T lookup(String name, Class<T> requiredType) throws NamingException {
+	public <T> T lookup(String name, @Nullable Class<T> requiredType) throws NamingException {
 		Object jndiObject = lookup(name);
 		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
 			throw new TypeMismatchNamingException(

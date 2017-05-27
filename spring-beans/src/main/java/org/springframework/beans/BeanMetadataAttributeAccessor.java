@@ -17,6 +17,7 @@
 package org.springframework.beans;
 
 import org.springframework.core.AttributeAccessorSupport;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link org.springframework.core.AttributeAccessorSupport},
@@ -60,6 +61,7 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	 * @return the corresponding BeanMetadataAttribute object,
 	 * or {@code null} if no such attribute defined
 	 */
+	@Nullable
 	public BeanMetadataAttribute getMetadataAttribute(String name) {
 		return (BeanMetadataAttribute) super.getAttribute(name);
 	}

@@ -36,6 +36,7 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -187,7 +188,7 @@ public abstract class AopUtils {
 	 * {@code targetClass} doesn't implement it or is {@code null}
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
-	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
+	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
@@ -324,6 +325,7 @@ public abstract class AopUtils {
 	 * @throws Throwable if thrown by the target method
 	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
 	 */
+	@Nullable
 	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
 			throws Throwable {
 

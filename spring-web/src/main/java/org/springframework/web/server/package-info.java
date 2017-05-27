@@ -4,4 +4,7 @@
  * reactive HTTP adapter layer, providing additional constructs such as
  * WebHandler, WebFilter, WebSession among others.
  */
+@NonNullApi
 package org.springframework.web.server;
+
+import org.springframework.lang.NonNullApi;

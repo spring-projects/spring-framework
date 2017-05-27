@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Subclass of SqlParameter to represent an output parameter.
  * No additional properties: instanceof will be used to check
@@ -111,6 +113,7 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	/**
 	 * Return the custom return type, if any.
 	 */
+	@Nullable
 	public SqlReturnType getSqlReturnType() {
 		return this.sqlReturnType;
 	}

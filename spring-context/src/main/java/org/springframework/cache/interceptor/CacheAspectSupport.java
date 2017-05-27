@@ -42,6 +42,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -470,6 +471,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @return a {@link Cache.ValueWrapper} holding the cached item,
 	 * or {@code null} if none is found
 	 */
+	@Nullable
 	private Cache.ValueWrapper findCachedItem(Collection<CacheOperationContext> contexts) {
 		Object result = CacheOperationExpressionEvaluator.NO_RESULT;
 		for (CacheOperationContext context : contexts) {
@@ -507,6 +509,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 	}
 
+	@Nullable
 	private Cache.ValueWrapper findInCaches(CacheOperationContext context, Object key) {
 		for (Cache cache : context.getCaches()) {
 			Cache.ValueWrapper wrapper = doGet(cache, key);
@@ -711,6 +714,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		 * Compute the key for the given caching operation.
 		 * @return the generated key, or {@code null} if none can be generated
 		 */
+		@Nullable
 		protected Object generateKey(Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);

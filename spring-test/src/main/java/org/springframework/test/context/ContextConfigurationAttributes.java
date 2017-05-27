@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -202,6 +203,7 @@ public class ContextConfigurationAttributes {
 	 * @see ContextConfiguration#classes
 	 * @see #setClasses(Class[])
 	 */
+	@Nullable
 	public Class<?>[] getClasses() {
 		return this.classes;
 	}
@@ -237,6 +239,7 @@ public class ContextConfigurationAttributes {
 	 * @see ContextConfiguration#locations
 	 * @see #setLocations(String[])
 	 */
+	@Nullable
 	public String[] getLocations() {
 		return this.locations;
 	}
@@ -301,6 +304,7 @@ public class ContextConfigurationAttributes {
 	 * @see ContextConfiguration#name()
 	 * @since 3.2.2
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.support;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +31,7 @@ import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -181,7 +183,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());
 		String[] supportedMethods = ex.getSupportedMethods();
@@ -448,7 +450,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @since 4.0
 	 */
 	protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		return new ModelAndView();
@@ -467,7 +469,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @since 4.2.8
 	 */
 	protected ModelAndView handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (!response.isCommitted()) {
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);

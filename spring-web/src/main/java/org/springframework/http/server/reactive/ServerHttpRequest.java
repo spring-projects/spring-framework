@@ -22,6 +22,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -57,6 +58,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	/**
 	 * Return the remote address where this request is connected to, if available.
 	 */
+	@Nullable
 	InetSocketAddress getRemoteAddress();
 
 

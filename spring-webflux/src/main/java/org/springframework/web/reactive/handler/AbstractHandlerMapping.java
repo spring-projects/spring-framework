@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -189,6 +190,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * @param exchange the current exchange
 	 * @return the CORS configuration for the handler, or {@code null} if none
 	 */
+	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		if (handler instanceof CorsConfigurationSource) {
 			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);

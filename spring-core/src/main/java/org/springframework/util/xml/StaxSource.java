@@ -23,6 +23,8 @@ import javax.xml.transform.sax.SAXSource;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Implementation of the {@code Source} tagging interface for StAX readers. Can be constructed with
  * an {@code XMLEventReader} or an {@code XMLStreamReader}.
@@ -81,6 +83,7 @@ class StaxSource extends SAXSource {
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */
+	@Nullable
 	XMLEventReader getXMLEventReader() {
 		return this.eventReader;
 	}
@@ -91,6 +94,7 @@ class StaxSource extends SAXSource {
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */
+	@Nullable
 	XMLStreamReader getXMLStreamReader() {
 		return this.streamReader;
 	}

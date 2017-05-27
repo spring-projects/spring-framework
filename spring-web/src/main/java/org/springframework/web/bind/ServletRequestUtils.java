@@ -18,6 +18,8 @@ package org.springframework.web.bind;
 
 import javax.servlet.ServletRequest;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Parameter extraction methods, for an approach distinct from data binding,
  * in which parameters of specific types are required.
@@ -53,6 +55,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static Integer getIntParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
@@ -131,6 +134,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static Long getLongParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
@@ -209,6 +213,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static Float getFloatParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
@@ -287,6 +292,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static Double getDoubleParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
@@ -367,6 +373,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static Boolean getBooleanParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
@@ -454,6 +461,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
+	@Nullable
 	public static String getStringParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 

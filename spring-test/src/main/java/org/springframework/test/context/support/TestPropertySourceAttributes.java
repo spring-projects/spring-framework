@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -105,6 +106,7 @@ class TestPropertySourceAttributes {
 	 * @see TestPropertySource#locations
 	 * @see #setLocations(String[])
 	 */
+	@Nullable
 	String[] getLocations() {
 		return locations;
 	}
@@ -125,6 +127,7 @@ class TestPropertySourceAttributes {
 	 * @return the inlined properties; potentially {@code null} or <em>empty</em>
 	 * @see TestPropertySource#properties
 	 */
+	@Nullable
 	String[] getProperties() {
 		return this.properties;
 	}

@@ -38,6 +38,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -260,6 +261,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(name);
 	}
 
+	@Nullable
 	private RootBeanDefinition getDefaultExecutorBeanDefinition(String channelName) {
 		if (channelName.equals("brokerChannel")) {
 			return null;
@@ -545,6 +547,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		registerBeanDef(beanDef, context, source);
 	}
 
+	@Nullable
 	private RuntimeBeanReference getValidator(Element messageBrokerElement, Object source, ParserContext parserContext) {
 		if (messageBrokerElement.hasAttribute("validator")) {
 			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));

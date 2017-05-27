@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -267,7 +268,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 */
-	protected ObjectInputStream createObjectInputStream(InputStream is, String codebaseUrl) throws IOException {
+	protected ObjectInputStream createObjectInputStream(InputStream is, @Nullable String codebaseUrl) throws IOException {
 		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), codebaseUrl);
 	}
 

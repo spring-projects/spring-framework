@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.inject.Provider;
 
 import org.springframework.beans.BeanUtils;
@@ -72,6 +73,7 @@ import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CompositeIterator;
@@ -269,6 +271,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
 	 * @since 4.0
 	 */
+	@Nullable
 	public Comparator<Object> getDependencyComparator() {
 		return this.dependencyComparator;
 	}
@@ -987,6 +990,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType, Object... args) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] candidateNames = getBeanNamesForType(requiredType);
@@ -1059,6 +1063,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	@Nullable
 	public Object doResolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
@@ -1315,6 +1320,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param descriptor the target dependency to match against
 	 * @return the name of the autowire candidate, or {@code null} if none found
 	 */
+	@Nullable
 	protected String determineAutowireCandidate(Map<String, Object> candidates, DependencyDescriptor descriptor) {
 		Class<?> requiredType = descriptor.getDependencyType();
 		String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
@@ -1345,6 +1351,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return the name of the primary candidate, or {@code null} if none found
 	 * @see #isPrimary(String, Object)
 	 */
+	@Nullable
 	protected String determinePrimaryCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String primaryBeanName = null;
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
@@ -1382,6 +1389,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * or {@code null} if none found
 	 * @see #getPriority(Object)
 	 */
+	@Nullable
 	protected String determineHighestPriorityCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String highestPriorityBeanName = null;
 		Integer highestPriority = null;
@@ -1438,6 +1446,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param beanInstance the bean instance to check (can be {@code null})
 	 * @return the priority assigned to that bean or {@code null} if none is set
 	 */
+	@Nullable
 	protected Integer getPriority(Object beanInstance) {
 		Comparator<Object> comparator = getDependencyComparator();
 		if (comparator instanceof OrderComparator) {
@@ -1727,6 +1736,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return sources.toArray(new Object[sources.size()]);
 		}
 
+		@Nullable
 		private RootBeanDefinition getRootBeanDefinition(String beanName) {
 			if (beanName != null && containsBeanDefinition(beanName)) {
 				BeanDefinition bd = getMergedBeanDefinition(beanName);

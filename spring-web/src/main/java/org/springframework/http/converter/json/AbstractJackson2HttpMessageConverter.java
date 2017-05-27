@@ -47,6 +47,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.TypeUtils;
 
@@ -315,7 +316,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * in which the target type appears in a method signature (can be {@code null})
 	 * @return the Jackson JavaType
 	 */
-	protected JavaType getJavaType(Type type, Class<?> contextClass) {
+	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}

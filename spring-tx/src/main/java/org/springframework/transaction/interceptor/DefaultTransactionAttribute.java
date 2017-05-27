@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
@@ -106,6 +107,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * or {@code null} if none.
 	 * @since 4.3.4
 	 */
+	@Nullable
 	public String getDescriptor() {
 		return this.descriptor;
 	}

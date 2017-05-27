@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -116,6 +117,7 @@ public class CorsConfiguration {
 	 * @see #addAllowedOrigin(String)
 	 * @see #setAllowedOrigins(List)
 	 */
+	@Nullable
 	public List<String> getAllowedOrigins() {
 		return this.allowedOrigins;
 	}
@@ -161,6 +163,7 @@ public class CorsConfiguration {
 	 * @see #addAllowedMethod(String)
 	 * @see #setAllowedMethods(List)
 	 */
+	@Nullable
 	public List<String> getAllowedMethods() {
 		return this.allowedMethods;
 	}
@@ -212,6 +215,7 @@ public class CorsConfiguration {
 	 * @see #addAllowedHeader(String)
 	 * @see #setAllowedHeaders(List)
 	 */
+	@Nullable
 	public List<String> getAllowedHeaders() {
 		return this.allowedHeaders;
 	}
@@ -246,6 +250,7 @@ public class CorsConfiguration {
 	 * @see #addExposedHeader(String)
 	 * @see #setExposedHeaders(List)
 	 */
+	@Nullable
 	public List<String> getExposedHeaders() {
 		return this.exposedHeaders;
 	}
@@ -276,6 +281,7 @@ public class CorsConfiguration {
 	 * Return the configured {@code allowCredentials} flag, or {@code null} if none.
 	 * @see #setAllowCredentials(Boolean)
 	 */
+	@Nullable
 	public Boolean getAllowCredentials() {
 		return this.allowCredentials;
 	}
@@ -293,6 +299,7 @@ public class CorsConfiguration {
 	 * Return the configured {@code maxAge} value, or {@code null} if none.
 	 * @see #setMaxAge(Long)
 	 */
+	@Nullable
 	public Long getMaxAge() {
 		return this.maxAge;
 	}
@@ -343,6 +350,7 @@ public class CorsConfiguration {
 	 * @return the combined {@code CorsConfiguration} or {@code this}
 	 * configuration if the supplied configuration is {@code null}
 	 */
+	@Nullable
 	public CorsConfiguration combine(CorsConfiguration other) {
 		if (other == null) {
 			return this;
@@ -381,6 +389,7 @@ public class CorsConfiguration {
 	 * @return the origin to use for the response, or {@code null} which
 	 * means the request origin is not allowed
 	 */
+	@Nullable
 	public String checkOrigin(String requestOrigin) {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
@@ -414,6 +423,7 @@ public class CorsConfiguration {
 	 * @return the list of HTTP methods to list in the response of a pre-flight
 	 * request, or {@code null} if the supplied {@code requestMethod} is not allowed
 	 */
+	@Nullable
 	public List<HttpMethod> checkHttpMethod(HttpMethod requestMethod) {
 		if (requestMethod == null) {
 			return null;
@@ -432,6 +442,7 @@ public class CorsConfiguration {
 	 * @return the list of allowed headers to list in the response of a pre-flight
 	 * request, or {@code null} if none of the supplied request headers is allowed
 	 */
+	@Nullable
 	public List<String> checkHeaders(List<String> requestHeaders) {
 		if (requestHeaders == null) {
 			return null;

@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -33,6 +34,8 @@ import org.hibernate.dialect.Oracle12cDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SybaseDialect;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
@@ -155,6 +158,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
+	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;

@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -143,6 +144,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * Return a FlashMap contained in the given list that matches the request.
 	 * @return a matching FlashMap or {@code null}
 	 */
+	@Nullable
 	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
 		List<FlashMap> result = new LinkedList<>();
 		for (FlashMap flashMap : allMaps) {
@@ -241,6 +243,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @param request the current request
 	 * @return a List with FlashMap instances, or {@code null} if none found
 	 */
+	@Nullable
 	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
 
 	/**
@@ -262,6 +265,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @return the mutex to use (may be {@code null} if none applicable)
 	 * @since 4.0.3
 	 */
+	@Nullable
 	protected Object getFlashMapsMutex(HttpServletRequest request) {
 		return DEFAULT_FLASH_MAPS_MUTEX;
 	}

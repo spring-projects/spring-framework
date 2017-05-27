@@ -26,6 +26,7 @@ import javax.servlet.jsp.JspTagException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -264,6 +265,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws JspException if argument conversion failed
 	 * @see #setArguments
 	 */
+	@Nullable
 	protected Object[] resolveArguments(Object arguments) throws JspException {
 		if (arguments instanceof String) {
 			String[] stringArray =

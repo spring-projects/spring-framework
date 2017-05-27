@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Arrays;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.CannotAcquireLockException;
@@ -33,6 +34,7 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link SQLExceptionTranslator} that analyzes vendor-specific error codes.
@@ -295,7 +297,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * as a nested root cause. This implementation always returns null, meaning that
 	 * the translator always falls back to the default error codes.
 	 */
-	protected DataAccessException customTranslate(String task, String sql, SQLException sqlEx) {
+	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
 		return null;
 	}
 
@@ -313,7 +315,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
 	protected DataAccessException createCustomException(
-			String task, String sql, SQLException sqlEx, Class<?> exceptionClass) {
+			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
 		// find appropriate constructor
 		try {

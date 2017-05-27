@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Java 5 enumeration of HTTP request methods. Intended for use
  * with {@link org.springframework.http.client.ClientHttpRequest}
@@ -48,6 +50,7 @@ public enum HttpMethod {
 	 * @return the corresponding {@code HttpMethod}, or {@code null} if not found
 	 * @since 4.2.4
 	 */
+	@Nullable
 	public static HttpMethod resolve(String method) {
 		return (method != null ? mappings.get(method) : null);
 	}

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
@@ -183,6 +184,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
+	@Nullable
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
 		if (providedArgs == null) {
 			return null;

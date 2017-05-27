@@ -17,6 +17,7 @@
 package org.springframework.cache.support;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 
 /**
  * Common base class for {@link Cache} implementations that need to adapt
@@ -81,7 +82,8 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @param storeValue the store value
 	 * @return the value to return to the user
 	 */
-	protected Object fromStoreValue(Object storeValue) {
+	@Nullable
+	protected Object fromStoreValue(@Nullable Object storeValue) {
 		if (this.allowNullValues && storeValue == NullValue.INSTANCE) {
 			return null;
 		}
@@ -94,7 +96,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @param userValue the given user value
 	 * @return the value to store
 	 */
-	protected Object toStoreValue(Object userValue) {
+	protected Object toStoreValue(@Nullable Object userValue) {
 		if (userValue == null) {
 			if (this.allowNullValues) {
 				return NullValue.INSTANCE;

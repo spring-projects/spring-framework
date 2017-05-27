@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -45,7 +46,7 @@ public interface Decoder<T> {
 	 * @param mimeType the mime type associated with the stream to decode, can be {@code null} if not specified.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canDecode(ResolvableType elementType, MimeType mimeType);
+	boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.
@@ -58,7 +59,7 @@ public interface Decoder<T> {
 	 * @return the output stream with decoded elements
 	 */
 	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints);
+			@Nullable MimeType mimeType, Map<String, Object> hints);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Mono of {@code T}.
@@ -71,7 +72,7 @@ public interface Decoder<T> {
 	 * @return the output stream with the decoded element
 	 */
 	Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints);
+			@Nullable MimeType mimeType, Map<String, Object> hints);
 
 	/**
 	 * Return the list of MIME types this decoder supports.

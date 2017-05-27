@@ -32,6 +32,7 @@ import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
 import org.springframework.jndi.JndiLocatorDelegate;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -152,6 +153,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 		public abstract MBeanServer getMBeanServer();
 
+		@Nullable
 		public static SpecificPlatform get() {
 			ClassLoader classLoader = MBeanExportConfiguration.class.getClassLoader();
 			for (SpecificPlatform environment : values()) {

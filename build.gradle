@@ -177,6 +177,7 @@ configure(allprojects) { project ->
 	}
 
 	dependencies {
+		provided("com.google.code.findbugs:jsr305:3.0.2")
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}

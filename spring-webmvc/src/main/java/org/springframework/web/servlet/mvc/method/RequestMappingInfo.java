@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.mvc.method;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -105,6 +107,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the name for this mapping, or {@code null}.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -160,6 +163,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Returns the "custom" condition of this {@link RequestMappingInfo}; or {@code null}.
 	 */
+	@Nullable
 	public RequestCondition<?> getCustomCondition() {
 		return this.customConditionHolder.getCondition();
 	}
@@ -532,6 +536,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Return a custom UrlPathHelper to use for the PatternsRequestCondition, if any.
 		 */
+
 		public UrlPathHelper getUrlPathHelper() {
 			return this.urlPathHelper;
 		}
@@ -547,6 +552,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Return a custom PathMatcher to use for the PatternsRequestCondition, if any.
 		 */
+		@Nullable
 		public PathMatcher getPathMatcher() {
 			return this.pathMatcher;
 		}
@@ -626,6 +632,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Return the ContentNegotiationManager to use for the ProducesRequestCondition,
 		 * if any.
 		 */
+		@Nullable
 		public ContentNegotiationManager getContentNegotiationManager() {
 			return this.contentNegotiationManager;
 		}

@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
@@ -164,6 +165,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @throws Throwable in case of invocation failure
 	 * @see #invoke
 	 */
+	@Nullable
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		try {
 			refreshHome();
@@ -184,6 +186,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #getHome
 	 * @see #newSessionBeanInstance
 	 */
+	@Nullable
 	protected abstract Object doInvoke(MethodInvocation invocation) throws Throwable;
 
 

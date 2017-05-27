@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 
 import static org.springframework.util.StringUtils.*;
@@ -173,6 +174,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return a {@link PathRemainingMatchInfo} describing the match result or null if
 	 * the path does not match this pattern
 	 */
+	@Nullable
 	public PathRemainingMatchInfo getPathRemaining(String path) {
 		if (this.head == null) {
 			if (path == null) {

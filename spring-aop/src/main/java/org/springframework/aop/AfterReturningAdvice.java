@@ -18,6 +18,8 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * After returning advice is invoked only on normal method return, not if an
  * exception is thrown. Such advice can see the return value, but cannot change it.
@@ -39,6 +41,6 @@ public interface AfterReturningAdvice extends AfterAdvice {
 	 * allowed by the method signature. Otherwise the exception
 	 * will be wrapped as a runtime exception.
 	 */
-	void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable;
+	void afterReturning(@Nullable Object returnValue, Method method, Object[] args, @Nullable Object target) throws Throwable;
 
 }

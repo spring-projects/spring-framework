@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.LocaleContextResolver;
 
 /**
@@ -51,6 +52,7 @@ public abstract class AbstractLocaleContextResolver extends AbstractLocaleResolv
 	/**
 	 * Return the default TimeZone that this resolver is supposed to fall back to, if any.
 	 */
+	@Nullable
 	public TimeZone getDefaultTimeZone() {
 		return this.defaultTimeZone;
 	}

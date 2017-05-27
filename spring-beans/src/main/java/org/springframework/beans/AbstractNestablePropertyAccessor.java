@@ -40,6 +40,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -715,6 +716,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * or {@code null} if not found
 	 * @throws BeansException in case of introspection failure
 	 */
+	@Nullable
 	protected PropertyHandler getPropertyHandler(String propertyName) throws BeansException {
 		Assert.notNull(propertyName, "Property name must not be null");
 		AbstractNestablePropertyAccessor nestedPa = getPropertyAccessorForPropertyPath(propertyName);
@@ -727,6 +729,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param propertyName the name of a local property
 	 * @return the handler for that property or {@code null} if it has not been found
 	 */
+	@Nullable
 	protected abstract PropertyHandler getLocalPropertyHandler(String propertyName);
 
 	/**
@@ -1016,6 +1019,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		public abstract TypeDescriptor nested(int level);
 
+		@Nullable
 		public abstract Object getValue() throws Exception;
 
 		public abstract void setValue(Object object, Object value) throws Exception;

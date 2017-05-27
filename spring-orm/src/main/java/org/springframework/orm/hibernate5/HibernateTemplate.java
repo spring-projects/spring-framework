@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
@@ -44,6 +45,7 @@ import org.hibernate.criterion.Example;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -170,6 +172,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	/**
 	 * Return the names of Hibernate filters to be activated, if any.
 	 */
+	@Nullable
 	public String[] getFilterNames() {
 		return this.filterNames;
 	}
@@ -322,6 +325,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException in case of Hibernate errors
 	 */
+	@Nullable
 	public <T> T executeWithNativeSession(HibernateCallback<T> action) {
 		return doExecute(action, true);
 	}
@@ -335,6 +339,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @throws DataAccessException in case of Hibernate errors
 	 */
 	@SuppressWarnings("deprecation")
+	@Nullable
 	protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNativeSession) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 

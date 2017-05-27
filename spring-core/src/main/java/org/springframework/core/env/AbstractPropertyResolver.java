@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -267,6 +268,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @param key the property name to resolve
 	 * @return the property value or {@code null} if none found
 	 */
+	@Nullable
 	protected abstract String getPropertyAsRawString(String key);
 
 }

@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -188,6 +189,7 @@ public class MessageBrokerRegistry {
 	}
 
 
+	@Nullable
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
@@ -201,6 +203,7 @@ public class MessageBrokerRegistry {
 		return null;
 	}
 
+	@Nullable
 	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
 			return this.brokerRelayRegistration.getMessageHandler(brokerChannel);

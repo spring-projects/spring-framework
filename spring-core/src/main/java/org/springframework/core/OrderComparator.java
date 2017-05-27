@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -135,6 +136,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code null} if none found
 	 */
+	@Nullable
 	protected Integer findOrder(Object obj) {
 		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : null);
 	}
@@ -150,6 +152,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @return the priority value, or {@code null} if none
 	 * @since 4.1
 	 */
+	@Nullable
 	public Integer getPriority(Object obj) {
 		return null;
 	}
@@ -215,6 +218,7 @@ public class OrderComparator implements Comparator<Object> {
 		 * @param obj the object to find an order source for
 		 * @return the order source for that object, or {@code null} if none found
 		 */
+		@Nullable
 		Object getOrderSource(Object obj);
 	}
 

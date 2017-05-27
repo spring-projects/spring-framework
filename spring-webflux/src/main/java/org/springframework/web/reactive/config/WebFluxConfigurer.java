@@ -20,6 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
@@ -102,6 +103,7 @@ public interface WebFluxConfigurer {
 	 * <p>By default a validator for standard bean validation is created if
 	 * bean validation api is present on the classpath.
 	 */
+	@Nullable
 	default Validator getValidator() {
 		return null;
 	}
@@ -110,6 +112,7 @@ public interface WebFluxConfigurer {
 	 * Provide a custom {@link MessageCodesResolver} to use for data binding instead
 	 * of the one created by default in {@link org.springframework.validation.DataBinder}.
 	 */
+	@Nullable
 	default MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}

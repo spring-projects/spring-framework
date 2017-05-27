@@ -37,6 +37,7 @@ import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -175,6 +176,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the name of the persistence unit to manage transactions for, if any.
 	 */
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -186,7 +188,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * or a "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaProperties(Properties jpaProperties) {
+	public void setJpaProperties(@Nullable Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
 	}
 
@@ -196,7 +198,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map<String, ?> jpaProperties) {
+	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}

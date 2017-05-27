@@ -33,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Builds on the {@link AbstractMBeanInfoAssembler} superclass to
@@ -210,6 +211,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Return default value for the JMX field "currencyTimeLimit", if any.
 	 */
+	@Nullable
 	protected Integer getDefaultCurrencyTimeLimit() {
 		return this.defaultCurrencyTimeLimit;
 	}
@@ -272,6 +274,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Return the ParameterNameDiscoverer to use for resolving method parameter
 	 * names if needed (may be {@code null} in order to skip parameter detection).
 	 */
+	@Nullable
 	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
 		return this.parameterNameDiscoverer;
 	}

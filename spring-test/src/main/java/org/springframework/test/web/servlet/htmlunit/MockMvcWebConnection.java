@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -90,7 +91,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * @param webClient  the {@link WebClient} to use. never {@code null}
 	 * @param contextPath the contextPath to use
 	 */
-	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, String contextPath) {
+	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, @Nullable String contextPath) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
 		Assert.notNull(webClient, "WebClient must not be null");
 		validateContextPath(contextPath);
@@ -108,7 +109,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * a "/" character and not end with a "/" character.
 	 * @param contextPath the path to validate
 	 */
-	static void validateContextPath(String contextPath) {
+	static void validateContextPath(@Nullable String contextPath) {
 		if (contextPath == null || "".equals(contextPath)) {
 			return;
 		}

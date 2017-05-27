@@ -22,6 +22,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -78,6 +79,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		}
 	}
 
+	@Nullable
 	private ResourceResolver getNext() {
 		Assert.state(this.index <= this.resolvers.size(),
 				"Current index exceeds the number of configured ResourceResolvers");

@@ -17,6 +17,7 @@
 package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
+
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
@@ -32,6 +33,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
 
@@ -122,6 +124,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * not using {@link ContextLoader}, this method should be overridden.
 	 * @return the {@link ApplicationContext} or {@code null}
 	 */
+	@Nullable
 	protected ApplicationContext getApplicationContext() {
 		return ContextLoader.getCurrentWebApplicationContext();
 	}

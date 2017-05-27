@@ -16,6 +16,8 @@
 
 package org.aopalliance.aop;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Superclass for all AOP infrastructure exceptions.
  * Unchecked, as such exceptions are fatal and end user
@@ -41,7 +43,7 @@ public class AspectException extends RuntimeException {
 	 * @param message the exception message
 	 * @param cause the root cause, if any
 	 */
-	public AspectException(String message, Throwable cause) {
+	public AspectException(String message, @Nullable Throwable cause) {
 		super(message, cause);
 	}
 

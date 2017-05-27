@@ -39,6 +39,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -192,7 +193,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @since 4.3
 	 * @see #initBeanWrapper(BeanWrapper)
 	 */
-	public void setConversionService(ConversionService conversionService) {
+	public void setConversionService(@Nullable ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -201,6 +202,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * or {@code null} if none.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ConversionService getConversionService() {
 		return this.conversionService;
 	}
@@ -366,7 +368,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @throws SQLException in case of extraction failure
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
 	 */
-	protected Object getColumnValue(ResultSet rs, int index, PropertyDescriptor pd) throws SQLException {
+	protected Object getColumnValue(ResultSet rs, int index, @Nullable PropertyDescriptor pd) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
 	}
 

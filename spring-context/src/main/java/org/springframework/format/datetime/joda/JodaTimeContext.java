@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific Joda-Time settings such as the user's
@@ -53,6 +54,7 @@ public class JodaTimeContext {
 	/**
 	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
@@ -72,6 +74,7 @@ public class JodaTimeContext {
 	/**
 	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public DateTimeZone getTimeZone() {
 		return this.timeZone;
 	}

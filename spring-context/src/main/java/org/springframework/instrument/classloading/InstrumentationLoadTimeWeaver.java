@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -139,6 +140,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * @return the Instrumentation instance, or {@code null} if none found
 	 * @see #isInstrumentationAvailable()
 	 */
+	@Nullable
 	private static Instrumentation getInstrumentation() {
 		if (AGENT_CLASS_PRESENT) {
 			return InstrumentationAccessor.getInstrumentation();
@@ -175,6 +177,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		}
 
 		@Override
+		@Nullable
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 

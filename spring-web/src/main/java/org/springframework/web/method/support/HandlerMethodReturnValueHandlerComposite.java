@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -57,6 +58,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		return getReturnValueHandler(returnType) != null;
 	}
 
+	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
@@ -81,6 +83,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 	}
 
+	@Nullable
 	private HandlerMethodReturnValueHandler selectHandler(Object value, MethodParameter returnType) {
 		boolean isAsyncValue = isAsyncReturnValue(value, returnType);
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {

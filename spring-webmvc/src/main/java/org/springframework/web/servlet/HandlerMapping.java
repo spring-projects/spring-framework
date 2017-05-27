@@ -18,6 +18,8 @@ package org.springframework.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
@@ -126,6 +128,7 @@ public interface HandlerMapping {
 	 * any interceptors, or {@code null} if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
+	@Nullable
 	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 
 }

@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Generic interface for a web request. Mainly intended for generic web
  * request interceptors, giving them access to general request metadata,
@@ -39,6 +41,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
 	 */
+	@Nullable
 	String getHeader(String headerName);
 
 	/**
@@ -48,6 +51,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
+	@Nullable
 	String[] getHeaderValues(String headerName);
 
 	/**
@@ -62,6 +66,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
+	@Nullable
 	String getParameter(String paramName);
 
 	/**
@@ -70,6 +75,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
+	@Nullable
 	String[] getParameterValues(String paramName);
 
 	/**
@@ -104,12 +110,14 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the remote user for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
 	 */
+	@Nullable
 	String getRemoteUser();
 
 	/**
 	 * Return the user principal for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
+	@Nullable
 	Principal getUserPrincipal();
 
 	/**

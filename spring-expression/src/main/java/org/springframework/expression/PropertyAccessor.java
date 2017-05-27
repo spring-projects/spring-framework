@@ -17,6 +17,8 @@
 package org.springframework.expression;
 
 
+import org.springframework.lang.Nullable;
+
 /**
  * A property accessor is able to read from (and possibly write to) an object's properties.
  * This interface places no restrictions, and so implementors are free to access properties
@@ -43,6 +45,7 @@ public interface PropertyAccessor {
 	 * @return an array of classes that this resolver is suitable for
 	 * (or {@code null} if a general resolver)
 	 */
+	@Nullable
 	Class<?>[] getSpecificTargetClasses();
 
 	/**

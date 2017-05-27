@@ -19,6 +19,8 @@ package org.springframework.beans.factory.parsing;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple {@link ProblemReporter} implementation that exhibits fail-fast
  * behavior when errors are encountered.
@@ -45,7 +47,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * the name of the instance class will be used.
 	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
-	public void setLogger(Log logger) {
+	public void setLogger(@Nullable Log logger) {
 		this.logger = (logger != null ? logger : LogFactory.getLog(getClass()));
 	}
 

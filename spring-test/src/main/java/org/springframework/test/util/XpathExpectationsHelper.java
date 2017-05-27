@@ -19,6 +19,7 @@ package org.springframework.test.util;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,6 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
@@ -64,7 +66,7 @@ public class XpathExpectationsHelper {
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 * @throws XPathExpressionException
 	 */
-	public XpathExpectationsHelper(String expression, Map<String, String> namespaces, Object... args)
+	public XpathExpectationsHelper(String expression, @Nullable Map<String, String> namespaces, Object... args)
 			throws XPathExpressionException {
 
 		this.expression = String.format(expression, args);

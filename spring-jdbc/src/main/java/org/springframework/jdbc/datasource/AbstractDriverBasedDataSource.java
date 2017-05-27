@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -105,6 +106,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Return the database catalog to be applied to each Connection, if any.
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public String getCatalog() {
 		return this.catalog;
 	}
@@ -122,6 +124,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Return the database schema to be applied to each Connection, if any.
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public String getSchema() {
 		return this.schema;
 	}
@@ -141,6 +144,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the connection properties to be passed to the Driver, if any.
 	 */
+	@Nullable
 	public Properties getConnectionProperties() {
 		return this.connectionProperties;
 	}
@@ -178,7 +182,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @throws SQLException in case of failure
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	protected Connection getConnectionFromDriver(String username, String password) throws SQLException {
+	protected Connection getConnectionFromDriver(@Nullable String username, @Nullable String password) throws SQLException {
 		Properties mergedProps = new Properties();
 		Properties connProps = getConnectionProperties();
 		if (connProps != null) {

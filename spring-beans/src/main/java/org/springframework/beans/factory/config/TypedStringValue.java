@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -153,6 +154,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @return the resolved type to convert to
 	 * @throws ClassNotFoundException if the type cannot be resolved
 	 */
+	@Nullable
 	public Class<?> resolveTargetType(ClassLoader classLoader) throws ClassNotFoundException {
 		if (this.targetType == null) {
 			return null;
@@ -179,13 +181,14 @@ public class TypedStringValue implements BeanMetadataElement {
 	/**
 	 * Set the type name as actually specified for this particular value, if any.
 	 */
-	public void setSpecifiedTypeName(String specifiedTypeName) {
+	public void setSpecifiedTypeName(@Nullable String specifiedTypeName) {
 		this.specifiedTypeName = specifiedTypeName;
 	}
 
 	/**
 	 * Return the type name as actually specified for this particular value, if any.
 	 */
+	@Nullable
 	public String getSpecifiedTypeName() {
 		return this.specifiedTypeName;
 	}

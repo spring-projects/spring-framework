@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -83,7 +84,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param payload the payload to send (may be {@code null})
 	 * @param headers the message headers (may be {@code null})
 	 */
-	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers)
+	void convertAndSendToUser(String user, String destination, @Nullable Object payload, @Nullable Map<String, Object> headers)
 			throws MessagingException;
 
 	/**
@@ -93,7 +94,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param payload the payload to send (may be {@code null})
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(String user, String destination, Object payload,
+	void convertAndSendToUser(String user, String destination, @Nullable Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**

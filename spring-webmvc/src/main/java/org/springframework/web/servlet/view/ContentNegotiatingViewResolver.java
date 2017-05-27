@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -240,6 +241,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */
+	@Nullable
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
@@ -317,6 +319,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		return candidateViews;
 	}
 
+	@Nullable
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView) {

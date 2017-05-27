@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -57,7 +58,7 @@ public abstract class ResourcePatternUtils {
 	 * @return the ResourcePatternResolver
 	 * @see PathMatchingResourcePatternResolver
 	 */
-	public static ResourcePatternResolver getResourcePatternResolver(ResourceLoader resourceLoader) {
+	public static ResourcePatternResolver getResourcePatternResolver(@Nullable ResourceLoader resourceLoader) {
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			return (ResourcePatternResolver) resourceLoader;
 		}

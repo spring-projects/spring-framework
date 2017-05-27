@@ -19,6 +19,8 @@ package org.springframework.beans;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown when instantiation of a bean failed.
  * Carries the offending bean class.
@@ -98,6 +100,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * factory method or in case of default instantiation
 	 * @since 4.3
 	 */
+	@Nullable
 	public Constructor<?> getConstructor() {
 		return this.constructor;
 	}
@@ -108,6 +111,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * or {@code null} in case of constructor-based instantiation
 	 * @since 4.3
 	 */
+	@Nullable
 	public Method getConstructingMethod() {
 		return this.constructingMethod;
 	}

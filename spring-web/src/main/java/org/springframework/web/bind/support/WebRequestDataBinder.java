@@ -18,10 +18,12 @@ package org.springframework.web.bind.support;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -75,7 +77,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public WebRequestDataBinder(Object target) {
+	public WebRequestDataBinder(@Nullable Object target) {
 		super(target);
 	}
 
@@ -85,7 +87,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebRequestDataBinder(Object target, String objectName) {
+	public WebRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

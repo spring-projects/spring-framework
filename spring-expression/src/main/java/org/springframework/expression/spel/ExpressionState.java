@@ -31,6 +31,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -204,6 +205,7 @@ public class ExpressionState {
 		this.variableScopes.peek().setVariable(name, value);
 	}
 
+	@Nullable
 	public Object lookupLocalVariable(String name) {
 		ensureVariableScopesInitialized();
 		int scopeNumber = this.variableScopes.size() - 1;

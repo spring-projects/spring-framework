@@ -35,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -74,6 +75,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	/**
 	 * Return the configured {@code Encoder}, if any.
 	 */
+	@Nullable
 	public Encoder<?> getEncoder() {
 		return this.encoder;
 	}

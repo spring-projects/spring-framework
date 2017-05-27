@@ -19,12 +19,14 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -141,6 +143,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #resetConnectionAfterTransaction
 	 */
+	@Nullable
 	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
 			throws SQLException {
 
@@ -192,7 +195,7 @@ public abstract class DataSourceUtils {
 	 * @param previousIsolationLevel the isolation level to restore, if any
 	 * @see #prepareConnectionForTransaction
 	 */
-	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
+	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {
 			// Reset transaction isolation to previous value, if changed for the transaction.
@@ -225,7 +228,7 @@ public abstract class DataSourceUtils {
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
-	public static boolean isConnectionTransactional(Connection con, DataSource dataSource) {
+	public static boolean isConnectionTransactional(Connection con, @Nullable DataSource dataSource) {
 		if (dataSource == null) {
 			return false;
 		}
@@ -277,7 +280,7 @@ public abstract class DataSourceUtils {
 	 * (may be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, DataSource dataSource) {
+	public static void releaseConnection(Connection con, @Nullable DataSource dataSource) {
 		try {
 			doReleaseConnection(con, dataSource);
 		}
@@ -300,7 +303,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, DataSource dataSource) throws SQLException {
+	public static void doReleaseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
 		if (con == null) {
 			return;
 		}

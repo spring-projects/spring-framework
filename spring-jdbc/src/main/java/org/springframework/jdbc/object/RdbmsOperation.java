@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * An "RDBMS operation" is a multi-threaded, reusable object representing a query,
@@ -376,7 +378,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters parameters supplied (may be {@code null})
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
+	protected void validateParameters(@Nullable Object[] parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
 		int declaredInParameters = 0;
 		for (SqlParameter param : this.declaredParameters) {
@@ -399,7 +401,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters parameter Map supplied. May be {@code null}.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected void validateNamedParameters(Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {
+	protected void validateNamedParameters(@Nullable Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
 		Map<String, ?> paramsToUse = (parameters != null ? parameters : Collections.<String, Object> emptyMap());
 		int declaredInParameters = 0;

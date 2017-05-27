@@ -38,6 +38,7 @@ import org.xml.sax.SAXException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -332,6 +333,7 @@ final class PersistenceUnitReader {
 	 * @return the corresponding persistence unit root URL
 	 * @throws IOException if the checking failed
 	 */
+	@Nullable
 	static URL determinePersistenceUnitRootUrl(Resource resource) throws IOException {
 		URL originalURL = resource.getURL();
 

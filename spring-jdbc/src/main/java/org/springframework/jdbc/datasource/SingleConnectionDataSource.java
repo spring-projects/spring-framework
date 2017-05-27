@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -146,6 +147,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
+	@Nullable
 	protected Boolean getAutoCommitValue() {
 		return this.autoCommit;
 	}

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.webjars.WebJarAssetLocator;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource and then
@@ -98,6 +99,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		return path;
 	}
 
+	@Nullable
 	protected String findWebJarResourcePath(String path) {
 		int startOffset = (path.startsWith("/") ? 1 : 0);
 		int endOffset = path.indexOf("/", 1);

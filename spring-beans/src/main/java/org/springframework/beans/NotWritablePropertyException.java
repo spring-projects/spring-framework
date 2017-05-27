@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown on an attempt to set the value of a property that
  * is not writable (typically because there is no setter method).
@@ -80,6 +82,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 * Return suggestions for actual bean property names that closely match
 	 * the invalid property name, if any.
 	 */
+	@Nullable
 	public String[] getPossibleMatches() {
 		return this.possibleMatches;
 	}

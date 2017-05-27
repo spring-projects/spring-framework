@@ -24,6 +24,7 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -67,7 +68,7 @@ public class NotificationListenerHolder {
 	 * with the encapsulated {@link #getNotificationFilter() NotificationFilter}.
 	 * <p>May be {@code null}.
 	 */
-	public void setNotificationFilter(NotificationFilter notificationFilter) {
+	public void setNotificationFilter(@Nullable NotificationFilter notificationFilter) {
 		this.notificationFilter = notificationFilter;
 	}
 
@@ -76,6 +77,7 @@ public class NotificationListenerHolder {
 	 * with the encapsulated {@link #getNotificationFilter() NotificationFilter}.
 	 * <p>May be {@code null}.
 	 */
+	@Nullable
 	public NotificationFilter getNotificationFilter() {
 		return this.notificationFilter;
 	}
@@ -87,7 +89,7 @@ public class NotificationListenerHolder {
 	 * @param handback the handback object (can be {@code null})
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
-	public void setHandback(Object handback) {
+	public void setHandback(@Nullable Object handback) {
 		this.handback = handback;
 	}
 
@@ -98,6 +100,7 @@ public class NotificationListenerHolder {
 	 * @return the handback object (may be {@code null})
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
+	@Nullable
 	public Object getHandback() {
 		return this.handback;
 	}

@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jca.cci.CannotGetCciConnectionException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -87,7 +88,7 @@ public abstract class ConnectionFactoryUtils {
 	 * if the attempt to get a Connection failed
 	 * @see #releaseConnection
 	 */
-	public static Connection getConnection(ConnectionFactory cf, ConnectionSpec spec)
+	public static Connection getConnection(ConnectionFactory cf, @Nullable ConnectionSpec spec)
 			throws CannotGetCciConnectionException {
 		try {
 			if (spec != null) {
@@ -145,7 +146,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
-	public static boolean isConnectionTransactional(Connection con, ConnectionFactory cf) {
+	public static boolean isConnectionTransactional(Connection con, @Nullable ConnectionFactory cf) {
 		if (cf == null) {
 			return false;
 		}
@@ -162,7 +163,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (can be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, ConnectionFactory cf) {
+	public static void releaseConnection(Connection con, @Nullable ConnectionFactory cf) {
 		try {
 			doReleaseConnection(con, cf);
 		}
@@ -186,7 +187,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, ConnectionFactory cf) throws ResourceException {
+	public static void doReleaseConnection(Connection con, @Nullable ConnectionFactory cf) throws ResourceException {
 		if (con == null || isConnectionTransactional(con, cf)) {
 			return;
 		}

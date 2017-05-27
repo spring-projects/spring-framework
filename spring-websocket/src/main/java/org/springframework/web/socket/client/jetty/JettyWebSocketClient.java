@@ -32,6 +32,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.socket.WebSocketExtension;
@@ -89,7 +90,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	 *
 	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
-	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
+	public void setTaskExecutor(@Nullable AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
@@ -192,6 +193,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
 	 * 	by default this method returns {@code null}
 	 */
+	@Nullable
 	protected Principal getUser() {
 		return null;
 	}

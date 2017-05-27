@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -98,7 +99,7 @@ public class SessionAttributesHandler {
 	 * @param attributeName the attribute name to check, never {@code null}
 	 * @param attributeType the type for the attribute, possibly {@code null}
 	 */
-	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
+	public boolean isHandlerSessionAttribute(String attributeName, @Nullable Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
 		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
 			this.knownAttributeNames.add(attributeName);
@@ -162,6 +163,7 @@ public class SessionAttributesHandler {
 	 * @param attributeName the name of the attribute of interest
 	 * @return the attribute value or {@code null}
 	 */
+	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName) {
 		return this.sessionAttributeStore.retrieveAttribute(request, attributeName);
 	}

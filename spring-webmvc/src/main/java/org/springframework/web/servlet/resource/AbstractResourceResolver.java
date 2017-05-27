@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.web.servlet.resource.ResourceResolver}
@@ -58,6 +59,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	}
 
 
+	@Nullable
 	protected abstract Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -35,6 +36,6 @@ public interface WebDataBinderFactory {
 	 * @return the created {@link WebDataBinder} instance, never null
 	 * @throws Exception raised if the creation and initialization of the data binder fails
 	 */
-	WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception;
+	WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName) throws Exception;
 
 }

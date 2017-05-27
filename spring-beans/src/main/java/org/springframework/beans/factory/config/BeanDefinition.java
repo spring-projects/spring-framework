@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * A BeanDefinition describes a bean instance, which has property values,
@@ -84,11 +85,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Set the name of the parent definition of this bean definition, if any.
 	 */
-	void setParentName(String parentName);
+	void setParentName(@Nullable String parentName);
 
 	/**
 	 * Return the name of the parent definition of this bean definition, if any.
 	 */
+	@Nullable
 	String getParentName();
 
 	/**
@@ -126,6 +128,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the name of the current target scope for this bean,
 	 * or {@code null} if not known yet.
 	 */
+	@Nullable
 	String getScope();
 
 	/**
@@ -188,6 +191,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return the factory bean name, if any.
 	 */
+	@Nullable
 	String getFactoryBeanName();
 
 	/**
@@ -203,6 +207,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return a factory method, if any.
 	 */
+	@Nullable
 	String getFactoryMethodName();
 
 	/**
@@ -260,6 +265,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
+	@Nullable
 	String getResourceDescription();
 
 	/**
@@ -268,6 +274,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
+	@Nullable
 	BeanDefinition getOriginatingBeanDefinition();
 
 }

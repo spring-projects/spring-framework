@@ -26,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -128,7 +129,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<URI> postForLocation(String url, @Nullable HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -142,7 +143,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<URI> postForLocation(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -154,7 +155,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	ListenableFuture<URI> postForLocation(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<URI> postForLocation(URI url, @Nullable HttpEntity<?> request) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
@@ -166,7 +167,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, @Nullable HttpEntity<?> request,
 			Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
@@ -179,7 +180,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, @Nullable HttpEntity<?> request,
 			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -190,7 +191,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, @Nullable HttpEntity<?> request,
 			Class<T> responseType) throws RestClientException;
 
 
@@ -205,7 +206,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -217,7 +218,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<?> put(String url, @Nullable HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -227,7 +228,7 @@ public interface AsyncRestOperations {
 	 * @param request the Object to be PUT (may be {@code null})
 	 * @see HttpEntity
 	 */
-	ListenableFuture<?> put(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<?> put(URI url, @Nullable HttpEntity<?> request) throws RestClientException;
 
 
 	// DELETE
@@ -305,7 +306,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -322,7 +323,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -337,7 +338,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, Class<T> responseType)
+			@Nullable HttpEntity<?> requestEntity, Class<T> responseType)
 			throws RestClientException;
 
 	/**
@@ -358,7 +359,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -379,7 +380,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -399,7 +400,7 @@ public interface AsyncRestOperations {
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
 	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
-			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
+			@Nullable HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
 			throws RestClientException;
 
 

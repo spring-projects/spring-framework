@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -454,7 +455,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder scheme(String scheme) {
+	public UriComponentsBuilder scheme(@Nullable String scheme) {
 		this.scheme = scheme;
 		return this;
 	}
@@ -480,7 +481,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder userInfo(String userInfo) {
+	public UriComponentsBuilder userInfo(@Nullable String userInfo) {
 		this.userInfo = userInfo;
 		resetSchemeSpecificPart();
 		return this;
@@ -493,7 +494,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder host(String host) {
+	public UriComponentsBuilder host(@Nullable String host) {
 		this.host = host;
 		resetSchemeSpecificPart();
 		return this;
@@ -520,7 +521,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder port(String port) {
+	public UriComponentsBuilder port(@Nullable String port) {
 		this.port = port;
 		resetSchemeSpecificPart();
 		return this;
@@ -545,7 +546,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder replacePath(String path) {
+	public UriComponentsBuilder replacePath(@Nullable String path) {
 		this.pathBuilder = new CompositePathComponentBuilder(path);
 		resetSchemeSpecificPart();
 		return this;
@@ -605,7 +606,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder replaceQuery(String query) {
+	public UriComponentsBuilder replaceQuery(@Nullable String query) {
 		this.queryParams.clear();
 		query(query);
 		resetSchemeSpecificPart();
@@ -691,7 +692,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder fragment(String fragment) {
+	public UriComponentsBuilder fragment(@Nullable String fragment) {
 		if (fragment != null) {
 			Assert.hasLength(fragment, "Fragment must not be empty");
 			this.fragment = fragment;
@@ -795,6 +796,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private interface PathComponentBuilder {
 
+		@Nullable
 		PathComponent build();
 
 		PathComponentBuilder cloneBuilder();
@@ -843,6 +845,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@SuppressWarnings("unchecked")
+		@Nullable
 		private <T> T getLastBuilder(Class<T> builderClass) {
 			if (!this.builders.isEmpty()) {
 				PathComponentBuilder last = this.builders.getLast();

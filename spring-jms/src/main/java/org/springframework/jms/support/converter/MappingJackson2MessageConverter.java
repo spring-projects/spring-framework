@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -38,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -456,6 +458,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * converter for the current conversion attempt
 	 * @return the serialization view class, or {@code null} if none
 	 */
+	@Nullable
 	protected Class<?> getSerializationView(Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter methodParam = (MethodParameter) conversionHint;

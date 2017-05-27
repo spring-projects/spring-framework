@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -53,6 +54,7 @@ public abstract class OrderUtils {
 	 * @return the order value, or {@code null} if none can be found
 	 * @see #getPriority(Class)
 	 */
+	@Nullable
 	public static Integer getOrder(Class<?> type) {
 		return getOrder(type, null);
 	}
@@ -83,6 +85,7 @@ public abstract class OrderUtils {
 	 * @param type the type to handle
 	 * @return the priority value if the annotation is declared, or {@code null} if none
 	 */
+	@Nullable
 	public static Integer getPriority(Class<?> type) {
 		if (priorityAnnotationType != null) {
 			Annotation priority = AnnotationUtils.findAnnotation(type, priorityAnnotationType);

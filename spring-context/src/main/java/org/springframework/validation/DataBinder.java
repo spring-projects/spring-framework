@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.Null;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,6 +45,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormatterPropertyEditorAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -159,7 +162,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public DataBinder(Object target) {
+	public DataBinder(@Nullable Object target) {
 		this(target, DEFAULT_OBJECT_NAME);
 	}
 
@@ -169,7 +172,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public DataBinder(Object target, String objectName) {
+	public DataBinder(@Nullable Object target, String objectName) {
 		this.target = ObjectUtils.unwrapOptional(target);
 		this.objectName = objectName;
 	}
@@ -557,6 +560,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Return the primary Validator to apply after each binding step, if any.
 	 */
+	@Nullable
 	public Validator getValidator() {
 		return (this.validators.size() > 0 ? this.validators.get(0) : null);
 	}
@@ -588,6 +592,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Return the associated ConversionService, if any.
 	 */
+	@Nullable
 	public ConversionService getConversionService() {
 		return this.conversionService;
 	}

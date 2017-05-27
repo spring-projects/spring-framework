@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -47,6 +48,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -1349,7 +1351,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
 	 */
-	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
+	protected void handleWarnings(@Nullable SQLWarning warning) throws SQLWarningException {
 		if (warning != null) {
 			throw new SQLWarningException("Warning not ignored", warning);
 		}
@@ -1361,6 +1363,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
+	@Nullable
 	private static String getSql(Object sqlProvider) {
 		if (sqlProvider instanceof SqlProvider) {
 			return ((SqlProvider) sqlProvider).getSql();
@@ -1385,6 +1388,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

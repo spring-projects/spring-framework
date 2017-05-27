@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,6 +52,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	/**
 	 * Return the fallback exception translator, if any.
 	 */
+	@Nullable
 	public SQLExceptionTranslator getFallbackTranslator() {
 		return this.fallbackTranslator;
 	}
@@ -95,7 +97,8 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * @return the DataAccessException, wrapping the {@code SQLException};
 	 * or {@code null} if no exception match found
 	 */
-	protected abstract DataAccessException doTranslate(String task, String sql, SQLException ex);
+	@Nullable
+	protected abstract DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex);
 
 
 	/**
@@ -107,7 +110,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * @param ex the offending {@code SQLException}
 	 * @return the message {@code String} to use
 	 */
-	protected String buildMessage(String task, String sql, SQLException ex) {
+	protected String buildMessage(String task, @Nullable String sql, SQLException ex) {
 		return task + "; SQL [" + sql + "]; " + ex.getMessage();
 	}
 

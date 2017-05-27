@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * Common interface for classes that can access named properties
@@ -86,6 +87,7 @@ public interface PropertyAccessor {
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
+	@Nullable
 	Class<?> getPropertyType(String propertyName) throws BeansException;
 
 	/**
@@ -98,6 +100,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
 	 */
+	@Nullable
 	TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException;
 
 	/**

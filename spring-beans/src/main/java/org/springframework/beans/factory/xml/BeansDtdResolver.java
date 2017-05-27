@@ -25,6 +25,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * EntityResolver implementation for the Spring beans DTD,
@@ -50,6 +51,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 
 	@Override
+	@Nullable
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +

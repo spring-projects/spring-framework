@@ -26,6 +26,7 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -129,6 +130,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see org.springframework.web.util.pattern.ParsingPathMatcher
 	 */
+	@Nullable
 	protected Object lookupHandler(String urlPath, ServerWebExchange exchange) throws Exception {
 		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);

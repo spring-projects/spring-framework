@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
@@ -149,6 +150,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * @return TransactionAttribute the configured transaction attribute,
 	 * or {@code null} if none was found
 	 */
+	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
 			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);

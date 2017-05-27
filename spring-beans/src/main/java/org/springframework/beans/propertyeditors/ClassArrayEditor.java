@@ -18,6 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -53,7 +54,7 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 	 * @param classLoader the {@code ClassLoader} to use
 	 * (or pass {@code null} for the thread context {@code ClassLoader})
 	 */
-	public ClassArrayEditor(ClassLoader classLoader) {
+	public ClassArrayEditor(@Nullable ClassLoader classLoader) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 

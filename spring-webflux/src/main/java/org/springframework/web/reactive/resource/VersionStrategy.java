@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.resource;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * An extension of {@link VersionPathStrategy} that adds a method
@@ -34,6 +35,7 @@ public interface VersionStrategy extends VersionPathStrategy {
 	 * @param resource the resource to check
 	 * @return the version (never {@code null})
 	 */
+	@Nullable
 	String getResourceVersion(Resource resource);
 
 }

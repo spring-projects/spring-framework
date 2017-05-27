@@ -28,6 +28,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
@@ -98,6 +99,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	 * Get a {@code ReactiveAdapter} for the top-level return value type.
 	 * @return the matching adapter or {@code null}
 	 */
+	@Nullable
 	protected ReactiveAdapter getAdapter(HandlerResult result) {
 		Class<?> returnType = result.getReturnType().getRawClass();
 		return getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
@@ -110,6 +112,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	 * @param producibleTypesSupplier the media types that can be produced for the current request
 	 * @return the selected media type or {@code null}
 	 */
+	@Nullable
 	protected MediaType selectMediaType(ServerWebExchange exchange,
 			Supplier<List<MediaType>> producibleTypesSupplier) {
 

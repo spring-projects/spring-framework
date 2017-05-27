@@ -18,6 +18,8 @@ package org.springframework.context;
 
 import java.util.Locale;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for resolving messages, with support for the parameterization
  * and internationalization of such messages.
@@ -51,7 +53,7 @@ public interface MessageSource {
 	 * otherwise the default message passed as a parameter
 	 * @see java.text.MessageFormat
 	 */
-	String getMessage(String code, Object[] args, String defaultMessage, Locale locale);
+	String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale);
 
 	/**
 	 * Try to resolve the message. Treat as an error if the message can't be found.
@@ -64,7 +66,7 @@ public interface MessageSource {
 	 * @throws NoSuchMessageException if the message wasn't found
 	 * @see java.text.MessageFormat
 	 */
-	String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException;
+	String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException;
 
 	/**
 	 * Try to resolve the message using all the attributes contained within the

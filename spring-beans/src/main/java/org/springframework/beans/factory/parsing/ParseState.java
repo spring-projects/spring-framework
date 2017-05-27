@@ -18,6 +18,8 @@ package org.springframework.beans.factory.parsing;
 
 import java.util.Stack;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during
  * a parsing process. {@link Entry entries} are added to the stack at
@@ -78,6 +80,7 @@ public final class ParseState {
 	 * Return the {@link Entry} currently at the top of the {@link Stack} or
 	 * {@code null} if the {@link Stack} is empty.
 	 */
+	@Nullable
 	public Entry peek() {
 		return this.state.empty() ? null : this.state.peek();
 	}

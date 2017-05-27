@@ -19,6 +19,7 @@ package org.springframework.aop.target;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -50,7 +51,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * @param targetClass the target Class (may be {@code null})
 	 * @see #getTargetClass()
 	 */
-	public static EmptyTargetSource forClass(Class<?> targetClass) {
+	public static EmptyTargetSource forClass(@Nullable Class<?> targetClass) {
 		return forClass(targetClass, true);
 	}
 
@@ -60,7 +61,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * @param isStatic whether the TargetSource should be marked as static
 	 * @see #getTargetClass()
 	 */
-	public static EmptyTargetSource forClass(Class<?> targetClass, boolean isStatic) {
+	public static EmptyTargetSource forClass(@Nullable Class<?> targetClass, boolean isStatic) {
 		return (targetClass == null && isStatic ? INSTANCE : new EmptyTargetSource(targetClass, isStatic));
 	}
 
@@ -81,7 +82,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	 * @param targetClass the target class to expose (may be {@code null})
 	 * @param isStatic whether the TargetSource is marked as static
 	 */
-	private EmptyTargetSource(Class<?> targetClass, boolean isStatic) {
+	private EmptyTargetSource(@Nullable Class<?> targetClass, boolean isStatic) {
 		this.targetClass = targetClass;
 		this.isStatic = isStatic;
 	}

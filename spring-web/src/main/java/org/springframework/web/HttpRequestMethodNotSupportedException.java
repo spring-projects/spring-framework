@@ -21,9 +21,11 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -63,7 +65,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * @param method the unsupported HTTP request method
 	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
 	 */
-	public HttpRequestMethodNotSupportedException(String method, Collection<String> supportedMethods) {
+	public HttpRequestMethodNotSupportedException(String method, @Nullable Collection<String> supportedMethods) {
 		this(method, StringUtils.toStringArray(supportedMethods));
 	}
 
@@ -72,7 +74,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * @param method the unsupported HTTP request method
 	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
 	 */
-	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
+	public HttpRequestMethodNotSupportedException(String method, @Nullable String[] supportedMethods) {
 		this(method, supportedMethods, "Request method '" + method + "' not supported");
 	}
 
@@ -99,6 +101,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	/**
 	 * Return the actually supported HTTP methods, or {@code null} if not known.
 	 */
+	@Nullable
 	public String[] getSupportedMethods() {
 		return this.supportedMethods;
 	}
@@ -108,6 +111,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * or {@code null} if not known.
 	 * @since 3.2
 	 */
+	@Nullable
 	public Set<HttpMethod> getSupportedHttpMethods() {
 		if (this.supportedMethods == null) {
 			return null;

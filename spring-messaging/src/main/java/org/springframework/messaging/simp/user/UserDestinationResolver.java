@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.user;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -44,6 +45,7 @@ public interface UserDestinationResolver {
 	 * @return 0 or more target messages (one for each active session), or
 	 * {@code null} if the source message does not contain a user destination.
 	 */
+	@Nullable
 	UserDestinationResult resolveDestination(Message<?> message);
 
 }

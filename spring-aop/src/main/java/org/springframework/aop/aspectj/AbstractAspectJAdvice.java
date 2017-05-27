@@ -42,6 +42,7 @@ import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -548,7 +549,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @param ex the exception thrown by the method execution (may be null)
 	 * @return the empty array if there are no arguments
 	 */
-	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable ex) {
+	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex) {
 		calculateArgumentBindings();
 
 		// AMC start
@@ -607,7 +608,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @return the invocation result
 	 * @throws Throwable in case of invocation failure
 	 */
-	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, Object returnValue, Throwable ex) throws Throwable {
+	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex) throws Throwable {
 		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
 	}
 

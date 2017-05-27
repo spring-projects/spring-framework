@@ -26,7 +26,7 @@ import kotlin.reflect.KClass
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, elementType: KClass<T>): T = queryForObject(sql, elementType.java)
+fun <T : Any> JdbcOperations.queryForObject(sql: String, elementType: KClass<T>): T? = queryForObject(sql, elementType.java)
 
 /**
  * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...")` variant
@@ -34,7 +34,7 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, elementType: KClass<T>)
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T = queryForObject(sql, T::class.java)
+inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T? = queryForObject(sql, T::class.java)
 
 /**
  * Extensions for [JdbcOperations.queryForObject] providing a RowMapper-like function variant: `queryForObject("...", arg1, argN){ rs, i -> }`.
@@ -51,7 +51,7 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, funct
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray, requiredType: KClass<T>): T =
+fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray, requiredType: KClass<T>): T? =
 		queryForObject(sql, args, argTypes, requiredType.java)
 
 /**
@@ -60,7 +60,7 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, a
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray): T =
+inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray): T? =
 		queryForObject(sql, args, argTypes, T::class.java)
 
 /**
@@ -69,7 +69,7 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Ar
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, requiredType: KClass<T>): T =
+fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, requiredType: KClass<T>): T? =
 		queryForObject(sql, args, requiredType.java)
 
 /**
@@ -78,7 +78,7 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, r
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T =
+inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
 		queryForObject(sql, args, T::class.java)
 
 /**
@@ -87,7 +87,7 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Ar
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, requiredType: KClass<T>, vararg args: Any): T =
+fun <T : Any> JdbcOperations.queryForObject(sql: String, requiredType: KClass<T>, vararg args: Any): T? =
 		queryForObject(sql, requiredType.java, *args)
 
 

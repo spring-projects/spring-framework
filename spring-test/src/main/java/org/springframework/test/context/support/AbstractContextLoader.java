@@ -32,6 +32,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
@@ -212,7 +213,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
 	@Override
-	public final String[] processLocations(Class<?> clazz, String... locations) {
+	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
 				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
 	}

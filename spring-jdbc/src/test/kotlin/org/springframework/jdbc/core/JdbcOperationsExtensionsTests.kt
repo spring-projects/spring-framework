@@ -82,7 +82,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `queryForObject with reified type`() {
-		val i: Int = template.queryForObject("select age from customer where id = 3")
+		val i: Int? = template.queryForObject("select age from customer where id = 3")
 		assertEquals(22, i)
 	}
 
@@ -103,7 +103,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `queryForObject with reified type and argTypes`() {
-		val i: Int = template.queryForObject("select age from customer where id = ?", arrayOf(3),
+		val i: Int? = template.queryForObject("select age from customer where id = ?", arrayOf(3),
 				intArrayOf(JDBCType.INTEGER.vendorTypeNumber))
 		assertEquals(22, i)
 	}
@@ -116,7 +116,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `queryForObject with reified type and args`() {
-		val i: Int = template.queryForObject("select age from customer where id = ?", arrayOf(3))
+		val i: Int? = template.queryForObject("select age from customer where id = ?", arrayOf(3))
 		assertEquals(22, i)
 	}
 

@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -121,6 +122,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	/**
 	 * Return the name of the RequestContext attribute, if any.
 	 */
+	@Nullable
 	public String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}
@@ -249,6 +251,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * the name {@link #REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME}.
 	 * @return the RequestDataValueProcessor, or null if there is none at the application context.
 	 */
+	@Nullable
 	protected RequestDataValueProcessor getRequestDataValueProcessor() {
 		ApplicationContext context = getApplicationContext();
 		if (context != null && context.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {

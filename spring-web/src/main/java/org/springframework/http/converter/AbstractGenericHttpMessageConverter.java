@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for most {@link GenericHttpMessageConverter} implementations.
@@ -123,7 +124,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
-	protected abstract void writeInternal(T t, Type type, HttpOutputMessage outputMessage)
+	protected abstract void writeInternal(T t, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException;
 
 }

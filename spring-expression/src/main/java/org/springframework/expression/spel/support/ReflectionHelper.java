@@ -26,6 +26,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
@@ -50,6 +51,7 @@ public class ReflectionHelper {
 	 * @return a MatchInfo object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
+	@Nullable
 	static ArgumentsMatchInfo compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
@@ -139,6 +141,7 @@ public class ReflectionHelper {
 	 * @return a MatchInfo object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
+	@Nullable
 	static ArgumentsMatchInfo compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
@@ -257,8 +260,9 @@ public class ReflectionHelper {
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
+	@Nullable
 	static boolean convertArguments(TypeConverter converter, Object[] arguments, Executable executable,
-			Integer varargsPosition) throws EvaluationException {
+			@Nullable Integer varargsPosition) throws EvaluationException {
 
 		boolean conversionOccurred = false;
 		if (varargsPosition == null) {

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -143,7 +144,7 @@ public class MessageHeaderAccessor {
 	 * A constructor accepting the headers of an existing message to copy.
 	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
-	public MessageHeaderAccessor(Message<?> message) {
+	public MessageHeaderAccessor(@Nullable Message<?> message) {
 		this.headers = new MutableMessageHeaders(message != null ? message.getHeaders() : null);
 	}
 
@@ -284,6 +285,7 @@ public class MessageHeaderAccessor {
 	 * @param headerName the name of the header
 	 * @return the associated value, or {@code null} if none found
 	 */
+	@Nullable
 	public Object getHeader(String headerName) {
 		return this.headers.get(headerName);
 	}
@@ -292,7 +294,7 @@ public class MessageHeaderAccessor {
 	 * Set the value for the given header name.
 	 * <p>If the provided value is {@code null}, the header will be removed.
 	 */
-	public void setHeader(String name, Object value) {
+	public void setHeader(String name, @Nullable Object value) {
 		if (isReadOnly(name)) {
 			throw new IllegalArgumentException("'" + name + "' header is read-only");
 		}
@@ -414,6 +416,7 @@ public class MessageHeaderAccessor {
 
 	// Specific header accessors
 
+	@Nullable
 	public UUID getId() {
 		Object value = getHeader(MessageHeaders.ID);
 		if (value == null) {
@@ -422,6 +425,7 @@ public class MessageHeaderAccessor {
 		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
 	}
 
+	@Nullable
 	public Long getTimestamp() {
 		Object value = getHeader(MessageHeaders.TIMESTAMP);
 		if (value == null) {
@@ -434,6 +438,7 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
+	@Nullable
 	public MimeType getContentType() {
 		Object value = getHeader(MessageHeaders.CONTENT_TYPE);
 		if (value == null) {
@@ -561,6 +566,7 @@ public class MessageHeaderAccessor {
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
+	@Nullable
 	public static <T extends MessageHeaderAccessor> T getAccessor(Message<?> message, Class<T> requiredType) {
 		return getAccessor(message.getHeaders(), requiredType);
 	}
@@ -573,6 +579,7 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static <T extends MessageHeaderAccessor> T getAccessor(
 			MessageHeaders messageHeaders, Class<T> requiredType) {
 

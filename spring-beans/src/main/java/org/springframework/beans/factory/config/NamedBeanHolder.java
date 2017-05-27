@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.factory.NamedBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,6 +57,7 @@ public class NamedBeanHolder<T> implements NamedBean {
 	/**
 	 * Return the corresponding bean instance (can be {@code null}).
 	 */
+	@Nullable
 	public T getBeanInstance() {
 		return this.beanInstance;
 	}

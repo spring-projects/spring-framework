@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -96,7 +97,7 @@ public class ReflectionTestUtils {
 	 * @param type the type of the field to set; may be {@code null} if
 	 * {@code name} is specified
 	 */
-	public static void setField(Object targetObject, String name, Object value, Class<?> type) {
+	public static void setField(Object targetObject, @Nullable String name, Object value, Class<?> type) {
 		setField(targetObject, null, name, value, type);
 	}
 
@@ -130,7 +131,7 @@ public class ReflectionTestUtils {
 	 * {@code name} is specified
 	 * @since 4.2
 	 */
-	public static void setField(Class<?> targetClass, String name, Object value, Class<?> type) {
+	public static void setField(Class<?> targetClass, @Nullable String name, Object value, @Nullable Class<?> type) {
 		setField(null, targetClass, name, value, type);
 	}
 
@@ -160,7 +161,7 @@ public class ReflectionTestUtils {
 	 * @see ReflectionUtils#setField(Field, Object, Object)
 	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
-	public static void setField(Object targetObject, Class<?> targetClass, String name, Object value, Class<?> type) {
+	public static void setField(@Nullable Object targetObject, @Nullable Class<?> targetClass, @Nullable String name, Object value, @Nullable Class<?> type) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
@@ -241,7 +242,7 @@ public class ReflectionTestUtils {
 	 * @see ReflectionUtils#getField(Field, Object)
 	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
-	public static Object getField(Object targetObject, Class<?> targetClass, String name) {
+	public static Object getField(@Nullable Object targetObject, @Nullable Class<?> targetClass, String name) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
@@ -402,7 +403,8 @@ public class ReflectionTestUtils {
 	 * @see ReflectionUtils#handleReflectionException(Exception)
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T invokeMethod(Object target, String name, Object... args) {
+	@Nullable
+	public static <T> T invokeMethod(Object target, String name, @Nullable Object... args) {
 		Assert.notNull(target, "Target object must not be null");
 		Assert.hasText(name, "Method name must not be empty");
 

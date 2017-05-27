@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -73,7 +74,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * @param executorName the name of an executor bean to use
 	 * @param callable the callable for concurrent handling
 	 */
-	public WebAsyncTask(Long timeout, String executorName, Callable<V> callable) {
+	public WebAsyncTask(@Nullable Long timeout, String executorName, Callable<V> callable) {
 		this(callable);
 		Assert.notNull(executorName, "Executor name must not be null");
 		this.executorName = executorName;
@@ -86,7 +87,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * @param executor the executor to use
 	 * @param callable the callable for concurrent handling
 	 */
-	public WebAsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
+	public WebAsyncTask(@Nullable Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
 		this(callable);
 		Assert.notNull(executor, "Executor must not be null");
 		this.executor = executor;
@@ -104,6 +105,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	/**
 	 * Return the timeout value in milliseconds, or {@code null} if no timeout is set.
 	 */
+	@Nullable
 	public Long getTimeout() {
 		return this.timeout;
 	}
@@ -121,6 +123,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * Return the AsyncTaskExecutor to use for concurrent handling,
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	public AsyncTaskExecutor getExecutor() {
 		if (this.executor != null) {
 			return this.executor;

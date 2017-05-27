@@ -29,6 +29,7 @@ import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility class handling the SpEL expression parsing.
@@ -93,7 +94,7 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	 * @return the evaluation context
 	 */
 	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
-			Method method, Object[] args, Object target, Class<?> targetClass, Object result,
+			Method method, Object[] args, Object target, Class<?> targetClass, @Nullable Object result,
 			BeanFactory beanFactory) {
 
 		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(

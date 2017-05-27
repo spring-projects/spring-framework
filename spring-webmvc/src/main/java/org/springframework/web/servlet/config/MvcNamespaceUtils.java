@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -183,6 +184,7 @@ abstract class MvcNamespaceUtils {
 	 * with the {@code annotation-driven} element.
 	 * @return a bean definition, bean reference, or null.
 	 */
+	@Nullable
 	public static Object getContentNegotiationManager(ParserContext context) {
 		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
 		if (context.getRegistry().containsBeanDefinition(name)) {

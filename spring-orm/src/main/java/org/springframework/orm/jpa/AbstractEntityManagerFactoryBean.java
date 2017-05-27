@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -55,6 +56,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -267,6 +269,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Return the JpaVendorAdapter implementation for this
 	 * EntityManagerFactory, or {@code null} if not known.
 	 */
+	@Nullable
 	public JpaVendorAdapter getJpaVendorAdapter() {
 		return this.jpaVendorAdapter;
 	}
@@ -291,6 +294,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Return the asynchronous executor for background bootstrapping, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public AsyncTaskExecutor getBootstrapExecutor() {
 		return this.bootstrapExecutor;
 	}

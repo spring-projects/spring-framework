@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Miscellaneous object utility methods.
  *
@@ -102,7 +104,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to check
 	 * @see #isEmpty(Object)
 	 */
-	public static boolean isEmpty(Object[] array) {
+	public static boolean isEmpty(@Nullable Object[] array) {
 		return (array == null || array.length == 0);
 	}
 
@@ -129,7 +131,7 @@ public abstract class ObjectUtils {
 	 * @see CollectionUtils#isEmpty(java.util.Map)
 	 */
 	@SuppressWarnings("rawtypes")
-	public static boolean isEmpty(Object obj) {
+	public static boolean isEmpty(@Nullable Object obj) {
 		if (obj == null) {
 			return true;
 		}
@@ -161,6 +163,7 @@ public abstract class ObjectUtils {
 	 * if the {@code Optional} is empty, or simply the given object as-is
 	 * @since 5.0
 	 */
+	@Nullable
 	public static Object unwrapOptional(Object obj) {
 		if (obj instanceof Optional) {
 			Optional<?> optional = (Optional<?>) obj;
@@ -181,7 +184,7 @@ public abstract class ObjectUtils {
 	 * @param element the element to check for
 	 * @return whether the element has been found in the given array
 	 */
-	public static boolean containsElement(Object[] array, Object element) {
+	public static boolean containsElement(@Nullable Object[] array, Object element) {
 		if (array == null) {
 			return false;
 		}
@@ -248,7 +251,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
+	public static <A, O extends A>  A[] addObjectToArray(@Nullable A[] array, O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();
@@ -275,7 +278,7 @@ public abstract class ObjectUtils {
 	 * @return the corresponding object array (never {@code null})
 	 * @throws IllegalArgumentException if the parameter is not an array
 	 */
-	public static Object[] toObjectArray(Object source) {
+	public static Object[] toObjectArray(@Nullable Object source) {
 		if (source instanceof Object[]) {
 			return (Object[]) source;
 		}
@@ -313,7 +316,7 @@ public abstract class ObjectUtils {
 	 * @see Object#equals(Object)
 	 * @see java.util.Arrays#equals
 	 */
-	public static boolean nullSafeEquals(Object o1, Object o2) {
+	public static boolean nullSafeEquals(@Nullable Object o1, @Nullable Object o2) {
 		if (o1 == o2) {
 			return true;
 		}
@@ -386,7 +389,7 @@ public abstract class ObjectUtils {
 	 * @see #nullSafeHashCode(long[])
 	 * @see #nullSafeHashCode(short[])
 	 */
-	public static int nullSafeHashCode(Object obj) {
+	public static int nullSafeHashCode(@Nullable Object obj) {
 		if (obj == null) {
 			return 0;
 		}
@@ -426,7 +429,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(Object[] array) {
+	public static int nullSafeHashCode(@Nullable Object[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -441,7 +444,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(boolean[] array) {
+	public static int nullSafeHashCode(@Nullable boolean[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -456,7 +459,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(byte[] array) {
+	public static int nullSafeHashCode(@Nullable byte[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -471,7 +474,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(char[] array) {
+	public static int nullSafeHashCode(@Nullable char[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -486,7 +489,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(double[] array) {
+	public static int nullSafeHashCode(@Nullable double[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -501,7 +504,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(float[] array) {
+	public static int nullSafeHashCode(@Nullable float[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -516,7 +519,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(int[] array) {
+	public static int nullSafeHashCode(@Nullable int[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -531,7 +534,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(long[] array) {
+	public static int nullSafeHashCode(@Nullable long[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -546,7 +549,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(short[] array) {
+	public static int nullSafeHashCode(@Nullable short[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -604,7 +607,7 @@ public abstract class ObjectUtils {
 	 * @return the object's identity as String representation,
 	 * or an empty String if the object was {@code null}
 	 */
-	public static String identityToString(Object obj) {
+	public static String identityToString(@Nullable Object obj) {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
@@ -629,7 +632,7 @@ public abstract class ObjectUtils {
 	 * @return a display String representation of {@code obj}
 	 * @see #nullSafeToString(Object)
 	 */
-	public static String getDisplayString(Object obj) {
+	public static String getDisplayString(@Nullable Object obj) {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
@@ -642,7 +645,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to introspect (may be {@code null})
 	 * @return the corresponding class name
 	 */
-	public static String nullSafeClassName(Object obj) {
+	public static String nullSafeClassName(@Nullable Object obj) {
 		return (obj != null ? obj.getClass().getName() : NULL_STRING);
 	}
 
@@ -653,7 +656,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of {@code obj}
 	 */
-	public static String nullSafeToString(Object obj) {
+	public static String nullSafeToString(@Nullable Object obj) {
 		if (obj == null) {
 			return NULL_STRING;
 		}
@@ -700,7 +703,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(Object[] array) {
+	public static String nullSafeToString(@Nullable Object[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -731,7 +734,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(boolean[] array) {
+	public static String nullSafeToString(@Nullable boolean[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -763,7 +766,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(byte[] array) {
+	public static String nullSafeToString(@Nullable byte[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -794,7 +797,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(char[] array) {
+	public static String nullSafeToString(@Nullable char[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -825,7 +828,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(double[] array) {
+	public static String nullSafeToString(@Nullable double[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -857,7 +860,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(float[] array) {
+	public static String nullSafeToString(@Nullable float[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -889,7 +892,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(int[] array) {
+	public static String nullSafeToString(@Nullable int[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -920,7 +923,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(long[] array) {
+	public static String nullSafeToString(@Nullable long[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -951,7 +954,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(short[] array) {
+	public static String nullSafeToString(@Nullable short[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}

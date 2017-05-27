@@ -30,6 +30,7 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -473,6 +474,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	/*
 	 * If the token starts meets Java identifier conventions, it's in.
 	 */
+	@Nullable
 	private String maybeExtractVariableName(String candidateToken) {
 		if (candidateToken == null || candidateToken.equals("")) {
 			return null;

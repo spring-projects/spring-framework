@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,7 +88,7 @@ public abstract class MethodMatchers {
 	 * asking is the subject on one or more introductions; {@code false} otherwise
 	 * @return whether or not this method matches statically
 	 */
-	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
+	public static boolean matches(MethodMatcher mm, Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
 		return ((mm instanceof IntroductionAwareMethodMatcher &&
 				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions)) ||

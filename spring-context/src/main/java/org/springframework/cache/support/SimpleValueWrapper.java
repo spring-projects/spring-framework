@@ -17,6 +17,7 @@
 package org.springframework.cache.support;
 
 import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.lang.Nullable;
 
 /**
  * Straightforward implementation of {@link org.springframework.cache.Cache.ValueWrapper},
@@ -34,7 +35,7 @@ public class SimpleValueWrapper implements ValueWrapper {
 	 * Create a new SimpleValueWrapper instance for exposing the given value.
 	 * @param value the value to expose (may be {@code null})
 	 */
-	public SimpleValueWrapper(Object value) {
+	public SimpleValueWrapper(@Nullable Object value) {
 		this.value = value;
 	}
 

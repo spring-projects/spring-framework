@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -207,6 +208,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * there is no appropriate text representation.
 	 */
 	@Override
+	@Nullable
 	public String getAsText() {
 		return null;
 	}

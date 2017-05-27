@@ -18,6 +18,7 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -79,7 +81,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public AbstractNamedValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext =
 				(beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
@@ -197,6 +199,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @return the resolved argument (may be {@code null})
 	 * @throws Exception in case of errors
 	 */
+	@Nullable
 	protected abstract Object resolveName(String name, MethodParameter parameter, NativeWebRequest request)
 			throws Exception;
 
@@ -228,7 +231,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	/**
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
 	 */
-	private Object handleNullValue(String name, Object value, Class<?> paramType) {
+	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;
@@ -251,7 +254,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param webRequest the current request
 	 */
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
+			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
 	}
 
 

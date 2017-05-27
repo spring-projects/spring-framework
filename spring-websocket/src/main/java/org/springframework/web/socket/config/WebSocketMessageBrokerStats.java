@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -75,6 +76,7 @@ public class WebSocketMessageBrokerStats {
 		this.stompSubProtocolHandler = initStompSubProtocolHandler();
 	}
 
+	@Nullable
 	private StompSubProtocolHandler initStompSubProtocolHandler() {
 		for (SubProtocolHandler handler : this.webSocketHandler.getProtocolHandlers()) {
 			if (handler instanceof StompSubProtocolHandler) {
@@ -105,6 +107,7 @@ public class WebSocketMessageBrokerStats {
 		this.loggingTask = initLoggingTask(1 * 60 * 1000);
 	}
 
+	@Nullable
 	private ScheduledFuture<?> initLoggingTask(long initialDelay) {
 		if (logger.isInfoEnabled() && this.loggingPeriod > 0) {
 			return this.sockJsTaskScheduler.scheduleAtFixedRate(new Runnable() {

@@ -19,6 +19,7 @@ package org.springframework.core.convert.converter;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,6 +53,7 @@ public interface GenericConverter {
 	 * <p>For {@link ConditionalConverter conditional converters} this method may return
 	 * {@code null} to indicate all source-to-target pairs should be considered.
 	 */
+	@Nullable
 	Set<ConvertiblePair> getConvertibleTypes();
 
 	/**
@@ -61,7 +63,8 @@ public interface GenericConverter {
 	 * @param targetType the type descriptor of the field we are converting to
 	 * @return the converted object
 	 */
-	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	@Nullable
+	Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
 
 	/**

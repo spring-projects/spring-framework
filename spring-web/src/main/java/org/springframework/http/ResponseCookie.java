@@ -18,6 +18,7 @@ package org.springframework.http;
 
 import java.time.Duration;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -73,6 +74,7 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Return the cookie "Domain" attribute, or {@code null} if not set.
 	 */
+	@Nullable
 	public String getDomain() {
 		return this.domain;
 	}
@@ -80,6 +82,7 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Return the cookie "Path" attribute, or {@code null} if not set.
 	 */
+	@Nullable
 	public String getPath() {
 		return this.path;
 	}

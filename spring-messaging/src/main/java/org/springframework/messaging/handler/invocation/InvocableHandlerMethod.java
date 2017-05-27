@@ -25,6 +25,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ClassUtils;
@@ -158,6 +159,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
+	@Nullable
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
 		if (providedArgs == null) {
 			return null;

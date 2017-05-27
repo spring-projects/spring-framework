@@ -19,6 +19,7 @@ package org.springframework.validation;
 import java.util.List;
 
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * Stores and exposes information about data-binding and validation
@@ -66,13 +67,14 @@ public interface Errors {
 	 * e.g. "address" (defaults to "", {@code null} is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
 	 */
-	void setNestedPath(String nestedPath);
+	void setNestedPath(@Nullable String nestedPath);
 
 	/**
 	 * Return the current nested path of this {@link Errors} object.
 	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
 	 * building of concatenated paths. Default is an empty String.
 	 */
+	@Nullable
 	String getNestedPath();
 
 	/**
@@ -119,7 +121,7 @@ public interface Errors {
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
 	 */
-	void reject(String errorCode, Object[] errorArgs, String defaultMessage);
+	void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage);
 
 	/**
 	 * Register a field error for the specified field of the current object
@@ -133,7 +135,7 @@ public interface Errors {
 	 * @param errorCode error code, interpretable as a message key
 	 * @see #getNestedPath()
 	 */
-	void rejectValue(String field, String errorCode);
+	void rejectValue(@Nullable String field, String errorCode);
 
 	/**
 	 * Register a field error for the specified field of the current object
@@ -148,7 +150,7 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 * @see #getNestedPath()
 	 */
-	void rejectValue(String field, String errorCode, String defaultMessage);
+	void rejectValue(@Nullable String field, String errorCode, String defaultMessage);
 
 	/**
 	 * Register a field error for the specified field of the current object
@@ -165,7 +167,7 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 * @see #getNestedPath()
 	 */
-	void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage);
+	void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage);
 
 	/**
 	 * Add all errors from the given {@code Errors} instance to this
@@ -220,6 +222,7 @@ public interface Errors {
 	 * Get the <i>first</i> global error, if any.
 	 * @return the global error, or {@code null}
 	 */
+	@Nullable
 	ObjectError getGlobalError();
 
 	/**
@@ -246,6 +249,7 @@ public interface Errors {
 	 * Get the <i>first</i> error associated with a field, if any.
 	 * @return the field-specific error, or {@code null}
 	 */
+	@Nullable
 	FieldError getFieldError();
 
 	/**
@@ -276,6 +280,7 @@ public interface Errors {
 	 * @param field the field name
 	 * @return the field-specific error, or {@code null}
 	 */
+	@Nullable
 	FieldError getFieldError(String field);
 
 	/**
@@ -296,6 +301,7 @@ public interface Errors {
 	 * @param field the field name
 	 * @return the type of the field, or {@code null} if not determinable
 	 */
-	Class<?> getFieldType(String field);
+	@Nullable
+	Class<?> getFieldType(@Nullable String field);
 
 }

@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Helper class that allows for specifying a method to invoke in a declarative
  * fashion, be it static or non-static.
@@ -201,6 +203,7 @@ public class MethodInvoker {
 	 * @see #getTargetMethod()
 	 * @see #getArguments()
 	 */
+	@Nullable
 	protected Method findMatchingMethod() {
 		String targetMethod = getTargetMethod();
 		Object[] arguments = getArguments();
@@ -258,6 +261,7 @@ public class MethodInvoker {
 	 * @throws IllegalAccessException if the target method couldn't be accessed
 	 * @see #prepare
 	 */
+	@Nullable
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
 		// In the static case, target will simply be {@code null}.
 		Object targetObject = getTargetObject();

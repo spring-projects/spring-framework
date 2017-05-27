@@ -22,6 +22,7 @@ import java.util.List;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -92,7 +93,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * @return this builder for further customization
 	 */
 	@SuppressWarnings("unchecked")
-	public T contextPath(String contextPath) {
+	public T contextPath(@Nullable String contextPath) {
 		this.contextPath = contextPath;
 		return (T) this;
 	}

@@ -18,6 +18,7 @@ package org.springframework.web.method.annotation;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -44,7 +45,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public AbstractCookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public AbstractCookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 

@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -58,6 +59,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
@@ -272,7 +274,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #setRequestURI
 	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
-	public MockHttpServletRequest(String method, String requestURI) {
+	public MockHttpServletRequest(@Nullable String method, @Nullable String requestURI) {
 		this(null, method, requestURI);
 	}
 
@@ -282,7 +284,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * (may be {@code null} to use a default {@link MockServletContext})
 	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
-	public MockHttpServletRequest(ServletContext servletContext) {
+	public MockHttpServletRequest(@Nullable ServletContext servletContext) {
 		this(servletContext, "", "");
 	}
 
@@ -299,7 +301,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #setPreferredLocales
 	 * @see MockServletContext
 	 */
-	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
+	public MockHttpServletRequest(@Nullable ServletContext servletContext, @Nullable String method, @Nullable String requestURI) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.method = method;
 		this.requestURI = requestURI;
@@ -409,6 +411,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #setContent(byte[])
 	 * @see #getContentAsString()
 	 */
+	@Nullable
 	public byte[] getContentAsByteArray() {
 		return this.content;
 	}
@@ -424,6 +427,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #setCharacterEncoding(String)
 	 * @see #getContentAsByteArray()
 	 */
+	@Nullable
 	public String getContentAsString() throws IllegalStateException, UnsupportedEncodingException {
 		Assert.state(this.characterEncoding != null,
 				"Cannot get content as a String for a null character encoding. " +

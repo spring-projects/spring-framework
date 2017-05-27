@@ -10,4 +10,7 @@
  * the {@code getJdbcOperations()} method of NamedParameterJdbcTemplate and
  * work with the returned classic template, or use a JdbcTemplate instance directly.
  */
+@NonNullApi
 package org.springframework.jdbc.core.namedparam;
+
+import org.springframework.lang.NonNullApi;

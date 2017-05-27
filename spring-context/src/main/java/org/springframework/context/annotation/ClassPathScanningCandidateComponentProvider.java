@@ -51,6 +51,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Indexed;
@@ -237,6 +238,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Return the {@link BeanDefinitionRegistry} used by this scanner, if any.
 	 */
+	@Nullable
 	protected BeanDefinitionRegistry getRegistry() {
 		return null;
 	}
@@ -341,6 +343,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @since 5.0
 	 * @see #isIndexSupportsIncludeFilter(TypeFilter)
 	 */
+	@Nullable
 	protected String extractStereotype(TypeFilter filter) {
 		if (filter instanceof AnnotationTypeFilter) {
 			return ((AnnotationTypeFilter) filter).getAnnotationType().getName();

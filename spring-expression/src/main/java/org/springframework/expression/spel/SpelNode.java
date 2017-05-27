@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a node in the Ast for a parsed expression.
@@ -85,6 +86,7 @@ public interface SpelNode {
 	 * @return the class of the object if it is not already a class object,
 	 * or {@code null} if the object is {@code null}
 	 */
+	@Nullable
 	Class<?> getObjectClass(Object obj);
 
 	/**

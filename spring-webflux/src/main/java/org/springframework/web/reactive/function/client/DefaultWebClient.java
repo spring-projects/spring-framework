@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -297,6 +298,7 @@ class DefaultWebClient implements WebClient {
 			return ClientRequest.method(this.httpMethod, this.uri).headers(initHeaders()).cookies(initCookies());
 		}
 
+		@Nullable
 		private HttpHeaders initHeaders() {
 			if (CollectionUtils.isEmpty(defaultHeaders) && CollectionUtils.isEmpty(this.headers)) {
 				return null;
@@ -319,6 +321,7 @@ class DefaultWebClient implements WebClient {
 			}
 		}
 
+		@Nullable
 		private MultiValueMap<String, String> initCookies() {
 			if (CollectionUtils.isEmpty(defaultCookies) && CollectionUtils.isEmpty(this.cookies)) {
 				return null;

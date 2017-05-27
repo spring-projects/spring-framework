@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.Assert;
@@ -81,6 +83,7 @@ public abstract class RequestContextUtils {
 	 * @see WebApplicationContextUtils#getWebApplicationContext(ServletContext)
 	 * @see ContextLoader#getCurrentWebApplicationContext()
 	 */
+	@Nullable
 	public static WebApplicationContext findWebApplicationContext(
 			HttpServletRequest request, ServletContext servletContext) {
 
@@ -112,6 +115,7 @@ public abstract class RequestContextUtils {
 	 * @see ServletRequest#getServletContext()
 	 * @see ContextLoader#getCurrentWebApplicationContext()
 	 */
+	@Nullable
 	public static WebApplicationContext findWebApplicationContext(HttpServletRequest request) {
 		return findWebApplicationContext(request, request.getServletContext());
 	}
@@ -122,6 +126,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current LocaleResolver, or {@code null} if not found
 	 */
+	@Nullable
 	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
 		return (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
 	}
@@ -163,6 +168,7 @@ public abstract class RequestContextUtils {
 	 * @see #getLocaleResolver
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 */
+	@Nullable
 	public static TimeZone getTimeZone(HttpServletRequest request) {
 		LocaleResolver localeResolver = getLocaleResolver(request);
 		if (localeResolver instanceof LocaleContextResolver) {
@@ -180,6 +186,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver, or {@code null} if not found
 	 */
+	@Nullable
 	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
 		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
@@ -201,6 +208,7 @@ public abstract class RequestContextUtils {
 	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
 	 */
+	@Nullable
 	public static Theme getTheme(HttpServletRequest request) {
 		ThemeResolver themeResolver = getThemeResolver(request);
 		ThemeSource themeSource = getThemeSource(request);
@@ -220,6 +228,7 @@ public abstract class RequestContextUtils {
 	 * @see FlashMap
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static Map<String, ?> getInputFlashMap(HttpServletRequest request) {
 		return (Map<String, ?>) request.getAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE);
 	}

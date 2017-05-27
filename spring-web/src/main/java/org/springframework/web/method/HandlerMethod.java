@@ -29,6 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -223,6 +224,7 @@ public class HandlerMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#code()
 	 */
+	@Nullable
 	protected HttpStatus getResponseStatus() {
 		return this.responseStatus;
 	}
@@ -232,6 +234,7 @@ public class HandlerMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#reason()
 	 */
+	@Nullable
 	protected String getResponseStatusReason() {
 		return this.responseStatusReason;
 	}
@@ -266,6 +269,7 @@ public class HandlerMethod {
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
+	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}

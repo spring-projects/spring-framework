@@ -38,6 +38,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -211,6 +212,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @throws BeansException in case of the not-unique scenario being fatal
 	 * @since 4.3
 	 */
+	@Nullable
 	public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) throws BeansException {
 		throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 	}
@@ -227,6 +229,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @throws BeansException if the shortcut could not be obtained
 	 * @since 4.3.1
 	 */
+	@Nullable
 	public Object resolveShortcut(BeanFactory beanFactory) throws BeansException {
 		return null;
 	}
@@ -321,7 +324,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * this point; it just allows discovery to happen when the application calls
 	 * {@link #getDependencyName()} (if ever).
 	 */
-	public void initParameterNameDiscovery(ParameterNameDiscoverer parameterNameDiscoverer) {
+	public void initParameterNameDiscovery(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
 		if (this.methodParameter != null) {
 			this.methodParameter.initParameterNameDiscovery(parameterNameDiscoverer);
 		}

@@ -25,6 +25,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Spring-configurable {@code FileTypeMap} implementation that will read
@@ -139,7 +140,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * @see javax.activation.MimetypesFileTypeMap#MimetypesFileTypeMap(java.io.InputStream)
 	 * @see javax.activation.MimetypesFileTypeMap#addMimeTypes(String)
 	 */
-	protected FileTypeMap createFileTypeMap(Resource mappingLocation, String[] mappings) throws IOException {
+	protected FileTypeMap createFileTypeMap(@Nullable Resource mappingLocation, @Nullable String[] mappings) throws IOException {
 		MimetypesFileTypeMap fileTypeMap = null;
 		if (mappingLocation != null) {
 			InputStream is = mappingLocation.getInputStream();

@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.TypeUtils;
 
@@ -75,7 +76,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value
 	 */
-	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
+	private boolean shouldInvokeOnReturnValueOf(Method method, @Nullable Object returnValue) {
 		Class<?> type = getDiscoveredReturningType();
 		Type genericType = getDiscoveredReturningGenericType();
 		// If we aren't dealing with a raw type, check if generic parameters are assignable.
@@ -94,7 +95,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value and type
 	 */
-	private boolean matchesReturnValue(Class<?> type, Method method, Object returnValue) {
+	private boolean matchesReturnValue(Class<?> type, Method method, @Nullable Object returnValue) {
 		if (returnValue != null) {
 			return ClassUtils.isAssignableValue(type, returnValue);
 		}

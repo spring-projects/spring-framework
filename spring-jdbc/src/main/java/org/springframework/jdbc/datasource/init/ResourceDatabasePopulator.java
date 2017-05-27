@@ -20,10 +20,12 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -102,7 +104,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops,
-			String sqlScriptEncoding, Resource... scripts) {
+			@Nullable String sqlScriptEncoding, Resource... scripts) {
 
 		this(scripts);
 		this.continueOnError = continueOnError;
@@ -152,7 +154,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * or empty to indicate platform encoding
 	 * @see #addScript(Resource)
 	 */
-	public void setSqlScriptEncoding(String sqlScriptEncoding) {
+	public void setSqlScriptEncoding(@Nullable String sqlScriptEncoding) {
 		this.sqlScriptEncoding = StringUtils.hasText(sqlScriptEncoding) ? sqlScriptEncoding : null;
 	}
 

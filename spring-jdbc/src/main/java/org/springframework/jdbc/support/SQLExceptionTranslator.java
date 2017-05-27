@@ -19,6 +19,7 @@ package org.springframework.jdbc.support;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for translating between {@link SQLException SQLExceptions}
@@ -50,6 +51,7 @@ public interface SQLExceptionTranslator {
 	 * @return the DataAccessException, wrapping the {@code SQLException}
 	 * @see org.springframework.dao.DataAccessException#getRootCause()
 	 */
-	DataAccessException translate(String task, String sql, SQLException ex);
+	@Nullable
+	DataAccessException translate(String task, @Nullable String sql, SQLException ex);
 
 }

@@ -26,6 +26,7 @@ import bsh.Primitive;
 import bsh.XThis;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -66,7 +67,7 @@ public abstract class BshScriptUtils {
 	 * @throws EvalError in case of BeanShell parsing failure
 	 * @see #createBshObject(String, Class[], ClassLoader)
 	 */
-	public static Object createBshObject(String scriptSource, Class<?>... scriptInterfaces) throws EvalError {
+	public static Object createBshObject(String scriptSource, @Nullable Class<?>... scriptInterfaces) throws EvalError {
 		return createBshObject(scriptSource, scriptInterfaces, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -84,7 +85,7 @@ public abstract class BshScriptUtils {
 	 * @return the scripted Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	public static Object createBshObject(String scriptSource, Class<?>[] scriptInterfaces, ClassLoader classLoader)
+	public static Object createBshObject(String scriptSource, @Nullable Class<?>[] scriptInterfaces, ClassLoader classLoader)
 			throws EvalError {
 
 		Object result = evaluateBshScript(scriptSource, scriptInterfaces, classLoader);
@@ -113,6 +114,7 @@ public abstract class BshScriptUtils {
 	 * @return the scripted Java class, or {@code null} if none could be determined
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
+	@Nullable
 	static Class<?> determineBshObjectType(String scriptSource, ClassLoader classLoader) throws EvalError {
 		Assert.hasText(scriptSource, "Script source must not be empty");
 		Interpreter interpreter = new Interpreter();
@@ -144,7 +146,7 @@ public abstract class BshScriptUtils {
 	 * @return the scripted Java class or Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	static Object evaluateBshScript(String scriptSource, Class<?>[] scriptInterfaces, ClassLoader classLoader)
+	static Object evaluateBshScript(String scriptSource, @Nullable Class<?>[] scriptInterfaces, ClassLoader classLoader)
 			throws EvalError {
 
 		Assert.hasText(scriptSource, "Script source must not be empty");
@@ -176,6 +178,7 @@ public abstract class BshScriptUtils {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameBshObject(args[0]));

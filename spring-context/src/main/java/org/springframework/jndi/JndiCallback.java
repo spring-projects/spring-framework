@@ -19,6 +19,8 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback interface to be implemented by classes that need to perform an
  * operation (such as a lookup) in a JNDI context. This callback approach
@@ -44,6 +46,7 @@ public interface JndiCallback<T> {
 	 * @throws NamingException if thrown by JNDI methods
 	 * @return a result object, or {@code null}
 	 */
+	@Nullable
 	T doInContext(Context ctx) throws NamingException;
 
 }

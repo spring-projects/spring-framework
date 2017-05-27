@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple interface for bean definition readers.
@@ -70,6 +71,7 @@ public interface BeanDefinitionReader {
 	 * but rather to just register bean definitions with class names,
 	 * with the corresponding Classes to be resolved later (or never).
 	 */
+	@Nullable
 	ClassLoader getBeanClassLoader();
 
 	/**

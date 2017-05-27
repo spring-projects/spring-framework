@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -173,6 +174,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		this.jsonpParameterNames = jsonpParameterNames;
 	}
 
+	@Nullable
 	private String getJsonpParameterValue(HttpServletRequest request) {
 		if (this.jsonpParameterNames != null) {
 			for (String name : this.jsonpParameterNames) {

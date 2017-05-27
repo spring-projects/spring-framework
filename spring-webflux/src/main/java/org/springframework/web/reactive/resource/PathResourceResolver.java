@@ -100,7 +100,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * {@code Resource} for the given path relative to the location.
 	 * @param resourcePath the path to the resource
 	 * @param location the location to check
-	 * @return the resource, or {@code null} if none found
+	 * @return the resource, or empty {@link Mono} if none found
 	 */
 	protected Mono<Resource> getResource(String resourcePath, Resource location) {
 		try {

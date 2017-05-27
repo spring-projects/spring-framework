@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method;
 
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -104,6 +105,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the name for this mapping, or {@code null}.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -159,6 +161,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Returns the "custom" condition of this {@link RequestMappingInfo}; or {@code null}.
 	 */
+	@Nullable
 	public RequestCondition<?> getCustomCondition() {
 		return this.customConditionHolder.getCondition();
 	}

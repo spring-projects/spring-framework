@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
@@ -45,7 +46,7 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	 * @param binderMethods {@code @InitBinder} methods, or {@code null}
 	 * @param initializer for global data binder intialization
 	 */
-	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods,
+	public InitBinderDataBinderFactory(@Nullable List<InvocableHandlerMethod> binderMethods,
 			WebBindingInitializer initializer) {
 
 		super(initializer);

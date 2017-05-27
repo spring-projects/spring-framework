@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -116,6 +117,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
 	 */
+	@Nullable
 	protected String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}

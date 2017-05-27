@@ -36,6 +36,7 @@ import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -171,6 +172,7 @@ public class MethodParameter {
 	 * <p>Note: Either Method or Constructor is available.
 	 * @return the Method, or {@code null} if none
 	 */
+	@Nullable
 	public Method getMethod() {
 		return this.method;
 	}
@@ -180,6 +182,7 @@ public class MethodParameter {
 	 * <p>Note: Either Method or Constructor is available.
 	 * @return the Constructor, or {@code null} if none
 	 */
+	@Nullable
 	public Constructor<?> getConstructor() {
 		return this.constructor;
 	}
@@ -279,6 +282,7 @@ public class MethodParameter {
 	 * if none specified (indicating the default type index)
 	 * @see #getNestingLevel()
 	 */
+	@Nullable
 	public Integer getTypeIndexForCurrentLevel() {
 		return getTypeIndexForLevel(this.nestingLevel);
 	}
@@ -289,6 +293,7 @@ public class MethodParameter {
 	 * @return the corresponding type index, or {@code null}
 	 * if none specified (indicating the default type index)
 	 */
+	@Nullable
 	public Integer getTypeIndexForLevel(int nestingLevel) {
 		return getTypeIndexesPerLevel().get(nestingLevel);
 	}
@@ -482,6 +487,7 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or {@code null} if not found
 	 */
+	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return adaptAnnotation(getAnnotatedElement().getAnnotation(annotationType));
 	}
@@ -528,6 +534,7 @@ public class MethodParameter {
 	 * @return the annotation object, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <A extends Annotation> A getParameterAnnotation(Class<A> annotationType) {
 		Annotation[] anns = getParameterAnnotations();
 		for (Annotation ann : anns) {
@@ -564,6 +571,7 @@ public class MethodParameter {
 	 * {@link #initParameterNameDiscovery ParameterNameDiscoverer}
 	 * has been set to begin with)
 	 */
+	@Nullable
 	public String getParameterName() {
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {

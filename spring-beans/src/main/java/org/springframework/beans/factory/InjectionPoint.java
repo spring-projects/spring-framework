@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -83,6 +84,7 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the MethodParameter, or {@code null} if none
 	 */
+	@Nullable
 	public MethodParameter getMethodParameter() {
 		return this.methodParameter;
 	}
@@ -92,6 +94,7 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the Field, or {@code null} if none
 	 */
+	@Nullable
 	public Field getField() {
 		return this.field;
 	}
@@ -117,6 +120,7 @@ public class InjectionPoint {
 	 * @return the annotation instance, or {@code null} if none found
 	 * @since 4.3.9
 	 */
+	@Nullable
 	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
 		return (this.field != null ? this.field.getAnnotation(annotationType) :
 				this.methodParameter.getParameterAnnotation(annotationType));

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -100,7 +101,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * (may be {@code null})
 	 * @see GroovyObjectCustomizer#customize
 	 */
-	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
+	public GroovyScriptFactory(String scriptSourceLocator, @Nullable GroovyObjectCustomizer groovyObjectCustomizer) {
 		this(scriptSourceLocator);
 		this.groovyObjectCustomizer = groovyObjectCustomizer;
 	}
@@ -116,7 +117,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * @since 4.3.3
 	 * @see GroovyClassLoader#GroovyClassLoader(ClassLoader, CompilerConfiguration)
 	 */
-	public GroovyScriptFactory(String scriptSourceLocator, CompilerConfiguration compilerConfiguration) {
+	public GroovyScriptFactory(String scriptSourceLocator, @Nullable CompilerConfiguration compilerConfiguration) {
 		this(scriptSourceLocator);
 		this.compilerConfiguration = compilerConfiguration;
 	}

@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import commonj.timers.Timer;
 import commonj.timers.TimerListener;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -164,6 +165,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 			this.trigger = trigger;
 		}
 
+		@Nullable
 		public ScheduledFuture<?> schedule() {
 			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
 			if (this.scheduledExecutionTime == null) {

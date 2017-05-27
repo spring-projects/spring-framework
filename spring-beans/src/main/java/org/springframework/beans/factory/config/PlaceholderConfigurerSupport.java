@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -140,7 +141,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * special character should be processed as a value separator.
 	 * The default is {@value #DEFAULT_VALUE_SEPARATOR}.
 	 */
-	public void setValueSeparator(String valueSeparator) {
+	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 

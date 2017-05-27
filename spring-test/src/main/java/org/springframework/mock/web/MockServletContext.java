@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -48,6 +49,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -165,7 +167,7 @@ public class MockServletContext implements ServletContext {
 	 * and no base path.
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
-	public MockServletContext(ResourceLoader resourceLoader) {
+	public MockServletContext(@Nullable ResourceLoader resourceLoader) {
 		this("", resourceLoader);
 	}
 
@@ -178,7 +180,7 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
-	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
+	public MockServletContext(String resourceBasePath, @Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
 
@@ -630,6 +632,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public ServletRegistration getServletRegistration(String servletName) {
 		return null;
 	}
@@ -668,6 +671,7 @@ public class MockServletContext implements ServletContext {
 	 * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
 	 */
 	@Override
+	@Nullable
 	public FilterRegistration getFilterRegistration(String filterName) {
 		return null;
 	}

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -52,7 +53,7 @@ public class BindingContext {
 	 * Create a new {@code BindingContext} with the given initializer.
 	 * @param initializer the binding initializer to apply (may be {@code null})
 	 */
-	public BindingContext(WebBindingInitializer initializer) {
+	public BindingContext(@Nullable WebBindingInitializer initializer) {
 		this.initializer = initializer;
 	}
 

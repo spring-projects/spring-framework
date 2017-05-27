@@ -27,6 +27,7 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -50,6 +51,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * <p>Allows factory method implementations to determine whether the current
 	 * caller is the container itself as opposed to user code.
 	 */
+	@Nullable
 	public static Method getCurrentlyInvokedFactoryMethod() {
 		return currentlyInvokedFactoryMethod.get();
 	}

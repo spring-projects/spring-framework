@@ -18,6 +18,8 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 
+import org.springframework.lang.Nullable;
+
 /**
  * The central interface of Spring's low-level JavaBeans infrastructure.
  *
@@ -65,6 +67,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * Return the bean instance wrapped by this object, if any.
 	 * @return the bean instance, or {@code null} if none set
 	 */
+	@Nullable
 	Object getWrappedInstance();
 
 	/**
@@ -72,6 +75,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * @return the type of the wrapped bean instance,
 	 * or {@code null} if no wrapped object has been set
 	 */
+	@Nullable
 	Class<?> getWrappedClass();
 
 	/**

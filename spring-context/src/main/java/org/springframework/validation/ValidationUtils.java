@@ -19,6 +19,7 @@ package org.springframework.validation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -139,7 +140,7 @@ public abstract class ValidationUtils {
 	 * @param errorArgs the error arguments, for argument binding via MessageFormat
 	 * (can be {@code null})
 	 */
-	public static void rejectIfEmpty(Errors errors, String field, String errorCode, Object[] errorArgs) {
+	public static void rejectIfEmpty(Errors errors, String field, @Nullable String errorCode, Object[] errorArgs) {
 		rejectIfEmpty(errors, field, errorCode, errorArgs, null);
 	}
 
@@ -159,7 +160,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmpty(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
@@ -218,7 +219,7 @@ public abstract class ValidationUtils {
 	 * (can be {@code null})
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs) {
 
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, errorArgs, null);
 	}
@@ -239,7 +240,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -30,6 +31,7 @@ import javax.jms.TransactionInProgressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -77,7 +79,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connectionFactory the JMS ConnectionFactory that this
 	 * resource holder is associated with (may be {@code null})
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -108,7 +110,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param connection the JMS Connection
 	 * @param session the JMS Session
 	 */
-	public JmsResourceHolder(ConnectionFactory connectionFactory, Connection connection, Session session) {
+	public JmsResourceHolder(@Nullable ConnectionFactory connectionFactory, Connection connection, Session session) {
 		this.connectionFactory = connectionFactory;
 		addConnection(connection);
 		addSession(session, connection);

@@ -18,6 +18,8 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A specialized type of {@link MethodMatcher} that takes into account introductions
  * when matching methods. If there are no introductions on the target class,
@@ -39,6 +41,6 @@ public interface IntroductionAwareMethodMatcher extends MethodMatcher {
 	 * asking is the subject on one or more introductions; {@code false} otherwise
 	 * @return whether or not this method matches statically
 	 */
-	boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions);
+	boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions);
 
 }

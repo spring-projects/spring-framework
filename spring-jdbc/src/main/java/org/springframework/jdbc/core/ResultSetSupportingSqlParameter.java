@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Common base class for ResultSet-supporting SqlParameters like
  * {@link SqlOutParameter} and {@link SqlReturnResultSet}.
@@ -107,6 +109,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
+	@Nullable
 	public ResultSetExtractor<?> getResultSetExtractor() {
 		return this.resultSetExtractor;
 	}
@@ -114,6 +117,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the RowCallbackHandler held by this parameter, if any.
 	 */
+	@Nullable
 	public RowCallbackHandler getRowCallbackHandler() {
 		return this.rowCallbackHandler;
 	}
@@ -121,6 +125,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the RowMapper held by this parameter, if any.
 	 */
+	@Nullable
 	public RowMapper<?> getRowMapper() {
 		return this.rowMapper;
 	}

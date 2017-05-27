@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -57,7 +58,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * @param converter the MessageConverter to use (may be {@code null})
 	 * @since 4.3
 	 */
-	public MessageMethodArgumentResolver(MessageConverter converter) {
+	public MessageMethodArgumentResolver(@Nullable MessageConverter converter) {
 		this.converter = converter;
 	}
 
@@ -103,7 +104,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * Check if the given {@code payload} is empty.
 	 * @param payload the payload to check (can be {@code null})
 	 */
-	protected boolean isEmptyPayload(Object payload) {
+	protected boolean isEmptyPayload(@Nullable Object payload) {
 		if (payload == null) {
 			return true;
 		}

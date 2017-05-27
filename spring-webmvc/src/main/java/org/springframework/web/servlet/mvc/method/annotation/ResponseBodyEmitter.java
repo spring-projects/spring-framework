@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -98,6 +99,7 @@ public class ResponseBodyEmitter {
 	/**
 	 * Return the configured timeout value, if any.
 	 */
+	@Nullable
 	public Long getTimeout() {
 		return this.timeout;
 	}

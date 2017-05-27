@@ -25,6 +25,7 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -84,7 +85,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * @param cs a ConversionService to use when method argument values
 	 * need to be formatted as Strings before being added to the URI
 	 */
-	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService cs) {
+	public CompositeUriComponentsContributor(Collection<?> contributors, @Nullable ConversionService cs) {
 		Assert.notNull(contributors, "'uriComponentsContributors' must not be null");
 		this.contributors.addAll(contributors);
 		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());

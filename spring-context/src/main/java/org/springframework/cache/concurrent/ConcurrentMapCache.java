@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.serializer.support.SerializationDelegate;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -98,7 +99,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * @since 4.3
 	 */
 	protected ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store,
-			boolean allowNullValues, SerializationDelegate serialization) {
+			boolean allowNullValues, @Nullable SerializationDelegate serialization) {
 
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");

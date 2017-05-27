@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying the API to be implemented by a class providing call metadata.
@@ -52,25 +53,28 @@ public interface CallMetaDataProvider {
 	 * @see	org.springframework.jdbc.core.simple.SimpleJdbcCall#withoutProcedureColumnMetaDataAccess()
 	 */
 	void initializeWithProcedureColumnMetaData(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName)
+			DatabaseMetaData databaseMetaData, @Nullable String catalogName, @Nullable String schemaName, String procedureName)
 			throws SQLException;
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
+	@Nullable
 	String procedureNameToUse(String procedureName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
+	@Nullable
 	String catalogNameToUse(String catalogName);
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
+	@Nullable
 	String schemaNameToUse(String schemaName);
 
 	/**
@@ -78,6 +82,7 @@ public interface CallMetaDataProvider {
 	 * The returned value will be used for meta data lookups. This could include altering the case
 	 * used or providing a base catalog if none is provided.
 	 */
+	@Nullable
 	String metaDataCatalogNameToUse(String catalogName) ;
 
 	/**
@@ -85,6 +90,7 @@ public interface CallMetaDataProvider {
 	 * The returned value will be used for meta data lookups. This could include altering the case
 	 * used or providing a base schema if none is provided.
 	 */
+	@Nullable
 	String metaDataSchemaNameToUse(String schemaName) ;
 
 	/**

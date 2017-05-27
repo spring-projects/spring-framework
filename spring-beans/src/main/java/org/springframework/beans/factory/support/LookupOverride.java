@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -43,7 +44,7 @@ public class LookupOverride extends MethodOverride {
 	 * @param beanName the name of the bean in the current {@code BeanFactory}
 	 * that the overridden method should return (may be {@code null})
 	 */
-	public LookupOverride(String methodName, String beanName) {
+	public LookupOverride(String methodName, @Nullable String beanName) {
 		super(methodName);
 		this.beanName = beanName;
 	}
@@ -54,7 +55,7 @@ public class LookupOverride extends MethodOverride {
 	 * @param beanName the name of the bean in the current {@code BeanFactory}
 	 * that the overridden method should return (may be {@code null})
 	 */
-	public LookupOverride(Method method, String beanName) {
+	public LookupOverride(Method method, @Nullable String beanName) {
 		super(method.getName());
 		this.method = method;
 		this.beanName = beanName;

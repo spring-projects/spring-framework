@@ -17,12 +17,15 @@
 package org.springframework.jca.support;
 
 import java.util.Timer;
+
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.UnavailableException;
 import javax.resource.spi.XATerminator;
 import javax.resource.spi.work.WorkContext;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.TransactionSynchronizationRegistry;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple implementation of the JCA 1.7 {@link javax.resource.spi.BootstrapContext}
@@ -50,7 +53,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * with no XATerminator available.
 	 * @param workManager the JCA WorkManager to use (may be {@code null})
 	 */
-	public SimpleBootstrapContext(WorkManager workManager) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager) {
 		this.workManager = workManager;
 	}
 
@@ -59,7 +62,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * @param workManager the JCA WorkManager to use (may be {@code null})
 	 * @param xaTerminator the JCA XATerminator to use (may be {@code null})
 	 */
-	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager, @Nullable XATerminator xaTerminator) {
 		this.workManager = workManager;
 		this.xaTerminator = xaTerminator;
 	}
@@ -73,8 +76,8 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	 * to use (may be {@code null})
 	 * @since 5.0
 	 */
-	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator,
-			TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+	public SimpleBootstrapContext(@Nullable WorkManager workManager, @Nullable XATerminator xaTerminator,
+			@Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
 
 		this.workManager = workManager;
 		this.xaTerminator = xaTerminator;

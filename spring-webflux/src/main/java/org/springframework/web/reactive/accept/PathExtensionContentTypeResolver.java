@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -110,6 +111,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	 * @param resource the resource
 	 * @return the MediaType for the extension, or {@code null} if none determined
 	 */
+	@Nullable
 	public MediaType resolveMediaTypeForResource(Resource resource) {
 		Assert.notNull(resource, "Resource must not be null");
 		MediaType mediaType = null;

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Helper class that efficiently creates multiple {@link CallableStatementCreator}
@@ -102,7 +103,7 @@ public class CallableStatementCreatorFactory {
 	 * Return a new CallableStatementCreator instance given this parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
+	public CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> params) {
 		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<>());
 	}
 

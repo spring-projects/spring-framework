@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -44,7 +45,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 

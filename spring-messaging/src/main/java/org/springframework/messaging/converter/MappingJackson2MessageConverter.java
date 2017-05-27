@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -266,6 +267,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @return the serialization view class, or {@code null} if none
 	 * @since 4.2
 	 */
+	@Nullable
 	protected Class<?> getSerializationView(Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter param = (MethodParameter) conversionHint;

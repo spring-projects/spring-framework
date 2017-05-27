@@ -35,6 +35,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -428,6 +429,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return this.destinationLookup.get(destination);
 		}
 
+		@Nullable
 		public Subscription getSubscription(String subscriptionId) {
 			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
 				Set<Subscription> subs = destinationEntry.getValue();
@@ -456,6 +458,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			subs.add(new Subscription(subscriptionId, selectorExpression));
 		}
 
+		@Nullable
 		public String removeSubscription(String subscriptionId) {
 			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
 				Set<Subscription> subs = destinationEntry.getValue();

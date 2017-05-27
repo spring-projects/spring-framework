@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -223,6 +224,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	 * @param bd the bean definition to build the resource description for
 	 * @return the JSON-escaped resource description
 	 */
+	@Nullable
 	protected String getEscapedResourceDescription(BeanDefinition bd) {
 		String resourceDescription = bd.getResourceDescription();
 		if (resourceDescription == null) {

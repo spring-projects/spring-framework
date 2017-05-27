@@ -167,7 +167,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * URL path and returns the full request URL path to expose for public use.
 	 * @param exchange the current exchange
 	 * @param requestUrl the request URL path to resolve
-	 * @return the resolved public URL path, or {@code null} if unresolved
+	 * @return the resolved public URL path, or empty if unresolved
 	 */
 	public final Mono<String> getForRequestUrl(ServerWebExchange exchange, String requestUrl) {
 		if (logger.isTraceEnabled()) {
@@ -211,7 +211,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * <p>If several handler mappings match, the handler used will be the one
 	 * configured with the most specific pattern.
 	 * @param lookupPath the lookup path to check
-	 * @return the resolved public URL path, or {@code null} if unresolved
+	 * @return the resolved public URL path, or empty if unresolved
 	 */
 	public final Mono<String> getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {

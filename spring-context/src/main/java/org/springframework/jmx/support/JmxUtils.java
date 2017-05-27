@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -88,7 +89,7 @@ public abstract class JmxUtils {
 	 * if no {@code MBeanServer} could be found
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
-	public static MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
+	public static MBeanServer locateMBeanServer(@Nullable String agentId) throws MBeanServerNotFoundException {
 		MBeanServer server = null;
 
 		// null means any registered server, but "" specifically means the platform server
@@ -267,6 +268,7 @@ public abstract class JmxUtils {
 	 * @param clazz the class to check
 	 * @return the Standard MBean interface for the given class
 	 */
+	@Nullable
 	public static Class<?> getMBeanInterface(Class<?> clazz) {
 		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
@@ -288,6 +290,7 @@ public abstract class JmxUtils {
 	 * @param clazz the class to check
 	 * @return whether there is an MXBean interface for the given class
 	 */
+	@Nullable
 	public static Class<?> getMXBeanInterface(Class<?> clazz) {
 		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;

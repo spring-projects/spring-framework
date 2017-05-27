@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,6 +38,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -121,6 +123,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	/**
 	 * Return the custom argument resolvers, or {@code null}.
 	 */
+	@Nullable
 	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
 		return this.customArgumentResolvers;
 	}
@@ -143,6 +146,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Return the configured argument resolvers, or possibly {@code null} if
 	 * not initialized yet via {@link #afterPropertiesSet()}.
 	 */
+	@Nullable
 	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
 		return this.argumentResolvers;
 	}
@@ -159,6 +163,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	/**
 	 * Return the custom return value handlers, or {@code null}.
 	 */
+	@Nullable
 	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
 		return this.customReturnValueHandlers;
 	}
@@ -181,6 +186,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Return the configured handlers, or possibly {@code null} if not
 	 * initialized yet via {@link #afterPropertiesSet()}.
 	 */
+	@Nullable
 	public HandlerMethodReturnValueHandlerComposite getReturnValueHandlers() {
 		return this.returnValueHandlers;
 	}
@@ -423,7 +429,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * @param exception the raised exception
 	 * @return a method to handle the exception, or {@code null}
 	 */
-	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+	@Nullable
+	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(@Nullable HandlerMethod handlerMethod, Exception exception) {
 		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
 
 		if (handlerMethod != null) {
