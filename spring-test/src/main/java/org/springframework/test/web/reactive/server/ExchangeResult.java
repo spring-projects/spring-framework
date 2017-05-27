@@ -101,7 +101,7 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return the request headers that were sent to the server.
+	 * Return the URI of the request.
 	 */
 	public URI getUrl() {
 		return this.request.getURI();
