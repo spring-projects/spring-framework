@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -26,6 +28,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import static java.nio.charset.StandardCharsets.*;
+import static java.time.format.DateTimeFormatter.*;
 
 /**
  * Represent the Content-Disposition type and parameters as defined in RFC 2183.
@@ -47,18 +50,26 @@ public class ContentDisposition {
 
 	private final Long size;
 
+	private final ZonedDateTime creationDate;
+
+	private final ZonedDateTime modificationDate;
+
+	private final ZonedDateTime readDate;
+
 
 	/**
 	 * Private constructor. See static factory methods in this class.
 	 */
-	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename,
-			@Nullable Charset charset, @Nullable Long size) {
-
+	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename, @Nullable Charset charset, @Nullable Long size,
+			@Nullable ZonedDateTime creationDate, @Nullable ZonedDateTime modificationDate, @Nullable ZonedDateTime readDate) {
 		this.type = type;
 		this.name = name;
 		this.filename = filename;
 		this.charset = charset;
 		this.size = size;
+		this.creationDate = creationDate;
+		this.modificationDate = modificationDate;
+		this.readDate = readDate;
 	}
 
 
@@ -104,6 +115,30 @@ public class ContentDisposition {
 		return this.size;
 	}
 
+	/**
+	 * Return the value of the {@literal creation-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public ZonedDateTime getCreationDate() {
+		return this.creationDate;
+	}
+
+	/**
+	 * Return the value of the {@literal modification-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public ZonedDateTime getModificationDate() {
+		return this.modificationDate;
+	}
+
+	/**
+	 * Return the value of the {@literal read-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public ZonedDateTime getReadDate() {
+		return this.readDate;
+	}
+
 
 	/**
 	 * Return a builder for a {@code ContentDisposition}.
@@ -119,11 +154,12 @@ public class ContentDisposition {
 	 * Return an empty content disposition.
 	 */
 	public static ContentDisposition empty() {
-		return new ContentDisposition("", null, null, null, null);
+		return new ContentDisposition("", null, null, null, null, null, null, null);
 	}
 
 	/**
 	 * Parse a {@literal Content-Disposition} header value as defined in RFC 2183.
+	 *
 	 * @param contentDisposition the {@literal Content-Disposition} header value
 	 * @return the parsed content disposition
 	 * @see #toString()
@@ -136,6 +172,9 @@ public class ContentDisposition {
 		String filename = null;
 		Charset charset = null;
 		Long size = null;
+		ZonedDateTime creationDate = null;
+		ZonedDateTime modificationDate = null;
+		ZonedDateTime readDate = null;
 		for (int i = 1; i < parts.length; i++) {
 			String part = parts[i];
 			int eqIndex = part.indexOf('=');
@@ -159,12 +198,36 @@ public class ContentDisposition {
 				else if (attribute.equals("size") ) {
 					size = Long.parseLong(value);
 				}
+				else if (attribute.equals("creation-date")) {
+					try {
+						creationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+					}
+					catch (DateTimeParseException ex) {
+						// ignore
+					}
+				}
+				else if (attribute.equals("modification-date")) {
+					try {
+						modificationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+					}
+					catch (DateTimeParseException ex) {
+						// ignore
+					}
+				}
+				else if (attribute.equals("read-date")) {
+					try {
+						readDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
+					}
+					catch (DateTimeParseException ex) {
+						// ignore
+					}
+				}
 			}
 			else {
 				throw new IllegalArgumentException("Invalid content disposition format");
 			}
 		}
-		return new ContentDisposition(type, name, filename, charset, size);
+		return new ContentDisposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
 	}
 
 	/**
@@ -225,7 +288,10 @@ public class ContentDisposition {
 				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
 				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&
 				ObjectUtils.nullSafeEquals(this.charset, otherCd.charset) &&
-				ObjectUtils.nullSafeEquals(this.size, otherCd.size));
+				ObjectUtils.nullSafeEquals(this.size, otherCd.size) &&
+				ObjectUtils.nullSafeEquals(this.creationDate, otherCd.creationDate)&&
+				ObjectUtils.nullSafeEquals(this.modificationDate, otherCd.modificationDate)&&
+				ObjectUtils.nullSafeEquals(this.readDate, otherCd.readDate));
 	}
 
 	@Override
@@ -235,6 +301,9 @@ public class ContentDisposition {
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
+		result = 31 * result + (creationDate != null ? creationDate.hashCode() : 0);
+		result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
+		result = 31 * result + (readDate != null ? readDate.hashCode() : 0);
 		return result;
 	}
 
@@ -265,6 +334,21 @@ public class ContentDisposition {
 		if (this.size != null) {
 			sb.append("; size=");
 			sb.append(this.size);
+		}
+		if (this.creationDate != null) {
+			sb.append("; creation-date=\"");
+			sb.append(RFC_1123_DATE_TIME.format(this.creationDate));
+			sb.append('\"');
+		}
+		if (this.modificationDate != null) {
+			sb.append("; modification-date=\"");
+			sb.append(RFC_1123_DATE_TIME.format(this.modificationDate));
+			sb.append('\"');
+		}
+		if (this.readDate != null) {
+			sb.append("; read-date=\"");
+			sb.append(RFC_1123_DATE_TIME.format(this.readDate));
+			sb.append('\"');
 		}
 		return sb.toString();
 	}
@@ -333,6 +417,21 @@ public class ContentDisposition {
 		Builder size(Long size);
 
 		/**
+		 * Set the value of the {@literal creation-date} parameter.
+		 */
+		Builder creationDate(ZonedDateTime creationDate);
+
+		/**
+		 * Set the value of the {@literal modification-date} parameter.
+		 */
+		Builder modificationDate(ZonedDateTime modificationDate);
+
+		/**
+		 * Set the value of the {@literal read-date} parameter.
+		 */
+		Builder readDate(ZonedDateTime readDate);
+
+		/**
 		 * Build the content disposition
 		 */
 		ContentDisposition build();
@@ -350,6 +449,13 @@ public class ContentDisposition {
 		private Charset charset;
 
 		private Long size;
+
+		private ZonedDateTime creationDate;
+
+		private ZonedDateTime modificationDate;
+
+		private ZonedDateTime readDate;
+
 
 		public BuilderImpl(String type) {
 			Assert.hasText(type, "'type' must not be not empty");
@@ -382,8 +488,27 @@ public class ContentDisposition {
 		}
 
 		@Override
+		public Builder creationDate(ZonedDateTime creationDate) {
+			this.creationDate = creationDate;
+			return this;
+		}
+
+		@Override
+		public Builder modificationDate(ZonedDateTime modificationDate) {
+			this.modificationDate = modificationDate;
+			return this;
+		}
+
+		@Override
+		public Builder readDate(ZonedDateTime readDate) {
+			this.readDate = readDate;
+			return this;
+		}
+
+		@Override
 		public ContentDisposition build() {
-			return new ContentDisposition(this.type, this.name, this.filename, this.charset, this.size);
+			return new ContentDisposition(this.type, this.name, this.filename, this.charset,
+					this.size, this.creationDate, this.modificationDate, this.readDate);
 		}
 	}
 
