@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function.server;
+package org.springframework.mock.web.reactive.function.server;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
 
 /**
