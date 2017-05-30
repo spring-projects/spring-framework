@@ -124,7 +124,7 @@ public class ResourceWebHandlerTests {
 		assertEquals(1, headers.get("Accept-Ranges").size());
 
 		StepVerifier.create(exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set."))
+				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written"))
 				.verify();
 	}
 

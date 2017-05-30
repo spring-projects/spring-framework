@@ -133,7 +133,7 @@ public class MessageWriterResultHandlerTests {
 
 		assertNull(this.exchange.getResponse().getHeaders().get("Content-Type"));
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set.")).verify();
+				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written")).verify();
 	}
 
 	@Test  // SPR-13135
