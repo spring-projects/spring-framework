@@ -71,4 +71,9 @@ public class HttpCookie {
 		return (this.name.equalsIgnoreCase(otherCookie.getName()));
 	}
 
+	@Override
+	public String toString() {
+		return this.name + '=' + this.value;
+	}
+
 }

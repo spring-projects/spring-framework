@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -231,7 +232,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add one or more cookies.
 		 */
-		B cookie(String name, HttpCookie... cookie);
+		B cookie(HttpCookie... cookie);
 
 		/**
 		 * Add the given cookies.
@@ -390,8 +391,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public BodyBuilder cookie(String name, HttpCookie... cookies) {
-			this.cookies.put(name, Arrays.asList(cookies));
+		public BodyBuilder cookie(HttpCookie... cookies) {
+			Arrays.stream(cookies).forEach(cookie -> this.cookies.add(cookie.getName(), cookie));
 			return this;
 		}
 
@@ -485,8 +486,14 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
+			applyCookies();
 			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
 					this.headers, this.cookies, this.remoteAddress, body);
+		}
+
+		private void applyCookies() {
+			this.cookies.values().stream().flatMap(Collection::stream)
+					.forEach(cookie -> this.headers.add(HttpHeaders.COOKIE, cookie.toString()));
 		}
 	}
 

@@ -98,7 +98,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void resolveCookieArgument() {
 		HttpCookie expected = new HttpCookie("name", "foo");
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").cookie(expected.getName(), expected).toExchange();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").cookie(expected).toExchange();
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieParameter, this.bindingContext, exchange);
@@ -109,7 +109,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void resolveCookieStringArgument() {
 		HttpCookie cookie = new HttpCookie("name", "foo");
-		ServerWebExchange exchange = MockServerHttpRequest.get("/").cookie(cookie.getName(), cookie).toExchange();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").cookie(cookie).toExchange();
 
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieStringParameter, this.bindingContext, exchange);
