@@ -230,7 +230,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 
 		Message<?> replyMessage = this.doReceive(tempReplyChannel, receiveTimeout);
-		if (replyMessage != null && (originalReplyChannelHeader!= null || originalErrorChannelHeader != null)) {
+		if (replyMessage != null) {
 			replyMessage = MessageBuilder.fromMessage(replyMessage)
 					.setHeader(MessageHeaders.REPLY_CHANNEL, originalReplyChannelHeader)
 					.setHeader(MessageHeaders.ERROR_CHANNEL, originalErrorChannelHeader)
