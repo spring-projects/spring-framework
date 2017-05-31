@@ -17,7 +17,7 @@
 package org.springframework.web.context.support;
 
 import org.junit.Test;
-
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
@@ -82,6 +82,16 @@ public class AnnotationConfigWebApplicationContextTests {
 		assertThat(ctx.containsBean("custom-myConfig"), is(true));
 	}
 
+	@Test
+	public void configLocationWithWrongSingleClass() {
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+		ctx.setConfigLocation(Config.class.getName() + "1");
+		try {
+			ctx.refresh();
+		} catch (Throwable e) {
+			assertThat(e.getClass().getName(), is(BeanDefinitionStoreException.class.getName()));
+		}
+	}
 
 	@Configuration("myConfig")
 	static class Config {

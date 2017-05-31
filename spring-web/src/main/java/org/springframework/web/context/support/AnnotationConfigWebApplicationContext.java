@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
@@ -240,6 +241,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 					if (logger.isInfoEnabled()) {
 						if (count == 0) {
 							logger.info("No annotated classes found for specified class/package [" + configLocation + "]");
+							throw new BeanDefinitionStoreException("No annotated classes found for specified class/package [" + configLocation + "]"); 
 						}
 						else {
 							logger.info("Found " + count + " annotated classes in package [" + configLocation + "]");
