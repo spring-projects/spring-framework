@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import reactor.core.publisher.Mono;
 
@@ -46,16 +45,24 @@ import org.springframework.web.server.WebFilterChain;
  * <p>Example usage:
  *
  * <pre class="code">
- * ExchangeMutatorWebFilter mutator = new ExchangeMutatorWebFilter(exchange -> ...);
+ * Function&lt;ServerWebExchange, ServerWebExchange&gt; fn1 = ...;
+ * Function&lt;ServerWebExchange, ServerWebExchange&gt; fn2 = ...;
+ *
+ * ExchangeMutatorWebFilter mutator = new ExchangeMutatorWebFilter(fn1().andThen(fn2()));
  * WebTestClient client = WebTestClient.bindToController(new MyController()).webFilter(mutator).build();
  * </pre>
+ *
  *
  * <p>It is also possible to apply "per request" transformations:
  *
  * <pre class="code">
- * ExchangeMutatorWebFilter mutator = new ExchangeMutatorWebFilter(exchange -> ...);
+ * ExchangeMutatorWebFilter mutator = new ExchangeMutatorWebFilter();
  * WebTestClient client = WebTestClient.bindToController(new MyController()).webFilter(mutator).build();
- * client.filter(mutator.perClient(exchange -> ...)).get().uri("/").exchange();
+ *
+ * Function&lt;ServerWebExchange, ServerWebExchange&gt; fn1 = ...;
+ * Function&lt;ServerWebExchange, ServerWebExchange&gt; fn2 = ...;
+ *
+ * client.filter(mutator.perClient(fn1().andThen(fn2()))).get().uri("/").exchange();
  * </pre>
  *
  * @author Rossen Stoyanchev
@@ -69,7 +76,11 @@ public class ExchangeMutatorWebFilter implements WebFilter {
 			new ConcurrentHashMap<>(4);
 
 
-	public ExchangeMutatorWebFilter(UnaryOperator<ServerWebExchange> processor) {
+	public ExchangeMutatorWebFilter() {
+		this(exchange -> exchange);
+	}
+
+	public ExchangeMutatorWebFilter(Function<ServerWebExchange, ServerWebExchange> processor) {
 		Assert.notNull(processor, "'processor' is required");
 		this.processor = processor;
 	}
@@ -100,7 +111,7 @@ public class ExchangeMutatorWebFilter implements WebFilter {
 	 * @param processor the exchange processor to use
 	 * @return client filter for use with {@link WebTestClient#filter}
 	 */
-	public ExchangeFilterFunction perClient(UnaryOperator<ServerWebExchange> processor) {
+	public ExchangeFilterFunction perClient(Function<ServerWebExchange, ServerWebExchange> processor) {
 		return (request, next) -> {
 			String id = getRequestId(request.headers());
 			this.perRequestProcessors.compute(id,
