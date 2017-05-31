@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,7 +59,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscape(String input) {
+	public static String htmlEscape(@Nullable String input) {
 		return htmlEscape(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -78,7 +79,7 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscape(String input, String encoding) {
+	public static String htmlEscape(@Nullable String input, String encoding) {
 		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
@@ -109,7 +110,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscapeDecimal(String input) {
+	public static String htmlEscapeDecimal(@Nullable String input) {
 		return htmlEscapeDecimal(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -129,7 +130,7 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscapeDecimal(String input, String encoding) {
+	public static String htmlEscapeDecimal(@Nullable String input, String encoding) {
 		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
@@ -161,7 +162,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscapeHex(String input) {
+	public static String htmlEscapeHex(@Nullable String input) {
 		return htmlEscapeHex(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -181,7 +182,7 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscapeHex(String input, String encoding) {
+	public static String htmlEscapeHex(@Nullable String input, String encoding) {
 		Assert.notNull(encoding, "Encoding is required");
 		if (input == null) {
 			return null;
@@ -220,7 +221,7 @@ public abstract class HtmlUtils {
 	 * @param input the (escaped) input string
 	 * @return the unescaped string
 	 */
-	public static String htmlUnescape(String input) {
+	public static String htmlUnescape(@Nullable String input) {
 		if (input == null) {
 			return null;
 		}

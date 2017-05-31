@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,7 +43,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param msg the detail message
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, String propertyName, String msg) {
+			@Nullable String resourceDescription, @Nullable String beanName, String propertyName, String msg) {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through bean property '" + propertyName + "'" +
@@ -57,7 +58,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param ex the bean creation exception that indicated the unsatisfied dependency
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, String propertyName, BeansException ex) {
+			@Nullable String resourceDescription, @Nullable String beanName, String propertyName, BeansException ex) {
 
 		this(resourceDescription, beanName, propertyName, "");
 		initCause(ex);
@@ -72,7 +73,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @since 4.3
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, InjectionPoint injectionPoint, String msg) {
+			@Nullable String resourceDescription, @Nullable String beanName, @Nullable InjectionPoint injectionPoint, String msg) {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through " + injectionPoint +
@@ -89,7 +90,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @since 4.3
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, InjectionPoint injectionPoint, BeansException ex) {
+			@Nullable String resourceDescription, @Nullable String beanName, @Nullable InjectionPoint injectionPoint, BeansException ex) {
 
 		this(resourceDescription, beanName, injectionPoint, "");
 		initCause(ex);
@@ -100,6 +101,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * Return the injection point (field or method/constructor parameter), if known.
 	 * @since 4.3
 	 */
+	@Nullable
 	public InjectionPoint getInjectionPoint() {
 		return this.injectionPoint;
 	}

@@ -54,7 +54,7 @@ public class HandlerExecutionChain {
 	 * Create a new HandlerExecutionChain.
 	 * @param handler the handler object to execute
 	 */
-	public HandlerExecutionChain(Object handler) {
+	public HandlerExecutionChain(@Nullable Object handler) {
 		this(handler, (HandlerInterceptor[]) null);
 	}
 
@@ -64,7 +64,7 @@ public class HandlerExecutionChain {
 	 * @param interceptors the array of interceptors to apply
 	 * (in the given order) before the handler itself executes
 	 */
-	public HandlerExecutionChain(Object handler, HandlerInterceptor... interceptors) {
+	public HandlerExecutionChain(@Nullable Object handler, HandlerInterceptor... interceptors) {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();

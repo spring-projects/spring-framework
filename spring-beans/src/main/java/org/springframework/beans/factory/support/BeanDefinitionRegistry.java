@@ -20,6 +20,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.AliasRegistry;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for registries that hold bean definitions, for example RootBeanDefinition
@@ -74,7 +75,7 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	 * @return the BeanDefinition for the given name (never {@code null})
 	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
-	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+	BeanDefinition getBeanDefinition(@Nullable String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Check if this registry contains a bean definition with the given name.

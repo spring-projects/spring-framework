@@ -978,7 +978,7 @@ public abstract class StringUtils {
 	 * @param array the original {@code String} array
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
-	public static String[] trimArrayElements(String[] array) {
+	public static String[] trimArrayElements(@Nullable String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}

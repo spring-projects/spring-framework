@@ -231,7 +231,7 @@ public abstract class AnnotationUtils {
 	 * @see AnnotatedElement#getAnnotations()
 	 */
 	@Nullable
-	public static Annotation[] getAnnotations(AnnotatedElement annotatedElement) {
+	public static Annotation[] getAnnotations(@Nullable AnnotatedElement annotatedElement) {
 		try {
 			return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
 		}
@@ -1441,7 +1441,7 @@ public abstract class AnnotationUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <A extends Annotation> A synthesizeAnnotation(A annotation, Object annotatedElement) {
+	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
 		if (annotation == null) {
 			return null;
 		}
@@ -1548,8 +1548,7 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	@Nullable
-	static Annotation[] synthesizeAnnotationArray(@Nullable Annotation[] annotations, @Nullable Object annotatedElement) {
+	static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, @Nullable Object annotatedElement) {
 		if (annotations == null) {
 			return null;
 		}

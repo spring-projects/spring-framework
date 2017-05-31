@@ -38,7 +38,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	 * Create a new resolver against the given property sources.
 	 * @param propertySources the set of {@link PropertySource} objects to use
 	 */
-	public PropertySourcesPropertyResolver(PropertySources propertySources) {
+	public PropertySourcesPropertyResolver(@Nullable PropertySources propertySources) {
 		this.propertySources = propertySources;
 	}
 

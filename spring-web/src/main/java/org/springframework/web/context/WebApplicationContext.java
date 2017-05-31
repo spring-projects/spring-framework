@@ -19,6 +19,7 @@ package org.springframework.web.context;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to provide configuration for a web application. This is read-only while
@@ -100,6 +101,7 @@ public interface WebApplicationContext extends ApplicationContext {
 	 * Return the standard Servlet API ServletContext for this application.
 	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
+	@Nullable
 	ServletContext getServletContext();
 
 }

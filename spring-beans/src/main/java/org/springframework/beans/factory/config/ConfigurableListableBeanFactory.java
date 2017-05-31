@@ -21,6 +21,7 @@ import java.util.Iterator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration interface to be implemented by most listable bean factories.
@@ -105,7 +106,7 @@ public interface ConfigurableListableBeanFactory
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * defined in this factory
 	 */
-	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+	BeanDefinition getBeanDefinition(@Nullable String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Return a unified view over all bean names managed by this factory.

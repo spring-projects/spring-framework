@@ -117,7 +117,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param beanClass the class of the bean to instantiate
 	 * @see #setBeanClass
 	 */
-	public RootBeanDefinition(Class<?> beanClass) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
 	}
@@ -131,7 +131,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @since 5.0
 	 * @see #setInstanceSupplier
 	 */
-	public <T> RootBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
+	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
 		super();
 		setBeanClass(beanClass);
 		setInstanceSupplier(instanceSupplier);
@@ -147,7 +147,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @since 5.0
 	 * @see #setInstanceSupplier
 	 */
-	public <T> RootBeanDefinition(Class<T> beanClass, String scope, Supplier<T> instanceSupplier) {
+	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, String scope, @Nullable Supplier<T> instanceSupplier) {
 		super();
 		setBeanClass(beanClass);
 		setScope(scope);
@@ -162,7 +162,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param dependencyCheck whether to perform a dependency check for objects
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
-	public RootBeanDefinition(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
@@ -178,7 +178,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(Class<?> beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+	public RootBeanDefinition(@Nullable Class<?> beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}

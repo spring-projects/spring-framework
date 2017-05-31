@@ -140,7 +140,8 @@ public abstract class ReflectionUtils {
 	 * @param target the target object from which to get the field
 	 * @return the field's current value
 	 */
-	public static Object getField(Field field, Object target) {
+	@Nullable
+	public static Object getField(Field field, @Nullable Object target) {
 		try {
 			return field.get(target);
 		}

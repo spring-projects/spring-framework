@@ -330,7 +330,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
-	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+	public BeanDefinition getBeanDefinition(@Nullable String beanName) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getBeanDefinition(beanName);
 	}
 

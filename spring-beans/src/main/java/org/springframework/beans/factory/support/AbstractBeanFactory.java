@@ -1738,7 +1738,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see ChildBeanDefinition
 	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#getBeanDefinition
 	 */
-	protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	protected abstract BeanDefinition getBeanDefinition(@Nullable String beanName) throws BeansException;
 
 	/**
 	 * Create a bean instance for the given merged bean definition (and arguments).
