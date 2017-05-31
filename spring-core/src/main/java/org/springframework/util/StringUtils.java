@@ -47,6 +47,7 @@ import org.springframework.lang.Nullable;
  * classes. It also provides easy-to-use methods to convert between
  * delimited strings, such as CSV strings, and collections and arrays.
  *
+ * @author Damien Bouclier
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -83,12 +84,49 @@ public abstract class StringUtils {
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
 	 * @param str the candidate String
+	 * @return true if string is empty
 	 * @since 3.2.1
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
 	}
 
+    /**
+     * Check whether the given {@code String} is not empty 
+     * 
+     *
+     * @param str the candidate String
+     * @return true if string is not empty
+     * @since 5.0.0
+     */
+    public static boolean isNotEmpty(Object str) {
+        return !isEmpty(str);
+    }
+
+    /**
+     * Check whether the given {@code String} is blank.
+     * return true if the string is equals to " " OR "" OR null
+     *
+     * @param str the candidate String
+     * @return true if string is blank
+     * @since 5.0.0
+     */
+    public static boolean isBlank(String str) {
+        return isEmpty(trimWhitespace(str));
+    }
+
+    /**
+     * Check whether the given String is blank.
+     * return true if the string is not equals to " " OR "" OR null
+     *
+     * @param str the candidate String
+     * @return true if the string is not blank
+     * @since 5.0.0
+     */
+    public static boolean isNotBlank(String str) {
+        return isNotEmpty(trimWhitespace(str));
+    }
+	
 	/**
 	 * Check that the given {@code CharSequence} is neither {@code null} nor
 	 * of length 0.
