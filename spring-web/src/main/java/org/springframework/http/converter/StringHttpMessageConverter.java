@@ -25,6 +25,7 @@ import java.util.List;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -86,7 +87,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected Long getContentLength(String str, MediaType contentType) {
+	protected Long getContentLength(String str, @Nullable MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
 		return (long) str.getBytes(charset).length;
 	}

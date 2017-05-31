@@ -373,17 +373,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
-	public String[] getBeanNamesForType(ResolvableType type) {
+	public String[] getBeanNamesForType(@Nullable ResolvableType type) {
 		return doGetBeanNamesForType(type, true, true);
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class<?> type) {
+	public String[] getBeanNamesForType(@Nullable Class<?> type) {
 		return getBeanNamesForType(type, true, true);
 	}
 
 	@Override
-	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
@@ -497,12 +497,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
-	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) throws BeansException {
 		return getBeansOfType(type, true, true);
 	}
 
 	@Override
-	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+	public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
 		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);

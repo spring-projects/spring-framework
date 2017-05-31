@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
@@ -78,7 +79,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
 	@Override
-	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(@Nullable ContextConfigurationAttributes configAttributes) {
 		if (!configAttributes.hasClasses() && isGenerateDefaultLocations()) {
 			configAttributes.setClasses(detectDefaultConfigurationClasses(configAttributes.getDeclaringClass()));
 		}

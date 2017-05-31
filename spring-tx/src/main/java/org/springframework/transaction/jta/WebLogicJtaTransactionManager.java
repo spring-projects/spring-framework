@@ -26,6 +26,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 
@@ -301,7 +302,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 	@Override
-	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
+	public Transaction createTransaction(@Nullable String name, int timeout) throws NotSupportedException, SystemException {
 		if (this.weblogicUserTransactionAvailable && name != null) {
 			try {
 				if (timeout >= 0) {

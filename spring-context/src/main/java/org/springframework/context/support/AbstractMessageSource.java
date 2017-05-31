@@ -72,7 +72,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 
 	@Override
-	public void setParentMessageSource(MessageSource parent) {
+	public void setParentMessageSource(@Nullable MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
 
@@ -134,7 +134,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 
 	@Override
-	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+	public final String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
@@ -149,7 +149,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	@Override
-	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;

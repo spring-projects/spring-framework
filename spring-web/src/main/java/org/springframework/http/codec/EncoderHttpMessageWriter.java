@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 
@@ -91,7 +92,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
+			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		MediaType contentType = updateContentType(message, mediaType);
 
@@ -139,7 +140,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>();

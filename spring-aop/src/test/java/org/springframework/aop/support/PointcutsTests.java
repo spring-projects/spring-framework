@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -64,7 +65,7 @@ public class PointcutsTests {
 		}
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return true;
 		}
 	};
@@ -82,7 +83,7 @@ public class PointcutsTests {
 		}
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith("set");
 		}
 	};
@@ -95,7 +96,7 @@ public class PointcutsTests {
 		}
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
 	};
@@ -111,7 +112,7 @@ public class PointcutsTests {
 		}
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
 	};

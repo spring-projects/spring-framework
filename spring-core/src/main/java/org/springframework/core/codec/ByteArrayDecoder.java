@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -41,14 +42,14 @@ public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
 		return (super.canDecode(elementType, mimeType) && byte[].class == clazz);
 	}
 
 	@Override
 	public Flux<byte[]> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream).map((dataBuffer) -> {
 			byte[] result = new byte[dataBuffer.readableByteCount()];

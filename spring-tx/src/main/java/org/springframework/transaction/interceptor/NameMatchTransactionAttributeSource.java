@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -100,7 +101,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 
 
 	@Override
-	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (!ClassUtils.isUserLevelMethod(method)) {
 			return null;
 		}

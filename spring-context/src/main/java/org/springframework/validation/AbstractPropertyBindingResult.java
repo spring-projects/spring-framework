@@ -87,7 +87,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
-	public Class<?> getFieldType(String field) {
+	public Class<?> getFieldType(@Nullable String field) {
 		return getPropertyAccessor().getPropertyType(fixedField(field));
 	}
 
@@ -149,7 +149,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * if applicable.
 	 */
 	@Override
-	public PropertyEditor findEditor(String field, Class<?> valueType) {
+	public PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType) {
 		Class<?> valueTypeForLookup = valueType;
 		if (valueTypeForLookup == null) {
 			valueTypeForLookup = getFieldType(field);

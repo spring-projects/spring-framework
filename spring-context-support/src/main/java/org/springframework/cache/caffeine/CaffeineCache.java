@@ -22,6 +22,7 @@ import java.util.function.Function;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -82,7 +83,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public ValueWrapper get(Object key) {
+	public ValueWrapper get(@Nullable Object key) {
 		if (this.cache instanceof LoadingCache) {
 			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
 			return toValueWrapper(value);
@@ -92,7 +93,8 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T get(Object key, final Callable<T> valueLoader) {
+	@Nullable
+	public <T> T get(@Nullable Object key, final Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
 	}
 
@@ -102,19 +104,20 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(@Nullable Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, final Object value) {
+	@Nullable
+	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable final Object value) {
 		PutIfAbsentFunction callable = new PutIfAbsentFunction(value);
 		Object result = this.cache.get(key, callable);
 		return (callable.called ? null : toValueWrapper(result));
 	}
 
 	@Override
-	public void evict(Object key) {
+	public void evict(@Nullable Object key) {
 		this.cache.invalidate(key);
 	}
 

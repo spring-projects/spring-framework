@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
@@ -40,7 +41,7 @@ public class SimpleCacheResolver extends AbstractCacheResolver {
 	}
 
 	@Override
-	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
+	protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
 		return context.getOperation().getCacheNames();
 	}
 

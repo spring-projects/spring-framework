@@ -33,6 +33,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -57,7 +58,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	@Override
 	@SuppressWarnings("resource")
-	public boolean processRequest(CorsConfiguration config, HttpServletRequest request, HttpServletResponse response)
+	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 
 		if (!CorsUtils.isCorsRequest(request)) {

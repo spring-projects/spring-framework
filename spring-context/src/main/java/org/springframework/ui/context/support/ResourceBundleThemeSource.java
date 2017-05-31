@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
@@ -61,7 +62,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 
 
 	@Override
-	public void setParentThemeSource(ThemeSource parent) {
+	public void setParentThemeSource(@Nullable ThemeSource parent) {
 		this.parentThemeSource = parent;
 
 		// Update existing Theme objects.
@@ -115,7 +116,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 

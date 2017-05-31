@@ -31,6 +31,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
@@ -67,17 +68,17 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return false;
 	}
 
 	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
 		return false;
 	}
 
 	@Override
-	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+	public Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		throw new UnsupportedOperationException();
@@ -91,12 +92,12 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return canWrite(clazz, null, mediaType);
 	}
 
 	@Override
-	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
 			return ResourceRegion.class.isAssignableFrom((Class<?>) type);
 		}
@@ -121,7 +122,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		if (object instanceof ResourceRegion) {

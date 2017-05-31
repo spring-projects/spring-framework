@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -80,7 +81,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	/**
 	 * Extract the configuration from the nominated {@link CachingConfigurer}.
 	 */
-	protected void useCachingConfigurer(CachingConfigurer config) {
+	protected void useCachingConfigurer(@Nullable CachingConfigurer config) {
 		this.cacheManager = config.cacheManager();
 		this.cacheResolver = config.cacheResolver();
 		this.keyGenerator = config.keyGenerator();

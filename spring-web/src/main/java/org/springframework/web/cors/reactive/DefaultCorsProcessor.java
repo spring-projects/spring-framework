@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
@@ -51,7 +52,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 
 	@Override
-	public boolean processRequest(CorsConfiguration config, ServerWebExchange exchange) {
+	public boolean processRequest(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();

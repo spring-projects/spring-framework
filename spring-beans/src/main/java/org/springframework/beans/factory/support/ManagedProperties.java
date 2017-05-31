@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 
 /**
  * Tag class which represents a Spring-managed {@link Properties} instance
@@ -65,7 +66,7 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 
 
 	@Override
-	public Object merge(Object parent) {
+	public Object merge(@Nullable Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}

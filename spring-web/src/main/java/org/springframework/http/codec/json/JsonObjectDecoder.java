@@ -33,6 +33,7 @@ import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -97,7 +98,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 	@Override
 	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.flatMap(new Function<DataBuffer, Publisher<? extends DataBuffer>>() {

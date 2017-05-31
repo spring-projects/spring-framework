@@ -67,7 +67,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		try {
 			if (ex instanceof ResponseStatusException) {

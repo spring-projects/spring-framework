@@ -262,7 +262,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	@Override
 	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
 			throws Exception {
 	}
 

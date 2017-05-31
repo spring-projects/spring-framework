@@ -200,7 +200,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
-	public void cleanupTransaction(Object transactionData) {
+	public void cleanupTransaction(@Nullable Object transactionData) {
 		((SessionTransactionData) transactionData).resetSessionState();
 	}
 

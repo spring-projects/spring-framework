@@ -19,6 +19,7 @@ package org.springframework.cache.support;
 import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 
 /**
  * A no operation {@link Cache} implementation suitable
@@ -47,21 +48,21 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	public void evict(Object key) {
+	public void evict(@Nullable Object key) {
 	}
 
 	@Override
-	public ValueWrapper get(Object key) {
+	public ValueWrapper get(@Nullable Object key) {
 		return null;
 	}
 
 	@Override
-	public <T> T get(Object key, Class<T> type) {
+	public <T> T get(@Nullable Object key, Class<T> type) {
 		return null;
 	}
 
 	@Override
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
 		try {
 			return valueLoader.call();
 		}
@@ -81,11 +82,12 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(@Nullable Object key, @Nullable Object value) {
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, Object value) {
+	@Nullable
+	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
 		return null;
 	}
 

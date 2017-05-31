@@ -28,6 +28,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.oxm.Marshaller;
@@ -134,7 +135,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	@Nullable
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
 		try {
 			Source source = getSource(message.getPayload());
@@ -159,7 +161,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+	@Nullable
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			if (byte[].class == getSerializedPayloadClass()) {

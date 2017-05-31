@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -540,5 +541,5 @@ class TestValidator implements Validator {
 	}
 
 	@Override
-	public void validate(Object target, Errors errors) { }
+	public void validate(@Nullable Object target, Errors errors) { }
 }

@@ -436,7 +436,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 						return false;
 					}
 					@Override
-					public void validate(Object target, Errors errors) {
+					public void validate(@Nullable Object target, Errors errors) {
 					}
 				};
 			}

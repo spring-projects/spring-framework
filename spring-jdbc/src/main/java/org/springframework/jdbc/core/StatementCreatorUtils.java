@@ -110,9 +110,8 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Derive a default SQL type from the given Java type.
 	 * @param javaType the Java type to translate
-	 * @return the corresponding SQL type, or {@code null} if none found
+	 * @return the corresponding SQL type, or {@link SqlTypeValue#TYPE_UNKNOWN} if none found
 	 */
-	@Nullable
 	public static int javaTypeToSqlParameterType(Class<?> javaType) {
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {

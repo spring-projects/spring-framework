@@ -58,6 +58,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
 
@@ -291,7 +292,7 @@ public class ComponentScanAnnotationIntegrationTests {
 		}
 
 		@Override
-		public void setBeanClassLoader(ClassLoader classLoader) {
+		public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 			this.classLoader = classLoader;
 		}
 

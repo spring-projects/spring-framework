@@ -19,6 +19,7 @@ package org.springframework.messaging.converter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
@@ -51,14 +52,14 @@ public class StringMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		Charset charset = getContentTypeCharset(getMimeType(message.getHeaders()));
 		Object payload = message.getPayload();
 		return (payload instanceof String ? payload : new String((byte[]) payload, charset));
 	}
 
 	@Override
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		if (byte[].class == getSerializedPayloadClass()) {
 			Charset charset = getContentTypeCharset(getMimeType(headers));
 			payload = ((String) payload).getBytes(charset);

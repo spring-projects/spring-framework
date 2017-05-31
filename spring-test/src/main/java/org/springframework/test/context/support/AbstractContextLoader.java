@@ -91,7 +91,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #processLocations(Class, String...)
 	 */
 	@Override
-	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(@Nullable ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations =
 				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);

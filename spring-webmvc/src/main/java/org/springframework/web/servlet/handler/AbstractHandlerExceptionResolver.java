@@ -127,7 +127,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	@Override
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
 			if (this.logger.isDebugEnabled()) {

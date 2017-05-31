@@ -130,7 +130,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return supports(clazz) && canRead(mediaType);
 	}
 
@@ -162,7 +162,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
 	}
 
@@ -200,7 +200,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * and then calls {@link #writeInternal}.
 	 */
 	@Override
-	public final void write(final T t, MediaType contentType, HttpOutputMessage outputMessage)
+	public final void write(final T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		final HttpHeaders headers = outputMessage.getHeaders();
@@ -238,7 +238,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@link #getContentLength}, and sets the corresponding headers.
 	 * @since 4.2
 	 */
-	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
+	protected void addDefaultHeaders(HttpHeaders headers, T t, @Nullable MediaType contentType) throws IOException{
 		if (headers.getContentType() == null) {
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {

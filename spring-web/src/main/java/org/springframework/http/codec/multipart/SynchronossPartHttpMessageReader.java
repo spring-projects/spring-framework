@@ -51,6 +51,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -78,7 +79,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 	}
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return Part.class.equals(elementType.resolve(Object.class)) &&
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}

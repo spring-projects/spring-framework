@@ -30,6 +30,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.DataBinder;
 
@@ -51,7 +52,7 @@ public class NumberFormattingTests {
 		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.setEmbeddedValueResolver(new StringValueResolver() {
 			@Override
-			public String resolveStringValue(String strVal) {
+			public String resolveStringValue(@Nullable String strVal) {
 				if ("${pattern}".equals(strVal)) {
 					return "#,##.00";
 				}

@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -146,7 +147,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * @return the list of codes
 	 */
 	@Override
-	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class<?> fieldType) {
 		Set<String> codeList = new LinkedHashSet<>();
 		List<String> fieldList = new ArrayList<>();
 		buildFieldList(field, fieldList);

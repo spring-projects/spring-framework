@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Spring's implementation of the AOP Alliance
@@ -240,7 +241,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	@Override
-	public void setUserAttribute(String key, Object value) {
+	public void setUserAttribute(String key, @Nullable Object value) {
 		if (value != null) {
 			if (this.userAttributes == null) {
 				this.userAttributes = new HashMap<>();

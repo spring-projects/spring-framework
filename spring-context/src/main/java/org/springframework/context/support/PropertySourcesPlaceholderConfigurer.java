@@ -31,6 +31,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
@@ -166,7 +167,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 
 		StringValueResolver valueResolver = new StringValueResolver() {
 			@Override
-			public String resolveStringValue(String strVal) {
+			@Nullable
+			public String resolveStringValue(@Nullable String strVal) {
 				String resolved = (ignoreUnresolvablePlaceholders ?
 						propertyResolver.resolvePlaceholders(strVal) :
 						propertyResolver.resolveRequiredPlaceholders(strVal));

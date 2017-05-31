@@ -31,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -76,7 +77,7 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return this.decoder.canDecode(elementType, mediaType);
 	}
 

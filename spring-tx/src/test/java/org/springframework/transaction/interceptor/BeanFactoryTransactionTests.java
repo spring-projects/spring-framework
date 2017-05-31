@@ -32,6 +32,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -147,7 +148,7 @@ public class BeanFactoryTransactionTests {
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			@Override
-			public TransactionStatus getTransaction(TransactionDefinition def) throws TransactionException {
+			public TransactionStatus getTransaction(@Nullable TransactionDefinition def) throws TransactionException {
 				if (invoked) {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
 				}
@@ -231,7 +232,7 @@ public class BeanFactoryTransactionTests {
 		int counter = 0;
 
 		@Override
-		public boolean matches(Method method, Class<?> clazz) {
+		public boolean matches(Method method, @Nullable Class<?> clazz) {
 			counter++;
 			return true;
 		}

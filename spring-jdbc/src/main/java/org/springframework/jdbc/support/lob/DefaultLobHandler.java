@@ -31,6 +31,8 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Default implementation of the {@link LobHandler} interface.
  * Invokes the direct accessor methods that {@code java.sql.ResultSet}
@@ -218,7 +220,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	protected class DefaultLobCreator implements LobCreator {
 
 		@Override
-		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
+		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, @Nullable byte[] content)
 				throws SQLException {
 
 			if (streamAsLob) {
@@ -248,7 +250,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		@Override
 		public void setBlobAsBinaryStream(
-				PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
+				PreparedStatement ps, int paramIndex, @Nullable InputStream binaryStream, int contentLength)
 				throws SQLException {
 
 			if (streamAsLob) {
@@ -285,7 +287,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 
 		@Override
-		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
+		public void setClobAsString(PreparedStatement ps, int paramIndex, @Nullable String content)
 				throws SQLException {
 
 			if (streamAsLob) {
@@ -315,7 +317,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		@Override
 		public void setClobAsAsciiStream(
-				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
+				PreparedStatement ps, int paramIndex, @Nullable InputStream asciiStream, int contentLength)
 				throws SQLException {
 
 			if (streamAsLob) {
@@ -359,7 +361,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		@Override
 		public void setClobAsCharacterStream(
-				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
+				PreparedStatement ps, int paramIndex, @Nullable Reader characterStream, int contentLength)
 				throws SQLException {
 
 			if (streamAsLob) {

@@ -146,7 +146,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.serialization = new SerializationDelegate(classLoader);
 		// Need to recreate all Cache instances with new ClassLoader in store-by-value mode...
 		if (isStoreByValue()) {

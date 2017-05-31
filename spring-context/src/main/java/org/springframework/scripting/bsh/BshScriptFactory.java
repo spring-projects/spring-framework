@@ -90,7 +90,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -118,7 +118,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
 	@Override
-	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		Class<?> clazz;

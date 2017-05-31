@@ -59,7 +59,7 @@ public interface Decoder<T> {
 	 * @return the output stream with decoded elements
 	 */
 	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			@Nullable MimeType mimeType, Map<String, Object> hints);
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Mono of {@code T}.
@@ -72,7 +72,7 @@ public interface Decoder<T> {
 	 * @return the output stream with the decoded element
 	 */
 	Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			@Nullable MimeType mimeType, Map<String, Object> hints);
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
 	 * Return the list of MIME types this decoder supports.

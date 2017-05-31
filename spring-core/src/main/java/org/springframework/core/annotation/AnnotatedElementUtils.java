@@ -189,7 +189,8 @@ public class AnnotatedElementUtils {
 			final Set<String> types = new LinkedHashSet<>();
 			searchWithGetSemantics(composed.annotationType(), null, null, null, new SimpleAnnotationProcessor<Object>(true) {
 					@Override
-					public Object process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+					@Nullable
+					public Object process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 						types.add(annotation.annotationType().getName());
 						return CONTINUE;
 					}
@@ -247,7 +248,8 @@ public class AnnotatedElementUtils {
 			searchWithGetSemantics(element, annotationType, annotationName, new SimpleAnnotationProcessor<Boolean>() {
 
 				@Override
-				public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+				@Nullable
+				public Boolean process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 					return (metaDepth > 0 ? Boolean.TRUE : CONTINUE);
 				}
 			}));
@@ -573,7 +575,8 @@ public class AnnotatedElementUtils {
 
 		searchWithGetSemantics(element, null, annotationName, new SimpleAnnotationProcessor<Object>() {
 			@Override
-			public Object process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+			@Nullable
+			public Object process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(
 						annotation, classValuesAsString, nestedAnnotationsAsMap);
 				for (Map.Entry<String, Object> entry : annotationAttributes.entrySet()) {
@@ -1459,7 +1462,7 @@ public class AnnotatedElementUtils {
 		}
 
 		@Override
-		public final void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result) {
+		public final void postProcess(@Nullable AnnotatedElement annotatedElement, Annotation annotation, T result) {
 			// no-op
 		}
 
@@ -1484,7 +1487,8 @@ public class AnnotatedElementUtils {
 	static class AlwaysTrueBooleanAnnotationProcessor extends SimpleAnnotationProcessor<Boolean> {
 
 		@Override
-		public final Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+		@Nullable
+		public final Boolean process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			return Boolean.TRUE;
 		}
 	}
@@ -1544,13 +1548,14 @@ public class AnnotatedElementUtils {
 		}
 
 		@Override
-		public AnnotationAttributes process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+		@Nullable
+		public AnnotationAttributes process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			return AnnotationUtils.retrieveAnnotationAttributes(annotatedElement, annotation,
 					this.classValuesAsString, this.nestedAnnotationsAsMap);
 		}
 
 		@Override
-		public void postProcess(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes) {
+		public void postProcess(@Nullable AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes) {
 			annotation = AnnotationUtils.synthesizeAnnotation(annotation, element);
 			Class<? extends Annotation> targetAnnotationType = attributes.annotationType();
 

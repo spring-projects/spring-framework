@@ -263,7 +263,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	private V put(final K key, final V value, final boolean overwriteExisting) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
-			protected V execute(Reference<K, V> reference, Entry<K, V> entry, Entries entries) {
+			@Nullable
+			protected V execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry, Entries entries) {
 				if (entry != null) {
 					V previousValue = entry.getValue();
 					if (overwriteExisting) {
@@ -281,7 +282,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public V remove(Object key) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			protected V execute(Reference<K, V> reference, Entry<K, V> entry) {
+			@Nullable
+			protected V execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null) {
 					reference.release();
 					return entry.value;
@@ -295,7 +297,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public boolean remove(Object key, final Object value) {
 		return doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			protected Boolean execute(Reference<K, V> reference, Entry<K, V> entry) {
+			@Nullable
+			protected Boolean execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null && ObjectUtils.nullSafeEquals(entry.getValue(), value)) {
 					reference.release();
 					return true;
@@ -309,7 +312,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public boolean replace(K key, final V oldValue, final V newValue) {
 		return doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			protected Boolean execute(Reference<K, V> reference, Entry<K, V> entry) {
+			@Nullable
+			protected Boolean execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null && ObjectUtils.nullSafeEquals(entry.getValue(), oldValue)) {
 					entry.setValue(newValue);
 					return true;
@@ -324,7 +328,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	public V replace(K key, final V value) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
-			protected V execute(Reference<K, V> reference, Entry<K, V> entry) {
+			@Nullable
+			protected V execute(@Nullable Reference<K, V> reference, @Nullable Entry<K, V> entry) {
 				if (entry != null) {
 					V previousValue = entry.getValue();
 					entry.setValue(value);

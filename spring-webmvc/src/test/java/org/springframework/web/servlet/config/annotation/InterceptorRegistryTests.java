@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -190,11 +191,11 @@ public class InterceptorRegistryTests {
 		}
 
 		@Override
-		public void postHandle(WebRequest request, ModelMap model) throws Exception {
+		public void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception {
 		}
 
 		@Override
-		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
+		public void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception {
 		}
 	}
 

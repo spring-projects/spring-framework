@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -60,7 +61,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.resolve(Object.class);
 		return (super.canEncode(elementType, mimeType) && Resource.class.isAssignableFrom(clazz));
 	}

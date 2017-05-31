@@ -168,7 +168,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -196,7 +196,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	}
 
 	@Override
-	public Message toMessage(Object object, Session session, Object conversionHint)
+	public Message toMessage(Object object, Session session, @Nullable Object conversionHint)
 			throws JMSException, MessageConversionException {
 
 		return toMessage(object, session, getSerializationView(conversionHint));

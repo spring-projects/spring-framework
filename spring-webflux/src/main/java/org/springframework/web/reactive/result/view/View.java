@@ -65,6 +65,6 @@ public interface View {
 	 * @param exchange the current exchange
 	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
-	Mono<Void> render(@Nullable Map<String, ?> model, MediaType contentType, ServerWebExchange exchange);
+	Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange);
 
 }

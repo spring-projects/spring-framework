@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoaderUtils;
@@ -79,7 +80,7 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
 	@Override
-	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(@Nullable ContextConfigurationAttributes configAttributes) {
 		if (!configAttributes.hasClasses() && isGenerateDefaultLocations()) {
 			configAttributes.setClasses(detectDefaultConfigurationClasses(configAttributes.getDeclaringClass()));
 		}

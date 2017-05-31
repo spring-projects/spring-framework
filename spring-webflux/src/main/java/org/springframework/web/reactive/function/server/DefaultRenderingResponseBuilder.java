@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -76,7 +77,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	}
 
 	@Override
-	public RenderingResponse.Builder modelAttribute(String name, Object value) {
+	public RenderingResponse.Builder modelAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "'name' must not be null");
 		this.model.put(name, value);
 		return this;

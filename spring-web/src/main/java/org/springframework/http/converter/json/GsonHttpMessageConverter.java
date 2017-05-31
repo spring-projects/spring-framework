@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -90,7 +91,7 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	}
 
 	@Override
-	protected void writeInternal(Object o, Type type, Writer writer) throws Exception {
+	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
 		if (type != null) {
 			getGson().toJson(o, type, writer);
 		}

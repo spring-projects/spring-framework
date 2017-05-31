@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 
 /**
  * Tag collection class used to hold managed Map values, which may
@@ -106,7 +107,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object merge(Object parent) {
+	public Object merge(@Nullable Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}

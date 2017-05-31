@@ -53,6 +53,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -226,7 +227,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	@Override
-	protected Long getContentLength(T t, MediaType contentType) {
+	@Nullable
+	protected Long getContentLength(T t, @Nullable MediaType contentType) {
 		if (t instanceof DOMSource) {
 			try {
 				CountingOutputStream os = new CountingOutputStream();

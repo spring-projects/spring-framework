@@ -49,6 +49,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MyThrowsHandler;
@@ -730,7 +731,7 @@ public class ProxyFactoryBeanTests {
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					return m.getReturnType() == Void.TYPE;
 				}
 			});

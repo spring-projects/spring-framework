@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -202,22 +203,22 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, Object payload,
-			Map<String, Object> headers) throws MessagingException {
+	public void convertAndSendToUser(String user, String destination, @Nullable Object payload,
+			@Nullable Map<String, Object> headers) throws MessagingException {
 
 		convertAndSendToUser(user, destination, payload, headers, null);
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, Object payload,
+	public void convertAndSendToUser(String user, String destination, @Nullable Object payload,
 			MessagePostProcessor postProcessor) throws MessagingException {
 
 		convertAndSendToUser(user, destination, payload, null, postProcessor);
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSendToUser(String user, String destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
@@ -238,7 +239,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * instance is also returned without changes.
 	 */
 	@Override
-	protected Map<String, Object> processHeadersToSend(Map<String, Object> headers) {
+	protected Map<String, Object> processHeadersToSend(@Nullable Map<String, Object> headers) {
 		if (headers == null) {
 			SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 			initHeaders(headerAccessor);

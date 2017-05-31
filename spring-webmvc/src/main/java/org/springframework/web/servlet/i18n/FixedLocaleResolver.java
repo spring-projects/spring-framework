@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.servlet.LocaleResolver} implementation
@@ -92,7 +93,7 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
+	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext) {
 		throw new UnsupportedOperationException("Cannot change fixed locale - use a different locale resolution strategy");
 	}
 

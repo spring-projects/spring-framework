@@ -359,7 +359,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		}
 
 		@Override
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
 	};

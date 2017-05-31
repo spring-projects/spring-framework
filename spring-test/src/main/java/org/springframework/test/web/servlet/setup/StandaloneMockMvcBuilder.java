@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -504,7 +505,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 
 		@Override
-		public String resolveStringValue(String strVal) throws BeansException {
+		public String resolveStringValue(@Nullable String strVal) throws BeansException {
 			return this.helper.replacePlaceholders(strVal, this.resolver);
 		}
 	}

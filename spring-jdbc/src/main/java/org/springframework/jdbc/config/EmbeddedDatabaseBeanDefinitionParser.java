@@ -23,6 +23,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import org.w3c.dom.Element;
@@ -55,7 +56,7 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(EmbeddedDatabaseFactoryBean.class);
 		setGenerateUniqueDatabaseNameFlag(element, builder);
 		setDatabaseName(element, builder);

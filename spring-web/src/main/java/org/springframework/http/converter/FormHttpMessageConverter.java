@@ -203,7 +203,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
@@ -220,7 +220,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
@@ -261,7 +261,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void write(MultiValueMap<String, ?> map, MediaType contentType, HttpOutputMessage outputMessage)
+	public void write(MultiValueMap<String, ?> map, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		if (!isMultipart(map, contentType)) {

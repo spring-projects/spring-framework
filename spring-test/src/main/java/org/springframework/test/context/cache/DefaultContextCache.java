@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
@@ -156,7 +157,7 @@ public class DefaultContextCache implements ContextCache {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void remove(MergedContextConfiguration key, HierarchyMode hierarchyMode) {
+	public void remove(MergedContextConfiguration key, @Nullable HierarchyMode hierarchyMode) {
 		Assert.notNull(key, "Key must not be null");
 
 		// startKey is the level at which to begin clearing the cache, depending

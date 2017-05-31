@@ -40,6 +40,7 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link SQLExceptionTranslator} implementation which analyzes the specific
@@ -62,7 +63,8 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 	}
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	@Nullable
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		if (ex instanceof SQLTransientException) {
 			if (ex instanceof SQLTransientConnectionException) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);

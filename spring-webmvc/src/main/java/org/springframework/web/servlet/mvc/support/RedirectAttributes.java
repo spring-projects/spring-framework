@@ -61,10 +61,10 @@ import org.springframework.web.servlet.FlashMap;
 public interface RedirectAttributes extends Model {
 
 	@Override
-	RedirectAttributes addAttribute(String attributeName, Object attributeValue);
+	RedirectAttributes addAttribute(String attributeName, @Nullable Object attributeValue);
 
 	@Override
-	RedirectAttributes addAttribute(Object attributeValue);
+	RedirectAttributes addAttribute(@Nullable Object attributeValue);
 
 	@Override
 	RedirectAttributes addAllAttributes(Collection<?> attributeValues);

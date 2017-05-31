@@ -21,6 +21,7 @@ import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
@@ -99,11 +100,11 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	}
 
 	@Override
-	public void postHandle(WebRequest request, ModelMap model) {
+	public void postHandle(WebRequest request, @Nullable ModelMap model) {
 	}
 
 	@Override
-	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
+	public void afterCompletion(WebRequest request, @Nullable Exception ex) throws DataAccessException {
 		if (!decrementParticipateCount(request)) {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());

@@ -487,7 +487,7 @@ public class MockHttpServletRequestBuilder
 	 * @return the result of the merge
 	 */
 	@Override
-	public Object merge(Object parent) {
+	public Object merge(@Nullable Object parent) {
 		if (parent == null) {
 			return this;
 		}

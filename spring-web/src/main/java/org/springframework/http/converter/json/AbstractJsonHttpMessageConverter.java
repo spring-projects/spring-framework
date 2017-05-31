@@ -84,7 +84,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 
 
 	@Override
-	public final Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+	public final Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		return readResolved(GenericTypeResolver.resolveType(type, contextClass), inputMessage);
@@ -110,7 +110,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 	}
 
 	@Override
-	protected final void writeInternal(Object o, Type type, HttpOutputMessage outputMessage)
+	protected final void writeInternal(Object o, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		Writer writer = getWriter(outputMessage);

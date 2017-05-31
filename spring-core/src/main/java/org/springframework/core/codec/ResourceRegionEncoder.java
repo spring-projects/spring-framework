@@ -37,6 +37,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -68,7 +69,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return super.canEncode(elementType, mimeType)
 				&& ResourceRegion.class.isAssignableFrom(elementType.resolve(Object.class));
 	}
@@ -76,7 +77,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");

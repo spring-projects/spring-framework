@@ -45,6 +45,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StreamUtils;
 
@@ -71,7 +72,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * required generic type information in order to read a Collection.
 	 */
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return false;
 	}
 
@@ -82,7 +83,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * {@link XmlRootElement} or {@link XmlType}.
 	 */
 	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
 			return false;
 		}
@@ -111,7 +112,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * does not convert collections to XML.
 	 */
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return false;
 	}
 
@@ -120,7 +121,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * does not convert collections to XML.
 	 */
 	@Override
-	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
 		return false;
 	}
 
@@ -138,7 +139,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public T read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+	public T read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -228,7 +229,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	}
 
 	@Override
-	public void write(T t, Type type, MediaType contentType, HttpOutputMessage outputMessage)
+	public void write(T t, @Nullable Type type, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		throw new UnsupportedOperationException();

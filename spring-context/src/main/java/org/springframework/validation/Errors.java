@@ -167,7 +167,7 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 * @see #getNestedPath()
 	 */
-	void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage);
+	void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
 
 	/**
 	 * Add all errors from the given {@code Errors} instance to this

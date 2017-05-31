@@ -48,6 +48,7 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.INestedTestBean;
@@ -574,14 +575,14 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	public TestBeanAdvisor() {
 		setAdvice(new MethodBeforeAdvice() {
 			@Override
-			public void before(Method method, Object[] args, Object target) throws Throwable {
+			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 				++count;
 			}
 		});
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return ITestBean.class.isAssignableFrom(targetClass);
 	}
 

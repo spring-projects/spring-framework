@@ -300,7 +300,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * building a client proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
 	 */
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 

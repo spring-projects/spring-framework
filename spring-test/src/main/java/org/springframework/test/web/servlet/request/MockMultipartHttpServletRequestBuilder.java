@@ -25,6 +25,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
@@ -109,7 +110,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	}
 
 	@Override
-	public Object merge(Object parent) {
+	public Object merge(@Nullable Object parent) {
 		if (parent == null) {
 			return this;
 		}

@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
@@ -38,7 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
 		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
 		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();

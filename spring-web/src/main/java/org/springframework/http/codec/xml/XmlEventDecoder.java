@@ -40,6 +40,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -89,8 +90,8 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
 		if (useAalto && aaltoPresent) {

@@ -64,7 +64,7 @@ public abstract class AbstractLocaleContextResolver extends AbstractLocaleResolv
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	public void setLocale(HttpServletRequest request, HttpServletResponse response, @Nullable Locale locale) {
 		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
 	}
 

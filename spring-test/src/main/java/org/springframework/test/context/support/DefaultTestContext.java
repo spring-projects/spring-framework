@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -122,7 +123,7 @@ public class DefaultTestContext implements TestContext {
 	 * that was supplied when this {@code TestContext} was constructed.
 	 * @see CacheAwareContextLoaderDelegate#closeContext
 	 */
-	public void markApplicationContextDirty(HierarchyMode hierarchyMode) {
+	public void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode) {
 		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedContextConfiguration, hierarchyMode);
 	}
 
@@ -142,14 +143,14 @@ public class DefaultTestContext implements TestContext {
 		return this.testException;
 	}
 
-	public void updateState(Object testInstance, Method testMethod, Throwable testException) {
+	public void updateState(@Nullable Object testInstance, @Nullable Method testMethod, @Nullable Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "Name must not be null");
 		synchronized (this.attributes) {
 			if (value != null) {

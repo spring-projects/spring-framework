@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -261,7 +262,8 @@ public class CacheResolverCustomizationTests {
 		}
 
 		@Override
-		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
+		@Nullable
+		protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
 			String cacheName = (String) context.getArgs()[1];
 			return Collections.singleton(cacheName);
 		}
@@ -275,7 +277,8 @@ public class CacheResolverCustomizationTests {
 		}
 
 		@Override
-		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
+		@Nullable
+		protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
 			return null;
 		}
 	}

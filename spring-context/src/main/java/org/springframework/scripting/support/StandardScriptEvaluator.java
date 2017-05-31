@@ -25,6 +25,7 @@ import javax.script.ScriptException;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
@@ -108,7 +109,7 @@ public class StandardScriptEvaluator implements ScriptEvaluator, BeanClassLoader
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		if (this.scriptEngineManager == null) {
 			this.scriptEngineManager = new ScriptEngineManager(classLoader);
 		}
@@ -121,7 +122,7 @@ public class StandardScriptEvaluator implements ScriptEvaluator, BeanClassLoader
 	}
 
 	@Override
-	public Object evaluate(ScriptSource script, Map<String, Object> argumentBindings) {
+	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> argumentBindings) {
 		ScriptEngine engine = getScriptEngine(script);
 		try {
 			if (CollectionUtils.isEmpty(argumentBindings)) {

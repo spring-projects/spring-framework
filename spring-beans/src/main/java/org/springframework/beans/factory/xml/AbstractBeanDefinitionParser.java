@@ -25,6 +25,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -147,7 +148,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
 	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.parsing.BeanComponentDefinition)
 	 */
-	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
+	protected abstract AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext);
 
 	/**
 	 * Should an ID be generated instead of read from the passed in {@link Element}?

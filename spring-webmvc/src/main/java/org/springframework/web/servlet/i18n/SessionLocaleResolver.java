@@ -139,7 +139,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
+	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext) {
 		Locale locale = null;
 		TimeZone timeZone = null;
 		if (localeContext != null) {

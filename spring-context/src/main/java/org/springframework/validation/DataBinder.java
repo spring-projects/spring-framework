@@ -661,29 +661,29 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	@Override
-	public void registerCustomEditor(Class<?> requiredType, String field, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(@Nullable Class<?> requiredType, @Nullable String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
 	@Override
-	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
+	public PropertyEditor findCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, field);

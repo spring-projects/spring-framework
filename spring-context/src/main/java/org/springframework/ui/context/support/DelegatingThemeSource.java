@@ -16,6 +16,7 @@
 
 package org.springframework.ui.context.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
@@ -37,7 +38,7 @@ public class DelegatingThemeSource implements HierarchicalThemeSource {
 
 
 	@Override
-	public void setParentThemeSource(ThemeSource parentThemeSource) {
+	public void setParentThemeSource(@Nullable ThemeSource parentThemeSource) {
 		this.parentThemeSource = parentThemeSource;
 	}
 

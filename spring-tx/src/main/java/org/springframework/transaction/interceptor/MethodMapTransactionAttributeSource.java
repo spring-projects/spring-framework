@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -82,7 +83,7 @@ public class MethodMapTransactionAttributeSource
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
@@ -207,7 +208,7 @@ public class MethodMapTransactionAttributeSource
 
 
 	@Override
-	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);
 		}

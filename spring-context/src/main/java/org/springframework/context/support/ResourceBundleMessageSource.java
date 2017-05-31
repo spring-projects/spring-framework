@@ -114,7 +114,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	}
 
 	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 

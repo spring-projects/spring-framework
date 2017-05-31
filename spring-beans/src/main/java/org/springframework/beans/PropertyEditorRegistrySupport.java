@@ -284,7 +284,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	}
 
 	@Override
-	public void registerCustomEditor(Class<?> requiredType, String propertyPath, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath, PropertyEditor propertyEditor) {
 		if (requiredType == null && propertyPath == null) {
 			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
 		}
@@ -304,7 +304,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	}
 
 	@Override
-	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
+	@Nullable
+	public PropertyEditor findCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath) {
 		Class<?> requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
 			if (this.customEditorsForPath != null) {

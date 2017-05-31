@@ -93,7 +93,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> input, ResolvableType elementType, MediaType mediaType,
+	public Mono<Void> write(Publisher<?> input, ResolvableType elementType, @Nullable MediaType mediaType,
 			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		message.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
@@ -171,7 +171,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	@Override
 	public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
 			Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>();

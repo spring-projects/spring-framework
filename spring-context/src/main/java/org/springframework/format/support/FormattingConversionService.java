@@ -36,6 +36,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -145,7 +146,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return "";
 			}
@@ -186,7 +187,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String text = (String) source;
 			if (!StringUtils.hasText(text)) {
 				return null;
@@ -247,7 +248,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			Annotation ann = sourceType.getAnnotation(this.annotationType);
 			if (ann == null) {
 				throw new IllegalStateException(
@@ -301,7 +302,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			Annotation ann = targetType.getAnnotation(this.annotationType);
 			if (ann == null) {
 				throw new IllegalStateException(

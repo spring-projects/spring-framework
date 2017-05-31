@@ -40,6 +40,7 @@ import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -68,7 +69,7 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = this.objectMapper.getTypeFactory().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
 		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
@@ -83,14 +84,14 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return decodeInternal(this.fluxDecoder, input, elementType, mimeType, hints);
 	}
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return decodeInternal(this.monoDecoder, input, elementType, mimeType, hints).singleOrEmpty();
 	}

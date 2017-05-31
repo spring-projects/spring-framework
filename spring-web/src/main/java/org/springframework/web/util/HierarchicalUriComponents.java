@@ -81,7 +81,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	 */
 	HierarchicalUriComponents(@Nullable String scheme, @Nullable String userInfo, @Nullable String host, @Nullable String port,
 			@Nullable PathComponent path, @Nullable MultiValueMap<String, String> queryParams,
-			@Nullable String fragment, @Nullable boolean encoded, @Nullable boolean verify) {
+			@Nullable String fragment, boolean encoded, boolean verify) {
 
 		super(scheme, fragment);
 		this.userInfo = userInfo;
@@ -919,7 +919,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		public Object getValue(@Nullable String name) {
 			Object value = this.delegate.getValue(name);
 			if (ObjectUtils.isArray(value)) {
 				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));

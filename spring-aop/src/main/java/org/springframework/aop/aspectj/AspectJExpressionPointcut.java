@@ -277,7 +277,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, boolean beanHasIntroductions) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass, boolean beanHasIntroductions) {
 		checkReadyToMatch();
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 		ShadowMatch shadowMatch = getShadowMatch(targetMethod, method);
@@ -306,7 +306,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return matches(method, targetClass, false);
 	}
 
@@ -317,7 +317,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
 		ShadowMatch originalShadowMatch = getShadowMatch(method, method);

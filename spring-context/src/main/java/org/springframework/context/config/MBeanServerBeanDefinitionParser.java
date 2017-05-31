@@ -63,7 +63,7 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
 		String agentId = element.getAttribute(AGENT_ID_ATTRIBUTE);
 		if (StringUtils.hasText(agentId)) {
 			RootBeanDefinition bd = new RootBeanDefinition(MBeanServerFactoryBean.class);

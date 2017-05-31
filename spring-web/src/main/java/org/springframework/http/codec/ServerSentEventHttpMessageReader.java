@@ -37,6 +37,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.lang.Nullable;
 
 import static java.util.stream.Collectors.joining;
 
@@ -91,7 +92,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
 				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 	}

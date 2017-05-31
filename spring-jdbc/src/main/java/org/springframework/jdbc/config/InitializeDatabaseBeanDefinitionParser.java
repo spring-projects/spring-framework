@@ -25,6 +25,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses an {@code initialize-database}
@@ -38,7 +39,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(DataSourceInitializer.class);
 		builder.addPropertyReference("dataSource", element.getAttribute("data-source"));
 		builder.addPropertyValue("enabled", element.getAttribute("enabled"));

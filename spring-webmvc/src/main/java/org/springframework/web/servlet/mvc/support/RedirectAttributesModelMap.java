@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.support;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.DataBinder;
 
@@ -67,7 +68,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
 	@Override
-	public RedirectAttributesModelMap addAttribute(String attributeName, Object attributeValue) {
+	public RedirectAttributesModelMap addAttribute(String attributeName, @Nullable Object attributeValue) {
 		super.addAttribute(attributeName, formatValue(attributeValue));
 		return this;
 	}
@@ -84,7 +85,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
 	@Override
-	public RedirectAttributesModelMap addAttribute(Object attributeValue) {
+	public RedirectAttributesModelMap addAttribute(@Nullable Object attributeValue) {
 		super.addAttribute(attributeValue);
 		return this;
 	}
@@ -157,7 +158,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	}
 
 	@Override
-	public RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue) {
+	public RedirectAttributes addFlashAttribute(String attributeName, @Nullable Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeName, attributeValue);
 		return this;
 	}

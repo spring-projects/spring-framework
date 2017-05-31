@@ -58,7 +58,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 
 	@Override
-	public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
+	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
 		if (bd.getMethodOverrides().isEmpty()) {
 			Constructor<?> constructorToUse;
@@ -107,7 +107,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 	@Override
-	public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
+	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
 			final Constructor<?> ctor, Object... args) {
 
 		if (bd.getMethodOverrides().isEmpty()) {
@@ -141,8 +141,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 	@Override
-	public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
-			Object factoryBean, final Method factoryMethod, Object... args) {
+	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
+			@Nullable Object factoryBean, final Method factoryMethod, Object... args) {
 
 		try {
 			if (System.getSecurityManager() != null) {

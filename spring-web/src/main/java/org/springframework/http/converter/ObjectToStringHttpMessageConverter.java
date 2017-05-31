@@ -23,6 +23,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -89,12 +90,12 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return this.conversionService.canConvert(String.class, clazz) && canRead(mediaType);
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return this.conversionService.canConvert(clazz, String.class) && canWrite(mediaType);
 	}
 
@@ -117,7 +118,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	@Override
-	protected Long getContentLength(Object obj, MediaType contentType) {
+	protected Long getContentLength(Object obj, @Nullable MediaType contentType) {
 		String value = this.conversionService.convert(obj, String.class);
 		return this.stringHttpMessageConverter.getContentLength(value, contentType);
 	}

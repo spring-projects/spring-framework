@@ -167,7 +167,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		SQLException sqlEx = ex;
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
@@ -297,6 +297,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * as a nested root cause. This implementation always returns null, meaning that
 	 * the translator always falls back to the default error codes.
 	 */
+	@Nullable
 	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
 		return null;
 	}

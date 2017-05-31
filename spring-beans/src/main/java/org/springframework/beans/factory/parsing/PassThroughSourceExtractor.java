@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link SourceExtractor} implementation that just passes
@@ -40,7 +41,7 @@ public class PassThroughSourceExtractor implements SourceExtractor {
 	 * @return the supplied {@code sourceCandidate}
 	 */
 	@Override
-	public Object extractSource(Object sourceCandidate, Resource definingResource) {
+	public Object extractSource(Object sourceCandidate, @Nullable Resource definingResource) {
 		return sourceCandidate;
 	}
 

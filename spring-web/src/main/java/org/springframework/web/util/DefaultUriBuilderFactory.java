@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -210,19 +211,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder scheme(String scheme) {
+		public DefaultUriBuilder scheme(@Nullable String scheme) {
 			this.uriComponentsBuilder.scheme(scheme);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder userInfo(String userInfo) {
+		public DefaultUriBuilder userInfo(@Nullable String userInfo) {
 			this.uriComponentsBuilder.userInfo(userInfo);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder host(String host) {
+		public DefaultUriBuilder host(@Nullable String host) {
 			this.uriComponentsBuilder.host(host);
 			return this;
 		}
@@ -234,19 +235,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder port(String port) {
+		public DefaultUriBuilder port(@Nullable String port) {
 			this.uriComponentsBuilder.port(port);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder path(String path) {
+		public DefaultUriBuilder path(@Nullable String path) {
 			this.uriComponentsBuilder.path(path);
 			return this;
 		}
 
 		@Override
-		public DefaultUriBuilder replacePath(String path) {
+		public DefaultUriBuilder replacePath(@Nullable String path) {
 			this.uriComponentsBuilder.replacePath(path);
 			return this;
 		}
@@ -264,7 +265,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder replaceQuery(String query) {
+		public DefaultUriBuilder replaceQuery(@Nullable String query) {
 			this.uriComponentsBuilder.replaceQuery(query);
 			return this;
 		}
@@ -294,7 +295,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder fragment(String fragment) {
+		public DefaultUriBuilder fragment(@Nullable String fragment) {
 			this.uriComponentsBuilder.fragment(fragment);
 			return this;
 		}

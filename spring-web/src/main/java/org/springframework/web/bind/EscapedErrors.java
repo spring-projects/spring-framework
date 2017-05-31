@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -64,7 +65,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void setNestedPath(String nestedPath) {
+	public void setNestedPath(@Nullable String nestedPath) {
 		this.source.setNestedPath(nestedPath);
 	}
 
@@ -95,22 +96,22 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
 		this.source.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		this.source.rejectValue(field, errorCode);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		this.source.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
@@ -202,7 +203,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public Class<?> getFieldType(String field) {
+	public Class<?> getFieldType(@Nullable String field) {
 		return this.source.getFieldType(field);
 	}
 

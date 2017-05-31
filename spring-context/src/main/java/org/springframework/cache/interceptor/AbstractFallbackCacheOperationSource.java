@@ -83,7 +83,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * is not cacheable
 	 */
 	@Override
-	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
+	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		if (method.getDeclaringClass() == Object.class) {
 			return null;
 		}

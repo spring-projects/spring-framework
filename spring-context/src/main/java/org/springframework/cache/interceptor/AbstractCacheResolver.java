@@ -95,6 +95,6 @@ public abstract class AbstractCacheResolver implements CacheResolver, Initializi
 	 * @return the cache name(s) to resolve or {@code null} if no cache should be resolved
 	 */
 	@Nullable
-	protected abstract Collection<String> getCacheNames(CacheOperationInvocationContext<?> context);
+	protected abstract Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context);
 
 }

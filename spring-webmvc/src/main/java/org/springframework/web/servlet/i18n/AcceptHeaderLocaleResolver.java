@@ -126,7 +126,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	public void setLocale(HttpServletRequest request, HttpServletResponse response, @Nullable Locale locale) {
 		throw new UnsupportedOperationException(
 				"Cannot change HTTP accept header - use a different locale resolution strategy");
 	}

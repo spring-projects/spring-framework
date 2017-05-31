@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -73,7 +74,8 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * Identify as bean to proxy if the bean name is in the configured list of names.
 	 */
 	@Override
-	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource) {
+	@Nullable
+	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 		if (this.beanNames != null) {
 			for (String mappedName : this.beanNames) {
 				if (FactoryBean.class.isAssignableFrom(beanClass)) {

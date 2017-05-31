@@ -176,7 +176,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 */
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		// Expose ModelAndView for chosen error view.
 		String viewName = determineViewName(ex, request);

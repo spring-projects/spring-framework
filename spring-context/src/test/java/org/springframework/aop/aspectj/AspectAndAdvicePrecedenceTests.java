@@ -26,6 +26,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
@@ -237,7 +238,7 @@ class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
 	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
 	 */
 	@Override
-	public void before(Method method, Object[] args, Object target)
+	public void before(Method method, Object[] args, @Nullable Object target)
 			throws Throwable {
 		this.collaborator.beforeAdviceOne(this.name);
 	}

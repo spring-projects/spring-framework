@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts a {@link ByteBuffer} directly to and from {@code byte[]}s and indirectly
@@ -85,7 +86,8 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
 		if (source instanceof ByteBuffer) {
 			ByteBuffer buffer = (ByteBuffer) source;

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 
 /**
  * Tag collection class used to hold managed Set values, which may
@@ -90,7 +91,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set<E> merge(Object parent) {
+	public Set<E> merge(@Nullable Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}

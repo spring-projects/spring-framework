@@ -304,7 +304,8 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
 			}
@@ -325,7 +326,8 @@ public abstract class UriComponents implements Serializable {
 		}
 
 		@Override
-		public Object getValue(String name) {
+		@Nullable
+		public Object getValue(@Nullable String name) {
 			if (!this.valueIterator.hasNext()) {
 				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}

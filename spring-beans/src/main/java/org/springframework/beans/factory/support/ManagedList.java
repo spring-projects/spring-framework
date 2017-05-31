@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 
 /**
  * Tag collection class used to hold managed List elements, which may
@@ -91,7 +92,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<E> merge(Object parent) {
+	public List<E> merge(@Nullable Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}

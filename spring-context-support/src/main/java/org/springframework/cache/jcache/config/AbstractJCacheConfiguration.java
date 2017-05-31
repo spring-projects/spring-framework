@@ -25,6 +25,7 @@ import org.springframework.cache.jcache.interceptor.JCacheOperationSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract JSR-107 specific {@code @Configuration} class providing common
@@ -40,7 +41,7 @@ public class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 	protected CacheResolver exceptionCacheResolver;
 
 	@Override
-	protected void useCachingConfigurer(CachingConfigurer config) {
+	protected void useCachingConfigurer(@Nullable CachingConfigurer config) {
 		super.useCachingConfigurer(config);
 		if (config instanceof JCacheConfigurer) {
 			this.exceptionCacheResolver = ((JCacheConfigurer) config).exceptionCacheResolver();

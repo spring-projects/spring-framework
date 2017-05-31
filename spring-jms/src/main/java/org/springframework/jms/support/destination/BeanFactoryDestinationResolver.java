@@ -23,6 +23,7 @@ import javax.jms.Session;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -70,7 +71,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 
 
 	@Override
-	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+	public Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
 		Assert.state(this.beanFactory != null, "BeanFactory is required");

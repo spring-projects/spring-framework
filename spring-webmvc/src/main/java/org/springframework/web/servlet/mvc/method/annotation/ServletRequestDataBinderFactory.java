@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -45,7 +46,7 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	 * Returns an instance of {@link ExtendedServletRequestDataBinder}.
 	 */
 	@Override
-	protected ServletRequestDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest request) {
+	protected ServletRequestDataBinder createBinderInstance(@Nullable Object target, String objectName, NativeWebRequest request) {
 		return new ExtendedServletRequestDataBinder(target, objectName);
 	}
 

@@ -72,7 +72,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * implementation of the mapRow() method.
 	 */
 	@Override
-	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
+	protected RowMapper<T> newRowMapper(@Nullable Object[] parameters, Map<?, ?> context) {
 		return new RowMapperImpl(parameters, context);
 	}
 

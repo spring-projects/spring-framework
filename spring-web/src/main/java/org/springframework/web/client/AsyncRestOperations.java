@@ -419,7 +419,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -435,7 +435,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(String url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -449,7 +449,7 @@ public interface AsyncRestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	<T> ListenableFuture<T> execute(URI url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
+			@Nullable AsyncRequestCallback requestCallback, @Nullable ResponseExtractor<T> responseExtractor)
 			throws RestClientException;
 
 }

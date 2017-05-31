@@ -41,6 +41,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -112,7 +113,7 @@ public class ImportSelectorTests {
 		static Environment environment;
 
 		@Override
-		public void setBeanClassLoader(ClassLoader classLoader) {
+		public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
 			SampleRegistrar.classLoader = classLoader;
 		}
 

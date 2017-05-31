@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
@@ -354,7 +355,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public Validator getValidator() {
 			return new Validator() {
 				@Override
-				public void validate(Object target, Errors errors) {
+				public void validate(@Nullable Object target, Errors errors) {
 					errors.reject("invalid");
 				}
 				@Override

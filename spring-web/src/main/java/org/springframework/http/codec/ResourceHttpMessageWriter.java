@@ -46,6 +46,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.util.Collections.emptyMap;
@@ -106,7 +107,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
+			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		return Mono.from(inputStream).flatMap(resource ->
 				writeResource(resource, elementType, mediaType, message, hints));
@@ -175,8 +176,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType actualType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+	public Mono<Void> write(Publisher<? extends Resource> inputStream, @Nullable ResolvableType actualType,
+			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		HttpHeaders headers = response.getHeaders();

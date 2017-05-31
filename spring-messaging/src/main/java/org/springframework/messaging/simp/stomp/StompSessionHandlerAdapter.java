@@ -18,6 +18,8 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract adapter class for {@link StompSessionHandler} with mostly empty
  * implementation methods except for {@link #getPayloadType} which returns String
@@ -48,7 +50,7 @@ public abstract class StompSessionHandlerAdapter implements StompSessionHandler 
 	 * This implementation is empty.
 	 */
 	@Override
-	public void handleFrame(StompHeaders headers, Object payload) {
+	public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 	}
 
 	/**

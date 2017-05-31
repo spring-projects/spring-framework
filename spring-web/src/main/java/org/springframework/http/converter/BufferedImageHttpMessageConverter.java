@@ -42,6 +42,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -127,7 +128,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (BufferedImage.class == clazz && isReadable(mediaType));
 	}
 
@@ -140,7 +141,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		return (BufferedImage.class == clazz && isWritable(mediaType));
 	}
 
@@ -204,7 +205,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	@Override
-	public void write(final BufferedImage image, final MediaType contentType,
+	public void write(final BufferedImage image, @Nullable final MediaType contentType,
 			final HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 

@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
@@ -107,7 +108,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 	@Override
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) throws Exception {
+			@Nullable Object handler, Exception ex) throws Exception {
 
 		ModelAndView mav = super.processHandlerException(request, response, handler, ex);
 

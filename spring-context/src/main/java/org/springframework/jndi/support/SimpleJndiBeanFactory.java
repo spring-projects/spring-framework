@@ -32,6 +32,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.ResolvableType;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple JNDI-based implementation of Spring's
@@ -106,7 +107,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
-	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+	public <T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException {
 		try {
 			if (isSingleton(name)) {
 				return doGetSingleton(name, requiredType);

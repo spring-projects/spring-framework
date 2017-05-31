@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -47,7 +48,7 @@ public class EmbeddedValueResolver implements StringValueResolver {
 
 
 	@Override
-	public String resolveStringValue(String strVal) {
+	public String resolveStringValue(@Nullable String strVal) {
 		String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
 		if (this.exprResolver != null && value != null) {
 			Object evaluated = this.exprResolver.evaluate(value, this.exprContext);

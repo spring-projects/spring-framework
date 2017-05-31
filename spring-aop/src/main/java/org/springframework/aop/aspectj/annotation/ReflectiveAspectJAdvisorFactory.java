@@ -315,7 +315,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
 			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
 				@Override
-				public void before(Method method, Object[] args, Object target) {
+				public void before(Method method, Object[] args, @Nullable Object target) {
 					// Simply instantiate the aspect
 					aif.getAspectInstance();
 				}

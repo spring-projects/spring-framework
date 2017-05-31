@@ -80,7 +80,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * some candidate classes.
 	 */
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return true;
 	}
 
@@ -90,7 +90,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 		this.evaluations++;
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {

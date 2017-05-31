@@ -470,7 +470,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

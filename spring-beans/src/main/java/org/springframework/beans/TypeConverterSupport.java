@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.lang.Nullable;
 
 /**
  * Base implementation of the {@link TypeConverter} interface, using a package-private delegate.
@@ -36,25 +37,25 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return doConvert(value, requiredType, null, null);
 	}
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		return doConvert(value, requiredType, methodParam, null);
 	}
 
 	@Override
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+	public <T> T convertIfNecessary(Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 
 		return doConvert(value, requiredType, null, field);
 	}
 
-	private <T> T doConvert(Object value, Class<T> requiredType, MethodParameter methodParam, Field field)
+	private <T> T doConvert(Object value, Class<T> requiredType, @Nullable MethodParameter methodParam, @Nullable Field field)
 			throws TypeMismatchException {
 		try {
 			if (field != null) {

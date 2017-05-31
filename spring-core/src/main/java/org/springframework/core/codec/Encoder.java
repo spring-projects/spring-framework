@@ -64,7 +64,7 @@ public interface Encoder<T> {
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, @Nullable MimeType mimeType, Map<String, Object> hints);
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
 	 * Return the list of mime types this encoder supports.

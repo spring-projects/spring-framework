@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -129,7 +130,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 
 	@Override
-	public void setParentName(String parentName) {
+	public void setParentName(@Nullable String parentName) {
 		this.parentName = parentName;
 	}
 

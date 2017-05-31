@@ -114,13 +114,13 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 			return (matchesClass1(targetClass) && MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions)) ||
 					(matchesClass2(targetClass) && MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return (matchesClass1(targetClass) && this.mm1.matches(method, targetClass)) ||
 					(matchesClass2(targetClass) && this.mm2.matches(method, targetClass));
 		}
@@ -139,7 +139,7 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 			return this.mm1.matches(method, targetClass, args) || this.mm2.matches(method, targetClass, args);
 		}
 
@@ -230,13 +230,13 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
 			return MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions);
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass) {
 			return this.mm1.matches(method, targetClass) && this.mm2.matches(method, targetClass);
 		}
 
@@ -246,7 +246,7 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as
 			// it will probably be an unsupported operation.

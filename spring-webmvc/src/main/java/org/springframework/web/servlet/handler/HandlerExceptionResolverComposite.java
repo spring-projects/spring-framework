@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -65,9 +66,10 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	 * The first one to return a ModelAndView instance wins. Otherwise {@code null} is returned.
 	 */
 	@Override
+	@Nullable
 	public ModelAndView resolveException(HttpServletRequest request,
 										 HttpServletResponse response,
-										 Object handler,
+										 @Nullable Object handler,
 										 Exception ex) {
 		if (resolvers != null) {
 			for (HandlerExceptionResolver handlerExceptionResolver : resolvers) {

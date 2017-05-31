@@ -103,7 +103,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		try {
 			if (ex instanceof HttpRequestMethodNotSupportedException) {

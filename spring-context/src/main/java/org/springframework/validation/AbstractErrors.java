@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 
 	@Override
-	public void setNestedPath(String nestedPath) {
+	public void setNestedPath(@Nullable String nestedPath) {
 		doSetNestedPath(nestedPath);
 		this.nestedPathStack.clear();
 	}
@@ -122,12 +123,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		rejectValue(field, errorCode, null, null);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		rejectValue(field, errorCode, null, defaultMessage);
 	}
 
@@ -213,7 +214,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 
 	@Override
-	public Class<?> getFieldType(String field) {
+	public Class<?> getFieldType(@Nullable String field) {
 		Object value = getFieldValue(field);
 		return (value != null ? value.getClass() : null);
 	}

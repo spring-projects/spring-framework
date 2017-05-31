@@ -39,7 +39,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	 * passing the bean of the {@code HandlerMethod}. Otherwise returns {@code false}.
 	 */
 	@Override
-	protected boolean shouldApplyTo(HttpServletRequest request, Object handler) {
+	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
 		if (handler == null) {
 			return super.shouldApplyTo(request, handler);
 		}
@@ -55,7 +55,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 
 	@Override
 	protected final ModelAndView doResolveException(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		return doResolveHandlerMethodException(request, response, (HandlerMethod) handler, ex);
 	}

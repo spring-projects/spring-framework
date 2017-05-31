@@ -58,7 +58,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * @see #doParse
 	 */
 	@Override
-	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected final AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
 		String parentName = getParentName(element);
 		if (parentName != null) {

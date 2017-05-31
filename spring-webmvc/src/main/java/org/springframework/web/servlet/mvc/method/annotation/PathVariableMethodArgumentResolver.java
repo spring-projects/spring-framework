@@ -24,6 +24,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -100,7 +101,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
-			ModelAndViewContainer mavContainer, NativeWebRequest request) {
+			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest request) {
 
 		String key = View.PATH_VARIABLES;
 		int scope = RequestAttributes.SCOPE_REQUEST;

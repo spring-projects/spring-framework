@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link CacheResolver} that forces the resolution to a configurable
@@ -50,7 +51,7 @@ public class NamedCacheResolver extends AbstractCacheResolver {
 	}
 
 	@Override
-	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
+	protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
 		return this.cacheNames;
 	}
 

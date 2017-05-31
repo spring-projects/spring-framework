@@ -153,7 +153,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	@Override
-	public Object getProxy(ClassLoader classLoader) {
+	public Object getProxy(@Nullable ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating CGLIB proxy: target source is " + this.advised.getTargetSource());
 		}

@@ -104,7 +104,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
 		// Engine attribute only supported for <lang:std>
 		String engine = element.getAttribute(ENGINE_ATTRIBUTE);
 

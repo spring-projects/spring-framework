@@ -19,6 +19,7 @@ package org.springframework.cache.transaction;
 import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -71,22 +72,22 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
-	public ValueWrapper get(Object key) {
+	public ValueWrapper get(@Nullable Object key) {
 		return this.targetCache.get(key);
 	}
 
 	@Override
-	public <T> T get(Object key, Class<T> type) {
+	public <T> T get(@Nullable Object key, Class<T> type) {
 		return this.targetCache.get(key, type);
 	}
 
 	@Override
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
 		return this.targetCache.get(key, valueLoader);
 	}
 
 	@Override
-	public void put(final Object key, final Object value) {
+	public void put(@Nullable final Object key, @Nullable final Object value) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
@@ -101,12 +102,12 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(final Object key, final Object value) {
+	public ValueWrapper putIfAbsent(@Nullable final Object key, @Nullable final Object value) {
 		return this.targetCache.putIfAbsent(key, value);
 	}
 
 	@Override
-	public void evict(final Object key) {
+	public void evict(@Nullable final Object key) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override

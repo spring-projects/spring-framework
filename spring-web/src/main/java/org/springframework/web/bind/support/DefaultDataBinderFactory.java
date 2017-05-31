@@ -49,7 +49,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
-	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target,
+	public final WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target,
 			String objectName) throws Exception {
 
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);

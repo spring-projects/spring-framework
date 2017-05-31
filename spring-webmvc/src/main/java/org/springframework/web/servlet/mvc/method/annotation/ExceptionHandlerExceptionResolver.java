@@ -361,8 +361,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
 	 */
 	@Override
+	@Nullable
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
-			HttpServletResponse response, HandlerMethod handlerMethod, Exception exception) {
+			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {

@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -82,7 +83,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, String>> inputStream,
-			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage message,
+			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
 		MediaType contentType = message.getHeaders().getContentType();

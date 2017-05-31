@@ -54,7 +54,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			return null;
 		}
 		@Override
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 		}
 	};
 

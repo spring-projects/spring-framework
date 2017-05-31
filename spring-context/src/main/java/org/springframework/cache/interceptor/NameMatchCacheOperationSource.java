@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
@@ -76,7 +77,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	@Override
-	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
+	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();
 		Collection<CacheOperation> ops = this.nameMap.get(methodName);

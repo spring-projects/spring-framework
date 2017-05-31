@@ -199,7 +199,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		JavaType javaType = this.objectMapper.constructType(targetClass);
 		Object payload = message.getPayload();
 		Class<?> view = getSerializationView(conversionHint);
@@ -228,7 +228,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+	@Nullable
+	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		try {
 			Class<?> view = getSerializationView(conversionHint);
 			if (byte[].class == getSerializedPayloadClass()) {

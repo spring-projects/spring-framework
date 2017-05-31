@@ -146,7 +146,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
 	@Override
-	public Mono<Void> render(Map<String, ?> model, MediaType contentType,
+	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
 			ServerWebExchange exchange) {
 
 		if (logger.isTraceEnabled()) {

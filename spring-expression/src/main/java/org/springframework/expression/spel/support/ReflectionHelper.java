@@ -260,7 +260,6 @@ public class ReflectionHelper {
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
-	@Nullable
 	static boolean convertArguments(TypeConverter converter, Object[] arguments, Executable executable,
 			@Nullable Integer varargsPosition) throws EvaluationException {
 

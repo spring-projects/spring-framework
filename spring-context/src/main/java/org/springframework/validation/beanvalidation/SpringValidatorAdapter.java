@@ -32,6 +32,7 @@ import javax.validation.metadata.ConstraintDescriptor;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -93,14 +94,14 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Override
-	public void validate(Object target, Errors errors) {
+	public void validate(@Nullable Object target, Errors errors) {
 		if (this.targetValidator != null) {
 			processConstraintViolations(this.targetValidator.validate(target), errors);
 		}
 	}
 
 	@Override
-	public void validate(Object target, Errors errors, Object... validationHints) {
+	public void validate(@Nullable Object target, Errors errors, Object... validationHints) {
 		if (this.targetValidator != null) {
 			Set<Class<?>> groups = new LinkedHashSet<>();
 			if (validationHints != null) {

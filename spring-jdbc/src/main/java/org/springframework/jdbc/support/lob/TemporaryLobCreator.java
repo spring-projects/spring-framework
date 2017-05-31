@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -56,7 +57,7 @@ public class TemporaryLobCreator implements LobCreator {
 
 
 	@Override
-	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
+	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, @Nullable byte[] content)
 			throws SQLException {
 
 		Blob blob = ps.getConnection().createBlob();
@@ -73,7 +74,7 @@ public class TemporaryLobCreator implements LobCreator {
 
 	@Override
 	public void setBlobAsBinaryStream(
-			PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
+			PreparedStatement ps, int paramIndex, @Nullable InputStream binaryStream, int contentLength)
 			throws SQLException {
 
 		Blob blob = ps.getConnection().createBlob();
@@ -95,7 +96,7 @@ public class TemporaryLobCreator implements LobCreator {
 	}
 
 	@Override
-	public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
+	public void setClobAsString(PreparedStatement ps, int paramIndex, @Nullable String content)
 			throws SQLException {
 
 		Clob clob = ps.getConnection().createClob();
@@ -112,7 +113,7 @@ public class TemporaryLobCreator implements LobCreator {
 
 	@Override
 	public void setClobAsAsciiStream(
-			PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
+			PreparedStatement ps, int paramIndex, @Nullable InputStream asciiStream, int contentLength)
 			throws SQLException {
 
 		Clob clob = ps.getConnection().createClob();
@@ -135,7 +136,7 @@ public class TemporaryLobCreator implements LobCreator {
 
 	@Override
 	public void setClobAsCharacterStream(
-			PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
+			PreparedStatement ps, int paramIndex, @Nullable Reader characterStream, int contentLength)
 			throws SQLException {
 
 		Clob clob = ps.getConnection().createClob();

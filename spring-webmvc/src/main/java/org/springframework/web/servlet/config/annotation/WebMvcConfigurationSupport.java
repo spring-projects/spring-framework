@@ -1006,7 +1006,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

@@ -22,6 +22,7 @@ import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Empty {@link MessageSource} that delegates all calls to the parent MessageSource.
@@ -40,7 +41,7 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 
 
 	@Override
-	public void setParentMessageSource(MessageSource parent) {
+	public void setParentMessageSource(@Nullable MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
 
@@ -51,7 +52,7 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 
 
 	@Override
-	public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
 		}
@@ -61,7 +62,7 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 	}
 
 	@Override
-	public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(code, args, locale);
 		}

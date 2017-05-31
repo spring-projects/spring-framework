@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * A generic implementation of the {@link TableMetaDataProvider} that should provide
@@ -212,8 +213,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
-	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
-			String schemaName, String tableName) throws SQLException {
+	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
+			@Nullable String schemaName, String tableName) throws SQLException {
 
 		this.tableColumnMetaDataUsed = true;
 		locateTableAndProcessMetaData(databaseMetaData, catalogName, schemaName, tableName);

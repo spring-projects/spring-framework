@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Reusable query in which concrete subclasses must implement the abstract
  * mapRow(ResultSet, int) method to convert each row of the JDBC ResultSet
@@ -59,7 +61,7 @@ public abstract class MappingSqlQuery<T> extends MappingSqlQueryWithParameters<T
 	 * @see #mapRow(ResultSet, int)
 	 */
 	@Override
-	protected final T mapRow(ResultSet rs, int rowNum, Object[] parameters, Map<?, ?> context)
+	protected final T mapRow(ResultSet rs, int rowNum, @Nullable Object[] parameters, @Nullable Map<?, ?> context)
 			throws SQLException {
 
 		return mapRow(rs, rowNum);

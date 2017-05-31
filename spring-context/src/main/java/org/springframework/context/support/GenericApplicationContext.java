@@ -150,7 +150,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
 	 */
 	@Override
-	public void setParent(ApplicationContext parent) {
+	public void setParent(@Nullable ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
@@ -238,7 +238,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
-	public void setClassLoader(ClassLoader classLoader) {
+	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		super.setClassLoader(classLoader);
 		this.customClassLoader = true;
 	}

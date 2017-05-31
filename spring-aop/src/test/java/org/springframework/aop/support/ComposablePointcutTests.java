@@ -24,6 +24,7 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -36,28 +37,28 @@ public class ComposablePointcutTests {
 
 	public static MethodMatcher GETTER_METHOD_MATCHER = new StaticMethodMatcher() {
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
 	};
 
 	public static MethodMatcher GET_AGE_METHOD_MATCHER = new StaticMethodMatcher() {
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().equals("getAge");
 		}
 	};
 
 	public static MethodMatcher ABSQUATULATE_METHOD_MATCHER = new StaticMethodMatcher() {
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().equals("absquatulate");
 		}
 	};
 
 	public static MethodMatcher SETTER_METHOD_MATCHER = new StaticMethodMatcher() {
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith("set");
 		}
 	};

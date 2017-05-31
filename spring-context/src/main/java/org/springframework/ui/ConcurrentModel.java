@@ -85,7 +85,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 * than for empty collections as is already done by JSTL tags.</emphasis>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
-	public ConcurrentModel addAttribute(Object attributeValue) {
+	public ConcurrentModel addAttribute(@Nullable Object attributeValue) {
 		Assert.notNull(attributeValue, "Model object must not be null");
 		if (attributeValue instanceof Collection && ((Collection<?>) attributeValue).isEmpty()) {
 			return this;

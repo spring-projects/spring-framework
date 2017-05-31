@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -67,7 +68,7 @@ public class GenericSqlQuery<T> extends SqlQuery<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected RowMapper<T> newRowMapper(Object[] parameters, Map<?, ?> context) {
+	protected RowMapper<T> newRowMapper(@Nullable Object[] parameters, Map<?, ?> context) {
 		return (this.rowMapper != null ? this.rowMapper : BeanUtils.instantiateClass(this.rowMapperClass));
 	}
 

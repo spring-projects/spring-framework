@@ -24,6 +24,7 @@ import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -63,14 +64,15 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
-	public ValueWrapper get(Object key) {
+	public ValueWrapper get(@Nullable Object key) {
 		Element element = lookup(key);
 		return toValueWrapper(element);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	@Nullable
+	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
 		Element element = lookup(key);
 		if (element != null) {
 			return (T) element.getObjectValue();
@@ -107,7 +109,8 @@ public class EhCacheCache implements Cache {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T get(Object key, Class<T> type) {
+	@Nullable
+	public <T> T get(@Nullable Object key, Class<T> type) {
 		Element element = this.cache.get(key);
 		Object value = (element != null ? element.getObjectValue() : null);
 		if (value != null && type != null && !type.isInstance(value)) {
@@ -117,18 +120,18 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(@Nullable Object key, @Nullable Object value) {
 		this.cache.put(new Element(key, value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, Object value) {
+	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
 		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
 		return toValueWrapper(existingElement);
 	}
 
 	@Override
-	public void evict(Object key) {
+	public void evict(@Nullable Object key) {
 		this.cache.remove(key);
 	}
 
