@@ -50,6 +50,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.NonNullApi;
 import org.springframework.util.StringUtils;
 
 /**
@@ -67,6 +68,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see ConfigurationClassParser
  */
+@NonNullApi
 class ConfigurationClassBeanDefinitionReader {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);

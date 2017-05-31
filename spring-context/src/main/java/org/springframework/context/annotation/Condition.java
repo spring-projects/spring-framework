@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.lang.NonNullApi;
 
 /**
  * A single {@code condition} that must be {@linkplain #matches matched} in order
@@ -39,6 +40,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @see ConditionContext
  */
 @FunctionalInterface
+@NonNullApi
 public interface Condition {
 
 	/**

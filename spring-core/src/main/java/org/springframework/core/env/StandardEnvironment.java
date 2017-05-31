@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * {@link Environment} implementation suitable for use in 'standard' (i.e. non-web)
  * applications.
@@ -51,6 +53,7 @@ package org.springframework.core.env;
  * @see SystemEnvironmentPropertySource
  * @see org.springframework.web.context.support.StandardServletEnvironment
  */
+@NonNullApi
 public class StandardEnvironment extends AbstractEnvironment {
 
 	/** System environment property source name: {@value} */

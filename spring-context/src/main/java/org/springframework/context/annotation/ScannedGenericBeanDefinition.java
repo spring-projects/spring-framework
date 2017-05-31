@@ -22,6 +22,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 
 /**
@@ -45,6 +46,7 @@ import org.springframework.util.Assert;
  * @see AnnotatedGenericBeanDefinition
  */
 @SuppressWarnings("serial")
+@NonNullApi
 public class ScannedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 
 	private final AnnotationMetadata metadata;

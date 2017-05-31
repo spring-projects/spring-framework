@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * Interface representing the environment in which the current application is running.
  * Models two key aspects of the application environment: <em>profiles</em> and
@@ -68,6 +70,7 @@ package org.springframework.core.env;
  * @see org.springframework.context.ConfigurableApplicationContext#setEnvironment
  * @see org.springframework.context.support.AbstractApplicationContext#createEnvironment
  */
+@NonNullApi
 public interface Environment extends PropertyResolver {
 
 	/**

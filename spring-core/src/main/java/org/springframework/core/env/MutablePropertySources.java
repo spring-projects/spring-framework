@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see PropertySourcesPropertyResolver
  */
+@NonNullApi
 public class MutablePropertySources implements PropertySources {
 
 	private final Log logger;

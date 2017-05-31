@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.lang.NonNullApi;
 
 /**
  * Simple {@link ScopeMetadataResolver} implementation that follows JSR-330 scoping rules:
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @see ClassPathBeanDefinitionScanner#setScopeMetadataResolver
  * @see AnnotatedBeanDefinitionReader#setScopeMetadataResolver
  */
+@NonNullApi
 public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 
 	private final Map<String, String> scopeMap = new HashMap<>();

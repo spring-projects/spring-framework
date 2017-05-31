@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * Common interface for annotation config application contexts,
  * defining {@link #register} and {@link #scan} methods.
@@ -23,6 +25,7 @@ package org.springframework.context.annotation;
  * @author Juergen Hoeller
  * @since 4.1
  */
+@NonNullApi
 public interface AnnotationConfigRegistry {
 
 	/**

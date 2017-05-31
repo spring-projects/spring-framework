@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * A variation of {@link ImportSelector} that runs after all {@code @Configuration} beans
  * have been processed. This type of selector can be particularly useful when the selected
@@ -28,6 +30,7 @@ package org.springframework.context.annotation;
  * @author Phillip Webb
  * @since 4.0
  */
+@NonNullApi
 public interface DeferredImportSelector extends ImportSelector {
 
 }

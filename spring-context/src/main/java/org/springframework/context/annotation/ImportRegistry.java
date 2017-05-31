@@ -17,11 +17,13 @@
 package org.springframework.context.annotation;
 
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNullApi;
 
 /**
  * @author Juergen Hoeller
  * @author Phil Webb
  */
+@NonNullApi
 interface ImportRegistry {
 
 	AnnotationMetadata getImportingClassFor(String importedClass);

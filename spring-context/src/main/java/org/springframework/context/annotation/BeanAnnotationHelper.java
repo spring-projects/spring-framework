@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.NonNullApi;
 
 /**
  * Utilities for processing {@link Bean}-annotated methods.
@@ -27,6 +28,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  * @author Juergen Hoeller
  * @since 3.1
  */
+@NonNullApi
 class BeanAnnotationHelper {
 
 	public static boolean isBeanAnnotated(Method method) {

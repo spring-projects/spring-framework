@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -60,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Controller#value()
  * @see javax.inject.Named#value()
  */
+@NonNullApi
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";

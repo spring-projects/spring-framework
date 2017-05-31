@@ -19,11 +19,13 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.NonNullApi;
 
 /**
  * @author Chris Beams
  * @since 3.1
  */
+@NonNullApi
 abstract class ConfigurationMethod {
 
 	protected final MethodMetadata metadata;

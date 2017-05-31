@@ -18,6 +18,8 @@ package org.springframework.core.env;
 
 import java.util.List;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * {@link CommandLinePropertySource} implementation backed by a simple String array.
  *
@@ -75,6 +77,7 @@ import java.util.List;
  * @see CommandLinePropertySource
  * @see JOptCommandLinePropertySource
  */
+@NonNullApi
 public class SimpleCommandLinePropertySource extends CommandLinePropertySource<CommandLineArgs> {
 
 	/**

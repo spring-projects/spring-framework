@@ -23,7 +23,7 @@ import javax.annotation.meta.TypeQualifierDefault;
  */
 @Documented
 @Nonnull
-@Target(ElementType.PACKAGE)
+@Target({ElementType.PACKAGE, ElementType.TYPE})
 @TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NonNullApi {

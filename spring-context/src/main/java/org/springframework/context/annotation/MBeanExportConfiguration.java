@@ -32,6 +32,7 @@ import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
 import org.springframework.jndi.JndiLocatorDelegate;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -48,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @see EnableMBeanExport
  */
 @Configuration
+@NonNullApi
 public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, BeanFactoryAware {
 
 	private static final String MBEAN_EXPORTER_BEAN_NAME = "mbeanExporter";

@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.NonNullApi;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 3.1.1
  */
+@NonNullApi
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();

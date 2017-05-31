@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 4.0
  */
+@NonNullApi
 public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotationAutowireCandidateResolver {
 
 	@Override

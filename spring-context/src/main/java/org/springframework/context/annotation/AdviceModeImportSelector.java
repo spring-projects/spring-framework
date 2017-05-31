@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.lang.Nullable;
  * @since 3.1
  * @param <A> annotation containing {@linkplain #getAdviceModeAttributeName() AdviceMode attribute}
  */
+@NonNullApi
 public abstract class AdviceModeImportSelector<A extends Annotation> implements ImportSelector {
 
 	public static final String DEFAULT_ADVICE_MODE_ATTRIBUTE_NAME = "mode";

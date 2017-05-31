@@ -26,6 +26,7 @@ import org.springframework.context.weaving.DefaultContextLoadTimeWeaver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -41,6 +42,7 @@ import org.springframework.lang.Nullable;
  * @see ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
 @Configuration
+@NonNullApi
 public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoaderAware {
 
 	private AnnotationAttributes enableLTW;

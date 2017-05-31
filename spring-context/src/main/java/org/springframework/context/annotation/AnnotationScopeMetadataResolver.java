@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
  */
+@NonNullApi
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
 	private final ScopedProxyMode defaultProxyMode;

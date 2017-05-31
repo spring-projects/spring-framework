@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -51,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @see ConfigurableEnvironment
  * @see StandardEnvironment
  */
+@NonNullApi
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**

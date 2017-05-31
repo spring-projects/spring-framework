@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system
  * properties or environment variables.
@@ -35,6 +37,7 @@ import java.util.Set;
  * @author Chris Beams
  * @since 3.0
  */
+@NonNullApi
 abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	@Override

@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.lang.NonNullApi;
 
 /**
  * Delegate factory class used to just introduce an AOP framework dependency
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @since 3.0
  * @see org.springframework.aop.scope.ScopedProxyUtils#createScopedProxy
  */
+@NonNullApi
 class ScopedProxyCreator {
 
 	public static BeanDefinitionHolder createScopedProxy(

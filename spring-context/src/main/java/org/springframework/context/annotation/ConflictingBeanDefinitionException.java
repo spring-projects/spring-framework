@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.lang.NonNullApi;
+
 /**
  * Marker subclass of {@link IllegalStateException}, allowing for explicit
  * catch clauses in calling code.
@@ -24,6 +26,7 @@ package org.springframework.context.annotation;
  * @since 3.1
  */
 @SuppressWarnings("serial")
+@NonNullApi
 class ConflictingBeanDefinitionException extends IllegalStateException {
 
 	public ConflictingBeanDefinitionException(String message) {

@@ -26,6 +26,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.NonNullApi;
 
 /**
  * Common delegate code for the handling of parser strategies, e.g.
@@ -34,6 +35,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Juergen Hoeller
  * @since 4.3.3
  */
+@NonNullApi
 abstract class ParserStrategyUtils {
 
 	/**

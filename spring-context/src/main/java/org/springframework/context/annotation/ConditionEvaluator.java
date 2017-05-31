@@ -31,6 +31,7 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -41,6 +42,7 @@ import org.springframework.util.MultiValueMap;
  * @author Phillip Webb
  * @since 4.0
  */
+@NonNullApi
 class ConditionEvaluator {
 
 	private final ConditionContextImpl context;

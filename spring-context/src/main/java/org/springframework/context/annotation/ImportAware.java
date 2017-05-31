@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.Aware;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.NonNullApi;
 
 /**
  * Interface to be implemented by any @{@link Configuration} class that wishes
@@ -28,6 +29,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Chris Beams
  * @since 3.1
  */
+@NonNullApi
 public interface ImportAware extends Aware {
 
 	/**
