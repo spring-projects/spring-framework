@@ -260,6 +260,9 @@ public class CronSequenceGenerator {
 	 * Parse the given pattern expression.
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
+		if (expression == null) {
+			throw new IllegalArgumentException("Cron expression cannot be null!");
+		}
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
 		if (!areValidCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
@@ -276,6 +279,10 @@ public class CronSequenceGenerator {
 			this.daysOfWeek.set(0);
 			this.daysOfWeek.clear(7);
 		}
+	}
+
+	private boolean areValidCronFields(String[] fields) {
+		return fields.length == 6;
 	}
 
 	/**
@@ -388,21 +395,18 @@ public class CronSequenceGenerator {
 
 	/**
 	 * Determine whether the specified expression represents a valid cron pattern.
-	 * <p>Specifically, this method verifies that the expression contains six
-	 * fields separated by single spaces.
 	 * @param expression the expression to evaluate
 	 * @return {@code true} if the given expression is a valid cron expression
 	 * @since 4.3
 	 */
 	public static boolean isValidExpression(String expression) {
-		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		return areValidCronFields(fields);
+		try {
+			new CronSequenceGenerator(expression);
+			return true;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
-
-	private static boolean areValidCronFields(String[] fields) {
-		return (fields != null && fields.length == 6);
-	}
-
 
 	@Override
 	public boolean equals(Object other) {

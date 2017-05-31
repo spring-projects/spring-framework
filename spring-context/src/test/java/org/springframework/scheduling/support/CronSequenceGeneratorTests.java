@@ -82,8 +82,18 @@ public class CronSequenceGeneratorTests {
 	}
 
 	@Test
-	public void invalidExpression() {
+	public void invalidExpressionWithLength() {
 		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *"));
+	}
+
+	@Test
+	public void invalidExpressionWithSeconds() {
+		assertFalse(CronSequenceGenerator.isValidExpression("100 */2 1-4 * * *"));
+	}
+
+	@Test
+	public void invalidExpressionWithMonths() {
+		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * INVALID *"));
 	}
 
 	@Test
