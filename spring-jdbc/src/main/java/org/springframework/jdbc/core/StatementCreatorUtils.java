@@ -193,7 +193,7 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	private static void setParameterValueInternal(PreparedStatement ps, int paramIndex, int sqlType,
-			String typeName, Integer scale, Object inValue) throws SQLException {
+			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;

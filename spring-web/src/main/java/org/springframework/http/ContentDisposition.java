@@ -49,7 +49,7 @@ public class ContentDisposition {
 	/**
 	 * Private constructor. See static factory methods in this class.
 	 */
-	private ContentDisposition(String type, String name, String filename, Charset charset, Long size) {
+	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename, @Nullable Charset charset, @Nullable Long size) {
 		this.type = type;
 		this.name = name;
 		this.filename = filename;

@@ -488,7 +488,7 @@ public class MessageHeaderAccessor {
 	 * @param payload the payload that corresponds to the headers.
 	 * @return the message
 	 */
-	public String getDetailedLogMessage(Object payload) {
+	public String getDetailedLogMessage(@Nullable Object payload) {
 		return "headers=" + this.headers.toString() + getDetailedPayloadLogMessage(payload);
 	}
 

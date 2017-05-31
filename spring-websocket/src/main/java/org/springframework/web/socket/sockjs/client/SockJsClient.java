@@ -239,7 +239,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(
-			WebSocketHandler handler, WebSocketHttpHeaders headers, URI url) {
+			WebSocketHandler handler, @Nullable WebSocketHttpHeaders headers, URI url) {
 
 		Assert.notNull(handler, "WebSocketHandler is required");
 		Assert.notNull(url, "URL is required");

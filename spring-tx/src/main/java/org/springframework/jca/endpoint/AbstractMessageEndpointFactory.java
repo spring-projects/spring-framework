@@ -226,7 +226,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * sibling {@link #afterDelivery()} explicitly, as part of its own processing.
 		 */
 		@Override
-		public void beforeDelivery(Method method) throws ResourceException {
+		public void beforeDelivery(@Nullable Method method) throws ResourceException {
 			this.beforeDeliveryCalled = true;
 			try {
 				this.transactionDelegate.beginTransaction();

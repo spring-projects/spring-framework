@@ -404,7 +404,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending a message
 	 */
-	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
+	protected void doSend(MimeMessage[] mimeMessages, @Nullable Object[] originalMessages) throws MailException {
 		Map<Object, Exception> failedMessages = new LinkedHashMap<>();
 		Transport transport = null;
 

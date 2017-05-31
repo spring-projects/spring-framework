@@ -97,7 +97,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
+	public boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
 			return ResourceRegion.class.isAssignableFrom((Class<?>) type);
 		}

@@ -18,6 +18,7 @@ package org.springframework.context;
 
 import org.springframework.beans.factory.Aware;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by any object that wishes to be notified of
@@ -73,6 +74,6 @@ public interface ResourceLoaderAware extends Aware {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.ResourcePatternUtils#getResourcePatternResolver
 	 */
-	void setResourceLoader(ResourceLoader resourceLoader);
+	void setResourceLoader(@Nullable ResourceLoader resourceLoader);
 
 }

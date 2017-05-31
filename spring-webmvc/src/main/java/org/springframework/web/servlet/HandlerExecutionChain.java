@@ -162,7 +162,7 @@ public class HandlerExecutionChain {
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
 	 */
-	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, Exception ex)
+	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {
 
 		HandlerInterceptor[] interceptors = getInterceptors();

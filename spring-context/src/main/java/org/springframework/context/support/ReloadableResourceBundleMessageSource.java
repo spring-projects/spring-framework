@@ -162,7 +162,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @see org.springframework.context.ResourceLoaderAware
 	 */
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
 

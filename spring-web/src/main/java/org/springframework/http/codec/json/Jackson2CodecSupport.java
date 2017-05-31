@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
@@ -80,7 +81,7 @@ public abstract class Jackson2CodecSupport {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
-	protected JavaType getJavaType(Type type, Class<?> contextClass) {
+	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}

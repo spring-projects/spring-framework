@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -124,7 +125,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 		this(new DefaultResourceLoader().getResource(location));
 	}
 
-	private ResourcePropertySource(String name, String resourceName, Map<String, Object> source) {
+	private ResourcePropertySource(String name, @Nullable String resourceName, Map<String, Object> source) {
 		super(name, source);
 		this.resourceName = resourceName;
 	}

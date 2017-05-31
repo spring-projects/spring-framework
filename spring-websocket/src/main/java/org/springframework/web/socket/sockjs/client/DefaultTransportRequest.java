@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -209,7 +210,7 @@ class DefaultTransportRequest implements TransportRequest {
 			handleFailure(null, true);
 		}
 
-		private void handleFailure(Throwable ex, boolean isTimeoutFailure) {
+		private void handleFailure(@Nullable Throwable ex, boolean isTimeoutFailure) {
 			if (this.handled.compareAndSet(false, true)) {
 				if (isTimeoutFailure) {
 					String message = "Connect timed out for " + DefaultTransportRequest.this;

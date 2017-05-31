@@ -32,6 +32,7 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.TaskTimeoutException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -94,7 +95,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 	}
 
 	@Override
-	public void doWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
+	public void doWork(Work work, long startTimeout, @Nullable ExecutionContext executionContext, @Nullable WorkListener workListener)
 			throws WorkException {
 
 		Assert.state(this.syncTaskExecutor != null, "No 'syncTaskExecutor' set");
@@ -107,7 +108,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 	}
 
 	@Override
-	public long startWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
+	public long startWork(Work work, long startTimeout, @Nullable ExecutionContext executionContext, @Nullable WorkListener workListener)
 			throws WorkException {
 
 		Assert.state(this.asyncTaskExecutor != null, "No 'asyncTaskExecutor' set");
@@ -120,7 +121,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 	}
 
 	@Override
-	public void scheduleWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
+	public void scheduleWork(Work work, long startTimeout, @Nullable ExecutionContext executionContext, @Nullable WorkListener workListener)
 			throws WorkException {
 
 		Assert.state(this.asyncTaskExecutor != null, "No 'asyncTaskExecutor' set");

@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.lang.Nullable;
 
 
 /**
@@ -62,7 +63,7 @@ public class SpelParserConfiguration {
 	 * @param compilerMode the compiler mode for the parser
 	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
 	 */
-	public SpelParserConfiguration(SpelCompilerMode compilerMode, ClassLoader compilerClassLoader) {
+	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, ClassLoader compilerClassLoader) {
 		this(compilerMode, compilerClassLoader, false, false, Integer.MAX_VALUE);
 	}
 

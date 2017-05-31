@@ -230,7 +230,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @return the converted null object
 	 */
 	@Nullable
-	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
+	protected Object convertNullSource(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType.getObjectType() == Optional.class) {
 			return Optional.empty();
 		}
@@ -317,7 +317,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		throw new ConverterNotFoundException(sourceType, targetType);
 	}
 
-	private Object handleResult(TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
+	private Object handleResult(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
 		if (result == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 		}

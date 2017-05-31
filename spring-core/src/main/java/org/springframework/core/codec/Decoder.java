@@ -58,7 +58,7 @@ public interface Decoder<T> {
 	 * @param hints additional information about how to do encode
 	 * @return the output stream with decoded elements
 	 */
-	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	Flux<T> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**

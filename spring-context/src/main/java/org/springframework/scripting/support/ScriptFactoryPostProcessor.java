@@ -228,7 +228,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 

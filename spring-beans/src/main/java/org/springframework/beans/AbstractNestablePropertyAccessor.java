@@ -189,7 +189,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
-	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
+	public void setWrappedInstance(Object object, String nestedPath, @Nullable Object rootObject) {
 		this.wrappedObject = ObjectUtils.unwrapOptional(object);
 		Assert.notNull(this.wrappedObject, "Target object must not be null");
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
@@ -567,7 +567,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return false;
 	}
 
-	private Object convertIfNecessary(String propertyName, Object oldValue, Object newValue, Class<?> requiredType,
+	private Object convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, Object newValue, Class<?> requiredType,
 			TypeDescriptor td) throws TypeMismatchException {
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(propertyName, oldValue, newValue, requiredType, td);
@@ -594,7 +594,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 	}
 
-	protected Object convertForProperty(String propertyName, Object oldValue, Object newValue, TypeDescriptor td)
+	protected Object convertForProperty(String propertyName, @Nullable Object oldValue, Object newValue, TypeDescriptor td)
 			throws TypeMismatchException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, td.getType(), td);
@@ -886,7 +886,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
 
-	private Object newValue(Class<?> type, TypeDescriptor desc, String name) {
+	private Object newValue(Class<?> type, @Nullable TypeDescriptor desc, String name) {
 		try {
 			if (type.isArray()) {
 				Class<?> componentType = type.getComponentType();

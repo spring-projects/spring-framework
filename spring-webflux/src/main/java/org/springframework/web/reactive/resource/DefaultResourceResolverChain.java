@@ -48,7 +48,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	public Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+	public Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations) {
 
 		ResourceResolver resolver = getNext();

@@ -52,7 +52,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Create a new {@link TypedStringValue} for the given String value.
 	 * @param value the String value
 	 */
-	public TypedStringValue(String value) {
+	public TypedStringValue(@Nullable String value) {
 		setValue(value);
 	}
 
@@ -62,7 +62,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @param value the String value
 	 * @param targetType the type to convert to
 	 */
-	public TypedStringValue(String value, Class<?> targetType) {
+	public TypedStringValue(@Nullable String value, Class<?> targetType) {
 		setValue(value);
 		setTargetType(targetType);
 	}
@@ -73,7 +73,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @param value the String value
 	 * @param targetTypeName the type to convert to
 	 */
-	public TypedStringValue(String value, String targetTypeName) {
+	public TypedStringValue(@Nullable String value, String targetTypeName) {
 		setValue(value);
 		setTargetTypeName(targetTypeName);
 	}
@@ -85,13 +85,14 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * for example in BeanFactoryPostProcessors.
 	 * @see PropertyPlaceholderConfigurer
 	 */
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 
 	/**
 	 * Return the String value.
 	 */
+	@Nullable
 	public String getValue() {
 		return this.value;
 	}

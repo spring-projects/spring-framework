@@ -105,7 +105,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>May be ignored by subclasses if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
 	 */
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;
 	}
 

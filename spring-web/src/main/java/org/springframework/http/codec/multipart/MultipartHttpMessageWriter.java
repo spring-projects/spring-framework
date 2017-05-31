@@ -110,7 +110,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) &&
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}

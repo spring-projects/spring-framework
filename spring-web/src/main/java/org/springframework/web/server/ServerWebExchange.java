@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -137,7 +138,7 @@ public interface ServerWebExchange {
 	 * determined for the underlying resource
 	 * @return true if the request does not require further processing.
 	 */
-	boolean checkNotModified(String etag, Instant lastModified);
+	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
 
 	/**

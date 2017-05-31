@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -217,7 +218,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @see #set(String, String)
 	 */
 	@Override
-	public void add(String headerName, String headerValue) {
+	public void add(String headerName, @Nullable String headerValue) {
 		this.headers.add(headerName, headerValue);
 	}
 

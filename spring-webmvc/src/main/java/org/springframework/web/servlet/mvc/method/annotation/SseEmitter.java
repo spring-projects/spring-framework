@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -103,7 +104,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 */
 	@Override
-	public void send(Object object, MediaType mediaType) throws IOException {
+	public void send(Object object, @Nullable MediaType mediaType) throws IOException {
 		if (object != null) {
 			send(event().data(object, mediaType));
 		}
@@ -173,7 +174,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		/**
 		 * Add an SSE "data" line.
 		 */
-		SseEventBuilder data(Object object, MediaType mediaType);
+		SseEventBuilder data(Object object, @Nullable MediaType mediaType);
 
 		/**
 		 * Return one or more Object-MediaType  pairs to write via
@@ -223,7 +224,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 
 		@Override
-		public SseEventBuilder data(Object object, MediaType mediaType) {
+		public SseEventBuilder data(Object object, @Nullable MediaType mediaType) {
 			append("data:");
 			saveAppendedText();
 			this.dataToSend.add(new DataWithMediaType(object, mediaType));

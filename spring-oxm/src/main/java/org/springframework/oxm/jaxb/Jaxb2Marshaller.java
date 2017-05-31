@@ -666,7 +666,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	@Override
-	public void marshal(Object graph, Result result, MimeContainer mimeContainer) throws XmlMappingException {
+	public void marshal(Object graph, Result result, @Nullable MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Marshaller marshaller = createMarshaller();
 			if (this.mtomEnabled && mimeContainer != null) {
@@ -753,7 +753,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	@Override
-	public Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException {
+	public Object unmarshal(Source source, @Nullable MimeContainer mimeContainer) throws XmlMappingException {
 		source = processSource(source);
 
 		try {

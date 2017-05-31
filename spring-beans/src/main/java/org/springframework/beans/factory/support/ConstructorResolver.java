@@ -823,7 +823,7 @@ class ConstructorResolver {
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
 	protected Object resolveAutowiredArgument(
-			MethodParameter param, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+			MethodParameter param, String beanName, @Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
 		if (InjectionPoint.class.isAssignableFrom(param.getParameterType())) {
 			InjectionPoint injectionPoint = currentInjectionPoint.get();

@@ -280,7 +280,7 @@ class ExtendedBeanInfo implements BeanInfo {
 			PropertyDescriptorUtils.copyNonMethodProperties(original, this);
 		}
 
-		public SimplePropertyDescriptor(String propertyName, Method readMethod, Method writeMethod) throws IntrospectionException {
+		public SimplePropertyDescriptor(String propertyName, @Nullable Method readMethod, Method writeMethod) throws IntrospectionException {
 			super(propertyName, null, null);
 			this.readMethod = readMethod;
 			this.writeMethod = writeMethod;
@@ -371,8 +371,8 @@ class ExtendedBeanInfo implements BeanInfo {
 			PropertyDescriptorUtils.copyNonMethodProperties(original, this);
 		}
 
-		public SimpleIndexedPropertyDescriptor(String propertyName, Method readMethod, Method writeMethod,
-				Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
+		public SimpleIndexedPropertyDescriptor(String propertyName, @Nullable Method readMethod, @Nullable Method writeMethod,
+				@Nullable Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
 
 			super(propertyName, null, null, null, null);
 			this.readMethod = readMethod;

@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketExtension;
@@ -72,7 +73,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			WebSocketHttpHeaders headers, URI uri) {
+			@Nullable WebSocketHttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 		assertUri(uri);

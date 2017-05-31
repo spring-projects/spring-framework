@@ -1040,7 +1040,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
+			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (Optional.class == descriptor.getDependencyType()) {
@@ -1065,7 +1065,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Nullable
 	public Object doResolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
+			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {

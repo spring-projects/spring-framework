@@ -34,6 +34,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -84,7 +85,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 
-	public void setRootObject(Object rootObject) {
+	public void setRootObject(@Nullable Object rootObject) {
 		this.rootObject = (rootObject != null ? new TypedValue(rootObject) : TypedValue.NULL);
 	}
 

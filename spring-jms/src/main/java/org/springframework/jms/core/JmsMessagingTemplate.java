@@ -28,6 +28,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -176,7 +177,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			convertAndSend(defaultDestination, payload, postProcessor);
@@ -211,8 +212,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public void convertAndSend(String destinationName, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Message<?> message = doConvert(payload, headers, postProcessor);
 		send(destinationName, message);
@@ -286,13 +287,13 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@Override
 	public <T> T convertSendAndReceive(String destinationName, Object request,
-			Map<String, Object> headers, Class<T> targetClass) throws MessagingException {
+			@Nullable Map<String, Object> headers, Class<T> targetClass) throws MessagingException {
 
 		return convertSendAndReceive(destinationName, request, headers, targetClass, null);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return convertSendAndReceive(defaultDestination, request, targetClass, postProcessor);
@@ -311,8 +312,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destinationName, requestMessage);

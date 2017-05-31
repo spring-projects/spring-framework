@@ -20,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Variant of the standard JMS {@link javax.jms.MessageListener} interface,
  * offering not only the received Message but also the underlying
@@ -52,6 +54,6 @@ public interface SessionAwareMessageListener<M extends Message> {
 	 * @param session the underlying JMS Session (never {@code null})
 	 * @throws JMSException if thrown by JMS methods
 	 */
-	void onMessage(M message, Session session) throws JMSException;
+	void onMessage(M message, @Nullable Session session) throws JMSException;
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for exceptions raised while processing SockJS HTTP requests.
@@ -45,7 +46,7 @@ public class SockJsException extends NestedRuntimeException {
 	 * @param sessionId the SockJS session id
 	 * @param cause the root cause
 	 */
-	public SockJsException(String message, String sessionId, Throwable cause) {
+	public SockJsException(String message, @Nullable String sessionId, @Nullable Throwable cause) {
 		super(message, cause);
 		this.sessionId = sessionId;
 	}

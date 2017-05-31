@@ -22,6 +22,7 @@ import java.sql.Savepoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
@@ -56,7 +57,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	private boolean savepointAllowed = false;
 
 
-	public void setConnectionHolder(ConnectionHolder connectionHolder) {
+	public void setConnectionHolder(@Nullable ConnectionHolder connectionHolder) {
 		this.connectionHolder = connectionHolder;
 	}
 

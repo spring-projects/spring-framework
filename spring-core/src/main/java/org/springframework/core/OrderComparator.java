@@ -74,7 +74,7 @@ public class OrderComparator implements Comparator<Object> {
 		return doCompare(o1, o2, null);
 	}
 
-	private int doCompare(Object o1, Object o2, OrderSourceProvider sourceProvider) {
+	private int doCompare(Object o1, Object o2, @Nullable OrderSourceProvider sourceProvider) {
 		boolean p1 = (o1 instanceof PriorityOrdered);
 		boolean p2 = (o2 instanceof PriorityOrdered);
 		if (p1 && !p2) {

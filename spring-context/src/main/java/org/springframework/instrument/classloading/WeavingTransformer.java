@@ -22,6 +22,8 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * ClassFileTransformer-based weaver, allowing for a list of transformers to be
  * applied on a class byte array. Normally used inside class loaders.
@@ -88,7 +90,7 @@ public class WeavingTransformer {
 	 * @param pd protection domain to be used (can be null)
 	 * @return (possibly transformed) class byte definition
 	 */
-	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, ProtectionDomain pd) {
+	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, @Nullable ProtectionDomain pd) {
 		byte[] result = bytes;
 		for (ClassFileTransformer cft : this.transformers) {
 			try {

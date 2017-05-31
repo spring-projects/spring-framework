@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,7 +55,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * @param value the value that will be set
 	 * @return {@code true} if the value was successfully set, else {@code false}
 	 */
-	public boolean set(T value) {
+	public boolean set(@Nullable T value) {
 		return this.settableTask.setResultValue(value);
 	}
 

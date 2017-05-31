@@ -125,7 +125,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	@Override
-	public void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
 		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
 	}
 
@@ -137,8 +137,8 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	}
 
 	@Override
-	public void convertAndSend(D destination, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Message<?> message = doConvert(payload, headers, postProcessor);
 		send(destination, message);

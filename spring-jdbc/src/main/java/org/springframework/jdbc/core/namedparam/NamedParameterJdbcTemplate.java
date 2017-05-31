@@ -37,6 +37,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -301,7 +302,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int update(
-			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
+			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, @Nullable String[] keyColumnNames)
 			throws DataAccessException {
 
 		ParsedSql parsedSql = getParsedSql(sql);

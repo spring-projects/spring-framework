@@ -48,7 +48,7 @@ public class ByteArrayDecoder extends AbstractDecoder<byte[]> {
 	}
 
 	@Override
-	public Flux<byte[]> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<byte[]> decode(Publisher<DataBuffer> inputStream,@Nullable  ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream).map((dataBuffer) -> {

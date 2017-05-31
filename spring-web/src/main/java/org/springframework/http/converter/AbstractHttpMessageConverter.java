@@ -191,7 +191,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Future implementations might add some default behavior, however.
 	 */
 	@Override
-	public final T read(Class<? extends T> clazz, HttpInputMessage inputMessage) throws IOException {
+	public final T read(@Nullable Class<? extends T> clazz, HttpInputMessage inputMessage) throws IOException {
 		return readInternal(clazz, inputMessage);
 	}
 

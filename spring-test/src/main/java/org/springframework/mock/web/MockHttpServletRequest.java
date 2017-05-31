@@ -873,7 +873,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
+	public AsyncContext startAsync(ServletRequest request, @Nullable ServletResponse response) {
 		Assert.state(this.asyncSupported, "Async not supported");
 		this.asyncStarted = true;
 		this.asyncContext = new MockAsyncContext(request, response);
@@ -1088,7 +1088,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.method;
 	}
 
-	public void setPathInfo(String pathInfo) {
+	public void setPathInfo(@Nullable String pathInfo) {
 		this.pathInfo = pathInfo;
 	}
 

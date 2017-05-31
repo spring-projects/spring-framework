@@ -28,6 +28,7 @@ import java.security.PrivilegedExceptionAction;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -147,7 +148,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	@Override
-	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
+	public void setWrappedInstance(Object object, String nestedPath, @Nullable Object rootObject) {
 		super.setWrappedInstance(object, nestedPath, rootObject);
 		setIntrospectionClass(getWrappedClass());
 	}

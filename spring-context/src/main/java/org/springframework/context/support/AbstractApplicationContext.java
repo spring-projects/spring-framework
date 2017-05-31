@@ -367,7 +367,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param eventType the resolved event type, if known
 	 * @since 4.2
 	 */
-	protected void publishEvent(Object event, ResolvableType eventType) {
+	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
 		Assert.notNull(event, "Event must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("Publishing event in " + getDisplayName() + ": " + event);
@@ -1250,7 +1250,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
 		return getMessageSource().getMessage(code, args, defaultMessage, locale);
 	}
 

@@ -106,7 +106,7 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	public List<Message<byte[]>> decode(ByteBuffer byteBuffer, MultiValueMap<String, String> partialMessageHeaders) {
+	public List<Message<byte[]>> decode(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> partialMessageHeaders) {
 		List<Message<byte[]>> messages = new ArrayList<>();
 		while (byteBuffer.hasRemaining()) {
 			Message<byte[]> message = decodeMessage(byteBuffer, partialMessageHeaders);

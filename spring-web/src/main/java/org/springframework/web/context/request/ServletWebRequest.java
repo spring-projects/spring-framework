@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -207,7 +208,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (this.notModified || HttpStatus.OK.value() != response.getStatus()) {
 			return this.notModified;

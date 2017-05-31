@@ -203,7 +203,7 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the response status
 	 * @param request the current request
 	 */
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {

@@ -23,6 +23,7 @@ import javax.jms.Session;
 import javax.jms.TransactionRolledBackException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -308,7 +309,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 		private JmsResourceHolder resourceHolder;
 
-		public void setResourceHolder(JmsResourceHolder resourceHolder) {
+		public void setResourceHolder(@Nullable JmsResourceHolder resourceHolder) {
 			this.resourceHolder = resourceHolder;
 		}
 

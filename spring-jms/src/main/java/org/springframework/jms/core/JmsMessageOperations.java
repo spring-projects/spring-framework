@@ -93,8 +93,8 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(String destinationName, Object payload, Map<String,
-			Object> headers, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(String destinationName, Object payload, @Nullable Map<String,
+			Object> headers, @Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination.
@@ -153,7 +153,7 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers, Class<T> targetClass)
+	<T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
 			throws MessagingException;
 
 	/**

@@ -120,7 +120,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Set a savepoint for this transaction. Useful for PROPAGATION_NESTED.
 	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
 	 */
-	protected void setSavepoint(Object savepoint) {
+	protected void setSavepoint(@Nullable Object savepoint) {
 		this.savepoint = savepoint;
 	}
 

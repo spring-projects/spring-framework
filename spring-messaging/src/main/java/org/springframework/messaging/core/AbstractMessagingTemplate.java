@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -56,12 +57,12 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass) {
+	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
 
@@ -72,8 +73,8 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);

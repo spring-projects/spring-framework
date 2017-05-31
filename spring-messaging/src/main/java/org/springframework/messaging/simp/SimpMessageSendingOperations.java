@@ -107,7 +107,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param headers the message headers
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 }

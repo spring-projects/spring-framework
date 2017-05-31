@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -89,7 +90,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
+	public <T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor) {
 		D destination = resolveDestination(destinationName);
 		super.convertAndSend(destination, payload, headers, postProcessor);
 	}

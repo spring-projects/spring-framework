@@ -17,6 +17,7 @@ package org.springframework.core;
 
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,7 +43,7 @@ public class ReactiveTypeDescriptor {
 	/**
 	 * Private constructor. See static factory methods.
 	 */
-	private ReactiveTypeDescriptor(Class<?> reactiveType, Supplier<?> emptySupplier,
+	private ReactiveTypeDescriptor(Class<?> reactiveType, @Nullable Supplier<?> emptySupplier,
 			boolean multiValue, boolean canBeEmpty, boolean noValue) {
 
 		Assert.notNull(reactiveType, "'reactiveType' must not be null");

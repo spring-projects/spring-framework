@@ -627,7 +627,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @throws DataAccessException if there is any problem
 	 */
 	public <T> T query(
-			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor<T> rse)
+			PreparedStatementCreator psc, @Nullable final PreparedStatementSetter pss, final ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		Assert.notNull(rse, "ResultSetExtractor must not be null");

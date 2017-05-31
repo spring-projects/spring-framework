@@ -145,7 +145,7 @@ class TypeConverterDelegate {
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T convertIfNecessary(String propertyName, @Nullable Object oldValue, Object newValue,
+	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, Object newValue,
 			@Nullable Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		// Custom editor for this type?

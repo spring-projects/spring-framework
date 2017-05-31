@@ -219,7 +219,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 */
 	private static EntityManager createProxy(
 			EntityManager rawEm, @Nullable Class<? extends EntityManager> emIfc, @Nullable ClassLoader cl,
-			PersistenceExceptionTranslator exceptionTranslator, @Nullable Boolean jta,
+			@Nullable PersistenceExceptionTranslator exceptionTranslator, @Nullable Boolean jta,
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");

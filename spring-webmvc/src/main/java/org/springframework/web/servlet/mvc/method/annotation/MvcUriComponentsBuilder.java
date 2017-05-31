@@ -159,7 +159,7 @@ public class MvcUriComponentsBuilder {
 	 * @param controllerType the controller to build a URI for
 	 * @return a UriComponentsBuilder instance (never {@code null})
 	 */
-	public static UriComponentsBuilder fromController(UriComponentsBuilder builder,
+	public static UriComponentsBuilder fromController(@Nullable UriComponentsBuilder builder,
 			Class<?> controllerType) {
 
 		builder = getBaseUrlToUse(builder);
@@ -328,7 +328,7 @@ public class MvcUriComponentsBuilder {
 	 * if there is no unique match
 	 * @since 4.2
 	 */
-	public static MethodArgumentBuilder fromMappingName(UriComponentsBuilder builder, String name) {
+	public static MethodArgumentBuilder fromMappingName(@Nullable UriComponentsBuilder builder, String name) {
 		RequestMappingInfoHandlerMapping handlerMapping = getRequestMappingInfoHandlerMapping();
 		List<HandlerMethod> handlerMethods = handlerMapping.getHandlerMethodsForMappingName(name);
 		if (handlerMethods == null) {
@@ -383,7 +383,7 @@ public class MvcUriComponentsBuilder {
 				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
 	}
 
-	private static UriComponentsBuilder fromMethodInternal(UriComponentsBuilder baseUrl,
+	private static UriComponentsBuilder fromMethodInternal(@Nullable UriComponentsBuilder baseUrl,
 			Class<?> controllerType, Method method, Object... args) {
 
 		baseUrl = getBaseUrlToUse(baseUrl);
@@ -692,7 +692,7 @@ public class MvcUriComponentsBuilder {
 		}
 
 		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
+		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
 			if (getControllerMethod.equals(method)) {
 				return this.controllerMethod;
 			}

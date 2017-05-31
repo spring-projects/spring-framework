@@ -206,7 +206,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 
 	@SuppressWarnings("unchecked")
-	private <T> T doGetSingleton(String name, Class<T> requiredType) throws NamingException {
+	private <T> T doGetSingleton(String name, @Nullable Class<T> requiredType) throws NamingException {
 		synchronized (this.singletonObjects) {
 			if (this.singletonObjects.containsKey(name)) {
 				Object jndiObject = this.singletonObjects.get(name);

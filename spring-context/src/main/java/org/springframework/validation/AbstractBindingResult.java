@@ -92,7 +92,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 
 	@Override
-	public void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
 	}
 

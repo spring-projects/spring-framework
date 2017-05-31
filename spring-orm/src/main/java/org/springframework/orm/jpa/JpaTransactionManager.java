@@ -622,7 +622,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		private Object transactionData;
 
 		public void setEntityManagerHolder(
-				EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
+				@Nullable EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
 			this.entityManagerHolder = entityManagerHolder;
 			this.newEntityManagerHolder = newEntityManagerHolder;
 		}

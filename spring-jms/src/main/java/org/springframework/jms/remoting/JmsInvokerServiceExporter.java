@@ -97,7 +97,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 
 	@Override
-	public void onMessage(Message requestMessage, Session session) throws JMSException {
+	public void onMessage(Message requestMessage, @Nullable Session session) throws JMSException {
 		RemoteInvocation invocation = readRemoteInvocation(requestMessage);
 		if (invocation != null) {
 			RemoteInvocationResult result = invokeAndCreateResult(invocation, this.proxy);

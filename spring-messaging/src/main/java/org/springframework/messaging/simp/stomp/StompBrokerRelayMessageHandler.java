@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -594,7 +595,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * Invoked when any TCP connectivity issue is detected, i.e. failure to establish
 		 * the TCP connection, failure to send a message, missed heartbeat, etc.
 		 */
-		protected void handleTcpConnectionFailure(String error, Throwable ex) {
+		protected void handleTcpConnectionFailure(String error, @Nullable Throwable ex) {
 			if (logger.isErrorEnabled()) {
 				logger.error("TCP connection failure in session " + this.sessionId + ": " + error, ex);
 			}
@@ -943,7 +944,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		protected void handleTcpConnectionFailure(String errorMessage, Throwable ex) {
+		protected void handleTcpConnectionFailure(String errorMessage, @Nullable Throwable ex) {
 			super.handleTcpConnectionFailure(errorMessage, ex);
 			publishBrokerUnavailableEvent();
 		}

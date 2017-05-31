@@ -107,7 +107,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
 	 * @param headers a map with headers to add
 	 */
-	public MessageHeaders(Map<String, Object> headers) {
+	public MessageHeaders(@Nullable Map<String, Object> headers) {
 		this(headers, null, null);
 	}
 
@@ -117,7 +117,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
-	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
+	protected MessageHeaders(@Nullable Map<String, Object> headers, UUID id, Long timestamp) {
 		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
 
 		if (id == null) {

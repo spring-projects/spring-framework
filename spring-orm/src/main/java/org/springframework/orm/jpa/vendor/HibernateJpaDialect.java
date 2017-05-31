@@ -326,7 +326,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		private final Integer previousIsolationLevel;
 
 		public SessionTransactionData(
-				Session session, FlushMode previousFlushMode, Connection preparedCon, Integer previousIsolationLevel) {
+				Session session, FlushMode previousFlushMode, @Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
 			this.preparedCon = preparedCon;

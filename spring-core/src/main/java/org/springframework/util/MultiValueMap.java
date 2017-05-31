@@ -42,7 +42,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @param key the key
 	 * @param value the value to be added
 	 */
-	void add(K key, V value);
+	void add(K key, @Nullable V value);
 
 	/**
 	 * Add all the values of the given list to the current list of values for the given key.

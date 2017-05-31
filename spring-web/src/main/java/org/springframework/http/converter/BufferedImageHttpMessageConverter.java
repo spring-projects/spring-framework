@@ -159,7 +159,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	@Override
-	public BufferedImage read(Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)
+	public BufferedImage read(@Nullable Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		ImageInputStream imageInputStream = null;

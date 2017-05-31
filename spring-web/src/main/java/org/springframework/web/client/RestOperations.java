@@ -593,8 +593,8 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException;
+	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, preparing the request with the
@@ -608,8 +608,8 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException;
+	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URL, preparing the request with the
@@ -621,7 +621,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(URI url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor) throws RestClientException;
+	<T> T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException;
 
 }

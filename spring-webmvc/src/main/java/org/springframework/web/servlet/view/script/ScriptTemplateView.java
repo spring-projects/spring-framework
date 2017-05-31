@@ -178,7 +178,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 * @since 4.2.1
 	 */
 	@Override
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
 		super.setContentType(contentType);
 	}
 

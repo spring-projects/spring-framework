@@ -123,7 +123,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found,
 	 * or if the method raised an exception
 	 */
-	public Object invokeForRequest(NativeWebRequest request, ModelAndViewContainer mavContainer,
+	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);

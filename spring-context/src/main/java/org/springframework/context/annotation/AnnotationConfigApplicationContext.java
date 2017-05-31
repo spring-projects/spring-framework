@@ -214,7 +214,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	@Override
-	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, Supplier<T> supplier,
+	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, @Nullable Supplier<T> supplier,
 			BeanDefinitionCustomizer... customizers) {
 
 		this.reader.doRegisterBean(beanClass, supplier, beanName, null, customizers);

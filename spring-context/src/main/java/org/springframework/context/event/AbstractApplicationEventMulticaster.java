@@ -208,7 +208,7 @@ public abstract class AbstractApplicationEventMulticaster
 	 * @return the pre-filtered list of application listeners for the given event and source type
 	 */
 	private Collection<ApplicationListener<?>> retrieveApplicationListeners(
-			ResolvableType eventType, Class<?> sourceType, ListenerRetriever retriever) {
+			ResolvableType eventType, Class<?> sourceType, @Nullable ListenerRetriever retriever) {
 
 		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 		Set<ApplicationListener<?>> listeners;

@@ -599,7 +599,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	private static void copyProperties(Object source, Object target, Class<?> editable, String... ignoreProperties)
+	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable, String... ignoreProperties)
 			throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");

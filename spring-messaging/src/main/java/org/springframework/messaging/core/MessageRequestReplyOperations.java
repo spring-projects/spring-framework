@@ -92,7 +92,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass)
+	<T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
 			throws MessagingException;
 
 	/**
@@ -108,7 +108,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor requestPostProcessor)
+	<T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor)
 			throws MessagingException;
 
 	/**
@@ -142,7 +142,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
+	<T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }

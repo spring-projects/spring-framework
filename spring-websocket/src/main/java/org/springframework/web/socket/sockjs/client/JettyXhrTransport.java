@@ -33,6 +33,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
@@ -134,7 +135,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
 	}
 
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, String body) {
+	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, @Nullable String body) {
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {

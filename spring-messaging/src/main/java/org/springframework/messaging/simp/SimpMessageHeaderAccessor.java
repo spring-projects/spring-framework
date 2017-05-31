@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.IdTimestampMessageHeaderInitializer;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -87,7 +88,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * A constructor for creating new message headers.
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	protected SimpMessageHeaderAccessor(SimpMessageType messageType, Map<String, List<String>> externalSourceHeaders) {
+	protected SimpMessageHeaderAccessor(SimpMessageType messageType, @Nullable Map<String, List<String>> externalSourceHeaders) {
 		super(externalSourceHeaders);
 		Assert.notNull(messageType, "MessageType must not be null");
 		setHeader(MESSAGE_TYPE_HEADER, messageType);
@@ -188,7 +189,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String getDetailedLogMessage(Object payload) {
+	public String getDetailedLogMessage(@Nullable Object payload) {
 		if (getMessageType() == null) {
 			return super.getDetailedLogMessage(payload);
 		}

@@ -362,7 +362,7 @@ public class MimeMessageHelper {
 	 * will be added to (can be the same as the root multipart object, or an element
 	 * nested underneath the root multipart element)
 	 */
-	protected final void setMimeMultiparts(@Nullable MimeMultipart root, MimeMultipart main) {
+	protected final void setMimeMultiparts(@Nullable MimeMultipart root, @Nullable MimeMultipart main) {
 		this.rootMimeMultipart = root;
 		this.mimeMultipart = main;
 	}

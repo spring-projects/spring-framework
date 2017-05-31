@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -95,7 +96,7 @@ public abstract class VfsUtils {
 		}
 	}
 
-	protected static Object invokeVfsMethod(Method method, Object target, Object... args) throws IOException {
+	protected static Object invokeVfsMethod(Method method, @Nullable Object target, Object... args) throws IOException {
 		try {
 			return method.invoke(target, args);
 		}

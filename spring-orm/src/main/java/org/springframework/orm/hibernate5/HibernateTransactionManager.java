@@ -785,7 +785,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			this.newSession = false;
 		}
 
-		public void setSessionHolder(SessionHolder sessionHolder) {
+		public void setSessionHolder(@Nullable SessionHolder sessionHolder) {
 			this.sessionHolder = sessionHolder;
 			this.newSessionHolder = false;
 			this.newSession = false;

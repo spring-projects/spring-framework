@@ -159,7 +159,7 @@ public interface StompSession {
 		 * to send to the server.
 		 * <p><strong>Note:</strong> There is no need to set the subscription id.
 		 */
-		void unsubscribe(StompHeaders stompHeaders);
+		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}
 
 }

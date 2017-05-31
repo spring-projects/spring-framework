@@ -21,6 +21,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -47,7 +48,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
+	public Resource resolveResource(@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
 			return null;

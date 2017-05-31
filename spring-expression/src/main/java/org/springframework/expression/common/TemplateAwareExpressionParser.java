@@ -24,6 +24,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
+import org.springframework.lang.Nullable;
 
 /**
  * An expression parser that understands templates. It can be subclassed by expression
@@ -255,7 +256,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @return an evaluator for the parsed expression
 	 * @throws ParseException an exception occurred during parsing
 	 */
-	protected abstract Expression doParseExpression(String expressionString, ParserContext context)
+	protected abstract Expression doParseExpression(String expressionString, @Nullable ParserContext context)
 			throws ParseException;
 
 

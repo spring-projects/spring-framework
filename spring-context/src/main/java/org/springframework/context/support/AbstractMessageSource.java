@@ -134,7 +134,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 
 	@Override
-	public final String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
+	public final String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;

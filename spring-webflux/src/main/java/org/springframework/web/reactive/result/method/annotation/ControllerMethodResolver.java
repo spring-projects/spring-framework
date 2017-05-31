@@ -38,6 +38,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -336,7 +337,7 @@ class ControllerMethodResolver {
 
 
 		private ArgumentResolverRegistrar(ArgumentResolverConfigurer resolvers,
-				ServerCodecConfigurer codecs, boolean modelAttribute) {
+				@Nullable ServerCodecConfigurer codecs, boolean modelAttribute) {
 
 			this.customResolvers = resolvers.getCustomResolvers();
 			this.messageReaders = codecs != null ? codecs.getReaders() : null;

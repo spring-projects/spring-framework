@@ -118,7 +118,7 @@ public class TypeDescriptor implements Serializable {
 	 * @param annotations the type annotations
 	 * @since 4.0
 	 */
-	protected TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, Annotation[] annotations) {
+	protected TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, @Nullable Annotation[] annotations) {
 		this.resolvableType = resolvableType;
 		this.type = (type != null ? type : resolvableType.resolve(Object.class));
 		this.annotatedElement = new AnnotatedElementAdapter(annotations);

@@ -28,6 +28,7 @@ import javax.enterprise.concurrent.ManagedTask;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.support.TaskExecutorAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
@@ -105,7 +106,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedExecutorService}
 	 * in order to expose {@link javax.enterprise.concurrent.ManagedTask} adapters for it.
 	 */
-	public final void setConcurrentExecutor(Executor concurrentExecutor) {
+	public final void setConcurrentExecutor(@Nullable Executor concurrentExecutor) {
 		if (concurrentExecutor != null) {
 			this.concurrentExecutor = concurrentExecutor;
 			if (managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(concurrentExecutor)) {

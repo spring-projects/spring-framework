@@ -135,7 +135,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * Instantiation should use the given constructor and parameters.
 	 */
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, String beanName, BeanFactory owner,
-			Constructor<?> ctor, Object... args) {
+			@Nullable Constructor<?> ctor, Object... args) {
 
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}

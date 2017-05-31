@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -229,7 +230,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param uriVariables URI variables to expand into the URL
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
-	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
+	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
 
 		return connect(url, handshakeHeaders, null, handler, uriVariables);
@@ -248,7 +249,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
-			StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
+			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
 
 		Assert.notNull(url, "'url' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).encode().toUri();

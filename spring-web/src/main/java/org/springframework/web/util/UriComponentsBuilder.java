@@ -155,7 +155,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param path the path to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
-	public static UriComponentsBuilder fromPath(String path) {
+	public static UriComponentsBuilder fromPath(@Nullable String path) {
 		UriComponentsBuilder builder = new UriComponentsBuilder();
 		builder.path(path);
 		return builder;

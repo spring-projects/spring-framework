@@ -760,7 +760,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public Message receiveSelected(final Destination destination, final String messageSelector) throws JmsException {
+	public Message receiveSelected(final Destination destination, @Nullable final String messageSelector) throws JmsException {
 		return execute(new SessionCallback<Message>() {
 			@Override
 			public Message doInJms(Session session) throws JMSException {
@@ -770,7 +770,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public Message receiveSelected(final String destinationName, final String messageSelector) throws JmsException {
+	public Message receiveSelected(final String destinationName, @Nullable final String messageSelector) throws JmsException {
 		return execute(new SessionCallback<Message>() {
 			@Override
 			public Message doInJms(Session session) throws JMSException {
@@ -1025,7 +1025,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public <T> T browseSelected(final Queue queue, final String messageSelector, final BrowserCallback<T> action)
+	public <T> T browseSelected(final Queue queue, @Nullable final String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
@@ -1044,7 +1044,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public <T> T browseSelected(final String queueName, final String messageSelector, final BrowserCallback<T> action)
+	public <T> T browseSelected(final String queueName, @Nullable final String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");

@@ -411,7 +411,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
-		public void add(K key, V value) {
+		public void add(K key, @Nullable V value) {
 			List<V> values = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			values.add(value);
 		}

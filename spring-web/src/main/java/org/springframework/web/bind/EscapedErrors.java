@@ -96,7 +96,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.source.reject(errorCode, errorArgs, defaultMessage);
 	}
 

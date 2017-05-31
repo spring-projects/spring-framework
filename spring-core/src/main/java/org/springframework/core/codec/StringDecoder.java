@@ -77,7 +77,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 	}
 
 	@Override
-	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<String> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);

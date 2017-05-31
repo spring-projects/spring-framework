@@ -39,6 +39,7 @@ import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -272,7 +273,7 @@ public abstract class YamlProcessor {
 		return result;
 	}
 
-	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, String path) {
+	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
 		for (Entry<String, Object> entry : source.entrySet()) {
 			String key = entry.getKey();
 			if (StringUtils.hasText(path)) {

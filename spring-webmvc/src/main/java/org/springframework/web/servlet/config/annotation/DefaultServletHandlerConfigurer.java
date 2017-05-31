@@ -71,7 +71,7 @@ public class DefaultServletHandlerConfigurer {
 	 * This is useful when the default Servlet cannot be auto-detected, for example when it has been manually configured.
 	 * @see DefaultServletHttpRequestHandler
 	 */
-	public void enable(String defaultServletName) {
+	public void enable(@Nullable String defaultServletName) {
 		handler = new DefaultServletHttpRequestHandler();
 		handler.setDefaultServletName(defaultServletName);
 		handler.setServletContext(servletContext);

@@ -22,6 +22,7 @@ import javax.jms.Session;
 import org.springframework.core.MethodParameter;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
@@ -61,7 +62,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 
 	@Override
-	public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
+	public void onMessage(javax.jms.Message jmsMessage, @Nullable Session session) throws JMSException {
 		Message<?> message = toMessagingMessage(jmsMessage);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing [" + message + "]");

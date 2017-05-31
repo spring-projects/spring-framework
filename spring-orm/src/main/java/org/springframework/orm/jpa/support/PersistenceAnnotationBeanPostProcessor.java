@@ -379,7 +379,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
-	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, PropertyValues pvs) {
+	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -631,7 +631,7 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		private Properties properties;
 
-		public PersistenceElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
+		public PersistenceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
 			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);

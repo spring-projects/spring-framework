@@ -256,7 +256,7 @@ public abstract class NamedParameterUtils {
 	 * @return the SQL statement with substituted parameters
 	 * @see #parseSqlStatement
 	 */
-	public static String substituteNamedParameters(ParsedSql parsedSql, SqlParameterSource paramSource) {
+	public static String substituteNamedParameters(ParsedSql parsedSql, @Nullable SqlParameterSource paramSource) {
 		String originalSql = parsedSql.getOriginalSql();
 		StringBuilder actualSql = new StringBuilder();
 		List<String> paramNames = parsedSql.getParameterNames();

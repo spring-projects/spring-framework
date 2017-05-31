@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
  *
@@ -187,7 +189,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
+	protected boolean doMatch(String pattern, String path, boolean fullMatch, @Nullable Map<String, String> uriTemplateVariables) {
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}

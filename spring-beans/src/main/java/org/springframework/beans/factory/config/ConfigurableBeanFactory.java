@@ -102,7 +102,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * then removed once the BeanFactory completes its bootstrap phase.
 	 * @since 2.5
 	 */
-	void setTempClassLoader(ClassLoader tempClassLoader);
+	void setTempClassLoader(@Nullable ClassLoader tempClassLoader);
 
 	/**
 	 * Return the temporary ClassLoader to use for type matching purposes,

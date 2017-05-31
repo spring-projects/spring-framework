@@ -498,8 +498,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #prepareTransactionStatus
 	 */
 	protected final DefaultTransactionStatus prepareTransactionStatus(
-			TransactionDefinition definition, Object transaction, boolean newTransaction,
-			boolean newSynchronization, boolean debug, Object suspendedResources) {
+			TransactionDefinition definition, @Nullable Object transaction, boolean newTransaction,
+			boolean newSynchronization, boolean debug, @Nullable Object suspendedResources) {
 
 		DefaultTransactionStatus status = newTransactionStatus(
 				definition, transaction, newTransaction, newSynchronization, debug, suspendedResources);
@@ -512,7 +512,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected DefaultTransactionStatus newTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
-			boolean newSynchronization, boolean debug, Object suspendedResources) {
+			boolean newSynchronization, boolean debug, @Nullable Object suspendedResources) {
 
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
@@ -610,7 +610,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doResume
 	 * @see #suspend
 	 */
-	protected final void resume(Object transaction, @Nullable SuspendedResourcesHolder resourcesHolder)
+	protected final void resume(@Nullable Object transaction, @Nullable SuspendedResourcesHolder resourcesHolder)
 			throws TransactionException {
 
 		if (resourcesHolder != null) {

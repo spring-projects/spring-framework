@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
@@ -91,7 +92,7 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 	@Override
-	public void dispatch(ServletContext context, String path) {
+	public void dispatch(@Nullable ServletContext context, String path) {
 		this.dispatchedPath = path;
 		for (Runnable r : this.dispatchHandlers) {
 			r.run();

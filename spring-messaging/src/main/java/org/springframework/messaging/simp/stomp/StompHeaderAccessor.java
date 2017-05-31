@@ -112,7 +112,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * A constructor for creating message headers from a parsed STOMP frame.
 	 */
-	StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
+	StompHeaderAccessor(StompCommand command, @Nullable Map<String, List<String>> externalSourceHeaders) {
 		super(command.getMessageType(), externalSourceHeaders);
 		setHeader(COMMAND_HEADER, command);
 		updateSimpMessageHeadersFromStompHeaders();
@@ -419,7 +419,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	@Override
-	public String getDetailedLogMessage(Object payload) {
+	public String getDetailedLogMessage(@Nullable Object payload) {
 		if (isHeartbeat()) {
 			return "heart-beat in session " + getSessionId();
 		}

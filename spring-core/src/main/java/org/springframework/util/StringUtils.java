@@ -1065,7 +1065,7 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Properties splitArrayElementsIntoProperties(
-			String[] array, String delimiter, String charsToDelete) {
+			String[] array, String delimiter, @Nullable String charsToDelete) {
 
 		if (ObjectUtils.isEmpty(array)) {
 			return null;
@@ -1179,7 +1179,7 @@ public abstract class StringUtils {
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
+	public static String[] delimitedListToStringArray(String str, String delimiter, @Nullable String charsToDelete) {
 		if (str == null) {
 			return new String[0];
 		}

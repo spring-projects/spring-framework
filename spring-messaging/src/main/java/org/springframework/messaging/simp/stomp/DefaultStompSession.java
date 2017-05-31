@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -243,7 +244,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Message<byte[]> createMessage(StompHeaderAccessor accessor, Object payload) {
+	private Message<byte[]> createMessage(StompHeaderAccessor accessor, @Nullable Object payload) {
 		accessor.updateSimpMessageHeadersFromStompHeaders();
 		Message<byte[]> message;
 		if (payload == null) {
@@ -635,7 +636,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
-		public void unsubscribe(StompHeaders stompHeaders) {
+		public void unsubscribe(@Nullable StompHeaders stompHeaders) {
 			String id = this.headers.getId();
 			DefaultStompSession.this.subscriptions.remove(id);
 			DefaultStompSession.this.unsubscribe(id, stompHeaders);

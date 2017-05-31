@@ -517,7 +517,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final Map<String, String> matchingVariables;
 
-		PathRemainingMatchInfo(String pathRemaining) {
+		PathRemainingMatchInfo(@Nullable String pathRemaining) {
 			this(pathRemaining, Collections.emptyMap());
 		}
 

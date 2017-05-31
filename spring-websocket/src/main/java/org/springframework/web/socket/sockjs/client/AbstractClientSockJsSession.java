@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
@@ -308,7 +309,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 		}
 	}
 
-	public void afterTransportClosed(CloseStatus closeStatus) {
+	public void afterTransportClosed(@Nullable CloseStatus closeStatus) {
 		this.closeStatus = (this.closeStatus != null ? this.closeStatus : closeStatus);
 		Assert.state(this.closeStatus != null, "CloseStatus not available");
 		if (logger.isDebugEnabled()) {

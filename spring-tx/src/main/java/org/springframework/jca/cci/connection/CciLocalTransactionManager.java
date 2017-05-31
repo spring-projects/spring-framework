@@ -23,6 +23,7 @@ import javax.resource.cci.ConnectionFactory;
 import javax.resource.spi.LocalTransactionException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -262,7 +263,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 		private ConnectionHolder connectionHolder;
 
-		public void setConnectionHolder(ConnectionHolder connectionHolder) {
+		public void setConnectionHolder(@Nullable ConnectionHolder connectionHolder) {
 			this.connectionHolder = connectionHolder;
 		}
 

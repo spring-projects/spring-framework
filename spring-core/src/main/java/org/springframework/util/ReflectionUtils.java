@@ -238,7 +238,7 @@ public abstract class ReflectionUtils {
 	 * @see #invokeJdbcMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	@Nullable
-	public static Object invokeJdbcMethod(Method method, Object target) throws SQLException {
+	public static Object invokeJdbcMethod(Method method, @Nullable Object target) throws SQLException {
 		return invokeJdbcMethod(method, target, new Object[0]);
 	}
 
@@ -547,7 +547,7 @@ public abstract class ReflectionUtils {
 	 * @param mf the filter that determines the methods to apply the callback to
 	 * @throws IllegalStateException if introspection fails
 	 */
-	public static void doWithMethods(Class<?> clazz, MethodCallback mc, MethodFilter mf) {
+	public static void doWithMethods(Class<?> clazz, MethodCallback mc, @Nullable MethodFilter mf) {
 		// Keep backing up the inheritance hierarchy.
 		Method[] methods = getDeclaredMethods(clazz);
 		for (Method method : methods) {
@@ -720,7 +720,7 @@ public abstract class ReflectionUtils {
 	 * @param ff the filter that determines the fields to apply the callback to
 	 * @throws IllegalStateException if introspection fails
 	 */
-	public static void doWithFields(Class<?> clazz, FieldCallback fc, FieldFilter ff) {
+	public static void doWithFields(Class<?> clazz, FieldCallback fc, @Nullable FieldFilter ff) {
 		// Keep backing up the inheritance hierarchy.
 		Class<?> targetClass = clazz;
 		do {

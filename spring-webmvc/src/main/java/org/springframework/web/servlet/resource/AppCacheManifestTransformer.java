@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -212,7 +213,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		private final Resource resource;
 
 
-		public LineOutput(String line, Resource resource) {
+		public LineOutput(String line, @Nullable Resource resource) {
 			this.line = line;
 			this.resource = resource;
 		}

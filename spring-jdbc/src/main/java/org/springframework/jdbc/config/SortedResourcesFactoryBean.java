@@ -31,6 +31,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} implementation that takes a list of location Strings
@@ -60,7 +61,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 
 
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 

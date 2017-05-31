@@ -43,7 +43,7 @@ public interface ResourceResolverChain {
 	 * @return the resolved resource or {@code null} if unresolved
 	 */
 	@Nullable
-	Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations);
+	Resource resolveResource(@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations);
 
 	/**
 	 * Resolve the externally facing <em>public</em> URL path for clients to use

@@ -749,7 +749,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @throws javax.management.MalformedObjectNameException
 	 * if the retrieved {@code ObjectName} is malformed
 	 */
-	protected ObjectName getObjectName(Object bean, String beanKey) throws MalformedObjectNameException {
+	protected ObjectName getObjectName(Object bean, @Nullable String beanKey) throws MalformedObjectNameException {
 		if (bean instanceof SelfNaming) {
 			return ((SelfNaming) bean).getObjectName();
 		}

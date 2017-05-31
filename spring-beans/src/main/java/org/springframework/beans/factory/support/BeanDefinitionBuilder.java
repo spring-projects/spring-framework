@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -93,7 +94,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClassName the class name for the bean that the definition is being created for
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, String factoryMethodName) {
+	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, @Nullable String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClassName(beanClassName);
@@ -114,7 +115,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, String factoryMethodName) {
+	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, @Nullable String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);

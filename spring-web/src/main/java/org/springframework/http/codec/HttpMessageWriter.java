@@ -54,7 +54,7 @@ public interface HttpMessageWriter<T> {
 	 * @param mediaType the media type for the write, possibly {@code null}
 	 * @return {@code true} if writable, {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType elementType, MediaType mediaType);
+	boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
 	 * Write an given stream of object to the output message.
@@ -85,7 +85,7 @@ public interface HttpMessageWriter<T> {
 	 * @param response the current response
 	 * @return a {@link Mono} that indicates completion of writing or error
 	 */
-	default Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
+	default Mono<Void> write(Publisher<? extends T> inputStream, @Nullable ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 

@@ -160,7 +160,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmpty(
-			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
@@ -240,7 +240,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);

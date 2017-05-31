@@ -18,6 +18,7 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,7 +88,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @throws NamingException if the JNDI lookup failed
 	 * @see #setResourceRef
 	 */
-	protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+	protected <T> T lookup(String jndiName, @Nullable Class<T> requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String convertedName = convertJndiName(jndiName);
 		T jndiObject;

@@ -442,7 +442,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public <T> T get(final Class<T> entityClass, final Serializable id, final LockMode lockMode)
+	public <T> T get(final Class<T> entityClass, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		return executeWithNativeSession(new HibernateCallback<T>() {
@@ -464,7 +464,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public Object get(final String entityName, final Serializable id, final LockMode lockMode)
+	public Object get(final String entityName, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		return executeWithNativeSession(new HibernateCallback<Object>() {
@@ -486,7 +486,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public <T> T load(final Class<T> entityClass, final Serializable id, final LockMode lockMode)
+	public <T> T load(final Class<T> entityClass, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		return executeWithNativeSession(new HibernateCallback<T>() {
@@ -508,7 +508,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public Object load(final String entityName, final Serializable id, final LockMode lockMode)
+	public Object load(final String entityName, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		return executeWithNativeSession(new HibernateCallback<Object>() {
@@ -555,7 +555,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public void refresh(final Object entity, final LockMode lockMode) throws DataAccessException {
+	public void refresh(final Object entity, @Nullable final LockMode lockMode) throws DataAccessException {
 		executeWithNativeSession(new HibernateCallback<Object>() {
 			@Override
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -668,7 +668,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public void update(final Object entity, final LockMode lockMode) throws DataAccessException {
+	public void update(final Object entity, @Nullable final LockMode lockMode) throws DataAccessException {
 		executeWithNativeSession(new HibernateCallback<Object>() {
 			@Override
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -688,7 +688,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public void update(final String entityName, final Object entity, final LockMode lockMode)
+	public void update(final String entityName, final Object entity, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		executeWithNativeSession(new HibernateCallback<Object>() {
@@ -810,7 +810,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
+	public void delete(final Object entity, @Nullable final LockMode lockMode) throws DataAccessException {
 		executeWithNativeSession(new HibernateCallback<Object>() {
 			@Override
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -830,7 +830,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	public void delete(final String entityName, final Object entity, final LockMode lockMode)
+	public void delete(final String entityName, final Object entity, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
 		executeWithNativeSession(new HibernateCallback<Object>() {
@@ -1074,7 +1074,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	@Override
 	@SuppressWarnings("deprecation")
 	public <T> List<T> findByExample(
-			final String entityName, final T exampleEntity, final int firstResult, final int maxResults)
+			@Nullable final String entityName, final T exampleEntity, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
 		Assert.notNull(exampleEntity, "Example entity must not be null");

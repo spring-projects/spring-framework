@@ -303,7 +303,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
-	public String getMessage(String code, @Nullable Object args[], String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object args[], @Nullable String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
@@ -400,13 +400,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) {
+		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
-				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+				@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 

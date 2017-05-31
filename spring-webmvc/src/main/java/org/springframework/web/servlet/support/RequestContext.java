@@ -222,7 +222,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
 	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
 	 */
-	protected void initContext(HttpServletRequest request, HttpServletResponse response, @Nullable ServletContext servletContext,
+	protected void initContext(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable ServletContext servletContext,
 			@Nullable Map<String, Object> model) {
 
 		this.request = request;

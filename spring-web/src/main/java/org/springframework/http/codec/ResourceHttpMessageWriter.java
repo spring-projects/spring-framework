@@ -93,7 +93,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return this.encoder.canEncode(elementType, mediaType);
 	}
 
@@ -152,7 +152,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		return OptionalLong.empty();
 	}
 
-	private static Optional<Mono<Void>> zeroCopy(Resource resource, ResourceRegion region,
+	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
 			ReactiveHttpOutputMessage message) {
 
 		if (message instanceof ZeroCopyHttpOutputMessage) {

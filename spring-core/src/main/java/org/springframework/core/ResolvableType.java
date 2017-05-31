@@ -146,7 +146,7 @@ public class ResolvableType implements Serializable {
 	 * with upfront resolution and a pre-calculated hash.
 	 * @since 4.2
 	 */
-	private ResolvableType(Type type, TypeProvider typeProvider, VariableResolver variableResolver, Integer hash) {
+	private ResolvableType(@Nullable Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver, Integer hash) {
 		this.type = type;
 		this.typeProvider = typeProvider;
 		this.variableResolver = variableResolver;
@@ -160,7 +160,7 @@ public class ResolvableType implements Serializable {
 	 * with upfront resolution but lazily calculated hash.
 	 */
 	private ResolvableType(
-			Type type, TypeProvider typeProvider, VariableResolver variableResolver, ResolvableType componentType) {
+			Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver, ResolvableType componentType) {
 
 		this.type = type;
 		this.typeProvider = typeProvider;
@@ -257,7 +257,7 @@ public class ResolvableType implements Serializable {
 		return isAssignableFrom(other, null);
 	}
 
-	private boolean isAssignableFrom(ResolvableType other, Map<Type, Type> matchedBefore) {
+	private boolean isAssignableFrom(ResolvableType other, @Nullable Map<Type, Type> matchedBefore) {
 		Assert.notNull(other, "ResolvableType must not be null");
 
 		// If we cannot resolve types, we are not assignable
@@ -700,7 +700,7 @@ public class ResolvableType implements Serializable {
 	 * @see #getGenerics()
 	 * @see #resolve()
 	 */
-	public Class<?>[] resolveGenerics(Class<?> fallback) {
+	public Class<?>[] resolveGenerics(@Nullable Class<?> fallback) {
 		ResolvableType[] generics = getGenerics();
 		Class<?>[] resolvedGenerics = new Class<?>[generics.length];
 		for (int i = 0; i < generics.length; i++) {

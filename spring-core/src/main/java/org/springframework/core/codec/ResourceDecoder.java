@@ -55,7 +55,7 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	}
 
 	@Override
-	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(decodeToMono(inputStream, elementType, mimeType, hints));

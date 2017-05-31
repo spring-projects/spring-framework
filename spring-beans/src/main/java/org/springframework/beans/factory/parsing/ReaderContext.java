@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * Context that gets passed along a bean definition reading process,
@@ -59,11 +60,11 @@ public class ReaderContext {
 		fatal(message, source, null, ex);
 	}
 
-	public void fatal(String message, Object source, ParseState parseState) {
+	public void fatal(String message, Object source, @Nullable ParseState parseState) {
 		fatal(message, source, parseState, null);
 	}
 
-	public void fatal(String message, Object source, ParseState parseState, Throwable cause) {
+	public void fatal(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.fatal(new Problem(message, location, parseState, cause));
 	}
@@ -72,15 +73,15 @@ public class ReaderContext {
 		error(message, source, null, null);
 	}
 
-	public void error(String message, Object source, Throwable ex) {
+	public void error(String message, Object source, @Nullable Throwable ex) {
 		error(message, source, null, ex);
 	}
 
-	public void error(String message, Object source, ParseState parseState) {
+	public void error(String message, Object source, @Nullable ParseState parseState) {
 		error(message, source, parseState, null);
 	}
 
-	public void error(String message, Object source, ParseState parseState, Throwable cause) {
+	public void error(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.error(new Problem(message, location, parseState, cause));
 	}
@@ -89,15 +90,15 @@ public class ReaderContext {
 		warning(message, source, null, null);
 	}
 
-	public void warning(String message, Object source, Throwable ex) {
+	public void warning(String message, Object source, @Nullable Throwable ex) {
 		warning(message, source, null, ex);
 	}
 
-	public void warning(String message, Object source, ParseState parseState) {
+	public void warning(String message, Object source, @Nullable ParseState parseState) {
 		warning(message, source, parseState, null);
 	}
 
-	public void warning(String message, Object source, ParseState parseState, Throwable cause) {
+	public void warning(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.warning(new Problem(message, location, parseState, cause));
 	}

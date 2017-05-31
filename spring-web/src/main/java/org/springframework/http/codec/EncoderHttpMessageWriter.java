@@ -86,7 +86,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return this.encoder.canEncode(elementType, mediaType);
 	}
 
@@ -139,7 +139,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	// Server side only...
 
 	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
+	public Mono<Void> write(Publisher<? extends T> inputStream, @Nullable ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 

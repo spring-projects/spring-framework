@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -151,12 +152,12 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
-	public boolean checkNotModified(String eTag) {
+	public boolean checkNotModified(@Nullable String eTag) {
 		return false;
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		return false;
 	}
 

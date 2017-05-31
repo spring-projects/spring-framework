@@ -91,7 +91,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Class<?> outputClass = elementType.getRawClass();

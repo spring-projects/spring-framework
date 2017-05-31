@@ -39,6 +39,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -215,7 +216,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, Instant lastModified) {
+	public boolean checkNotModified(@Nullable String etag, Instant lastModified) {
 		HttpStatus status = getResponse().getStatusCode();
 		if (this.notModified || (status != null && !HttpStatus.OK.equals(status))) {
 			return this.notModified;

@@ -115,7 +115,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
-	public void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.bindingResult.reject(errorCode, errorArgs, defaultMessage);
 	}
 

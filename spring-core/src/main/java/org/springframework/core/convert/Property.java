@@ -63,7 +63,7 @@ public final class Property {
 	private Annotation[] annotations;
 
 
-	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
+	public Property(Class<?> objectType, @Nullable Method readMethod, @Nullable Method writeMethod) {
 		this(objectType, readMethod, writeMethod, null);
 	}
 

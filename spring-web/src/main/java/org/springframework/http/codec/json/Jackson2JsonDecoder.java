@@ -83,7 +83,7 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
+	public Flux<Object> decode(Publisher<DataBuffer> input, @Nullable ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return decodeInternal(this.fluxDecoder, input, elementType, mimeType, hints);

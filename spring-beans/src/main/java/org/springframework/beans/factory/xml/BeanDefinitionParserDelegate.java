@@ -309,7 +309,7 @@ public class BeanDefinitionParserDelegate {
 	 * @see #populateDefaults(DocumentDefaultsDefinition, DocumentDefaultsDefinition, org.w3c.dom.Element)
 	 * @see #getDefaults()
 	 */
-	public void initDefaults(Element root, BeanDefinitionParserDelegate parent) {
+	public void initDefaults(Element root, @Nullable BeanDefinitionParserDelegate parent) {
 		populateDefaults(this.defaults, (parent != null ? parent.defaults : null), root);
 		this.readerContext.fireDefaultsRegistered(this.defaults);
 	}
@@ -417,7 +417,7 @@ public class BeanDefinitionParserDelegate {
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
 	@Nullable
-	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, BeanDefinition containingBean) {
+	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -907,7 +907,7 @@ public class BeanDefinitionParserDelegate {
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
 	@Nullable
-	public Object parsePropertyValue(Element ele, BeanDefinition bd, String propertyName) {
+	public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
 		String elementName = (propertyName != null) ?
 						"<property> element for property '" + propertyName + "'" :
 						"<constructor-arg> element";
@@ -961,7 +961,7 @@ public class BeanDefinitionParserDelegate {
 		}
 	}
 
-	public Object parsePropertySubElement(Element ele, BeanDefinition bd) {
+	public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd) {
 		return parsePropertySubElement(ele, bd, null);
 	}
 
@@ -973,7 +973,7 @@ public class BeanDefinitionParserDelegate {
 	 * {@code <value>} tag that might be created
 	 */
 	@Nullable
-	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
+	public Object parsePropertySubElement(Element ele, BeanDefinition bd, @Nullable String defaultValueType) {
 		if (!isDefaultNamespace(ele)) {
 			return parseNestedCustomElement(ele, bd);
 		}
@@ -1355,7 +1355,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	@Nullable
-	public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
+	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
 		String namespaceUri = getNamespaceURI(ele);
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
@@ -1370,7 +1370,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(
-			Element ele, BeanDefinitionHolder definitionHolder, BeanDefinition containingBd) {
+			Element ele, BeanDefinitionHolder definitionHolder, @Nullable BeanDefinition containingBd) {
 
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 

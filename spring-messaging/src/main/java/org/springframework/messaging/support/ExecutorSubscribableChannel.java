@@ -169,7 +169,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			return message;
 		}
 
-		private void triggerAfterMessageHandled(Message<?> message, Exception ex) {
+		private void triggerAfterMessageHandled(Message<?> message, @Nullable Exception ex) {
 			for (int i = this.interceptorIndex; i >= 0; i--) {
 				ExecutorChannelInterceptor interceptor = executorInterceptors.get(i);
 				try {

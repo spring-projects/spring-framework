@@ -26,6 +26,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -195,7 +196,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void onMessage(Message message, Session session) throws JMSException {
+	public void onMessage(Message message, @Nullable Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.
 		Object delegate = getDelegate();

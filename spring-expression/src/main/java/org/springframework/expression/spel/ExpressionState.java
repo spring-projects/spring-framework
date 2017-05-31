@@ -217,7 +217,7 @@ public class ExpressionState {
 		return null;
 	}
 
-	public TypedValue operate(Operation op, Object left, Object right) throws EvaluationException {
+	public TypedValue operate(Operation op, Object left, @Nullable Object right) throws EvaluationException {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
 			Object returnValue = overloader.operate(op, left, right);

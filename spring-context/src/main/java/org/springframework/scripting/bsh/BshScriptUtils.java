@@ -85,7 +85,7 @@ public abstract class BshScriptUtils {
 	 * @return the scripted Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	public static Object createBshObject(String scriptSource, @Nullable Class<?>[] scriptInterfaces, ClassLoader classLoader)
+	public static Object createBshObject(String scriptSource, @Nullable Class<?>[] scriptInterfaces, @Nullable ClassLoader classLoader)
 			throws EvalError {
 
 		Object result = evaluateBshScript(scriptSource, scriptInterfaces, classLoader);

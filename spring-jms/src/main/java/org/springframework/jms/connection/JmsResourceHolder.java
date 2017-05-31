@@ -134,7 +134,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		addSession(session, null);
 	}
 
-	public final void addSession(Session session, Connection connection) {
+	public final void addSession(Session session, @Nullable Connection connection) {
 		Assert.isTrue(!this.frozen, "Cannot add Session because JmsResourceHolder is frozen");
 		Assert.notNull(session, "Session must not be null");
 		if (!this.sessions.contains(session)) {
@@ -171,7 +171,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		return getSession(sessionType, null);
 	}
 
-	public Session getSession(Class<? extends Session> sessionType, Connection connection) {
+	public Session getSession(Class<? extends Session> sessionType, @Nullable Connection connection) {
 		List<Session> sessions = this.sessions;
 		if (connection != null) {
 			sessions = this.sessionsPerConnection.get(connection);

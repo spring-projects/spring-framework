@@ -236,7 +236,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	@Override
-	public MultiValueMap<String, String> read(Class<? extends MultiValueMap<String, ?>> clazz,
+	public MultiValueMap<String, String> read(@Nullable Class<? extends MultiValueMap<String, ?>> clazz,
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();

@@ -450,7 +450,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		return isDependent(beanName, dependentBeanName, null);
 	}
 
-	private boolean isDependent(String beanName, String dependentBeanName, Set<String> alreadySeen) {
+	private boolean isDependent(String beanName, String dependentBeanName, @Nullable Set<String> alreadySeen) {
 		if (alreadySeen != null && alreadySeen.contains(beanName)) {
 			return false;
 		}

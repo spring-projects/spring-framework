@@ -400,7 +400,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		private MessageConsumer getCachedConsumer(
-				Destination dest, String selector, Boolean noLocal, String subscription, boolean durable) throws JMSException {
+				Destination dest, String selector, @Nullable Boolean noLocal, @Nullable String subscription, boolean durable) throws JMSException {
 
 			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription, durable);
 			MessageConsumer consumer = this.cachedConsumers.get(cacheKey);

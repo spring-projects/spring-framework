@@ -87,7 +87,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return (mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
 				ServerSentEvent.class.isAssignableFrom(elementType.resolve(Object.class)));
 	}
@@ -170,7 +170,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,
+	public Mono<Void> write(Publisher<?> input, @Nullable ResolvableType actualType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
 			Map<String, Object> hints) {
 

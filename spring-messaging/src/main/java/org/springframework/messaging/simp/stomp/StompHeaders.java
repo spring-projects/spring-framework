@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
@@ -396,7 +397,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @see #set(String, String)
 	 */
 	@Override
-	public void add(String headerName, String headerValue) {
+	public void add(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
 	}

@@ -21,6 +21,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -44,7 +45,7 @@ public abstract class ExpressionUtils {
 	 * of the value to the specified type is not supported
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
+	public static <T> T convertTypedValue(@Nullable EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
 		Object value = typedValue.getValue();
 		if (targetType == null) {
 			return (T) value;

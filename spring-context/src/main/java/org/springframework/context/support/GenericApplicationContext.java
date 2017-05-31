@@ -419,7 +419,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, Supplier<T> supplier,
+	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, @Nullable Supplier<T> supplier,
 			BeanDefinitionCustomizer... customizers) {
 
 		Assert.isTrue(beanName != null || beanClass != null, "Either bean name or bean class must be specified");

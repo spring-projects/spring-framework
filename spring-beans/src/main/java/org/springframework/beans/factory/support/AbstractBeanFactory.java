@@ -230,7 +230,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(
-			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
+			final String name, @Nullable final Class<T> requiredType, @Nullable final Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
 		final String beanName = transformedBeanName(name);
@@ -708,7 +708,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public void setTempClassLoader(ClassLoader tempClassLoader) {
+	public void setTempClassLoader(@Nullable ClassLoader tempClassLoader) {
 		this.tempClassLoader = tempClassLoader;
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.expression;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -43,7 +44,7 @@ public class TypedValue {
 	 * is inferred from the object, so no generic declarations are preserved.
 	 * @param value the object value
 	 */
-	public TypedValue(Object value) {
+	public TypedValue(@Nullable Object value) {
 		this.value = value;
 		this.typeDescriptor = null;  // initialized when/if requested
 	}
@@ -54,12 +55,13 @@ public class TypedValue {
 	 * @param value the object value
 	 * @param typeDescriptor a type descriptor describing the type of the value
 	 */
-	public TypedValue(Object value, TypeDescriptor typeDescriptor) {
+	public TypedValue(@Nullable Object value, @Nullable TypeDescriptor typeDescriptor) {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
 
 
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}

@@ -677,7 +677,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		marshalOutputStream(graph, outputStream, null);
 	}
 
-	public void marshalOutputStream(Object graph, OutputStream outputStream, DataHolder dataHolder)
+	public void marshalOutputStream(Object graph, OutputStream outputStream, @Nullable DataHolder dataHolder)
 			throws XmlMappingException, IOException {
 
 		if (this.streamDriver != null) {
@@ -693,7 +693,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		marshalWriter(graph, writer, null);
 	}
 
-	public void marshalWriter(Object graph, Writer writer, DataHolder dataHolder)
+	public void marshalWriter(Object graph, Writer writer, @Nullable DataHolder dataHolder)
 			throws XmlMappingException, IOException {
 
 		if (this.streamDriver != null) {
@@ -708,7 +708,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 * Marshals the given graph to the given XStream HierarchicalStreamWriter.
 	 * Converts exceptions using {@link #convertXStreamException}.
 	 */
-	private void doMarshal(Object graph, HierarchicalStreamWriter streamWriter, DataHolder dataHolder) {
+	private void doMarshal(Object graph, HierarchicalStreamWriter streamWriter, @Nullable DataHolder dataHolder) {
 		try {
 			getXStream().marshal(graph, streamWriter, dataHolder);
 		}
@@ -785,7 +785,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return unmarshalInputStream(inputStream, null);
 	}
 
-	public Object unmarshalInputStream(InputStream inputStream, DataHolder dataHolder) throws XmlMappingException, IOException {
+	public Object unmarshalInputStream(InputStream inputStream, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
         if (this.streamDriver != null) {
             return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
         }
@@ -799,7 +799,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return unmarshalReader(reader, null);
 	}
 
-	public Object unmarshalReader(Reader reader, DataHolder dataHolder) throws XmlMappingException, IOException {
+	public Object unmarshalReader(Reader reader, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
 		return doUnmarshal(getDefaultDriver().createReader(reader), dataHolder);
 	}
 
@@ -807,7 +807,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
      * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
      * Converts exceptions using {@link #convertXStreamException}.
      */
-    private Object doUnmarshal(HierarchicalStreamReader streamReader, DataHolder dataHolder) {
+    private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
         try {
             return getXStream().unmarshal(streamReader, null, dataHolder);
         }

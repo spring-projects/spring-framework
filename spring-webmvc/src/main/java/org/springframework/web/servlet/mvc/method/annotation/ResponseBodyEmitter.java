@@ -157,7 +157,7 @@ public class ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
-	public synchronized void send(Object object, MediaType mediaType) throws IOException {
+	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
 		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
 		sendInternal(object, mediaType);
 	}

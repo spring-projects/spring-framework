@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -54,7 +55,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * Create a new AsyncResult holder.
 	 * @param value the value to pass through
 	 */
-	public AsyncResult(V value) {
+	public AsyncResult(@Nullable V value) {
 		this(value, null);
 	}
 
@@ -62,7 +63,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * Create a new AsyncResult holder.
 	 * @param value the value to pass through
 	 */
-	private AsyncResult(V value, ExecutionException ex) {
+	private AsyncResult(@Nullable V value, @Nullable ExecutionException ex) {
 		this.value = value;
 		this.executionException = ex;
 	}

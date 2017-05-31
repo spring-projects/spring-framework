@@ -279,7 +279,7 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or {@code null} if none found
 	 */
 	@Nullable
-	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName, Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName, @Nullable Set<ValueHolder> usedValueHolders) {
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
@@ -351,7 +351,7 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	@Nullable
-	public ValueHolder getArgumentValue(int index, @Nullable Class<?> requiredType, @Nullable String requiredName, Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getArgumentValue(int index, @Nullable Class<?> requiredType, @Nullable String requiredName, @Nullable Set<ValueHolder> usedValueHolders) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType, requiredName);
 		if (valueHolder == null) {

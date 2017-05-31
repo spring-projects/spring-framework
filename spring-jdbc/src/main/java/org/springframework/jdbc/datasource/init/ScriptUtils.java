@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -164,7 +165,7 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	public static void splitSqlScript(EncodedResource resource, String script, String separator, String commentPrefix,
+	public static void splitSqlScript(@Nullable EncodedResource resource, String script, String separator, String commentPrefix,
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
 			throws ScriptException {
 

@@ -121,7 +121,7 @@ public interface Errors {
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
 	 */
-	void reject(String errorCode, @Nullable Object[] errorArgs, String defaultMessage);
+	void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
 
 	/**
 	 * Register a field error for the specified field of the current object

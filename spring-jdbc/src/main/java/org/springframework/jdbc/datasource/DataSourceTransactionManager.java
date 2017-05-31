@@ -22,6 +22,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
@@ -413,7 +414,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		private boolean mustRestoreAutoCommit;
 
-		public void setConnectionHolder(ConnectionHolder connectionHolder, boolean newConnectionHolder) {
+		public void setConnectionHolder(@Nullable ConnectionHolder connectionHolder, boolean newConnectionHolder) {
 			super.setConnectionHolder(connectionHolder);
 			this.newConnectionHolder = newConnectionHolder;
 		}

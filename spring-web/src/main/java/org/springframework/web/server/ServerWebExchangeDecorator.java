@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -115,7 +116,7 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, Instant lastModified) {
+	public boolean checkNotModified(@Nullable String etag, Instant lastModified) {
 		return getDelegate().checkNotModified(etag, lastModified);
 	}
 

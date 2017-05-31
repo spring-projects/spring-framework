@@ -180,7 +180,7 @@ public abstract class WebApplicationContextUtils {
 	 * @param beanFactory the BeanFactory to configure
 	 * @param sc the ServletContext that we're running within
 	 */
-	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory, ServletContext sc) {
+	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory, @Nullable ServletContext sc) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
 		if (sc != null) {
@@ -217,7 +217,7 @@ public abstract class WebApplicationContextUtils {
 	 * @param servletConfig the ServletConfig of the containing Portlet
 	 */
 	public static void registerEnvironmentBeans(
-			ConfigurableListableBeanFactory bf, ServletContext servletContext, ServletConfig servletConfig) {
+			ConfigurableListableBeanFactory bf, ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
 		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
 			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);

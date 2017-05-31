@@ -69,7 +69,7 @@ abstract class MvcNamespaceUtils {
 	 * under that well-known name, unless already registered.
 	 * @return a RuntimeBeanReference to this {@link UrlPathHelper} instance
 	 */
-	public static RuntimeBeanReference registerUrlPathHelper(RuntimeBeanReference urlPathHelperRef, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerUrlPathHelper(@Nullable RuntimeBeanReference urlPathHelperRef, ParserContext parserContext, Object source) {
 		if (urlPathHelperRef != null) {
 			if (parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(URL_PATH_HELPER_BEAN_NAME);
@@ -92,7 +92,7 @@ abstract class MvcNamespaceUtils {
 	 * under that well-known name, unless already registered.
 	 * @return a RuntimeBeanReference to this {@link PathMatcher} instance
 	 */
-	public static RuntimeBeanReference registerPathMatcher(RuntimeBeanReference pathMatcherRef, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerPathMatcher(@Nullable RuntimeBeanReference pathMatcherRef, ParserContext parserContext, Object source) {
 		if (pathMatcherRef != null) {
 			if (parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(PATH_MATCHER_BEAN_NAME);
@@ -161,7 +161,7 @@ abstract class MvcNamespaceUtils {
 	 * if a non-null CORS configuration is provided.
 	 * @return a RuntimeBeanReference to this {@code Map<String, CorsConfiguration>} instance
 	 */
-	public static RuntimeBeanReference registerCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations, ParserContext parserContext, Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(CORS_CONFIGURATION_BEAN_NAME)) {
 			RootBeanDefinition corsConfigurationsDef = new RootBeanDefinition(LinkedHashMap.class);
 			corsConfigurationsDef.setSource(source);

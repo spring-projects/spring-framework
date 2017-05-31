@@ -317,7 +317,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		private final JsonFormat.Printer printer;
 
-		public ProtobufJavaUtilSupport(JsonFormat.Parser parser, JsonFormat.Printer printer) {
+		public ProtobufJavaUtilSupport(@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
 			this.parser = (parser != null ? parser : JsonFormat.parser());
 			this.printer = (printer != null ? printer : JsonFormat.printer());
 		}

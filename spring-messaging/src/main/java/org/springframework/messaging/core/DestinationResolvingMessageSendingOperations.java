@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -86,7 +87,7 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	<T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	<T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 }

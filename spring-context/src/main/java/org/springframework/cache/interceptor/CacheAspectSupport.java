@@ -458,7 +458,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 	}
 
-	private void logInvalidating(CacheOperationContext context, CacheEvictOperation operation, Object key) {
+	private void logInvalidating(CacheOperationContext context, CacheEvictOperation operation, @Nullable Object key) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Invalidating " + (key != null ? "cache key [" + key + "]" : "entire cache") +
 					" for operation " + operation + " on method " + context.metadata.method);

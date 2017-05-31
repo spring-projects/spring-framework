@@ -272,7 +272,7 @@ public class CciTemplate implements CciOperations {
 	 */
 	protected <T> T doExecute(
 			final InteractionSpec spec, final Record inputRecord, @Nullable final Record outputRecord,
-			final RecordExtractor<T> outputExtractor) throws DataAccessException {
+			@Nullable final RecordExtractor<T> outputExtractor) throws DataAccessException {
 
 		return execute(new InteractionCallback<T>() {
 			@Override

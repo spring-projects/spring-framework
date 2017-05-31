@@ -241,8 +241,8 @@ public class AnnotatedElementUtils {
 		return hasMetaAnnotationTypes(element, null, annotationName);
 	}
 
-	private static boolean hasMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName) {
+	private static boolean hasMetaAnnotationTypes(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName) {
 
 		return Boolean.TRUE.equals(
 			searchWithGetSemantics(element, annotationType, annotationName, new SimpleAnnotationProcessor<Boolean>() {
@@ -844,8 +844,8 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 */
 	@Nullable
-	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Processor<T> processor) {
+	private static <T> T searchWithGetSemantics(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName, Processor<T> processor) {
 
 		return searchWithGetSemantics(element, annotationType, annotationName, null, processor);
 	}
@@ -866,7 +866,7 @@ public class AnnotatedElementUtils {
 	 */
 	@Nullable
 	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
+			@Nullable String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
 
 		try {
 			return searchWithGetSemantics(element, annotationType, annotationName, containerType, processor,
@@ -896,8 +896,8 @@ public class AnnotatedElementUtils {
 	 * @return the result of the processor, potentially {@code null}
 	 */
 	@Nullable
-	private static <T> T searchWithGetSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor,
+	private static <T> T searchWithGetSemantics(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
@@ -1029,8 +1029,8 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 */
 	@Nullable
-	private static <T> T searchWithFindSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, Processor<T> processor) {
+	private static <T> T searchWithFindSemantics(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
+			@Nullable String annotationName, Processor<T> processor) {
 
 		return searchWithFindSemantics(element, annotationType, annotationName, null, processor);
 	}
@@ -1051,7 +1051,7 @@ public class AnnotatedElementUtils {
 	 */
 	@Nullable
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, Class<? extends Annotation> annotationType,
-			String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
+			@Nullable String annotationName, @Nullable Class<? extends Annotation> containerType, Processor<T> processor) {
 
 		if (containerType != null && !processor.aggregates()) {
 			throw new IllegalArgumentException(

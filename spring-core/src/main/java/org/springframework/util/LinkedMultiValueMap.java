@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple implementation of {@link MultiValueMap} that wraps a {@link LinkedHashMap},
  * storing multiple values in a {@link LinkedList}.
@@ -74,7 +76,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	// MultiValueMap implementation
 
 	@Override
-	public void add(K key, V value) {
+	public void add(K key, @Nullable V value) {
 		List<V> values = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
 		values.add(value);
 	}
