@@ -6,7 +6,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.annotation.meta.TypeQualifierDefault;
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierNickname;
+import javax.annotation.meta.When;
 
 /**
  * Leverage JSR 305 meta-annotations to define the annotated element could be null
@@ -20,9 +22,9 @@ import javax.annotation.meta.TypeQualifierDefault;
  * @see javax.annotation.Nullable
  */
 @Documented
-@javax.annotation.Nullable
+@TypeQualifierNickname
+@Nonnull(when= When.MAYBE)
 @Target({ElementType.METHOD, ElementType.PARAMETER})
-@TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Nullable {
 }
