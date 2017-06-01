@@ -69,6 +69,21 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
+	public void hasErrorOverride() throws Exception {
+		this.errorHandler.setSeriesMapping(Collections
+				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
+
+		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		assertTrue(this.errorHandler.hasError(this.response));
+
+		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		assertFalse(this.errorHandler.hasError(this.response));
+
+		given(this.response.getStatusCode()).willReturn(HttpStatus.OK);
+		assertFalse(this.errorHandler.hasError(this.response));
+	}
+
+	@Test
 	public void handleErrorStatusMatch() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -133,6 +148,7 @@ public class ExtractingResponseErrorHandlerTests {
 	public void handleNoMatchOverride() throws Exception {
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
+
 		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
