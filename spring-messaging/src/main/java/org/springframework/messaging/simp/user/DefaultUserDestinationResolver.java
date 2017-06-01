@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Set<String> targetSet = new HashSet<>();
 		for (String sessionId : parseResult.getSessionIds()) {
 			String actualDestination = parseResult.getActualDestination();
-			String targetDestination = getTargetDestination(sourceDestination, actualDestination, sessionId, user);
+			String targetDestination = getTargetDestination(
+					sourceDestination, actualDestination, sessionId, user);
 			if (targetDestination != null) {
 				targetSet.add(targetDestination);
 			}
@@ -150,7 +151,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		switch (messageType) {
 			case SUBSCRIBE:
 			case UNSUBSCRIBE:
-				return parseSubscriptionMessage(message, headers, sourceDestination);
+				return parseSubscriptionMessage(message, sourceDestination);
 			case MESSAGE:
 				return parseMessage(headers, sourceDestination);
 			default:
@@ -158,7 +159,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 	}
 
-	private ParseResult parseSubscriptionMessage(Message<?> message, MessageHeaders headers, String sourceDestination) {
+	private ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
+		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
 			logger.error("No session id. Ignoring " + message);
@@ -172,7 +174,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		String user = (principal != null ? principal.getName() : null);
 		Set<String> sessionIds = Collections.singleton(sessionId);
-		return new ParseResult(sourceDestination, actualDestination, sourceDestination, sessionIds, user);
+		return new ParseResult(sourceDestination, actualDestination, sourceDestination,
+				sessionIds, user);
 	}
 
 	private ParseResult parseMessage(MessageHeaders headers, String sourceDestination) {
@@ -195,7 +198,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		if (!this.keepLeadingSlash) {
 			actualDestination = actualDestination.substring(1);
 		}
-		return new ParseResult(sourceDestination, actualDestination, subscribeDestination, sessionIds, userName);
+		return new ParseResult(sourceDestination, actualDestination, subscribeDestination,
+				sessionIds, userName);
 	}
 
 	private Set<String> getSessionIdsByUser(String userName, String sessionId) {
@@ -251,6 +255,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 */
 	private static class ParseResult {
 
+		private final String sourceDestination;
+
 		private final String actualDestination;
 
 		private final String subscribeDestination;
@@ -259,10 +265,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final String user;
 
-		private final String sourceDestination;
 
 		public ParseResult(String sourceDest, String actualDest, String subscribeDest,
 				Set<String> sessionIds, String user) {
+
 			this.sourceDestination = sourceDest;
 			this.actualDestination = actualDest;
 			this.subscribeDestination = subscribeDest;
@@ -270,6 +276,10 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			this.user = user;
 		}
 
+
+		public String getSourceDestination() {
+			return this.sourceDestination;
+		}
 
 		public String getActualDestination() {
 			return this.actualDestination;
@@ -285,10 +295,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		public String getUser() {
 			return this.user;
-		}
-
-		public String getSourceDestination() {
-			return this.sourceDestination;
 		}
 	}
 
