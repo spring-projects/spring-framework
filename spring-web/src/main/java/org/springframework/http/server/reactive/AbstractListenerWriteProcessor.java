@@ -163,11 +163,11 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Invoked when an error happens while writing. Defaults to no-op.
-	 * Servlet 3.1 based implementations will receive
-	 * {@link WriteListener#onError(Throwable)} event.
+	 * Invoked when an error happens while writing.
+	 * <p>Defaults to no-op. Servlet 3.1 based implementations will receive
+	 * {@code javax.servlet.WriteListener#onError(Throwable)} event.
 	 */
-	protected void writingFailed(Throwable t) {
+	protected void writingFailed(Throwable ex) {
 	}
 
 

@@ -231,9 +231,9 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 
 		@Override
-		protected void writingFailed(Throwable t) {
+		protected void writingFailed(Throwable ex) {
 			cancel();
-			onError(t);
+			onError(ex);
 		}
 	}
 
