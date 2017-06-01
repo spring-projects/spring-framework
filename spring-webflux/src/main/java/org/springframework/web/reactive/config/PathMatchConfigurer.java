@@ -18,6 +18,7 @@ package org.springframework.web.reactive.config;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
@@ -105,7 +106,13 @@ public class PathMatchConfigurer {
 		return this.pathHelper;
 	}
 
-	protected PathMatcher getPathMatcher() {
+	public PathMatcher getPathMatcher() {
+		if(this.pathMatcher != null
+				&& this.pathMatcher.getClass().isAssignableFrom(ParsingPathMatcher.class)
+				&& (this.trailingSlashMatch || this.suffixPatternMatch)) {
+			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
+					" and useSuffixPatternMatch should be set to 'false'.");
+		}
 		return this.pathMatcher;
 	}
 

@@ -30,6 +30,10 @@ import org.springframework.util.PathMatcher;
  * <p>Once parsed, {@link PathPattern}s are tailored for fast matching
  * and quick comparison.
  *
+ * <p>Calls this {@link PathMatcher} implementation can lead to
+ * {@link PatternParseException} if the provided patterns are
+ * illegal.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 5.0

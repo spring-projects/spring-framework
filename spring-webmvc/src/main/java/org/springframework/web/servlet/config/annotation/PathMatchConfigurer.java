@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * Helps with configuring HandlerMappings path matching options such as trailing
@@ -123,6 +124,12 @@ public class PathMatchConfigurer {
 	}
 
 	public PathMatcher getPathMatcher() {
+		if(this.pathMatcher != null
+				&& this.pathMatcher.getClass().isAssignableFrom(ParsingPathMatcher.class)
+				&& (this.trailingSlashMatch || this.suffixPatternMatch)) {
+			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
+					" and useSuffixPatternMatch should be set to 'false'.");
+		}
 		return this.pathMatcher;
 	}
 
