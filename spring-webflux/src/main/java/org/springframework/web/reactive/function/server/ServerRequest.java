@@ -129,7 +129,16 @@ public interface ServerRequest {
 	 */
 	default Optional<String> queryParam(String name) {
 		List<String> queryParams = this.queryParams(name);
-		return (!queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty());
+		if (queryParams.isEmpty()) {
+			return Optional.empty();
+		}
+		else {
+			String value = queryParams.get(0);
+			if (value == null) {
+				value = "";
+			}
+			return Optional.of(value);
+		}
 	}
 
 	/**
