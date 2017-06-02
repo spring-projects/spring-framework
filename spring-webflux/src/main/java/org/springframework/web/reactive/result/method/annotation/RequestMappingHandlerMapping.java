@@ -32,13 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.server.support.LookupPath;
-import org.springframework.web.server.ServerWebExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -167,11 +165,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected boolean isHandler(Class<?> beanType) {
 		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
 				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
-	}
-
-	@Override
-	protected LookupPath createLookupPath(ServerWebExchange exchange) {
-		return getPathHelper().getLookupPathForRequest(exchange);
 	}
 
 	/**

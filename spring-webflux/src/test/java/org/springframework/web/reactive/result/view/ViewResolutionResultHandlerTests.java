@@ -219,17 +219,17 @@ public class ViewResolutionResultHandlerTests {
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
 		MockServerWebExchange exchange = get("/account").toExchange();
-		addLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		exchange = get("/account/").toExchange();
-		addLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		exchange = get("/account.123").toExchange();
-		addLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 	}
@@ -256,7 +256,7 @@ public class ViewResolutionResultHandlerTests {
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
-		addLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
@@ -307,9 +307,9 @@ public class ViewResolutionResultHandlerTests {
 		assertEquals("/", response.getHeaders().getLocation().toString());
 	}
 
-	private void addLookupPathAttribute(ServerWebExchange exchange) {
-		HttpRequestPathHelper helper = new HttpRequestPathHelper();
-		exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE, helper.getLookupPathForRequest(exchange));
+	private void initLookupPath(ServerWebExchange exchange) {
+		exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE,
+				new HttpRequestPathHelper().getLookupPathForRequest(exchange));
 	}
 
 
@@ -333,7 +333,7 @@ public class ViewResolutionResultHandlerTests {
 		model.addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 		MockServerWebExchange exchange = get(path).toExchange();
-		addLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		resultHandler(resolvers).handleResult(exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(exchange, responseBody);
 		return exchange;

@@ -175,12 +175,12 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	}
 
 	protected LookupPath getLookupPath(ServerWebExchange exchange) {
-		Optional<LookupPath> attribute = exchange.getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE);
-		return attribute.orElseGet(() -> {
-			LookupPath lookupPath = createLookupPath(exchange);
-			exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE, lookupPath);
-			return lookupPath;
-		});
+		return exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE)
+				.orElseGet(() -> {
+					LookupPath lookupPath = createLookupPath(exchange);
+					exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE, lookupPath);
+					return lookupPath;
+				});
 	}
 
 	protected LookupPath createLookupPath(ServerWebExchange exchange) {

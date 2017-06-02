@@ -41,7 +41,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 	@Test
 	public void empty() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
-		setLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 	}
 
@@ -51,11 +51,11 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo/test.html").toExchange();
-		setLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 
 		exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
-		setLookupPathAttribute(exchange);
+		initLookupPath(exchange);
 		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
 	}
 
@@ -64,10 +64,9 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
 	}
 
-	public void setLookupPathAttribute(ServerWebExchange exchange) {
-		HttpRequestPathHelper helper = new HttpRequestPathHelper();
+	private void initLookupPath(ServerWebExchange exchange) {
 		exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE,
-				helper.getLookupPathForRequest(exchange));
+				new HttpRequestPathHelper().getLookupPathForRequest(exchange));
 	}
 
 }

@@ -29,17 +29,20 @@ public final class LookupPath {
 
 	public static final String LOOKUP_PATH_ATTRIBUTE = LookupPath.class.getName();
 
+
 	private final String path;
 
 	private final int fileExtStartIndex;
 
 	private final int fileExtEndIndex;
 
+
 	public LookupPath(String path, int fileExtStartIndex, int fileExtEndIndex) {
 		this.path = path;
 		this.fileExtStartIndex = fileExtStartIndex;
 		this.fileExtEndIndex = fileExtEndIndex;
 	}
+
 
 	public String getPath() {
 			return this.path;

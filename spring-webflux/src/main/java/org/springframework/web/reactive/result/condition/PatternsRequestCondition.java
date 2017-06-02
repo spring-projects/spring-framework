@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -187,13 +187,17 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 
-		LookupPath lookupPath = exchange
-				.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE).get();
+		LookupPath lookupPath = getLookupPath(exchange);
 		List<String> matches = getMatchingPatterns(lookupPath);
 
 		return matches.isEmpty() ? null :
 				new PatternsRequestCondition(matches, this.pathMatcher, this.useSuffixPatternMatch,
 						this.useTrailingSlashMatch, this.fileExtensions);
+	}
+
+	private LookupPath getLookupPath(ServerWebExchange exchange) {
+		return exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE)
+				.orElseThrow(() -> new IllegalStateException("No LookupPath attribute."));
 	}
 
 	/**
@@ -259,8 +263,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public int compareTo(PatternsRequestCondition other, ServerWebExchange exchange) {
-		LookupPath lookupPath = exchange
-				.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE).get();
+		LookupPath lookupPath = getLookupPath(exchange);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath.getPath());
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
