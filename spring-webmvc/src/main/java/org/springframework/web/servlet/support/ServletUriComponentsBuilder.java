@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Enumeration;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpRequest;
@@ -34,7 +33,17 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * A UriComponentsBuilder that extracts information from the HttpServletRequest.
+ * UriComponentsBuilder with additional static factory methods to create links
+ * based on the current HttpServletRequest.
+ *
+ * <p><strong>Note:</strong> This class extracts and uses values from the headers
+ * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+ * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
+ * "Forwarded" is not found, in order to reflect the client-originated protocol
+ * and address. As an alternative consider using the
+ * {@link org.springframework.web.filter.ForwardedHeaderFilter} to have such
+ * headers extracted once and removed, or removed only (without being used).
+ * See the reference for further information including security considerations.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -71,6 +80,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder from the host, port, scheme, and context path of the
 	 * given HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
@@ -85,6 +97,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * will end with "/main". If the servlet is mapped otherwise, e.g.
 	 * {@code "/"} or {@code "*.do"}, the result will be the same as
 	 * if calling {@link #fromContextPath(HttpServletRequest)}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
@@ -97,6 +112,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder from the host, port, scheme, and path (but not the query)
 	 * of the HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
@@ -107,6 +125,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Prepare a builder by copying the scheme, host, port, path, and
 	 * query string of an HttpServletRequest.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = initFromRequest(request);
@@ -155,6 +176,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromContextPath(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentContextPath() {
 		return fromContextPath(getCurrentRequest());
@@ -163,6 +187,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromServletMapping(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentServletMapping() {
 		return fromServletMapping(getCurrentRequest());
@@ -171,6 +198,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromRequestUri(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequestUri() {
 		return fromRequestUri(getCurrentRequest());
@@ -179,6 +209,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	/**
 	 * Same as {@link #fromRequest(HttpServletRequest)} except the
 	 * request is obtained through {@link RequestContextHolder}.
+	 *
+	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
+	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequest() {
 		return fromRequest(getCurrentRequest());
