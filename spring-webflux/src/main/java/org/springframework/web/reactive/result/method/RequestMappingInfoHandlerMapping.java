@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -34,7 +35,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
@@ -44,7 +47,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.support.LookupPath;
-import org.springframework.web.util.WebUtils;
+
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -145,19 +148,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				continue;
 			}
 
-			String matrixVariables;
-
+			String semicolonContent;
 			int semicolonIndex = uriVarValue.indexOf(';');
 			if ((semicolonIndex == -1) || (semicolonIndex == 0) || (equalsIndex < semicolonIndex)) {
-				matrixVariables = uriVarValue;
+				semicolonContent = uriVarValue;
 			}
 			else {
-				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
+				semicolonContent = uriVarValue.substring(semicolonIndex + 1);
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
-
-			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
-			result.put(uriVar.getKey(), getPathHelper().decodeMatrixVariables(exchange, vars));
+			result.put(uriVar.getKey(), getPathHelper().parseMatrixVariables(exchange, semicolonContent));
 		}
 		return result;
 	}
