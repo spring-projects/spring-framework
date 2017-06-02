@@ -357,7 +357,11 @@ public abstract class AbstractAdaptableMessageListener
 
 	/**
 	 * Determine a response destination for the given message.
-	 * <p>The default implementation first checks the JMS Reply-To
+	 * <p>The default implementation first checks the JMS {@link Destination}
+	 * of retrieved response and uses it if not {@code null}.
+	 * This allows to dynamically override {@link SendTo} annotation value
+         * as well as the JMS Reply-To {@link Destination} of the handled request.
+	 * <p>Then the default implementation checks the JMS Reply-To
 	 * {@link Destination} of the supplied request; if that is not {@code null}
 	 * it is returned; if it is {@code null}, then the configured
 	 * {@link #resolveDefaultResponseDestination default response destination}
@@ -374,6 +378,9 @@ public abstract class AbstractAdaptableMessageListener
 	 */
 	protected Destination getResponseDestination(Message request, Message response, Session session)
 			throws JMSException {
+		if (response.getJMSDestination() != null) {
+			return response.getJMSDestination();
+                }
 
 		Destination replyTo = request.getJMSReplyTo();
 		if (replyTo == null) {
