@@ -109,7 +109,7 @@ public class ReactiveAdapterRegistry {
 	/**
 	 * Get the adapter for the given reactive type.
 	 */
-	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
+	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType) {
 		return getAdapter(reactiveType, null);
 	}
 
