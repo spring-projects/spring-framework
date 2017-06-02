@@ -23,6 +23,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.util.MultiValueMap;
 import org.w3c.dom.Node;
 
 import org.springframework.http.HttpHeaders;
@@ -210,6 +213,23 @@ public class ContentRequestMatchers {
 		};
 	}
 
+
+	/**
+	 * Compare the body of the request to the form given as MultiValueMap.
+	 * @since 4.3
+	 */
+	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+				MockHttpInputMessage mockHttpInputMessage = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
+				mockHttpInputMessage.getHeaders().putAll(request.getHeaders());
+				FormHttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
+				assertEquals("Request formData", expectedContent, formHttpMessageConverter.read(null, mockHttpInputMessage));
+			}
+		};
+	}
 
 	/**
 	 * Abstract base class for XML {@link RequestMatcher}'s.

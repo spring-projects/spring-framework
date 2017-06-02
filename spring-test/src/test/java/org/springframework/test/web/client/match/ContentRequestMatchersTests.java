@@ -142,4 +142,27 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().node(hasXPath("/foo/bar/bar")).match(this.request);
 	}
 
+	@Test
+	public void testFormMatcher() throws Exception {
+		String content = "foo=foo&bar=bar";
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		this.request.getBody().write(content.getBytes());
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("bar", "bar");
+		form.add("foo", "foo");
+		MockRestRequestMatchers.content().formData(form).match(this.request);
+	}
+
+	@Test(expected=AssertionError.class)
+	public void testFormMatcherNoMatch() throws Exception {
+		String content = "foo=foo&bar=bar";
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		this.request.getBody().write(content.getBytes());
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("foobar", "bar");
+		MockRestRequestMatchers.content().formData(form).match(this.request);
+	}
+
 }
