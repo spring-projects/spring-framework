@@ -46,11 +46,10 @@ public class LookupPathTests {
 
 	@Test
 	public void parsePathWithParams() {
-		LookupPath path = create("/test/foo.txt;foo=bar?framework=spring");
-		assertEquals("/test/foo.txt;foo=bar", path.getPath());
-		assertEquals("/test/foo", path.getPathWithoutExtension());
+		LookupPath path = create("/test;spring=framework/foo.txt;foo=bar?framework=spring");
+		assertEquals("/test;spring=framework/foo.txt;foo=bar", path.getPath());
+		assertEquals("/test;spring=framework/foo", path.getPathWithoutExtension());
 		assertEquals(".txt", path.getFileExtension());
-		assertEquals("foo=bar", path.getPathParameters());
 	}
 
 	private LookupPath create(String path) {

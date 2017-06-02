@@ -17,7 +17,6 @@
 package org.springframework.web.server.support;
 
 import org.springframework.lang.Nullable;
-import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Lookup path information of an incoming HTTP request.
@@ -32,30 +31,23 @@ public final class LookupPath {
 
 	private final String path;
 
-	private final int fileExtensionIndex;
+	private final int fileExtStartIndex;
 
-	private final int pathParametersIndex;
+	private final int fileExtEndIndex;
 
-	public LookupPath(String path, int fileExtensionIndex, int pathParametersIndex) {
+	public LookupPath(String path, int fileExtStartIndex, int fileExtEndIndex) {
 		this.path = path;
-		this.fileExtensionIndex = fileExtensionIndex;
-		this.pathParametersIndex = pathParametersIndex;
+		this.fileExtStartIndex = fileExtStartIndex;
+		this.fileExtEndIndex = fileExtEndIndex;
 	}
 
 	public String getPath() {
-		if (this.pathParametersIndex != -1) {
-			// TODO: variant without the path parameter information?
-			//return this.path.substring(0, this.pathParametersIndex);
 			return this.path;
-		}
-		else {
-			return this.path;
-		}
 	}
 
 	public String getPathWithoutExtension() {
-		if (this.fileExtensionIndex != -1) {
-			return this.path.substring(0, this.fileExtensionIndex);
+		if (this.fileExtStartIndex != -1) {
+			return this.path.substring(0, this.fileExtStartIndex);
 		}
 		else {
 			return this.path;
@@ -64,21 +56,15 @@ public final class LookupPath {
 
 	@Nullable
 	public String getFileExtension() {
-		if (this.fileExtensionIndex == -1) {
+		if (this.fileExtStartIndex == -1) {
 			return null;
 		}
-		else if (this.pathParametersIndex == -1) {
-			return this.path.substring(this.fileExtensionIndex);
+		else if (this.fileExtEndIndex == -1) {
+			return this.path.substring(this.fileExtStartIndex);
 		}
 		else {
-			return this.path.substring(this.fileExtensionIndex, this.pathParametersIndex);
+			return this.path.substring(this.fileExtStartIndex, this.fileExtEndIndex);
 		}
-	}
-
-	@Nullable
-	public String getPathParameters() {
-		return this.pathParametersIndex == -1 ?
-				null : this.path.substring(this.pathParametersIndex + 1);
 	}
 
 }
