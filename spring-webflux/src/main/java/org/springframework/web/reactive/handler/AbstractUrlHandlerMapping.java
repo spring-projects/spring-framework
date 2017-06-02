@@ -101,7 +101,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	@Override
 	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
-		LookupPath lookupPath = getLookupPath(exchange);
+		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
 		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);

@@ -222,8 +222,7 @@ public class PatternsRequestConditionTests {
 
 	private MockServerWebExchange initExchange(String path) {
 		MockServerWebExchange exchange = get(path).toExchange();
-		exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE,
-				new HttpRequestPathHelper().getLookupPathForRequest(exchange));
+		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		return exchange;
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.handler;
 
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -33,7 +32,6 @@ import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.cors.reactive.DefaultCorsProcessor;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.support.HttpRequestPathHelper;
@@ -172,19 +170,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 			}
 			return handler;
 		});
-	}
-
-	protected LookupPath getLookupPath(ServerWebExchange exchange) {
-		return exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE)
-				.orElseGet(() -> {
-					LookupPath lookupPath = createLookupPath(exchange);
-					exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE, lookupPath);
-					return lookupPath;
-				});
-	}
-
-	protected LookupPath createLookupPath(ServerWebExchange exchange) {
-		  return getPathHelper().getLookupPathForRequest(exchange);
 	}
 
 	/**

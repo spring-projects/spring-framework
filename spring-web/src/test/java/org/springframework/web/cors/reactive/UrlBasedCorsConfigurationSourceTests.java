@@ -41,7 +41,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 	@Test
 	public void empty() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
-		initLookupPath(exchange);
+		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 	}
 
@@ -51,22 +51,17 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo/test.html").toExchange();
-		initLookupPath(exchange);
+		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 
 		exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
-		initLookupPath(exchange);
+		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void unmodifiableConfigurationsMap() {
 		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
-	}
-
-	private void initLookupPath(ServerWebExchange exchange) {
-		exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE,
-				new HttpRequestPathHelper().getLookupPathForRequest(exchange));
 	}
 
 }

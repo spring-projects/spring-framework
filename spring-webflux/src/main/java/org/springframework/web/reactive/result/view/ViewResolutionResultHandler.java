@@ -257,9 +257,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	 * Use the request path the leading and trailing slash stripped.
 	 */
 	private String getDefaultViewName(ServerWebExchange exchange) {
-		String path = exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE)
-				.map(LookupPath::getPath)
-				.orElseThrow(() -> new IllegalStateException("No LookupPath attribute."));
+		String path = LookupPath.getCurrent(exchange).getPath();
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}

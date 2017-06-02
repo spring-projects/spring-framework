@@ -257,7 +257,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		LookupPath lookupPath = getLookupPath(exchange);
+		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}

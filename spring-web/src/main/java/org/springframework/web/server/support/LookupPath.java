@@ -17,17 +17,23 @@
 package org.springframework.web.server.support;
 
 import org.springframework.lang.Nullable;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Lookup path information of an incoming HTTP request.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see HttpRequestPathHelper
  */
 public final class LookupPath {
 
-	public static final String LOOKUP_PATH_ATTRIBUTE = LookupPath.class.getName();
+	/**
+	 * Name of request attribute under which the LookupPath is stored via
+	 * {@link #getOrCreate} and accessed via {@link #getCurrent}.
+	 */
+	public static final String LOOKUP_PATH_ATTRIBUTE_NAME = LookupPath.class.getName();
 
 
 	private final String path;
@@ -68,6 +74,36 @@ public final class LookupPath {
 		else {
 			return this.path.substring(this.fileExtStartIndex, this.fileExtEndIndex);
 		}
+	}
+
+
+	/**
+	 * Get the LookupPath for the current request from the request attribute
+	 * {@link #LOOKUP_PATH_ATTRIBUTE_NAME} or otherwise create and stored it
+	 * under that attribute for subsequent use.
+	 * @param exchange the current exchange
+	 * @param pathHelper the pathHelper to create the LookupPath with
+	 * @return the LookupPath for the current request
+	 */
+	public static LookupPath getOrCreate(ServerWebExchange exchange, HttpRequestPathHelper pathHelper) {
+		return exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE_NAME)
+				.orElseGet(() -> {
+					LookupPath lookupPath = pathHelper.getLookupPathForRequest(exchange);
+					exchange.getAttributes().put(LookupPath.LOOKUP_PATH_ATTRIBUTE_NAME, lookupPath);
+					return lookupPath;
+				});
+	}
+
+	/**
+	 * Get the LookupPath for the current request from the request attribute
+	 * {@link #LOOKUP_PATH_ATTRIBUTE_NAME} or raise an {@link IllegalStateException}
+	 * if not found.
+	 * @param exchange the current exchange
+	 * @return the LookupPath, never {@code null}
+	 */
+	public static LookupPath getCurrent(ServerWebExchange exchange) {
+		return exchange.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE_NAME)
+				.orElseThrow(() -> new IllegalStateException("No LookupPath attribute."));
 	}
 
 }

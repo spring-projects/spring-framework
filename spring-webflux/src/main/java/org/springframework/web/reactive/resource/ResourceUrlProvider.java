@@ -185,9 +185,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String requestPath = request.getURI().getPath();
-		LookupPath lookupPath = exchange
-				.<LookupPath>getAttribute(LookupPath.LOOKUP_PATH_ATTRIBUTE)
-				.orElseGet(() -> getPathHelper().getLookupPathForRequest(exchange));
+		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
 		return requestPath.indexOf(lookupPath.getPath());
 	}
 
