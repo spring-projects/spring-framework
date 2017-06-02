@@ -72,7 +72,12 @@ class RegexPathElement extends PathElement {
 			}
 			else if ("*".equals(match)) {
 				patternBuilder.append(".*");
-				this.wildcardCount++;
+				int pos = matcher.start();
+				if (pos < 1 || text.charAt(pos-1) != '.') {
+					// To be compatible with the AntPathMatcher comparator, 
+					// '.*' is not considered a wildcard usage
+					this.wildcardCount++;
+				}
 			}
 			else if (match.startsWith("{") && match.endsWith("}")) {
 				int colonIdx = match.indexOf(':');

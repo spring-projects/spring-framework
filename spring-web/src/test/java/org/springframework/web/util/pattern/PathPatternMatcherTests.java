@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -1051,6 +1052,25 @@ public class PathPatternMatcherTests {
 		// SPR-13139
 		assertEquals(-1, comparator.compare(parse("*"), parse("*/**")));
 		assertEquals(1, comparator.compare(parse("*/**"), parse("*")));
+	}
+	
+	@Test
+	public void compare_spr15597() {
+		PathPatternParser parser = new PathPatternParser();
+		PathPattern p1 = parser.parse("/{foo}");
+		PathPattern p2 = parser.parse("/{foo}.*");
+		Map<String, String> r1 = p1.matchAndExtract("/file.txt");
+		Map<String, String> r2 = p2.matchAndExtract("/file.txt");
+		 
+		// works fine
+		assertEquals(r1.get("foo"), "file.txt");
+		assertEquals(r2.get("foo"), "file");
+
+		// This produces 2 (see comments in https://jira.spring.io/browse/SPR-14544 )
+		// Comparator<String> patternComparator = new AntPathMatcher().getPatternComparator("");
+		// System.out.println(patternComparator.compare("/{foo}","/{foo}.*"));
+
+		assertThat(p1.compareTo(p2), Matchers.greaterThan(0));
 	}
 
 	@Test
