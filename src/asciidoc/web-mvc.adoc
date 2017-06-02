@@ -3389,6 +3389,38 @@ with a base URL and then use the instance-based "withXxx" methods. For example:
 ----
 
 
+[[mvc-links-to-controllers-forwarded-headers]]
+=== Working with "Forwarded" and "X-Forwarded-*" Headers
+
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change presenting a challenge for applications that need to create links
+to resources since the links should reflect the host, port, and scheme of the
+original request as seen from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the "Forwarded" HTTP header
+for proxies to use to provide information about the original request. There are also
+other non-standard headers in use such as "X-Forwarded-Host", "X-Forwarded-Port",
+and "X-Forwarded-Proto".
+
+Both `ServletUriComponentsBuilder` and `MvcUriComponentsBuilder` detect, extract, and use
+information from the "Forwarded" header, or from "X-Forwarded-Host", "X-Forwarded-Port",
+and "X-Forwarded-Proto" if "Forwarded" is not present, so that the resulting links reflect
+the original request.
+
+The `ForwardedHeaderFilter` provides an alternative to do the same once and globally for
+the entire application. The filter wraps the request in order to overlay host, port, and
+scheme information and also "hides" any forwarded headers for subsequent processing.
+
+Note that there are security considerations when using forwarded headers as explained
+in Section 8 of RFC 7239. At the application level it is difficult to determine whether
+forwarded headers can be trusted or not. This is why the network upstream should be
+configured correctly to filter out untrusted forwarded headers from the outside.
+
+Applications that don't have a proxy and don't need to use forwarded headers can
+configure the `ForwardedHeaderFilter` to remove and ignore such headers.
+
+
+
 [[mvc-links-to-controllers-from-views]]
 === Building URIs to Controllers and methods from views
 
