@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -90,7 +91,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 		}
 
 		public InputStream getInputStream() throws IOException {
-			return this.gzipped.getInputStream();
+			return new GZIPInputStream(this.gzipped.getInputStream());
 		}
 
 		public boolean exists() {
