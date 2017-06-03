@@ -118,14 +118,13 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @param result the resulting aliases list
 	 */
 	private void retrieveAliases(String name, List<String> result) {
-		for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
-			String registeredName = entry.getValue();
-			if (registeredName.equals(name)) {
-				String alias = entry.getKey();
-				result.add(alias);
-				retrieveAliases(alias, result);
-			}
-		}
+		this.aliasMap.entrySet().stream()  //
+				.filter(e -> e.getKey().equals(name)) //
+				.forEach(e -> {
+					String alias = e.getKey();
+					result.add(alias);
+					retrieveAliases(alias, result);
+				});
 	}
 
 	/**

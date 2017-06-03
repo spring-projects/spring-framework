@@ -17,6 +17,7 @@
 package org.springframework.core;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -82,9 +83,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	protected void copyAttributesFrom(AttributeAccessor source) {
 		Assert.notNull(source, "Source must not be null");
 		String[] attributeNames = source.attributeNames();
-		for (String attributeName : attributeNames) {
-			setAttribute(attributeName, source.getAttribute(attributeName));
-		}
+		Arrays.stream(attributeNames).forEach(a -> setAttribute(a, source.getAttribute(a)));
 	}
 
 

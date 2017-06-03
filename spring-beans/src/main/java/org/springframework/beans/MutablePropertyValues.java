@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,9 +88,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		// There is no replacement of existing property values.
 		if (original != null) {
 			this.propertyValueList = new ArrayList<>(original.size());
-			for (Map.Entry<?, ?> entry : original.entrySet()) {
-				this.propertyValueList.add(new PropertyValue(entry.getKey().toString(), entry.getValue()));
-			}
+			original.forEach((e, v) -> this.propertyValueList.add(new PropertyValue(e.toString(), v)));
 		}
 		else {
 			this.propertyValueList = new ArrayList<>(0);
@@ -136,9 +135,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	public MutablePropertyValues addPropertyValues(PropertyValues other) {
 		if (other != null) {
 			PropertyValue[] pvs = other.getPropertyValues();
-			for (PropertyValue pv : pvs) {
-				addPropertyValue(new PropertyValue(pv));
-			}
+			Arrays.stream(pvs).forEach(pv -> addPropertyValue(new PropertyValue(pv)));
 		}
 		return this;
 	}
@@ -151,9 +148,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public MutablePropertyValues addPropertyValues(Map<?, ?> other) {
 		if (other != null) {
-			for (Map.Entry<?, ?> entry : other.entrySet()) {
-				addPropertyValue(new PropertyValue(entry.getKey().toString(), entry.getValue()));
-			}
+			other.forEach((e, v) -> addPropertyValue(new PropertyValue(e.toString(), v)));
 		}
 		return this;
 	}
