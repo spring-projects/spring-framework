@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
@@ -31,9 +32,10 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
+ * @author Eko Kurniawan Khannedy
  * @since 3.1
  */
-public class InterceptorRegistration {
+public class InterceptorRegistration implements Ordered {
 
 	private final HandlerInterceptor interceptor;
 
@@ -43,6 +45,7 @@ public class InterceptorRegistration {
 
 	private PathMatcher pathMatcher;
 
+	private int order = 0;
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -103,4 +106,16 @@ public class InterceptorRegistration {
 		return (CollectionUtils.isEmpty(list) ? null : list.toArray(new String[list.size()]));
 	}
 
+	/**
+	 * An order position to be used, default is 0.
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	@Override
+	public int getOrder() {
+		return order;
+	}
 }
