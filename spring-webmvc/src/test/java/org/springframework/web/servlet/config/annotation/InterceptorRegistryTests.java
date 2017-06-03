@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -46,6 +47,7 @@ import static org.junit.Assert.*;
  * {@link WebRequestInterceptor}s.
  *
  * @author Rossen Stoyanchev
+ * @author Eko Kurniawan Khannedy
  */
 public class InterceptorRegistryTests {
 
@@ -194,4 +196,27 @@ public class InterceptorRegistryTests {
 		}
 	}
 
+	@Test
+	public void orderedInterceptors() throws Exception {
+		registry.addInterceptor(interceptor1).order(Ordered.LOWEST_PRECEDENCE);
+		registry.addInterceptor(interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
+
+		List<Object> interceptors = registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(interceptor2, interceptors.get(0));
+		assertSame(interceptor1, interceptors.get(1));
+	}
+
+	@Test
+	public void nonOrderedInterceptors() throws Exception {
+		registry.addInterceptor(interceptor1).order(0);
+		registry.addInterceptor(interceptor2).order(0);
+
+		List<Object> interceptors = registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(interceptor1, interceptors.get(0));
+		assertSame(interceptor2, interceptors.get(1));
+	}
 }
