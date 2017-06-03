@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Eko Kurniawan Khannedy
  * @since 19.05.2003
  */
 public class BeanUtilsTests {
