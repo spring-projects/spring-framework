@@ -90,6 +90,7 @@ import org.springframework.core.Ordered;
  * public class AppConfig implements AsyncConfigurer {
  *
  *     &#064;Override
+ *     &#064;Bean
  *     public Executor getAsyncExecutor() {
  *         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
  *         executor.setCorePoolSize(7);
