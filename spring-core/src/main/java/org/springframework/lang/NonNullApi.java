@@ -18,7 +18,7 @@ import javax.annotation.meta.TypeQualifierDefault;
  *
  * @author Sebastien Deleuze
  * @since 5.0
- * @see NonNull
+ * @see Nullable
  * @see javax.annotation.Nonnull
  */
 @Documented
