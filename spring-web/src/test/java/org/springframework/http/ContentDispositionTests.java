@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -74,6 +75,17 @@ public class ContentDispositionTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void parseInvalidParameter() {
 		ContentDisposition.parse("foo;bar");
+	}
+
+	@Test
+	public void parseDates() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("attachment; creation-date=\"Mon, 12 Feb 2007 10:15:30 -0500\"; modification-date=\"Tue, 13 Feb 2007 10:15:30 -0500\"; read-date=\"Wed, 14 Feb 2007 10:15:30 -0500\"");
+		assertEquals(ContentDisposition.builder("attachment")
+				.creationDate(Instant.parse("2007-02-12T15:15:30.00Z"))
+				.modificationDate(Instant.parse("2007-02-13T15:15:30.00Z"))
+				.readDate(Instant.parse("2007-02-14T15:15:30.00Z"))
+						.build(), disposition);
 	}
 
 	@Test

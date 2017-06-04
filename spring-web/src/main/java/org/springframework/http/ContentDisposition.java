@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -45,16 +47,28 @@ public class ContentDisposition {
 
 	private final Long size;
 
+	private final Instant creationDate;
+
+	private final Instant modificationDate;
+
+	private final Instant readDate;
+
 
 	/**
 	 * Private constructor. See static factory methods in this class.
 	 */
-	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename, @Nullable Charset charset, @Nullable Long size) {
+	private ContentDisposition(@Nullable String type, @Nullable String name,
+			@Nullable String filename, @Nullable Charset charset, @Nullable Long size,
+			@Nullable Instant creationDate, @Nullable Instant modificationDate, @Nullable Instant readDate) {
+
 		this.type = type;
 		this.name = name;
 		this.filename = filename;
 		this.charset = charset;
 		this.size = size;
+		this.creationDate = creationDate;
+		this.modificationDate = modificationDate;
+		this.readDate = readDate;
 	}
 
 
@@ -100,6 +114,30 @@ public class ContentDisposition {
 		return this.size;
 	}
 
+	/**
+	 * Return the value of the {@literal creation-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public Instant getCreationDate() {
+		return this.creationDate;
+	}
+
+	/**
+	 * Return the value of the {@literal modification-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public Instant getModificationDate() {
+		return this.modificationDate;
+	}
+
+	/**
+	 * Return the value of the {@literal read-date} parameter, or {@code null} if not defined.
+	 */
+	@Nullable
+	public Instant getReadDate() {
+		return this.readDate;
+	}
+
 
 	/**
 	 * Return a builder for a {@code ContentDisposition}.
@@ -115,11 +153,12 @@ public class ContentDisposition {
 	 * Return an empty content disposition.
 	 */
 	public static ContentDisposition empty() {
-		return new ContentDisposition(null, null, null, null, null);
+		return new ContentDisposition(null, null, null, null, null, null, null, null);
 	}
 
 	/**
 	 * Parse a {@literal Content-Disposition} header value as defined in RFC 2183.
+	 *
 	 * @param contentDisposition the {@literal Content-Disposition} header value
 	 * @return the parsed content disposition
 	 * @see #toString()
@@ -132,6 +171,9 @@ public class ContentDisposition {
 		String filename = null;
 		Charset charset = null;
 		Long size = null;
+		Instant creationDate = null;
+		Instant modificationDate = null;
+		Instant readDate = null;
 		for (int i = 1; i < parts.length; i++) {
 			String part = parts[i];
 			int eqIndex = part.indexOf('=');
@@ -155,12 +197,21 @@ public class ContentDisposition {
 				else if (attribute.equals("size") ) {
 					size = Long.parseLong(value);
 				}
+				else if (attribute.equals("creation-date")) {
+					creationDate = DateTimeFormatter.RFC_1123_DATE_TIME.parse(value, Instant::from);
+				}
+				else if (attribute.equals("modification-date")) {
+					modificationDate = DateTimeFormatter.RFC_1123_DATE_TIME.parse(value, Instant::from);
+				}
+				else if (attribute.equals("read-date")) {
+					readDate = DateTimeFormatter.RFC_1123_DATE_TIME.parse(value, Instant::from);
+				}
 			}
 			else {
 				throw new IllegalArgumentException("Invalid content disposition format");
 			}
 		}
-		return new ContentDisposition(type, name, filename, charset, size);
+		return new ContentDisposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
 	}
 
 	/**
@@ -229,7 +280,16 @@ public class ContentDisposition {
 		if (charset != null ? !charset.equals(that.charset) : that.charset != null) {
 			return false;
 		}
-		return size != null ? size.equals(that.size) : that.size == null;
+		if (size != null ? !size.equals(that.size) : that.size != null) {
+			return false;
+		}
+		if (creationDate != null ? !creationDate.equals(that.creationDate) : that.creationDate != null) {
+			return false;
+		}
+		if (modificationDate != null ? !modificationDate.equals(that.modificationDate) : that.modificationDate != null) {
+			return false;
+		}
+		return readDate != null ? readDate.equals(that.readDate) : that.readDate == null;
 	}
 
 	@Override
@@ -239,6 +299,9 @@ public class ContentDisposition {
 		result = 31 * result + (filename != null ? filename.hashCode() : 0);
 		result = 31 * result + (charset != null ? charset.hashCode() : 0);
 		result = 31 * result + (size != null ? size.hashCode() : 0);
+		result = 31 * result + (creationDate != null ? creationDate.hashCode() : 0);
+		result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
+		result = 31 * result + (readDate != null ? readDate.hashCode() : 0);
 		return result;
 	}
 
@@ -266,6 +329,21 @@ public class ContentDisposition {
 		if (this.size != null) {
 			builder.append("; size=");
 			builder.append(this.size);
+		}
+		if (this.creationDate != null) {
+			builder.append("; creation-date=\"");
+			builder.append(DateTimeFormatter.RFC_1123_DATE_TIME.format(this.creationDate));
+			builder.append('\"');
+		}
+		if (this.modificationDate != null) {
+			builder.append("; modification-date=\"");
+			builder.append(DateTimeFormatter.RFC_1123_DATE_TIME.format(this.modificationDate));
+			builder.append('\"');
+		}
+		if (this.readDate != null) {
+			builder.append("; read-date=\"");
+			builder.append(DateTimeFormatter.RFC_1123_DATE_TIME.format(this.readDate));
+			builder.append('\"');
 		}
 		return builder.toString();
 	}
@@ -334,6 +412,21 @@ public class ContentDisposition {
 		Builder size(Long size);
 
 		/**
+		 * Set the value of the {@literal creation-date} parameter.
+		 */
+		Builder creationDate(Instant creationDate);
+
+		/**
+		 * Set the value of the {@literal modification-date} parameter.
+		 */
+		Builder modificationDate(Instant modificationDate);
+
+		/**
+		 * Set the value of the {@literal read-date} parameter.
+		 */
+		Builder readDate(Instant readDate);
+
+		/**
 		 * Build the content disposition
 		 */
 		ContentDisposition build();
@@ -351,6 +444,13 @@ public class ContentDisposition {
 		private Charset charset;
 
 		private Long size;
+
+		private Instant creationDate;
+
+		private Instant modificationDate;
+
+		private Instant readDate;
+
 
 		public BuilderImpl(String type) {
 			Assert.hasText(type, "'type' must not be not empty");
@@ -383,8 +483,27 @@ public class ContentDisposition {
 		}
 
 		@Override
+		public Builder creationDate(Instant creationDate) {
+			this.creationDate = creationDate;
+			return this;
+		}
+
+		@Override
+		public Builder modificationDate(Instant modificationDate) {
+			this.modificationDate = modificationDate;
+			return this;
+		}
+
+		@Override
+		public Builder readDate(Instant readDate) {
+			this.readDate = readDate;
+			return this;
+		}
+
+		@Override
 		public ContentDisposition build() {
-			return new ContentDisposition(this.type, this.name, this.filename, this.charset, this.size);
+			return new ContentDisposition(this.type, this.name, this.filename, this.charset,
+					this.size, this.creationDate, this.modificationDate, this.readDate);
 		}
 	}
 
