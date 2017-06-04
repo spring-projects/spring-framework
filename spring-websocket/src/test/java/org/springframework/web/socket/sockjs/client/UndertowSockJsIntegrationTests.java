@@ -56,6 +56,16 @@ public class UndertowSockJsIntegrationTests extends AbstractSockJsIntegrationTes
 		}
 	}
 
+	@Override
+	protected AbstractEventSourceTransport createEventSourceTransport() {
+		try {
+			return new UndertowEventSourceTransport();
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Could not create UndertowEventSourceTransport");
+		}
+	}
+
 	@Configuration
 	static class UndertowTestConfig {
 		@Bean

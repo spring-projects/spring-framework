@@ -16,8 +16,8 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
@@ -33,82 +34,82 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 /**
- * Abstract base class for XHR transport implementations to extend.
+ * Abstract base class for EventSource transport implementations to extend.
  *
  * @author Rossen Stoyanchev
- * @since 4.1
+ * @author Sebastian Lövdahl
+ * @since 5.0
  */
-public abstract class AbstractXhrTransport extends AbstractHttpTransport implements XhrTransport {
-
-	protected static final String PRELUDE;
-
-	static {
-		byte[] bytes = new byte[2048];
-		for (int i = 0; i < bytes.length; i++) {
-			bytes[i] = 'h';
-		}
-		PRELUDE = new String(bytes, SockJsFrame.CHARSET);
-	}
+public abstract class AbstractEventSourceTransport extends AbstractHttpTransport implements EventSourceTransport {
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private boolean xhrStreamingDisabled;
-
 
 	@Override
 	public List<TransportType> getTransportTypes() {
-		return (isXhrStreamingDisabled() ?
-				Collections.singletonList(TransportType.XHR) :
-				Arrays.asList(TransportType.XHR_STREAMING, TransportType.XHR));
+		return Collections.singletonList(TransportType.EVENT_SOURCE);
 	}
-
-	/**
-	 * An {@code XhrTransport} can support both the "xhr_streaming" and "xhr"
-	 * SockJS server transports. From a client perspective there is no
-	 * implementation difference.
-	 * <p>Typically an {@code XhrTransport} is used as "XHR streaming" first and
-	 * then, if that fails, as "XHR". In some cases however it may be helpful to
-	 * suppress XHR streaming so that only XHR is attempted.
-	 * <p>By default this property is set to {@code false} which means both
-	 * "XHR streaming" and "XHR" apply.
-	 */
-	public void setXhrStreamingDisabled(boolean disabled) {
-		this.xhrStreamingDisabled = disabled;
-	}
-
-	/**
-	 * Whether XHR streaming is disabled or not.
-	 */
-	public boolean isXhrStreamingDisabled() {
-		return this.xhrStreamingDisabled;
-	}
-
-
-	// Transport methods
 
 	@Override
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
 		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<>();
-		XhrClientSockJsSession session = new XhrClientSockJsSession(request, handler, this, connectFuture);
+		EventSourceClientSockJsSession session =
+				new EventSourceClientSockJsSession(request, handler, this, connectFuture);
 		request.addTimeoutTask(session.getTimeoutTask());
 
 		URI receiveUrl = request.getTransportUrl();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Starting XHR " +
-					(isXhrStreamingDisabled() ? "Polling" : "Streaming") + "session url=" + receiveUrl);
+			logger.debug("Starting EventSource session url=" + receiveUrl);
 		}
 
 		HttpHeaders handshakeHeaders = new HttpHeaders();
+		handshakeHeaders.setAccept(Collections.singletonList(MediaType.TEXT_EVENT_STREAM));
 		handshakeHeaders.putAll(request.getHandshakeHeaders());
 
 		connectInternal(request, handler, receiveUrl, handshakeHeaders, session, connectFuture);
 		return connectFuture;
 	}
 
-	protected abstract void connectInternal(TransportRequest request, WebSocketHandler handler,
-			URI receiveUrl, HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
+	protected abstract void connectInternal(TransportRequest request,
+			WebSocketHandler handler, URI receiveUrl, HttpHeaders handshakeHeaders,
+			EventSourceClientSockJsSession session,
 			SettableListenableFuture<WebSocketSession> connectFuture);
+
+
+	protected void handleEventSourceFrame(ByteArrayOutputStream outputStream, EventSourceClientSockJsSession session) {
+		byte[] bytes = outputStream.toByteArray();
+		outputStream.reset();
+		if (bytes.length > 0) {
+			String content = new String(bytes, SockJsFrame.CHARSET);
+			if (logger.isDebugEnabled()) {
+				logger.debug("EventSource content received: " + content);
+			}
+
+			String eventData = "";
+			String[] splittedContent = content.split("\n");
+			for (String line : splittedContent) {
+				if (line.startsWith("data:")) {
+					// strip the field name and the colon
+					int dataBeginIndex = content.indexOf(':') + 1;
+					if (line.length() > dataBeginIndex) {
+						String value = line.substring(dataBeginIndex);
+						// if present, strip one single space immediately after the colon
+						if (value.charAt(0) == ' ') {
+							value = value.substring(1);
+						}
+						if (!value.isEmpty()) {
+							eventData += (eventData.isEmpty() ? value : "\n" + value);
+						}
+					}
+				}
+			}
+
+			if (!eventData.isEmpty()) {
+				session.handleFrame(eventData);
+			}
+		}
+	}
 
 
 	@Override
