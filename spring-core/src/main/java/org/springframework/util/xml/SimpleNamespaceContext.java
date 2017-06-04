@@ -97,9 +97,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	 * The supplied map must consist of string key value pairs.
 	 */
 	public void setBindings(Map<String, String> bindings) {
-		for (Map.Entry<String, String> entry : bindings.entrySet()) {
-			bindNamespaceUri(entry.getKey(), entry.getValue());
-		}
+		bindings.forEach((k, v) -> bindNamespaceUri(k, v));
 	}
 
 	/**
