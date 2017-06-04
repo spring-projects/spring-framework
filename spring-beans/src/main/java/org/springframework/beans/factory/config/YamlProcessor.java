@@ -202,20 +202,18 @@ public abstract class YamlProcessor {
 		}
 
 		Map<Object, Object> map = (Map<Object, Object>) object;
-		for (Entry<Object, Object> entry : map.entrySet()) {
-			Object value = entry.getValue();
-			if (value instanceof Map) {
-				value = asMap(value);
+		map.forEach((k, v) -> {
+			if (v instanceof Map) {
+				v = asMap(v);
 			}
-			Object key = entry.getKey();
-			if (key instanceof CharSequence) {
-				result.put(key.toString(), value);
+			if (k instanceof CharSequence) {
+				result.put(k.toString(), v);
 			}
 			else {
 				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
+				result.put("[" + k.toString() + "]", v);
 			}
-		}
+		});
 		return result;
 	}
 
