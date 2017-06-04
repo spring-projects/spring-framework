@@ -369,9 +369,7 @@ public class GenericConversionServiceTests {
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
 			Map<String, Integer> target = new HashMap<>(source.size());
-			for (Map.Entry<String, String> entry : source.entrySet()) {
-				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
-			}
+			source.forEach((k, v) -> target.put(k, Integer.valueOf(v)));
 		}
 		watch.stop();
 		// System.out.println(watch.prettyPrint());
