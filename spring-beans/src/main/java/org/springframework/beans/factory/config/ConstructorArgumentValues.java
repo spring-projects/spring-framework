@@ -72,14 +72,10 @@ public class ConstructorArgumentValues {
 	 */
 	public void addArgumentValues(ConstructorArgumentValues other) {
 		if (other != null) {
-			for (Map.Entry<Integer, ValueHolder> entry : other.indexedArgumentValues.entrySet()) {
-				addOrMergeIndexedArgumentValue(entry.getKey(), entry.getValue().copy());
-			}
-			for (ValueHolder valueHolder : other.genericArgumentValues) {
-				if (!this.genericArgumentValues.contains(valueHolder)) {
-					addOrMergeGenericArgumentValue(valueHolder.copy());
-				}
-			}
+			other.indexedArgumentValues.forEach((k, v) -> addOrMergeIndexedArgumentValue(k, v.copy()));
+			other.genericArgumentValues.stream()
+					.filter(v -> !this.genericArgumentValues.contains(v))
+					.forEach(v -> addOrMergeGenericArgumentValue(v));
 		}
 	}
 

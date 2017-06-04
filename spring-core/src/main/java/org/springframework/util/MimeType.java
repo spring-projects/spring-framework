@@ -175,12 +175,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
-			for (Map.Entry<String, String> entry : parameters.entrySet()) {
-				String attribute = entry.getKey();
-				String value = entry.getValue();
-				checkParameters(attribute, value);
-				map.put(attribute, value);
-			}
+			parameters.forEach((k, v) -> {
+				checkParameters(k, v);
+				map.put(k, v);
+			});
 			this.parameters = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -459,12 +457,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	private void appendTo(Map<String, String> map, StringBuilder builder) {
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			builder.append(';');
-			builder.append(entry.getKey());
+		map.forEach((k, v) -> {
+			builder.append(";");
+			builder.append(k);
 			builder.append('=');
-			builder.append(entry.getValue());
-		}
+			builder.append(v);
+		});
 	}
 
 	/**

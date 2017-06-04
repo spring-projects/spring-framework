@@ -168,17 +168,15 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof ManagedProperties) {
 			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			for (Map.Entry<Object, Object> propEntry : original.entrySet()) {
-				Object propKey = propEntry.getKey();
-				Object propValue = propEntry.getValue();
-				if (propKey instanceof TypedStringValue) {
-					propKey = evaluate((TypedStringValue) propKey);
+			original.forEach((k, v) -> {
+				if (k instanceof TypedStringValue) {
+					k = evaluate((TypedStringValue) k);
 				}
-				if (propValue instanceof TypedStringValue) {
-					propValue = evaluate((TypedStringValue) propValue);
+				if (v instanceof TypedStringValue) {
+					v = evaluate((TypedStringValue) v);
 				}
-				copy.put(propKey, propValue);
-			}
+				copy.put(k, v);
+			});
 			return copy;
 		}
 		else if (value instanceof TypedStringValue) {
