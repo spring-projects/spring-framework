@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -123,20 +122,18 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void merge(Map<String, Object> output, Map<String, Object> map) {
-		for (Entry<String, Object> entry : map.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-			Object existing = output.get(key);
-			if (value instanceof Map && existing instanceof Map) {
+		map.forEach((k, v) -> {
+			Object existing = output.get(k);
+			if (v instanceof Map && existing instanceof Map) {
 				// Inner cast required by Eclipse IDE.
 				Map<String, Object> result = new LinkedHashMap<>((Map<String, Object>) existing);
-				merge(result, (Map) value);
-				output.put(key, result);
+				merge(result, (Map) v);
+				output.put(k, result);
 			}
 			else {
-				output.put(key, value);
+				output.put(k, v);
 			}
-		}
+		});
 	}
 
 }
