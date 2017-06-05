@@ -48,7 +48,7 @@ public class BindingAwareConcurrentModel extends ConcurrentModel {
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		map.entrySet().forEach(e -> removeBindingResultIfNecessary(e.getKey(), e.getValue()));
+		map.forEach(this::removeBindingResultIfNecessary);
 		super.putAll(map);
 	}
 
