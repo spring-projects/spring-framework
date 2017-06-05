@@ -362,7 +362,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			Collections.sort(this.members, Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
-			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<String>());
+			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
 			for (LifecycleGroupMember member : this.members) {
 				if (this.lifecycleBeans.containsKey(member.name)) {
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);

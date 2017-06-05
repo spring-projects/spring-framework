@@ -424,7 +424,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	protected void handleMessageInternal(Message<?> message, String lookupDestination) {
-		List<Match> matches = new ArrayList<Match>();
+		List<Match> matches = new ArrayList<>();
 
 		List<T> mappingsByUrl = this.destinationLookup.get(lookupDestination);
 		if (mappingsByUrl != null) {
