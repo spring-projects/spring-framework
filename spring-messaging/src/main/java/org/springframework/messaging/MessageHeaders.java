@@ -118,7 +118,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(@Nullable Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());

@@ -52,7 +52,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	private final Map<String, Object> model = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> model = new LinkedHashMap<>();
 
 
 	public DefaultRenderingResponseBuilder(String name) {
