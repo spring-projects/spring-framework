@@ -457,9 +457,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		String actualPropertyName =
 				(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
 		if (this.customEditors != null) {
-			for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
-				target.registerCustomEditor(entry.getKey(), entry.getValue());
-			}
+			this.customEditors.forEach((clazz, propertyEditor) -> target.registerCustomEditor(clazz, propertyEditor));
 		}
 		if (this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {

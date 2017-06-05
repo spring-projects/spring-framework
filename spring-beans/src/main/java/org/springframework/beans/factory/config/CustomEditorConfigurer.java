@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -140,16 +141,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
-			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
-				beanFactory.addPropertyEditorRegistrar(propertyEditorRegistrar);
-			}
+			Arrays.stream(this.propertyEditorRegistrars).forEach(beanFactory::addPropertyEditorRegistrar);
 		}
 		if (this.customEditors != null) {
-			for (Map.Entry<Class<?>, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
-				Class<?> requiredType = entry.getKey();
-				Class<? extends PropertyEditor> propertyEditorClass = entry.getValue();
-				beanFactory.registerCustomEditor(requiredType, propertyEditorClass);
-			}
+			this.customEditors.forEach(beanFactory::registerCustomEditor);
 		}
 	}
 

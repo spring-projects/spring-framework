@@ -287,9 +287,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			}
 		}
 
-		for (Map.Entry<String, String> entry : this.validationPropertyMap.entrySet()) {
-			configuration.addProperty(entry.getKey(), entry.getValue());
-		}
+		this.validationPropertyMap.forEach(configuration::addProperty);
 
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
 		postProcessConfiguration(configuration);

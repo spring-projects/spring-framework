@@ -126,12 +126,11 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 */
 	public ConcurrentModel mergeAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
-			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
-				String key = entry.getKey();
+			attributes.forEach((key, value) -> {
 				if (!containsKey(key)) {
-					put(key, entry.getValue());
+					put(key, value);
 				}
-			}
+			});
 		}
 		return this;
 	}

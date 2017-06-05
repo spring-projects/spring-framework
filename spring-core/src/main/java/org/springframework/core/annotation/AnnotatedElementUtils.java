@@ -580,9 +580,7 @@ public class AnnotatedElementUtils {
 			public Object process(@Nullable AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(
 						annotation, classValuesAsString, nestedAnnotationsAsMap);
-				for (Map.Entry<String, Object> entry : annotationAttributes.entrySet()) {
-					attributesMap.add(entry.getKey(), entry.getValue());
-				}
+				annotationAttributes.forEach(attributesMap::add);
 				return CONTINUE;
 			}
 		});
