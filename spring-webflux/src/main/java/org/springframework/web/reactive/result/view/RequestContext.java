@@ -25,6 +25,8 @@ import java.util.TimeZone;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -84,9 +86,10 @@ public class RequestContext {
 		this.model = model;
 		this.messageSource = messageSource;
 
-		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-		this.locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
-		this.timeZone = TimeZone.getDefault(); // TODO
+		LocaleContext localeContext = exchange.getLocaleContext();
+		this.locale = localeContext.getLocale();
+		this.timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
+				((TimeZoneAwareLocaleContext)localeContext).getTimeZone() : TimeZone.getDefault());
 
 		this.defaultHtmlEscape = null; // TODO
 		this.dataValueProcessor = dataValueProcessor;

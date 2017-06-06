@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -189,8 +188,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "].");
 		}
 
-		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-		Locale locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
+		Locale locale = exchange.getLocaleContext().getLocale();
 
 		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {

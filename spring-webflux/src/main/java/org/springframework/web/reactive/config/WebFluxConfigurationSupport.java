@@ -58,9 +58,11 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 
 /**
  * The main class for Spring WebFlux configuration.
@@ -264,6 +266,18 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		ServerCodecConfigurer serverCodecConfigurer = ServerCodecConfigurer.create();
 		configureHttpMessageCodecs(serverCodecConfigurer);
 		return serverCodecConfigurer;
+	}
+
+	/**
+	 * Override to plug a sub-class of {@link LocaleContextResolver}.
+	 */
+	protected LocaleContextResolver createLocaleContextResolver() {
+		return new AcceptHeaderLocaleContextResolver();
+	}
+
+	@Bean
+	public LocaleContextResolver localeContextResolver() {
+		return createLocaleContextResolver();
 	}
 
 	/**

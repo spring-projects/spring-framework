@@ -199,6 +199,7 @@ public abstract class RouterFunctions {
 		return WebHttpHandlerBuilder.webHandler(webHandler)
 				.filters(strategies.webFilters())
 				.exceptionHandlers(strategies.exceptionHandlers())
+				.localeContextResolver(strategies.localeContextResolver())
 				.build();
 	}
 

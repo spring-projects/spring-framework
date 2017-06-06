@@ -201,8 +201,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					Model model = result.getModel();
 					MethodParameter parameter = result.getReturnTypeSource();
 
-					List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-					Locale locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
+					Locale locale = exchange.getLocaleContext().getLocale();
 
 					Class<?> clazz = valueType.getRawClass();
 					if (clazz == null) {
