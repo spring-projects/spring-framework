@@ -52,6 +52,7 @@ public class SimpleTimeZoneAwareLocaleContext extends SimpleLocaleContext implem
 	}
 
 
+	@Override
 	public TimeZone getTimeZone() {
 		return this.timeZone;
 	}

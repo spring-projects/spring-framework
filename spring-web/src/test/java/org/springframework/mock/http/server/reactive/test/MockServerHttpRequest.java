@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -261,6 +262,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
+
+		/**
 		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -417,6 +425,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder acceptCharset(Charset... acceptableCharsets) {
 			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+			return this;
+		}
+
+		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
 			return this;
 		}
 

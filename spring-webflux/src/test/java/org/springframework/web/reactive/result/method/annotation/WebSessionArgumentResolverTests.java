@@ -31,6 +31,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.session.DefaultWebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
@@ -65,7 +66,7 @@ public class WebSessionArgumentResolverTests {
 		WebSessionManager manager = exchange -> Mono.just(session);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(),
-				manager, ServerCodecConfigurer.create());
+				manager, ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
 
 		MethodParameter param = this.testMethod.arg(WebSession.class);
 		Object actual = this.resolver.resolveArgument(param, context, exchange).block();

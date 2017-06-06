@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,6 +46,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
@@ -82,6 +84,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<WebSession> sessionMono;
 
+	private final LocaleContextResolver localeContextResolver;
+
 	private final Mono<MultiValueMap<String, String>> formDataMono;
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
@@ -89,20 +93,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private volatile boolean notModified;
 
 
-	/**
-	 * Alternate constructor with a WebSessionManager parameter.
-	 */
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
-			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer) {
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer, LocaleContextResolver localeContextResolver) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
 		Assert.notNull(sessionManager, "'sessionManager' is required");
 		Assert.notNull(codecConfigurer, "'codecConfigurer' is required");
+		Assert.notNull(localeContextResolver, "'localeContextResolver' is required");
 
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
+		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer);
 		this.multipartDataMono = initMultipartData(request, codecConfigurer);
 	}
@@ -188,6 +191,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public <T extends Principal> Mono<T> getPrincipal() {
 		return Mono.empty();
+	}
+
+	@Override
+	public LocaleContext getLocaleContext() {
+		return this.localeContextResolver.resolveLocaleContext(this);
 	}
 
 	@Override

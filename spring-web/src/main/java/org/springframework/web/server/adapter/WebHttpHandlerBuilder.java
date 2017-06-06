@@ -27,6 +27,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -68,6 +69,9 @@ public class WebHttpHandlerBuilder {
 	/** Well-known name for the ServerCodecConfigurer in the bean factory. */
 	public static final String SERVER_CODEC_CONFIGURER_BEAN_NAME = "serverCodecConfigurer";
 
+	/** Well-known name for the LocaleContextResolver in the bean factory. */
+	public static final String LOCALE_CONTEXT_RESOLVER_BEAN_NAME = "localeContextResolver";
+
 
 	private final WebHandler webHandler;
 
@@ -78,6 +82,8 @@ public class WebHttpHandlerBuilder {
 	private WebSessionManager sessionManager;
 
 	private ServerCodecConfigurer codecConfigurer;
+
+	private LocaleContextResolver localeContextResolver;
 
 
 	/**
@@ -112,6 +118,8 @@ public class WebHttpHandlerBuilder {
 	 *	{@link #WEB_SESSION_MANAGER_BEAN_NAME}.
 	 *  <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
 	 *	{@link #SERVER_CODEC_CONFIGURER_BEAN_NAME}.
+	 *<li>{@link LocaleContextResolver} [0..1] -- looked up by the name
+	 *	{@link #LOCALE_CONTEXT_RESOLVER_BEAN_NAME}.
 	 * </ul>
 	 * @param context the application context to use for the lookup
 	 * @return the prepared builder
@@ -139,6 +147,14 @@ public class WebHttpHandlerBuilder {
 		try {
 			builder.codecConfigurer(
 					context.getBean(SERVER_CODEC_CONFIGURER_BEAN_NAME, ServerCodecConfigurer.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.localeContextResolver(
+					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default
@@ -234,6 +250,16 @@ that's	 */
 		return this;
 	}
 
+	/**
+	 * Configure the {@link LocaleContextResolver} to set on the
+	 * {@link ServerWebExchange WebServerExchange}.
+	 * @param localeContextResolver the locale context resolver
+	 */
+	public WebHttpHandlerBuilder localeContextResolver(LocaleContextResolver localeContextResolver) {
+		this.localeContextResolver = localeContextResolver;
+		return this;
+	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
@@ -251,6 +277,9 @@ that's	 */
 		}
 		if (this.codecConfigurer != null) {
 			adapted.setCodecConfigurer(this.codecConfigurer);
+		}
+		if (this.localeContextResolver != null) {
+			adapted.setLocaleContextResolver(this.localeContextResolver);
 		}
 
 		return adapted;

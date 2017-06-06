@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -156,7 +155,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale locale = resolveLocale(exchange);
+			Locale locale = exchange.getLocaleContext().getLocale();
 			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
 			return Flux.fromStream(viewResolverStream)
@@ -167,11 +166,6 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
-		private Locale resolveLocale(ServerWebExchange exchange) {
-			List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-			return locales.isEmpty() ? Locale.getDefault() : locales.get(0);
-
-		}
 	}
 
 }

@@ -24,6 +24,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 
@@ -35,6 +36,7 @@ import org.springframework.web.server.WebFilter;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see RouterFunctions#toHttpHandler(RouterFunction, HandlerStrategies)
  */
@@ -71,6 +73,12 @@ public interface HandlerStrategies {
 	 * @return the exception handlers
 	 */
 	List<WebExceptionHandler> exceptionHandlers();
+
+	/**
+	 * Return the {@link LocaleContextResolver} to be used for resolving locale context.
+	 * @return the locale context resolver
+	 */
+	LocaleContextResolver localeContextResolver();
 
 
 	// Static methods
@@ -145,6 +153,13 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 */
 		Builder exceptionHandler(WebExceptionHandler exceptionHandler);
+
+		/**
+		 * Add the given locale context resolver to this builder.
+		 * @param localeContextResolver the locale context resolver to add
+		 * @return this builder
+		 */
+		Builder localeContextResolver(LocaleContextResolver localeContextResolver);
 
 		/**
 		 * Builds the {@link HandlerStrategies}.
