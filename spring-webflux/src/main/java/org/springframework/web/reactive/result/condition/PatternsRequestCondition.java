@@ -30,7 +30,6 @@ import java.util.Set;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -187,7 +186,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 
-		LookupPath lookupPath = LookupPath.getCurrent(exchange);
+		String lookupPath = exchange.getRequest().getPathWithinApplication();
 		List<String> matches = getMatchingPatterns(lookupPath);
 
 		return matches.isEmpty() ? null :
@@ -204,7 +203,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param lookupPath the lookup path to match to existing patterns
 	 * @return a collection of matching patterns sorted with the closest match at the top
 	 */
-	public List<String> getMatchingPatterns(LookupPath lookupPath) {
+	public List<String> getMatchingPatterns(String lookupPath) {
 		List<String> matches = new ArrayList<>();
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -212,33 +211,19 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath.getPath()));
+		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
 		return matches;
 	}
 
-	private String getMatchingPattern(String pattern, LookupPath lookupPath) {
-		if (pattern.equals(lookupPath.getPath())) {
+	private String getMatchingPattern(String pattern, String lookupPath) {
+		if (pattern.equals(lookupPath)) {
 			return pattern;
 		}
-		if (this.useSuffixPatternMatch) {
-			if (!this.fileExtensions.isEmpty() && lookupPath.getFileExtension() != null) {
-				if (this.fileExtensions.contains(lookupPath.getFileExtension()) &&
-						this.pathMatcher.match(pattern, lookupPath.getPathWithoutExtension())) {
-					return pattern + lookupPath.getFileExtension();
-				}
-			}
-			else {
-				if (lookupPath.getFileExtension() != null
-						&& this.pathMatcher.match(pattern , lookupPath.getPathWithoutExtension())) {
-					return pattern + ".*";
-				}
-			}
-		}
-		if (this.pathMatcher.match(pattern, lookupPath.getPath())) {
+		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
 		if (this.useTrailingSlashMatch) {
-			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath.getPath())) {
+			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
 				return pattern +"/";
 			}
 		}
@@ -258,8 +243,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public int compareTo(PatternsRequestCondition other, ServerWebExchange exchange) {
-		String path = LookupPath.getCurrent(exchange).getPath();
-		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(path);
+		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {

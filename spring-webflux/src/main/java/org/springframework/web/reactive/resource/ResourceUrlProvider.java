@@ -38,7 +38,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -186,8 +185,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String requestPath = request.getURI().getPath();
-		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
-		return requestPath.indexOf(lookupPath.getPath());
+		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		return requestPath.indexOf(lookupPath);
 	}
 
 	private int getEndPathIndex(String lookupPath) {

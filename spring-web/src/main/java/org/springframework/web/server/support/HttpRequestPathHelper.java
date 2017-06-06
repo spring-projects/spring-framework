@@ -36,7 +36,7 @@ import org.springframework.web.util.UriUtils;
  */
 public class HttpRequestPathHelper {
 
-	private boolean urlDecode = true;
+	private boolean urlDecode = false;
 
 
 	// TODO: sanitize path, default/request encoding?, remove path params?
@@ -57,26 +57,6 @@ public class HttpRequestPathHelper {
 		return this.urlDecode;
 	}
 
-
-	public LookupPath getLookupPathForRequest(ServerWebExchange exchange) {
-		String path = getPathWithinApplication(exchange.getRequest());
-		path = (shouldUrlDecode() ? decode(exchange, path) : path);
-		int begin = path.lastIndexOf('/') + 1;
-		int end = path.length();
-		int paramIndex = path.indexOf(';', begin);
-		int extIndex = path.lastIndexOf('.', paramIndex != -1 ? paramIndex : end);
-		return new LookupPath(path, extIndex, paramIndex);
-	}
-
-	private String getPathWithinApplication(ServerHttpRequest request) {
-		String contextPath = request.getContextPath();
-		String path = request.getURI().getRawPath();
-		if (!StringUtils.hasText(contextPath)) {
-			return path;
-		}
-		int contextLength = contextPath.length();
-		return (path.length() > contextLength ? path.substring(contextLength) : "");
-	}
 
 	private String decode(ServerWebExchange exchange, String path) {
 		// TODO: look up request encoding?

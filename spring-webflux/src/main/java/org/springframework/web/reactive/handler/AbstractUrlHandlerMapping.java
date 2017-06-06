@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -101,7 +100,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	@Override
 	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
-		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
+		String lookupPath = exchange.getRequest().getPathWithinApplication();
 		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
@@ -111,10 +110,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		if (handler != null && logger.isDebugEnabled()) {
-			logger.debug("Mapping [" + lookupPath.getPath() + "] to " + handler);
+			logger.debug("Mapping [" + lookupPath + "] to " + handler);
 		}
 		else if (handler == null && logger.isTraceEnabled()) {
-			logger.trace("No handler mapping found for [" + lookupPath.getPath() + "]");
+			logger.trace("No handler mapping found for [" + lookupPath + "]");
 		}
 
 		return Mono.justOrEmpty(handler);
@@ -133,29 +132,28 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.web.util.pattern.ParsingPathMatcher
 	 */
 	@Nullable
-	protected Object lookupHandler(LookupPath lookupPath, ServerWebExchange exchange) throws Exception {
+	protected Object lookupHandler(String lookupPath, ServerWebExchange exchange) throws Exception {
 		// Direct match?
-		String urlPath = lookupPath.getPath();
-		Object handler = this.handlerMap.get(urlPath);
+		Object handler = this.handlerMap.get(lookupPath);
 		if (handler != null) {
-			return handleMatch(handler, urlPath, urlPath, exchange);
+			return handleMatch(handler, lookupPath, lookupPath, exchange);
 		}
 
 		// Pattern match?
 		List<String> matches = new ArrayList<>();
 		for (String pattern : this.handlerMap.keySet()) {
-			if (getPathMatcher().match(pattern, urlPath)) {
+			if (getPathMatcher().match(pattern, lookupPath)) {
 				matches.add(pattern);
 			}
 			else if (useTrailingSlashMatch()) {
-				if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", urlPath)) {
+				if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
 					matches.add(pattern +"/");
 				}
 			}
 		}
 
 		String bestMatch = null;
-		Comparator<String> comparator = getPathMatcher().getPatternComparator(urlPath);
+		Comparator<String> comparator = getPathMatcher().getPatternComparator(lookupPath);
 		if (!matches.isEmpty()) {
 			Collections.sort(matches, comparator);
 			if (logger.isDebugEnabled()) {
@@ -174,7 +172,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 							"Could not find handler for best pattern match [" + bestMatch + "]");
 				}
 			}
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, lookupPath);
 			return handleMatch(handler, bestMatch, pathWithinMapping, exchange);
 		}
 

@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -81,7 +80,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
-		String lookupPath = LookupPath.getCurrent(exchange).getPath();
+		String lookupPath = exchange.getRequest().getPathWithinApplication();
 		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
 				return entry.getValue();

@@ -51,7 +51,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.LookupPath;
 
 /**
  * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
@@ -259,7 +258,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	 * Use the request path the leading and trailing slash stripped.
 	 */
 	private String getDefaultViewName(ServerWebExchange exchange) {
-		String path = LookupPath.getCurrent(exchange).getPath();
+		String path = exchange.getRequest().getPathWithinApplication();
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}

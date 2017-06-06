@@ -55,8 +55,6 @@ import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.server.support.LookupPath;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
@@ -219,17 +217,14 @@ public class ViewResolutionResultHandlerTests {
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
 		MockServerWebExchange exchange = get("/account").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		exchange = get("/account/").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		exchange = get("/account.123").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 	}
@@ -256,8 +251,7 @@ public class ViewResolutionResultHandlerTests {
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
-		
+
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
 		resultHandler(Collections.singletonList(defaultView), new TestViewResolver("account"))
@@ -328,7 +322,6 @@ public class ViewResolutionResultHandlerTests {
 		model.addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 		MockServerWebExchange exchange = get(path).toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		resultHandler(resolvers).handleResult(exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(exchange, responseBody);
 		return exchange;

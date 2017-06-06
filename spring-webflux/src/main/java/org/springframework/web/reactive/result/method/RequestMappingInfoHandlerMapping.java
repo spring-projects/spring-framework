@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -35,9 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
@@ -46,7 +43,6 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.server.support.LookupPath;
 
 
 /**
@@ -105,30 +101,33 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
-	protected void handleMatch(RequestMappingInfo info, LookupPath lookupPath, ServerWebExchange exchange) {
+	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
 		super.handleMatch(info, lookupPath, exchange);
 
 		String bestPattern;
 		Map<String, String> uriVariables;
-		Map<String, String> decodedUriVariables;
 
 		Set<String> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
-			bestPattern = lookupPath.getPath();
+			bestPattern = lookupPath;
 			uriVariables = Collections.emptyMap();
-			decodedUriVariables = Collections.emptyMap();
 		}
 		else {
 			bestPattern = patterns.iterator().next();
-			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath.getPath());
-			decodedUriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
+			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+		}
+
+		// Let URI vars be stripped of semicolon content..
+		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
+		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+
+		// Now decode URI variables
+		if (!uriVariables.isEmpty()) {
+			uriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
 		}
 
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
-		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
-
-		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
-		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
@@ -174,7 +173,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * method but not by query parameter conditions
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, LookupPath lookupPath,
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath,
 			ServerWebExchange exchange) throws Exception {
 
 		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);

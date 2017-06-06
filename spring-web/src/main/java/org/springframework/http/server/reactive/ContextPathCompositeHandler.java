@@ -4,11 +4,10 @@ package org.springframework.http.server.reactive;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
-import reactor.core.publisher.Mono;
 
 /**
  * {@code HttpHandler} delegating requests to one of several {@code HttpHandler}'s
@@ -49,7 +48,8 @@ public class ContextPathCompositeHandler implements HttpHandler {
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		String path = getPathWithinApplication(request);
+		// Remove underlying context path first (e.g. Servlet container)
+		String path = request.getPathWithinApplication();
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> path.startsWith(entry.getKey()))
 				.findFirst()
@@ -63,20 +63,6 @@ public class ContextPathCompositeHandler implements HttpHandler {
 					response.setComplete();
 					return Mono.empty();
 				});
-	}
-
-	/**
-	 * Get the path within the "native" context path of the underlying server,
-	 * for example when running on a Servlet container.
-	 */
-	private String getPathWithinApplication(ServerHttpRequest request) {
-		String path = request.getURI().getRawPath();
-		String contextPath = request.getContextPath();
-		if (!StringUtils.hasText(contextPath)) {
-			return path;
-		}
-		int length = contextPath.length();
-		return (path.length() > length ? path.substring(length) : "");
 	}
 
 }
