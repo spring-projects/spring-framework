@@ -336,16 +336,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
 					}
 					try {
-						Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
-							@Override
-							public Object getObject() throws BeansException {
-								beforePrototypeCreation(beanName);
-								try {
-									return createBean(beanName, mbd, args);
-								}
-								finally {
-									afterPrototypeCreation(beanName);
-								}
+						Object scopedInstance = scope.get(beanName, () -> {
+							beforePrototypeCreation(beanName);
+							try {
+								return createBean(beanName, mbd, args);
+							}
+							finally {
+								afterPrototypeCreation(beanName);
 							}
 						});
 						bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
