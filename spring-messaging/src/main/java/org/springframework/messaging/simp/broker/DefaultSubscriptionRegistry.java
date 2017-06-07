@@ -431,8 +431,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public Subscription getSubscription(String subscriptionId) {
-			for (String destination : this.destinationLookup.keySet()) {
-				Set<Subscription> subs = this.destinationLookup.get(destination);
+			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
+				Set<Subscription> subs = destinationEntry.getValue();
 				if (subs != null) {
 					for (Subscription sub : subs) {
 						if (sub.getId().equalsIgnoreCase(subscriptionId)) {
@@ -459,17 +459,17 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public String removeSubscription(String subscriptionId) {
-			for (String destination : this.destinationLookup.keySet()) {
-				Set<Subscription> subs = this.destinationLookup.get(destination);
+			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
+				Set<Subscription> subs = destinationEntry.getValue();
 				if (subs != null) {
 					for (Subscription sub : subs) {
 						if (sub.getId().equals(subscriptionId) && subs.remove(sub)) {
 							synchronized (this.destinationLookup) {
 								if (subs.isEmpty()) {
-									this.destinationLookup.remove(destination);
+									this.destinationLookup.remove(destinationEntry.getKey());
 								}
 							}
-							return destination;
+							return destinationEntry.getKey();
 						}
 					}
 				}

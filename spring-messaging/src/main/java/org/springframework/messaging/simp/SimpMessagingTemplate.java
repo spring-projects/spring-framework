@@ -258,9 +258,9 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		initHeaders(headerAccessor);
-		for (String key : headers.keySet()) {
-			Object value = headers.get(key);
-			headerAccessor.setNativeHeader(key, (value != null ? value.toString() : null));
+		for (Map.Entry<String, Object> headerEntry : headers.entrySet()) {
+			Object value = headerEntry.getValue();
+			headerAccessor.setNativeHeader(headerEntry.getKey(), (value != null ? value.toString() : null));
 		}
 		return headerAccessor.getMessageHeaders();
 	}
