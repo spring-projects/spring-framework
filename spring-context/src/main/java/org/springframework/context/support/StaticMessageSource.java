@@ -87,9 +87,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 	 */
 	public void addMessages(Map<String, String> messages, Locale locale) {
 		Assert.notNull(messages, "Messages Map must not be null");
-		for (Map.Entry<String, String> entry : messages.entrySet()) {
-			addMessage(entry.getKey(), locale, entry.getValue());
-		}
+		messages.forEach((code, msg) -> addMessage(code, locale, msg));
 	}
 
 
