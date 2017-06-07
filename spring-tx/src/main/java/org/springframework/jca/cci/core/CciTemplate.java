@@ -222,17 +222,13 @@ public class CciTemplate implements CciOperations {
 	@Override
 	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-		return execute(new ConnectionCallback<T>() {
-			@Override
-			public T doInConnection(Connection connection, ConnectionFactory connectionFactory)
-					throws ResourceException, SQLException, DataAccessException {
-				Interaction interaction = connection.createInteraction();
-				try {
-					return action.doInInteraction(interaction, connectionFactory);
-				}
-				finally {
-					closeInteraction(interaction);
-				}
+		return execute((ConnectionCallback<T>) (connection, connectionFactory) -> {
+			Interaction interaction = connection.createInteraction();
+			try {
+				return action.doInInteraction(interaction, connectionFactory);
+			}
+			finally {
+				closeInteraction(interaction);
 			}
 		});
 	}

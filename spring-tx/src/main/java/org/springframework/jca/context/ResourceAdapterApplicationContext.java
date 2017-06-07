@@ -59,12 +59,7 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 		beanFactory.registerResolvableDependency(BootstrapContext.class, this.bootstrapContext);
 
 		// JCA WorkManager resolved lazily - may not be available.
-		beanFactory.registerResolvableDependency(WorkManager.class, new ObjectFactory<WorkManager>() {
-			@Override
-			public WorkManager getObject() {
-				return bootstrapContext.getWorkManager();
-			}
-		});
+		beanFactory.registerResolvableDependency(WorkManager.class, (ObjectFactory<WorkManager>) bootstrapContext::getWorkManager);
 	}
 
 }

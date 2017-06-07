@@ -350,12 +350,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		}
 
 		if (this.bootstrapExecutor != null) {
-			this.nativeEntityManagerFactoryFuture = this.bootstrapExecutor.submit(new Callable<EntityManagerFactory>() {
-				@Override
-				public EntityManagerFactory call() {
-					return buildNativeEntityManagerFactory();
-				}
-			});
+			this.nativeEntityManagerFactoryFuture = this.bootstrapExecutor.submit(this::buildNativeEntityManagerFactory);
 		}
 		else {
 			this.nativeEntityManagerFactory = buildNativeEntityManagerFactory();
