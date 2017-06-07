@@ -119,7 +119,10 @@ public class GuavaCache extends AbstractValueAdaptingCache {
 
 	@Override
 	public void put(Object key, Object value) {
-		this.cache.put(key, toStoreValue(value));
+		Object storeValue = toStoreValue(value);
+		if (storeValue != null) {
+			this.cache.put(key, storeValue);
+		}
 	}
 
 	@Override
