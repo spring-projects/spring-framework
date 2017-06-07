@@ -133,16 +133,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-
-		HttpRequestPathHelper pathHelper = configurer.getPathHelper();
-		if (pathHelper != null) {
-			mapping.setPathHelper(pathHelper);
-		}
 		PathMatcher pathMatcher = configurer.getPathMatcher();
 		if (pathMatcher != null) {
 			mapping.setPathMatcher(pathMatcher);
 		}
-
 		return mapping;
 	}
 
@@ -250,9 +244,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
 			if (pathMatchConfigurer.getPathMatcher() != null) {
 				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
-			}
-			if (pathMatchConfigurer.getPathHelper() != null) {
-				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
 		}
 		else {

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -34,7 +36,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
@@ -123,7 +127,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		// Now decode URI variables
 		if (!uriVariables.isEmpty()) {
-			uriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
+			uriVariables = uriVariables.entrySet().stream().collect(Collectors.toMap(
+					Entry::getKey, e -> StringUtils.uriDecode(e.getValue(), StandardCharsets.UTF_8)
+			));
 		}
 
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
@@ -156,9 +162,39 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				semicolonContent = uriVarValue.substring(semicolonIndex + 1);
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
-			result.put(uriVar.getKey(), getPathHelper().parseMatrixVariables(exchange, semicolonContent));
+			result.put(uriVar.getKey(), parseMatrixVariables(exchange, semicolonContent));
 		}
 		return result;
+	}
+
+	private static MultiValueMap<String, String> parseMatrixVariables(ServerWebExchange exchange,
+			String semicolonContent) {
+
+		MultiValueMap<String, String> vars = new LinkedMultiValueMap<>();
+		if (!StringUtils.hasText(semicolonContent)) {
+			return vars;
+		}
+		StringTokenizer pairs = new StringTokenizer(semicolonContent, ";");
+		while (pairs.hasMoreTokens()) {
+			String pair = pairs.nextToken();
+			int index = pair.indexOf('=');
+			if (index != -1) {
+				String name = pair.substring(0, index);
+				String rawValue = pair.substring(index + 1);
+				for (String value : StringUtils.commaDelimitedListToStringArray(rawValue)) {
+					vars.add(name, value);
+				}
+			}
+			else {
+				vars.add(pair, "");
+			}
+		}
+		MultiValueMap<String, String> decoded = new LinkedMultiValueMap<>(vars.size());
+		vars.forEach((key, values) -> values.forEach(value -> {
+			String decodedValue = StringUtils.uriDecode(value, StandardCharsets.UTF_8);
+			decoded.add(key, decodedValue);
+		}));
+		return decoded;
 	}
 
 	/**

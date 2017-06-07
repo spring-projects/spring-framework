@@ -34,7 +34,6 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -52,8 +51,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
-
-	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
 	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
@@ -74,33 +71,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	@Override
 	public final int getOrder() {
 		return this.order;
-	}
-
-	/**
-	 * Set if the path should be URL-decoded. This sets the same property on the
-	 * underlying path helper.
-	 * @see HttpRequestPathHelper#setUrlDecode(boolean)
-	 */
-	public void setUrlDecode(boolean urlDecode) {
-		this.pathHelper.setUrlDecode(urlDecode);
-	}
-
-	/**
-	 * Set the {@link HttpRequestPathHelper} to use for resolution of lookup
-	 * paths. Use this to override the default implementation with a custom
-	 * subclass or to share common path helper settings across multiple
-	 * HandlerMappings.
-	 */
-	public void setPathHelper(HttpRequestPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
-	}
-
-	/**
-	 * Return the {@link HttpRequestPathHelper} implementation to use for
-	 * resolution of lookup paths.
-	 */
-	public HttpRequestPathHelper getPathHelper() {
-		return this.pathHelper;
 	}
 
 	/**

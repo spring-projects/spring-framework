@@ -37,7 +37,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -55,30 +54,12 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
-
 	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private final Map<String, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
 	private boolean autodetect = true;
 
-
-	/**
-	 * Configure a {@code HttpRequestPathHelper} to use in
-	 * {@link #getForRequestUrl(ServerWebExchange, String)}
-	 * in order to derive the lookup path for a target request URL path.
-	 */
-	public void setPathHelper(HttpRequestPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
-	}
-
-	/**
-	 * Return the configured {@code HttpRequestPathHelper}.
-	 */
-	public HttpRequestPathHelper getPathHelper() {
-		return this.pathHelper;
-	}
 
 	/**
 	 * Configure a {@code PathMatcher} to use when comparing target lookup path
