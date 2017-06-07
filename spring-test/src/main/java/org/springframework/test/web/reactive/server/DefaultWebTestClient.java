@@ -32,18 +32,20 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -289,20 +291,19 @@ class DefaultWebTestClient implements WebTestClient {
 			this.timeout = timeout;
 		}
 
-		@SuppressWarnings("unchecked")
-		public <T> EntityExchangeResult<T> decode(ResolvableType bodyType) {
-			T body = (T) this.response.body(toMono(bodyType)).block(this.timeout);
+		public <T> EntityExchangeResult<T> decode(BodyExtractor<Mono<T>, ? super ClientHttpResponse> extractor) {
+			T body = this.response.body(extractor).block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public <T> EntityExchangeResult<List<T>> decodeToList(ResolvableType elementType) {
-			Flux<T> flux = this.response.body(toFlux(elementType));
+		public <T> EntityExchangeResult<List<T>> decodeToList(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> flux = this.response.body(extractor);
 			List<T> body = flux.collectList().block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public <T> FluxExchangeResult<T> decodeToFlux(ResolvableType elementType) {
-			Flux<T> body = this.response.body(toFlux(elementType));
+		public <T> FluxExchangeResult<T> decodeToFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> body = this.response.body(extractor);
 			return new FluxExchangeResult<>(this, body, this.timeout);
 		}
 
@@ -333,25 +334,23 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
-			return (BodySpec<B, ?>) expectBody(ResolvableType.forClass(bodyType));
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		public <B> BodySpec<B, ?> expectBody(ResolvableType bodyType) {
-			return new DefaultBodySpec(this.result.decode(bodyType));
+		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
 		public <E> ListBodySpec<E> expectBodyList(Class<E> elementType) {
-			return expectBodyList(ResolvableType.forClass(elementType));
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
 		}
 
 		@Override
-		public <E> ListBodySpec<E> expectBodyList(ResolvableType elementType) {
-			return new DefaultListBodySpec<>(this.result.decodeToList(elementType));
+		public <E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
 		}
 
 		@Override
@@ -361,12 +360,12 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
-			return returnResult(ResolvableType.forClass(elementType));
+			return this.result.decodeToFlux(toFlux(elementType));
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(ResolvableType elementType) {
-			return this.result.decodeToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
+			return this.result.decodeToFlux(toFlux(elementType));
 		}
 	}
 

@@ -26,6 +26,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
@@ -39,9 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
@@ -98,7 +97,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/persons?map=true")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(forClassWithGenerics(Map.class, String.class, Person.class)).isEqualTo(map);
+				.expectBody(new ParameterizedTypeReference<Map<String, Person>>() {}).isEqualTo(map);
 	}
 
 	@Test

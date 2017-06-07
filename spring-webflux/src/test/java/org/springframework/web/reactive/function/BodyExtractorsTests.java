@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -116,6 +118,28 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.expectNext("foo")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void toMonoParameterizedTypeReference() throws Exception {
+		ParameterizedTypeReference<Map<String, String>> typeReference = new ParameterizedTypeReference<Map<String, String>>() {};
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(typeReference);
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").contentType(MediaType.APPLICATION_JSON).body(body);
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		Map<String, String > expected = new LinkedHashMap<>();
+		expected.put("username", "foo");
+		expected.put("password", "bar");
+		StepVerifier.create(result)
+				.expectNext(expected)
 				.expectComplete()
 				.verify();
 	}
