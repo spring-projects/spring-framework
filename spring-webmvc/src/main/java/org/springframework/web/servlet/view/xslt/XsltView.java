@@ -380,9 +380,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @param transformer the target transformer
 	 */
 	protected final void copyModelParameters(Map<String, Object> model, Transformer transformer) {
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			transformer.setParameter(entry.getKey(), entry.getValue());
-		}
+		model.forEach(transformer::setParameter);
 	}
 
 	/**

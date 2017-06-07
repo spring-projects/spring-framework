@@ -193,9 +193,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void setAttributesMap(Map<String, ?> attributes) {
 		if (attributes != null) {
-			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
-				addStaticAttribute(entry.getKey(), entry.getValue());
-			}
+			attributes.forEach(this::addStaticAttribute);
 		}
 	}
 
@@ -425,9 +423,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param request current HTTP request
 	 */
 	protected void exposeModelAsRequestAttributes(Map<String, Object> model, HttpServletRequest request) throws Exception {
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			String modelName = entry.getKey();
-			Object modelValue = entry.getValue();
+		model.forEach((modelName, modelValue) -> {
 			if (modelValue != null) {
 				request.setAttribute(modelName, modelValue);
 				if (logger.isDebugEnabled()) {
@@ -442,7 +438,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 							"' from request in view with name '" + getBeanName() + "'");
 				}
 			}
-		}
+		});
 	}
 
 	/**
