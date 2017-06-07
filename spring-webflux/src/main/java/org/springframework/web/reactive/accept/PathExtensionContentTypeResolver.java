@@ -20,11 +20,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -102,28 +100,6 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 			return null;
 		}
 		throw new NotAcceptableStatusException(getAllMediaTypes());
-	}
-
-	/**
-	 * A public method exposing the knowledge of the path extension resolver to
-	 * determine the media type for a given {@link Resource}. First it checks
-	 * the explicitly registered mappings and then falls back on {@link MediaTypeFactory}.
-	 * @param resource the resource
-	 * @return the MediaType for the extension, or {@code null} if none determined
-	 */
-	@Nullable
-	public MediaType resolveMediaTypeForResource(Resource resource) {
-		Assert.notNull(resource, "Resource must not be null");
-		MediaType mediaType = null;
-		String filename = resource.getFilename();
-		String extension = StringUtils.getFilenameExtension(filename);
-		if (extension != null) {
-			mediaType = getMediaType(extension);
-		}
-		if (mediaType == null) {
-			mediaType = MediaTypeFactory.getMediaType(filename).orElse(null);
-		}
-		return mediaType;
 	}
 
 }

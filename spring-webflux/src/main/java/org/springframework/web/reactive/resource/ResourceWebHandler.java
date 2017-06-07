@@ -23,9 +23,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,7 +33,6 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -43,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -51,8 +49,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
-import org.springframework.web.reactive.accept.PathExtensionContentTypeResolver;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -85,7 +81,7 @@ import org.springframework.web.server.WebHandler;
  * @author Brian Clozel
  * @since 5.0
  */
-public class ResourceWebHandler implements WebHandler, InitializingBean, SmartInitializingSingleton {
+public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	/** Set of supported HTTP methods */
 	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
@@ -102,10 +98,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean, SmartIn
 	private CacheControl cacheControl;
 
 	private ResourceHttpMessageWriter resourceHttpMessageWriter;
-
-	private CompositeContentTypeResolver contentTypeResolver;
-
-	private PathExtensionContentTypeResolver pathExtensionResolver;
 
 
 	/**
@@ -197,23 +189,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean, SmartIn
 		return this.resourceHttpMessageWriter;
 	}
 
-	/**
-	 * Configure a {@link CompositeContentTypeResolver} to help determine the
-	 * media types for resources being served. If the manager contains a path
-	 * extension resolver it will be checked for registered file extension.
-	 * @param contentTypeResolver the resolver in use
-	 */
-	public void setContentTypeResolver(CompositeContentTypeResolver contentTypeResolver) {
-		this.contentTypeResolver = contentTypeResolver;
-	}
-
-	/**
-	 * Return the configured {@link CompositeContentTypeResolver}.
-	 */
-	@Nullable
-	public CompositeContentTypeResolver getContentTypeResolver() {
-		return this.contentTypeResolver;
-	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -248,23 +223,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean, SmartIn
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void afterSingletonsInstantiated() {
-		this.pathExtensionResolver = initContentNegotiationStrategy();
-	}
-
-	protected PathExtensionContentTypeResolver initContentNegotiationStrategy() {
-		Map<String, MediaType> mediaTypes = null;
-		if (getContentTypeResolver() != null) {
-			PathExtensionContentTypeResolver strategy =
-					getContentTypeResolver().findResolver(PathExtensionContentTypeResolver.class);
-			if (strategy != null) {
-				mediaTypes = new HashMap<>(strategy.getMediaTypes());
-			}
-		}
-		return new PathExtensionContentTypeResolver(mediaTypes);
 	}
 
 
@@ -317,7 +275,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean, SmartIn
 						}
 
 						// Check the media type for the resource
-						MediaType mediaType = getMediaType(exchange, resource);
+						MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(null);
 						if (mediaType != null) {
 							if (logger.isTraceEnabled()) {
 								logger.trace("Determined media type '" + mediaType + "' for " + resource);
@@ -472,20 +430,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean, SmartIn
 
 	private ResourceTransformerChain createTransformerChain(ResourceResolverChain resolverChain) {
 		return new DefaultResourceTransformerChain(resolverChain, getResourceTransformers());
-	}
-
-	/**
-	 * Determine the media type for the given request and the resource matched
-	 * to it. This implementation tries to determine the MediaType based on the
-	 * file extension of the Resource via
-	 * {@link PathExtensionContentTypeResolver#resolveMediaTypeForResource(Resource)}.
-	 * @param exchange the current exchange
-	 * @param resource the resource to check
-	 * @return the corresponding media type, or {@code null} if none found
-	 */
-	@Nullable
-	protected MediaType getMediaType(ServerWebExchange exchange, Resource resource) {
-		return this.pathExtensionResolver.resolveMediaTypeForResource(resource);
 	}
 
 	/**

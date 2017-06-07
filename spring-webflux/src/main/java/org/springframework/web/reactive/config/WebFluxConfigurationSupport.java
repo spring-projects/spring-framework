@@ -235,8 +235,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, webFluxContentTypeResolver());
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();

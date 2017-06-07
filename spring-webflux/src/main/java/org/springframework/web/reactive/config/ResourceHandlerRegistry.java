@@ -26,7 +26,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
@@ -56,8 +55,6 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
-	private final CompositeContentTypeResolver contentTypeResolver;
-
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
 	private int order = Integer.MAX_VALUE -1;
@@ -68,20 +65,9 @@ public class ResourceHandlerRegistry {
 	 * @param applicationContext the Spring application context
 	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext) {
-		this(applicationContext, null);
-	}
-
-	/**
-	 * Create a new resource handler registry for the given application context.
-	 * @param applicationContext the Spring application context
-	 * @param contentTypeResolver the content type resolver to use
-	 */
-	public ResourceHandlerRegistry(ApplicationContext applicationContext,
-			@Nullable CompositeContentTypeResolver contentTypeResolver) {
 
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
-		this.contentTypeResolver = contentTypeResolver;
 	}
 
 
@@ -133,15 +119,12 @@ public class ResourceHandlerRegistry {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}
-
 		Map<String, WebHandler> urlMap = new LinkedHashMap<>();
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceWebHandler handler = registration.getRequestHandler();
-				handler.setContentTypeResolver(this.contentTypeResolver);
 				try {
 					handler.afterPropertiesSet();
-					handler.afterSingletonsInstantiated();
 				}
 				catch (Exception ex) {
 					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
@@ -149,7 +132,6 @@ public class ResourceHandlerRegistry {
 				urlMap.put(pathPattern, handler);
 			}
 		}
-
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
 		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
