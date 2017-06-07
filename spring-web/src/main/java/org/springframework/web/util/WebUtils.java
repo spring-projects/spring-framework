@@ -593,6 +593,12 @@ public abstract class WebUtils {
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and
 	 * "spring_param2" result in a Map with "param1" and "param2" as keys.
+	 * <p>Parameter names using square brackets such as, "items[0][id]"
+	 * and "items[0]['tags'][]" will be converted to "items[0].id" and
+	 * "items[0].tags" respectively, so those parameters can be bound to
+	 * a model attribute object through
+	 * {@link org.springframework.web.bind.ServletRequestParameterPropertyValues}
+	 * and {@link org.springframework.web.bind.ServletRequestDataBinder}.
 	 * @param request HTTP request in which to look for parameters
 	 * @param prefix the beginning of parameter names
 	 * (if this is null or the empty string, all parameters will match)
@@ -618,14 +624,27 @@ public abstract class WebUtils {
 					// Do nothing, no values found at all.
 				}
 				else if (values.length > 1) {
-					params.put(unprefixed, values);
+					params.put(convertSquareBracketToDot(unprefixed), values);
 				}
 				else {
-					params.put(unprefixed, values[0]);
+					params.put(convertSquareBracketToDot(unprefixed), values[0]);
 				}
 			}
 		}
 		return params;
+	}
+
+	private static String convertSquareBracketToDot(String paramName) {
+		return paramName
+				.replaceAll("\\['", "[")
+				.replaceAll("']", "]")
+				.replaceAll("\\[\"", "[")
+				.replaceAll("\"]", "]")
+				.replaceAll("\\[]", "")
+				.replaceAll("\\[(\\d+)]", "!#%@$1%@#!")
+				.replaceAll("\\[", ".")
+				.replaceAll("]", "")
+				.replaceAll("!#%@(\\d+)%@#!", "[$1]");
 	}
 
 	/**
