@@ -264,15 +264,12 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Nullable
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
-			return CompletableFuture.supplyAsync(new Supplier<Object>() {
-				@Override
-				public Object get() {
-					try {
-						return task.call();
-					}
-					catch (Throwable ex) {
-						throw new CompletionException(ex);
-					}
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					return task.call();
+				}
+				catch (Throwable ex) {
+					throw new CompletionException(ex);
 				}
 			}, executor);
 		}
