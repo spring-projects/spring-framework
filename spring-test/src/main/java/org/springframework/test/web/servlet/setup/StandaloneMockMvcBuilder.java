@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -496,16 +495,11 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		public StaticStringValueResolver(final Map<String, String> values) {
 			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
-			this.resolver = new PlaceholderResolver() {
-				@Override
-				public String resolvePlaceholder(String placeholderName) {
-					return values.get(placeholderName);
-				}
-			};
+			this.resolver = values::get;
 		}
 
 		@Override
-		public String resolveStringValue(@Nullable String strVal) throws BeansException {
+		public String resolveStringValue(String strVal) throws BeansException {
 			return this.helper.replacePlaceholders(strVal, this.resolver);
 		}
 	}

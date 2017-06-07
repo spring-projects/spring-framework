@@ -103,13 +103,14 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));
 	}
 
-	private MediaType updateContentType(ReactiveHttpOutputMessage message, MediaType mediaType) {
+	@Nullable
+	private MediaType updateContentType(ReactiveHttpOutputMessage message, @Nullable MediaType mediaType) {
 		MediaType result = message.getHeaders().getContentType();
 		if (result != null) {
 			return result;
 		}
 		MediaType fallback = this.defaultMediaType;
-		result = useFallback(mediaType, fallback) ? fallback : mediaType;
+		result = (useFallback(mediaType, fallback) ? fallback : mediaType);
 		if (result != null) {
 			result = addDefaultCharset(result, fallback);
 			message.getHeaders().setContentType(result);
@@ -117,29 +118,29 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return result;
 	}
 
-	private static boolean useFallback(MediaType main, MediaType fallback) {
+	private static boolean useFallback(@Nullable MediaType main, @Nullable MediaType fallback) {
 		return (main == null || !main.isConcrete() ||
 				main.equals(MediaType.APPLICATION_OCTET_STREAM) && fallback != null);
 	}
 
-	private static MediaType addDefaultCharset(MediaType main, MediaType defaultType) {
+	private static MediaType addDefaultCharset(MediaType main, @Nullable MediaType defaultType) {
 		if (main.getCharset() == null && defaultType != null && defaultType.getCharset() != null) {
 			return new MediaType(main, defaultType.getCharset());
 		}
 		return main;
 	}
 
-	private boolean isStreamingMediaType(MediaType contentType) {
-		return this.encoder instanceof HttpMessageEncoder &&
+	private boolean isStreamingMediaType(@Nullable MediaType contentType) {
+		return (contentType != null && this.encoder instanceof HttpMessageEncoder &&
 				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
-						.anyMatch(contentType::isCompatibleWith);
+						.anyMatch(contentType::isCompatibleWith));
 	}
 
 
 	// Server side only...
 
 	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, @Nullable ResolvableType actualType,
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
@@ -156,7 +157,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 * the encoder if it is an instance of {@link HttpMessageEncoder}.
 	 */
 	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.encoder instanceof HttpMessageEncoder) {
 			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;

@@ -31,13 +31,6 @@ import org.springframework.lang.Nullable;
 public abstract class StompSessionHandlerAdapter implements StompSessionHandler {
 
 	/**
-	 * This implementation is empty.
-	 */
-	@Override
-	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-	}
-
-	/**
 	 * This implementation returns String as the expected payload type
 	 * for STOMP ERROR frames.
 	 */
@@ -57,8 +50,15 @@ public abstract class StompSessionHandlerAdapter implements StompSessionHandler 
 	 * This implementation is empty.
 	 */
 	@Override
-	public void handleException(StompSession session, StompCommand command, StompHeaders headers,
-			byte[] payload, Throwable exception) {
+	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	@Override
+	public void handleException(StompSession session, @Nullable StompCommand command,
+			StompHeaders headers, byte[] payload, Throwable exception) {
 	}
 
 	/**

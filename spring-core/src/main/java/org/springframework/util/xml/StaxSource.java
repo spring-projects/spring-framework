@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,9 @@ class StaxSource extends SAXSource {
 
 
 	/**
-	 * Return the {@code XMLEventReader} used by this {@code StaxSource}. If this {@code StaxSource}
-	 * was created with an {@code XMLStreamReader}, the result will be {@code null}.
+	 * Return the {@code XMLEventReader} used by this {@code StaxSource}.
+	 * <p>If this {@code StaxSource} was created with an {@code XMLStreamReader},
+	 * the result will be {@code null}.
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */
@@ -89,8 +90,9 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Return the {@code XMLStreamReader} used by this {@code StaxSource}. If this {@code StaxSource}
-	 * was created with an {@code XMLEventReader}, the result will be {@code null}.
+	 * Return the {@code XMLStreamReader} used by this {@code StaxSource}.
+	 * <p>If this {@code StaxSource} was created with an {@code XMLEventReader},
+	 * the result will be {@code null}.
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
 	 */

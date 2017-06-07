@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple adapter for {@link PreparedStatementSetter} that applies a given array of arguments.
  *
@@ -34,7 +36,7 @@ public class ArgumentPreparedStatementSetter implements PreparedStatementSetter,
 	 * Create a new ArgPreparedStatementSetter for the given arguments.
 	 * @param args the arguments to set
 	 */
-	public ArgumentPreparedStatementSetter(Object[] args) {
+	public ArgumentPreparedStatementSetter(@Nullable Object[] args) {
 		this.args = args;
 	}
 

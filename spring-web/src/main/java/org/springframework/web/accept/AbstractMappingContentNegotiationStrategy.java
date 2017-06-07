@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	/**
 	 * Create an instance with the given map of file extensions and media types.
 	 */
-	public AbstractMappingContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
+	public AbstractMappingContentNegotiationStrategy(@Nullable Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
 
@@ -67,7 +67,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * an already extracted key.
 	 * @since 3.2.16
 	 */
-	public List<MediaType> resolveMediaTypeKey(@Nullable NativeWebRequest webRequest, String key)
+	public List<MediaType> resolveMediaTypeKey(NativeWebRequest webRequest, @Nullable String key)
 			throws HttpMediaTypeNotAcceptableException {
 
 		if (StringUtils.hasText(key)) {
@@ -88,7 +88,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 
 	/**
 	 * Extract a key from the request to use to look up media types.
-	 * @return the lookup key or {@code null}.
+	 * @return the lookup key, or {@code null} if none
 	 */
 	@Nullable
 	protected abstract String getMediaTypeKey(NativeWebRequest request);

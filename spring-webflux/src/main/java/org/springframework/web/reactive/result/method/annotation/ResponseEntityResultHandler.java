@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Instant;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -83,11 +85,12 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 		ReactiveAdapter adapter = getAdapter(result);
 		return adapter != null && !adapter.isNoValue() &&
-				isSupportedType(result.getReturnType().getGeneric(0).resolve(Object.class));
+				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
 	}
 
-	private boolean isSupportedType(Class<?> clazz) {
-		return (HttpEntity.class.isAssignableFrom(clazz) && !RequestEntity.class.isAssignableFrom(clazz));
+	private boolean isSupportedType(@Nullable Class<?> clazz) {
+		return (clazz != null && HttpEntity.class.isAssignableFrom(clazz) &&
+				!RequestEntity.class.isAssignableFrom(clazz));
 	}
 
 

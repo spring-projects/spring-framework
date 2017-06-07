@@ -19,9 +19,7 @@ package org.springframework.web.servlet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -205,19 +203,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 */
 	@Override
 	@Nullable
-	public final String getServletName() {
+	public String getServletName() {
 		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
-	}
-
-	/**
-	 * Overridden method that simply returns {@code null} when no
-	 * ServletConfig set yet.
-	 * @see #getServletConfig()
-	 */
-	@Override
-	@Nullable
-	public final ServletContext getServletContext() {
-		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
 	}
 
 

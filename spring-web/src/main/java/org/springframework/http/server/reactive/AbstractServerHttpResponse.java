@@ -146,9 +146,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		if (action != null) {
-			this.commitActions.add(action);
-		}
+		this.commitActions.add(action);
 	}
 
 	@Override

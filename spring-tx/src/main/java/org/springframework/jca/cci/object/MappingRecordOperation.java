@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.resource.cci.RecordFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jca.cci.core.RecordCreator;
 import org.springframework.jca.cci.core.RecordExtractor;
+import org.springframework.lang.Nullable;
 
 /**
  * EIS operation object that expects mapped input and output objects,
@@ -85,6 +86,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * @see #createInputRecord
 	 * @see #extractOutputData
 	 */
+	@Nullable
 	public Object execute(Object inputObject) throws DataAccessException {
 		return getCciTemplate().execute(
 				getInteractionSpec(), new RecordCreatorImpl(inputObject), new RecordExtractorImpl());

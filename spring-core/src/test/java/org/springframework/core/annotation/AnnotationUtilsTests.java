@@ -861,12 +861,6 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void synthesizeAnnotationsFromNullSources() throws Exception {
-		assertNull("null annotation", synthesizeAnnotation(null, null));
-		assertNull("null map", synthesizeAnnotation(null, WebMapping.class, null));
-	}
-
-	@Test
 	public void synthesizeAlreadySynthesizedAnnotation() throws Exception {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -64,6 +65,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		this.allowedLocations = locations;
 	}
 
+	@Nullable
 	public Resource[] getAllowedLocations() {
 		return this.allowedLocations;
 	}
@@ -113,10 +115,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 					return Mono.just(resource);
 				}
 				else if (logger.isTraceEnabled()) {
+					Resource[] allowedLocations = getAllowedLocations();
 					logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
 							"but resource=\"" + resource.getURL() + "\" is neither under the " +
 							"current location=\"" + location.getURL() + "\" nor under any of the " +
-							"allowed locations=" + Arrays.asList(getAllowedLocations()));
+							"allowed locations=" + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 				}
 			}
 			else if (logger.isTraceEnabled()) {

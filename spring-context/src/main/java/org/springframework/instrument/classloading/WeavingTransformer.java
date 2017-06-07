@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * ClassFileTransformer-based weaver, allowing for a list of transformers to be
@@ -47,10 +48,7 @@ public class WeavingTransformer {
 	 * Create a new WeavingTransformer for the given class loader.
 	 * @param classLoader the ClassLoader to build a transformer for
 	 */
-	public WeavingTransformer(ClassLoader classLoader) {
-		if (classLoader == null) {
-			throw new IllegalArgumentException("ClassLoader must not be null");
-		}
+	public WeavingTransformer(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -60,9 +58,7 @@ public class WeavingTransformer {
 	 * @param transformer the class file transformer to register
 	 */
 	public void addTransformer(ClassFileTransformer transformer) {
-		if (transformer == null) {
-			throw new IllegalArgumentException("Transformer must not be null");
-		}
+		Assert.notNull(transformer, "Transformer must not be null");
 		this.transformers.add(transformer);
 	}
 

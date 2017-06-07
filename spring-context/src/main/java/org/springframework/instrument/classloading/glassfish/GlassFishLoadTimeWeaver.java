@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -48,11 +49,21 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	private final Method copyMethod;
 
 
+	/**
+	 * Create a new instance of the {@link GlassFishLoadTimeWeaver} class using
+	 * the default {@link ClassLoader class loader}.
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
+	 */
 	public GlassFishLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
-	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {
+	/**
+	 * Create a new instance of the {@link GlassFishLoadTimeWeaver} class using
+	 * the supplied {@link ClassLoader}.
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
+	 */
+	public GlassFishLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 
 		Class<?> instrumentableLoaderClass;

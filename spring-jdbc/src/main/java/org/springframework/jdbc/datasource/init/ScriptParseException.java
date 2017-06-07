@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.init;
 
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link ScriptUtils} if an SQL script cannot be properly parsed.
@@ -32,7 +33,7 @@ public class ScriptParseException extends ScriptException {
 	 * @param message detailed message
 	 * @param resource the resource from which the SQL script was read
 	 */
-	public ScriptParseException(String message, EncodedResource resource) {
+	public ScriptParseException(String message, @Nullable EncodedResource resource) {
 		super(buildMessage(message, resource));
 	}
 
@@ -42,13 +43,14 @@ public class ScriptParseException extends ScriptException {
 	 * @param resource the resource from which the SQL script was read
 	 * @param cause the underlying cause of the failure
 	 */
-	public ScriptParseException(String message, EncodedResource resource, Throwable cause) {
+	public ScriptParseException(String message, @Nullable EncodedResource resource, @Nullable Throwable cause) {
 		super(buildMessage(message, resource), cause);
 	}
 
-	private static String buildMessage(String message, EncodedResource resource) {
-		return String.format("Failed to parse SQL script from resource [%s]: %s", (resource == null ? "<unknown>"
-				: resource), message);
+
+	private static String buildMessage(String message, @Nullable EncodedResource resource) {
+		return String.format("Failed to parse SQL script from resource [%s]: %s",
+				(resource == null ? "<unknown>" : resource), message);
 	}
 
 }

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext},
@@ -67,10 +68,12 @@ public class XmlReaderContext extends ReaderContext {
 		return this.reader.getRegistry();
 	}
 
+	@Nullable
 	public final ResourceLoader getResourceLoader() {
 		return this.reader.getResourceLoader();
 	}
 
+	@Nullable
 	public final ClassLoader getBeanClassLoader() {
 		return this.reader.getBeanClassLoader();
 	}

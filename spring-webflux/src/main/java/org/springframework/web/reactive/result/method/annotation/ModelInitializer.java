@@ -100,7 +100,7 @@ class ModelInitializer {
 
 	private String getAttributeName(MethodParameter param) {
 		return Optional
-				.ofNullable(AnnotatedElementUtils.findMergedAnnotation(param.getMethod(), ModelAttribute.class))
+				.ofNullable(AnnotatedElementUtils.findMergedAnnotation(param.getAnnotatedElement(), ModelAttribute.class))
 				.filter(ann -> StringUtils.hasText(ann.value()))
 				.map(ModelAttribute::value)
 				.orElse(Conventions.getVariableNameForParameter(param));

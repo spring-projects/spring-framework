@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,7 @@ public class MethodMapTransactionAttributeSource
 	private boolean initialized = false;
 
 	/** Map from Method to TransactionAttribute */
-	private final Map<Method, TransactionAttribute> transactionAttributeMap =
-			new HashMap<>();
+	private final Map<Method, TransactionAttribute> transactionAttributeMap = new HashMap<>();
 
 	/** Map from Method to name pattern used for registration */
 	private final Map<Method, String> methodNameMap = new HashMap<>();
@@ -83,7 +82,7 @@ public class MethodMapTransactionAttributeSource
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
@@ -105,7 +104,7 @@ public class MethodMapTransactionAttributeSource
 	 * @param methodMap Map from method names to {@code TransactionAttribute} instances
 	 * @see #setMethodMap
 	 */
-	protected void initMethodMap(Map<String, TransactionAttribute> methodMap) {
+	protected void initMethodMap(@Nullable Map<String, TransactionAttribute> methodMap) {
 		if (methodMap != null) {
 			for (Map.Entry<String, TransactionAttribute> entry : methodMap.entrySet()) {
 				addTransactionalMethod(entry.getKey(), entry.getValue());

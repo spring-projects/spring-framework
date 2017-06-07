@@ -202,7 +202,8 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 		public final JmsListenerContainerFactory<?> containerFactory;
 
-		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> containerFactory) {
+		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint,
+				@Nullable JmsListenerContainerFactory<?> containerFactory) {
 			this.endpoint = endpoint;
 			this.containerFactory = containerFactory;
 		}

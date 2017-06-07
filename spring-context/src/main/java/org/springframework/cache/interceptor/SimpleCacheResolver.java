@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collection;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 
 /**
  * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
@@ -40,8 +39,9 @@ public class SimpleCacheResolver extends AbstractCacheResolver {
 		super(cacheManager);
 	}
 
+
 	@Override
-	protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
+	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 		return context.getOperation().getCacheNames();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.jsf.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
-
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
@@ -69,7 +68,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 
 	@Override
 	@Nullable
-	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
+	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext) {
 				WebApplicationContext wac = (WebApplicationContext) base;
@@ -107,7 +106,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 
 	@Override
 	@Nullable
-	public Class<?> getType(ELContext elContext, Object base, Object property) throws ELException {
+	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext) {
 				WebApplicationContext wac = (WebApplicationContext) base;

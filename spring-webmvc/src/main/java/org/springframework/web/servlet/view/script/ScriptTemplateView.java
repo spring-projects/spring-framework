@@ -287,7 +287,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected ScriptEngine createEngineFromName() {
 		if (this.scriptEngineManager == null) {
-			this.scriptEngineManager = new ScriptEngineManager(getApplicationContext().getClassLoader());
+			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
 		}
 
 		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, this.engineName);
@@ -326,7 +326,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	protected ScriptTemplateConfig autodetectViewConfig() throws BeansException {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
-					getApplicationContext(), ScriptTemplateConfig.class, true, false);
+					obtainApplicationContext(), ScriptTemplateConfig.class, true, false);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException("Expected a single ScriptTemplateConfig bean in the current " +
@@ -338,7 +338,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Override
 	public boolean checkResource(Locale locale) throws Exception {
-		return (getResource(getUrl()) != null);
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+		return (getResource(url) != null);
 	}
 
 	@Override
@@ -357,6 +359,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			ScriptEngine engine = getEngine();
 			Invocable invocable = (Invocable) engine;
 			String url = getUrl();
+			Assert.state(url != null, "'url' not set");
 			String template = getTemplate(url);
 			Function<String, String> templateLoader = path -> {
 				try {
@@ -366,7 +369,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					throw new IllegalStateException(ex);
 				}
 			};
-			RenderingContext context = new RenderingContext(this.getApplicationContext(), this.locale, templateLoader, url);
+			RenderingContext context = new RenderingContext(obtainApplicationContext(), this.locale, templateLoader, url);
 
 			Object html;
 			if (this.renderObject != null) {

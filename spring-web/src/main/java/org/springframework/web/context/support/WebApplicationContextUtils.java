@@ -216,8 +216,8 @@ public abstract class WebApplicationContextUtils {
 	 * @param servletContext the ServletContext that we're running within
 	 * @param servletConfig the ServletConfig of the containing Portlet
 	 */
-	public static void registerEnvironmentBeans(
-			ConfigurableListableBeanFactory bf, ServletContext servletContext, @Nullable ServletConfig servletConfig) {
+	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf,
+			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
 		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
 			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);

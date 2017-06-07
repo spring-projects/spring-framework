@@ -48,7 +48,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 				(in, out) -> handler.handle(new ReactorNettyWebSocketSession(in, out, info, bufferFactory)));
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);

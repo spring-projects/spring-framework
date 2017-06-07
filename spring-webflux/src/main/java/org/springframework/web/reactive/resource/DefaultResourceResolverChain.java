@@ -40,7 +40,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	private int index = -1;
 
 
-	public DefaultResourceResolverChain(List<? extends ResourceResolver> resolvers) {
+	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {
 		if (resolvers != null) {
 			this.resolvers.addAll(resolvers);
 		}
@@ -53,7 +53,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
-			return null;
+			return Mono.empty();
 		}
 
 		try {
@@ -68,7 +68,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	public Mono<String> resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
-			return null;
+			return Mono.empty();
 		}
 
 		try {

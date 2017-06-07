@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -299,7 +300,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * servers forward messages to each other (e.g. unresolved user destinations).
 	 * @param subscriptions the destinations to subscribe to.
 	 */
-	public void setSystemSubscriptions(Map<String, MessageHandler> subscriptions) {
+	public void setSystemSubscriptions(@Nullable Map<String, MessageHandler> subscriptions) {
 		this.systemSubscriptions.clear();
 		if (subscriptions != null) {
 			this.systemSubscriptions.putAll(subscriptions);
@@ -328,6 +329,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Return the configured virtual host value.
 	 */
+	@Nullable
 	public String getVirtualHost() {
 		return this.virtualHost;
 	}
@@ -345,6 +347,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * invoked and this method is invoked before the handler is started and
 	 * hence a default implementation initialized).
 	 */
+	@Nullable
 	public TcpOperations<byte[]> getTcpClient() {
 		return this.tcpClient;
 	}
@@ -362,6 +365,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -399,7 +403,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		accessor.setLogin(this.systemLogin);
 		accessor.setPasscode(this.systemPasscode);
 		accessor.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
-		accessor.setHost(getVirtualHost());
+		String virtualHost = getVirtualHost();
+		if (virtualHost != null) {
+			accessor.setHost(virtualHost);
+		}
 		accessor.setSessionId(SYSTEM_SESSION_ID);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
@@ -443,7 +450,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					getHeaderInitializer().initHeaders(accessor);
 				}
 				accessor.setSessionId(sessionId);
-				accessor.setUser(SimpMessageHeaderAccessor.getUser(message.getHeaders()));
+				Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
+				if (user != null) {
+					accessor.setUser(user);
+				}
 				accessor.setMessage("Broker not available.");
 				MessageHeaders headers = accessor.getMessageHeaders();
 				getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
@@ -564,6 +574,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return this.sessionId;
 		}
 
+		@Nullable
 		protected TcpConnection<byte[]> getTcpConnection() {
 			return this.tcpConnection;
 		}
@@ -616,22 +627,27 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private void sendStompErrorFrameToClient(String errorText) {
 			if (this.isRemoteClientSession) {
-				StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+				StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 				if (getHeaderInitializer() != null) {
-					getHeaderInitializer().initHeaders(headerAccessor);
+					getHeaderInitializer().initHeaders(accessor);
 				}
-				headerAccessor.setSessionId(this.sessionId);
-				headerAccessor.setUser(this.connectHeaders.getUser());
-				headerAccessor.setMessage(errorText);
-				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
+				accessor.setSessionId(this.sessionId);
+				Principal user = this.connectHeaders.getUser();
+				if (user != null) {
+					accessor.setUser(user);
+				}
+				accessor.setMessage(errorText);
+				Message<?> errorMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 				handleInboundMessage(errorMessage);
 			}
 		}
 
 		protected void handleInboundMessage(Message<?> message) {
 			if (this.isRemoteClientSession) {
-				StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-				accessor.setImmutable();
+				MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, null);
+				if (accessor != null) {
+					accessor.setImmutable();
+				}
 				StompBrokerRelayMessageHandler.this.getClientOutboundChannel().send(message);
 			}
 		}
@@ -639,8 +655,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void handleMessage(Message<byte[]> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			Assert.state(accessor != null, "No StompHeaderAccessor");
 			accessor.setSessionId(this.sessionId);
-			accessor.setUser(this.connectHeaders.getUser());
+			Principal user = this.connectHeaders.getUser();
+			if (user != null) {
+				accessor.setUser(user);
+			}
 
 			StompCommand command = accessor.getCommand();
 			if (StompCommand.CONNECTED.equals(command)) {
@@ -915,7 +935,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		protected void handleInboundMessage(Message<?> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-			if (StompCommand.MESSAGE.equals(accessor.getCommand())) {
+			if (accessor != null && StompCommand.MESSAGE.equals(accessor.getCommand())) {
 				String destination = accessor.getDestination();
 				if (destination == null) {
 					if (logger.isDebugEnabled()) {

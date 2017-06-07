@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.util;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,7 +58,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscape(@Nullable String input) {
+	public static String htmlEscape(String input) {
 		return htmlEscape(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -79,11 +78,9 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscape(@Nullable String input, String encoding) {
+	public static String htmlEscape(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -110,7 +107,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscapeDecimal(@Nullable String input) {
+	public static String htmlEscapeDecimal(String input) {
 		return htmlEscapeDecimal(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -130,11 +127,9 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscapeDecimal(@Nullable String input, String encoding) {
+	public static String htmlEscapeDecimal(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -162,7 +157,7 @@ public abstract class HtmlUtils {
 	 * @param input the (unescaped) input string
 	 * @return the escaped string
 	 */
-	public static String htmlEscapeHex(@Nullable String input) {
+	public static String htmlEscapeHex(String input) {
 		return htmlEscapeHex(input, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -182,11 +177,9 @@ public abstract class HtmlUtils {
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
-	public static String htmlEscapeHex(@Nullable String input, String encoding) {
+	public static String htmlEscapeHex(String input, String encoding) {
+		Assert.notNull(input, "Input is required");
 		Assert.notNull(encoding, "Encoding is required");
-		if (input == null) {
-			return null;
-		}
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
@@ -221,10 +214,7 @@ public abstract class HtmlUtils {
 	 * @param input the (escaped) input string
 	 * @return the unescaped string
 	 */
-	public static String htmlUnescape(@Nullable String input) {
-		if (input == null) {
-			return null;
-		}
+	public static String htmlUnescape(String input) {
 		return new HtmlCharacterEntityDecoder(characterEntityReferences, input).decode();
 	}
 

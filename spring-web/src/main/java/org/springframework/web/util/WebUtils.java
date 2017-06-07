@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -41,6 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -194,7 +194,7 @@ public abstract class WebUtils {
 	 * ({@code null} = no explicit default)
 	 */
 	@Nullable
-	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
+	public static Boolean getDefaultHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -217,7 +217,7 @@ public abstract class WebUtils {
 	 * @since 4.1.2
 	 */
 	@Nullable
-	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
+	public static Boolean getResponseEncodedHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -319,7 +319,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @param value the value of the session attribute
 	 */
-	public static void setSessionAttribute(HttpServletRequest request, String name, Object value) {
+	public static void setSessionAttribute(HttpServletRequest request, String name, @Nullable Object value) {
 		Assert.notNull(request, "Request must not be null");
 		if (value != null) {
 			request.getSession().setAttribute(name, value);
@@ -372,7 +372,7 @@ public abstract class WebUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <T> T getNativeRequest(ServletRequest request, Class<T> requiredType) {
+	public static <T> T getNativeRequest(ServletRequest request, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(request)) {
 				return (T) request;
@@ -394,7 +394,7 @@ public abstract class WebUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <T> T getNativeResponse(ServletResponse response, Class<T> requiredType) {
+	public static <T> T getNativeResponse(ServletResponse response, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(response)) {
 				return (T) response;
@@ -437,13 +437,15 @@ public abstract class WebUtils {
 	 * @param ex the exception encountered
 	 * @param servletName the name of the offending servlet
 	 */
-	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, String servletName) {
+	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, @Nullable String servletName) {
 		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, HttpServletResponse.SC_OK);
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_TYPE_ATTRIBUTE, ex.getClass());
 		exposeRequestAttributeIfNotPresent(request, ERROR_MESSAGE_ATTRIBUTE, ex.getMessage());
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_ATTRIBUTE, ex);
 		exposeRequestAttributeIfNotPresent(request, ERROR_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
-		exposeRequestAttributeIfNotPresent(request, ERROR_SERVLET_NAME_ATTRIBUTE, servletName);
+		if (servletName != null) {
+			exposeRequestAttributeIfNotPresent(request, ERROR_SERVLET_NAME_ATTRIBUTE, servletName);
+		}
 	}
 
 	/**
@@ -600,7 +602,7 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterValues
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
-	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
+	public static Map<String, Object> getParametersStartingWith(ServletRequest request, @Nullable String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration<String> paramNames = request.getParameterNames();
 		Map<String, Object> params = new TreeMap<>();
@@ -686,7 +688,7 @@ public abstract class WebUtils {
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
 	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
-	 * of cross-origin request.
+	 * of cross-origin request
 	 * @since 4.2
 	 */
 	public static boolean isSameOrigin(HttpRequest request) {
@@ -709,7 +711,8 @@ public abstract class WebUtils {
 		}
 		UriComponents actualUrl = urlBuilder.build();
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+		return (ObjectUtils.nullSafeEquals(actualUrl.getHost(), originUrl.getHost()) &&
+				getPort(actualUrl) == getPort(originUrl));
 	}
 
 	private static int getPort(UriComponents uri) {

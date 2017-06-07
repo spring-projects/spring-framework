@@ -67,6 +67,7 @@ public interface WebSocketSession extends Closeable {
 	 * of the authenticated user.
 	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
+	@Nullable
 	Principal getPrincipal();
 
 	/**

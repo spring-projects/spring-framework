@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public interface CallbackPreferringPlatformTransactionManager extends PlatformTr
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
 	@Nullable
-	<T> T execute(TransactionDefinition definition, TransactionCallback<T> callback)
+	<T> T execute(@Nullable TransactionDefinition definition, TransactionCallback<T> callback)
 			throws TransactionException;
 
 }

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
@@ -58,7 +57,6 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 			boolean initialRequest) throws IOException {
 
 		byte[] prelude = getPrelude(request);
-		Assert.state(prelude != null, "Prelude expected");
 		response.getBody().write(prelude);
 		response.flush();
 

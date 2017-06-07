@@ -292,7 +292,7 @@ public class ComponentScanAnnotationIntegrationTests {
 		}
 
 		@Override
-		public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+		public void setBeanClassLoader(ClassLoader classLoader) {
 			this.classLoader = classLoader;
 		}
 

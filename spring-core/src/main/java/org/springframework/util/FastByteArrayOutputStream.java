@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	@Override
 	public void write(byte[] data, int offset, int length) throws IOException {
-		if (data == null) {
-			throw new NullPointerException();
-		}
-		else if (offset < 0 || offset + length > data.length || length < 0) {
+		if (offset < 0 || offset + length > data.length || length < 0) {
 			throw new IndexOutOfBoundsException();
 		}
 		else if (this.closed) {
@@ -395,10 +392,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 		@Override
 		public int read(byte[] b, int off, int len) {
-			if (b == null) {
-				throw new NullPointerException();
-			}
-			else if (off < 0 || len < 0 || len > b.length - off) {
+			if (off < 0 || len < 0 || len > b.length - off) {
 				throw new IndexOutOfBoundsException();
 			}
 			else if (len == 0) {

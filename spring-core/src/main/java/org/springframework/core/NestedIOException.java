@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.core;
 
 import java.io.IOException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Subclass of {@link IOException} that properly handles a root cause,
@@ -59,7 +61,7 @@ public class NestedIOException extends IOException {
 	 * @param msg the detail message
 	 * @param cause the nested exception
 	 */
-	public NestedIOException(String msg, Throwable cause) {
+	public NestedIOException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -69,6 +71,7 @@ public class NestedIOException extends IOException {
 	 * if there is one.
 	 */
 	@Override
+	@Nullable
 	public String getMessage() {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}

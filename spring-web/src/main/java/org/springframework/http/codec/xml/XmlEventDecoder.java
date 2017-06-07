@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
+	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);

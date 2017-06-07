@@ -29,6 +29,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -160,7 +161,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * @see #setMediaTypes
 	 * @see #addMediaType
 	 */
-	public void addMediaTypes(Map<String, MediaType> mediaTypes) {
+	public void addMediaTypes(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
 			this.mediaTypes.putAll(mediaTypes);
 		}
@@ -266,6 +267,11 @@ public class ContentNegotiationManagerFactoryBean
 		this.servletContext = servletContext;
 	}
 
+
+	public ContentNegotiationManager build() {
+		afterPropertiesSet();
+		return this.contentNegotiationManager;
+	}
 
 	@Override
 	public void afterPropertiesSet() {

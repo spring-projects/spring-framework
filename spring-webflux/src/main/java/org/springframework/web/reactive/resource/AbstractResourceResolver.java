@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -37,7 +38,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 
 
 	@Override
-	public Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+	public Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
@@ -58,7 +59,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	}
 
 
-	protected abstract Mono<Resource> resolveResourceInternal(ServerWebExchange exchange,
+	protected abstract Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
 			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain);
 
 	protected abstract Mono<String> resolveUrlPathInternal(String resourceUrlPath,

@@ -17,7 +17,6 @@
 package org.springframework.core.env;
 
 import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -29,7 +28,6 @@ import org.springframework.lang.Nullable;
  * @author Chris Beams
  * @since 3.1
  */
-@NonNullApi
 public interface ConfigurablePropertyResolver extends PropertyResolver {
 
 	/**

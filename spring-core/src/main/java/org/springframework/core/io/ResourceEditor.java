@@ -70,7 +70,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @param resourceLoader the {@code ResourceLoader} to use
 	 * @param propertyResolver the {@code PropertyResolver} to use
 	 */
-	public ResourceEditor(ResourceLoader resourceLoader, PropertyResolver propertyResolver) {
+	public ResourceEditor(ResourceLoader resourceLoader, @Nullable PropertyResolver propertyResolver) {
 		this(resourceLoader, propertyResolver, true);
 	}
 
@@ -82,7 +82,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding property could be found in the given {@code propertyResolver}
 	 */
-	public ResourceEditor(ResourceLoader resourceLoader, PropertyResolver propertyResolver,
+	public ResourceEditor(ResourceLoader resourceLoader, @Nullable PropertyResolver propertyResolver,
 			boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");

@@ -22,6 +22,7 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**

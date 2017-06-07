@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.lang.NonNullApi;
-
 /**
  * A {@link Condition} that offers more fine-grained control when used with
  * {@code @Configuration}. Allows certain {@link Condition}s to adapt when they match
@@ -29,7 +27,6 @@ import org.springframework.lang.NonNullApi;
  * @since 4.0
  * @see Configuration
  */
-@NonNullApi
 public interface ConfigurationCondition extends Condition {
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	 * Construct a new GroovyScriptEvaluator.
 	 * @param classLoader the ClassLoader to use as a parent for the {@link GroovyShell}
 	 */
-	public GroovyScriptEvaluator(ClassLoader classLoader) {
+	public GroovyScriptEvaluator(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -66,7 +66,7 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	 * @since 4.3.3
 	 * @see #setCompilationCustomizers
 	 */
-	public void setCompilerConfiguration(CompilerConfiguration compilerConfiguration) {
+	public void setCompilerConfiguration(@Nullable CompilerConfiguration compilerConfiguration) {
 		this.compilerConfiguration =
 				(compilerConfiguration != null ? compilerConfiguration : new CompilerConfiguration());
 	}
@@ -91,7 +91,7 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 

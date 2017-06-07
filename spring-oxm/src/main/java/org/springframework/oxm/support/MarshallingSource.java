@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 
@@ -130,6 +131,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
+		@Nullable
 		public ContentHandler getContentHandler() {
 			return this.contentHandler;
 		}
@@ -140,6 +142,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
+		@Nullable
 		public DTDHandler getDTDHandler() {
 			return this.dtdHandler;
 		}
@@ -150,6 +153,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
+		@Nullable
 		public EntityResolver getEntityResolver() {
 			return this.entityResolver;
 		}
@@ -160,6 +164,7 @@ public class MarshallingSource extends SAXSource {
 		}
 
 		@Override
+		@Nullable
 		public ErrorHandler getErrorHandler() {
 			return this.errorHandler;
 		}

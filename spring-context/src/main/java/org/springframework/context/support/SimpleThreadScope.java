@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.util.Assert;
 
 /**
  * A simple thread-backed {@link Scope} implementation.
@@ -67,12 +68,13 @@ public class SimpleThreadScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Map<String, Object> scope = this.threadScope.get();
-		Object object = scope.get(name);
-		if (object == null) {
-			object = objectFactory.getObject();
-			scope.put(name, object);
+		Object scopedObject = scope.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			Assert.state(scopedObject != null, "Scoped object resolved to null");
+			scope.put(name, scopedObject);
 		}
-		return object;
+		return scopedObject;
 	}
 
 	@Override

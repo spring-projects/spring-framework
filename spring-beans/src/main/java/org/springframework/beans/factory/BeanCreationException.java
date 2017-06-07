@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param msg the detail message
 	 */
 	public BeanCreationException(String beanName, String msg) {
-		super("Error creating bean" + (beanName != null ? " with name '" + beanName + "'" : "") + ": " + msg);
+		super("Error creating bean with name '" + beanName + "': " + msg);
 		this.beanName = beanName;
 	}
 
@@ -86,8 +86,8 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message
 	 */
-	public BeanCreationException(String resourceDescription, String beanName, String msg) {
-		super("Error creating bean" + (beanName != null ? " with name '" + beanName + "'" : "") +
+	public BeanCreationException(@Nullable String resourceDescription, @Nullable String beanName, String msg) {
+		super("Error creating bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : "") + ": " + msg);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
@@ -101,19 +101,11 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable cause) {
+	public BeanCreationException(@Nullable String resourceDescription, String beanName, String msg, Throwable cause) {
 		this(resourceDescription, beanName, msg);
 		initCause(cause);
 	}
 
-
-	/**
-	 * Return the name of the bean requested, if any.
-	 */
-	@Nullable
-	public String getBeanName() {
-		return this.beanName;
-	}
 
 	/**
 	 * Return the description of the resource that the bean
@@ -122,6 +114,13 @@ public class BeanCreationException extends FatalBeanException {
 	@Nullable
 	public String getResourceDescription() {
 		return this.resourceDescription;
+	}
+
+	/**
+	 * Return the name of the bean requested, if any.
+	 */
+	public String getBeanName() {
+		return this.beanName;
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class BeanCreationException extends FatalBeanException {
 	}
 
 	@Override
-	public boolean contains(Class<?> exClass) {
+	public boolean contains(@Nullable Class<?> exClass) {
 		if (super.contains(exClass)) {
 			return true;
 		}

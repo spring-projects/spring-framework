@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented for setting values for more complex database-specific
@@ -62,6 +63,7 @@ public interface SqlTypeValue {
 	 * @see java.sql.Types
 	 * @see java.sql.PreparedStatement#setObject
 	 */
-	void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException;
+	void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
+			throws SQLException;
 
 }

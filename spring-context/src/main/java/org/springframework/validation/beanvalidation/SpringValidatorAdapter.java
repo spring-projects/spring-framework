@@ -101,7 +101,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Override
-	public void validate(@Nullable Object target, Errors errors, Object... validationHints) {
+	public void validate(@Nullable Object target, Errors errors, @Nullable Object... validationHints) {
 		if (this.targetValidator != null) {
 			Set<Class<?>> groups = new LinkedHashSet<>();
 			if (validationHints != null) {
@@ -256,6 +256,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @see javax.validation.ConstraintViolation#getInvalidValue()
 	 * @see org.springframework.validation.FieldError#getRejectedValue()
 	 */
+	@Nullable
 	protected Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
 		Object invalidValue = violation.getInvalidValue();
 		if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
@@ -300,7 +301,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T unwrap(Class<T> type) {
+	public <T> T unwrap(@Nullable Class<T> type) {
 		Assert.state(this.targetValidator != null, "No target Validator set");
 		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
 	}

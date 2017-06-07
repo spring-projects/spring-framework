@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.util.Assert;
 
 /**
  * A {@link Scope} implementation exposing the attributes of a SiMP session
@@ -34,17 +35,18 @@ public class SimpSessionScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-		Object value = simpAttributes.getAttribute(name);
-		if (value != null) {
-			return value;
+		Object scopedObject = simpAttributes.getAttribute(name);
+		if (scopedObject != null) {
+			return scopedObject;
 		}
 		synchronized (simpAttributes.getSessionMutex()) {
-			value = simpAttributes.getAttribute(name);
-			if (value == null) {
-				value = objectFactory.getObject();
-				simpAttributes.setAttribute(name, value);
+			scopedObject = simpAttributes.getAttribute(name);
+			if (scopedObject == null) {
+				scopedObject = objectFactory.getObject();
+				Assert.state(scopedObject != null, "Scoped object resolved to null");
+				simpAttributes.setAttribute(name, scopedObject);
 			}
-			return value;
+			return scopedObject;
 		}
 	}
 

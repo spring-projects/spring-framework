@@ -17,6 +17,8 @@
 package org.springframework.http.server.reactive;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -82,9 +84,9 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse implem
 
 	@Override
 	protected void applyHeaders() {
-		for (String name : getHeaders().keySet()) {
-			for (String value : getHeaders().get(name)) {
-				this.response.responseHeaders().add(name, value);
+		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
+			for (String value : entry.getValue()) {
+				this.response.responseHeaders().add(entry.getKey(), value);
 			}
 		}
 	}

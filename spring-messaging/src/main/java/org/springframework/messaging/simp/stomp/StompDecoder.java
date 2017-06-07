@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class StompDecoder {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message}s from decoded STOMP frames.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 
@@ -82,7 +82,6 @@ public class StompDecoder {
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
 	 */
-	@Nullable
 	public List<Message<byte[]>> decode(ByteBuffer byteBuffer) {
 		return decode(byteBuffer, null);
 	}
@@ -123,7 +122,8 @@ public class StompDecoder {
 	/**
 	 * Decode a single STOMP frame from the given {@code buffer} into a {@link Message}.
 	 */
-	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, MultiValueMap<String, String> headers) {
+	@Nullable
+	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
 		skipLeadingEol(byteBuffer);
 
@@ -144,9 +144,12 @@ public class StompDecoder {
 				payload = readPayload(byteBuffer, headerAccessor);
 			}
 			if (payload != null) {
-				if (payload.length > 0 && !headerAccessor.getCommand().isBodyAllowed()) {
-					throw new StompConversionException(headerAccessor.getCommand() +
-							" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+				if (payload.length > 0) {
+					StompCommand stompCommand = headerAccessor.getCommand();
+					if (stompCommand != null && !stompCommand.isBodyAllowed()) {
+						throw new StompConversionException(headerAccessor.getCommand() +
+								" shouldn't have a payload: length=" + payload.length + ", headers=" + headers);
+					}
 				}
 				headerAccessor.updateSimpMessageHeadersFromStompHeaders();
 				headerAccessor.setLeaveMutable(true);

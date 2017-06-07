@@ -75,7 +75,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * Actually set the nested path.
 	 * Delegated to by setNestedPath and pushNestedPath.
 	 */
-	protected void doSetNestedPath(String nestedPath) {
+	protected void doSetNestedPath(@Nullable String nestedPath) {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
@@ -90,7 +90,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	 * Transform the given field into its full path,
 	 * regarding the nested path of this instance.
 	 */
-	protected String fixedField(String field) {
+	protected String fixedField(@Nullable String field) {
 		if (StringUtils.hasLength(field)) {
 			return getNestedPath() + canonicalFieldName(field);
 		}
@@ -214,7 +214,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 
 	@Override
-	public Class<?> getFieldType(@Nullable String field) {
+	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
 		return (value != null ? value.getClass() : null);
 	}

@@ -73,9 +73,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
@@ -87,15 +85,12 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder cookies(MultiValueMap<String, String> cookies) {
-		if (cookies != null) {
-			this.cookies.putAll(cookies);
-		}
+		this.cookies.putAll(cookies);
 		return this;
 	}
 
 	@Override
-	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
-			Class<S> elementClass) {
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
@@ -105,7 +100,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-		this.inserter = inserter != null ? inserter : BodyInserters.empty();
+		this.inserter = inserter;
 		return this;
 	}
 

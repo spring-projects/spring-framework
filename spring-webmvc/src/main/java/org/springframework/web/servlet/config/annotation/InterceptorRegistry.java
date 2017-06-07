@@ -28,12 +28,12 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
- *
  * @since 3.1
  */
 public class InterceptorRegistry {
 
 	private final List<InterceptorRegistration> registrations = new ArrayList<>();
+
 
 	/**
 	 * Adds the provided {@link HandlerInterceptor}.
@@ -43,7 +43,7 @@ public class InterceptorRegistry {
 	 */
 	public InterceptorRegistration addInterceptor(HandlerInterceptor interceptor) {
 		InterceptorRegistration registration = new InterceptorRegistration(interceptor);
-		registrations.add(registration);
+		this.registrations.add(registration);
 		return registration;
 	}
 
@@ -56,16 +56,16 @@ public class InterceptorRegistry {
 	public InterceptorRegistration addWebRequestInterceptor(WebRequestInterceptor interceptor) {
 		WebRequestHandlerInterceptorAdapter adapted = new WebRequestHandlerInterceptorAdapter(interceptor);
 		InterceptorRegistration registration = new InterceptorRegistration(adapted);
-		registrations.add(registration);
+		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Returns all registered interceptors.
+	 * Return all registered interceptors.
 	 */
 	protected List<Object> getInterceptors() {
-		List<Object> interceptors = new ArrayList<>();
-		for (InterceptorRegistration registration : registrations) {
+		List<Object> interceptors = new ArrayList<>(this.registrations.size());
+		for (InterceptorRegistration registration : this.registrations) {
 			interceptors.add(registration.getInterceptor());
 		}
 		return interceptors ;

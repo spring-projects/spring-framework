@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ public interface CciOperations {
 	 * @return the output record
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException;
 
 	/**
@@ -106,6 +107,7 @@ public interface CciOperations {
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(InteractionSpec spec, Record inputRecord, RecordExtractor<T> outputExtractor)
 			throws DataAccessException;
 
@@ -118,6 +120,7 @@ public interface CciOperations {
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor<T> outputExtractor)
 			throws DataAccessException;
 

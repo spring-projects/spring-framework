@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,13 +141,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 		this.beanFactory.addBean(name, bean);
 	}
 
-	public void addBeans(List<?> beans) {
-		if (beans == null) {
-			return;
-		}
-		for (Object bean : beans) {
-			String name = bean.getClass().getName() + "#" +  ObjectUtils.getIdentityHexString(bean);
-			this.beanFactory.addBean(name, bean);
+	public void addBeans(@Nullable List<?> beans) {
+		if (beans != null) {
+			for (Object bean : beans) {
+				String name = bean.getClass().getName() + "#" + ObjectUtils.getIdentityHexString(bean);
+				this.beanFactory.addBean(name, bean);
+			}
 		}
 	}
 
@@ -167,13 +166,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public <T> T getBean(Class<T> requiredType) throws BeansException {
-		return this.beanFactory.getBean(requiredType);
+	public Object getBean(String name, Object... args) throws BeansException {
+		return this.beanFactory.getBean(name, args);
 	}
 
 	@Override
-	public Object getBean(String name, Object... args) throws BeansException {
-		return this.beanFactory.getBean(name, args);
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return this.beanFactory.getBean(requiredType);
 	}
 
 	@Override
@@ -202,7 +201,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
@@ -405,7 +404,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
+		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 				@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}

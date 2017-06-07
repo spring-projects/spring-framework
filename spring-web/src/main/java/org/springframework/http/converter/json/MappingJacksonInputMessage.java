@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.InputStream;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link HttpInputMessage} that can eventually stores a Jackson view that will be used
@@ -38,12 +39,12 @@ public class MappingJacksonInputMessage implements HttpInputMessage {
 	private Class<?> deserializationView;
 
 
-	public MappingJacksonInputMessage(InputStream body, HttpHeaders headers) {
+	public MappingJacksonInputMessage(@Nullable InputStream body, HttpHeaders headers) {
 		this.body = body;
 		this.headers = headers;
 	}
 
-	public MappingJacksonInputMessage(InputStream body, HttpHeaders headers, Class<?> deserializationView) {
+	public MappingJacksonInputMessage(@Nullable InputStream body, HttpHeaders headers, Class<?> deserializationView) {
 		this(body, headers);
 		this.deserializationView = deserializationView;
 	}
@@ -63,6 +64,7 @@ public class MappingJacksonInputMessage implements HttpInputMessage {
 		this.deserializationView = deserializationView;
 	}
 
+	@Nullable
 	public Class<?> getDeserializationView() {
 		return this.deserializationView;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using the
@@ -104,9 +105,15 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	 */
 	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
-		factory.setStylePattern(resolveEmbeddedValue(annotation.style()));
+		String style = resolveEmbeddedValue(annotation.style());
+		if (StringUtils.hasLength(style)) {
+			factory.setStylePattern(style);
+		}
 		factory.setIso(annotation.iso());
-		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			factory.setPattern(pattern);
+		}
 		return factory.createDateTimeFormatter();
 	}
 

@@ -429,7 +429,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ public class SpelCompiler implements Opcodes {
 
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
-	private static final Map<ClassLoader, SpelCompiler> compilers =
-			new ConcurrentReferenceHashMap<>();
+	private static final Map<ClassLoader, SpelCompiler> compilers = new ConcurrentReferenceHashMap<>();
 
 	// The child ClassLoader used to load the compiled expression classes
 	private ChildClassLoader ccl;
@@ -84,9 +83,11 @@ public class SpelCompiler implements Opcodes {
 	// Counter suffix for generated classes within this SpelCompiler instance
 	private final AtomicInteger suffixId = new AtomicInteger(1);
 
-	private SpelCompiler(ClassLoader classloader) {
+
+	private SpelCompiler(@Nullable ClassLoader classloader) {
 		this.ccl = new ChildClassLoader(classloader);
 	}
+
 
 	/**
 	 * Attempt compilation of the supplied expression. A check is
@@ -212,7 +213,7 @@ public class SpelCompiler implements Opcodes {
 	 * @param classLoader the ClassLoader to use as the basis for compilation
 	 * @return a corresponding SpelCompiler instance
 	 */
-	public static SpelCompiler getCompiler(ClassLoader classLoader) {
+	public static SpelCompiler getCompiler(@Nullable ClassLoader classLoader) {
 		ClassLoader clToUse = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		synchronized (compilers) {
 			SpelCompiler compiler = compilers.get(clToUse);
@@ -289,7 +290,7 @@ public class SpelCompiler implements Opcodes {
 
 		private int classesDefinedCount = 0;
 
-		public ChildClassLoader(ClassLoader classLoader) {
+		public ChildClassLoader(@Nullable ClassLoader classLoader) {
 			super(NO_URLS, classLoader);
 		}
 

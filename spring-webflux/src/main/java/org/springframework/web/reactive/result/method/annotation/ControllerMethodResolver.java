@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
@@ -52,7 +53,7 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.springframework.core.MethodIntrospector.selectMethods;
+import static org.springframework.core.MethodIntrospector.*;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -163,7 +164,7 @@ class ControllerMethodResolver {
 		registrar.addIfModelAttribute(() -> new ModelAttributeMethodArgumentResolver(reactiveRegistry, true));
 	}
 
-	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
+	private void initControllerAdviceCaches(@Nullable ApplicationContext applicationContext) {
 		if (applicationContext == null) {
 			return;
 		}
@@ -176,25 +177,27 @@ class ControllerMethodResolver {
 
 		for (ControllerAdviceBean bean : beans) {
 			Class<?> beanType = bean.getBeanType();
-			Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
-			if (!attrMethods.isEmpty()) {
-				this.modelAttributeAdviceCache.put(bean, attrMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + bean);
+			if (beanType != null) {
+				Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
+				if (!attrMethods.isEmpty()) {
+					this.modelAttributeAdviceCache.put(bean, attrMethods);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @ModelAttribute methods in " + bean);
+					}
 				}
-			}
-			Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
-			if (!binderMethods.isEmpty()) {
-				this.initBinderAdviceCache.put(bean, binderMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + bean);
+				Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
+				if (!binderMethods.isEmpty()) {
+					this.initBinderAdviceCache.put(bean, binderMethods);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @InitBinder methods in " + bean);
+					}
 				}
-			}
-			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ExceptionHandler methods in " + bean);
+				ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
+				if (resolver.hasExceptionMappings()) {
+					this.exceptionHandlerAdviceCache.put(bean, resolver);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @ExceptionHandler methods in " + bean);
+					}
 				}
 			}
 		}

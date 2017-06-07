@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@linkplain HttpMethod method} and
- * {@linkplain URI uri}.
- * Used in {@code RestTemplate} and {@code @Controller} methods.
+ * {@linkplain URI uri}. Used in {@code RestTemplate} and {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is used as parameter in
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
@@ -76,7 +75,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(HttpMethod method, URI url) {
-		this(null, null, method, url);
+		this(null, null, method, url, null);
 	}
 
 	/**
@@ -85,7 +84,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(T body, HttpMethod method, URI url) {
+	public RequestEntity(@Nullable T body, HttpMethod method, URI url) {
 		this(body, null, method, url, null);
 	}
 
@@ -97,7 +96,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
 	 */
-	public RequestEntity(T body, HttpMethod method, URI url, Type type) {
+	public RequestEntity(@Nullable T body, HttpMethod method, URI url, Type type) {
 		this(body, null, method, url, type);
 	}
 
@@ -118,7 +117,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
+	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			@Nullable HttpMethod method, URI url) {
+
 		this(body, headers, method, url, null);
 	}
 
@@ -131,7 +132,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
 	 */
-	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url, Type type) {
+	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			@Nullable HttpMethod method, URI url, @Nullable Type type) {
+
 		super(body, headers);
 		this.method = method;
 		this.url = url;
@@ -143,6 +146,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP method of the request.
 	 * @return the HTTP method as an {@code HttpMethod} enum value
 	 */
+	@Nullable
 	public HttpMethod getMethod() {
 		return this.method;
 	}
@@ -173,7 +177,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -204,13 +208,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		HttpHeaders headers = getHeaders();
 		if (body != null) {
 			builder.append(body);
-			if (headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (headers != null) {
-			builder.append(headers);
-		}
+		builder.append(headers);
 		builder.append('>');
 		return builder.toString();
 	}

@@ -80,7 +80,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		}
 
 		Object payload = message.getPayload();
-		if (payload == null || targetPayloadType.isInstance(payload)) {
+		if (targetPayloadType.isInstance(payload)) {
 			return message;
 		}
 

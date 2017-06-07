@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,18 +56,18 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	 * Set the interface that the proxy must implement.
 	 * @param serviceInterface the interface that the proxy must implement
 	 * @throws IllegalArgumentException if the supplied {@code serviceInterface}
-	 * is {@code null}, or if the supplied {@code serviceInterface}
 	 * is not an interface type
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface == null || !serviceInterface.isInterface()) {
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		if (!serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 

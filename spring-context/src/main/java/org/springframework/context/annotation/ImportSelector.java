@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Interface to be implemented by types that determine which @{@link Configuration}
@@ -46,7 +45,6 @@ import org.springframework.lang.NonNullApi;
  * @see ImportBeanDefinitionRegistrar
  * @see Configuration
  */
-@NonNullApi
 public interface ImportSelector {
 
 	/**

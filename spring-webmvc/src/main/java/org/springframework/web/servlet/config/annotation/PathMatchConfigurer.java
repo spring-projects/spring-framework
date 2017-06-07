@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
@@ -107,26 +108,30 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+
+	@Nullable
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
+	@Nullable
 	public Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
+	@Nullable
 	public Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+	@Nullable
 	public PathMatcher getPathMatcher() {
-		if(this.pathMatcher != null
-				&& this.pathMatcher.getClass().isAssignableFrom(ParsingPathMatcher.class)
-				&& (this.trailingSlashMatch || this.suffixPatternMatch)) {
+		if (this.pathMatcher instanceof ParsingPathMatcher && (this.trailingSlashMatch || this.suffixPatternMatch)) {
 			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
 					" and useSuffixPatternMatch should be set to 'false'.");
 		}

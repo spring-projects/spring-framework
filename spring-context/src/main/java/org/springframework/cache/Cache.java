@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public interface Cache {
 	 * @see #get(Object, Class)
 	 */
 	@Nullable
-	ValueWrapper get(@Nullable Object key);
+	ValueWrapper get(Object key);
 
 	/**
 	 * Return the value to which this cache maps the specified key,
@@ -78,7 +78,7 @@ public interface Cache {
 	 * @see #get(Object)
 	 */
 	@Nullable
-	<T> T get(@Nullable Object key, Class<T> type);
+	<T> T get(Object key, @Nullable Class<T> type);
 
 	/**
 	 * Return the value to which this cache maps the specified key, obtaining
@@ -96,7 +96,7 @@ public interface Cache {
 	 * @since 4.3
 	 */
 	@Nullable
-	<T> T get(@Nullable Object key, Callable<T> valueLoader);
+	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
 	 * Associate the specified value with the specified key in this cache.
@@ -105,7 +105,7 @@ public interface Cache {
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 */
-	void put(@Nullable Object key, @Nullable Object value);
+	void put(Object key, @Nullable Object value);
 
 	/**
 	 * Atomically associate the specified value with the specified key in this cache
@@ -134,13 +134,13 @@ public interface Cache {
 	 * @since 4.1
 	 */
 	@Nullable
-	ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value);
+	ValueWrapper putIfAbsent(Object key, @Nullable Object value);
 
 	/**
 	 * Evict the mapping for this key from this cache if it is present.
 	 * @param key the key whose mapping is to be removed from the cache
 	 */
-	void evict(@Nullable Object key);
+	void evict(Object key);
 
 	/**
 	 * Remove all mappings from the cache.

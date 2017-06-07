@@ -152,7 +152,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * implementation simply delegates to
 	 * {@link CorsConfiguration#checkOrigin(String)}.
 	 */
-	protected String checkOrigin(CorsConfiguration config, String requestOrigin) {
+	@Nullable
+	protected String checkOrigin(CorsConfiguration config, @Nullable String requestOrigin) {
 		return config.checkOrigin(requestOrigin);
 	}
 
@@ -161,10 +162,12 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * pre-flight request. The default implementation simply delegates to
 	 * {@link CorsConfiguration#checkOrigin(String)}.
 	 */
-	protected List<HttpMethod> checkMethods(CorsConfiguration config, HttpMethod requestMethod) {
+	@Nullable
+	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {
 		return config.checkHttpMethod(requestMethod);
 	}
 
+	@Nullable
 	private HttpMethod getMethodToUse(ServerHttpRequest request, boolean isPreFlight) {
 		return (isPreFlight ? request.getHeaders().getAccessControlRequestMethod() : request.getMethod());
 	}
@@ -174,6 +177,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * pre-flight request. The default implementation simply delegates to
 	 * {@link CorsConfiguration#checkOrigin(String)}.
 	 */
+	@Nullable
+
 	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
 		return config.checkHeaders(requestHeaders);
 	}

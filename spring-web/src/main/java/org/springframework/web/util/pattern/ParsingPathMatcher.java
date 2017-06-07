@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 
 /**
@@ -106,7 +107,7 @@ public class ParsingPathMatcher implements PathMatcher {
 		}
 
 		@Override
-		public int compare(String o1, String o2) {
+		public int compare(@Nullable String o1, @Nullable String o2) {
 			if (o1 == null) {
 				return (o2 == null ? 0 : +1);
 			}
@@ -133,7 +134,7 @@ public class ParsingPathMatcher implements PathMatcher {
 		}
 
 		@Override
-		public int compare(PathPattern o1, PathPattern o2) {
+		public int compare(@Nullable PathPattern o1, @Nullable PathPattern o2) {
 			// Nulls get sorted to the end
 			if (o1 == null) {
 				return (o2 == null ? 0 : +1);

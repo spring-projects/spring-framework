@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,11 +86,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private Collection<String> destinationPrefixes = new ArrayList<>();
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers =
-			new ArrayList<>(4);
+	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(4);
 
-	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers =
-			new ArrayList<>(4);
+	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<>(4);
 
 	private final HandlerMethodArgumentResolverComposite argumentResolvers =
 			new HandlerMethodArgumentResolverComposite();
@@ -119,7 +117,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>By default, no prefixes are configured in which case all messages are
 	 * eligible for handling.
 	 */
-	public void setDestinationPrefixes(Collection<String> prefixes) {
+	public void setDestinationPrefixes(@Nullable Collection<String> prefixes) {
 		this.destinationPrefixes.clear();
 		if (prefixes != null) {
 			for (String prefix : prefixes) {
@@ -140,7 +138,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Sets the list of custom {@code HandlerMethodArgumentResolver}s that will be used
 	 * after resolvers for supported argument type.
 	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
+	public void setCustomArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> customArgumentResolvers) {
 		this.customArgumentResolvers.clear();
 		if (customArgumentResolvers != null) {
 			this.customArgumentResolvers.addAll(customArgumentResolvers);
@@ -158,7 +156,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Set the list of custom {@code HandlerMethodReturnValueHandler}s that will be used
 	 * after return value handlers for known types.
 	 */
-	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
+	public void setCustomReturnValueHandlers(@Nullable List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
 		this.customReturnValueHandlers.clear();
 		if (customReturnValueHandlers != null) {
 			this.customReturnValueHandlers.addAll(customReturnValueHandlers);
@@ -177,7 +175,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * the ones configured by default. This is an advanced option; for most use cases
 	 * it should be sufficient to use {@link #setCustomArgumentResolvers}.
 	 */
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers == null) {
 			this.argumentResolvers.clear();
 			return;
@@ -197,7 +195,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * the ones configured by default. This is an advanced option; for most use cases
 	 * it should be sufficient to use {@link #setCustomReturnValueHandlers}.
 	 */
-	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setReturnValueHandlers(@Nullable List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers == null) {
 			this.returnValueHandlers.clear();
 			return;
@@ -217,6 +215,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.applicationContext = applicationContext;
 	}
 
+	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
@@ -236,7 +235,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				Class<?> beanType = null;
 				try {
-					beanType = getApplicationContext().getType(beanName);
+					beanType = this.applicationContext.getType(beanName);
 				}
 				catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
@@ -281,21 +280,17 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
 				this.applicationContext.getType((String) handler) : handler.getClass());
-		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
-		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
-				new MethodIntrospector.MetadataLookup<T>() {
-					@Override
-					public T inspect(Method method) {
-						return getMappingForMethod(method, userType);
-					}
-				});
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
-		}
-		for (Map.Entry<Method, T> entry : methods.entrySet()) {
-			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
+		if (handlerType != null) {
+			final Class<?> userType = ClassUtils.getUserClass(handlerType);
+			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+					(MethodIntrospector.MetadataLookup<T>) method -> getMappingForMethod(method, userType));
+			if (logger.isDebugEnabled()) {
+				logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
+			}
+			for (Map.Entry<Method, T> entry : methods.entrySet()) {
+				registerHandlerMethod(handler, entry.getKey(), entry.getValue());
+			}
 		}
 	}
 
@@ -402,6 +397,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		headerAccessor.setImmutable();
 	}
 
+	@Nullable
 	protected abstract String getDestination(Message<?> message);
 
 	/**
@@ -412,7 +408,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
 	@Nullable
-	protected String getLookupDestination(String destination) {
+	protected String getLookupDestination(@Nullable String destination) {
 		if (destination == null) {
 			return null;
 		}
@@ -508,7 +504,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (void.class == returnType.getParameterType()) {
 				return;
 			}
-			if (this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
+			if (returnValue != null && this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
 				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
 				if (future != null) {
 					future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));

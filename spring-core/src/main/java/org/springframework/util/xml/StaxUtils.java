@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import javax.xml.transform.stax.StAXSource;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3 compatibility;
@@ -98,6 +100,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
+	@Nullable
 	public static XMLStreamReader getXMLStreamReader(Source source) {
 		if (source instanceof StAXSource) {
 			return ((StAXSource) source).getXMLStreamReader();
@@ -117,6 +120,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
+	@Nullable
 	public static XMLEventReader getXMLEventReader(Source source) {
 		if (source instanceof StAXSource) {
 			return ((StAXSource) source).getXMLEventReader();
@@ -182,6 +186,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
+	@Nullable
 	public static XMLStreamWriter getXMLStreamWriter(Result result) {
 		if (result instanceof StAXResult) {
 			return ((StAXResult) result).getXMLStreamWriter();
@@ -201,6 +206,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
+	@Nullable
 	public static XMLEventWriter getXMLEventWriter(Result result) {
 		if (result instanceof StAXResult) {
 			return ((StAXResult) result).getXMLEventWriter();

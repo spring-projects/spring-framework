@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package org.springframework.expression;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Expressions are executed in an evaluation context. It is in this context that
  * references are resolved when encountered during expression evaluation.
  *
- * <p>There is a default implementation of the EvaluationContext,
- * {@link org.springframework.expression.spel.support.StandardEvaluationContext} that can
- * be extended, rather than having to implement everything.
+ * <p>There is a default implementation of this EvaluationContext interface:
+ * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
+ * which can be extended, rather than having to implement everything manually.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -79,6 +81,7 @@ public interface EvaluationContext {
 	/**
 	 * Return a bean resolver that can look up beans by name.
 	 */
+	@Nullable
 	BeanResolver getBeanResolver();
 
 	/**
@@ -86,13 +89,14 @@ public interface EvaluationContext {
 	 * @param name variable to set
 	 * @param value value to be placed in the variable
 	 */
-	void setVariable(String name, Object value);
+	void setVariable(String name, @Nullable Object value);
 
 	/**
 	 * Look up a named variable within this evaluation context.
 	 * @param name variable to lookup
-	 * @return the value of the variable
+	 * @return the value of the variable, or {@code null} if not found
 	 */
+	@Nullable
 	Object lookupVariable(String name);
 
 }

@@ -32,6 +32,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -131,7 +132,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 
 	@Override
-	public Object evaluate(String value, BeanExpressionContext evalContext) throws BeansException {
+	public Object evaluate(@Nullable String value, BeanExpressionContext evalContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;
 		}
@@ -160,7 +161,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			}
 			return expr.getValue(sec);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new BeanExpressionException("Expression parsing failed", ex);
 		}
 	}

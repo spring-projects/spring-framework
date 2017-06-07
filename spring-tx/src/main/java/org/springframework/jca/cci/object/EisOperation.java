@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.resource.cci.InteractionSpec;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jca.cci.core.CciTemplate;
+import org.springframework.util.Assert;
 
 /**
  * Base class for EIS operation objects that work with the CCI API.
@@ -47,9 +48,7 @@ public abstract class EisOperation implements InitializingBean {
 	 * @see #setConnectionFactory
 	 */
 	public void setCciTemplate(CciTemplate cciTemplate) {
-		if (cciTemplate == null) {
-			throw new IllegalArgumentException("cciTemplate must not be null");
-		}
+		Assert.notNull(cciTemplate, "CciTemplate must not be null");
 		this.cciTemplate = cciTemplate;
 	}
 

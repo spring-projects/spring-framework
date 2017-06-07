@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,10 @@ public abstract class AopUtils {
 	 * @since 4.3
 	 * @see MethodIntrospector#selectInvocableMethod(Method, Class)
 	 */
-	public static Method selectInvocableMethod(Method method, Class<?> targetType) {
+	public static Method selectInvocableMethod(Method method, @Nullable Class<?> targetType) {
+		if (targetType == null) {
+			return method;
+		}
 		Method methodToUse = MethodIntrospector.selectInvocableMethod(method, targetType);
 		if (Modifier.isPrivate(methodToUse.getModifiers()) && !Modifier.isStatic(methodToUse.getModifiers()) &&
 				SpringProxy.class.isAssignableFrom(targetType)) {
@@ -143,7 +146,7 @@ public abstract class AopUtils {
 	 * Determine whether the given method is an "equals" method.
 	 * @see java.lang.Object#equals
 	 */
-	public static boolean isEqualsMethod(Method method) {
+	public static boolean isEqualsMethod(@Nullable Method method) {
 		return ReflectionUtils.isEqualsMethod(method);
 	}
 
@@ -151,7 +154,7 @@ public abstract class AopUtils {
 	 * Determine whether the given method is a "hashCode" method.
 	 * @see java.lang.Object#hashCode
 	 */
-	public static boolean isHashCodeMethod(Method method) {
+	public static boolean isHashCodeMethod(@Nullable Method method) {
 		return ReflectionUtils.isHashCodeMethod(method);
 	}
 
@@ -159,7 +162,7 @@ public abstract class AopUtils {
 	 * Determine whether the given method is a "toString" method.
 	 * @see java.lang.Object#toString()
 	 */
-	public static boolean isToStringMethod(Method method) {
+	public static boolean isToStringMethod(@Nullable Method method) {
 		return ReflectionUtils.isToStringMethod(method);
 	}
 
@@ -167,7 +170,7 @@ public abstract class AopUtils {
 	 * Determine whether the given method is a "finalize" method.
 	 * @see java.lang.Object#finalize()
 	 */
-	public static boolean isFinalizeMethod(Method method) {
+	public static boolean isFinalizeMethod(@Nullable Method method) {
 		return (method != null && method.getName().equals("finalize") &&
 				method.getParameterCount() == 0);
 	}
@@ -326,7 +329,7 @@ public abstract class AopUtils {
 	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
 	 */
 	@Nullable
-	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
+	public static Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, Object[] args)
 			throws Throwable {
 
 		// Use reflection to invoke the method.

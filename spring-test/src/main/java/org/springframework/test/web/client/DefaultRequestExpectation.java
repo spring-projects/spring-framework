@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -61,6 +62,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		return this.requestMatchers;
 	}
 
+	@Nullable
 	protected ResponseCreator getResponseCreator() {
 		return this.responseCreator;
 	}
@@ -86,7 +88,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 	}
 
 	@Override
-	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
+	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
 		ResponseCreator responseCreator = getResponseCreator();
 		Assert.state(responseCreator != null, "createResponse() called before ResponseCreator was set");
 		getRequestCount().incrementAndValidate();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ReflectionUtils;
 
@@ -65,6 +66,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * (provided that the present TypeConverter actually implements the
 	 * PropertyEditorRegistry interface).
 	 */
+	@Nullable
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null && this.useDefaultConverter) {
 			this.typeConverter = getDefaultTypeConverter();
@@ -135,7 +137,9 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			String targetMethod = getTargetMethod();
 			Method matchingMethod = null;
 			int argCount = arguments.length;
-			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(getTargetClass());
+			Class<?> targetClass = getTargetClass();
+			Assert.state(targetClass != null, "No target class set");
+			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(targetClass);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Object[] argumentsToUse = null;
 			for (Method candidate : candidates) {

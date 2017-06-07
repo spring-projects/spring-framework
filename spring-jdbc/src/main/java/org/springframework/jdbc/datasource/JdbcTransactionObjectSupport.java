@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.support.SmartTransactionObject;
+import org.springframework.util.Assert;
 
 /**
  * Convenient base class for JDBC-aware transaction objects. Can contain a
@@ -62,6 +63,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	public ConnectionHolder getConnectionHolder() {
+		Assert.state(this.connectionHolder != null, "No ConnectionHolder available");
 		return this.connectionHolder;
 	}
 
@@ -69,7 +71,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		return (this.connectionHolder != null);
 	}
 
-	public void setPreviousIsolationLevel(Integer previousIsolationLevel) {
+	public void setPreviousIsolationLevel(@Nullable Integer previousIsolationLevel) {
 		this.previousIsolationLevel = previousIsolationLevel;
 	}
 

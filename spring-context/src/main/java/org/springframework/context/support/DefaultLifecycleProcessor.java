@@ -278,8 +278,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			boolean isFactoryBean = this.beanFactory.isFactoryBean(beanNameToRegister);
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
 			if ((this.beanFactory.containsSingleton(beanNameToRegister) &&
-					(!isFactoryBean || Lifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck)))) ||
-					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck))) {
+					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck))) ||
+					matchesBeanType(SmartLifecycle.class, beanNameToCheck)) {
 				Lifecycle bean = this.beanFactory.getBean(beanNameToCheck, Lifecycle.class);
 				if (bean != this) {
 					beans.put(beanNameToRegister, bean);
@@ -287,6 +287,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 		return beans;
+	}
+
+	private boolean matchesBeanType(Class<?> targetType, String beanName) {
+		Class<?> beanType = this.beanFactory.getType(beanName);
+		return (beanType != null && targetType.isAssignableFrom(beanType));
 	}
 
 	/**

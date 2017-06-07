@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jdbc.core.metadata;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Derby specific implementation for the {@link CallMetaDataProvider} interface.
  * This class is intended for internal use by the Simple JDBC classes.
@@ -34,7 +36,7 @@ public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
-	public String metaDataSchemaNameToUse(String schemaName) {
+	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (schemaName != null) {
 			return super.metaDataSchemaNameToUse(schemaName);
 		}

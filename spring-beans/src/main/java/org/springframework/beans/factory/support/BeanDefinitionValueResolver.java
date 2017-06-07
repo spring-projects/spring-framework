@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ class BeanDefinitionValueResolver {
 	 * @param value the value object to resolve
 	 * @return the resolved object
 	 */
+	@Nullable
 	public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
@@ -177,6 +178,11 @@ class BeanDefinitionValueResolver {
 				if (propValue instanceof TypedStringValue) {
 					propValue = evaluate((TypedStringValue) propValue);
 				}
+				if (propKey == null || propValue == null) {
+					throw new BeanCreationException(
+							this.beanDefinition.getResourceDescription(), this.beanName,
+							"Error converting Properties key/value pair for " + argName + ": resolved to null");
+				}
 				copy.put(propKey, propValue);
 			}
 			return copy;
@@ -211,6 +217,7 @@ class BeanDefinitionValueResolver {
 	 * @param value the candidate value (may be an expression)
 	 * @return the resolved value
 	 */
+	@Nullable
 	protected Object evaluate(TypedStringValue value) {
 		Object result = doEvaluate(value.getValue());
 		if (!ObjectUtils.nullSafeEquals(result, value.getValue())) {
@@ -224,7 +231,8 @@ class BeanDefinitionValueResolver {
 	 * @param value the original value (may be an expression)
 	 * @return the resolved value if necessary, or the original value
 	 */
-	protected Object evaluate(Object value) {
+	@Nullable
+	protected Object evaluate(@Nullable Object value) {
 		if (value instanceof String) {
 			return doEvaluate((String) value);
 		}
@@ -252,7 +260,8 @@ class BeanDefinitionValueResolver {
 	 * @param value the original value (may be an expression)
 	 * @return the resolved value if necessary, or the original String value
 	 */
-	private Object doEvaluate(String value) {
+	@Nullable
+	private Object doEvaluate(@Nullable String value) {
 		return this.beanFactory.evaluateBeanDefinitionString(value, this.beanDefinition);
 	}
 
@@ -278,6 +287,7 @@ class BeanDefinitionValueResolver {
 	 * @param innerBd the bean definition for the inner bean
 	 * @return the resolved inner bean instance
 	 */
+	@Nullable
 	private Object resolveInnerBean(Object argName, String innerBeanName, BeanDefinition innerBd) {
 		RootBeanDefinition mbd = null;
 		try {

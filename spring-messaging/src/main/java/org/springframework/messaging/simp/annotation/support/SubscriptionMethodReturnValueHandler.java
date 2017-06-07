@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -88,6 +89,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -101,7 +103,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
 		if (returnValue == null) {
@@ -109,12 +111,16 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		}
 
 		MessageHeaders headers = message.getHeaders();
-		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 
 		if (subscriptionId == null) {
-			throw new IllegalStateException("No subscriptionId in " + message +
+			throw new IllegalStateException("No simpSubscriptionId in " + message +
+					" returned by: " + returnType.getMethod());
+		}
+		if (destination == null) {
+			throw new IllegalStateException("No simpDestination in " + message +
 					" returned by: " + returnType.getMethod());
 		}
 
@@ -125,12 +131,14 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		this.messagingTemplate.convertAndSend(destination, returnValue, headersToSend);
 	}
 
-	private MessageHeaders createHeaders(String sessionId, String subscriptionId, MethodParameter returnType) {
+	private MessageHeaders createHeaders(@Nullable String sessionId, String subscriptionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(accessor);
 		}
-		accessor.setSessionId(sessionId);
+		if (sessionId != null) {
+			accessor.setSessionId(sessionId);
+		}
 		accessor.setSubscriptionId(subscriptionId);
 		accessor.setHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER, returnType);
 		accessor.setLeaveMutable(true);

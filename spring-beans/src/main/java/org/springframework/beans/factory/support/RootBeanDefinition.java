@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,7 +290,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Specify the target type of this bean definition, if known in advance.
 	 * @since 3.2.2
 	 */
-	public void setTargetType(Class<?> targetType) {
+	public void setTargetType(@Nullable Class<?> targetType) {
 		this.targetType = (targetType != null ? ResolvableType.forClass(targetType) : null);
 	}
 
@@ -299,6 +299,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * (either specified in advance or resolved on first instantiation).
 	 * @since 3.2.2
 	 */
+	@Nullable
 	public Class<?> getTargetType() {
 		if (this.resolvedTargetType != null) {
 			return this.resolvedTargetType;
@@ -319,7 +320,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Check whether the given candidate qualifies as a factory method.
 	 */
 	public boolean isFactoryMethod(Method candidate) {
-		return (candidate != null && candidate.getName().equals(getFactoryMethodName()));
+		return candidate.getName().equals(getFactoryMethodName());
 	}
 
 	/**

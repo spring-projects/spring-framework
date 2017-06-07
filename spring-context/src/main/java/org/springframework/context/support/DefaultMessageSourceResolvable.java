@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -81,7 +82,9 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * @param arguments the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
-	public DefaultMessageSourceResolvable(String[] codes, Object[] arguments, String defaultMessage) {
+	public DefaultMessageSourceResolvable(
+			@Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage) {
+
 		this.codes = codes;
 		this.arguments = arguments;
 		this.defaultMessage = defaultMessage;
@@ -96,17 +99,18 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 
-	@Override
-	public String[] getCodes() {
-		return this.codes;
-	}
-
 	/**
 	 * Return the default code of this resolvable, that is,
 	 * the last one in the codes array.
 	 */
+	@Nullable
 	public String getCode() {
 		return (this.codes != null && this.codes.length > 0 ? this.codes[this.codes.length - 1] : null);
+	}
+
+	@Override
+	public String[] getCodes() {
+		return this.codes;
 	}
 
 	@Override

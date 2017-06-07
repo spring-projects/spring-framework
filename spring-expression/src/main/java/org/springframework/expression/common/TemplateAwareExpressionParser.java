@@ -42,16 +42,16 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 */
 	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
 		@Override
+		public boolean isTemplate() {
+			return false;
+		}
+		@Override
 		public String getExpressionPrefix() {
-			return null;
+			return "";
 		}
 		@Override
 		public String getExpressionSuffix() {
-			return null;
-		}
-		@Override
-		public boolean isTemplate() {
-			return false;
+			return "";
 		}
 	};
 
@@ -63,10 +63,6 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 
 	@Override
 	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
-		if (context == null) {
-			context = NON_TEMPLATE_PARSER_CONTEXT;
-		}
-
 		if (context.isTemplate()) {
 			return parseTemplate(expressionString, context);
 		}

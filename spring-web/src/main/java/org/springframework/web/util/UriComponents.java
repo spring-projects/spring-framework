@@ -55,7 +55,7 @@ public abstract class UriComponents implements Serializable {
 	private final String fragment;
 
 
-	protected UriComponents(String scheme, String fragment) {
+	protected UriComponents(@Nullable String scheme, @Nullable String fragment) {
 		this.scheme = scheme;
 		this.fragment = fragment;
 	}
@@ -69,6 +69,14 @@ public abstract class UriComponents implements Serializable {
 	@Nullable
 	public final String getScheme() {
 		return this.scheme;
+	}
+
+	/**
+	 * Return the fragment. Can be {@code null}.
+	 */
+	@Nullable
+	public final String getFragment() {
+		return this.fragment;
 	}
 
 	/**
@@ -115,14 +123,6 @@ public abstract class UriComponents implements Serializable {
 	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	public abstract MultiValueMap<String, String> getQueryParams();
-
-	/**
-	 * Return the fragment. Can be {@code null}.
-	 */
-	@Nullable
-	public final String getFragment() {
-		return this.fragment;
-	}
 
 
 	/**
@@ -214,7 +214,8 @@ public abstract class UriComponents implements Serializable {
 
 	// Static expansion helpers
 
-	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
+	@Nullable
+	static String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
 		}
@@ -267,7 +268,7 @@ public abstract class UriComponents implements Serializable {
 		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
 
-	private static String getVariableValueAsString(Object variableValue) {
+	private static String getVariableValueAsString(@Nullable Object variableValue) {
 		return (variableValue != null ? variableValue.toString() : "");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.transaction.UserTransaction;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.util.Assert;
 
 /**
  * Special {@link JtaTransactionManager} variant for BEA WebLogic (9.0 and higher).
@@ -198,6 +199,12 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+	private TransactionManager obtainTransactionManager() {
+		TransactionManager tm = getTransactionManager();
+		Assert.state(tm != null, "No TransactionManager set");
+		return tm;
+	}
+
 
 	@Override
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
@@ -243,7 +250,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		if (this.weblogicTransactionManagerAvailable) {
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				try {
-					Transaction tx = getTransactionManager().getTransaction();
+					Transaction tx = obtainTransactionManager().getTransaction();
 					Integer isolationLevel = definition.getIsolationLevel();
 					/*
 					weblogic.transaction.Transaction wtx = (weblogic.transaction.Transaction) tx;
@@ -271,7 +278,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			throws InvalidTransactionException, SystemException {
 
 		try {
-			getTransactionManager().resume((Transaction) suspendedTransaction);
+			obtainTransactionManager().resume((Transaction) suspendedTransaction);
 		}
 		catch (InvalidTransactionException ex) {
 			if (!this.weblogicTransactionManagerAvailable) {
@@ -330,7 +337,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			catch (Exception ex) {
 				throw new SystemException("Could not invoke WebLogic's UserTransaction.begin() method: " + ex);
 			}
-			return new ManagedTransactionAdapter(getTransactionManager());
+			return new ManagedTransactionAdapter(obtainTransactionManager());
 		}
 
 		else {

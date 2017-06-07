@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Adapts a {@link CompletableFuture} or {@link CompletionStage} into a
  * Spring {@link ListenableFuture}.
@@ -53,7 +55,8 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 		this.completableFuture = completableFuture;
 		this.completableFuture.handle(new BiFunction<T, Throwable, Object>() {
 			@Override
-			public Object apply(T result, Throwable ex) {
+			@Nullable
+			public Object apply(T result, @Nullable Throwable ex) {
 				if (ex != null) {
 					callbacks.failure(ex);
 				}
