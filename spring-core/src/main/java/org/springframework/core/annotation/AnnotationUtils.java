@@ -533,6 +533,9 @@ public abstract class AnnotationUtils {
 	@Nullable
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		Assert.notNull(method, "Method must not be null");
+		if (annotationType == null) {
+			return null;
+		}
 
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(method, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
@@ -655,6 +658,10 @@ public abstract class AnnotationUtils {
 	@Nullable
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
 		Assert.notNull(clazz, "Class must not be null");
+		if (annotationType == null) {
+			return null;
+		}
+
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
@@ -1310,7 +1317,7 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Object getValue(Annotation annotation, String attributeName) {
-		if (!StringUtils.hasText(attributeName)) {
+		if (annotation == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -1350,6 +1357,9 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+		if (annotation == null) {
+			return null;
+		}
 		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
@@ -1375,7 +1385,7 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
-		if (!StringUtils.hasText(attributeName)) {
+		if (annotationType == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -1430,7 +1440,7 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (annotation == null || annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
 
