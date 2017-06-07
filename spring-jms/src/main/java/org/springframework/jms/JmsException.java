@@ -47,7 +47,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * expected to be a proper subclass of {@link javax.jms.JMSException},
 	 * but can also be a JNDI NamingException or the like.
 	 */
-	public JmsException(String msg, Throwable cause) {
+	public JmsException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -57,7 +57,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * @param cause the cause of the exception. This argument is generally
 	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
 	 */
-	public JmsException(Throwable cause) {
+	public JmsException(@Nullable Throwable cause) {
 		super(cause != null ? cause.getMessage() : null, cause);
 	}
 

@@ -52,6 +52,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		this.beanFactory = beanFactory;
 	}
 
+	@Nullable
 	protected final BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
@@ -63,7 +64,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			// If explicitly false, do not proceed with any other checks...
 			return false;
 		}
-		return (descriptor == null || checkGenericTypeMatch(bdHolder, descriptor));
+		return checkGenericTypeMatch(bdHolder, descriptor);
 	}
 
 	/**

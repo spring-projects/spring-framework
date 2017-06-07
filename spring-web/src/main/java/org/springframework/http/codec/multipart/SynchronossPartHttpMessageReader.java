@@ -112,18 +112,17 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		private final DataBufferFactory bufferFactory;
 
-
 		SynchronossPartGenerator(ReactiveHttpInputMessage inputMessage, DataBufferFactory factory) {
 			this.inputMessage = inputMessage;
 			this.bufferFactory = factory;
 		}
 
-
 		@Override
 		public void accept(FluxSink<Part> emitter) {
-
 			HttpHeaders headers = this.inputMessage.getHeaders();
 			MediaType mediaType = headers.getContentType();
+			Assert.state(mediaType != null, "No content type set");
+
 			int length = Math.toIntExact(headers.getContentLength());
 			Charset charset = Optional.ofNullable(mediaType.getCharset()).orElse(StandardCharsets.UTF_8);
 			MultipartContext context = new MultipartContext(mediaType.toString(), length, charset.name());
@@ -159,6 +158,8 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		}
 	}
+
+
 	/**
 	 * Listen for parser output and adapt to {@code Flux<Sink<Part>>}.
 	 */
@@ -172,13 +173,11 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		private final AtomicInteger terminated = new AtomicInteger(0);
 
-
 		FluxSinkAdapterListener(FluxSink<Part> sink, DataBufferFactory bufferFactory, MultipartContext context) {
 			this.sink = sink;
 			this.bufferFactory = bufferFactory;
 			this.context = context;
 		}
-
 
 		@Override
 		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
@@ -238,14 +237,12 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 		private final DataBufferFactory bufferFactory;
 
-
 		AbstractSynchronossPart(HttpHeaders headers, DataBufferFactory bufferFactory) {
 			Assert.notNull(headers, "HttpHeaders is required");
 			Assert.notNull(bufferFactory, "'bufferFactory' is required");
 			this.headers = headers;
 			this.bufferFactory = bufferFactory;
 		}
-
 
 		@Override
 		public String name() {
@@ -262,17 +259,16 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		}
 	}
 
+
 	private static class DefaultSynchronossPart extends AbstractSynchronossPart {
 
 		private final StreamStorage storage;
-
 
 		DefaultSynchronossPart(HttpHeaders headers, StreamStorage storage, DataBufferFactory factory) {
 			super(headers, factory);
 			Assert.notNull(storage, "'storage' is required");
 			this.storage = storage;
 		}
-
 
 		@Override
 		public Flux<DataBuffer> content() {
@@ -285,15 +281,14 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		}
 	}
 
-	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
+	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
 		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage,
 				String fileName, DataBufferFactory factory) {
 
 			super(headers, storage, factory);
 		}
-
 
 		@Override
 		public String filename() {
@@ -341,16 +336,15 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		}
 	}
 
+
 	private static class SynchronossFormFieldPart extends AbstractSynchronossPart implements FormFieldPart {
 
 		private final String content;
-
 
 		SynchronossFormFieldPart(HttpHeaders headers, DataBufferFactory bufferFactory, String content) {
 			super(headers, bufferFactory);
 			this.content = content;
 		}
-
 
 		@Override
 		public String value() {

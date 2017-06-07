@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 				responseStatus == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
-		else if (this.getHeaders().getContentLength() == 0) {
+		else if (getHeaders().getContentLength() == 0) {
 			return false;
 		}
 		return true;
@@ -79,10 +79,7 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 	 */
 	public boolean hasEmptyMessageBody() throws IOException {
 		InputStream body = this.response.getBody();
-		if (body == null) {
-			return true;
-		}
-		else if (body.markSupported()) {
+		if (body.markSupported()) {
 			body.mark(1);
 			if (body.read() == -1) {
 				return true;

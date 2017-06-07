@@ -113,7 +113,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -234,7 +234,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see #createObjectInputStream
 	 * @see #doReadRemoteInvocationResult
 	 */
-	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
+	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, @Nullable String codebaseUrl)
 			throws IOException, ClassNotFoundException {
 
 		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);

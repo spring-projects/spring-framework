@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -177,7 +178,9 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * @throws javax.resource.ResourceException if thrown by CCI API methods
 	 */
 	protected Connection doCreateConnection() throws ResourceException {
-		return getTargetConnectionFactory().getConnection();
+		ConnectionFactory connectionFactory = getTargetConnectionFactory();
+		Assert.state(connectionFactory != null, "No 'targetConnectionFactory' set");
+		return connectionFactory.getConnection();
 	}
 
 	/**
@@ -229,6 +232,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
-	protected MessageHeaders(@Nullable Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
+	protected MessageHeaders(@Nullable Map<String, Object> headers, @Nullable UUID id, @Nullable Long timestamp) {
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());

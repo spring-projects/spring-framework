@@ -54,7 +54,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 
 	@Override
 	@Nullable
-	public ValueWrapper get(@Nullable Object key) {
+	public ValueWrapper get(Object key) {
 		Object value = lookup(key);
 		return toValueWrapper(value);
 	}
@@ -62,7 +62,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	@Override
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T> T get(@Nullable Object key, Class<T> type) {
+	public <T> T get(Object key, @Nullable Class<T> type) {
 		Object value = fromStoreValue(lookup(key));
 		if (value != null && type != null && !type.isInstance(value)) {
 			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
@@ -85,7 +85,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @return the value to return to the user
 	 */
 	@Nullable
-	protected Object fromStoreValue(@Nullable Object storeValue) {
+	protected Object fromStoreValue(Object storeValue) {
 		if (this.allowNullValues && storeValue == NullValue.INSTANCE) {
 			return null;
 		}
@@ -118,7 +118,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @return the wrapped value
 	 */
 	@Nullable
-	protected Cache.ValueWrapper toValueWrapper(Object storeValue) {
+	protected Cache.ValueWrapper toValueWrapper(@Nullable Object storeValue) {
 		return (storeValue != null ? new SimpleValueWrapper(fromStoreValue(storeValue)) : null);
 	}
 

@@ -50,7 +50,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.lang.NonNullApi;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -68,7 +68,6 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see ConfigurationClassParser
  */
-@NonNullApi
 class ConfigurationClassBeanDefinitionReader {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
@@ -185,8 +184,10 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		// Consider name and any aliases
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
+		Assert.state(bean != null, "No @Bean annotation attributes");
+
+		// Consider name and any aliases
 		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 
@@ -230,9 +231,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		String destroyMethodName = bean.getString("destroyMethod");
-		if (destroyMethodName != null) {
-			beanDef.setDestroyMethodName(destroyMethodName);
-		}
+		beanDef.setDestroyMethodName(destroyMethodName);
 
 		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;

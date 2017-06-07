@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class ObjectUtils {
 	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>... declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(Throwable ex, @Nullable Class<?>... declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
@@ -94,7 +94,7 @@ public abstract class ObjectUtils {
 	 * either an Object array or a primitive array.
 	 * @param obj the object to check
 	 */
-	public static boolean isArray(Object obj) {
+	public static boolean isArray(@Nullable Object obj) {
 		return (obj != null && obj.getClass().isArray());
 	}
 
@@ -164,7 +164,7 @@ public abstract class ObjectUtils {
 	 * @since 5.0
 	 */
 	@Nullable
-	public static Object unwrapOptional(Object obj) {
+	public static Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional) {
 			Optional<?> optional = (Optional<?>) obj;
 			if (!optional.isPresent()) {
@@ -251,7 +251,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A, O extends A>  A[] addObjectToArray(@Nullable A[] array, O obj) {
+	public static <A, O extends A>  A[] addObjectToArray(@Nullable A[] array, @Nullable O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();

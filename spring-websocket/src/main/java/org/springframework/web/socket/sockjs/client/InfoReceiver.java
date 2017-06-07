@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.sockjs.client;
 import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * A component that can execute the SockJS "Info" request that needs to be
@@ -42,6 +43,6 @@ public interface InfoReceiver {
 	 * @param headers the headers to use for the request
 	 * @return the body of the response
 	 */
-	String executeInfoRequest(URI infoUrl, HttpHeaders headers);
+	String executeInfoRequest(URI infoUrl, @Nullable HttpHeaders headers);
 
 }

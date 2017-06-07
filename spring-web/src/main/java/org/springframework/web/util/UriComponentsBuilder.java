@@ -155,7 +155,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param path the path to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
-	public static UriComponentsBuilder fromPath(@Nullable String path) {
+	public static UriComponentsBuilder fromPath(String path) {
 		UriComponentsBuilder builder = new UriComponentsBuilder();
 		builder.path(path);
 		return builder;
@@ -334,8 +334,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			return new HierarchicalUriComponents(this.scheme, this.userInfo, this.host, this.port,
-					this.pathBuilder.build(), this.queryParams, this.fragment, encoded, true);
+			return new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
+					this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded, true);
 		}
 	}
 
@@ -422,7 +422,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				this.port = String.valueOf(uri.getPort());
 			}
 			if (StringUtils.hasLength(uri.getRawPath())) {
-				this.pathBuilder = new CompositePathComponentBuilder(uri.getRawPath());
+				this.pathBuilder = new CompositePathComponentBuilder();
+				this.pathBuilder.addPath(uri.getRawPath());
 			}
 			if (StringUtils.hasLength(uri.getRawQuery())) {
 				this.queryParams.clear();
@@ -541,18 +542,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Set the path of this builder overriding all existing path and path segment values.
-	 * @param path the URI path; a {@code null} value results in an empty path.
-	 * @return this UriComponentsBuilder
-	 */
-	@Override
-	public UriComponentsBuilder replacePath(@Nullable String path) {
-		this.pathBuilder = new CompositePathComponentBuilder(path);
-		resetSchemeSpecificPart();
-		return this;
-	}
-
-	/**
 	 * Append path segments to the existing path. Each path segment may contain
 	 * URI template variables and should not contain any slashes.
 	 * Use {@code path("/")} subsequently to ensure a trailing slash.
@@ -562,6 +551,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		this.pathBuilder.addPathSegments(pathSegments);
+		resetSchemeSpecificPart();
+		return this;
+	}
+
+	/**
+	 * Set the path of this builder overriding all existing path and path segment values.
+	 * @param path the URI path (a {@code null} value results in an empty path)
+	 * @return this UriComponentsBuilder
+	 */
+	@Override
+	public UriComponentsBuilder replacePath(@Nullable String path) {
+		this.pathBuilder = new CompositePathComponentBuilder();
+		if (path != null) {
+			this.pathBuilder.addPath(path);
+		}
 		resetSchemeSpecificPart();
 		return this;
 	}
@@ -583,7 +587,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	@Override
-	public UriComponentsBuilder query(String query) {
+	public UriComponentsBuilder query(@Nullable String query) {
 		if (query != null) {
 			Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
 			while (matcher.find()) {
@@ -608,7 +612,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder replaceQuery(@Nullable String query) {
 		this.queryParams.clear();
-		query(query);
+		if (query != null) {
+			query(query);
+		}
 		resetSchemeSpecificPart();
 		return this;
 	}
@@ -645,7 +651,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @since 4.0
 	 */
 	@Override
-	public UriComponentsBuilder queryParams(MultiValueMap<String, String> params) {
+	public UriComponentsBuilder queryParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
 			this.queryParams.putAll(params);
 		}
@@ -677,7 +683,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @since 4.2
 	 */
 	@Override
-	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
+	public UriComponentsBuilder replaceQueryParams(@Nullable MultiValueMap<String, String> params) {
 		this.queryParams.clear();
 		if (params != null) {
 			this.queryParams.putAll(params);
@@ -807,13 +813,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 		private final LinkedList<PathComponentBuilder> builders = new LinkedList<>();
 
-		public CompositePathComponentBuilder() {
-		}
-
-		public CompositePathComponentBuilder(String path) {
-			addPath(path);
-		}
-
 		public void addPathSegments(String... pathSegments) {
 			if (!ObjectUtils.isEmpty(pathSegments)) {
 				PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
@@ -834,7 +833,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
 				FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
 				if (psBuilder != null) {
-					path = path.startsWith("/") ? path : "/" + path;
+					path = (path.startsWith("/") ? path : "/" + path);
 				}
 				if (fpBuilder == null) {
 					fpBuilder = new FullPathComponentBuilder();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.ClassPathResource;
@@ -68,13 +67,14 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		this.allowedLocations = locations;
 	}
 
+	@Nullable
 	public Resource[] getAllowedLocations() {
 		return this.allowedLocations;
 	}
 
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, locations);
@@ -128,10 +128,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				return resource;
 			}
 			else if (logger.isTraceEnabled()) {
+				Resource[] allowedLocations = getAllowedLocations();
 				logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
 						"but resource=\"" +	resource.getURL() + "\" is neither under the " +
 						"current location=\"" + location.getURL() + "\" nor under any of the " +
-						"allowed locations=" + Arrays.asList(getAllowedLocations()));
+						"allowed locations=" + (allowedLocations != null ? Arrays.asList(allowedLocations) : "[]"));
 			}
 		}
 		return null;
@@ -151,8 +152,9 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		if (isResourceUnderLocation(resource, location)) {
 			return true;
 		}
-		if (getAllowedLocations() != null) {
-			for (Resource current : getAllowedLocations()) {
+		Resource[] allowedLocations = getAllowedLocations();
+		if (allowedLocations != null) {
+			for (Resource current : allowedLocations) {
 				if (isResourceUnderLocation(resource, current)) {
 					return true;
 				}

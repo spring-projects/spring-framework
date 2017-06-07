@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
@@ -135,13 +136,18 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	@Override
 	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
 		RequestCallback requestCallback = new XhrRequestCallback(headers);
-		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor);
+		return nonNull(this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor));
 	}
 
 	@Override
 	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
 		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
-		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
+		return nonNull(this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor));
+	}
+
+	private static <T> T nonNull(@Nullable T result) {
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 
@@ -149,18 +155,11 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
 	private final static ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
-			new ResponseExtractor<ResponseEntity<String>>() {
-				@Override
-				public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
-					if (response.getBody() == null) {
-						return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
-					}
-					else {
-						String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
-						return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
-					}
-				}
+			response -> {
+				String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
+				return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
 			};
+
 
 	/**
 	 * A RequestCallback to add the headers and (optionally) String content.
@@ -175,7 +174,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 			this(headers, null);
 		}
 
-		public XhrRequestCallback(HttpHeaders headers, String body) {
+		public XhrRequestCallback(HttpHeaders headers, @Nullable String body) {
 			this.headers = headers;
 			this.body = body;
 		}

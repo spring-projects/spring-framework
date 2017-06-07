@@ -99,11 +99,13 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	@Nullable
 	protected String getUserDestinationBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
 	}
 
+	@Nullable
 	protected String getUserRegistryBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
@@ -124,6 +126,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected Collection<String> getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes != null ?
 				Arrays.asList(this.applicationDestinationPrefixes) : null);
@@ -146,6 +149,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
 	}
@@ -172,6 +176,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
+	@Nullable
 	protected PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}

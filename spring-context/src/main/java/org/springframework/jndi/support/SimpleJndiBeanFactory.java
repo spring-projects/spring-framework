@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,12 +128,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
-	public <T> T getBean(Class<T> requiredType) throws BeansException {
-		return getBean(requiredType.getSimpleName(), requiredType);
-	}
-
-	@Override
-	public Object getBean(String name, Object... args) throws BeansException {
+	public Object getBean(String name, @Nullable Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
 					"SimpleJndiBeanFactory does not support explicit bean creation arguments");
@@ -142,7 +137,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
-	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return getBean(requiredType.getSimpleName(), requiredType);
+	}
+
+	@Override
+	public <T> T getBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
 					"SimpleJndiBeanFactory does not support explicit bean creation arguments");
@@ -181,7 +181,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, @Nullable Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
 		Class<?> type = getType(name);
 		return (typeToMatch == null || (type != null && typeToMatch.isAssignableFrom(type)));
 	}
@@ -224,8 +224,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 	private Class<?> doGetType(String name) throws NamingException {
 		if (isSingleton(name)) {
-			Object jndiObject = doGetSingleton(name, null);
-			return (jndiObject != null ? jndiObject.getClass() : null);
+			return doGetSingleton(name, null).getClass();
 		}
 		else {
 			synchronized (this.resourceTypes) {
@@ -233,8 +232,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 					return this.resourceTypes.get(name);
 				}
 				else {
-					Object jndiObject = lookup(name, null);
-					Class<?> type = (jndiObject != null ? jndiObject.getClass() : null);
+					Class<?> type = lookup(name, null).getClass();
 					this.resourceTypes.put(name, type);
 					return type;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class SqlParameter {
 	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 */
-	public SqlParameter(int sqlType, String typeName) {
+	public SqlParameter(int sqlType, @Nullable String typeName) {
 		this.sqlType = sqlType;
 		this.typeName = typeName;
 	}
@@ -93,7 +93,7 @@ public class SqlParameter {
 	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 */
-	public SqlParameter(String name, int sqlType, String typeName) {
+	public SqlParameter(String name, int sqlType, @Nullable String typeName) {
 		this.name = name;
 		this.sqlType = sqlType;
 		this.typeName = typeName;
@@ -180,7 +180,7 @@ public class SqlParameter {
 	 * Convert a list of JDBC types, as defined in {@code java.sql.Types},
 	 * to a List of SqlParameter objects as used in this package.
 	 */
-	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int... types) {
+	public static List<SqlParameter> sqlTypesToAnonymousParameterList(@Nullable int... types) {
 		List<SqlParameter> result = new LinkedList<>();
 		if (types != null) {
 			for (int type : types) {

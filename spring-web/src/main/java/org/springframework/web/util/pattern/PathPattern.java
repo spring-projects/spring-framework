@@ -171,18 +171,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	/**
 	 * For a given path return the remaining piece that is not covered by this PathPattern.
 	 * @param path a path that may or may not match this path pattern
-	 * @return a {@link PathRemainingMatchInfo} describing the match result or null if
-	 * the path does not match this pattern
+	 * @return a {@link PathRemainingMatchInfo} describing the match result,
+	 * or {@code null} if the path does not match this pattern
 	 */
 	@Nullable
 	public PathRemainingMatchInfo getPathRemaining(String path) {
 		if (this.head == null) {
-			if (path == null) {
-				return new PathRemainingMatchInfo(null);
-			}
-			else {
-				return new PathRemainingMatchInfo(hasLength(path) ? path : "");
-			}
+			return new PathRemainingMatchInfo(path);
 		}
 		else if (!hasLength(path)) {
 			return null;
@@ -338,7 +333,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * The aim is to sort more specific patterns first.
 	 */
 	@Override
-	public int compareTo(PathPattern otherPattern) {
+	public int compareTo(@Nullable PathPattern otherPattern) {
 		// 1) null is sorted last
 		if (otherPattern == null) {
 			return -1;
@@ -517,7 +512,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final Map<String, String> matchingVariables;
 
-		PathRemainingMatchInfo(@Nullable String pathRemaining) {
+		PathRemainingMatchInfo(String pathRemaining) {
 			this(pathRemaining, Collections.emptyMap());
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class CurrencyStyleFormatter extends AbstractNumberFormatter {
 	}
 
 	/**
-	 * Sets the pattern to use to format number values.
+	 * Specify the pattern to use to format number values.
 	 * If not specified, the default DecimalFormat pattern is used.
 	 * @see java.text.DecimalFormat#applyPattern(String)
 	 */
@@ -84,13 +84,11 @@ public class CurrencyStyleFormatter extends AbstractNumberFormatter {
 	@Override
 	public BigDecimal parse(String text, Locale locale) throws ParseException {
 		BigDecimal decimal = (BigDecimal) super.parse(text, locale);
-		if (decimal != null) {
-			if (this.roundingMode != null) {
-				decimal = decimal.setScale(this.fractionDigits, this.roundingMode);
-			}
-			else {
-				decimal = decimal.setScale(this.fractionDigits);
-			}
+		if (this.roundingMode != null) {
+			decimal = decimal.setScale(this.fractionDigits, this.roundingMode);
+		}
+		else {
+			decimal = decimal.setScale(this.fractionDigits);
 		}
 		return decimal;
 	}

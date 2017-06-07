@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -317,7 +316,6 @@ public class RequestContext {
 	 * <p>The default implementation returns the default theme (with name "theme").
 	 * @return the fallback theme (never {@code null})
 	 */
-	@Nullable
 	protected Theme getFallbackTheme() {
 		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
 		if (themeSource == null) {
@@ -341,6 +339,7 @@ public class RequestContext {
 	/**
 	 * Return the underlying ServletContext. Only intended for cooperating classes in this package.
 	 */
+	@Nullable
 	protected final ServletContext getServletContext() {
 		return this.webApplicationContext.getServletContext();
 	}
@@ -446,7 +445,7 @@ public class RequestContext {
 	 * @param theme the new theme
 	 * @see ThemeResolver#setThemeName
 	 */
-	public void changeTheme(Theme theme) {
+	public void changeTheme(@Nullable Theme theme) {
 		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
 		if (themeResolver == null) {
 			throw new IllegalStateException("Cannot change theme if no ThemeResolver configured");
@@ -491,6 +490,7 @@ public class RequestContext {
 	 * Return the default HTML escape setting, differentiating between no default specified and an explicit value.
 	 * @return whether default HTML escaping is enabled (null = no explicit default)
 	 */
+	@Nullable
 	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}
@@ -879,10 +879,12 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the model object for the given model name, either from the model or from the request attributes.
+	 * Retrieve the model object for the given model name, either from the model
+	 * or from the request attributes.
 	 * @param modelName the name of the model object
 	 * @return the model object
 	 */
+	@Nullable
 	protected Object getModelObject(String modelName) {
 		if (this.model != null) {
 			return this.model.get(modelName);
@@ -920,7 +922,7 @@ public class RequestContext {
 	 */
 	private static class JstlLocaleResolver {
 
-		public static Locale getJstlLocale(HttpServletRequest request, ServletContext servletContext) {
+		public static Locale getJstlLocale(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object localeObject = Config.get(request, Config.FMT_LOCALE);
 			if (localeObject == null) {
 				HttpSession session = request.getSession(false);
@@ -934,7 +936,7 @@ public class RequestContext {
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
 		}
 
-		public static TimeZone getJstlTimeZone(HttpServletRequest request, ServletContext servletContext) {
+		public static TimeZone getJstlTimeZone(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object timeZoneObject = Config.get(request, Config.FMT_TIME_ZONE);
 			if (timeZoneObject == null) {
 				HttpSession session = request.getSession(false);

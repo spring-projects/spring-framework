@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,8 @@ public class OpMinus extends Operator {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
-		SpelNodeImpl rightOp = getRightOperand();
 
-		if (rightOp == null) {  // if only one operand, then this is unary minus
+		if (this.children.length < 2) {  // if only one operand, then this is unary minus
 			Object operand = leftOp.getValueInternal(state).getValue();
 			if (operand instanceof Number) {
 				if (operand instanceof BigDecimal) {
@@ -96,7 +95,7 @@ public class OpMinus extends Operator {
 		}
 
 		Object left = leftOp.getValueInternal(state).getValue();
-		Object right = rightOp.getValueInternal(state).getValue();
+		Object right = getRightOperand().getValueInternal(state).getValue();
 
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
@@ -146,7 +145,7 @@ public class OpMinus extends Operator {
 
 	@Override
 	public String toStringAST() {
-		if (getRightOperand() == null) {  // unary minus
+		if (this.children.length < 2) {  // unary minus
 			return "-" + getLeftOperand().toStringAST();
 		}
 		return super.toStringAST();
@@ -155,7 +154,7 @@ public class OpMinus extends Operator {
 	@Override
 	public SpelNodeImpl getRightOperand() {
 		if (this.children.length < 2) {
-			return null;
+			throw new IllegalStateException("No right operand");
 		}
 		return this.children[1];
 	}

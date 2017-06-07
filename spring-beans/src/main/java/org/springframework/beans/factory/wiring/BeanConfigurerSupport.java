@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * Typically called by an aspect, for all bean instances matched by a pointcut.
 	 * @param beanInstance the bean instance to configure (must <b>not</b> be {@code null})
 	 */
-	public void configureBean(@Nullable Object beanInstance) {
+	public void configureBean(Object beanInstance) {
 		if (this.beanFactory == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
@@ -137,8 +137,8 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		}
 
 		try {
-			if (bwi.indicatesAutowiring() ||
-					(bwi.isDefaultBeanName() && !this.beanFactory.containsBean(bwi.getBeanName()))) {
+			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && bwi.getBeanName() != null &&
+					!this.beanFactory.containsBean(bwi.getBeanName()))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
 				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
 				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
@@ -168,11 +168,12 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		}
 	}
 
-	private void checkExposedObject(Object exposedObject, Object originalBeanInstance) {
+	private void checkExposedObject(@Nullable Object exposedObject, Object originalBeanInstance) {
 		if (exposedObject != originalBeanInstance) {
 			throw new IllegalStateException("Post-processor tried to replace bean instance of type [" +
 					originalBeanInstance.getClass().getName() + "] with (proxy) object of type [" +
-					exposedObject.getClass().getName() + "] - not supported for aspect-configured classes!");
+					(exposedObject != null ? exposedObject.getClass().getName() : null) +
+					"] - not supported for aspect-configured classes!");
 		}
 	}
 

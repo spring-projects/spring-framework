@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,12 +153,22 @@ public abstract class AbstractJackson2View extends AbstractView {
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
-		Object value = filterAndWrapModel(model, request);
+		ByteArrayOutputStream temporaryStream = null;
+		OutputStream stream;
 
-		writeContent(stream, value);
 		if (this.updateContentLength) {
-			writeToResponse(response, (ByteArrayOutputStream) stream);
+			temporaryStream = createTemporaryOutputStream();
+			stream = temporaryStream;
+		}
+		else {
+			stream = response.getOutputStream();
+		}
+
+		Object value = filterAndWrapModel(model, request);
+		writeContent(stream, value);
+
+		if (temporaryStream != null) {
+			writeToResponse(response, temporaryStream);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Accept} header.
 	 * @return the value of the header
 	 */
+	@Nullable
 	public String getSecWebSocketAccept() {
 		return getFirst(SEC_WEBSOCKET_ACCEPT);
 	}
@@ -141,6 +142,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Key} header.
 	 * @return the value of the header
 	 */
+	@Nullable
 	public String getSecWebSocketKey() {
 		return getFirst(SEC_WEBSOCKET_KEY);
 	}
@@ -150,9 +152,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @param secWebSocketProtocol the value of the header
 	 */
 	public void setSecWebSocketProtocol(String secWebSocketProtocol) {
-		if (secWebSocketProtocol != null) {
-			set(SEC_WEBSOCKET_PROTOCOL, secWebSocketProtocol);
-		}
+		set(SEC_WEBSOCKET_PROTOCOL, secWebSocketProtocol);
 	}
 
 	/**
@@ -192,6 +192,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Version} header.
 	 * @return the value of the header
 	 */
+	@Nullable
 	public String getSecWebSocketVersion() {
 		return getFirst(SEC_WEBSOCKET_VERSION);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
@@ -48,9 +49,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	public final void setServletContext(ServletContext servletContext) {
 		if (servletContext != this.servletContext) {
 			this.servletContext = servletContext;
-			if (servletContext != null) {
-				initServletContext(servletContext);
-			}
+			initServletContext(servletContext);
 		}
 	}
 
@@ -121,18 +120,19 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 	/**
 	 * Return the current ServletContext.
-	 * @throws IllegalStateException if not running within a ServletContext
+	 * @throws IllegalStateException if not running within a required ServletContext
+	 * @see #isContextRequired()
 	 */
 	@Nullable
 	protected final ServletContext getServletContext() throws IllegalStateException {
 		if (this.servletContext != null) {
 			return this.servletContext;
 		}
+		ServletContext servletContext = null;
 		WebApplicationContext wac = getWebApplicationContext();
-		if (wac == null) {
-			return null;
+		if (wac != null) {
+			servletContext = wac.getServletContext();
 		}
-		ServletContext servletContext = wac.getServletContext();
 		if (servletContext == null && isContextRequired()) {
 			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
 					"] does not run within a ServletContext. Make sure the object is fully configured!");
@@ -148,7 +148,9 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @see org.springframework.web.util.WebUtils#getTempDir(javax.servlet.ServletContext)
 	 */
 	protected final File getTempDir() throws IllegalStateException {
-		return WebUtils.getTempDir(getServletContext());
+		ServletContext servletContext = getServletContext();
+		Assert.state(servletContext != null, "ServletContext is required");
+		return WebUtils.getTempDir(servletContext);
 	}
 
 }

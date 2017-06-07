@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.lang.Nullable;
 
 /**
  * Represent a list in an expression, e.g. '{1,2,3}'
@@ -121,6 +122,7 @@ public class InlineList extends SpelNodeImpl {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public List<Object> getConstantValue() {
 		return (List<Object>) this.constant.getValue();
 	}
@@ -174,8 +176,9 @@ public class InlineList extends SpelNodeImpl {
 			}
 			else {
 				children[c].generateCode(mv, codeflow);
-				if (CodeFlow.isPrimitive(codeflow.lastDescriptor())) {
-					CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+				String lastDesc = codeflow.lastDescriptor();
+				if (CodeFlow.isPrimitive(lastDesc)) {
+					CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 				}
 			}
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);

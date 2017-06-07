@@ -63,7 +63,7 @@ public class HandlerResult {
 	 * @param context the binding context used for request handling
 	 */
 	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType,
-			BindingContext context) {
+			@Nullable BindingContext context) {
 
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnType, "'returnType' is required");

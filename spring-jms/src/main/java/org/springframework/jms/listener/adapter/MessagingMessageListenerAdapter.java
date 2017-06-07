@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 
 	@Override
-	public void onMessage(javax.jms.Message jmsMessage, @Nullable Session session) throws JMSException {
+	public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
 		Message<?> message = toMessagingMessage(jmsMessage);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing [" + message + "]");
@@ -100,6 +100,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException}
 	 * with a dedicated error message.
 	 */
+	@Nullable
 	private Object invokeHandler(javax.jms.Message jmsMessage, Session session, Message<?> message) {
 		try {
 			return this.handlerMethod.invoke(message, jmsMessage, session);

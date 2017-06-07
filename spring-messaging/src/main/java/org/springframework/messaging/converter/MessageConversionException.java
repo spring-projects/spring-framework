@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -32,7 +33,7 @@ public class MessageConversionException extends MessagingException {
 		super(description);
 	}
 
-	public MessageConversionException(String description, Throwable cause) {
+	public MessageConversionException(@Nullable String description, @Nullable Throwable cause) {
 		super(description, cause);
 	}
 
@@ -40,7 +41,7 @@ public class MessageConversionException extends MessagingException {
 		super(failedMessage, description);
 	}
 
-	public MessageConversionException(Message<?> failedMessage, String description, Throwable cause) {
+	public MessageConversionException(Message<?> failedMessage, @Nullable String description, @Nullable Throwable cause) {
 		super(failedMessage, description, cause);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -108,7 +109,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		private final HttpHeaders httpHeaders;
 
 		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
-				URI uri, String contextPath, HttpHeaders httpHeaders) {
+				@Nullable URI uri, String contextPath, @Nullable HttpHeaders httpHeaders) {
 
 			super(delegate);
 			this.httpMethod = httpMethod;

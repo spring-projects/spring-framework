@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,7 +244,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectModeName(String constantName) {
-		if (constantName == null || !constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
+		if (!constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
 			throw new IllegalArgumentException("Only autodetect constants allowed");
 		}
 		this.autodetectMode = (Integer) constants.asNumber(constantName);
@@ -316,9 +316,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	public void setExcludedBeans(String... excludedBeans) {
 		this.excludedBeans.clear();
-		if (excludedBeans != null) {
-			this.excludedBeans.addAll(Arrays.asList(excludedBeans));
-		}
+		this.excludedBeans.addAll(Arrays.asList(excludedBeans));
 	}
 
 	/**
@@ -385,7 +383,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -584,7 +582,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #registerLazyInit
 	 */
 	@Nullable
-	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
+	protected ObjectName registerBeanNameOrInstance(@Nullable Object mapValue, String beanKey) throws MBeanExportException {
 		try {
 			if (mapValue instanceof String) {
 				// Bean name pointing to a potentially lazy-init bean in the factory.
@@ -599,11 +597,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				}
 				else {
 					Object bean = this.beanFactory.getBean(beanName);
-					if (bean != null) {
-						ObjectName objectName = registerBeanInstance(bean, beanKey);
-						replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
-						return objectName;
-					}
+					ObjectName objectName = registerBeanInstance(bean, beanKey);
+					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
+					return objectName;
 				}
 			}
 			else if (mapValue != null) {
@@ -622,12 +618,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				}
 				return registerBeanInstance(mapValue, beanKey);
 			}
+			else {
+				return null;
+			}
 		}
 		catch (Throwable ex) {
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
-		return null;
 	}
 
 	/**
@@ -637,8 +635,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @param objectName the {@code ObjectName} under which the bean will be registered
 	 * with the {@code MBeanServer}
 	 */
-	private void replaceNotificationListenerBeanNameKeysIfNecessary(String beanName, ObjectName objectName) {
-		if (this.notificationListeners != null) {
+	private void replaceNotificationListenerBeanNameKeysIfNecessary(String beanName, @Nullable ObjectName objectName) {
+		if (objectName != null && this.notificationListeners != null) {
 			for (NotificationListenerBean notificationListener : this.notificationListeners) {
 				notificationListener.replaceObjectName(beanName, objectName);
 			}
@@ -653,7 +651,12 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @return the {@code ObjectName} under which the bean was registered
 	 * with the {@code MBeanServer}
 	 */
-	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
+	@Nullable
+	private ObjectName registerBeanInstance(@Nullable Object bean, String beanKey) throws JMException {
+		if (bean == null) {
+			return null;
+		}
+
 		ObjectName objectName = getObjectName(bean, beanKey);
 		Object mbeanToExpose = null;
 		if (isMBean(bean.getClass())) {
@@ -665,6 +668,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				mbeanToExpose = adaptedBean;
 			}
 		}
+
 		if (mbeanToExpose != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
@@ -681,6 +685,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			doRegister(mbean, objectName);
 			injectNotificationPublisherIfNecessary(bean, mbean, objectName);
 		}
+
 		return objectName;
 	}
 
@@ -765,7 +770,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
 	 */
-	protected boolean isMBean(Class<?> beanClass) {
+	protected boolean isMBean(@Nullable Class<?> beanClass) {
 		return JmxUtils.isMBean(beanClass);
 	}
 

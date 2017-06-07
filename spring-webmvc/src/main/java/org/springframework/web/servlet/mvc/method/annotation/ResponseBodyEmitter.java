@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,24 +162,22 @@ public class ResponseBodyEmitter {
 		sendInternal(object, mediaType);
 	}
 
-	private void sendInternal(Object object, MediaType mediaType) throws IOException {
-		if (object != null) {
-			if (this.handler != null) {
-				try {
-					this.handler.send(object, mediaType);
-				}
-				catch (IOException ex) {
-					completeWithError(ex);
-					throw ex;
-				}
-				catch (Throwable ex) {
-					completeWithError(ex);
-					throw new IllegalStateException("Failed to send " + object, ex);
-				}
+	private void sendInternal(Object object, @Nullable MediaType mediaType) throws IOException {
+		if (this.handler != null) {
+			try {
+				this.handler.send(object, mediaType);
 			}
-			else {
-				this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
+			catch (IOException ex) {
+				completeWithError(ex);
+				throw ex;
 			}
+			catch (Throwable ex) {
+				completeWithError(ex);
+				throw new IllegalStateException("Failed to send " + object, ex);
+			}
+		}
+		else {
+			this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
 		}
 	}
 
@@ -238,7 +236,7 @@ public class ResponseBodyEmitter {
 	 */
 	interface Handler {
 
-		void send(Object data, MediaType mediaType) throws IOException;
+		void send(Object data, @Nullable MediaType mediaType) throws IOException;
 
 		void complete();
 
@@ -260,7 +258,7 @@ public class ResponseBodyEmitter {
 
 		private final MediaType mediaType;
 
-		public DataWithMediaType(Object data, MediaType mediaType) {
+		public DataWithMediaType(Object data, @Nullable MediaType mediaType) {
 			this.data = data;
 			this.mediaType = mediaType;
 		}
@@ -269,6 +267,7 @@ public class ResponseBodyEmitter {
 			return this.data;
 		}
 
+		@Nullable
 		public MediaType getMediaType() {
 			return this.mediaType;
 		}

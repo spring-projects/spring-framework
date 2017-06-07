@@ -496,13 +496,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void testSetAutodetectModeNameToNull() {
-		MBeanExporter exporter = new MBeanExporter();
-		thrown.expect(IllegalArgumentException.class);
-		exporter.setAutodetectModeName(null);
-	}
-
-	@Test
 	public void testSetAutodetectModeNameToAnEmptyString() {
 		MBeanExporter exporter = new MBeanExporter();
 		thrown.expect(IllegalArgumentException.class);

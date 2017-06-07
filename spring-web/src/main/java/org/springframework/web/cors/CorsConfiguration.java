@@ -108,7 +108,7 @@ public class CorsConfiguration {
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
 	 */
-	public void setAllowedOrigins(List<String> allowedOrigins) {
+	public void setAllowedOrigins(@Nullable List<String> allowedOrigins) {
 		this.allowedOrigins = (allowedOrigins != null ? new ArrayList<>(allowedOrigins) : null);
 	}
 
@@ -139,7 +139,7 @@ public class CorsConfiguration {
 	 * <p>If not set, only {@code "GET"} and {@code "HEAD"} are allowed.
 	 * <p>By default this is not set.
 	 */
-	public void setAllowedMethods(List<String> allowedMethods) {
+	public void setAllowedMethods(@Nullable List<String> allowedMethods) {
 		this.allowedMethods = (allowedMethods != null ? new ArrayList<>(allowedMethods) : null);
 		if (!CollectionUtils.isEmpty(allowedMethods)) {
 			this.resolvedMethods = new ArrayList<>(allowedMethods.size());
@@ -172,9 +172,7 @@ public class CorsConfiguration {
 	 * Add an HTTP method to allow.
 	 */
 	public void addAllowedMethod(HttpMethod method) {
-		if (method != null) {
-			addAllowedMethod(method.name());
-		}
+		addAllowedMethod(method.name());
 	}
 
 	/**
@@ -206,7 +204,7 @@ public class CorsConfiguration {
 	 * {@code Last-Modified}, or {@code Pragma}.
 	 * <p>By default this is not set.
 	 */
-	public void setAllowedHeaders(List<String> allowedHeaders) {
+	public void setAllowedHeaders(@Nullable List<String> allowedHeaders) {
 		this.allowedHeaders = (allowedHeaders != null ? new ArrayList<>(allowedHeaders) : null);
 	}
 
@@ -238,7 +236,7 @@ public class CorsConfiguration {
 	 * <p>Note that {@code "*"} is not a valid exposed header value.
 	 * <p>By default this is not set.
 	 */
-	public void setExposedHeaders(List<String> exposedHeaders) {
+	public void setExposedHeaders(@Nullable List<String> exposedHeaders) {
 		if (exposedHeaders != null && exposedHeaders.contains(ALL)) {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
@@ -351,7 +349,7 @@ public class CorsConfiguration {
 	 * configuration if the supplied configuration is {@code null}
 	 */
 	@Nullable
-	public CorsConfiguration combine(CorsConfiguration other) {
+	public CorsConfiguration combine(@Nullable CorsConfiguration other) {
 		if (other == null) {
 			return this;
 		}
@@ -371,9 +369,9 @@ public class CorsConfiguration {
 		return config;
 	}
 
-	private List<String> combine(List<String> source, List<String> other) {
+	private List<String> combine(@Nullable List<String> source, @Nullable List<String> other) {
 		if (other == null || other.contains(ALL)) {
-			return source;
+			return (source != null ? source : Collections.emptyList());
 		}
 		if (source == null || source.contains(ALL)) {
 			return other;
@@ -390,7 +388,7 @@ public class CorsConfiguration {
 	 * means the request origin is not allowed
 	 */
 	@Nullable
-	public String checkOrigin(String requestOrigin) {
+	public String checkOrigin(@Nullable String requestOrigin) {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
@@ -424,7 +422,7 @@ public class CorsConfiguration {
 	 * request, or {@code null} if the supplied {@code requestMethod} is not allowed
 	 */
 	@Nullable
-	public List<HttpMethod> checkHttpMethod(HttpMethod requestMethod) {
+	public List<HttpMethod> checkHttpMethod(@Nullable HttpMethod requestMethod) {
 		if (requestMethod == null) {
 			return null;
 		}
@@ -443,7 +441,7 @@ public class CorsConfiguration {
 	 * request, or {@code null} if none of the supplied request headers is allowed
 	 */
 	@Nullable
-	public List<String> checkHeaders(List<String> requestHeaders) {
+	public List<String> checkHeaders(@Nullable List<String> requestHeaders) {
 		if (requestHeaders == null) {
 			return null;
 		}

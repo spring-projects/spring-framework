@@ -19,7 +19,6 @@ package org.springframework.core.env;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -57,7 +56,6 @@ import org.springframework.util.ObjectUtils;
  * @see MutablePropertySources
  * @see org.springframework.context.annotation.PropertySource
  */
-@NonNullApi
 public abstract class PropertySource<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());

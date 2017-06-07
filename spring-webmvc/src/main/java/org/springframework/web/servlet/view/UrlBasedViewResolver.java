@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.servlet.View;
@@ -138,9 +139,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see AbstractUrlBasedView
 	 */
 	public void setViewClass(Class<?> viewClass) {
-		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
-			throw new IllegalArgumentException(
-					"Given view class [" + (viewClass != null ? viewClass.getName() : null) +
+		if (!requiredViewClass().isAssignableFrom(viewClass)) {
+			throw new IllegalArgumentException("Given view class [" + viewClass.getName() +
 					"] is not of type [" + requiredViewClass().getName() + "]");
 		}
 		this.viewClass = viewClass;
@@ -149,6 +149,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the view class to be used to create views.
 	 */
+	@Nullable
 	protected Class<?> getViewClass() {
 		return this.viewClass;
 	}
@@ -165,7 +166,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Set the prefix that gets prepended to view names when building a URL.
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
 	}
 
@@ -179,7 +180,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Set the suffix that gets appended to view names when building a URL.
 	 */
-	public void setSuffix(String suffix) {
+	public void setSuffix(@Nullable String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
@@ -318,7 +319,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @param attributes Map with name Strings as keys and attribute objects as values
 	 * @see AbstractView#setAttributesMap
 	 */
-	public void setAttributesMap(Map<String, ?> attributes) {
+	public void setAttributesMap(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			this.staticAttributes.putAll(attributes);
 		}
@@ -354,6 +355,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return whether views resolved by this resolver should add path variables to the model or not.
 	 */
+	@Nullable
 	protected Boolean getExposePathVariables() {
 		return this.exposePathVariables;
 	}
@@ -371,6 +373,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
 	}
 
+	@Nullable
 	protected Boolean getExposeContextBeansAsAttributes() {
 		return this.exposeContextBeansAsAttributes;
 	}
@@ -385,6 +388,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		this.exposedContextBeanNames = exposedContextBeanNames;
 	}
 
+	@Nullable
 	protected String[] getExposedContextBeanNames() {
 		return this.exposedContextBeanNames;
 	}
@@ -404,6 +408,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the view names (or name patterns) that can be handled by this
 	 * {@link org.springframework.web.servlet.ViewResolver}.
 	 */
+	@Nullable
 	protected String[] getViewNames() {
 		return this.viewNames;
 	}
@@ -512,7 +517,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	private View applyLifecycleMethods(String viewName, AbstractView view) {
-		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		ApplicationContext context = getApplicationContext();
+		if (context != null) {
+			return (View) context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		}
+		else {
+			return view;
+		}
 	}
 
 	/**
@@ -530,7 +541,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
+		Class<?> viewClass = getViewClass();
+		Assert.state(viewClass != null, "No view class");
+
+		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
 		view.setUrl(getPrefix() + viewName + getSuffix());
 
 		String contentType = getContentType();

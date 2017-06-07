@@ -32,6 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.SynchronousSink;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -122,7 +123,7 @@ public abstract class DataBufferUtils {
 		});
 	}
 
-	private static void closeChannel(Channel channel) {
+	private static void closeChannel(@Nullable Channel channel) {
 		try {
 			if (channel != null) {
 				channel.close();

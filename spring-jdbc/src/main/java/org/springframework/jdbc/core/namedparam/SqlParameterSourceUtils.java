@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.lang.Nullable;
 
 /**
  * Class that provides helper methods for the use of {@link SqlParameterSource}
@@ -66,6 +67,7 @@ public class SqlParameterSourceUtils {
 	 * @param parameterName the name of the parameter
 	 * @return the value object
 	 */
+	@Nullable
 	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
 		int sqlType = source.getSqlType(parameterName);
 		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
@@ -90,8 +92,7 @@ public class SqlParameterSourceUtils {
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<>();
 		if (parameterSource instanceof BeanPropertySqlParameterSource) {
 			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
-			for (int i = 0; i < propertyNames.length; i++) {
-				String name = propertyNames[i];
+			for (String name : propertyNames) {
 				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
 			}
 		}

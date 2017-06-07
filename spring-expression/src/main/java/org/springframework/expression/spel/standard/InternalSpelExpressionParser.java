@@ -156,7 +156,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				SpelNodeImpl assignedValue = eatLogicalOrExpression();
 				return new Assign(toPos(t), expr, assignedValue);
 			}
-
 			if (t.kind == TokenKind.ELVIS) {  // a?:b (a if it isn't null, otherwise b)
 				if (expr == null) {
 					expr = new NullLiteral(toPos(t.startPos - 1, t.endPos - 2));
@@ -168,7 +167,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				}
 				return new Elvis(toPos(t), expr, valueIfNull);
 			}
-
 			if (t.kind == TokenKind.QMARK) {  // a?b:c
 				if (expr == null) {
 					expr = new NullLiteral(toPos(t.startPos - 1, t.endPos - 1));
@@ -256,9 +254,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private SpelNodeImpl eatSumExpression() {
 		SpelNodeImpl expr = eatProductExpression();
 		while (peekToken(TokenKind.PLUS, TokenKind.MINUS, TokenKind.INC)) {
-			Token t = nextToken();//consume PLUS or MINUS or INC
+			Token t = nextToken();  //consume PLUS or MINUS or INC
 			SpelNodeImpl rhExpr = eatProductExpression();
-			checkRightOperand(t,rhExpr);
+			checkRightOperand(t, rhExpr);
 			if (t.kind == TokenKind.PLUS) {
 				expr = new OpPlus(toPos(t), expr, rhExpr);
 			}
@@ -296,10 +294,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (peekToken(TokenKind.POWER)) {
 			Token t = nextToken();  //consume POWER
 			SpelNodeImpl rhExpr = eatUnaryExpression();
-			checkRightOperand(t,rhExpr);
+			checkRightOperand(t, rhExpr);
 			return new OperatorPower(toPos(t), expr, rhExpr);
 		}
-
 		if (expr != null && peekToken(TokenKind.INC, TokenKind.DEC)) {
 			Token t = nextToken();  //consume INC/DEC
 			if (t.getKind() == TokenKind.INC) {
@@ -307,7 +304,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			}
 			return new OpDec(toPos(t), true, expr);
 		}
-
 		return expr;
 	}
 
@@ -481,7 +477,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 	}
 
-	private int positionOf(Token t) {
+	private int positionOf(@Nullable Token t) {
 		if (t == null) {
 			// if null assume the problem is because the right token was
 			// not found at the end of the expression
@@ -743,7 +739,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 	}
 
-	private boolean isValidQualifiedId(Token node) {
+	private boolean isValidQualifiedId(@Nullable Token node) {
 		if (node == null || node.kind == TokenKind.LITERAL_STRING) {
 			return false;
 		}
@@ -1026,13 +1022,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		checkRightOperand(token, right);
 	}
 
-	private void checkLeftOperand(Token token, SpelNodeImpl operandExpression) {
+	private void checkLeftOperand(Token token, @Nullable SpelNodeImpl operandExpression) {
 		if (operandExpression == null) {
 			raiseInternalException(token.startPos, SpelMessage.LEFT_OPERAND_PROBLEM);
 		}
 	}
 
-	private void checkRightOperand(Token token, SpelNodeImpl operandExpression) {
+	private void checkRightOperand(Token token, @Nullable SpelNodeImpl operandExpression) {
 		if (operandExpression == null) {
 			raiseInternalException(token.startPos, SpelMessage.RIGHT_OPERAND_PROBLEM);
 		}
@@ -1043,7 +1039,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return (t.startPos<<16) + t.endPos;
 	}
 
-	private int toPos(int start,int end) {
+	private int toPos(int start, int end) {
 		return (start<<16) + end;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -62,25 +63,23 @@ public class ReflectionHelper {
 		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
-			if (!expectedArg.equals(suppliedArg)) {
-				// The user may supply null - and that will be ok unless a primitive is expected
-				if (suppliedArg == null) {
-					if (expectedArg.isPrimitive()) {
-						match = null;
+			// The user may supply null - and that will be ok unless a primitive is expected
+			if (suppliedArg == null) {
+				if (expectedArg.isPrimitive()) {
+					match = null;
+				}
+			}
+			else if (!expectedArg.equals(suppliedArg))  {
+				if (suppliedArg.isAssignableTo(expectedArg)) {
+					if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
+						match = ArgumentsMatchKind.CLOSE;
 					}
 				}
+				else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
+					match = ArgumentsMatchKind.REQUIRES_CONVERSION;
+				}
 				else {
-					if (suppliedArg.isAssignableTo(expectedArg)) {
-						if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
-							match = ArgumentsMatchKind.CLOSE;
-						}
-					}
-					else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
-						match = ArgumentsMatchKind.REQUIRES_CONVERSION;
-					}
-					else {
-						match = null;
-					}
+					match = null;
 				}
 			}
 		}
@@ -145,8 +144,8 @@ public class ReflectionHelper {
 	static ArgumentsMatchInfo compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
-		Assert.isTrue(expectedArgTypes != null && expectedArgTypes.size() > 0,
-				"Expected arguments must at least include one array (the vargargs parameter)");
+		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),
+				"Expected arguments must at least include one array (the varargs parameter)");
 		Assert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),
 				"Final expected argument should be array type (the varargs parameter)");
 
@@ -196,7 +195,9 @@ public class ReflectionHelper {
 			// Now... we have the final argument in the method we are checking as a match and we have 0
 			// or more other arguments left to pass to it.
 			TypeDescriptor varargsDesc = expectedArgTypes.get(expectedArgTypes.size() - 1);
-			Class<?> varargsParamType = varargsDesc.getElementTypeDescriptor().getType();
+			TypeDescriptor elementDesc = varargsDesc.getElementTypeDescriptor();
+			Assert.state(elementDesc != null, "No element type");
+			Class<?> varargsParamType = elementDesc.getType();
 
 			// All remaining parameters must be of this type or convertible to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
@@ -300,6 +301,7 @@ public class ReflectionHelper {
 			else {
 				// Convert remaining arguments to the varargs element type
 				TypeDescriptor targetType = new TypeDescriptor(methodParam).getElementTypeDescriptor();
+				Assert.state(targetType != null, "No element type");
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
 					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
@@ -316,7 +318,7 @@ public class ReflectionHelper {
 	 * @param possibleArray an array object that may have the supplied value as the first element
 	 * @return true if the supplied value is the first entry in the array
 	 */
-	private static boolean isFirstEntryInArray(Object value, Object possibleArray) {
+	private static boolean isFirstEntryInArray(Object value, @Nullable Object possibleArray) {
 		if (possibleArray == null) {
 			return false;
 		}

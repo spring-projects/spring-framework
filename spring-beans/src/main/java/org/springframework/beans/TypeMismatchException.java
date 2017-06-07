@@ -56,7 +56,9 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
+	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, @Nullable Class<?> requiredType,
+			@Nullable Throwable cause) {
+
 		super(propertyChangeEvent,
 				"Failed to convert property value of type '" +
 				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +

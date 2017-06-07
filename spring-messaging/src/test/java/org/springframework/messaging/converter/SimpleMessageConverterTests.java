@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,8 @@ import static org.junit.Assert.*;
  */
 public class SimpleMessageConverterTests {
 
-	private SimpleMessageConverter converter;
+	private final SimpleMessageConverter converter = new SimpleMessageConverter();
 
-	@Before
-	public void setup() {
-		this.converter = new SimpleMessageConverter();
-	}
-
-	@Test
-	public void toMessageWithNullPayload() {
-		assertNull(this.converter.toMessage(null, null));
-	}
 
 	@Test
 	public void toMessageWithPayloadAndHeaders() {

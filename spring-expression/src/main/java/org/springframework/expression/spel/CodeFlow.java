@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ public class CodeFlow implements Opcodes {
 	 * @param mv the visitor into which new instructions should be inserted
 	 */
 	public void unboxBooleanIfNecessary(MethodVisitor mv) {
-		if (lastDescriptor().equals("Ljava/lang/Boolean")) {
+		if ("Ljava/lang/Boolean".equals(lastDescriptor())) {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
 		}
 	}
@@ -524,7 +524,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor type descriptor
 	 * @return {@code true} if the descriptor is for a boolean primitive or boolean reference type
 	 */
-	public static boolean isBooleanCompatible(String descriptor) {
+	public static boolean isBooleanCompatible(@Nullable String descriptor) {
 		return (descriptor != null && (descriptor.equals("Z") || descriptor.equals("Ljava/lang/Boolean")));
 	}
 
@@ -532,7 +532,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor type descriptor
 	 * @return {@code true} if the descriptor is for a primitive type
 	 */
-	public static boolean isPrimitive(String descriptor) {
+	public static boolean isPrimitive(@Nullable String descriptor) {
 		return (descriptor != null && descriptor.length() == 1);
 	}
 
@@ -606,7 +606,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor the descriptor for a type
 	 * @return {@code true} if the descriptor is for a supported numeric type or boolean
 	 */
-	public static boolean isPrimitiveOrUnboxableSupportedNumberOrBoolean(String descriptor) {
+	public static boolean isPrimitiveOrUnboxableSupportedNumberOrBoolean(@Nullable String descriptor) {
 		if (descriptor == null) {
 			return false;
 		}
@@ -623,7 +623,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor the descriptor for a type
 	 * @return {@code true} if the descriptor is for a supported numeric type
 	 */
-	public static boolean isPrimitiveOrUnboxableSupportedNumber(String descriptor) {
+	public static boolean isPrimitiveOrUnboxableSupportedNumber(@Nullable String descriptor) {
 		if (descriptor == null) {
 			return false;
 		}
@@ -716,8 +716,8 @@ public class CodeFlow implements Opcodes {
 	 * @param mv the target visitor for the new instructions
 	 * @param descriptor the descriptor of a type that may or may not need boxing
 	 */
-	public static void insertBoxIfNecessary(MethodVisitor mv, String descriptor) {
-		if (descriptor.length() == 1) {
+	public static void insertBoxIfNecessary(MethodVisitor mv, @Nullable String descriptor) {
+		if (descriptor != null && descriptor.length() == 1) {
 			insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 	}

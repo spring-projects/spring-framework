@@ -43,7 +43,9 @@ public class ConversionFailedException extends ConversionException {
 	 * @param value the value we tried to convert
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, @Nullable Object value, Throwable cause) {
+	public ConversionFailedException(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType,
+			@Nullable Object value, Throwable cause) {
+
 		super("Failed to convert from type [" + sourceType + "] to type [" + targetType +
 				"] for value '" + ObjectUtils.nullSafeToString(value) + "'", cause);
 		this.sourceType = sourceType;

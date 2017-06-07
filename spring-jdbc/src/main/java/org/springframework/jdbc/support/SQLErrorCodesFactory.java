@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.support;
 
 import java.util.Collections;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -211,16 +210,16 @@ public class SQLErrorCodesFactory {
 				if (sec == null) {
 					// We could not find it - got to look it up.
 					try {
-						String name = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+						String name = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
 						if (name != null) {
 							return registerDatabase(dataSource, name);
 						}
 					}
 					catch (MetaDataAccessException ex) {
 						logger.warn("Error while extracting database name - falling back to empty error codes", ex);
-						// Fallback is to return an empty SQLErrorCodes instance.
-						return new SQLErrorCodes();
 					}
+					// Fallback is to return an empty SQLErrorCodes instance.
+					return new SQLErrorCodes();
 				}
 			}
 		}

@@ -425,7 +425,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
 	 */
-	public boolean includes(MediaType other) {
+	public boolean includes(@Nullable MediaType other) {
 		return super.includes(other);
 	}
 
@@ -436,7 +436,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
 	 */
-	public boolean isCompatibleWith(MediaType other) {
+	public boolean isCompatibleWith(@Nullable MediaType other) {
 		return super.isCompatibleWith(other);
 	}
 
@@ -529,7 +529,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 * @since 4.3.2
 	 */
-	public static List<MediaType> parseMediaTypes(List<String> mediaTypes) {
+	public static List<MediaType> parseMediaTypes(@Nullable List<String> mediaTypes) {
 		if (CollectionUtils.isEmpty(mediaTypes)) {
 			return Collections.emptyList();
 		}

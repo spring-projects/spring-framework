@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -129,9 +130,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 					logger.trace("Getting bean with name '" + this.targetBeanName + "' in order to determine type");
 				}
 				Object beanInstance = this.beanFactory.getBean(this.targetBeanName);
-				if (beanInstance != null) {
-					this.targetClass = beanInstance.getClass();
-				}
+				this.targetClass = beanInstance.getClass();
 			}
 		}
 		return this.targetClass;

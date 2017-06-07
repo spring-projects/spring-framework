@@ -124,9 +124,6 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 	@Nullable
 	private String extractFilename(String contentDisposition, String key) {
-		if (contentDisposition == null) {
-			return null;
-		}
 		int startIndex = contentDisposition.indexOf(key);
 		if (startIndex == -1) {
 			return null;
@@ -147,6 +144,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		return filename;
 	}
 
+	@Nullable
 	private String extractFilename(String contentDisposition) {
 		return extractFilename(contentDisposition, FILENAME_KEY);
 	}

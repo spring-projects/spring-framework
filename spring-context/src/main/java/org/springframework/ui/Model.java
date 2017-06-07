@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public interface Model {
 	 * than for empty collections as is already done by JSTL tags.</emphasis>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
-	Model addAttribute(@Nullable Object attributeValue);
+	Model addAttribute(Object attributeValue);
 
 	/**
 	 * Copy all attributes in the supplied {@code Collection} into this

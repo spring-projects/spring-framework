@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Interface to be implemented by
@@ -34,7 +33,6 @@ import org.springframework.lang.NonNullApi;
  * @see LoadTimeWeavingConfiguration
  * @see EnableLoadTimeWeaving
  */
-@NonNullApi
 public interface LoadTimeWeavingConfigurer {
 
 	/**

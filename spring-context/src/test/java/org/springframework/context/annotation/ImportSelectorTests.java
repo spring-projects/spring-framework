@@ -113,7 +113,7 @@ public class ImportSelectorTests {
 		static Environment environment;
 
 		@Override
-		public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+		public void setBeanClassLoader(ClassLoader classLoader) {
 			SampleRegistrar.classLoader = classLoader;
 		}
 

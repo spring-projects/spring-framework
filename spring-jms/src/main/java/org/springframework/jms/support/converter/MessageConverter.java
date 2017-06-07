@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.jms.support.converter;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface that specifies a converter between Java objects and JMS messages.
@@ -56,7 +54,6 @@ public interface MessageConverter {
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 */
-	@Nullable
 	Object fromMessage(Message message) throws JMSException, MessageConversionException;
 
 }

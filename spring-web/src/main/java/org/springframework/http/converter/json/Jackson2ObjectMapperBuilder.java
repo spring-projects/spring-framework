@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,9 +276,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
-		if (mixinSource != null) {
-			this.mixIns.put(target, mixinSource);
-		}
+		this.mixIns.put(target, mixinSource);
 		return this;
 	}
 
@@ -291,9 +289,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIns(Map<Class<?>, Class<?>> mixIns) {
-		if (mixIns != null) {
-			this.mixIns.putAll(mixIns);
-		}
+		this.mixIns.putAll(mixIns);
 		return this;
 	}
 
@@ -303,14 +299,12 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see #serializersByType(Map)
 	 */
 	public Jackson2ObjectMapperBuilder serializers(JsonSerializer<?>... serializers) {
-		if (serializers != null) {
-			for (JsonSerializer<?> serializer : serializers) {
-				Class<?> handledType = serializer.handledType();
-				if (handledType == null || handledType == Object.class) {
-					throw new IllegalArgumentException("Unknown handled type in " + serializer.getClass().getName());
-				}
-				this.serializers.put(serializer.handledType(), serializer);
+		for (JsonSerializer<?> serializer : serializers) {
+			Class<?> handledType = serializer.handledType();
+			if (handledType == null || handledType == Object.class) {
+				throw new IllegalArgumentException("Unknown handled type in " + serializer.getClass().getName());
 			}
+			this.serializers.put(serializer.handledType(), serializer);
 		}
 		return this;
 	}
@@ -321,9 +315,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @since 4.1.2
 	 */
 	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
-		if (serializer != null) {
-			this.serializers.put(type, serializer);
-		}
+		this.serializers.put(type, serializer);
 		return this;
 	}
 
@@ -332,9 +324,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see #serializers(JsonSerializer...)
 	 */
 	public Jackson2ObjectMapperBuilder serializersByType(Map<Class<?>, JsonSerializer<?>> serializers) {
-		if (serializers != null) {
-			this.serializers.putAll(serializers);
-		}
+		this.serializers.putAll(serializers);
 		return this;
 	}
 
@@ -345,14 +335,12 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see #deserializersByType(Map)
 	 */
 	public Jackson2ObjectMapperBuilder deserializers(JsonDeserializer<?>... deserializers) {
-		if (deserializers != null) {
-			for (JsonDeserializer<?> deserializer : deserializers) {
-				Class<?> handledType = deserializer.handledType();
-				if (handledType == null || handledType == Object.class) {
-					throw new IllegalArgumentException("Unknown handled type in " + deserializer.getClass().getName());
-				}
-				this.deserializers.put(deserializer.handledType(), deserializer);
+		for (JsonDeserializer<?> deserializer : deserializers) {
+			Class<?> handledType = deserializer.handledType();
+			if (handledType == null || handledType == Object.class) {
+				throw new IllegalArgumentException("Unknown handled type in " + deserializer.getClass().getName());
 			}
+			this.deserializers.put(deserializer.handledType(), deserializer);
 		}
 		return this;
 	}
@@ -362,9 +350,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @since 4.1.2
 	 */
 	public Jackson2ObjectMapperBuilder deserializerByType(Class<?> type, JsonDeserializer<?> deserializer) {
-		if (deserializer != null) {
-			this.deserializers.put(type, deserializer);
-		}
+		this.deserializers.put(type, deserializer);
 		return this;
 	}
 
@@ -372,9 +358,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * Configure custom deserializers for the given types.
 	 */
 	public Jackson2ObjectMapperBuilder deserializersByType(Map<Class<?>, JsonDeserializer<?>> deserializers) {
-		if (deserializers != null) {
-			this.deserializers.putAll(deserializers);
-		}
+		this.deserializers.putAll(deserializers);
 		return this;
 	}
 
@@ -449,10 +433,8 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.MapperFeature
 	 */
 	public Jackson2ObjectMapperBuilder featuresToEnable(Object... featuresToEnable) {
-		if (featuresToEnable != null) {
-			for (Object feature : featuresToEnable) {
-				this.features.put(feature, Boolean.TRUE);
-			}
+		for (Object feature : featuresToEnable) {
+			this.features.put(feature, Boolean.TRUE);
 		}
 		return this;
 	}
@@ -466,10 +448,8 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.MapperFeature
 	 */
 	public Jackson2ObjectMapperBuilder featuresToDisable(Object... featuresToDisable) {
-		if (featuresToDisable != null) {
-			for (Object feature : featuresToDisable) {
-				this.features.put(feature, Boolean.FALSE);
-			}
+		for (Object feature : featuresToDisable) {
+			this.features.put(feature, Boolean.FALSE);
 		}
 		return this;
 	}

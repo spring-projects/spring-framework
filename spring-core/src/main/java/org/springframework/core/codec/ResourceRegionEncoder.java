@@ -77,7 +77,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
@@ -93,7 +94,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 			final String boundaryString = (String) hints.get(BOUNDARY_STRING_HINT);
 
 			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
-			byte[] contentType = getAsciiBytes("Content-Type: " + mimeType.toString() + "\r\n");
+			byte[] contentType =
+					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
 
 			Flux<DataBuffer> regions = Flux.from(inputStream).
 					concatMap(region ->

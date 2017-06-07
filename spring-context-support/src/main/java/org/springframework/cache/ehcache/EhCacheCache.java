@@ -64,7 +64,7 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
-	public ValueWrapper get(@Nullable Object key) {
+	public ValueWrapper get(Object key) {
 		Element element = lookup(key);
 		return toValueWrapper(element);
 	}
@@ -72,7 +72,7 @@ public class EhCacheCache implements Cache {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
+	public <T> T get(Object key, Callable<T> valueLoader) {
 		Element element = lookup(key);
 		if (element != null) {
 			return (T) element.getObjectValue();
@@ -110,7 +110,7 @@ public class EhCacheCache implements Cache {
 	@Override
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T> T get(@Nullable Object key, Class<T> type) {
+	public <T> T get(Object key, @Nullable Class<T> type) {
 		Element element = this.cache.get(key);
 		Object value = (element != null ? element.getObjectValue() : null);
 		if (value != null && type != null && !type.isInstance(value)) {
@@ -120,18 +120,18 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
-	public void put(@Nullable Object key, @Nullable Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(new Element(key, value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
 		return toValueWrapper(existingElement);
 	}
 
 	@Override
-	public void evict(@Nullable Object key) {
+	public void evict(Object key) {
 		this.cache.remove(key);
 	}
 
@@ -141,11 +141,13 @@ public class EhCacheCache implements Cache {
 	}
 
 
+	@Nullable
 	private Element lookup(Object key) {
 		return this.cache.get(key);
 	}
 
-	private ValueWrapper toValueWrapper(Element element) {
+	@Nullable
+	private ValueWrapper toValueWrapper(@Nullable Element element) {
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 

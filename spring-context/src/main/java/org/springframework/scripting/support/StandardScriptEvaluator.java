@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,14 +102,14 @@ public class StandardScriptEvaluator implements ScriptEvaluator, BeanClassLoader
 	 * @see javax.script.ScriptEngineManager#setBindings(Bindings)
 	 * @see javax.script.SimpleBindings
 	 */
-	public void setGlobalBindings(Map<String, Object> globalBindings) {
+	public void setGlobalBindings(@Nullable Map<String, Object> globalBindings) {
 		if (globalBindings != null) {
 			this.scriptEngineManager.setBindings(StandardScriptUtils.getBindings(globalBindings));
 		}
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (this.scriptEngineManager == null) {
 			this.scriptEngineManager = new ScriptEngineManager(classLoader);
 		}

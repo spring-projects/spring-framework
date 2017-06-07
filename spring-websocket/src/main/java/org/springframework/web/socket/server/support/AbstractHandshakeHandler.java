@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -343,15 +343,13 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 */
 	@Nullable
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
-		if (requestedProtocols != null) {
-			List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
-			for (String protocol : requestedProtocols) {
-				if (handlerProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
-				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
+		List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
+		for (String protocol : requestedProtocols) {
+			if (handlerProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
+			}
+			if (this.supportedProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
 			}
 		}
 		return null;

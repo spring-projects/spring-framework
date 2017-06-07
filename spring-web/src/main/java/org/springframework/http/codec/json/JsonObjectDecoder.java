@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,9 +147,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 						if (this.openBraces == 0) {
 							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
 									this.index + 1 - this.input.readerIndex());
-							if (json != null) {
-								chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
-							}
+							chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
 
 							// The JSON object/array was extracted => discard the bytes from
 							// the input buffer.
@@ -174,16 +172,12 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 							int idxNoSpaces = this.index - 1;
 							while (idxNoSpaces >= this.input.readerIndex() &&
 									Character.isWhitespace(this.input.getByte(idxNoSpaces))) {
-
 								idxNoSpaces--;
 							}
 
 							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
 									idxNoSpaces + 1 - this.input.readerIndex());
-
-							if (json != null) {
-								chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
-							}
+							chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
 
 							this.input.readerIndex(this.index + 1);
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
@@ -30,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
@@ -85,8 +87,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 
 	@SuppressWarnings("unchecked")
-	protected Mono<Void> writeBody(Object body, MethodParameter bodyParameter, ServerWebExchange exchange) {
-
+	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter, ServerWebExchange exchange) {
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
 		Class<?> bodyClass = bodyType.resolve();
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyClass, body);

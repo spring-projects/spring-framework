@@ -152,6 +152,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * Resolve the given annotation-specified value,
 	 * potentially containing placeholders and expressions.
 	 */
+	@Nullable
 	private Object resolveStringValue(String value) {
 		if (this.configurableBeanFactory == null) {
 			return value;
@@ -177,7 +178,8 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	/**
 	 * Apply type conversion if necessary.
 	 */
-	private Object applyConversion(Object value, NamedValueInfo namedValueInfo, MethodParameter parameter,
+	@Nullable
+	private Object applyConversion(@Nullable Object value, NamedValueInfo namedValueInfo, MethodParameter parameter,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		WebDataBinder binder = bindingContext.createDataBinder(exchange, namedValueInfo.name);
@@ -249,6 +251,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or
 	 * an exception for other primitives.
 	 */
+	@Nullable
 	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
@@ -274,7 +277,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 */
 	@SuppressWarnings("UnusedParameters")
 	protected void handleResolvedValue(
-			Object arg, String name, MethodParameter parameter, Model model, ServerWebExchange exchange) {
+			@Nullable Object arg, String name, MethodParameter parameter, Model model, ServerWebExchange exchange) {
 	}
 
 
@@ -290,7 +293,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		private final String defaultValue;
 
-		public NamedValueInfo(String name, boolean required, String defaultValue) {
+		public NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {
 			this.name = name;
 			this.required = required;
 			this.defaultValue = defaultValue;

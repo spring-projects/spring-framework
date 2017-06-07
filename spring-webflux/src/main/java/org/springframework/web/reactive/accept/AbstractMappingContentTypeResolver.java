@@ -53,7 +53,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	/**
 	 * Create an instance with the given map of file extensions and media types.
 	 */
-	public AbstractMappingContentTypeResolver(Map<String, MediaType> mediaTypes) {
+	public AbstractMappingContentTypeResolver(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
 			for (Map.Entry<String, MediaType> entry : mediaTypes.entrySet()) {
 				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
@@ -90,11 +90,8 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	// RequestedContentTypeResolver implementation
 
 	@Override
-	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange)
-			throws NotAcceptableStatusException {
-
-		String key = extractKey(exchange);
-		return resolveMediaTypes(key);
+	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
+		return resolveMediaTypes(extractKey(exchange));
 	}
 
 	/**
@@ -103,7 +100,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * @return a list of resolved media types or an empty list
 	 * @throws NotAcceptableStatusException
 	 */
-	public List<MediaType> resolveMediaTypes(String key) throws NotAcceptableStatusException {
+	public List<MediaType> resolveMediaTypes(@Nullable String key) throws NotAcceptableStatusException {
 		if (StringUtils.hasText(key)) {
 			MediaType mediaType = getMediaType(key);
 			if (mediaType != null) {

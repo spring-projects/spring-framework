@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -48,9 +49,7 @@ public class EscapedErrors implements Errors {
 	 * Create a new EscapedErrors instance for the given source instance.
 	 */
 	public EscapedErrors(Errors source) {
-		if (source == null) {
-			throw new IllegalArgumentException("Cannot wrap a null instance");
-		}
+		Assert.notNull(source, "Errors source must not be null");
 		this.source = source;
 	}
 
@@ -65,7 +64,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void setNestedPath(@Nullable String nestedPath) {
+	public void setNestedPath(String nestedPath) {
 		this.source.setNestedPath(nestedPath);
 	}
 
@@ -203,14 +202,19 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public Class<?> getFieldType(@Nullable String field) {
+	public Class<?> getFieldType(String field) {
 		return this.source.getFieldType(field);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends ObjectError> T escapeObjectError(T source) {
+	@Nullable
+	private <T extends ObjectError> T escapeObjectError(@Nullable T source) {
 		if (source == null) {
 			return null;
+		}
+		String defaultMessage = source.getDefaultMessage();
+		if (defaultMessage != null) {
+			defaultMessage = HtmlUtils.htmlEscape(defaultMessage);
 		}
 		if (source instanceof FieldError) {
 			FieldError fieldError = (FieldError) source;
@@ -219,14 +223,12 @@ public class EscapedErrors implements Errors {
 				value = HtmlUtils.htmlEscape((String) value);
 			}
 			return (T) new FieldError(
-					fieldError.getObjectName(), fieldError.getField(), value,
-					fieldError.isBindingFailure(), fieldError.getCodes(),
-					fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+					fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
+					fieldError.getCodes(), fieldError.getArguments(), defaultMessage);
 		}
 		else {
 			return (T) new ObjectError(
-					source.getObjectName(), source.getCodes(), source.getArguments(),
-					HtmlUtils.htmlEscape(source.getDefaultMessage()));
+					source.getObjectName(), source.getCodes(), source.getArguments(), defaultMessage);
 		}
 	}
 

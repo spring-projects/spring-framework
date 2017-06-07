@@ -26,7 +26,6 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Parser for the &lt;context:annotation-config/&gt; element.
@@ -37,7 +36,6 @@ import org.springframework.lang.NonNullApi;
  * @since 2.5
  * @see AnnotationConfigUtils
  */
-@NonNullApi
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,53 +52,53 @@ public class ReaderContext {
 	}
 
 
-	public void fatal(String message, Object source) {
+	public void fatal(String message, @Nullable Object source) {
 		fatal(message, source, null, null);
 	}
 
-	public void fatal(String message, Object source, Throwable ex) {
-		fatal(message, source, null, ex);
+	public void fatal(String message, @Nullable Object source, @Nullable Throwable cause) {
+		fatal(message, source, null, cause);
 	}
 
-	public void fatal(String message, Object source, @Nullable ParseState parseState) {
+	public void fatal(String message, @Nullable Object source, @Nullable ParseState parseState) {
 		fatal(message, source, parseState, null);
 	}
 
-	public void fatal(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
+	public void fatal(String message, @Nullable Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.fatal(new Problem(message, location, parseState, cause));
 	}
 
-	public void error(String message, Object source) {
+	public void error(String message, @Nullable Object source) {
 		error(message, source, null, null);
 	}
 
-	public void error(String message, Object source, @Nullable Throwable ex) {
-		error(message, source, null, ex);
+	public void error(String message, @Nullable Object source, @Nullable Throwable cause) {
+		error(message, source, null, cause);
 	}
 
-	public void error(String message, Object source, @Nullable ParseState parseState) {
+	public void error(String message, @Nullable Object source, @Nullable ParseState parseState) {
 		error(message, source, parseState, null);
 	}
 
-	public void error(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
+	public void error(String message, @Nullable Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.error(new Problem(message, location, parseState, cause));
 	}
 
-	public void warning(String message, Object source) {
+	public void warning(String message, @Nullable Object source) {
 		warning(message, source, null, null);
 	}
 
-	public void warning(String message, Object source, @Nullable Throwable ex) {
-		warning(message, source, null, ex);
+	public void warning(String message, @Nullable Object source, @Nullable Throwable cause) {
+		warning(message, source, null, cause);
 	}
 
-	public void warning(String message, Object source, @Nullable ParseState parseState) {
+	public void warning(String message, @Nullable Object source, @Nullable ParseState parseState) {
 		warning(message, source, parseState, null);
 	}
 
-	public void warning(String message, Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
+	public void warning(String message, @Nullable Object source, @Nullable ParseState parseState, @Nullable Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.warning(new Problem(message, location, parseState, cause));
 	}
@@ -112,15 +112,15 @@ public class ReaderContext {
 		this.eventListener.componentRegistered(componentDefinition);
 	}
 
-	public void fireAliasRegistered(String beanName, String alias, Object source) {
+	public void fireAliasRegistered(String beanName, String alias, @Nullable Object source) {
 		this.eventListener.aliasRegistered(new AliasDefinition(beanName, alias, source));
 	}
 
-	public void fireImportProcessed(String importedResource, Object source) {
+	public void fireImportProcessed(String importedResource, @Nullable Object source) {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
-	public void fireImportProcessed(String importedResource, Resource[] actualResources, Object source) {
+	public void fireImportProcessed(String importedResource, Resource[] actualResources, @Nullable Object source) {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, actualResources, source));
 	}
 
@@ -129,6 +129,7 @@ public class ReaderContext {
 		return this.sourceExtractor;
 	}
 
+	@Nullable
 	public Object extractSource(Object sourceCandidate) {
 		return this.sourceExtractor.extractSource(sourceCandidate, this.resource);
 	}

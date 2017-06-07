@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -34,7 +33,6 @@ import org.springframework.lang.Nullable;
  * @since 3.1
  * @see SimpleCommandLineArgsParser
  */
-@NonNullApi
 class CommandLineArgs {
 
 	private final Map<String, List<String>> optionArgs = new HashMap<>();

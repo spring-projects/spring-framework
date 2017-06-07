@@ -77,7 +77,7 @@ public class ResourceHandlerRegistry {
 	 * @param contentTypeResolver the content type resolver to use
 	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext,
-			CompositeContentTypeResolver contentTypeResolver) {
+			@Nullable CompositeContentTypeResolver contentTypeResolver) {
 
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;

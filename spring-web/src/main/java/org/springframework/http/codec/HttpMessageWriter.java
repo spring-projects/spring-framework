@@ -74,7 +74,6 @@ public interface HttpMessageWriter<T> {
 	 * Server-side only alternative to
 	 * {@link #write(Publisher, ResolvableType, MediaType, ReactiveHttpOutputMessage, Map)}
 	 * with additional context available.
-	 *
 	 * @param actualType the actual return type of the method that returned the
 	 * value; for annotated controllers, the {@link MethodParameter} can be
 	 * accessed via {@link ResolvableType#getSource()}.
@@ -85,7 +84,7 @@ public interface HttpMessageWriter<T> {
 	 * @param response the current response
 	 * @return a {@link Mono} that indicates completion of writing or error
 	 */
-	default Mono<Void> write(Publisher<? extends T> inputStream, @Nullable ResolvableType actualType,
+	default Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,34 +192,37 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 			return null;
 		}
 
-		payload = convertToInternal(payload, headers, conversionHint);
-		if (payload == null) {
+		Object payloadToUse = convertToInternal(payload, headers, conversionHint);
+		if (payloadToUse == null) {
 			return null;
 		}
 
-		MimeType mimeType = getDefaultContentType(payload);
+		MimeType mimeType = getDefaultContentType(payloadToUse);
 		if (headers != null) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(headers, MessageHeaderAccessor.class);
 			if (accessor != null && accessor.isMutable()) {
-				accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
-				return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());
+				if (mimeType != null) {
+					accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+				}
+				return MessageBuilder.createMessage(payloadToUse, accessor.getMessageHeaders());
 			}
 		}
 
-		MessageBuilder<?> builder = MessageBuilder.withPayload(payload);
+		MessageBuilder<?> builder = MessageBuilder.withPayload(payloadToUse);
 		if (headers != null) {
 			builder.copyHeaders(headers);
 		}
-		builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		if (mimeType != null) {
+			builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
+		}
 		return builder.build();
 	}
 
-	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		Class<?> clazz = (payload != null ? payload.getClass() : null);
-		return (supports(clazz) && supportsMimeType(headers));
+	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
+		return (supports(payload.getClass()) && supportsMimeType(headers));
 	}
 
-	protected boolean supportsMimeType(MessageHeaders headers) {
+	protected boolean supportsMimeType(@Nullable MessageHeaders headers) {
 		if (getSupportedMimeTypes().isEmpty()) {
 			return true;
 		}
@@ -235,8 +238,9 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 		return false;
 	}
 
-	protected MimeType getMimeType(MessageHeaders headers) {
-		return (this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
+	@Nullable
+	protected MimeType getMimeType(@Nullable MessageHeaders headers) {
+		return (headers != null && this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
 	}
 
 
@@ -258,7 +262,9 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @since 4.2
 	 */
 	@Nullable
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected Object convertFromInternal(
+			Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+
 		return null;
 	}
 
@@ -273,7 +279,9 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @since 4.2
 	 */
 	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(
+			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+
 		return null;
 	}
 

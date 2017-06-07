@@ -19,7 +19,6 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Interface to be implemented by types that register additional bean definitions when
@@ -48,7 +47,6 @@ import org.springframework.lang.NonNullApi;
  * @see ImportSelector
  * @see Configuration
  */
-@NonNullApi
 public interface ImportBeanDefinitionRegistrar {
 
 	/**

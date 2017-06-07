@@ -42,8 +42,8 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -52,16 +52,15 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.web.method.ResolvableMethod.on;
-import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.junit.Assert.*;
+import static org.springframework.core.io.buffer.support.DataBufferTestUtils.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.method.ResolvableMethod.*;
+import static org.springframework.web.reactive.HandlerMapping.*;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MessageWriterResultHandlerTests {

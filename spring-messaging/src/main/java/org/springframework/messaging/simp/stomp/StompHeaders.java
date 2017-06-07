@@ -138,6 +138,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return the content-type header value.
 	 */
+	@Nullable
 	public MimeType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MimeTypeUtils.parseMimeType(value) : null);
@@ -170,6 +171,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceipt() {
 		return getFirst(RECEIPT);
 	}
@@ -185,6 +187,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the host header.
 	 */
+	@Nullable
 	public String getHost() {
 		return getFirst(HOST);
 	}
@@ -200,6 +203,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the login header.
 	 */
+	@Nullable
 	public String getLogin() {
 		return getFirst(LOGIN);
 	}
@@ -215,6 +219,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the passcode header.
 	 */
+	@Nullable
 	public String getPasscode() {
 		return getFirst(PASSCODE);
 	}
@@ -223,7 +228,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the heartbeat header.
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
-	public void setHeartbeat(long[] heartbeat) {
+	public void setHeartbeat(@Nullable long[] heartbeat) {
 		if (heartbeat == null || heartbeat.length != 2) {
 			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
 					(heartbeat != null ? heartbeat.length : "null"));
@@ -238,6 +243,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the heartbeat header.
 	 */
+	@Nullable
 	public long[] getHeartbeat() {
 		String rawValue = getFirst(HEARTBEAT);
 		String[] rawValues = StringUtils.split(rawValue, ",");
@@ -267,6 +273,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the session header.
 	 */
+	@Nullable
 	public String getSession() {
 		return getFirst(SESSION);
 	}
@@ -283,6 +290,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the server header.
 	 * Applies to the CONNECTED frame.
 	 */
+	@Nullable
 	public String getServer() {
 		return getFirst(SERVER);
 	}
@@ -298,6 +306,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the destination header.
 	 * Applies to the SEND, SUBSCRIBE, and MESSAGE frames.
 	 */
+	@Nullable
 	public String getDestination() {
 		return getFirst(DESTINATION);
 	}
@@ -313,6 +322,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the id header.
 	 */
+	@Nullable
 	public String getId() {
 		return getFirst(ID);
 	}
@@ -328,6 +338,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the ack header.
 	 */
+	@Nullable
 	public String getAck() {
 		return getFirst(ACK);
 	}
@@ -343,6 +354,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the subscription header.
 	 */
+	@Nullable
 	public String getSubscription() {
 		return getFirst(SUBSCRIPTION);
 	}
@@ -358,6 +370,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the message-id header.
 	 */
+	@Nullable
 	public String getMessageId() {
 		return getFirst(MESSAGE_ID);
 	}
@@ -373,6 +386,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceiptId() {
 		return getFirst(RECEIPT_ID);
 	}
@@ -523,8 +537,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
-	public static StompHeaders readOnlyStompHeaders(Map<String, List<String>> headers) {
-		return new StompHeaders(headers, true);
+	public static StompHeaders readOnlyStompHeaders(@Nullable Map<String, List<String>> headers) {
+		return new StompHeaders((headers != null ? headers : Collections.emptyMap()), true);
 	}
 
 }

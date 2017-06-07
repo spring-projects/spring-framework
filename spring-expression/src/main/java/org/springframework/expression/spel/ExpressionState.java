@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,18 +137,13 @@ public class ExpressionState {
 		return this.scopeRootObjects.peek();
 	}
 
-	public void setVariable(String name, Object value) {
+	public void setVariable(String name, @Nullable Object value) {
 		this.relatedContext.setVariable(name, value);
 	}
 
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
-		if (value == null) {
-			return TypedValue.NULL;
-		}
-		else {
-			return new TypedValue(value);
-		}
+		return (value != null ? new TypedValue(value) : TypedValue.NULL);
 	}
 
 	public TypeComparator getTypeComparator() {
@@ -160,14 +155,19 @@ public class ExpressionState {
 	}
 
 	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
-		return this.relatedContext.getTypeConverter().convertValue(value,
+		Object result = this.relatedContext.getTypeConverter().convertValue(value,
 				TypeDescriptor.forObject(value), targetTypeDescriptor);
+		if (result == null) {
+			throw new IllegalStateException("Null conversion result for value [" + value + "]");
+		}
+		return result;
 	}
 
 	public TypeConverter getTypeConverter() {
 		return this.relatedContext.getTypeConverter();
 	}
 
+	@Nullable
 	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		Object val = value.getValue();
 		return this.relatedContext.getTypeConverter().convertValue(val, TypeDescriptor.forObject(val), targetTypeDescriptor);
@@ -217,7 +217,7 @@ public class ExpressionState {
 		return null;
 	}
 
-	public TypedValue operate(Operation op, Object left, @Nullable Object right) throws EvaluationException {
+	public TypedValue operate(Operation op, @Nullable Object left, @Nullable Object right) throws EvaluationException {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
 			Object returnValue = overloader.operate(op, left, right);
@@ -257,7 +257,7 @@ public class ExpressionState {
 		public VariableScope() {
 		}
 
-		public VariableScope(Map<String, Object> arguments) {
+		public VariableScope(@Nullable Map<String, Object> arguments) {
 			if (arguments != null) {
 				this.vars.putAll(arguments);
 			}

@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Strategy interface for resolving the scope of bean definitions.
@@ -27,7 +26,6 @@ import org.springframework.lang.NonNullApi;
  * @see org.springframework.context.annotation.Scope
  */
 @FunctionalInterface
-@NonNullApi
 public interface ScopeMetadataResolver {
 
 	/**

@@ -38,6 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -129,7 +130,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	 * Set the default views to consider always when resolving view names and
 	 * trying to satisfy the best matching content type.
 	 */
-	public void setDefaultViews(List<View> defaultViews) {
+	public void setDefaultViews(@Nullable List<View> defaultViews) {
 		this.defaultViews.clear();
 		if (defaultViews != null) {
 			this.defaultViews.addAll(defaultViews);
@@ -158,10 +159,11 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			type = result.getReturnType().getGeneric().resolve(Object.class);
 		}
 
-		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
-				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				void.class.equals(type) || View.class.isAssignableFrom(type) ||
-				!BeanUtils.isSimpleProperty(type));
+		return (type != null &&
+				(CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
+						Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
+						void.class.equals(type) || View.class.isAssignableFrom(type) ||
+						!BeanUtils.isSimpleProperty(type)));
 	}
 
 	private boolean hasModelAnnotation(MethodParameter parameter) {
@@ -299,10 +301,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				});
 	}
 
-	private boolean isBindingCandidate(String name, Object value) {
-		return !name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
+	private boolean isBindingCandidate(String name, @Nullable Object value) {
+		return (!name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
 				!value.getClass().isArray() && !(value instanceof Collection) &&
-				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass());
+				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 	private Mono<? extends Void> render(List<View> views, Map<String, Object> model,

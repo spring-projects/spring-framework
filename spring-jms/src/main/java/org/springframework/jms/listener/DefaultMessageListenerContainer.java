@@ -256,7 +256,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setCacheLevel
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith("CACHE_")) {
+		if (!constantName.startsWith("CACHE_")) {
 			throw new IllegalArgumentException("Only cache constants allowed");
 		}
 		setCacheLevel(constants.asNumber(constantName).intValue());

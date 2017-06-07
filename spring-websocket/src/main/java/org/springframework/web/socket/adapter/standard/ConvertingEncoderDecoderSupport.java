@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
-
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
@@ -159,6 +158,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * @see javax.websocket.Encoder.Binary#encode(Object)
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public M encode(T object) throws EncodeException {
 		try {
 			return (M) getConversionService().convert(object, getType(), getMessageType());
@@ -181,6 +181,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * @see javax.websocket.Decoder.Binary#decode(ByteBuffer)
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public T decode(M message) throws DecodeException {
 		try {
 			return (T) getConversionService().convert(message, getMessageType(), getType());

@@ -52,7 +52,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * @param objectName the name of the target object
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(@Nullable Object target, String objectName) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target, @Nullable String objectName) {
 		super(target, objectName);
 	}
 

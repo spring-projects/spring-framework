@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,9 +141,8 @@ public class SimpleTaskWorkManager implements WorkManager {
 	 * (or -1 if not applicable or not known)
 	 * @throws WorkException if the TaskExecutor did not accept the Work
 	 */
-	protected long executeWork(TaskExecutor taskExecutor, Work work, long startTimeout,
-			boolean blockUntilStarted, ExecutionContext executionContext, WorkListener workListener)
-			throws WorkException {
+	protected long executeWork(TaskExecutor taskExecutor, Work work, long startTimeout, boolean blockUntilStarted,
+			@Nullable ExecutionContext executionContext, @Nullable WorkListener workListener) throws WorkException {
 
 		if (executionContext != null && executionContext.getXid() != null) {
 			throw new WorkException("SimpleTaskWorkManager does not supported imported XIDs: " + executionContext.getXid());

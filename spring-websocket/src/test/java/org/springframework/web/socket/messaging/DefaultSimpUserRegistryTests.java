@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.socket.messaging;
-
-import static org.junit.Assert.*;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -35,6 +33,8 @@ import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 
+import static org.junit.Assert.*;
+
 /**
  * Test fixture for
  * {@link DefaultSimpUserRegistry}
@@ -46,7 +46,6 @@ public class DefaultSimpUserRegistryTests {
 
 	@Test
 	public void addOneSessionId() {
-
 		TestPrincipal user = new TestPrincipal("joe");
 		Message<byte[]> message = createMessage(SimpMessageType.CONNECT_ACK, "123");
 		SessionConnectedEvent event = new SessionConnectedEvent(this, message, user);
@@ -64,7 +63,6 @@ public class DefaultSimpUserRegistryTests {
 
 	@Test
 	public void addMultipleSessionIds() {
-
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -92,7 +90,6 @@ public class DefaultSimpUserRegistryTests {
 
 	@Test
 	public void removeSessionIds() {
-
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -112,7 +109,6 @@ public class DefaultSimpUserRegistryTests {
 		assertNotNull(simpUser);
 		assertEquals(3, simpUser.getSessions().size());
 
-
 		CloseStatus status = CloseStatus.GOING_AWAY;
 		message = createMessage(SimpMessageType.DISCONNECT, "456");
 		SessionDisconnectEvent disconnectEvent = new SessionDisconnectEvent(this, message, "456", status, user);
@@ -128,7 +124,6 @@ public class DefaultSimpUserRegistryTests {
 
 	@Test
 	public void findSubscriptions() throws Exception {
-
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -166,7 +161,6 @@ public class DefaultSimpUserRegistryTests {
 
 	@Test
 	public void nullSessionId() throws Exception {
-
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");

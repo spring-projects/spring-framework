@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.hibernate5.SessionFactoryUtils;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * Simple AOP Alliance {@link MethodInterceptor} implementation that binds a new
@@ -61,6 +63,7 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	/**
 	 * Return the Hibernate SessionFactory that should be used to create Hibernate Sessions.
 	 */
+	@Nullable
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
@@ -76,9 +79,11 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		SessionFactory sf = getSessionFactory();
+		Assert.state(sf != null, "No SessionFactory set");
+
 		if (!TransactionSynchronizationManager.hasResource(sf)) {
 			// New Session to be bound for the current method's scope...
-			Session session = openSession();
+			Session session = openSession(sf);
 			try {
 				TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 				return invocation.proceed();
@@ -100,12 +105,13 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	 * method and sets the {@link Session}'s flush mode to "MANUAL".
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
+	 * @since 4.3.9
 	 * @see FlushMode#MANUAL
 	 */
 	@SuppressWarnings("deprecation")
-	protected Session openSession() throws DataAccessResourceFailureException {
+	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		try {
-			Session session = getSessionFactory().openSession();
+			Session session = sessionFactory.openSession();
 			session.setFlushMode(FlushMode.MANUAL);
 			return session;
 		}

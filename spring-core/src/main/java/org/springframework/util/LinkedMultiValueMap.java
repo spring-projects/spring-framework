@@ -137,16 +137,19 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	@Override
+	@Nullable
 	public List<V> get(Object key) {
 		return this.targetMap.get(key);
 	}
 
 	@Override
+	@Nullable
 	public List<V> put(K key, List<V> value) {
 		return this.targetMap.put(key, value);
 	}
 
 	@Override
+	@Nullable
 	public List<V> remove(Object key) {
 		return this.targetMap.remove(key);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -59,13 +60,12 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	 * to ensure that the hierarchical ordering of the entries is preserved.
 	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes
 	 */
-	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap =
-			new LinkedMultiValueMap<>(4);
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(4);
 
 	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<>(4);
 
 
-	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
+	public AnnotationMetadataReadingVisitor(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -131,6 +131,9 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
+		if (raw == null) {
+			return null;
+		}
 		return AnnotationReadingVisitorUtils.convertClassValues(
 				"class '" + getClassName() + "'", this.classLoader, raw, classValuesAsString);
 	}

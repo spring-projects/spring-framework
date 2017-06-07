@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 */
 	@Override
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
-		if (taskScheduler != null && !isDefaultHeartbeatEnabled()) {
+		if (!isDefaultHeartbeatEnabled()) {
 			setDefaultHeartbeat(new long[] {10000, 10000});
 		}
 		super.setTaskScheduler(taskScheduler);
@@ -248,7 +248,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param uriVariables URI variables to expand into the URL
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
-	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
+	public ListenableFuture<StompSession> connect(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
 
 		Assert.notNull(url, "'url' must not be null");
@@ -266,8 +266,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param sessionHandler the STOMP session handler
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
-	public ListenableFuture<StompSession> connect(URI url, WebSocketHttpHeaders handshakeHeaders,
-			StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
+	public ListenableFuture<StompSession> connect(URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
+			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
 
 		Assert.notNull(url, "'url' must not be null");
 		ConnectionHandlingStompSession session = createSession(connectHeaders, sessionHandler);
@@ -277,7 +277,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	}
 
 	@Override
-	protected StompHeaders processConnectHeaders(StompHeaders connectHeaders) {
+	protected StompHeaders processConnectHeaders(@Nullable StompHeaders connectHeaders) {
 		connectHeaders = super.processConnectHeaders(connectHeaders);
 		if (connectHeaders.isHeartbeatEnabled()) {
 			Assert.state(getTaskScheduler() != null, "TaskScheduler must be set if heartbeats are enabled");

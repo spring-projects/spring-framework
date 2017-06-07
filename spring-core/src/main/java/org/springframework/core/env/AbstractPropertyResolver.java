@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -39,7 +38,6 @@ import org.springframework.util.SystemPropertyUtils;
  * @author Juergen Hoeller
  * @since 3.1
  */
-@NonNullApi
 public abstract class AbstractPropertyResolver implements ConfigurablePropertyResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -131,10 +129,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	@Override
 	public void setRequiredProperties(String... requiredProperties) {
-		if (requiredProperties != null) {
-			for (String key : requiredProperties) {
-				this.requiredProperties.add(key);
-			}
+		for (String key : requiredProperties) {
+			this.requiredProperties.add(key);
 		}
 	}
 
@@ -247,7 +243,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @since 4.3.5
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T convertValueIfNecessary(Object value, Class<T> targetType) {
+	@Nullable
+	protected <T> T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
 		if (targetType == null) {
 			return (T) value;
 		}

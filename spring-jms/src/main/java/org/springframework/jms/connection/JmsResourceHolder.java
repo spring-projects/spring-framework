@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -62,8 +61,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private final List<Session> sessions = new LinkedList<>();
 
-	private final Map<Connection, List<Session>> sessionsPerConnection =
-			new HashMap<>();
+	private final Map<Connection, List<Session>> sessionsPerConnection = new HashMap<>();
 
 
 	/**
@@ -155,27 +153,29 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 
+	@Nullable
 	public Connection getConnection() {
 		return (!this.connections.isEmpty() ? this.connections.get(0) : null);
 	}
 
+	@Nullable
 	public Connection getConnection(Class<? extends Connection> connectionType) {
 		return CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
+	@Nullable
 	public Session getSession() {
 		return (!this.sessions.isEmpty() ? this.sessions.get(0) : null);
 	}
 
+	@Nullable
 	public Session getSession(Class<? extends Session> sessionType) {
 		return getSession(sessionType, null);
 	}
 
+	@Nullable
 	public Session getSession(Class<? extends Session> sessionType, @Nullable Connection connection) {
-		List<Session> sessions = this.sessions;
-		if (connection != null) {
-			sessions = this.sessionsPerConnection.get(connection);
-		}
+		List<Session> sessions = (connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
 

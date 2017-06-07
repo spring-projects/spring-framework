@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		return (BufferedImage.class == clazz && isReadable(mediaType));
 	}
 
-	private boolean isReadable(MediaType mediaType) {
+	private boolean isReadable(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
 			return true;
 		}
@@ -145,7 +145,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		return (BufferedImage.class == clazz && isWritable(mediaType));
 	}
 
-	private boolean isWritable(MediaType mediaType) {
+	private boolean isWritable(@Nullable MediaType mediaType) {
 		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
 			return true;
 		}
@@ -167,6 +167,9 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		try {
 			imageInputStream = createImageInputStream(inputMessage.getBody());
 			MediaType contentType = inputMessage.getHeaders().getContentType();
+			if (contentType == null) {
+				throw new HttpMessageNotReadableException("No Content-Type header");
+			}
 			Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByMIMEType(contentType.toString());
 			if (imageReaders.hasNext()) {
 				imageReader = imageReaders.next();
@@ -226,7 +229,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		}
 	}
 
-	private MediaType getContentType(MediaType contentType) {
+	private MediaType getContentType(@Nullable MediaType contentType) {
 		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType();
 		}

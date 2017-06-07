@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
@@ -106,10 +108,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+		Assert.state(servletRequest != null, "No HttpServletRequest");
+
 		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
 		boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional());
 
@@ -125,21 +129,20 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			try {
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, name);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getNestedGenericParameterType());
-				WebDataBinder binder = binderFactory.createBinder(request, arg, name);
-				if (arg != null) {
-					validateIfApplicable(binder, parameter);
-					if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-						throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+				if (binderFactory != null) {
+					WebDataBinder binder = binderFactory.createBinder(request, arg, name);
+					if (arg != null) {
+						validateIfApplicable(binder, parameter);
+						if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+							throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+						}
+					}
+					if (mavContainer != null) {
+						mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
 					}
 				}
-				mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
 			}
-			catch (MissingServletRequestPartException ex) {
-				if (isRequired) {
-					throw ex;
-				}
-			}
-			catch (MultipartException ex) {
+			catch (MissingServletRequestPartException | MultipartException ex) {
 				if (isRequired) {
 					throw ex;
 				}
@@ -157,7 +160,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		return adaptArgumentIfNecessary(arg, parameter);
 	}
 
-	private String getPartName(MethodParameter methodParam, RequestPart requestPart) {
+	private String getPartName(MethodParameter methodParam, @Nullable RequestPart requestPart) {
 		String partName = (requestPart != null ? requestPart.name() : "");
 		if (partName.isEmpty()) {
 			partName = methodParam.getParameterName();

@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -208,7 +207,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Configure the complete list of supported argument types thus overriding
 	 * the resolvers that would otherwise be configured by default.
 	 */
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers == null) {
 			this.argumentResolvers = null;
 		}
@@ -224,13 +223,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	@Nullable
 	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return (this.argumentResolvers != null) ? this.argumentResolvers.getResolvers() : null;
+		return (this.argumentResolvers != null ? this.argumentResolvers.getResolvers() : null);
 	}
 
 	/**
 	 * Configure the supported argument types in {@code @InitBinder} methods.
 	 */
-	public void setInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setInitBinderArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers == null) {
 			this.initBinderArgumentResolvers = null;
 		}
@@ -270,7 +269,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Configure the complete list of supported return value types thus
 	 * overriding handlers that would otherwise be configured by default.
 	 */
-	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setReturnValueHandlers(@Nullable List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers == null) {
 			this.returnValueHandlers = null;
 		}
@@ -344,7 +343,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * request before it is read and converted for {@code @RequestBody} and
 	 * {@code HttpEntity} method arguments.
 	 */
-	public void setRequestBodyAdvice(List<RequestBodyAdvice> requestBodyAdvice) {
+	public void setRequestBodyAdvice(@Nullable List<RequestBodyAdvice> requestBodyAdvice) {
 		if (requestBodyAdvice != null) {
 			this.requestResponseBodyAdvice.addAll(requestBodyAdvice);
 		}
@@ -355,7 +354,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * response before {@code @ResponseBody} or {@code ResponseEntity} return
 	 * values are written to the response body.
 	 */
-	public void setResponseBodyAdvice(List<ResponseBodyAdvice<?>> responseBodyAdvice) {
+	public void setResponseBodyAdvice(@Nullable List<ResponseBodyAdvice<?>> responseBodyAdvice) {
 		if (responseBodyAdvice != null) {
 			this.requestResponseBodyAdvice.addAll(responseBodyAdvice);
 		}
@@ -562,36 +561,40 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
 		}
 
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(beans);
+		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		AnnotationAwareOrderComparator.sort(adviceBeans);
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
-		for (ControllerAdviceBean bean : beans) {
-			Set<Method> attrMethods = MethodIntrospector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
+		for (ControllerAdviceBean adviceBean : adviceBeans) {
+			Class<?> beanType = adviceBean.getBeanType();
+			if (beanType == null) {
+				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
+			}
+			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
-				this.modelAttributeAdviceCache.put(bean, attrMethods);
+				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
 				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + bean);
+					logger.info("Detected @ModelAttribute methods in " + adviceBean);
 				}
 			}
-			Set<Method> binderMethods = MethodIntrospector.selectMethods(bean.getBeanType(), INIT_BINDER_METHODS);
+			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
-				this.initBinderAdviceCache.put(bean, binderMethods);
+				this.initBinderAdviceCache.put(adviceBean, binderMethods);
 				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + bean);
+					logger.info("Detected @InitBinder methods in " + adviceBean);
 				}
 			}
-			if (RequestBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
-				requestResponseBodyAdviceBeans.add(bean);
+			if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
+				requestResponseBodyAdviceBeans.add(adviceBean);
 				if (logger.isInfoEnabled()) {
-					logger.info("Detected RequestBodyAdvice bean in " + bean);
+					logger.info("Detected RequestBodyAdvice bean in " + adviceBean);
 				}
 			}
-			if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
-				requestResponseBodyAdviceBeans.add(bean);
+			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
+				requestResponseBodyAdviceBeans.add(adviceBean);
 				if (logger.isInfoEnabled()) {
-					logger.info("Detected ResponseBodyAdvice bean in " + bean);
+					logger.info("Detected ResponseBodyAdvice bean in " + adviceBean);
 				}
 			}
 		}
@@ -971,7 +974,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (model instanceof RedirectAttributes) {
 			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-			RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
+			if (request != null) {
+				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
+			}
 		}
 		return mav;
 	}

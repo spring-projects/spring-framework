@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.jmx.support.MetricType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -333,17 +333,22 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * to the attribute descriptor.
 	 */
 	@Override
-	protected void populateAttributeDescriptor(Descriptor desc, Method getter, Method setter, String beanKey) {
-		if (getter != null && hasManagedMetric(getter)) {
-			populateMetricDescriptor(desc, this.attributeSource.getManagedMetric(getter));
+	protected void populateAttributeDescriptor(
+			Descriptor desc, @Nullable Method getter, @Nullable Method setter, String beanKey) {
+
+		if (getter != null) {
+			ManagedMetric metric = this.attributeSource.getManagedMetric(getter);
+			if (metric != null) {
+				populateMetricDescriptor(desc, metric);
+				return;
+			}
 		}
-		else {
-			ManagedAttribute gma =
-				(getter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(getter);
-			ManagedAttribute sma =
-				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
-			populateAttributeDescriptor(desc,gma,sma);
-		}
+
+		ManagedAttribute gma = (getter != null ? this.attributeSource.getManagedAttribute(getter) : null);
+		ManagedAttribute sma = (setter != null ? this.attributeSource.getManagedAttribute(setter) : null);
+		populateAttributeDescriptor(desc,
+				(gma != null ? gma : ManagedAttribute.EMPTY),
+				(sma != null ? sma : ManagedAttribute.EMPTY));
 	}
 
 	private void populateAttributeDescriptor(Descriptor desc, ManagedAttribute gma, ManagedAttribute sma) {
@@ -384,8 +389,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			desc.setField(FIELD_METRIC_CATEGORY, metric.getCategory());
 		}
 
-		String metricType = (metric.getMetricType() == null) ? MetricType.GAUGE.toString() : metric.getMetricType().toString();
-		desc.setField(FIELD_METRIC_TYPE, metricType);
+		desc.setField(FIELD_METRIC_TYPE, metric.getMetricType().toString());
 	}
 
 	/**
@@ -422,7 +426,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the Object value associated with the set method
 	 * @return the appropriate Object to use as the value for the descriptor
 	 */
-	private Object resolveObjectDescriptor(Object getter, Object setter) {
+	private Object resolveObjectDescriptor(@Nullable Object getter, Object setter) {
 		return (getter != null ? getter : setter);
 	}
 

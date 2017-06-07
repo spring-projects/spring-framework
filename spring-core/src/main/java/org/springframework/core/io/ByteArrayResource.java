@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link Resource} implementation for a given byte array.
@@ -57,10 +60,8 @@ public class ByteArrayResource extends AbstractResource {
 	 * @param byteArray the byte array to wrap
 	 * @param description where the byte array comes from
 	 */
-	public ByteArrayResource(byte[] byteArray, String description) {
-		if (byteArray == null) {
-			throw new IllegalArgumentException("Byte array must not be null");
-		}
+	public ByteArrayResource(byte[] byteArray, @Nullable String description) {
+		Assert.notNull(byteArray, "Byte array must not be null");
 		this.byteArray = byteArray;
 		this.description = (description != null ? description : "");
 	}

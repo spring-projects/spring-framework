@@ -51,7 +51,7 @@ public interface HttpMessageReader<T> {
 	/**
 	 * Whether the given object type is supported by this reader.
 	 * @param elementType the type of object to check
-	 * @param mediaType the media type for the read, possibly {@code null}
+	 * @param mediaType the media type for the read (possibly {@code null})
 	 * @return {@code true} if readable, {@code false} otherwise
 	 */
 	boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType);

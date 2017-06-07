@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-201 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,7 +355,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		}
 	}
 
-	private void addScheduledTask(ScheduledTask task) {
+	private void addScheduledTask(@Nullable ScheduledTask task) {
 		if (task != null) {
 			this.scheduledTasks.add(task);
 		}
@@ -368,6 +368,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @return a handle to the scheduled task, allowing to cancel it
 	 * @since 4.3
 	 */
+	@Nullable
 	public ScheduledTask scheduleTriggerTask(TriggerTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;

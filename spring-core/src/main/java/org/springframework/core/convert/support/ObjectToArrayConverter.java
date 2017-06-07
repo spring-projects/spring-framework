@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Converts an Object to a single-element array containing the Object.
  * Will convert the Object to the target array's component type if necessary.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class ObjectToArrayConverter implements ConditionalGenericConverter {
@@ -49,7 +51,8 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType, targetType.getElementTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(sourceType, targetType.getElementTypeDescriptor(),
+				this.conversionService);
 	}
 
 	@Override
@@ -58,8 +61,10 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
-		Object target = Array.newInstance(targetType.getElementTypeDescriptor().getType(), 1);
-		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor());
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		Assert.state(targetElementType != null, "No target element type");
+		Object target = Array.newInstance(targetElementType.getType(), 1);
+		Object targetElement = this.conversionService.convert(source, sourceType, targetElementType);
 		Array.set(target, 0, targetElement);
 		return target;
 	}

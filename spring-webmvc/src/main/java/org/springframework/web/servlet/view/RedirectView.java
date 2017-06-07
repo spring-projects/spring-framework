@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -318,6 +320,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(request.getContextPath());
@@ -500,7 +505,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param value the value of the model element
 	 * @return whether the element is eligible as query property
 	 */
-	protected boolean isEligibleProperty(String key, Object value) {
+	protected boolean isEligibleProperty(String key, @Nullable Object value) {
 		if (value == null) {
 			return false;
 		}
@@ -543,7 +548,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @return whether the element value is eligible
 	 * @see BeanUtils#isSimpleValueType
 	 */
-	protected boolean isEligibleValue(Object value) {
+	protected boolean isEligibleValue(@Nullable Object value) {
 		return (value != null && BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
@@ -558,7 +563,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
+		return URLEncoder.encode(input, encodingScheme);
 	}
 
 	/**

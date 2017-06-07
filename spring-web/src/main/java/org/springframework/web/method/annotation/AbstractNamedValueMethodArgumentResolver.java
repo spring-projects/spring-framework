@@ -18,7 +18,6 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -89,8 +88,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
-	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
@@ -178,13 +177,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Resolve the given annotation-specified value,
 	 * potentially containing placeholders and expressions.
 	 */
+	@Nullable
 	private Object resolveStringValue(String value) {
 		if (this.configurableBeanFactory == null) {
 			return value;
 		}
 		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
 		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null) {
+		if (exprResolver == null || this.expressionContext == null) {
 			return value;
 		}
 		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
@@ -231,6 +231,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	/**
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
 	 */
+	@Nullable
 	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
@@ -253,7 +254,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param mavContainer the {@link ModelAndViewContainer} (may be {@code null})
 	 * @param webRequest the current request
 	 */
-	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
+	protected void handleResolvedValue(@Nullable Object arg, String name, MethodParameter parameter,
 			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
 	}
 
@@ -269,7 +270,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		private final String defaultValue;
 
-		public NamedValueInfo(String name, boolean required, String defaultValue) {
+		public NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {
 			this.name = name;
 			this.required = required;
 			this.defaultValue = defaultValue;

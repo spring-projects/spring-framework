@@ -190,6 +190,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		return null;
 	}
 
+	@Nullable
 	private SendTo getSendTo(Method specificMethod) {
 		SendTo ann = AnnotatedElementUtils.findMergedAnnotation(specificMethod, SendTo.class);
 		if (ann == null) {
@@ -198,6 +199,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		return ann;
 	}
 
+	@Nullable
 	private String resolve(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}

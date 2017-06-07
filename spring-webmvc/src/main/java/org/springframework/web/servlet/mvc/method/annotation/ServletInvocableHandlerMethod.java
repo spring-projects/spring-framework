@@ -21,10 +21,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -131,12 +133,15 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			return;
 		}
 
-		String reason = getResponseStatusReason();
-		if (StringUtils.hasText(reason)) {
-			webRequest.getResponse().sendError(status.value(), reason);
-		}
-		else {
-			webRequest.getResponse().setStatus(status.value());
+		HttpServletResponse response = webRequest.getResponse();
+		if (response != null) {
+			String reason = getResponseStatusReason();
+			if (StringUtils.hasText(reason)) {
+				response.sendError(status.value(), reason);
+			}
+			else {
+				response.setStatus(status.value());
+			}
 		}
 
 		// To be picked up by RedirectView
@@ -152,7 +157,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return webRequest.isNotModified();
 	}
 
-	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
+	private String getReturnValueHandlingErrorMessage(String message, @Nullable Object returnValue) {
 		StringBuilder sb = new StringBuilder(message);
 		if (returnValue != null) {
 			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
@@ -213,7 +218,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		 * async return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
 		 */
 		@Override
-		public MethodParameter getReturnValueType(Object returnValue) {
+		public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 			return this.returnType;
 		}
 
@@ -266,7 +271,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.resolve();
+				return this.returnType.resolve(Object.class);
 			}
 			return super.getParameterType();
 		}

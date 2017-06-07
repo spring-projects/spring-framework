@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -46,7 +47,7 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
+	protected boolean canConvertFrom(Message<?> message, @Nullable Class<?> targetClass) {
 		if (targetClass == null || !supportsMimeType(message.getHeaders())) {
 			return false;
 		}
@@ -156,8 +156,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		if (payload == null || !supportsMimeType(headers)) {
+	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
+		if (!supportsMimeType(headers)) {
 			return false;
 		}
 		if (!logger.isWarnEnabled()) {
@@ -179,7 +179,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * (typically a {@link JsonMappingException})
 	 * @since 4.3
 	 */
-	protected void logWarningIfNecessary(Type type, Throwable cause) {
+	protected void logWarningIfNecessary(Type type, @Nullable Throwable cause) {
 		if (cause != null && !(cause instanceof JsonMappingException && cause.getMessage().startsWith("Can not find"))) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
 					"serialization for type [" + type + "]";
@@ -269,7 +269,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @since 4.2
 	 */
 	@Nullable
-	protected Class<?> getSerializationView(Object conversionHint) {
+	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter param = (MethodParameter) conversionHint;
 			JsonView annotation = (param.getParameterIndex() >= 0 ?
@@ -303,8 +303,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @param contentType the MIME type from the MessageHeaders, if any
 	 * @return the JSON encoding to use (never {@code null})
 	 */
-	protected JsonEncoding getJsonEncoding(MimeType contentType) {
-		if ((contentType != null) && (contentType.getCharset() != null)) {
+	protected JsonEncoding getJsonEncoding(@Nullable MimeType contentType) {
+		if (contentType != null && (contentType.getCharset() != null)) {
 			Charset charset = contentType.getCharset();
 			for (JsonEncoding encoding : JsonEncoding.values()) {
 				if (charset.name().equals(encoding.getJavaName())) {

@@ -49,18 +49,18 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 
 
 	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
-	public PathExtensionContentTypeResolver(Map<String, MediaType> mediaTypes) {
-		super(mediaTypes);
-	}
-
-	/**
 	 * Create an instance without any mappings to start with. Mappings may be added
 	 * later on if any extensions are resolved through the Java Activation framework.
 	 */
 	public PathExtensionContentTypeResolver() {
 		super(null);
+	}
+
+	/**
+	 * Create an instance with the given map of file extensions and media types.
+	 */
+	public PathExtensionContentTypeResolver(@Nullable Map<String, MediaType> mediaTypes) {
+		super(mediaTypes);
 	}
 
 

@@ -22,7 +22,6 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -80,18 +79,16 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 				"Errors argument must be immediately after a model attribute argument");
 
 		int index = parameter.getParameterIndex() - 1;
-		MethodParameter attributeParam = new MethodParameter(parameter.getMethod(), index);
-
-		ResolvableType type = ResolvableType.forMethodParameter(attributeParam);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
+		MethodParameter attributeParam = MethodParameter.forExecutable(parameter.getExecutable(), index);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(attributeParam.getParameterType());
 
 		Assert.isNull(adapter, "Errors/BindingResult cannot be used with an async model attribute. " +
 				"Either declare the model attribute without the async wrapper type " +
 				"or handle WebExchangeBindException through the async type.");
 
-		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (annot != null && StringUtils.hasText(annot.value())) {
-			return annot.value();
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (ann != null && StringUtils.hasText(ann.value())) {
+			return ann.value();
 		}
 		return Conventions.getVariableNameForParameter(attributeParam);
 	}

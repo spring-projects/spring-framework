@@ -62,7 +62,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param msg the detail message
 	 * @param cause the nested exception
 	 */
-	public NestedCheckedException(String msg, Throwable cause) {
+	public NestedCheckedException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -72,6 +72,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * if there is one.
 	 */
 	@Override
+	@Nullable
 	public String getMessage() {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
@@ -106,7 +107,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param exType the exception type to look for
 	 * @return whether there is a nested exception of the specified type
 	 */
-	public boolean contains(Class<?> exType) {
+	public boolean contains(@Nullable Class<?> exType) {
 		if (exType == null) {
 			return false;
 		}

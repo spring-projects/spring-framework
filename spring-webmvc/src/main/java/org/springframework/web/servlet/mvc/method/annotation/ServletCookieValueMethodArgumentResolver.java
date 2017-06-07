@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver;
 import org.springframework.web.util.UrlPathHelper;
@@ -38,7 +40,7 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 
-	public ServletCookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public ServletCookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
@@ -51,6 +53,8 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 	@Override
 	protected Object resolveName(String cookieName, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		Assert.state(servletRequest != null, "No HttpServletRequest");
+
 		Cookie cookieValue = WebUtils.getCookie(servletRequest, cookieName);
 		if (Cookie.class.isAssignableFrom(parameter.getNestedParameterType())) {
 			return cookieValue;

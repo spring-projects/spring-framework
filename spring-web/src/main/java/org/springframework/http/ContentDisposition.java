@@ -22,14 +22,16 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import static java.nio.charset.StandardCharsets.*;
 
 /**
- * Represent the content disposition type and parameters as defined in RFC 2183.
+ * Represent the Content-Disposition type and parameters as defined in RFC 2183.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183</a>
  */
@@ -49,7 +51,9 @@ public class ContentDisposition {
 	/**
 	 * Private constructor. See static factory methods in this class.
 	 */
-	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename, @Nullable Charset charset, @Nullable Long size) {
+	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename,
+			@Nullable Charset charset, @Nullable Long size) {
+
 		this.type = type;
 		this.name = name;
 		this.filename = filename;
@@ -115,7 +119,7 @@ public class ContentDisposition {
 	 * Return an empty content disposition.
 	 */
 	public static ContentDisposition empty() {
-		return new ContentDisposition(null, null, null, null, null);
+		return new ContentDisposition("", null, null, null, null);
 	}
 
 	/**
@@ -209,36 +213,28 @@ public class ContentDisposition {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
+		if (!(other instanceof ContentDisposition)) {
 			return false;
 		}
-		ContentDisposition that = (ContentDisposition) o;
-		if (type != null ? !type.equals(that.type) : that.type != null) {
-			return false;
-		}
-		if (name != null ? !name.equals(that.name) : that.name != null) {
-			return false;
-		}
-		if (filename != null ? !filename.equals(that.filename) : that.filename != null) {
-			return false;
-		}
-		if (charset != null ? !charset.equals(that.charset) : that.charset != null) {
-			return false;
-		}
-		return size != null ? size.equals(that.size) : that.size == null;
+		ContentDisposition otherCd = (ContentDisposition) other;
+		return (ObjectUtils.nullSafeEquals(this.type, otherCd.type) &&
+				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
+				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&
+				ObjectUtils.nullSafeEquals(this.charset, otherCd.charset) &&
+				ObjectUtils.nullSafeEquals(this.size, otherCd.size));
 	}
 
 	@Override
 	public int hashCode() {
-		int result = type != null ? type.hashCode() : 0;
-		result = 31 * result + (name != null ? name.hashCode() : 0);
-		result = 31 * result + (filename != null ? filename.hashCode() : 0);
-		result = 31 * result + (charset != null ? charset.hashCode() : 0);
-		result = 31 * result + (size != null ? size.hashCode() : 0);
+		int result = ObjectUtils.nullSafeHashCode(this.type);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.name);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
 		return result;
 	}
 
@@ -248,26 +244,29 @@ public class ContentDisposition {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder(this.type);
+		StringBuilder sb = new StringBuilder();
+		if (this.type != null) {
+			sb.append(this.type);
+		}
 		if (this.name != null) {
-			builder.append("; name=\"");
-			builder.append(this.name).append('\"');
+			sb.append("; name=\"");
+			sb.append(this.name).append('\"');
 		}
 		if (this.filename != null) {
 			if(this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
-				builder.append("; filename=\"");
-				builder.append(this.filename).append('\"');
+				sb.append("; filename=\"");
+				sb.append(this.filename).append('\"');
 			}
 			else {
-				builder.append("; filename*=");
-				builder.append(encodeHeaderFieldParam(this.filename, this.charset));
+				sb.append("; filename*=");
+				sb.append(encodeHeaderFieldParam(this.filename, this.charset));
 			}
 		}
 		if (this.size != null) {
-			builder.append("; size=");
-			builder.append(this.size);
+			sb.append("; size=");
+			sb.append(this.size);
 		}
-		return builder.toString();
+		return sb.toString();
 	}
 
 	/**

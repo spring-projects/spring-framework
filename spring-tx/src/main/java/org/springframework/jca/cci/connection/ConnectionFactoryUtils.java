@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (can be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, @Nullable ConnectionFactory cf) {
+	public static void releaseConnection(@Nullable Connection con, @Nullable ConnectionFactory cf) {
 		try {
 			doReleaseConnection(con, cf);
 		}
@@ -187,7 +187,9 @@ public abstract class ConnectionFactoryUtils {
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, @Nullable ConnectionFactory cf) throws ResourceException {
+	public static void doReleaseConnection(@Nullable Connection con, @Nullable ConnectionFactory cf)
+			throws ResourceException {
+
 		if (con == null || isConnectionTransactional(con, cf)) {
 			return;
 		}

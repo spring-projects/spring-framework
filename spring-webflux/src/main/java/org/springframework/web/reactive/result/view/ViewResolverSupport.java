@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,7 +57,7 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	 * Set the supported media types for this view.
 	 * Default is "text/html;charset=UTF-8".
 	 */
-	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
+	public void setSupportedMediaTypes(@Nullable List<MediaType> supportedMediaTypes) {
 		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
 		this.mediaTypes.clear();
 		if (supportedMediaTypes != null) {

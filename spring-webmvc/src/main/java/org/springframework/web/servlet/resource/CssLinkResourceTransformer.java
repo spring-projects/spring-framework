@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,10 +103,11 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			String link = content.substring(linkSegment.getStart(), linkSegment.getEnd());
 			String newLink = null;
 			if (!hasScheme(link)) {
-				newLink = resolveUrlPath(toAbsolutePath(link, request), request, resource, transformerChain);
+				String absolutePath = toAbsolutePath(link, request);
+				newLink = resolveUrlPath(absolutePath, request, resource, transformerChain);
 			}
 			if (logger.isTraceEnabled()) {
-				if (newLink != null && !link.equals(newLink)) {
+				if (newLink != null && !newLink.equals(link)) {
 					logger.trace("Link modified: " + newLink + " (original: " + link + ")");
 				}
 				else {
@@ -257,7 +258,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (this == obj) {
 				return true;
 			}
-			if (obj != null && obj instanceof Segment) {
+			if (obj instanceof Segment) {
 				Segment other = (Segment) obj;
 				return (this.start == other.start && this.end == other.end);
 			}
