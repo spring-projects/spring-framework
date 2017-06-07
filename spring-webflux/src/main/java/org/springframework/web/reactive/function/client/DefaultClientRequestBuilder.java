@@ -73,7 +73,12 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder headers(HttpHeaders headers) {
-		this.headers.putAll(headers);
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				this.headers.add(headerName, headerValue);
+			}
+		}
 		return this;
 	}
 
