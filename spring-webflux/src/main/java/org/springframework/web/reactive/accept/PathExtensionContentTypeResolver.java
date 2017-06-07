@@ -16,90 +16,30 @@
 
 package org.springframework.web.reactive.accept;
 
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
-import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriUtils;
 
 /**
- * A {@link RequestedContentTypeResolver} that extracts the file extension from
- * the request path and uses that as the media type lookup key.
- *
- * <p>If the file extension is not found in the explicit registrations provided
- * to the constructor, the {@link MediaTypeFactory} is used as a fallback
- * mechanism.
+ * Path file extension sub-class of {@link AbstractMappingContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class PathExtensionContentTypeResolver extends AbstractMappingContentTypeResolver {
 
-	private boolean useRegisteredExtensionsOnly = false;
 
-	private boolean ignoreUnknownExtensions = true;
-
-
-	/**
-	 * Create an instance without any mappings to start with. Mappings may be added
-	 * later on if any extensions are resolved through the Java Activation framework.
-	 */
-	public PathExtensionContentTypeResolver() {
-		super(null);
-	}
-
-	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
-	public PathExtensionContentTypeResolver(@Nullable Map<String, MediaType> mediaTypes) {
+	public PathExtensionContentTypeResolver(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
 
 
-	/**
-	 * Whether to only use the registered mappings to look up file extensions, or also refer to
-	 * defaults.
-	 * <p>By default this is set to {@code false}, meaning that defaults are used.
-	 */
-	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
-		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
-	}
-
-	/**
-	 * Whether to ignore requests with unknown file extension. Setting this to
-	 * {@code false} results in {@code HttpMediaTypeNotAcceptableException}.
-	 * <p>By default this is set to {@code true}.
-	 */
-	public void setIgnoreUnknownExtensions(boolean ignoreUnknownExtensions) {
-		this.ignoreUnknownExtensions = ignoreUnknownExtensions;
-	}
-
-
 	@Override
-	protected String extractKey(ServerWebExchange exchange) {
+	protected String getKey(ServerWebExchange exchange) {
 		String path = exchange.getRequest().getURI().getRawPath();
-		String extension = UriUtils.extractFileExtension(path);
-		return (StringUtils.hasText(extension)) ? extension.toLowerCase(Locale.ENGLISH) : null;
-	}
-
-	@Override
-	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
-		if (!this.useRegisteredExtensionsOnly) {
-			Optional<MediaType> mediaType = MediaTypeFactory.getMediaType("file." + key);
-			if (mediaType.isPresent()) {
-				return mediaType.get();
-			}
-		}
-		if (this.ignoreUnknownExtensions) {
-			return null;
-		}
-		throw new NotAcceptableStatusException(getAllMediaTypes());
+		return UriUtils.extractFileExtension(path);
 	}
 
 }

@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
-import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
@@ -80,17 +79,6 @@ public class CompositeContentTypeResolverBuilderTests {
 		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), resolver.resolveMediaTypes(exchange));
 	}
 
-	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
-	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
-		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
-				.favorPathExtension(true)
-				.ignoreUnknownPathExtensions(false)
-				.build();
-
-		ServerWebExchange exchange = MockServerHttpRequest.get("/flower.foobar?format=json").toExchange();
-		resolver.resolveMediaTypes(exchange);
-	}
-
 	@Test
 	public void favorParameter() throws Exception {
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
@@ -101,16 +89,6 @@ public class CompositeContentTypeResolverBuilderTests {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/flower?format=json").toExchange();
 
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
-	}
-
-	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
-	public void favorParameterWithUnknownMediaType() throws Exception {
-		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
-				.favorParameter(true)
-				.build();
-
-		ServerWebExchange exchange = MockServerHttpRequest.get("/flower?format=xyz").toExchange();
-		resolver.resolveMediaTypes(exchange);
 	}
 
 	@Test

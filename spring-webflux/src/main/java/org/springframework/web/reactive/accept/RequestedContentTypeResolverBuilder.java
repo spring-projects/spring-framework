@@ -92,10 +92,6 @@ public class RequestedContentTypeResolverBuilder {
 
 	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
-	private boolean ignoreUnknownPathExtensions = true;
-
-	private Boolean useRegisteredExtensionsOnly;
-
 	private String parameterName = "format";
 
 	private RequestedContentTypeResolver contentTypeResolver;
@@ -140,30 +136,6 @@ public class RequestedContentTypeResolverBuilder {
 	 */
 	public RequestedContentTypeResolverBuilder mediaType(String key, MediaType mediaType) {
 		this.mediaTypes.put(key, mediaType);
-		return this;
-	}
-
-	/**
-	 * Whether to ignore requests with path extension that cannot be resolved
-	 * to any media type. Setting this to {@code false} will result in an
-	 * {@link org.springframework.web.HttpMediaTypeNotAcceptableException} if
-	 * there is no match.
-	 * <p>By default this is set to {@code true}.
-	 */
-	public RequestedContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
-		this.ignoreUnknownPathExtensions = ignore;
-		return this;
-	}
-
-	/**
-	 * When {@link #favorPathExtension favorPathExtension} is set, this
-	 * property determines whether to use only registered {@code MediaType} mappings
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
-	 */
-	public RequestedContentTypeResolverBuilder useRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
-		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
 		return this;
 	}
 
@@ -230,12 +202,7 @@ public class RequestedContentTypeResolverBuilder {
 		List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
 
 		if (this.favorPathExtension) {
-			PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver(this.mediaTypes);
-			resolver.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
-			if (this.useRegisteredExtensionsOnly != null) {
-				resolver.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
-			}
-			resolvers.add(resolver);
+			resolvers.add(new PathExtensionContentTypeResolver(this.mediaTypes));
 		}
 
 		if (this.favorParameter) {

@@ -64,7 +64,6 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * The main class for Spring WebFlux configuration.

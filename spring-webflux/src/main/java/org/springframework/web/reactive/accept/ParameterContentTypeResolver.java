@@ -18,31 +18,21 @@ package org.springframework.web.reactive.accept;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestedContentTypeResolver} that extracts the media type lookup
- * key from a known query parameter named "format" by default.
+ * Query parameter based {@link AbstractMappingContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ParameterContentTypeResolver extends AbstractMappingContentTypeResolver {
 
-	private static final Log logger = LogFactory.getLog(ParameterContentTypeResolver.class);
-
 	private String parameterName = "format";
 
 
-	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
 	public ParameterContentTypeResolver(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
@@ -53,7 +43,7 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 	 * <p>By default this is set to {@code "format"}.
 	 */
 	public void setParameterName(String parameterName) {
-		Assert.notNull(parameterName, "parameterName is required");
+		Assert.notNull(parameterName, "'parameterName' is required");
 		this.parameterName = parameterName;
 	}
 
@@ -63,21 +53,8 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 
 
 	@Override
-	protected String extractKey(ServerWebExchange exchange) {
+	protected String getKey(ServerWebExchange exchange) {
 		return exchange.getRequest().getQueryParams().getFirst(getParameterName());
-	}
-
-	@Override
-	protected void handleMatch(String mediaTypeKey, MediaType mediaType) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media type is '" + mediaType +
-					"' based on '" + getParameterName() + "'='" + mediaTypeKey + "'.");
-		}
-	}
-
-	@Override
-	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
-		throw new NotAcceptableStatusException(getAllMediaTypes());
 	}
 
 }

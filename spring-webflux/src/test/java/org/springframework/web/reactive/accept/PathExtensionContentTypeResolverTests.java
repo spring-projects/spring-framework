@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
@@ -36,9 +35,9 @@ import static org.junit.Assert.assertEquals;
 public class PathExtensionContentTypeResolverTests {
 
 	@Test
-	public void resolveMediaTypesFromMapping() throws Exception {
+	public void resolveFromRegistrations() throws Exception {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/test.html").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
+		PathExtensionContentTypeResolver resolver = createResolver();
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(Collections.singletonList(new MediaType("text", "html")), mediaTypes);
@@ -51,42 +50,34 @@ public class PathExtensionContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveMediaTypesFromJaf() throws Exception {
+	public void resolveFromMediaTypeFactory() throws Exception {
 		ServerWebExchange exchange = MockServerHttpRequest.get("test.xls").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
+		PathExtensionContentTypeResolver resolver = createResolver();
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(Collections.singletonList(new MediaType("application", "vnd.ms-excel")), mediaTypes);
 	}
 
-	// SPR-9390
-
-	@Test
-	public void getMediaTypeFilenameWithEncodedURI() throws Exception {
+	@Test // SPR-9390
+	public void resolveFromFilenameWithEncodedURI() throws Exception {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/quo%20vadis%3f.html").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
+		PathExtensionContentTypeResolver resolver = createResolver();
 		List<MediaType> result = resolver.resolveMediaTypes(exchange);
 
 		assertEquals("Invalid content type", Collections.singletonList(new MediaType("text", "html")), result);
 	}
 
-	// SPR-10170
-
-	@Test
-	public void resolveMediaTypesIgnoreUnknownExtension() throws Exception {
+	@Test // SPR-10170
+	public void resolveAndIgnoreUnknownExtension() throws Exception {
 		ServerWebExchange exchange = MockServerHttpRequest.get("test.foobar").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
+		PathExtensionContentTypeResolver resolver = createResolver();
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertEquals(Collections.<MediaType>emptyList(), mediaTypes);
 	}
 
-	@Test(expected = NotAcceptableStatusException.class)
-	public void resolveMediaTypesDoNotIgnoreUnknownExtension() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("test.foobar").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
-		resolver.setIgnoreUnknownExtensions(false);
-		resolver.resolveMediaTypes(exchange);
+	private PathExtensionContentTypeResolver createResolver() {
+		return new PathExtensionContentTypeResolver(Collections.emptyMap());
 	}
 
 }

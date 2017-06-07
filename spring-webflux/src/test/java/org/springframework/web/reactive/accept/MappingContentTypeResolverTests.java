@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package org.springframework.web.reactive.accept;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link AbstractMappingContentTypeResolver}.
@@ -34,65 +35,46 @@ import static org.junit.Assert.assertTrue;
  */
 public class MappingContentTypeResolverTests {
 
-	@Test
-	public void resolveExtensions() {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("", mapping);
-		Set<String> keys = resolver.getKeysFor(MediaType.APPLICATION_JSON);
-
-		assertEquals(1, keys.size());
-		assertEquals("json", keys.iterator().next());
-	}
-
-	@Test
-	public void resolveExtensionsNoMatch() {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("", mapping);
-		Set<String> keys = resolver.getKeysFor(MediaType.TEXT_HTML);
-
-		assertTrue(keys.isEmpty());
-	}
-
 	@Test // SPR-13747
-	public void lookupMediaTypeCaseInsensitive() {
+	public void resolveCaseInsensitive() {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("", mapping);
-		MediaType mediaType = resolver.getMediaType("JSoN");
+		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("JSoN", mapping);
+		List<MediaType> mediaTypes = resolver.resolve();
 
-		assertEquals(mediaType, MediaType.APPLICATION_JSON);
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), mediaTypes);
 	}
 
 	@Test
 	public void resolveMediaTypes() throws Exception {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("json", mapping);
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes((ServerWebExchange) null);
+		List<MediaType> mediaTypes = resolver.resolve();
 
 		assertEquals(1, mediaTypes.size());
 		assertEquals("application/json", mediaTypes.get(0).toString());
 	}
 
 	@Test
-	public void resolveMediaTypesNoMatch() throws Exception {
-		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("blah", null);
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes((ServerWebExchange) null);
+	public void resolveNoMatch() throws Exception {
+		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("blah", Collections.emptyMap());
+		List<MediaType> mediaTypes = resolver.resolve();
 
 		assertEquals(0, mediaTypes.size());
 	}
 
 	@Test
-	public void resolveMediaTypesNoKey() throws Exception {
+	public void resolveNoKey() throws Exception {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver(null, mapping);
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes((ServerWebExchange) null);
+		List<MediaType> mediaTypes = resolver.resolve();
 
 		assertEquals(0, mediaTypes.size());
 	}
 
 	@Test
 	public void resolveMediaTypesHandleNoMatch() throws Exception {
-		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("xml", null);
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes((ServerWebExchange) null);
+		TestMappingContentTypeResolver resolver = new TestMappingContentTypeResolver("xml", Collections.emptyMap());
+		List<MediaType> mediaTypes = resolver.resolve();
 
 		assertEquals(1, mediaTypes.size());
 		assertEquals("application/xml", mediaTypes.get(0).toString());
@@ -103,19 +85,18 @@ public class MappingContentTypeResolverTests {
 
 		private final String key;
 
-		public TestMappingContentTypeResolver(String key, Map<String, MediaType> mapping) {
+		TestMappingContentTypeResolver(@Nullable String key, Map<String, MediaType> mapping) {
 			super(mapping);
 			this.key = key;
 		}
 
-		@Override
-		protected String extractKey(ServerWebExchange exchange) {
-			return this.key;
+		public List<MediaType> resolve() throws NotAcceptableStatusException {
+			return super.resolveMediaTypes(MockServerHttpRequest.get("/").toExchange());
 		}
 
 		@Override
-		protected MediaType handleNoMatch(String mappingKey) {
-			return "xml".equals(mappingKey) ? MediaType.APPLICATION_XML : null;
+		protected String getKey(ServerWebExchange exchange) {
+			return this.key;
 		}
 	}
 

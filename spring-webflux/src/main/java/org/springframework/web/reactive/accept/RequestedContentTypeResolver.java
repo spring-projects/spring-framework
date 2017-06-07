@@ -38,6 +38,6 @@ public interface RequestedContentTypeResolver {
 	 * @return the requested media types or an empty list
 	 * @throws NotAcceptableStatusException if the requested media types is invalid
 	 */
-	List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException;
+	List<MediaType> resolveMediaTypes(ServerWebExchange exchange);
 
 }

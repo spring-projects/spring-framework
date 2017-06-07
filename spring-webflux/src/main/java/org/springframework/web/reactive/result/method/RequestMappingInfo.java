@@ -22,7 +22,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
@@ -566,12 +565,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 */
 		@Nullable
 		public Set<String> getFileExtensions() {
-			RequestedContentTypeResolver resolver = getContentTypeResolver();
-			if (useRegisteredSuffixPatternMatch() && resolver != null) {
-				if (resolver instanceof MappingContentTypeResolver) {
-					return ((MappingContentTypeResolver) resolver).getKeys();
-				}
-			}
 			return null;
 		}
 
