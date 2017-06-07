@@ -219,6 +219,14 @@ public class HandlerExecutionChain {
 				sb.append("s");
 			}
 		}
+		else {
+			if(this.interceptors != null && this.interceptors.length > 0) {
+				sb.append(" and ").append(this.interceptors.length).append(" interceptor");
+				if (this.interceptors.length > 1) {
+					sb.append("s");
+				}
+			}
+		}
 		return sb.toString();
 	}
 
