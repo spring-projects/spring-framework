@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Theodoros Ntakouris
  * @since 3.0.2
  * @see #getStatusCode()
  */
@@ -232,6 +233,15 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * Create a builder with the status set to {@linkplain HttpStatus#CREATED CREATED}.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder created() {
+		return status(HttpStatus.CREATED);
+	}
+
+	/**
 	 * Create a new builder with a {@linkplain HttpStatus#CREATED CREATED} status
 	 * and a location header set to the given URI.
 	 * @param location the location URI
@@ -253,6 +263,17 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#ACCEPTED ACCEPTED}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> accepted(T body) {
+		BodyBuilder builder = accepted();
+		return builder.body(body);
+	}
+
+	/**
 	 * Create a builder with a {@linkplain HttpStatus#NO_CONTENT NO_CONTENT} status.
 	 * @return the created builder
 	 * @since 4.1
@@ -268,6 +289,17 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	public static BodyBuilder badRequest() {
 		return status(HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#BAD_REQUEST BAD_REQUEST}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> badRequest(T body) {
+		BodyBuilder builder = badRequest();
+		return builder.body(body);
 	}
 
 	/**
@@ -289,6 +321,111 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> unprocessableEntity(T body) {
+		BodyBuilder builder = unprocessableEntity();
+		return builder.body(body);
+	}
+
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#INTERNAL_SERVER_ERROR INTERNAL_SERVER_ERROR} status.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder serverError(){return status(HttpStatus.INTERNAL_SERVER_ERROR);}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#INTERNAL_SERVER_ERROR INTERNAL_SERVER_ERROR}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> serverError(T body) {
+		BodyBuilder builder = serverError();
+		return builder.body(body);
+	}
+
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#UNAUTHORIZED UNAUTHORIZED} status.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder unauthorized(){return status(HttpStatus.UNAUTHORIZED);}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#UNAUTHORIZED UNAUTHORIZED}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> unauthorized(T body) {
+		BodyBuilder builder = unauthorized();
+		return builder.body(body);
+	}
+
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#NOT_IMPLEMENTED NOT_IMPLEMENTED} status.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder notImplemented(){return status(HttpStatus.NOT_IMPLEMENTED);}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#NOT_IMPLEMENTED NOT_IMPLEMENTED}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> notImplemented(T body) {
+		BodyBuilder builder = notImplemented();
+		return builder.body(body);
+	}
+
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#FORBIDDEN FORBIDDEN} status.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder forbidden(){return status(HttpStatus.FORBIDDEN);}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#FORBIDDEN FORBIDDEN}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> forbidden(T body) {
+		BodyBuilder builder = forbidden();
+		return builder.body(body);
+	}
+
+	/**
+	 * Create a builder with an
+	 * {@linkplain HttpStatus#SERVICE_UNAVAILABLE SERVICE_UNAVAILABLE} status.
+	 * @return the created builder
+	 * @since 5.0
+	 */
+	public static BodyBuilder serviceUnavailable(){return status(HttpStatus.SERVICE_UNAVAILABLE);}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body and
+	 * the status set to {@linkplain HttpStatus#SERVICE_UNAVAILABLE SERVICE_UNAVAILABLE}.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.0
+	 */
+	public static <T> ResponseEntity<T> serviceUnavailable(T body) {
+		BodyBuilder builder = serviceUnavailable();
+		return builder.body(body);
+	}
 
 	/**
 	 * Defines a builder that adds headers to the response entity.
