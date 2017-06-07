@@ -310,7 +310,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		}
 		catch (ValidationException ex) {
 			// ignore if just being asked for plain Validator
-			if (Validator.class == type) {
+			if (javax.validation.Validator.class == type) {
 				return (T) this.targetValidator;
 			}
 			throw ex;
