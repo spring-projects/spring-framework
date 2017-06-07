@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
 import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
@@ -303,7 +304,16 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	@SuppressWarnings("unchecked")
 	public <T> T unwrap(@Nullable Class<T> type) {
 		Assert.state(this.targetValidator != null, "No target Validator set");
-		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+		try {
+			return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+		}
+		catch (ValidationException ex) {
+			// ignore if just being asked for plain Validator
+			if (javax.validation.Validator.class == type) {
+				return (T) this.targetValidator;
+			}
+			throw ex;
+		}
 	}
 
 	@Override

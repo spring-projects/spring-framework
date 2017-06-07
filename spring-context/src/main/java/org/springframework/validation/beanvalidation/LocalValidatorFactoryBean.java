@@ -378,6 +378,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	*/
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T unwrap(@Nullable Class<T> type) {
 		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
 			try {
@@ -387,7 +388,16 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				// ignore - we'll try ValidatorFactory unwrapping next
 			}
 		}
-		return this.validatorFactory.unwrap(type);
+		try {
+			return this.validatorFactory.unwrap(type);
+		}
+		catch (ValidationException ex) {
+			// ignore if just being asked for ValidatorFactory
+			if (ValidatorFactory.class == type) {
+				return (T) this.validatorFactory;
+			}
+			throw ex;
+		}
 	}
 
 	public void close() {
