@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param payload the payload to send (may be {@code null})
 	 * @param headers the message headers (may be {@code null})
 	 */
-	void convertAndSendToUser(String user, String destination, @Nullable Object payload, @Nullable Map<String, Object> headers)
+	void convertAndSendToUser(String user, String destination, Object payload, Map<String, Object> headers)
 			throws MessagingException;
 
 	/**
@@ -94,8 +94,8 @@ public interface SimpMessageSendingOperations extends MessageSendingOperations<S
 	 * @param payload the payload to send (may be {@code null})
 	 * @param postProcessor a postProcessor to post-process or modify the created message
 	 */
-	void convertAndSendToUser(String user, String destination, @Nullable Object payload,
-			MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSendToUser(String user, String destination, Object payload, MessagePostProcessor postProcessor)
+			throws MessagingException;
 
 	/**
 	 * Send a message to the given user.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class FunctionReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = state.lookupVariable(this.name);
-		if (value == null) {
+		if (value == TypedValue.NULL) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 
@@ -107,15 +107,12 @@ public class FunctionReference extends SpelNodeImpl {
 					SpelMessage.FUNCTION_MUST_BE_STATIC, ClassUtils.getQualifiedMethodName(method), this.name);
 		}
 
-		argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
-		if (functionArgs != null) {
-			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
-		}
+		TypeConverter converter = state.getEvaluationContext().getTypeConverter();
+		argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		if (method.isVarArgs()) {
-			functionArgs =
-					ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
+					method.getParameterTypes(), functionArgs);
 		}
 
 		try {

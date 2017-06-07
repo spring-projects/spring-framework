@@ -38,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -63,6 +64,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * The main class for Spring WebFlux configuration.
@@ -119,20 +121,26 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseSuffixPatternMatch() != null) {
-			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
+		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		if (useSuffixPatternMatch != null) {
+			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 		}
-		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		if (useRegisteredSuffixPatternMatch != null) {
+			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
 		}
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-		if (configurer.getPathMatcher() != null) {
-			mapping.setPathMatcher(configurer.getPathMatcher());
+
+		HttpRequestPathHelper pathHelper = configurer.getPathHelper();
+		if (pathHelper != null) {
+			mapping.setPathHelper(pathHelper);
 		}
-		if (configurer.getPathHelper() != null) {
-			mapping.setPathHelper(configurer.getPathHelper());
+		PathMatcher pathMatcher = configurer.getPathMatcher();
+		if (pathMatcher != null) {
+			mapping.setPathMatcher(pathMatcher);
 		}
 
 		return mapping;
@@ -313,7 +321,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(webFluxConversionService());
 		initializer.setValidator(webFluxValidator());
-		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = getMessageCodesResolver();
+		if (messageCodesResolver != null) {
+			initializer.setMessageCodesResolver(messageCodesResolver);
+		}
 		return initializer;
 	}
 

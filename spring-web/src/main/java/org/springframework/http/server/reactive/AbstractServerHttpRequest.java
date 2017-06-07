@@ -90,11 +90,11 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		if (query != null) {
 			Matcher matcher = QUERY_PATTERN.matcher(query);
 			while (matcher.find()) {
-				String name = matcher.group(1);
+				String name = decodeQueryParam(matcher.group(1));
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
-				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
+				value = (value != null ? decodeQueryParam(value) : (StringUtils.hasLength(eq) ? "" : null));
+				queryParams.add(name, value);
 			}
 		}
 		return queryParams;

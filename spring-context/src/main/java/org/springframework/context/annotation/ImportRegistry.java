@@ -17,15 +17,15 @@
 package org.springframework.context.annotation;
 
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.NonNullApi;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Juergen Hoeller
  * @author Phil Webb
  */
-@NonNullApi
 interface ImportRegistry {
 
+	@Nullable
 	AnnotationMetadata getImportingClassFor(String importedClass);
 
 	void removeImportingClass(String importingClass);

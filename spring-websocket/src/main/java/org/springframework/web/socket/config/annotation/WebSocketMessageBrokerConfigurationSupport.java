@@ -107,15 +107,15 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats() {
 		AbstractBrokerMessageHandler relayBean = stompBrokerRelayMessageHandler();
-		StompBrokerRelayMessageHandler brokerRelay = (relayBean instanceof StompBrokerRelayMessageHandler ?
-				(StompBrokerRelayMessageHandler) relayBean : null);
 
 		// Ensure STOMP endpoints are registered
 		stompWebSocketHandlerMapping();
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler());
-		stats.setStompBrokerRelay(brokerRelay);
+		if (relayBean instanceof StompBrokerRelayMessageHandler) {
+			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) relayBean);
+		}
 		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
 		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
 		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());

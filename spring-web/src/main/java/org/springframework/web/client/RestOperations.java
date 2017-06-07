@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(String url, @Nullable Object request, Object... uriVariables) throws RestClientException;
 
 	/**
@@ -168,6 +169,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -180,6 +182,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(URI url, @Nullable Object request) throws RestClientException;
 
 	/**

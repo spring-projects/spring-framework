@@ -72,22 +72,22 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
-	public ValueWrapper get(@Nullable Object key) {
+	public ValueWrapper get(Object key) {
 		return this.targetCache.get(key);
 	}
 
 	@Override
-	public <T> T get(@Nullable Object key, Class<T> type) {
+	public <T> T get(Object key, @Nullable Class<T> type) {
 		return this.targetCache.get(key, type);
 	}
 
 	@Override
-	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
+	public <T> T get(Object key, Callable<T> valueLoader) {
 		return this.targetCache.get(key, valueLoader);
 	}
 
 	@Override
-	public void put(@Nullable final Object key, @Nullable final Object value) {
+	public void put(final Object key, @Nullable final Object value) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
@@ -102,12 +102,12 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(@Nullable final Object key, @Nullable final Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		return this.targetCache.putIfAbsent(key, value);
 	}
 
 	@Override
-	public void evict(@Nullable final Object key) {
+	public void evict(final Object key) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override

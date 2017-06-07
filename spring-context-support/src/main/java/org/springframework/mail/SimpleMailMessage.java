@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mail;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -68,10 +69,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy constructor for creating a new {@code SimpleMailMessage} from the state
 	 * of an existing {@code SimpleMailMessage} instance.
-	 * @throws IllegalArgumentException if the supplied message is {@code null}
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
-		Assert.notNull(original, "The 'original' message argument cannot be null");
+		Assert.notNull(original, "'original' message argument must not be null");
 		this.from = original.getFrom();
 		this.replyTo = original.getReplyTo();
 		if (original.getTo() != null) {
@@ -94,6 +94,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.from = from;
 	}
 
+	@Nullable
 	public String getFrom() {
 		return this.from;
 	}
@@ -103,8 +104,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.replyTo = replyTo;
 	}
 
+	@Nullable
 	public String getReplyTo() {
-		return replyTo;
+		return this.replyTo;
 	}
 
 	@Override
@@ -117,6 +119,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.to = to;
 	}
 
+	@Nullable
 	public String[] getTo() {
 		return this.to;
 	}
@@ -131,8 +134,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.cc = cc;
 	}
 
+	@Nullable
 	public String[] getCc() {
-		return cc;
+		return this.cc;
 	}
 
 	@Override
@@ -145,8 +149,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.bcc = bcc;
 	}
 
+	@Nullable
 	public String[] getBcc() {
-		return bcc;
+		return this.bcc;
 	}
 
 	@Override
@@ -154,8 +159,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.sentDate = sentDate;
 	}
 
+	@Nullable
 	public Date getSentDate() {
-		return sentDate;
+		return this.sentDate;
 	}
 
 	@Override
@@ -163,6 +169,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.subject = subject;
 	}
 
+	@Nullable
 	public String getSubject() {
 		return this.subject;
 	}
@@ -172,6 +179,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		this.text = text;
 	}
 
+	@Nullable
 	public String getText() {
 		return this.text;
 	}

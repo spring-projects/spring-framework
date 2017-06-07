@@ -141,9 +141,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		}
 		if (defaultMessage == null) {
 			String fallback = getDefaultMessage(code);
-			if (fallback != null) {
-				return fallback;
-			}
+			return (fallback != null ? fallback : "");
 		}
 		return renderDefaultMessage(defaultMessage, args, locale);
 	}
@@ -176,7 +174,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (defaultMessage != null) {
 			return defaultMessage;
 		}
-		throw new NoSuchMessageException(!ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : null, locale);
+		throw new NoSuchMessageException(!ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "", locale);
 	}
 
 
@@ -195,7 +193,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #setUseCodeAsDefaultMessage
 	 */
 	@Nullable
-	protected String getMessageInternal(String code, Object[] args, Locale locale) {
+	protected String getMessageInternal(@Nullable String code, @Nullable Object[] args, @Nullable Locale locale) {
 		if (code == null) {
 			return null;
 		}
@@ -252,7 +250,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #getParentMessageSource()
 	 */
 	@Nullable
-	protected String getMessageFromParent(String code, Object[] args, Locale locale) {
+	protected String getMessageFromParent(String code, @Nullable Object[] args, Locale locale) {
 		MessageSource parent = getParentMessageSource();
 		if (parent != null) {
 			if (parent instanceof AbstractMessageSource) {
@@ -323,9 +321,9 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return an array of arguments with any MessageSourceResolvables resolved
 	 */
 	@Override
-	protected Object[] resolveArguments(Object[] args, Locale locale) {
-		if (args == null) {
-			return new Object[0];
+	protected Object[] resolveArguments(@Nullable Object[] args, Locale locale) {
+		if (ObjectUtils.isEmpty(args)) {
+			return super.resolveArguments(args, locale);
 		}
 		List<Object> resolvedArgs = new ArrayList<>(args.length);
 		for (Object arg : args) {

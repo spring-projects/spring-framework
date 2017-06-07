@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setFactoryBeanName
 	 * @see #setFactoryMethodName
 	 */
-	void setBeanClassName(String beanClassName);
+	void setBeanClassName(@Nullable String beanClassName);
 
 	/**
 	 * Return the current bean class name of this bean definition.
@@ -115,6 +115,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
 	 */
+	@Nullable
 	String getBeanClassName();
 
 	/**
@@ -122,11 +123,10 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
-	void setScope(String scope);
+	void setScope(@Nullable String scope);
 
 	/**
-	 * Return the name of the current target scope for this bean,
-	 * or {@code null} if not known yet.
+	 * Return the name of the current target scope for this bean.
 	 */
 	@Nullable
 	String getScope();
@@ -153,6 +153,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return the bean names that this bean depends on.
 	 */
+	@Nullable
 	String[] getDependsOn();
 
 	/**
@@ -186,7 +187,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * This the name of the bean to call the specified factory method on.
 	 * @see #setFactoryMethodName
 	 */
-	void setFactoryBeanName(String factoryBeanName);
+	void setFactoryBeanName(@Nullable String factoryBeanName);
 
 	/**
 	 * Return the factory bean name, if any.
@@ -202,7 +203,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setFactoryBeanName
 	 * @see #setBeanClassName
 	 */
-	void setFactoryMethodName(String factoryMethodName);
+	void setFactoryMethodName(@Nullable String factoryMethodName);
 
 	/**
 	 * Return a factory method, if any.
@@ -259,6 +260,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return a human-readable description of this bean definition.
 	 */
+	@Nullable
 	String getDescription();
 
 	/**

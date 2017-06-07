@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param msg the detail message (used as exception message as-is)
 	 */
-	public BeanDefinitionStoreException(String resourceDescription, String msg) {
+	public BeanDefinitionStoreException(@Nullable String resourceDescription, String msg) {
 		super(msg);
 		this.resourceDescription = resourceDescription;
 	}
@@ -68,7 +68,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param msg the detail message (used as exception message as-is)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public BeanDefinitionStoreException(String resourceDescription, String msg, @Nullable Throwable cause) {
+	public BeanDefinitionStoreException(@Nullable String resourceDescription, String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.resourceDescription = resourceDescription;
 	}
@@ -80,7 +80,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param msg the detail message (appended to an introductory message that indicates
 	 * the resource and the name of the bean)
 	 */
-	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg) {
+	public BeanDefinitionStoreException(@Nullable String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);
 	}
 
@@ -92,7 +92,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * the resource and the name of the bean)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, @Nullable Throwable cause) {
+	public BeanDefinitionStoreException(@Nullable String resourceDescription, String beanName, String msg, @Nullable Throwable cause) {
 		super("Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;

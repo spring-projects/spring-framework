@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -137,7 +138,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	@Override
-	public void setTargetSource(TargetSource targetSource) {
+	public void setTargetSource(@Nullable TargetSource targetSource) {
 		this.targetSource = (targetSource != null ? targetSource : EMPTY_TARGET_SOURCE);
 	}
 
@@ -446,7 +447,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param advice the advice to check inclusion of
 	 * @return whether this advice instance is included
 	 */
-	public boolean adviceIncluded(Advice advice) {
+	public boolean adviceIncluded(@Nullable Advice advice) {
 		if (advice != null) {
 			for (Advisor advisor : this.advisors) {
 				if (advisor.getAdvice() == advice) {
@@ -462,7 +463,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param adviceClass the advice class to check
 	 * @return the count of the interceptors of this class or subclasses
 	 */
-	public int countAdvicesOfType(Class<?> adviceClass) {
+	public int countAdvicesOfType(@Nullable Class<?> adviceClass) {
 		int count = 0;
 		if (adviceClass != null) {
 			for (Advisor advisor : this.advisors) {
@@ -482,7 +483,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
+	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {

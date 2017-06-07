@@ -54,7 +54,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	@Override
 	protected final void compileInternal() {
-		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
+		this.preparedStatementFactory = new PreparedStatementCreatorFactory(resolveSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
 		this.preparedStatementFactory.setReturnGeneratedKeys(isReturnGeneratedKeys());
@@ -80,7 +80,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected ParsedSql getParsedSql() {
 		synchronized (this.parsedSqlMonitor) {
 			if (this.cachedSql == null) {
-				this.cachedSql = NamedParameterUtils.parseSqlStatement(getSql());
+				this.cachedSql = NamedParameterUtils.parseSqlStatement(resolveSql());
 			}
 			return this.cachedSql;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.mvc;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -117,10 +119,13 @@ public class ServletForwardingController extends AbstractController implements B
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		RequestDispatcher rd = getServletContext().getNamedDispatcher(this.servletName);
+		ServletContext servletContext = getServletContext();
+		Assert.state(servletContext != null, "No ServletContext");
+		RequestDispatcher rd = servletContext.getNamedDispatcher(this.servletName);
 		if (rd == null) {
 			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
 		}
+
 		// If already included, include again, else forward.
 		if (useInclude(request, response)) {
 			rd.include(request, response);
@@ -136,6 +141,7 @@ public class ServletForwardingController extends AbstractController implements B
 						"] in ServletForwardingController '" + this.beanName + "'");
 			}
 		}
+
 		return null;
 	}
 

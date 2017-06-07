@@ -85,25 +85,19 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Object... attributes) {
-		if (attributes != null) {
-			modelAttributes(Arrays.asList(attributes));
-		}
+		modelAttributes(Arrays.asList(attributes));
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Collection<?> attributes) {
-		if (attributes != null) {
-			attributes.forEach(this::modelAttribute);
-		}
+		attributes.forEach(this::modelAttribute);
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Map<String, ?> attributes) {
-		if (attributes != null) {
-			this.model.putAll(attributes);
-		}
+		this.model.putAll(attributes);
 		return this;
 	}
 
@@ -117,9 +111,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 

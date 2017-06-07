@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -60,7 +61,7 @@ public class ServletRequestParameterPropertyValues extends MutablePropertyValues
 	 * consist of this plus the separator)
 	 * @see #DEFAULT_PREFIX_SEPARATOR
 	 */
-	public ServletRequestParameterPropertyValues(ServletRequest request, String prefix) {
+	public ServletRequestParameterPropertyValues(ServletRequest request, @Nullable String prefix) {
 		this(request, prefix, DEFAULT_PREFIX_SEPARATOR);
 	}
 
@@ -73,7 +74,9 @@ public class ServletRequestParameterPropertyValues extends MutablePropertyValues
 	 * @param prefixSeparator separator delimiting prefix (e.g. "spring")
 	 * and the rest of the parameter name ("param1", "param2")
 	 */
-	public ServletRequestParameterPropertyValues(ServletRequest request, String prefix, String prefixSeparator) {
+	public ServletRequestParameterPropertyValues(
+			ServletRequest request, @Nullable String prefix, @Nullable String prefixSeparator) {
+
 		super(WebUtils.getParametersStartingWith(
 				request, (prefix != null ? prefix + prefixSeparator : null)));
 	}

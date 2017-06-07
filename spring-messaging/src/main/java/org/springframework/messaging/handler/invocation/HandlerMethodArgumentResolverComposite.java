@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -55,7 +56,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 * @since 4.3
 	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(HandlerMethodArgumentResolver... resolvers) {
+	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable HandlerMethodArgumentResolver... resolvers) {
 		if (resolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : resolvers) {
 				this.argumentResolvers.add(resolver);
@@ -67,7 +68,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public HandlerMethodArgumentResolverComposite addResolvers(@Nullable List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);
@@ -115,6 +116,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Find a registered {@link HandlerMethodArgumentResolver} that supports the given method parameter.
 	 */
+	@Nullable
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {

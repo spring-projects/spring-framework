@@ -228,10 +228,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		if (beanType != null) {
-			InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
-			metadata.checkConfigMembers(beanDefinition);
-		}
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
 	}
 
 	@Override
@@ -389,7 +387,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, PropertyValues pvs) {
+	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -512,7 +510,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Register the specified bean as dependent on the autowired beans.
 	 */
-	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
+	private void registerDependentBeans(@Nullable String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
 				if (this.beanFactory.containsBean(autowiredBeanName)) {
@@ -529,7 +527,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Resolve the specified cached method argument or field value.
 	 */
-	private Object resolvedCachedArgument(String beanName, Object cachedArgument) {
+	@Nullable
+	private Object resolvedCachedArgument(@Nullable String beanName, Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor) {
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
@@ -557,7 +556,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 
 		@Override
-		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
+		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 			Field field = (Field) this.member;
 			Object value;
 			if (this.cached) {
@@ -615,13 +614,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private volatile Object[] cachedMethodArguments;
 
-		public AutowiredMethodElement(Method method, boolean required, PropertyDescriptor pd) {
+		public AutowiredMethodElement(Method method, boolean required, @Nullable PropertyDescriptor pd) {
 			super(method, pd);
 			this.required = required;
 		}
 
 		@Override
-		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
+		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 			if (checkPropertySkipping(pvs)) {
 				return;
 			}
@@ -694,7 +693,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 
 		@Nullable
-		private Object[] resolveCachedArguments(String beanName) {
+		private Object[] resolveCachedArguments(@Nullable String beanName) {
 			if (this.cachedMethodArguments == null) {
 				return null;
 			}

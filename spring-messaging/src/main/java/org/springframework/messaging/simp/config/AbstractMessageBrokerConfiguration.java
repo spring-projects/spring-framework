@@ -235,6 +235,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Provide access to the configured PatchMatcher for access from other
 	 * configuration classes.
 	 */
+	@Nullable
 	public final PathMatcher getPathMatcher() {
 		return getBrokerRegistry().getPathMatcher();
 	}
@@ -308,7 +309,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
 				brokerChannel(), userDestinationResolver());
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
-		handler.setBroadcastDestination(destination);
+		if (destination != null) {
+			handler.setBroadcastDestination(destination);
+		}
 		return handler;
 	}
 
@@ -384,7 +387,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
-		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
+		resolver.setPathMatcher(getPathMatcher());
 		return resolver;
 	}
 

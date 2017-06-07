@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.ClassFileTransformer;
 
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Simplistic implementation of an instrumentable {@code ClassLoader}.
@@ -43,7 +44,7 @@ public class SimpleInstrumentableClassLoader extends OverridingClassLoader {
 	 * Create a new SimpleInstrumentableClassLoader for the given ClassLoader.
 	 * @param parent the ClassLoader to build an instrumentable ClassLoader for
 	 */
-	public SimpleInstrumentableClassLoader(ClassLoader parent) {
+	public SimpleInstrumentableClassLoader(@Nullable ClassLoader parent) {
 		super(parent);
 		this.weavingTransformer = new WeavingTransformer(parent);
 	}

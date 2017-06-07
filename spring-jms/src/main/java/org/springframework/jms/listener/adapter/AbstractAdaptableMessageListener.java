@@ -70,6 +70,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private QosSettings responseQosSettings;
 
+
 	/**
 	 * Set the default destination to send response messages to. This will be applied
 	 * in case of a request message that does not carry a "JMSReplyTo" field.
@@ -148,6 +149,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * listener method arguments, and objects returned from listener
 	 * methods back to JMS messages.
 	 */
+	@Nullable
 	protected MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
@@ -182,13 +184,14 @@ public abstract class AbstractAdaptableMessageListener
 	}
 
 	/**
-	 * Return the {@link QosSettings} to use when sending a response or {@code null} if
-	 * the defaults should be used.
+	 * Return the {@link QosSettings} to use when sending a response,
+	 * or {@code null} if the defaults should be used.
 	 */
 	@Nullable
 	protected QosSettings getResponseQosSettings() {
 		return this.responseQosSettings;
 	}
+
 
 	/**
 	 * Standard JMS {@link MessageListener} entry point.
@@ -213,6 +216,9 @@ public abstract class AbstractAdaptableMessageListener
 		}
 	}
 
+	@Override
+	public abstract void onMessage(Message message, @Nullable Session session) throws JMSException;
+
 	/**
 	 * Handle the given exception that arose during listener execution.
 	 * The default implementation logs the exception at error level.
@@ -225,6 +231,7 @@ public abstract class AbstractAdaptableMessageListener
 	protected void handleListenerException(Throwable ex) {
 		logger.error("Listener execution failed", ex);
 	}
+
 
 	/**
 	 * Extract the message body from the given JMS message.
@@ -457,9 +464,6 @@ public abstract class AbstractAdaptableMessageListener
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
-			if (message == null) {
-				return null;
-			}
 			return new LazyResolutionMessage(message);
 		}
 
@@ -481,8 +485,9 @@ public abstract class AbstractAdaptableMessageListener
 		}
 
 		@Override
-		protected Message createMessageForPayload(Object payload, Session session, Object conversionHint)
+		protected Message createMessageForPayload(Object payload, Session session, @Nullable Object conversionHint)
 				throws JMSException {
+
 			MessageConverter converter = getMessageConverter();
 			if (converter == null) {
 				throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
@@ -493,6 +498,7 @@ public abstract class AbstractAdaptableMessageListener
 			}
 			return converter.toMessage(payload, session);
 		}
+
 
 		protected class LazyResolutionMessage implements org.springframework.messaging.Message<Object> {
 
@@ -517,7 +523,6 @@ public abstract class AbstractAdaptableMessageListener
 								"Failed to extract payload from [" + this.message + "]", ex);
 					}
 				}
-				//
 				return this.payload;
 			}
 
@@ -543,7 +548,6 @@ public abstract class AbstractAdaptableMessageListener
 				return this.headers;
 			}
 		}
-
 	}
 
 

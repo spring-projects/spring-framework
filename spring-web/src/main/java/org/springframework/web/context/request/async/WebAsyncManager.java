@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -166,7 +165,7 @@ public final class WebAsyncManager {
 	/**
 	 * Get the {@link CallableProcessingInterceptor} registered under the given key.
 	 * @param key the key
-	 * @return the interceptor registered under that key or {@code null}
+	 * @return the interceptor registered under that key, or {@code null} if none
 	 */
 	@Nullable
 	public CallableProcessingInterceptor getCallableInterceptor(Object key) {
@@ -176,7 +175,7 @@ public final class WebAsyncManager {
 	/**
 	 * Get the {@link DeferredResultProcessingInterceptor} registered under the given key.
 	 * @param key the key
-	 * @return the interceptor registered under that key or {@code null}
+	 * @return the interceptor registered under that key, or {@code null} if none
 	 */
 	@Nullable
 	public DeferredResultProcessingInterceptor getDeferredResultInterceptor(Object key) {
@@ -433,8 +432,10 @@ public final class WebAsyncManager {
 
 		if (logger.isDebugEnabled()) {
 			HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
-			String requestUri = urlPathHelper.getRequestUri(request);
-			logger.debug("Concurrent handling starting for " + request.getMethod() + " [" + requestUri + "]");
+			if (request != null) {
+				String requestUri = urlPathHelper.getRequestUri(request);
+				logger.debug("Concurrent handling starting for " + request.getMethod() + " [" + requestUri + "]");
+			}
 		}
 	}
 

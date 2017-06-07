@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -139,7 +140,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	/**
 	 * Configure one or more WebSocket handshake request interceptors.
 	 */
-	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {
+	public void setHandshakeInterceptors(@Nullable List<HandshakeInterceptor> interceptors) {
 		this.interceptors.clear();
 		if (interceptors != null) {
 			this.interceptors.addAll(interceptors);

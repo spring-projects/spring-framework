@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -264,16 +264,13 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			}
 			else {
 				if (bd.isSingleton()) {
-					Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
-					if (bean != null) {
-						return bean.getClass();
-					}
+					return this.scriptBeanFactory.getBean(scriptedObjectBeanName).getClass();
 				}
 			}
 		}
 		catch (Exception ex) {
-			if (ex instanceof BeanCreationException
-					&& ((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
+			if (ex instanceof BeanCreationException &&
+					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
 							+ ex.getMessage());
@@ -490,7 +487,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
-	protected Class<?> createConfigInterface(BeanDefinition bd, Class<?>[] interfaces) {
+	protected Class<?> createConfigInterface(BeanDefinition bd, @Nullable Class<?>[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
 		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 		for (PropertyValue pv : pvs) {
@@ -539,7 +536,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see org.springframework.scripting.ScriptFactory#getScriptedObject
 	 */
 	protected BeanDefinition createScriptedObjectBeanDefinition(BeanDefinition bd, String scriptFactoryBeanName,
-			ScriptSource scriptSource, Class<?>[] interfaces) {
+			ScriptSource scriptSource, @Nullable Class<?>[] interfaces) {
 
 		GenericBeanDefinition objectBd = new GenericBeanDefinition(bd);
 		objectBd.setFactoryBeanName(scriptFactoryBeanName);
@@ -563,10 +560,16 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		proxyFactory.setTargetSource(ts);
 		ClassLoader classLoader = this.beanClassLoader;
 
-		if (interfaces == null) {
-			interfaces = ClassUtils.getAllInterfacesForClass(ts.getTargetClass(), this.beanClassLoader);
+		if (interfaces != null) {
+			proxyFactory.setInterfaces(interfaces);
 		}
-		proxyFactory.setInterfaces(interfaces);
+		else {
+			Class<?> targetClass = ts.getTargetClass();
+			if (targetClass != null) {
+				proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.beanClassLoader));
+			}
+		}
+
 		if (proxyTargetClass) {
 			classLoader = null;  // force use of Class.getClassLoader()
 			proxyFactory.setProxyTargetClass(true);

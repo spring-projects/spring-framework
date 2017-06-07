@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.HashMap;
@@ -73,7 +74,7 @@ public class RequestContext {
 	}
 
 	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource,
-			RequestDataValueProcessor dataValueProcessor) {
+			@Nullable RequestDataValueProcessor dataValueProcessor) {
 
 		Assert.notNull(exchange, "'exchange' is required");
 		Assert.notNull(model, "'model' is required");
@@ -368,7 +369,11 @@ public class RequestContext {
 		Errors errors = this.errorsMap.get(name);
 		if (errors == null) {
 			errors = getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+			if (errors == null) {
+				return null;
+			}
 		}
+
 		if (errors instanceof BindException) {
 			errors = ((BindException) errors).getBindingResult();
 		}

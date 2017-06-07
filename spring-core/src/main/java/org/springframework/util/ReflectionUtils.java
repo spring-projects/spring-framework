@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,7 +253,8 @@ public abstract class ReflectionUtils {
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	@Nullable
-	public static Object invokeJdbcMethod(Method method, Object target, @Nullable Object... args) throws SQLException {
+	public static Object invokeJdbcMethod(Method method, @Nullable Object target, @Nullable Object... args)
+			throws SQLException {
 		try {
 			return method.invoke(target, args);
 		}
@@ -380,7 +381,7 @@ public abstract class ReflectionUtils {
 	 * Determine whether the given method is an "equals" method.
 	 * @see java.lang.Object#equals(Object)
 	 */
-	public static boolean isEqualsMethod(Method method) {
+	public static boolean isEqualsMethod(@Nullable Method method) {
 		if (method == null || !method.getName().equals("equals")) {
 			return false;
 		}
@@ -392,7 +393,7 @@ public abstract class ReflectionUtils {
 	 * Determine whether the given method is a "hashCode" method.
 	 * @see java.lang.Object#hashCode()
 	 */
-	public static boolean isHashCodeMethod(Method method) {
+	public static boolean isHashCodeMethod(@Nullable Method method) {
 		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
 	}
 
@@ -400,14 +401,14 @@ public abstract class ReflectionUtils {
 	 * Determine whether the given method is a "toString" method.
 	 * @see java.lang.Object#toString()
 	 */
-	public static boolean isToStringMethod(Method method) {
+	public static boolean isToStringMethod(@Nullable Method method) {
 		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
 	}
 
 	/**
 	 * Determine whether the given method is originally declared by {@link java.lang.Object}.
 	 */
-	public static boolean isObjectMethod(Method method) {
+	public static boolean isObjectMethod(@Nullable Method method) {
 		if (method == null) {
 			return false;
 		}
@@ -579,12 +580,7 @@ public abstract class ReflectionUtils {
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
 		final List<Method> methods = new ArrayList<>(32);
-		doWithMethods(leafClass, new MethodCallback() {
-			@Override
-			public void doWith(Method method) {
-				methods.add(method);
-			}
-		});
+		doWithMethods(leafClass, method -> methods.add(method));
 		return methods.toArray(new Method[methods.size()]);
 	}
 
@@ -597,31 +593,28 @@ public abstract class ReflectionUtils {
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
 		final List<Method> methods = new ArrayList<>(32);
-		doWithMethods(leafClass, new MethodCallback() {
-			@Override
-			public void doWith(Method method) {
-				boolean knownSignature = false;
-				Method methodBeingOverriddenWithCovariantReturnType = null;
-				for (Method existingMethod : methods) {
-					if (method.getName().equals(existingMethod.getName()) &&
-							Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
-						// Is this a covariant return type situation?
-						if (existingMethod.getReturnType() != method.getReturnType() &&
-								existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
-							methodBeingOverriddenWithCovariantReturnType = existingMethod;
-						}
-						else {
-							knownSignature = true;
-						}
-						break;
+		doWithMethods(leafClass, method -> {
+			boolean knownSignature = false;
+			Method methodBeingOverriddenWithCovariantReturnType = null;
+			for (Method existingMethod : methods) {
+				if (method.getName().equals(existingMethod.getName()) &&
+						Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
+					// Is this a covariant return type situation?
+					if (existingMethod.getReturnType() != method.getReturnType() &&
+							existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
+						methodBeingOverriddenWithCovariantReturnType = existingMethod;
 					}
+					else {
+						knownSignature = true;
+					}
+					break;
 				}
-				if (methodBeingOverriddenWithCovariantReturnType != null) {
-					methods.remove(methodBeingOverriddenWithCovariantReturnType);
-				}
-				if (!knownSignature && !isCglibRenamedMethod(method)) {
-					methods.add(method);
-				}
+			}
+			if (methodBeingOverriddenWithCovariantReturnType != null) {
+				methods.remove(methodBeingOverriddenWithCovariantReturnType);
+			}
+			if (!knownSignature && !isCglibRenamedMethod(method)) {
+				methods.add(method);
 			}
 		});
 		return methods.toArray(new Method[methods.size()]);
@@ -666,6 +659,7 @@ public abstract class ReflectionUtils {
 		return result;
 	}
 
+	@Nullable
 	private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
 		List<Method> result = null;
 		for (Class<?> ifc : clazz.getInterfaces()) {
@@ -772,23 +766,16 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void shallowCopyFieldState(final Object src, final Object dest) {
-		if (src == null) {
-			throw new IllegalArgumentException("Source for field copy cannot be null");
-		}
-		if (dest == null) {
-			throw new IllegalArgumentException("Destination for field copy cannot be null");
-		}
+		Assert.notNull(src, "Source for field copy cannot be null");
+		Assert.notNull(dest, "Destination for field copy cannot be null");
 		if (!src.getClass().isAssignableFrom(dest.getClass())) {
 			throw new IllegalArgumentException("Destination class [" + dest.getClass().getName() +
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}
-		doWithFields(src.getClass(), new FieldCallback() {
-			@Override
-			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-				makeAccessible(field);
-				Object srcValue = field.get(src);
-				field.set(dest, srcValue);
-			}
+		doWithFields(src.getClass(), field -> {
+			makeAccessible(field);
+			Object srcValue = field.get(src);
+			field.set(dest, srcValue);
 		}, COPYABLE_FIELDS);
 	}
 
@@ -873,25 +860,15 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
-
-		@Override
-		public boolean matches(Method method) {
-			return !method.isBridge();
-		}
-	};
+	public static final MethodFilter NON_BRIDGED_METHODS =
+			(method -> !method.isBridge());
 
 
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
-
-		@Override
-		public boolean matches(Method method) {
-			return (!method.isBridge() && method.getDeclaringClass() != Object.class);
-		}
-	};
+	public static final MethodFilter USER_DECLARED_METHODS =
+			(method -> (!method.isBridge() && method.getDeclaringClass() != Object.class));
 
 }

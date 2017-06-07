@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Collection
 	 */
 	@Nullable
-	public static <T> T singleResult(Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T> T singleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
 			return null;
@@ -137,7 +137,7 @@ public abstract class DataAccessUtils {
 	 * not match the specified required type
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T objectResult(@Nullable Collection<?> results, Class<T> requiredType)
+	public static <T> T objectResult(@Nullable Collection<?> results, @Nullable Class<T> requiredType)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		Object result = requiredUniqueResult(results);

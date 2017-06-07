@@ -181,6 +181,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	@Nullable
 	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
 		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		Assert.state(flushMode != null, "No FlushMode from Session");
 		if (readOnly) {
 			// We should suppress flushing for a read-only transaction.
 			if (!flushMode.equals(FlushMode.MANUAL)) {
@@ -201,7 +202,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	@Override
 	public void cleanupTransaction(@Nullable Object transactionData) {
-		((SessionTransactionData) transactionData).resetSessionState();
+		if (transactionData instanceof SessionTransactionData) {
+			((SessionTransactionData) transactionData).resetSessionState();
+		}
 	}
 
 	@Override
@@ -325,8 +328,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final Integer previousIsolationLevel;
 
-		public SessionTransactionData(
-				Session session, FlushMode previousFlushMode, @Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
+		public SessionTransactionData(Session session, @Nullable FlushMode previousFlushMode,
+				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
+
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
 			this.preparedCon = preparedCon;
@@ -377,7 +381,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 					// Reflective lookup to find SessionImpl's connection() method on Hibernate 4.x/5.x
 					connectionMethodToUse = session.getClass().getMethod("connection");
 				}
-				return (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, session);
+				Connection con = (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, session);
+				Assert.state(con != null, "No Connection from Session");
+				return con;
 			}
 			catch (NoSuchMethodException ex) {
 				throw new IllegalStateException("Cannot find connection() method on Hibernate Session", ex);

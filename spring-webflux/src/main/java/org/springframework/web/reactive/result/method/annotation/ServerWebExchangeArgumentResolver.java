@@ -77,7 +77,7 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 			return Optional.of(exchange.getResponse());
 		}
 		else if (HttpMethod.class == paramType) {
-			return Optional.of(exchange.getRequest().getMethod());
+			return Optional.ofNullable(exchange.getRequest().getMethod());
 		}
 		else {
 			// should never happen...

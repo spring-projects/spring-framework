@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -101,7 +102,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceWebHandler> handlerMap) {
+	public void setHandlerMap(@Nullable Map<String, ResourceWebHandler> handlerMap) {
 		if (handlerMap != null) {
 			this.handlerMap.clear();
 			this.handlerMap.putAll(handlerMap);

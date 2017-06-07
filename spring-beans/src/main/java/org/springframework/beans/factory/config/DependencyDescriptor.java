@@ -99,12 +99,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		this.declaringClass = methodParameter.getDeclaringClass();
 		if (this.methodParameter.getMethod() != null) {
-			this.methodName = methodParameter.getMethod().getName();
-			this.parameterTypes = methodParameter.getMethod().getParameterTypes();
+			this.methodName = this.methodParameter.getMethod().getName();
 		}
-		else {
-			this.parameterTypes = methodParameter.getConstructor().getParameterTypes();
-		}
+		this.parameterTypes = methodParameter.getExecutable().getParameterTypes();
 		this.parameterIndex = methodParameter.getParameterIndex();
 		this.containingClass = methodParameter.getContainingClass();
 		this.required = required;
@@ -334,6 +331,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * Determine the name of the wrapped parameter/field.
 	 * @return the declared name (never {@code null})
 	 */
+	@Nullable
 	public String getDependencyName() {
 		return (this.field != null ? this.field.getName() : this.methodParameter.getParameterName());
 	}

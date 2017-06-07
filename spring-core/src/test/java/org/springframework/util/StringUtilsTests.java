@@ -301,7 +301,6 @@ public class StringUtilsTests {
 
 	@Test
 	public void testStripFilenameExtension() {
-		assertEquals(null, StringUtils.stripFilenameExtension(null));
 		assertEquals("", StringUtils.stripFilenameExtension(""));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile."));

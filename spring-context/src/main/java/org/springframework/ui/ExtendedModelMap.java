@@ -43,7 +43,7 @@ public class ExtendedModelMap extends ModelMap implements Model {
 	}
 
 	@Override
-	public ExtendedModelMap addAttribute(@Nullable Object attributeValue) {
+	public ExtendedModelMap addAttribute(Object attributeValue) {
 		super.addAttribute(attributeValue);
 		return this;
 	}

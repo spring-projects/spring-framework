@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * {@code Map}, using attribute name generation for each element.
 	 * @see #addAttribute(Object)
 	 */
-	public ModelMap addAllAttributes(Collection<?> attributeValues) {
+	public ModelMap addAllAttributes(@Nullable Collection<?> attributeValues) {
 		if (attributeValues != null) {
 			for (Object attributeValue : attributeValues) {
 				addAttribute(attributeValue);
@@ -112,7 +112,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * Copy all attributes in the supplied {@code Map} into this {@code Map}.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap addAllAttributes(Map<String, ?> attributes) {
+	public ModelMap addAllAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			putAll(attributes);
 		}
@@ -124,7 +124,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * with existing objects of the same name taking precedence (i.e. not getting
 	 * replaced).
 	 */
-	public ModelMap mergeAttributes(Map<String, ?> attributes) {
+	public ModelMap mergeAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
 				String key = entry.getKey();

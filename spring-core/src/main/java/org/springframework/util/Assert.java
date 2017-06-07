@@ -531,7 +531,7 @@ public abstract class Assert {
 	 * of the offending object's type will be appended.
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 */
-	public static void isInstanceOf(Class<?> type, Object obj, String message) {
+	public static void isInstanceOf(Class<?> type, @Nullable Object obj, String message) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
 			instanceCheckFailed(type, obj, message);
@@ -550,7 +550,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 * @since 5.0
 	 */
-	public static void isInstanceOf(Class<?> type, Object obj, Supplier<String> messageSupplier) {
+	public static void isInstanceOf(Class<?> type, @Nullable Object obj, Supplier<String> messageSupplier) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
 			instanceCheckFailed(type, obj, nullSafeGet(messageSupplier));
@@ -564,7 +564,7 @@ public abstract class Assert {
 	 * @param obj the object to check
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 */
-	public static void isInstanceOf(Class<?> type, Object obj) {
+	public static void isInstanceOf(Class<?> type, @Nullable Object obj) {
 		isInstanceOf(type, obj, "");
 	}
 
@@ -580,7 +580,7 @@ public abstract class Assert {
 	 * offending sub type will be appended.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignable(Class<?> superType, Class<?> subType, String message) {
+	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, String message) {
 		notNull(superType, "Super type to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
 			assignableCheckFailed(superType, subType, message);
@@ -599,7 +599,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 * @since 5.0
 	 */
-	public static void isAssignable(Class<?> superType, Class<?> subType, Supplier<String> messageSupplier) {
+	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, Supplier<String> messageSupplier) {
 		notNull(superType, "Super type to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
 			assignableCheckFailed(superType, subType, nullSafeGet(messageSupplier));
@@ -618,7 +618,7 @@ public abstract class Assert {
 	}
 
 
-	private static void instanceCheckFailed(Class<?> type, Object obj, String msg) {
+	private static void instanceCheckFailed(Class<?> type, @Nullable Object obj, @Nullable String msg) {
 		String className = (obj != null ? obj.getClass().getName() : "null");
 		String result = "";
 		boolean defaultMessage = true;
@@ -637,7 +637,7 @@ public abstract class Assert {
 		throw new IllegalArgumentException(result);
 	}
 
-	private static void assignableCheckFailed(Class<?> superType, Class<?> subType, String msg) {
+	private static void assignableCheckFailed(Class<?> superType, @Nullable Class<?> subType, @Nullable String msg) {
 		String result = "";
 		boolean defaultMessage = true;
 		if (StringUtils.hasLength(msg)) {
@@ -659,11 +659,12 @@ public abstract class Assert {
 		return (msg.endsWith(":") || msg.endsWith(";") || msg.endsWith(",") || msg.endsWith("."));
 	}
 
-	private static String messageWithTypeName(String msg, Object typeName) {
+	private static String messageWithTypeName(String msg, @Nullable Object typeName) {
 		return msg + (msg.endsWith(" ") ? "" : ": ") + typeName;
 	}
 
-	private static String nullSafeGet(Supplier<String> messageSupplier) {
+	@Nullable
+	private static String nullSafeGet(@Nullable Supplier<String> messageSupplier) {
 		return (messageSupplier != null ? messageSupplier.get() : null);
 	}
 

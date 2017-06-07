@@ -68,7 +68,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType type, MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		try {
 			if (resource.isFile()) {

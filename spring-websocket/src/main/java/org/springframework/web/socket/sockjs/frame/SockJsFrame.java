@@ -164,8 +164,8 @@ public class SockJsFrame {
 		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
 	}
 
-	public static SockJsFrame closeFrame(int code, String reason) {
-		return new SockJsFrame("c[" + code + ",\"" + reason + "\"]");
+	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
+		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
 	}
 
 }

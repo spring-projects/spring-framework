@@ -134,6 +134,7 @@ public class JmsActivationSpecConfig {
 		this.subscriptionName = subscriptionName;
 	}
 
+	@Nullable
 	public String getSubscriptionName() {
 		return this.subscriptionName;
 	}
@@ -143,6 +144,7 @@ public class JmsActivationSpecConfig {
 		this.subscriptionDurable = true;
 	}
 
+	@Nullable
 	public String getDurableSubscriptionName() {
 		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
@@ -151,6 +153,7 @@ public class JmsActivationSpecConfig {
 		this.clientId = clientId;
 	}
 
+	@Nullable
 	public String getClientId() {
 		return this.clientId;
 	}
@@ -159,6 +162,7 @@ public class JmsActivationSpecConfig {
 		this.messageSelector = messageSelector;
 	}
 
+	@Nullable
 	public String getMessageSelector() {
 		return this.messageSelector;
 	}

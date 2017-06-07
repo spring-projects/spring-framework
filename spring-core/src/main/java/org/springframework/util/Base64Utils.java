@@ -39,14 +39,13 @@ public abstract class Base64Utils {
 
 	/**
 	 * Base64-encode the given byte array.
-	 * @param src the original byte array (may be {@code null})
-	 * @return the encoded byte array (or {@code null} if the input was {@code null})
+	 * @param src the original byte array
+	 * @return the encoded byte array
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	@Nullable
-	public static byte[] encode(@Nullable byte[] src) {
-		if (src == null || src.length == 0) {
+	public static byte[] encode(byte[] src) {
+		if (src.length == 0) {
 			return src;
 		}
 		return Base64.getEncoder().encode(src);
@@ -54,14 +53,13 @@ public abstract class Base64Utils {
 
 	/**
 	 * Base64-decode the given byte array.
-	 * @param src the encoded byte array (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @param src the encoded byte array
+	 * @return the original byte array
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	@Nullable
-	public static byte[] decode(@Nullable byte[] src) {
-		if (src == null || src.length == 0) {
+	public static byte[] decode(byte[] src) {
+		if (src.length == 0) {
 			return src;
 		}
 		return Base64.getDecoder().decode(src);
@@ -70,15 +68,14 @@ public abstract class Base64Utils {
 	/**
 	 * Base64-encode the given byte array using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
-	 * @param src the original byte array (may be {@code null})
-	 * @return the encoded byte array (or {@code null} if the input was {@code null})
+	 * @param src the original byte array
+	 * @return the encoded byte array
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
-	@Nullable
-	public static byte[] encodeUrlSafe(@Nullable byte[] src) {
-		if (src == null || src.length == 0) {
+	public static byte[] encodeUrlSafe(byte[] src) {
+		if (src.length == 0) {
 			return src;
 		}
 		return Base64.getUrlEncoder().encode(src);
@@ -87,8 +84,8 @@ public abstract class Base64Utils {
 	/**
 	 * Base64-decode the given byte array using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
-	 * @param src the encoded byte array (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @param src the encoded byte array
+	 * @return the original byte array
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
@@ -105,13 +102,8 @@ public abstract class Base64Utils {
 	 * Base64-encode the given byte array to a String.
 	 * @param src the original byte array (may be {@code null})
 	 * @return the encoded byte array as a UTF-8 String
-	 * (or {@code null} if the input was {@code null})
 	 */
-	@Nullable
-	public static String encodeToString(@Nullable byte[] src) {
-		if (src == null) {
-			return null;
-		}
+	public static String encodeToString(byte[] src) {
 		if (src.length == 0) {
 			return "";
 		}
@@ -120,14 +112,10 @@ public abstract class Base64Utils {
 
 	/**
 	 * Base64-decode the given byte array from an UTF-8 String.
-	 * @param src the encoded UTF-8 String (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @param src the encoded UTF-8 String
+	 * @return the original byte array
 	 */
-	@Nullable
-	public static byte[] decodeFromString(@Nullable String src) {
-		if (src == null) {
-			return null;
-		}
+	public static byte[] decodeFromString(String src) {
 		if (src.isEmpty()) {
 			return new byte[0];
 		}
@@ -137,27 +125,26 @@ public abstract class Base64Utils {
 	/**
 	 * Base64-encode the given byte array to a String using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
-	 * @param src the original byte array (may be {@code null})
+	 * @param src the original byte array
 	 * @return the encoded byte array as a UTF-8 String
-	 * (or {@code null} if the input was {@code null})
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	@Nullable
-	public static String encodeToUrlSafeString(@Nullable byte[] src) {
+	public static String encodeToUrlSafeString(byte[] src) {
 		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
 	}
 
 	/**
 	 * Base64-decode the given byte array from an UTF-8 String using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
-	 * @param src the encoded UTF-8 String (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @param src the encoded UTF-8 String
+	 * @return the original byte array
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	@Nullable
-	public static byte[] decodeFromUrlSafeString(@Nullable String src) {
+	public static byte[] decodeFromUrlSafeString(String src) {
 		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.context.ApplicationContext} implementation
@@ -59,7 +60,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
-	public StaticApplicationContext(ApplicationContext parent) throws BeansException {
+	public StaticApplicationContext(@Nullable ApplicationContext parent) throws BeansException {
 		super(parent);
 
 		// Initialize and register a StaticMessageSource.

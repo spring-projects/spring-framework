@@ -84,6 +84,7 @@ public class JmsTemplateTests {
 
 	private QosSettings qosSettings = new QosSettings(DeliveryMode.PERSISTENT, 9, 10000);
 
+
 	/**
 	 * Create the mock objects for testing.
 	 */
@@ -150,13 +151,10 @@ public class JmsTemplateTests {
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
-		template.execute(new ProducerCallback<Void>() {
-			@Override
-			public Void doInJms(Session session, MessageProducer producer) throws JMSException {
-				session.getTransacted();
-				producer.getPriority();
-				return null;
-			}
+		template.execute((ProducerCallback<Void>) (session1, producer) -> {
+			session1.getTransacted();
+			producer.getPriority();
+			return null;
 		});
 
 		verify(messageProducer).close();
@@ -175,13 +173,10 @@ public class JmsTemplateTests {
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
-		template.execute(new ProducerCallback<Void>() {
-			@Override
-			public Void doInJms(Session session, MessageProducer producer) throws JMSException {
-				session.getTransacted();
-				producer.getPriority();
-				return null;
-			}
+		template.execute((ProducerCallback<Void>) (session1, producer) -> {
+			session1.getTransacted();
+			producer.getPriority();
+			return null;
 		});
 
 		verify(messageProducer).setDisableMessageID(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 				return ann.value();
 			}
 		}
-		else if (obj != null) {
+		else {
 			order = OrderUtils.getOrder(obj.getClass());
 			if (order == null && obj instanceof DecoratingProxy) {
 				order = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
@@ -98,15 +98,12 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * multiple matches but only one object to be returned.
 	 */
 	public Integer getPriority(Object obj) {
-		Integer priority = null;
 		if (obj instanceof Class) {
-			priority = OrderUtils.getPriority((Class<?>) obj);
+			return OrderUtils.getPriority((Class<?>) obj);
 		}
-		else if (obj != null) {
-			priority = OrderUtils.getPriority(obj.getClass());
-			if (priority == null && obj instanceof DecoratingProxy) {
-				priority = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
-			}
+		Integer priority = OrderUtils.getPriority(obj.getClass());
+		if (priority == null && obj instanceof DecoratingProxy) {
+			priority = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
 		}
 		return priority;
 	}

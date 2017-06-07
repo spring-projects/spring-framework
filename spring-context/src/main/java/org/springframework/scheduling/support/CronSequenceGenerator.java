@@ -400,7 +400,7 @@ public class CronSequenceGenerator {
 	}
 
 	private static boolean areValidCronFields(String[] fields) {
-		return (fields != null && fields.length == 6);
+		return (fields.length == 6);
 	}
 
 

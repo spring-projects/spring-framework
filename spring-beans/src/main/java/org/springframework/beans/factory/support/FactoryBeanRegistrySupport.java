@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
-					@Override
-					public Class<?> run() {
-						return factoryBean.getObjectType();
-					}
-				}, getAccessControlContext());
+				return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () ->
+						factoryBean.getObjectType(), getAccessControlContext());
 			}
 			else {
 				return factoryBean.getObjectType();
@@ -98,6 +94,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Nullable
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
@@ -148,6 +145,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Nullable
 	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
 			throws BeanCreationException {
 
@@ -156,12 +154,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			if (System.getSecurityManager() != null) {
 				AccessControlContext acc = getAccessControlContext();
 				try {
-					object = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
-						public Object run() throws Exception {
-								return factory.getObject();
-							}
-						}, acc);
+					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+							factory.getObject(), acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
@@ -197,6 +191,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the object to expose
 	 * @throws org.springframework.beans.BeansException if any post-processing failed
 	 */
+	@Nullable
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) throws BeansException {
 		return object;
 	}

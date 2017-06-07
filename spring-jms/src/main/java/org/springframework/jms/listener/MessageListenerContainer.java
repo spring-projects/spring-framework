@@ -67,8 +67,8 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	boolean isReplyPubSubDomain();
 
 	/**
-	 * Return the {@link QosSettings} to use when sending a reply or {@code null}
-	 * if the broker's defaults should be used.
+	 * Return the {@link QosSettings} to use when sending a reply,
+	 * or {@code null} if the broker's defaults should be used.
 	 * @since 5.0
 	 */
 	@Nullable

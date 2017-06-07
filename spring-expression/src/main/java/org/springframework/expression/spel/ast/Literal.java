@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.lang.Nullable;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
@@ -34,7 +35,7 @@ public abstract class Literal extends SpelNodeImpl {
 	private final String originalValue;
 
 
-	public Literal(String originalValue, int pos) {
+	public Literal(@Nullable String originalValue, int pos) {
 		super(pos);
 		this.originalValue = originalValue;
 	}
@@ -51,7 +52,7 @@ public abstract class Literal extends SpelNodeImpl {
 
 	@Override
 	public String toString() {
-		return getLiteralValue().getValue().toString();
+		return String.valueOf(getLiteralValue().getValue());
 	}
 
 	@Override

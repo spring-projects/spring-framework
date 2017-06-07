@@ -103,7 +103,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	 * {@code ResponseEntity}.
 	 */
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
-			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
+			@Nullable ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 
 		super(converters, manager, requestResponseBodyAdvice);
 	}
@@ -122,8 +122,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
@@ -164,7 +164,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
@@ -221,24 +221,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private List<String> getVaryRequestHeadersToAdd(HttpHeaders responseHeaders, HttpHeaders entityHeaders) {
-		if (!responseHeaders.containsKey(HttpHeaders.VARY)) {
-			return entityHeaders.getVary();
-		}
 		List<String> entityHeadersVary = entityHeaders.getVary();
-		List<String> result = new ArrayList<>(entityHeadersVary);
-		for (String header : responseHeaders.get(HttpHeaders.VARY)) {
-			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
-				if ("*".equals(existing)) {
-					return Collections.emptyList();
-				}
-				for (String value : entityHeadersVary) {
-					if (value.equalsIgnoreCase(existing)) {
-						result.remove(value);
+		List<String> vary = responseHeaders.get(HttpHeaders.VARY);
+		if (vary != null) {
+			List<String> result = new ArrayList<>(entityHeadersVary);
+			for (String header : vary) {
+				for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+					if ("*".equals(existing)) {
+						return Collections.emptyList();
+					}
+					for (String value : entityHeadersVary) {
+						if (value.equalsIgnoreCase(existing)) {
+							result.remove(value);
+						}
 					}
 				}
 			}
+			return result;
 		}
-		return result;
+		return entityHeadersVary;
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
@@ -262,15 +263,19 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
 			if (!CollectionUtils.isEmpty(flashAttributes)) {
 				HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
-				HttpServletResponse res = request.getNativeRequest(HttpServletResponse.class);
-				RequestContextUtils.getOutputFlashMap(req).putAll(flashAttributes);
-				RequestContextUtils.saveOutputFlashMap(location, req, res);
+				HttpServletResponse res = request.getNativeResponse(HttpServletResponse.class);
+				if (req != null) {
+					RequestContextUtils.getOutputFlashMap(req).putAll(flashAttributes);
+					if (res != null) {
+						RequestContextUtils.saveOutputFlashMap(location, req, res);
+					}
+				}
 			}
 		}
 	}
 
 	@Override
-	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+	protected Class<?> getReturnValueType(@Nullable Object returnValue, MethodParameter returnType) {
 		if (returnValue != null) {
 			return returnValue.getClass();
 		}

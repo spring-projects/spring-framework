@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -52,6 +51,7 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -159,8 +159,21 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Return the SessionFactory that this instance should manage transactions for.
 	 */
+	@Nullable
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
+	}
+
+	/**
+	 * Obtain the SessionFactory for actual use.
+	 * @return the SessionFactory (never {@code null})
+	 * @throws IllegalStateException in case of no SessionFactory set
+	 * @since 5.0
+	 */
+	protected final SessionFactory obtainSessionFactory() {
+		SessionFactory sessionFactory = getSessionFactory();
+		Assert.state(sessionFactory != null, "No SessionFactory set");
+		return sessionFactory;
 	}
 
 	/**
@@ -200,6 +213,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
+	@Nullable
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -368,7 +382,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	@Override
 	public Object getResourceFactory() {
-		return getSessionFactory();
+		return obtainSessionFactory();
 	}
 
 	@Override
@@ -376,8 +390,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = new HibernateTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
+		SessionFactory sessionFactory = obtainSessionFactory();
 		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() + "] for Hibernate transaction");
@@ -386,7 +401,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else if (this.hibernateManagedSession) {
 			try {
-				Session session = this.sessionFactory.getCurrentSession();
+				Session session = sessionFactory.getCurrentSession();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found Hibernate-managed Session [" + session + "] for Spring-managed transaction");
 				}
@@ -430,11 +445,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		Session session = null;
 
 		try {
-			if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
+			if (!txObject.hasSessionHolder() || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
 				Interceptor entityInterceptor = getEntityInterceptor();
 				Session newSession = (entityInterceptor != null ?
-						getSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
-						getSessionFactory().openSession());
+						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
+						obtainSessionFactory().openSession());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
@@ -522,7 +537,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Bind the session holder to the thread.
 			if (txObject.isNewSessionHolder()) {
-				TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
+				TransactionSynchronizationManager.bindResource(obtainSessionFactory(), txObject.getSessionHolder());
 			}
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		}
@@ -530,7 +545,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		catch (Throwable ex) {
 			if (txObject.isNewSession()) {
 				try {
-					if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+					if (session != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 						session.getTransaction().rollback();
 					}
 				}
@@ -551,7 +566,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 		txObject.setSessionHolder(null);
 		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
+				(SessionHolder) TransactionSynchronizationManager.unbindResource(obtainSessionFactory());
 		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
@@ -561,15 +576,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
-	protected void doResume(Object transaction, Object suspendedResources) {
+	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
+		SessionFactory sessionFactory = obtainSessionFactory();
+
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
-		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
+		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
 			// From non-transactional code running in active transaction synchronization
 			// -> can be safely removed, will be closed on transaction completion.
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+			TransactionSynchronizationManager.unbindResource(sessionFactory);
 		}
-		TransactionSynchronizationManager.bindResource(getSessionFactory(), resourcesHolder.getSessionHolder());
-		if (getDataSource() != null) {
+		TransactionSynchronizationManager.bindResource(sessionFactory, resourcesHolder.getSessionHolder());
+		if (getDataSource() != null && resourcesHolder.getConnectionHolder() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
 	}
@@ -577,12 +594,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
+		Transaction hibTx = txObject.getSessionHolder().getTransaction();
+		Assert.state(hibTx != null, "No Hibernate transaction");
 		if (status.isDebug()) {
 			logger.debug("Committing Hibernate transaction on Session [" +
 					txObject.getSessionHolder().getSession() + "]");
 		}
+
 		try {
-			txObject.getSessionHolder().getTransaction().commit();
+			hibTx.commit();
 		}
 		catch (org.hibernate.TransactionException ex) {
 			// assumably from commit call to the underlying JDBC connection
@@ -603,12 +623,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
+		Transaction hibTx = txObject.getSessionHolder().getTransaction();
+		Assert.state(hibTx != null, "No Hibernate transaction");
 		if (status.isDebug()) {
 			logger.debug("Rolling back Hibernate transaction on Session [" +
 					txObject.getSessionHolder().getSession() + "]");
 		}
+
 		try {
-			txObject.getSessionHolder().getTransaction().rollback();
+			hibTx.rollback();
 		}
 		catch (org.hibernate.TransactionException ex) {
 			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
@@ -649,7 +672,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		// Remove the session holder from the thread.
 		if (txObject.isNewSessionHolder()) {
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+			TransactionSynchronizationManager.unbindResource(obtainSessionFactory());
 		}
 
 		// Remove the JDBC connection holder from the thread, if exposed.
@@ -792,7 +815,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		public SessionHolder getSessionHolder() {
+			Assert.state(this.sessionHolder != null, "No SessionHolder available");
 			return this.sessionHolder;
+		}
+
+		public boolean hasSessionHolder() {
+			return (this.sessionHolder != null);
 		}
 
 		public boolean isNewSessionHolder() {
@@ -807,6 +835,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			this.previousHoldability = previousHoldability;
 		}
 
+		@Nullable
 		public Integer getPreviousHoldability() {
 			return this.previousHoldability;
 		}
@@ -861,7 +890,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private final ConnectionHolder connectionHolder;
 
-		private SuspendedResourcesHolder(SessionHolder sessionHolder, ConnectionHolder conHolder) {
+		private SuspendedResourcesHolder(SessionHolder sessionHolder, @Nullable ConnectionHolder conHolder) {
 			this.sessionHolder = sessionHolder;
 			this.connectionHolder = conHolder;
 		}
@@ -870,6 +899,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			return this.sessionHolder;
 		}
 
+		@Nullable
 		private ConnectionHolder getConnectionHolder() {
 			return this.connectionHolder;
 		}

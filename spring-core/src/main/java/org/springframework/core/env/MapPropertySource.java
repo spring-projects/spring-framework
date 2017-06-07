@@ -18,7 +18,6 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.StringUtils;
 
 /**
@@ -29,7 +28,6 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see PropertiesPropertySource
  */
-@NonNullApi
 public class MapPropertySource extends EnumerablePropertySource<Map<String, Object>> {
 
 	public MapPropertySource(String name, Map<String, Object> source) {

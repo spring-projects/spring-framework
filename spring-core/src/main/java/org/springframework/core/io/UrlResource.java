@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -121,7 +122,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException  {
+	public UrlResource(String protocol, String location, @Nullable String fragment) throws MalformedURLException  {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();

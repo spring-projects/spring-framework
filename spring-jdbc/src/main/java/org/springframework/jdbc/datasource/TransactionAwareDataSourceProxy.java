@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.Assert;
 
 /**
  * Proxy for a target JDBC {@link javax.sql.DataSource}, adding awareness of
@@ -119,9 +118,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		DataSource ds = getTargetDataSource();
-		Assert.state(ds != null, "'targetDataSource' is required");
-		return getTransactionAwareConnectionProxy(ds);
+		return getTransactionAwareConnectionProxy(obtainTargetDataSource());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public final class CloseStatus {
 	 * @param code the status code
 	 * @param reason the reason
 	 */
-	public CloseStatus(int code, String reason) {
+	public CloseStatus(int code, @Nullable String reason) {
 		Assert.isTrue((code >= 1000 && code < 5000), "Invalid status code");
 		this.code = code;
 		this.reason = reason;

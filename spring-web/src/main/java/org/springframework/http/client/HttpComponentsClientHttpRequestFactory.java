@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
+	@Nullable
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
@@ -219,11 +220,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * the factory-level {@link RequestConfig}, if necessary.
 	 * @param clientConfig the config held by the current
 	 * @return the merged request config
-	 * (may be {@code null} if the given client config is {@code null})
 	 * @since 4.2
 	 */
-	@Nullable
-	protected RequestConfig mergeRequestConfig(@Nullable RequestConfig clientConfig) {
+	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
 		if (this.requestConfig == null) {  // nothing to merge
 			return clientConfig;
 		}

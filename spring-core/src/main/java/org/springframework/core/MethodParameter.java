@@ -378,7 +378,7 @@ public class MethodParameter {
 	/**
 	 * Set a resolved (generic) parameter type.
 	 */
-	void setParameterType(Class<?> parameterType) {
+	void setParameterType(@Nullable Class<?> parameterType) {
 		this.parameterType = parameterType;
 	}
 
@@ -408,7 +408,7 @@ public class MethodParameter {
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
 			if (this.parameterIndex < 0) {
-				this.genericParameterType = (this.method != null ? this.method.getGenericReturnType() : null);
+				this.genericParameterType = (this.method != null ? this.method.getGenericReturnType() : void.class);
 			}
 			else {
 				this.genericParameterType = (this.method != null ?
@@ -489,7 +489,8 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return adaptAnnotation(getAnnotatedElement().getAnnotation(annotationType));
+		A annotation = getAnnotatedElement().getAnnotation(annotationType);
+		return (annotation != null ? adaptAnnotation(annotation) : null);
 	}
 
 	/**
@@ -560,7 +561,7 @@ public class MethodParameter {
 	 * this point; it just allows discovery to happen when the application calls
 	 * {@link #getParameterName()} (if ever).
 	 */
-	public void initParameterNameDiscovery(ParameterNameDiscoverer parameterNameDiscoverer) {
+	public void initParameterNameDiscovery(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
@@ -720,22 +721,28 @@ public class MethodParameter {
 		 */
 		public static boolean isNullable(MethodParameter param) {
 			if (param.getContainingClass().isAnnotationPresent(Metadata.class)) {
-				int parameterIndex = param.getParameterIndex();
-				if (parameterIndex == -1) {
-					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(param.getMethod());
+				Method method = param.getMethod();
+				Constructor<?> ctor = param.getConstructor();
+				int index = param.getParameterIndex();
+				if (method != null && index == -1) {
+					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 					return (function != null && function.getReturnType().isMarkedNullable());
 				}
 				else {
-					KFunction<?> function = (param.getMethod() != null ?
-							ReflectJvmMapping.getKotlinFunction(param.getMethod()) :
-							ReflectJvmMapping.getKotlinFunction(param.getConstructor()));
+					KFunction<?> function = null;
+					if (method != null) {
+						function = ReflectJvmMapping.getKotlinFunction(method);
+					}
+					else if (ctor != null) {
+						function = ReflectJvmMapping.getKotlinFunction(ctor);
+					}
 					if (function != null) {
 						List<KParameter> parameters = function.getParameters();
 						return parameters
 								.stream()
 								.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
 								.collect(Collectors.toList())
-								.get(parameterIndex)
+								.get(index)
 								.getType()
 								.isMarkedNullable();
 					}

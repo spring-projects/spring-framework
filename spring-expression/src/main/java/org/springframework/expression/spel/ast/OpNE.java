@@ -23,6 +23,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.Assert;
 
 /**
  * Implements the not-equal operator.
@@ -40,12 +41,11 @@ public class OpNE extends Operator {
 
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Object left = getLeftOperand().getValueInternal(state).getValue();
-		Object right = getRightOperand().getValueInternal(state).getValue();
-		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
-		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
-		return BooleanTypedValue.forValue(
-				!equalityCheck(state.getEvaluationContext(), left, right));
+		Object leftValue = getLeftOperand().getValueInternal(state).getValue();
+		Object rightValue = getRightOperand().getValueInternal(state).getValue();
+		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(leftValue);
+		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(rightValue);
+		return BooleanTypedValue.forValue(!equalityCheck(state.getEvaluationContext(), leftValue, rightValue));
 	}
 
 	// This check is different to the one in the other numeric operators (OpLt/etc)

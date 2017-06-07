@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceHttpRequestHandler> handlerMap) {
+	public void setHandlerMap(@Nullable Map<String, ResourceHttpRequestHandler> handlerMap) {
 		if (handlerMap != null) {
 			this.handlerMap.clear();
 			this.handlerMap.putAll(handlerMap);

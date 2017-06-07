@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -93,16 +92,15 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * Use this property to configure one or more properties to be passed on
 	 * every handshake.
 	 */
-	public void setUserProperties(Map<String, Object> userProperties) {
+	public void setUserProperties(@Nullable Map<String, Object> userProperties) {
 		if (userProperties != null) {
 			this.userProperties.putAll(userProperties);
 		}
 	}
 
 	/**
-	 * The configured user properties, or {@code null}.
+	 * The configured user properties.
 	 */
-	@Nullable
 	public Map<String, Object> getUserProperties() {
 		return this.userProperties;
 	}

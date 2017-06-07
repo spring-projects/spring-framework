@@ -18,7 +18,6 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -64,7 +63,6 @@ import org.springframework.util.Assert;
  * @see AbstractEnvironment#getSystemEnvironment()
  * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
  */
-@NonNullApi
 public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 	/**

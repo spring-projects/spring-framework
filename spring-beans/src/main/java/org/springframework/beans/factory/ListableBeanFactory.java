@@ -106,7 +106,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
-	 * @param type the class or interface to match, or {@code null} for all bean names
+	 * @param type the generically typed class or interface to match
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
 	 * @since 4.2
@@ -114,7 +114,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, ResolvableType)
 	 */
-	String[] getBeanNamesForType(@Nullable ResolvableType type);
+	String[] getBeanNamesForType(ResolvableType type);
 
 	/**
 	 * Return the names of beans matching the given type (including subclasses),
@@ -268,7 +268,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * found on the given class itself.
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the annotation class to look for
-	 * @return the annotation of the given type if found, or {@code null}
+	 * @return the annotation of the given type if found, or {@code null} otherwise
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 3.0
 	 */

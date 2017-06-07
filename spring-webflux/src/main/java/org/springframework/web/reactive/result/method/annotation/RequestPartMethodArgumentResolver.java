@@ -31,6 +31,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.BindingContext;
@@ -71,7 +72,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 			ServerWebExchange exchange) {
 
 		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = requestPart == null || requestPart.required();
+		boolean isRequired = (requestPart == null || requestPart.required());
 		String name = getPartName(parameter, requestPart);
 
 		Flux<Part> partFlux = getPartValues(name, exchange);
@@ -99,7 +100,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 		});
 	}
 
-	private String getPartName(MethodParameter methodParam, RequestPart requestPart) {
+	private String getPartName(MethodParameter methodParam, @Nullable RequestPart requestPart) {
 		String partName = (requestPart != null ? requestPart.name() : "");
 		if (partName.isEmpty()) {
 			partName = methodParam.getParameterName();

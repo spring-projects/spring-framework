@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import javax.jms.QueueReceiver;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JMS MessageConsumer decorator that adapts all calls
  * to a shared MessageConsumer instance underneath.
@@ -48,11 +50,13 @@ class CachedMessageConsumer implements MessageConsumer, QueueReceiver, TopicSubs
 	}
 
 	@Override
+	@Nullable
 	public Queue getQueue() throws JMSException {
 		return (this.target instanceof QueueReceiver ? ((QueueReceiver) this.target).getQueue() : null);
 	}
 
 	@Override
+	@Nullable
 	public Topic getTopic() throws JMSException {
 		return (this.target instanceof TopicSubscriber ? ((TopicSubscriber) this.target).getTopic() : null);
 	}

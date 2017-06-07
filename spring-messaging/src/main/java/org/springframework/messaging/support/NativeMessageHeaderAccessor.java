@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * A protected constructor accepting the headers of an existing message to copy.
 	 */
-	protected NativeMessageHeaderAccessor(Message<?> message) {
+	protected NativeMessageHeaderAccessor(@Nullable Message<?> message) {
 		super(message);
 		if (message != null) {
 			@SuppressWarnings("unchecked")
@@ -86,7 +86,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, List<String>> getNativeHeaders() {
+	@Nullable
+	protected Map<String, List<String>> getNativeHeaders() {
 		return (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 	}
 
@@ -105,7 +106,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			if (map != null) {
 				// Force removal since setHeader checks for equality
 				removeHeader(NATIVE_HEADERS);
-				setHeader(NATIVE_HEADERS, Collections.<String, List<String>>unmodifiableMap(map));
+				setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
 			}
 			super.setImmutable();
 		}
@@ -120,7 +121,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * @return all values for the specified native header or {@code null}.
+	 * Return all values for the specified native header.
+	 * or {@code null} if none.
 	 */
 	@Nullable
 	public List<String> getNativeHeader(String headerName) {
@@ -129,7 +131,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * @return the first value for the specified native header or {@code null}.
+	 * Return the first value for the specified native header,
+	 * or {@code null} if none.
 	 */
 	@Nullable
 	public String getFirstNativeHeader(String headerName) {
@@ -146,7 +149,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Set the specified native header value replacing existing values.
 	 */
-	public void setNativeHeader(String name, String value) {
+	public void setNativeHeader(String name, @Nullable String value) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> map = getNativeHeaders();
 		if (value == null) {
@@ -171,7 +174,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Add the specified native header value to existing values.
 	 */
-	public void addNativeHeader(String name, String value) {
+	public void addNativeHeader(String name, @Nullable String value) {
 		Assert.state(isMutable(), "Already immutable");
 		if (value == null) {
 			return;
@@ -190,7 +193,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
-	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+	public void addNativeHeaders(@Nullable MultiValueMap<String, String> headers) {
 		if (headers == null) {
 			return;
 		}

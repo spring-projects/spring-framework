@@ -107,7 +107,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	}
 
-	private Charset getMediaTypeCharset(MediaType mediaType) {
+	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
 		if (mediaType != null && mediaType.getCharset() != null) {
 			return mediaType.getCharset();
 		}

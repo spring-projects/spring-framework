@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,17 @@ public class ByteArrayMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	@Nullable
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected Object convertFromInternal(
+			Message<?> message, @Nullable Class<?> targetClass, @Nullable Object conversionHint) {
+
 		return message.getPayload();
 	}
 
 	@Override
 	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(
+			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+
 		return payload;
 	}
 

@@ -72,9 +72,9 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -101,18 +101,12 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
-@NonNullApi
 class ConfigurationClassParser {
 
 	private static final PropertySourceFactory DEFAULT_PROPERTY_SOURCE_FACTORY = new DefaultPropertySourceFactory();
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
-			new Comparator<ConfigurationClassParser.DeferredImportSelectorHolder>() {
-				@Override
-				public int compare(DeferredImportSelectorHolder o1, DeferredImportSelectorHolder o2) {
-					return AnnotationAwareOrderComparator.INSTANCE.compare(o1.getImportSelector(), o2.getImportSelector());
-				}
-			};
+			(o1, o2) -> AnnotationAwareOrderComparator.INSTANCE.compare(o1.getImportSelector(), o2.getImportSelector());
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -189,7 +183,8 @@ class ConfigurationClassParser {
 		processDeferredImportSelectors();
 	}
 
-	protected final void parse(String className, String beanName) throws IOException {
+	protected final void parse(@Nullable String className, String beanName) throws IOException {
+		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
 		processConfigurationClass(new ConfigurationClass(reader, beanName));
 	}
@@ -304,9 +299,9 @@ class ConfigurationClassParser {
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
-		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
-			AnnotationAttributes importResource =
-					AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
+		AnnotationAttributes importResource =
+				AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
+		if (importResource != null) {
 			String[] resources = importResource.getStringArray("locations");
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
@@ -327,7 +322,8 @@ class ConfigurationClassParser {
 		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
-			if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
+			if (superclass != null && !superclass.startsWith("java") &&
+					!this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// Superclass found, return its annotation metadata and recurse
 				return sourceClass.getSuperClass();
@@ -469,32 +465,35 @@ class ConfigurationClassParser {
 	private void addPropertySource(PropertySource<?> propertySource) {
 		String name = propertySource.getName();
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
-		if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
+
+		if (this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
 			PropertySource<?> existing = propertySources.get(name);
-			PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
-					((ResourcePropertySource) propertySource).withResourceName() : propertySource);
-			if (existing instanceof CompositePropertySource) {
-				((CompositePropertySource) existing).addFirstPropertySource(newSource);
-			}
-			else {
-				if (existing instanceof ResourcePropertySource) {
-					existing = ((ResourcePropertySource) existing).withResourceName();
+			if (existing != null) {
+				PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
+						((ResourcePropertySource) propertySource).withResourceName() : propertySource);
+				if (existing instanceof CompositePropertySource) {
+					((CompositePropertySource) existing).addFirstPropertySource(newSource);
 				}
-				CompositePropertySource composite = new CompositePropertySource(name);
-				composite.addPropertySource(newSource);
-				composite.addPropertySource(existing);
-				propertySources.replace(name, composite);
+				else {
+					if (existing instanceof ResourcePropertySource) {
+						existing = ((ResourcePropertySource) existing).withResourceName();
+					}
+					CompositePropertySource composite = new CompositePropertySource(name);
+					composite.addPropertySource(newSource);
+					composite.addPropertySource(existing);
+					propertySources.replace(name, composite);
+				}
+				return;
 			}
 		}
+
+		if (this.propertySourceNames.isEmpty()) {
+			propertySources.addLast(propertySource);
+		}
 		else {
-			if (this.propertySourceNames.isEmpty()) {
-				propertySources.addLast(propertySource);
-			}
-			else {
-				String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
-				propertySources.addBefore(firstProcessed, propertySource);
-			}
+			String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
+			propertySources.addBefore(firstProcessed, propertySource);
 		}
 		this.propertySourceNames.add(name);
 	}
@@ -655,7 +654,10 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a {@link Class}.
 	 */
-	SourceClass asSourceClass(Class<?> classType) throws IOException {
+	SourceClass asSourceClass(@Nullable Class<?> classType) throws IOException {
+		if (classType == null) {
+			return new SourceClass(Object.class);
+		}
 		try {
 			// Sanity test that we can read annotations, if not fall back to ASM
 			classType.getAnnotations();
@@ -681,11 +683,14 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
-	SourceClass asSourceClass(String className) throws IOException {
+	SourceClass asSourceClass(@Nullable String className) throws IOException {
+		if (className == null) {
+			return new SourceClass(Object.class);
+		}
 		if (className.startsWith("java")) {
 			// Never use ASM for core java types
 			try {
-				return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
+				return new SourceClass(ClassUtils.forName(className, this.resourceLoader.getClassLoader()));
 			}
 			catch (ClassNotFoundException ex) {
 				throw new NestedIOException("Failed to load class [" + className + "]", ex);
@@ -802,7 +807,7 @@ class ConfigurationClassParser {
 				return (Class<?>) this.source;
 			}
 			String className = ((MetadataReader) this.source).getClassMetadata().getClassName();
-			return resourceLoader.getClassLoader().loadClass(className);
+			return ClassUtils.forName(className, resourceLoader.getClassLoader());
 		}
 
 		public boolean isAssignable(Class<?> clazz) throws IOException {

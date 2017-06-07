@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -118,7 +117,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 					"ConverterFactory [" + factory.getClass().getName() + "]; does the class parameterize those types?");
 		}
 		addConverter(new ConverterFactoryAdapter(factory,
-				new ConvertiblePair(typeInfo[0].resolve(), typeInfo[1].resolve())));
+				new ConvertiblePair(typeInfo[0].resolve(Object.class), typeInfo[1].resolve(Object.class))));
 	}
 
 	@Override
@@ -306,25 +305,29 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	@Nullable
-	private Object handleConverterNotFound(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	private Object handleConverterNotFound(
+			@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
+
 		if (source == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 			return null;
 		}
-		if (sourceType.isAssignableTo(targetType) && targetType.getObjectType().isInstance(source)) {
+		if ((sourceType == null || sourceType.isAssignableTo(targetType)) &&
+				targetType.getObjectType().isInstance(source)) {
 			return source;
 		}
 		throw new ConverterNotFoundException(sourceType, targetType);
 	}
 
-	private Object handleResult(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
+	@Nullable
+	private Object handleResult(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType, @Nullable Object result) {
 		if (result == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 		}
 		return result;
 	}
 
-	private void assertNotPrimitiveTargetType(TypeDescriptor sourceType, TypeDescriptor targetType) {
+	private void assertNotPrimitiveTargetType(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType.isPrimitive()) {
 			throw new ConversionFailedException(sourceType, targetType, null,
 					new IllegalArgumentException("A null value cannot be assigned to a primitive type"));
@@ -460,14 +463,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 				return false;
 			}
 			ConverterCacheKey otherKey = (ConverterCacheKey) other;
-			return (ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType) &&
-					ObjectUtils.nullSafeEquals(this.targetType, otherKey.targetType));
+			return (this.sourceType.equals(otherKey.sourceType)) &&
+					this.targetType.equals(otherKey.targetType);
 		}
 
 		@Override
 		public int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(this.sourceType) * 29 +
-					ObjectUtils.nullSafeHashCode(this.targetType));
+			return (this.sourceType.hashCode() * 29 + this.targetType.hashCode());
 		}
 
 		@Override

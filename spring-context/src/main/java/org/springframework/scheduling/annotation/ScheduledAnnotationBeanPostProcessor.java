@@ -302,13 +302,10 @@ public class ScheduledAnnotationBeanPostProcessor
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
-						@Override
-						public Set<Scheduled> inspect(Method method) {
-							Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-									method, Scheduled.class, Schedules.class);
-							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
-						}
+					(MethodIntrospector.MetadataLookup<Set<Scheduled>>) method -> {
+						Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+								method, Scheduled.class, Schedules.class);
+						return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
 					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
@@ -354,33 +351,37 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
-				try {
-					initialDelay = Long.parseLong(initialDelayString);
-				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+				if (StringUtils.hasLength(initialDelayString)) {
+					try {
+						initialDelay = Long.parseLong(initialDelayString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+					}
 				}
 			}
 
 			// Check cron expression
 			String cron = scheduled.cron();
 			if (StringUtils.hasText(cron)) {
-				Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
-				processedSchedule = true;
 				String zone = scheduled.zone();
 				if (this.embeddedValueResolver != null) {
 					cron = this.embeddedValueResolver.resolveStringValue(cron);
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
-				TimeZone timeZone;
-				if (StringUtils.hasText(zone)) {
-					timeZone = StringUtils.parseTimeZoneString(zone);
+				if (StringUtils.hasLength(cron)) {
+					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
+					processedSchedule = true;
+					TimeZone timeZone;
+					if (StringUtils.hasText(zone)) {
+						timeZone = StringUtils.parseTimeZoneString(zone);
+					}
+					else {
+						timeZone = TimeZone.getDefault();
+					}
+					tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 				}
-				else {
-					timeZone = TimeZone.getDefault();
-				}
-				tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
@@ -397,19 +398,21 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
-				Assert.isTrue(!processedSchedule, errorMessage);
-				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
 					fixedDelayString = this.embeddedValueResolver.resolveStringValue(fixedDelayString);
 				}
-				try {
-					fixedDelay = Long.parseLong(fixedDelayString);
+				if (StringUtils.hasLength(fixedDelayString)) {
+					Assert.isTrue(!processedSchedule, errorMessage);
+					processedSchedule = true;
+					try {
+						fixedDelay = Long.parseLong(fixedDelayString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
+					}
+					tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into integer");
-				}
-				tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 			}
 
 			// Check fixed rate
@@ -421,19 +424,21 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
-				Assert.isTrue(!processedSchedule, errorMessage);
-				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
 					fixedRateString = this.embeddedValueResolver.resolveStringValue(fixedRateString);
 				}
-				try {
-					fixedRate = Long.parseLong(fixedRateString);
+				if (StringUtils.hasLength(fixedRateString)) {
+					Assert.isTrue(!processedSchedule, errorMessage);
+					processedSchedule = true;
+					try {
+						fixedRate = Long.parseLong(fixedRateString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
+					}
+					tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
-				}
-				tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 			}
 
 			// Check whether we had any attribute set

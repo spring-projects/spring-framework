@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -120,6 +121,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Get the redirect status code to use.
 	 */
+	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
@@ -197,12 +199,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * RequestDataValueProcessor}.
 	 */
 	protected final String createTargetUrl(Map<String, Object> model, ServerWebExchange exchange) {
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
 
 		StringBuilder targetUrl = new StringBuilder();
-		if (isContextRelative() && getUrl().startsWith("/")) {
+		if (isContextRelative() && url.startsWith("/")) {
 			targetUrl.append(exchange.getRequest().getContextPath());
 		}
-		targetUrl.append(getUrl());
+		targetUrl.append(url);
 
 		if (StringUtils.hasText(targetUrl)) {
 			Map<String, String> uriVars = getCurrentUriVariables(exchange);
@@ -296,7 +300,10 @@ public class RedirectView extends AbstractUrlBasedView {
 		ServerHttpResponse response = exchange.getResponse();
 		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
 		response.getHeaders().setLocation(URI.create(encodedURL));
-		response.setStatusCode(getStatusCode());
+		HttpStatus status = getStatusCode();
+		if (status != null) {
+			response.setStatusCode(status);
+		}
 		return Mono.empty();
 	}
 

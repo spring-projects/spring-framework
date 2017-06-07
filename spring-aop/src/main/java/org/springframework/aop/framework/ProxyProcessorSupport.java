@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * {@link org.springframework.beans.factory.BeanFactory} for loading all bean classes.
 	 * This can be overridden here for specific proxies.
 	 */
-	public void setProxyClassLoader(ClassLoader classLoader) {
+	public void setProxyClassLoader(@Nullable ClassLoader classLoader) {
 		this.proxyClassLoader = classLoader;
 		this.classLoaderConfigured = (classLoader != null);
 	}
@@ -82,7 +82,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (!this.classLoaderConfigured) {
 			this.proxyClassLoader = classLoader;
 		}

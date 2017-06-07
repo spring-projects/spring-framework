@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public interface InstantiationStrategy {
 	 * @throws BeansException if the instantiation attempt failed
 	 */
 	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			Constructor<?> ctor, Object... args) throws BeansException;
+			Constructor<?> ctor, @Nullable Object... args) throws BeansException;
 
 	/**
 	 * Return an instance of the bean with the given name in this factory,
@@ -80,6 +80,7 @@ public interface InstantiationStrategy {
 	 * @throws BeansException if the instantiation attempt failed
 	 */
 	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			@Nullable Object factoryBean, Method factoryMethod, Object... args) throws BeansException;
+			@Nullable Object factoryBean, Method factoryMethod, @Nullable Object... args)
+			throws BeansException;
 
 }

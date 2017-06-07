@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
+	@Nullable
 	public Set<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
@@ -246,19 +247,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
-			RequestMapping requestMapping, RequestCondition<?> customCondition) {
+			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
 
-		return RequestMappingInfo
+		RequestMappingInfo.Builder builder = RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())
 				.params(requestMapping.params())
 				.headers(requestMapping.headers())
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
-				.mappingName(requestMapping.name())
-				.customCondition(customCondition)
-				.options(this.config)
-				.build();
+				.mappingName(requestMapping.name());
+		if (customCondition != null) {
+			builder.customCondition(customCondition);
+		}
+		return builder.options(this.config).build();
 	}
 
 	/**
@@ -301,7 +303,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return config.applyPermitDefaultValues();
 	}
 
-	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
+	private void updateCorsConfig(CorsConfiguration config, @Nullable CrossOrigin annotation) {
 		if (annotation == null) {
 			return;
 		}
@@ -336,7 +338,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	private String resolveCorsAnnotationValue(String value) {
-		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
+		if (this.embeddedValueResolver != null) {
+			String resolved = this.embeddedValueResolver.resolveStringValue(value);
+			return (resolved != null ? resolved : "");
+		}
+		else {
+			return value;
+		}
 	}
 
 }

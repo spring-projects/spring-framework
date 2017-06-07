@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
@@ -42,6 +43,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 
 	public StringMessageConverter(Charset defaultCharset) {
 		super(new MimeType("text", "plain", defaultCharset));
+		Assert.notNull(defaultCharset, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
 	}
 
@@ -59,7 +61,9 @@ public class StringMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected Object convertToInternal(
+			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+
 		if (byte[].class == getSerializedPayloadClass()) {
 			Charset charset = getContentTypeCharset(getMimeType(headers));
 			payload = ((String) payload).getBytes(charset);
@@ -67,7 +71,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 		return payload;
 	}
 
-	private Charset getContentTypeCharset(MimeType mimeType) {
+	private Charset getContentTypeCharset(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			return mimeType.getCharset();
 		}

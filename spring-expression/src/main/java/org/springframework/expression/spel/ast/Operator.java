@@ -24,6 +24,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
@@ -62,7 +63,6 @@ public abstract class Operator extends SpelNodeImpl {
 		return this.children[0];
 	}
 
-	@Nullable
 	public SpelNodeImpl getRightOperand() {
 		return this.children[1];
 	}
@@ -89,7 +89,7 @@ public abstract class Operator extends SpelNodeImpl {
 
 	protected boolean isCompilableOperatorUsingNumerics() {
 		SpelNodeImpl left = getLeftOperand();
-		SpelNodeImpl right= getRightOperand();
+		SpelNodeImpl right = getRightOperand();
 		if (!left.isCompilable() || !right.isCompilable()) {
 			return false;
 		}
@@ -107,8 +107,10 @@ public abstract class Operator extends SpelNodeImpl {
 	 * two comparison instructions.
 	 */
 	protected void generateComparisonCode(MethodVisitor mv, CodeFlow cf, int compInstruction1, int compInstruction2) {
-		String leftDesc = getLeftOperand().exitTypeDescriptor;
-		String rightDesc = getRightOperand().exitTypeDescriptor;
+		SpelNodeImpl left = getLeftOperand();
+		SpelNodeImpl right = getRightOperand();
+		String leftDesc = left.exitTypeDescriptor;
+		String rightDesc = right.exitTypeDescriptor;
 		
 		boolean unboxLeft = !CodeFlow.isPrimitive(leftDesc);
 		boolean unboxRight = !CodeFlow.isPrimitive(rightDesc);
@@ -117,14 +119,14 @@ public abstract class Operator extends SpelNodeImpl {
 		char targetType = dc.compatibleType;  // CodeFlow.toPrimitiveTargetDesc(leftDesc);
 		
 		cf.enterCompilationScope();
-		getLeftOperand().generateCode(mv, cf);
+		left.generateCode(mv, cf);
 		cf.exitCompilationScope();
 		if (unboxLeft) {
 			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 		}
 	
 		cf.enterCompilationScope();
-		getRightOperand().generateCode(mv, cf);
+		right.generateCode(mv, cf);
 		cf.exitCompilationScope();
 		if (unboxRight) {
 			CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
@@ -171,7 +173,7 @@ public abstract class Operator extends SpelNodeImpl {
 	 * @param left the left-hand operand value
 	 * @param right the right-hand operand value
 	 */
-	public static boolean equalityCheck(EvaluationContext context, Object left, Object right) {
+	public static boolean equalityCheck(EvaluationContext context, @Nullable Object left, @Nullable Object right) {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
@@ -179,7 +181,7 @@ public abstract class Operator extends SpelNodeImpl {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
-				return (leftBigDecimal == null ? rightBigDecimal == null : leftBigDecimal.compareTo(rightBigDecimal) == 0);
+				return (leftBigDecimal.compareTo(rightBigDecimal) == 0);
 			}
 			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return (leftNumber.doubleValue() == rightNumber.doubleValue());
@@ -190,7 +192,7 @@ public abstract class Operator extends SpelNodeImpl {
 			else if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
 				BigInteger leftBigInteger = NumberUtils.convertNumberToTargetClass(leftNumber, BigInteger.class);
 				BigInteger rightBigInteger = NumberUtils.convertNumberToTargetClass(rightNumber, BigInteger.class);
-				return (leftBigInteger == null ? rightBigInteger == null : leftBigInteger.compareTo(rightBigInteger) == 0);
+				return (leftBigInteger.compareTo(rightBigInteger) == 0);
 			}
 			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return (leftNumber.longValue() == rightNumber.longValue());

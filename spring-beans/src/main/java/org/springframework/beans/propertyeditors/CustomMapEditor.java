@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -76,9 +77,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 */
 	@SuppressWarnings("rawtypes")
 	public CustomMapEditor(Class<? extends Map> mapType, boolean nullAsEmptyMap) {
-		if (mapType == null) {
-			throw new IllegalArgumentException("Map type is required");
-		}
+		Assert.notNull(mapType, "Map type is required");
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException(
 					"Map type [" + mapType.getName() + "] does not implement [java.util.Map]");
@@ -100,7 +99,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * Convert the given value to a Map of the target type.
 	 */
 	@Override
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		if (value == null && this.nullAsEmptyMap) {
 			super.setValue(createMap(this.mapType, 0));
 		}

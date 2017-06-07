@@ -145,7 +145,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		boolean match = super.isAutowireCandidate(bdHolder, descriptor);
-		if (match && descriptor != null) {
+		if (match) {
 			match = checkQualifiers(bdHolder, descriptor.getAnnotations());
 			if (match) {
 				MethodParameter methodParam = descriptor.getMethodParameter();
@@ -298,11 +298,13 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		return true;
 	}
 
+	@Nullable
 	protected Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		AnnotatedElement qualifiedElement = bd.getQualifiedElement();
 		return (qualifiedElement != null ? AnnotationUtils.getAnnotation(qualifiedElement, type) : null);
 	}
 
+	@Nullable
 	protected Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		Method resolvedFactoryMethod = bd.getResolvedFactoryMethod();
 		return (resolvedFactoryMethod != null ? AnnotationUtils.getAnnotation(resolvedFactoryMethod, type) : null);

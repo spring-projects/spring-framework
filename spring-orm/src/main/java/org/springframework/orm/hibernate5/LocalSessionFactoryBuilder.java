@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import javax.persistence.Embeddable;
@@ -323,10 +322,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		try {
 			ClassLoader cl = this.resourcePatternResolver.getClassLoader();
 			for (String className : entityClassNames) {
-				addAnnotatedClass(cl.loadClass(className));
+				addAnnotatedClass(ClassUtils.forName(className, cl));
 			}
 			for (String className : converterClassNames) {
-				addAttributeConverter((Class<? extends AttributeConverter<?, ?>>) cl.loadClass(className));
+				addAttributeConverter((Class<? extends AttributeConverter<?, ?>>) ClassUtils.forName(className, cl));
 			}
 			for (String packageName : packageNames) {
 				addPackage(packageName);

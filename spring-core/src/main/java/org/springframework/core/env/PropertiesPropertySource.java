@@ -19,8 +19,6 @@ package org.springframework.core.env;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.lang.NonNullApi;
-
 /**
  * {@link PropertySource} implementation that extracts properties from a
  * {@link java.util.Properties} object.
@@ -35,7 +33,6 @@ import org.springframework.lang.NonNullApi;
  * @author Juergen Hoeller
  * @since 3.1
  */
-@NonNullApi
 public class PropertiesPropertySource extends MapPropertySource {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

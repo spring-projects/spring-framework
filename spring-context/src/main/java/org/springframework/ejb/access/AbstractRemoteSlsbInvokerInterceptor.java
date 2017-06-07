@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,30 +42,11 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	private Class<?> homeInterface;
-
 	private boolean refreshHomeOnConnectFailure = false;
 
 	private volatile boolean homeAsComponent = false;
 
 
-
-	/**
-	 * Set a home interface that this invoker will narrow to before performing
-	 * the parameterless SLSB {@code create()} call that returns the actual
-	 * SLSB proxy.
-	 * <p>Default is none, which will work on all Java EE servers that are not
-	 * based on CORBA. A plain {@code javax.ejb.EJBHome} interface is known to
-	 * be sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
-	 * the specific home interface for the target SLSB might be necessary.
-	 */
-	public void setHomeInterface(Class<?> homeInterface) {
-		if (homeInterface != null && !homeInterface.isInterface()) {
-			throw new IllegalArgumentException(
-					"Home interface class [" + homeInterface.getClass() + "] is not an interface");
-		}
-		this.homeInterface = homeInterface;
-	}
 
 	/**
 	 * Set whether to refresh the EJB home on connect failure.
@@ -142,6 +123,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		return RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
+	@Nullable
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshHomeOnConnectFailure) {
 			if (logger.isDebugEnabled()) {
@@ -215,7 +197,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @param ejb the EJB instance to remove
 	 * @see javax.ejb.EJBObject#remove
 	 */
-	protected void removeSessionBeanInstance(EJBObject ejb) {
+	protected void removeSessionBeanInstance(@Nullable EJBObject ejb) {
 		if (ejb != null && !this.homeAsComponent) {
 			try {
 				ejb.remove();

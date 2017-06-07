@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -57,7 +58,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	/**
 	 * Set CORS configuration based on URL patterns.
 	 */
-	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
 			this.corsConfigurations.putAll(corsConfigurations);

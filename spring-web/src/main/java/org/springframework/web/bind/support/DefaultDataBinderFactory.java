@@ -68,8 +68,8 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @param webRequest the current request
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected WebDataBinder createBinderInstance(@Nullable Object target, String objectName,
-			NativeWebRequest webRequest) throws Exception {
+	protected WebDataBinder createBinderInstance(
+			@Nullable Object target, @Nullable String objectName, NativeWebRequest webRequest) throws Exception {
 
 		return new WebRequestDataBinder(target, objectName);
 	}

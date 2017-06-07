@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,13 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	@Override
 	public Advice getAdvice() {
 		Advice advice = this.advice;
-		if (advice != null || this.adviceBeanName == null) {
+		if (advice != null) {
 			return advice;
 		}
 
+		Assert.state(this.adviceBeanName != null, "'adviceBeanName' must be specified");
 		Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
+
 		if (this.beanFactory.isSingleton(this.adviceBeanName)) {
 			// Rely on singleton semantics provided by the factory.
 			advice = this.beanFactory.getBean(this.adviceBeanName, Advice.class);

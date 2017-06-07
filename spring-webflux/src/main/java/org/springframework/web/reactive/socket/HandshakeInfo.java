@@ -51,7 +51,7 @@ public class HandshakeInfo {
 	 * @param principal the principal for the session
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 */
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, String protocol) {
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
 		Assert.notNull(principal, "Principal is required");

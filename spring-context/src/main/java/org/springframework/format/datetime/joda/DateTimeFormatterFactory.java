@@ -24,7 +24,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -126,11 +125,11 @@ public class DateTimeFormatterFactory {
 	 * Create a new {@code DateTimeFormatter} using this factory.
 	 * <p>If no specific pattern or style has been defined,
 	 * the supplied {@code fallbackFormatter} will be used.
-	 * @param fallbackFormatter the fall-back formatter to use when no specific
-	 * factory properties have been set (can be {@code null}).
+	 * @param fallbackFormatter the fall-back formatter to use
+	 * when no specific factory properties have been set
 	 * @return a new date time formatter
 	 */
-	public DateTimeFormatter createDateTimeFormatter(@Nullable DateTimeFormatter fallbackFormatter) {
+	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = null;
 		if (StringUtils.hasLength(this.pattern)) {
 			dateTimeFormatter = DateTimeFormat.forPattern(this.pattern);
@@ -145,9 +144,6 @@ public class DateTimeFormatterFactory {
 					break;
 				case DATE_TIME:
 					dateTimeFormatter = ISODateTimeFormat.dateTime();
-					break;
-				case NONE:
-					/* no-op */
 					break;
 				default:
 					throw new IllegalStateException("Unsupported ISO format: " + this.iso);

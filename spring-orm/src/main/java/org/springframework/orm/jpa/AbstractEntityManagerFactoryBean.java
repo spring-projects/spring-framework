@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -57,7 +56,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -193,7 +191,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map<String, ?> jpaProperties) {
+	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -300,7 +298,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -372,10 +370,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	private EntityManagerFactory buildNativeEntityManagerFactory() {
 		EntityManagerFactory emf = createNativeEntityManagerFactory();
-		if (emf == null) {
-			throw new IllegalStateException(
-					"JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
-		}
 		if (this.jpaVendorAdapter != null) {
 			this.jpaVendorAdapter.postProcessEntityManagerFactory(emf);
 		}
@@ -389,10 +383,11 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Create a proxy of the given EntityManagerFactory. We do this to be able
 	 * to return transaction-aware proxies for application-managed
 	 * EntityManagers, and to introduce the NamedEntityManagerFactory interface
-	 * @param emf EntityManagerFactory as returned by the persistence provider
+	 * @param emf EntityManagerFactory as returned by the persistence provider,
+	 * if initialized already
 	 * @return proxy entity manager
 	 */
-	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
+	protected EntityManagerFactory createEntityManagerFactoryProxy(@Nullable EntityManagerFactory emf) {
 		Set<Class<?>> ifcs = new LinkedHashSet<>();
 		if (this.entityManagerFactoryInterface != null) {
 			ifcs.add(this.entityManagerFactoryInterface);
@@ -427,7 +422,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo
 	 * or the native EntityManagerFactory accordingly.
 	 */
-	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
+	Object invokeProxyMethod(Method method, @Nullable Object[] args) throws Throwable {
 		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 			return method.invoke(this, args);
 		}

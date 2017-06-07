@@ -79,13 +79,14 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
-	public void setTaskExecutor(Executor taskExecutor) {
+	public void setTaskExecutor(@Nullable Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
 	 * Return the current task executor for this multicaster.
 	 */
+	@Nullable
 	protected Executor getTaskExecutor() {
 		return this.taskExecutor;
 	}
@@ -105,7 +106,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * (e.g. {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
-	public void setErrorHandler(ErrorHandler errorHandler) {
+	public void setErrorHandler(@Nullable ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
 
@@ -113,6 +114,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * Return the current error handler for this multicaster.
 	 * @since 4.1
 	 */
+	@Nullable
 	protected ErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
@@ -129,12 +131,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			Executor executor = getTaskExecutor();
 			if (executor != null) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						invokeListener(listener, event);
-					}
-				});
+				executor.execute(() -> invokeListener(listener, event));
 			}
 			else {
 				invokeListener(listener, event);

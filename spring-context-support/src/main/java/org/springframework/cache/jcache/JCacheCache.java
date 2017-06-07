@@ -76,7 +76,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
+	public <T> T get(Object key, Callable<T> valueLoader) {
 		try {
 			return this.cache.invoke(key, new ValueLoaderEntryProcessor<T>(), valueLoader);
 		}
@@ -86,18 +86,18 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public void put(@Nullable Object key, @Nullable Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
 		return (set ? null : get(key));
 	}
 
 	@Override
-	public void evict(@Nullable Object key) {
+	public void evict(Object key) {
 		this.cache.remove(key);
 	}
 
@@ -111,8 +111,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T process(MutableEntry<Object, Object> entry, Object... arguments)
-				throws EntryProcessorException {
+		@Nullable
+		public T process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
 			Callable<T> valueLoader = (Callable<T>) arguments[0];
 			if (entry.exists()) {
 				return (T) fromStoreValue(entry.getValue());

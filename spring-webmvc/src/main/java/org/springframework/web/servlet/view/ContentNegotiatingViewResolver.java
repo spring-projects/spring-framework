@@ -176,7 +176,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
 		Collection<ViewResolver> matchingBeans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class).values();
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(obtainApplicationContext(), ViewResolver.class).values();
 		if (this.viewResolvers == null) {
 			this.viewResolvers = new ArrayList<>(matchingBeans.size());
 			for (ViewResolver viewResolver : matchingBeans) {
@@ -186,12 +186,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			}
 		}
 		else {
-			for (int i = 0; i < viewResolvers.size(); i++) {
-				if (matchingBeans.contains(viewResolvers.get(i))) {
+			for (int i = 0; i < this.viewResolvers.size(); i++) {
+				ViewResolver vr = this.viewResolvers.get(i);
+				if (matchingBeans.contains(vr)) {
 					continue;
 				}
-				String name = viewResolvers.get(i).getClass().getName() + i;
-				getApplicationContext().getAutowireCapableBeanFactory().initializeBean(viewResolvers.get(i), name);
+				String name = vr.getClass().getName() + i;
+				obtainApplicationContext().getAutowireCapableBeanFactory().initializeBean(vr, name);
 			}
 
 		}
@@ -206,8 +207,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Override
 	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
-			this.cnmFactoryBean.afterPropertiesSet();
-			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
+			this.contentNegotiationManager = this.cnmFactoryBean.build();
 		}
 	}
 

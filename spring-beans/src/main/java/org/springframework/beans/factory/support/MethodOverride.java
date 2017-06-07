@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -82,7 +83,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setSource(Object source) {
+	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
 

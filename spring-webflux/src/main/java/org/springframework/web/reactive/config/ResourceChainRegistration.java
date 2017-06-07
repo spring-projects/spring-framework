@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.resource.CachingResourceResolver;
@@ -63,7 +64,7 @@ public class ResourceChainRegistration {
 		this(cacheResources, cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null);
 	}
 
-	public ResourceChainRegistration(boolean cacheResources, Cache cache) {
+	public ResourceChainRegistration(boolean cacheResources, @Nullable Cache cache) {
 		Assert.isTrue(!cacheResources || cache != null, "'cache' is required when cacheResources=true");
 		if (cacheResources) {
 			this.resolvers.add(new CachingResourceResolver(cache));

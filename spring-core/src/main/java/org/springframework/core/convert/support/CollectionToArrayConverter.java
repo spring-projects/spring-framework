@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Converts a Collection to an array.
@@ -35,15 +36,18 @@ import org.springframework.lang.Nullable;
  * array's component type if necessary.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class CollectionToArrayConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public CollectionToArrayConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -52,7 +56,8 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(),
+				targetType.getElementTypeDescriptor(), this.conversionService);
 	}
 
 	@Override
@@ -62,10 +67,13 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		Object array = Array.newInstance(targetType.getElementTypeDescriptor().getType(), sourceCollection.size());
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		Assert.state(targetElementType != null, "No target element type");
+		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+			Object targetElement = this.conversionService.convert(sourceElement,
+					sourceType.elementTypeDescriptor(sourceElement), targetElementType);
 			Array.set(array, i++, targetElement);
 		}
 		return array;

@@ -38,7 +38,7 @@ public class ServerErrorException extends ResponseStatusException {
 	 * Constructor with an explanation only.
 	 */
 	public ServerErrorException(String reason) {
-		this(reason, null);
+		this(reason, null, null);
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class ServerErrorException extends ResponseStatusException {
 	/**
 	 * Constructor for a 500 error with a root cause.
 	 */
-	public ServerErrorException(String reason, MethodParameter parameter, Throwable cause) {
+	public ServerErrorException(String reason, @Nullable MethodParameter parameter, @Nullable Throwable cause) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.parameter = parameter;
 	}

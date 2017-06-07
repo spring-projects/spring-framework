@@ -109,7 +109,8 @@ public class ReactiveAdapterRegistry {
 	/**
 	 * Get the adapter for the given reactive type.
 	 */
-	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType) {
+	@Nullable
+	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
 		return getAdapter(reactiveType, null);
 	}
 
@@ -123,7 +124,6 @@ public class ReactiveAdapterRegistry {
 	 */
 	@Nullable
 	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
-
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
 		if (clazz == null) {

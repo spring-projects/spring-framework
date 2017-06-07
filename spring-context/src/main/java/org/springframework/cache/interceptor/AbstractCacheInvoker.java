@@ -34,12 +34,11 @@ public abstract class AbstractCacheInvoker {
 
 
 	protected AbstractCacheInvoker() {
-		this(new SimpleCacheErrorHandler());
+		this.errorHandler = new SimpleCacheErrorHandler();
 	}
 
 	protected AbstractCacheInvoker(CacheErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "ErrorHandler must not be null");
-		this.errorHandler = errorHandler;
+		setErrorHandler(errorHandler);
 	}
 
 
@@ -49,6 +48,7 @@ public abstract class AbstractCacheInvoker {
 	 * is used who throws any exception as is.
 	 */
 	public void setErrorHandler(CacheErrorHandler errorHandler) {
+		Assert.notNull(errorHandler, "CacheErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
@@ -82,7 +82,7 @@ public abstract class AbstractCacheInvoker {
 	 * Execute {@link Cache#put(Object, Object)} on the specified {@link Cache}
 	 * and invoke the error handler if an exception occurs.
 	 */
-	protected void doPut(Cache cache, Object key, Object result) {
+	protected void doPut(Cache cache, Object key, @Nullable Object result) {
 		try {
 			cache.put(key, result);
 		}

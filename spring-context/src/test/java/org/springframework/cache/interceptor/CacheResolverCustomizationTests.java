@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ public class CacheResolverCustomizationTests {
 
 		@Override
 		@Nullable
-		protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
+		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			String cacheName = (String) context.getArgs()[1];
 			return Collections.singleton(cacheName);
 		}
@@ -278,7 +278,7 @@ public class CacheResolverCustomizationTests {
 
 		@Override
 		@Nullable
-		protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
+		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			return null;
 		}
 	}

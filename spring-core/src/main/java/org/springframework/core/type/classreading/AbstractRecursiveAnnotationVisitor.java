@@ -26,6 +26,7 @@ import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -44,7 +45,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 	protected final ClassLoader classLoader;
 
 
-	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
+	public AbstractRecursiveAnnotationVisitor(@Nullable ClassLoader classLoader, AnnotationAttributes attributes) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;

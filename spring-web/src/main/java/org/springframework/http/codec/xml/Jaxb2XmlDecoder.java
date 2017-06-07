@@ -42,6 +42,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -82,8 +83,8 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (super.canDecode(elementType, mimeType)) {
 			Class<?> outputClass = elementType.getRawClass();
-			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class);
+			return (outputClass != null && (outputClass.isAnnotationPresent(XmlRootElement.class) ||
+					outputClass.isAnnotationPresent(XmlType.class)));
 		}
 		else {
 			return false;
@@ -91,11 +92,14 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Class<?> outputClass = elementType.getRawClass();
-		Flux<XMLEvent> xmlEventFlux = this.xmlEventDecoder.decode(inputStream, null, mimeType, hints);
+		Assert.state(outputClass != null, "Unresolvable output class");
+
+		Flux<XMLEvent> xmlEventFlux = this.xmlEventDecoder.decode(
+				inputStream, ResolvableType.forClass(XMLEvent.class), mimeType, hints);
 
 		QName typeName = toQName(outputClass);
 		Flux<List<XMLEvent>> splitEvents = split(xmlEventFlux, typeName);

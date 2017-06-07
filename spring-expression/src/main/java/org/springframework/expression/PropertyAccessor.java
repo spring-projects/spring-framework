@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.expression;
-
 
 import org.springframework.lang.Nullable;
 
@@ -57,7 +56,7 @@ public interface PropertyAccessor {
 	 * @return true if this resolver is able to read the property
 	 * @throws AccessException if there is any problem determining whether the property can be read
 	 */
-	boolean canRead(EvaluationContext context, Object target, String name) throws AccessException;
+	boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
 	/**
 	 * Called to read a property from a specified target object.
@@ -68,7 +67,7 @@ public interface PropertyAccessor {
 	 * @return a TypedValue object wrapping the property value read and a type descriptor for it
 	 * @throws AccessException if there is any problem accessing the property value
 	 */
-	TypedValue read(EvaluationContext context, Object target, String name) throws AccessException;
+	TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
 	/**
 	 * Called to determine if a resolver instance is able to write to a specified
@@ -80,7 +79,7 @@ public interface PropertyAccessor {
 	 * @throws AccessException if there is any problem determining whether the
 	 * property can be written to
 	 */
-	boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException;
+	boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
 	/**
 	 * Called to write to a property on a specified target object.
@@ -91,6 +90,7 @@ public interface PropertyAccessor {
 	 * @param newValue the new value for the property
 	 * @throws AccessException if there is any problem writing to the property value
 	 */
-	void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException;
+	void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
+			throws AccessException;
 
 }

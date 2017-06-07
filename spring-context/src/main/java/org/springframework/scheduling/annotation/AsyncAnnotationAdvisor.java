@@ -77,7 +77,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
 	 */
 	@SuppressWarnings("unchecked")
-	public AsyncAnnotationAdvisor(@Nullable Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	public AsyncAnnotationAdvisor(@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<>(2);
 		asyncAnnotationTypes.add(Async.class);
 		try {
@@ -143,7 +143,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	}
 
 
-	protected Advice buildAdvice(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	protected Advice buildAdvice(@Nullable Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		return new AnnotationAsyncExecutionInterceptor(executor, exceptionHandler);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	/**
 	 * Return the configured error handler.
 	 */
+	@Nullable
 	public StompSubProtocolErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
@@ -179,6 +180,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -248,10 +250,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			try {
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+				Assert.state(headerAccessor != null, "No StompHeaderAccessor");
 
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
-				headerAccessor.setUser(getUser(session));
+
+				Principal user = getUser(session);
+				if (user != null) {
+					headerAccessor.setUser(user);
+				}
+
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
@@ -275,20 +283,19 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 					if (sent) {
 						if (isConnect) {
-							Principal user = headerAccessor.getUser();
 							if (user != null && user != session.getPrincipal()) {
 								this.stompAuthentications.put(session.getId(), user);
 							}
 						}
 						if (this.eventPublisher != null) {
 							if (isConnect) {
-								publishEvent(new SessionConnectEvent(this, message, getUser(session)));
+								publishEvent(new SessionConnectEvent(this, message, user));
 							}
 							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-								publishEvent(new SessionSubscribeEvent(this, message, getUser(session)));
+								publishEvent(new SessionSubscribeEvent(this, message, user));
 							}
 							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-								publishEvent(new SessionUnsubscribeEvent(this, message, getUser(session)));
+								publishEvent(new SessionUnsubscribeEvent(this, message, user));
 							}
 						}
 					}
@@ -307,12 +314,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
+	@Nullable
 	private Principal getUser(WebSocketSession session) {
 		Principal user = this.stompAuthentications.get(session.getId());
-		return user != null ? user : session.getPrincipal();
+		return (user != null ? user : session.getPrincipal());
 	}
 
-	private void handleError(WebSocketSession session, Throwable ex, Message<byte[]> clientMessage) {
+	private void handleError(WebSocketSession session, Throwable ex, @Nullable Message<byte[]> clientMessage) {
 		if (getErrorHandler() == null) {
 			sendErrorMessage(session, ex);
 			return;
@@ -324,7 +332,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-		Assert.state(accessor != null, "Expected STOMP headers");
+		Assert.state(accessor != null, "No StompHeaderAccessor");
 		sendToClient(session, accessor, message.getPayload());
 	}
 
@@ -421,9 +429,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		byte[] payload = (byte[]) message.getPayload();
 		if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
 			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient((Message<byte[]>) message);
-			accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
-			Assert.state(accessor != null, "Expected STOMP headers");
-			payload = errorMessage.getPayload();
+			if (errorMessage != null) {
+				accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
+				Assert.state(accessor != null, "No StompHeaderAccessor");
+				payload = errorMessage.getPayload();
+			}
 		}
 		sendToClient(session, accessor, payload);
 	}
@@ -510,15 +520,17 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 
-		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
-		if (acceptVersions.contains("1.2")) {
-			connectedHeaders.setVersion("1.2");
-		}
-		else if (acceptVersions.contains("1.1")) {
-			connectedHeaders.setVersion("1.1");
-		}
-		else if (!acceptVersions.isEmpty()) {
-			throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
+		if (connectHeaders != null) {
+			Set<String> acceptVersions = connectHeaders.getAcceptVersion();
+			if (acceptVersions.contains("1.2")) {
+				connectedHeaders.setVersion("1.2");
+			}
+			else if (acceptVersions.contains("1.1")) {
+				connectedHeaders.setVersion("1.1");
+			}
+			else if (!acceptVersions.isEmpty()) {
+				throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
+			}
 		}
 
 		long[] heartbeat = (long[]) connectAckHeaders.getHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER);
@@ -538,7 +550,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		Message<?> message = (Message<?>) simpHeaders.getHeader(name);
 		if (message != null) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-			return accessor.getReceipt();
+			if (accessor != null) {
+				return accessor.getReceipt();
+			}
 		}
 		return null;
 	}
@@ -606,9 +620,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
+
 		headerAccessor.setSessionId(session.getId());
 		headerAccessor.setSessionAttributes(session.getAttributes());
-		headerAccessor.setUser(getUser(session));
+
+		Principal user = getUser(session);
+		if (user != null) {
+			headerAccessor.setUser(user);
+		}
+
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 

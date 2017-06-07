@@ -29,7 +29,7 @@ import org.springframework.expression.spel.CodeFlow;
 public class NullLiteral extends Literal {
 
 	public NullLiteral(int pos) {
-		super(null,pos);
+		super(null, pos);
 		this.exitTypeDescriptor = "Ljava/lang/Object";
 	}
 

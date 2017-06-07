@@ -99,7 +99,6 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Servlet API ServletContext for this application.
-	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
 	@Nullable
 	ServletContext getServletContext();

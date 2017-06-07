@@ -153,6 +153,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * @see System#getProperty
 	 * @see #resolvePlaceholder(String, java.util.Properties)
 	 */
+	@Nullable
 	protected String resolvePlaceholder(String placeholder, Properties props, int systemPropertiesMode) {
 		String propVal = null;
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
@@ -238,8 +239,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		}
 
 		@Override
-		@Nullable
-		public String resolveStringValue(@Nullable String strVal) throws BeansException {
+		public String resolveStringValue(String strVal) throws BeansException {
 			String resolved = this.helper.replacePlaceholders(strVal, this.resolver);
 			if (trimValues) {
 				resolved = resolved.trim();

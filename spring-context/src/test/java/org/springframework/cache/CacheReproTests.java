@@ -333,7 +333,7 @@ public class CacheReproTests {
 
 		@Override
 		@Nullable
-		protected Collection<String> getCacheNames(@Nullable CacheOperationInvocationContext<?> context) {
+		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			String cacheName = (String) context.getArgs()[0];
 			if (cacheName != null) {
 				return Collections.singleton(cacheName);

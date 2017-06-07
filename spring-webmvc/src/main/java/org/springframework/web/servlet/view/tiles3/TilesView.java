@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.tiles3;
 
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,6 +32,7 @@ import org.apache.tiles.request.render.Renderer;
 import org.apache.tiles.request.servlet.ServletRequest;
 import org.apache.tiles.request.servlet.ServletUtil;
 
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -92,7 +94,10 @@ public class TilesView extends AbstractUrlBasedView {
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 
-		this.applicationContext = ServletUtil.getApplicationContext(getServletContext());
+		ServletContext servletContext = getServletContext();
+		Assert.state(servletContext != null, "No ServletContext");
+		this.applicationContext = ServletUtil.getApplicationContext(servletContext);
+
 		if (this.renderer == null) {
 			TilesContainer container = TilesAccess.getContainer(this.applicationContext);
 			this.renderer = new DefinitionRenderer(container);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,12 +134,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * here, supporting "#{...}" expressions in a Unified EL compatible style.
 	 * @since 3.0
 	 */
-	void setBeanExpressionResolver(BeanExpressionResolver resolver);
+	void setBeanExpressionResolver(@Nullable BeanExpressionResolver resolver);
 
 	/**
 	 * Return the resolution strategy for expressions in bean definition values.
 	 * @since 3.0
 	 */
+	@Nullable
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
@@ -147,7 +148,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
 	 */
-	void setConversionService(ConversionService conversionService);
+	void setConversionService(@Nullable ConversionService conversionService);
 
 	/**
 	 * Return the associated ConversionService, if any.

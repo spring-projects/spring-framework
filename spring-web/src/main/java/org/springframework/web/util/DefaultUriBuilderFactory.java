@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -56,7 +57,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * Default constructor without a base URI.
 	 */
 	public DefaultUriBuilderFactory() {
-		this(UriComponentsBuilder.fromPath(null));
+		this(UriComponentsBuilder.newInstance());
 	}
 
 	/**
@@ -87,7 +88,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * default values.
 	 * @param defaultUriVariables the default URI variables
 	 */
-	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+	public void setDefaultUriVariables(@Nullable Map<String, ?> defaultUriVariables) {
 		this.defaultUriVariables.clear();
 		if (defaultUriVariables != null) {
 			this.defaultUriVariables.putAll(defaultUriVariables);
@@ -241,7 +242,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder path(@Nullable String path) {
+		public DefaultUriBuilder path(String path) {
 			this.uriComponentsBuilder.path(path);
 			return this;
 		}

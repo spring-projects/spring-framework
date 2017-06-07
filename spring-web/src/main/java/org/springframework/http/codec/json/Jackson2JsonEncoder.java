@@ -139,8 +139,8 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		}
 	}
 
-	private DataBuffer encodeValue(Object value, MimeType mimeType, DataBufferFactory bufferFactory,
-			ResolvableType elementType, Map<String, Object> hints) {
+	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(elementType.getType());
@@ -148,7 +148,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 			javaType = getJavaType(elementType.getType(), null);
 		}
 
-		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
+		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
 				this.objectMapper.writerWithView(jsonView) : this.objectMapper.writer());
 
@@ -189,10 +189,10 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 	}
 
 	@Override
-	public Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+	public Map<String, Object> getEncodeHints(@Nullable ResolvableType actualType, ResolvableType elementType,
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		return getHints(actualType);
+		return (actualType != null ? getHints(actualType) : Collections.emptyMap());
 	}
 
 	@Override

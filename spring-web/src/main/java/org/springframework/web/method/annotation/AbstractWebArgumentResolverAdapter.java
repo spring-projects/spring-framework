@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,8 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	 * to the method parameter.
 	 */
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 		Object result = this.adaptee.resolveArgument(parameter, webRequest);
@@ -110,7 +110,6 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	/**
 	 * Required for access to NativeWebRequest in {@link #supportsParameter}.
 	 */
-	@Nullable
 	protected abstract NativeWebRequest getWebRequest();
 
 }

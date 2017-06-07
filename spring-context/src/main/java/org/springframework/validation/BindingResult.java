@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public interface BindingResult extends Errors {
 	 * Return the wrapped target object, which may be a bean, an object with
 	 * public fields, a Map - depending on the concrete binding strategy.
 	 */
+	@Nullable
 	Object getTarget();
 
 	/**

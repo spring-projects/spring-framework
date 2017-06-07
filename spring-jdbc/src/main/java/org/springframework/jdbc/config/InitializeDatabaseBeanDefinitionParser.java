@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses an {@code initialize-database}
@@ -39,7 +38,7 @@ import org.springframework.lang.Nullable;
 class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(DataSourceInitializer.class);
 		builder.addPropertyReference("dataSource", element.getAttribute("data-source"));
 		builder.addPropertyValue("enabled", element.getAttribute("enabled"));

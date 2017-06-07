@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.json.AbstractJackson2View;
@@ -101,6 +102,7 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 				}
 			}
 		}
+		Assert.state(value != null, "Model contains no object to render");
 		return value;
 	}
 

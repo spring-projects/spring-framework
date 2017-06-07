@@ -75,7 +75,9 @@ public class ViewResolverRegistry {
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
 		UrlBasedViewResolver resolver = registration.getViewResolver();
-		resolver.setApplicationContext(this.applicationContext);
+		if (this.applicationContext != null) {
+			resolver.setApplicationContext(this.applicationContext);
+		}
 		this.viewResolvers.add(resolver);
 		return registration;
 	}

@@ -102,8 +102,9 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			@Nullable String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
-			WebSocketHandler wsHandler, Map<String, Object> attrs) throws HandshakeFailureException {
+			@Nullable String selectedProtocol, List<WebSocketExtension> selectedExtensions,
+			@Nullable Principal user, WebSocketHandler wsHandler, Map<String, Object> attrs)
+			throws HandshakeFailureException {
 
 		HttpHeaders headers = request.getHeaders();
 		InetSocketAddress localAddr = null;
@@ -133,7 +134,7 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
+			@Nullable String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
 			throws HandshakeFailureException;
 
 }

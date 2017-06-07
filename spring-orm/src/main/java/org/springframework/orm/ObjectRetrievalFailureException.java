@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.orm;
 
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown if a mapped object could not be retrieved via its identifier.
@@ -64,7 +65,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			Class<?> persistentClass, Object identifier, String msg, Throwable cause) {
+			Class<?> persistentClass, Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClass;
@@ -92,7 +93,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			String persistentClassName, Object identifier, String msg, Throwable cause) {
+			String persistentClassName, Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClassName;
@@ -104,6 +105,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the persistent class of the object that was not found.
 	 * If no Class was specified, this method returns null.
 	 */
+	@Nullable
 	public Class<?> getPersistentClass() {
 		return (this.persistentClass instanceof Class ? (Class<?>) this.persistentClass : null);
 	}
@@ -112,6 +114,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the name of the persistent class of the object that was not found.
 	 * Will work for both Class objects and String names.
 	 */
+	@Nullable
 	public String getPersistentClassName() {
 		if (this.persistentClass instanceof Class) {
 			return ((Class<?>) this.persistentClass).getName();
@@ -123,7 +126,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the identifier of the object that was not found.
 	 */
 	public Object getIdentifier() {
-		return identifier;
+		return this.identifier;
 	}
 
 }

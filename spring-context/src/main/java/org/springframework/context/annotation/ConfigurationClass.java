@@ -31,7 +31,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -48,7 +47,6 @@ import org.springframework.util.ClassUtils;
  * @see BeanMethod
  * @see ConfigurationClassParser
  */
-@NonNullApi
 final class ConfigurationClass {
 
 	private final AnnotationMetadata metadata;

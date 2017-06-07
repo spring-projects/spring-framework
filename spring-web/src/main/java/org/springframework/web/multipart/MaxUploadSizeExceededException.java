@@ -16,6 +16,8 @@
 
 package org.springframework.web.multipart;
 
+import org.springframework.lang.Nullable;
+
 /**
  * MultipartException subclass thrown when an upload exceeds the
  * maximum upload size allowed.
@@ -44,7 +46,7 @@ public class MaxUploadSizeExceededException extends MultipartException {
 	 * or -1 if the size limit isn't known
 	 * @param ex root cause from multipart parsing API in use
 	 */
-	public MaxUploadSizeExceededException(long maxUploadSize, Throwable ex) {
+	public MaxUploadSizeExceededException(long maxUploadSize, @Nullable Throwable ex) {
 		super("Maximum upload size " + (maxUploadSize >= 0 ? "of " + maxUploadSize + " bytes " : "") + "exceeded", ex);
 		this.maxUploadSize = maxUploadSize;
 	}

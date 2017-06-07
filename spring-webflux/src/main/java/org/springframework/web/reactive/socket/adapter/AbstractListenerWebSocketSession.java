@@ -29,6 +29,7 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -84,7 +85,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	 * the session completion (success or error) (for client-side use).
 	 */
 	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
-			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> completionMono) {
 
 		super(delegate, id, handshakeInfo, bufferFactory);
 		this.completionMono = completionMono;

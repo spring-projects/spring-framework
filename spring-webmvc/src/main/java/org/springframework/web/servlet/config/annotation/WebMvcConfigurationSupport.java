@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -258,32 +257,37 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping handlerMapping = createRequestMappingHandlerMapping();
-		handlerMapping.setOrder(0);
-		handlerMapping.setInterceptors(getInterceptors());
-		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
-		handlerMapping.setCorsConfigurations(getCorsConfigurations());
+		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
+		mapping.setOrder(0);
+		mapping.setInterceptors(getInterceptors());
+		mapping.setContentNegotiationManager(mvcContentNegotiationManager());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseSuffixPatternMatch() != null) {
-			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
+		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		if (useSuffixPatternMatch != null) {
+			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 		}
-		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			handlerMapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		if (useRegisteredSuffixPatternMatch != null) {
+			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
 		}
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
-		}
-		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
-		if (pathHelper != null) {
-			handlerMapping.setUrlPathHelper(pathHelper);
-		}
-		PathMatcher pathMatcher = configurer.getPathMatcher();
-		if (pathMatcher != null) {
-			handlerMapping.setPathMatcher(pathMatcher);
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
 
-		return handlerMapping;
+		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
+		if (pathHelper != null) {
+			mapping.setUrlPathHelper(pathHelper);
+		}
+
+		PathMatcher pathMatcher = configurer.getPathMatcher();
+		if (pathMatcher != null) {
+			mapping.setPathMatcher(pathMatcher);
+		}
+
+		return mapping;
 	}
 
 	/**
@@ -579,7 +583,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(mvcConversionService());
 		initializer.setValidator(mvcValidator());
-		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = getMessageCodesResolver();
+		if (messageCodesResolver != null) {
+			initializer.setMessageCodesResolver(messageCodesResolver);
+		}
 		return initializer;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * A no operation {@link Cache} implementation suitable
- * for disabling caching.
+ * A no operation {@link Cache} implementation suitable for disabling caching.
  *
  * <p>Will simply accept any items into the cache not actually storing them.
  *
@@ -35,34 +35,40 @@ public class NoOpCache implements Cache {
 
 	private final String name;
 
+
 	/**
 	 * Create a {@link NoOpCache} instance with the specified name
 	 * @param name the name of the cache
 	 */
 	public NoOpCache(String name) {
+		Assert.notNull(name, "Cache name must not be null");
 		this.name = name;
 	}
 
+
+
 	@Override
-	public void clear() {
+	public String getName() {
+		return this.name;
 	}
 
 	@Override
-	public void evict(@Nullable Object key) {
+	public Object getNativeCache() {
+		return this;
 	}
 
 	@Override
-	public ValueWrapper get(@Nullable Object key) {
+	public ValueWrapper get(Object key) {
 		return null;
 	}
 
 	@Override
-	public <T> T get(@Nullable Object key, Class<T> type) {
+	public <T> T get(Object key, @Nullable Class<T> type) {
 		return null;
 	}
 
 	@Override
-	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
+	public <T> T get(Object key, Callable<T> valueLoader) {
 		try {
 			return valueLoader.call();
 		}
@@ -72,23 +78,21 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Object getNativeCache() {
-		return null;
-	}
-
-	@Override
-	public void put(@Nullable Object key, @Nullable Object value) {
+	public void put(Object key, @Nullable Object value) {
 	}
 
 	@Override
 	@Nullable
-	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		return null;
+	}
+
+	@Override
+	public void evict(Object key) {
+	}
+
+	@Override
+	public void clear() {
 	}
 
 }

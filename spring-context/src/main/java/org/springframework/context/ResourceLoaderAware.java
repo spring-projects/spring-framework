@@ -74,6 +74,6 @@ public interface ResourceLoaderAware extends Aware {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.ResourcePatternUtils#getResourcePatternResolver
 	 */
-	void setResourceLoader(@Nullable ResourceLoader resourceLoader);
+	void setResourceLoader(ResourceLoader resourceLoader);
 
 }

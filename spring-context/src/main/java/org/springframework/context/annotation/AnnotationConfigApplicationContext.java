@@ -23,7 +23,6 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -51,7 +50,6 @@ import org.springframework.util.Assert;
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
  */
-@NonNullApi
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
 	private final AnnotatedBeanDefinitionReader reader;
@@ -190,7 +188,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, @Nullable Object... constructorArguments) {
+	public <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
 		registerBean(null, annotatedClass, constructorArguments);
 	}
 
@@ -206,7 +204,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public <T> void registerBean(@Nullable String beanName, Class<T> annotatedClass, @Nullable Object... constructorArguments) {
+	public <T> void registerBean(@Nullable String beanName, Class<T> annotatedClass, Object... constructorArguments) {
 		this.reader.doRegisterBean(annotatedClass, null, beanName, null,
 				bd -> {
 					for (Object arg : constructorArguments) {
@@ -216,7 +214,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	@Override
-	public <T> void registerBean(@Nullable String beanName, @Nullable Class<T> beanClass, @Nullable Supplier<T> supplier,
+	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass, @Nullable Supplier<T> supplier,
 			BeanDefinitionCustomizer... customizers) {
 
 		this.reader.doRegisterBean(beanClass, supplier, beanName, null, customizers);

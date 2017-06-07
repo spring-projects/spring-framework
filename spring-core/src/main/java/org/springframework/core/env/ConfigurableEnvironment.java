@@ -18,8 +18,6 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-import org.springframework.lang.NonNullApi;
-
 /**
  * Configuration interface to be implemented by most if not all {@link Environment} types.
  * Provides facilities for setting active and default profiles and manipulating underlying
@@ -71,7 +69,6 @@ import org.springframework.lang.NonNullApi;
  * @see StandardEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  */
-@NonNullApi
 public interface ConfigurableEnvironment extends Environment, ConfigurablePropertyResolver {
 
 	/**
