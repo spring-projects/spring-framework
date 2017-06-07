@@ -432,7 +432,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -1001,7 +1001,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				}
 				contentId = '<' + contentId + '>';
 			}
-			return this.mimeContainer.getAttachment(contentId);
+			DataHandler dataHandler = this.mimeContainer.getAttachment(contentId);
+			if (dataHandler == null) {
+				throw new IllegalArgumentException("No attachment found for " + contentId);
+			}
+			return dataHandler;
 		}
 
 		@Override

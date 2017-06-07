@@ -64,7 +64,7 @@ public interface RedirectAttributes extends Model {
 	RedirectAttributes addAttribute(String attributeName, @Nullable Object attributeValue);
 
 	@Override
-	RedirectAttributes addAttribute(@Nullable Object attributeValue);
+	RedirectAttributes addAttribute(Object attributeValue);
 
 	@Override
 	RedirectAttributes addAllAttributes(Collection<?> attributeValues);

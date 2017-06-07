@@ -132,8 +132,7 @@ public abstract class BodyInserters {
 						serverRequest.get(), (ServerHttpResponse) outputMessage, context.hints());
 			}
 			else {
-				return messageWriter.write(inputStream, RESOURCE_TYPE, null,
-						outputMessage, context.hints());
+				return messageWriter.write(inputStream, RESOURCE_TYPE, null, outputMessage, context.hints());
 			}
 		};
 	}

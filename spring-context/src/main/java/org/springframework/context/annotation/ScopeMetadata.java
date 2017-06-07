@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 
 /**
@@ -33,7 +32,6 @@ import org.springframework.util.Assert;
  * @see ScopeMetadataResolver
  * @see ScopedProxyMode
  */
-@NonNullApi
 public class ScopeMetadata {
 
 	private String scopeName = BeanDefinition.SCOPE_SINGLETON;

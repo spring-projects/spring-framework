@@ -35,6 +35,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -154,7 +155,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
@@ -202,7 +203,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected String resolveUrlPathInternal(String resourceUrlPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
+
 		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (StringUtils.hasText(baseUrl)) {
 			VersionStrategy versionStrategy = getStrategyForPath(resourceUrlPath);
@@ -213,6 +216,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				logger.trace("Getting the original resource to determine version for path \"" + resourceUrlPath + "\"");
 			}
 			Resource resource = chain.resolveResource(null, baseUrl, locations);
+			Assert.state(resource != null, "Unresolvable resource");
 			String version = versionStrategy.getResourceVersion(resource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Determined version [" + version + "] for " + resource);

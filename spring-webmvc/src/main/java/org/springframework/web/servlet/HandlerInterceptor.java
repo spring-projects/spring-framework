@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public interface HandlerInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	default void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex)
 			throws Exception {
 	}
 

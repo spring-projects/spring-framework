@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class ModelAndViewContainer {
 	 * Set a view name to be resolved by the DispatcherServlet via a ViewResolver.
 	 * Will override any pre-existing view name or View.
 	 */
-	public void setViewName(String viewName) {
+	public void setViewName(@Nullable String viewName) {
 		this.view = viewName;
 	}
 
@@ -105,7 +105,7 @@ public class ModelAndViewContainer {
 	 * Set a View object to be used by the DispatcherServlet.
 	 * Will override any pre-existing view name or View.
 	 */
-	public void setView(Object view) {
+	public void setView(@Nullable Object view) {
 		this.view = view;
 	}
 
@@ -214,7 +214,7 @@ public class ModelAndViewContainer {
 	 * {@code ModelAndView} used for view rendering purposes.
 	 * @since 4.3
 	 */
-	public void setStatus(HttpStatus status) {
+	public void setStatus(@Nullable HttpStatus status) {
 		this.status = status;
 	}
 
@@ -249,7 +249,7 @@ public class ModelAndViewContainer {
 	 * Add the supplied attribute to the underlying model.
 	 * A shortcut for {@code getModel().addAttribute(String, Object)}.
 	 */
-	public ModelAndViewContainer addAttribute(String name, Object value) {
+	public ModelAndViewContainer addAttribute(String name, @Nullable Object value) {
 		getModel().addAttribute(name, value);
 		return this;
 	}
@@ -267,7 +267,7 @@ public class ModelAndViewContainer {
 	 * Copy all attributes to the underlying model.
 	 * A shortcut for {@code getModel().addAllAttributes(Map)}.
 	 */
-	public ModelAndViewContainer addAllAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer addAllAttributes(@Nullable Map<String, ?> attributes) {
 		getModel().addAllAttributes(attributes);
 		return this;
 	}
@@ -277,7 +277,7 @@ public class ModelAndViewContainer {
 	 * the same name taking precedence (i.e. not getting replaced).
 	 * A shortcut for {@code getModel().mergeAttributes(Map<String, ?>)}.
 	 */
-	public ModelAndViewContainer mergeAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer mergeAttributes(@Nullable Map<String, ?> attributes) {
 		getModel().mergeAttributes(attributes);
 		return this;
 	}
@@ -285,7 +285,7 @@ public class ModelAndViewContainer {
 	/**
 	 * Remove the given attributes from the model.
 	 */
-	public ModelAndViewContainer removeAttributes(Map<String, ?> attributes) {
+	public ModelAndViewContainer removeAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
 				getModel().remove(key);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Determine whether the given candidate name matches the bean name
 	 * or the aliases stored in this bean definition.
 	 */
-	public boolean matchesName(String candidateName) {
+	public boolean matchesName(@Nullable String candidateName) {
 		return (candidateName != null && (candidateName.equals(this.beanName) ||
 				candidateName.equals(BeanFactoryUtils.transformedBeanName(this.beanName)) ||
 				ObjectUtils.containsElement(this.aliases, candidateName)));

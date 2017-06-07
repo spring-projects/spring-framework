@@ -72,6 +72,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 */
 	public ConcurrentModel addAttribute(String attributeName, @Nullable Object attributeValue) {
 		Assert.notNull(attributeName, "Model attribute name must not be null");
+		Assert.notNull(attributeValue, "ConcurrentModel does not support null attribute value");
 		put(attributeName, attributeValue);
 		return this;
 	}
@@ -98,7 +99,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 * {@code Map}, using attribute name generation for each element.
 	 * @see #addAttribute(Object)
 	 */
-	public ConcurrentModel addAllAttributes(Collection<?> attributeValues) {
+	public ConcurrentModel addAllAttributes(@Nullable Collection<?> attributeValues) {
 		if (attributeValues != null) {
 			for (Object attributeValue : attributeValues) {
 				addAttribute(attributeValue);
@@ -111,7 +112,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 * Copy all attributes in the supplied {@code Map} into this {@code Map}.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ConcurrentModel addAllAttributes(Map<String, ?> attributes) {
+	public ConcurrentModel addAllAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			putAll(attributes);
 		}
@@ -123,7 +124,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	 * with existing objects of the same name taking precedence (i.e. not getting
 	 * replaced).
 	 */
-	public ConcurrentModel mergeAttributes(Map<String, ?> attributes) {
+	public ConcurrentModel mergeAttributes(@Nullable Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
 				String key = entry.getKey();

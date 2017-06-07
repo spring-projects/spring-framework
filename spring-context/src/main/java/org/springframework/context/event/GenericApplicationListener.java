@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Extended variant of the standard {@link ApplicationListener} interface,
@@ -41,6 +42,6 @@ public interface GenericApplicationListener extends ApplicationListener<Applicat
 	/**
 	 * Determine whether this listener actually supports the given source type.
 	 */
-	boolean supportsSourceType(Class<?> sourceType);
+	boolean supportsSourceType(@Nullable Class<?> sourceType);
 
 }

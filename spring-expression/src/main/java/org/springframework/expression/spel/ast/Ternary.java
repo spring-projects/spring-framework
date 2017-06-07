@@ -24,6 +24,7 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.Assert;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -94,8 +95,10 @@ public class Ternary extends SpelNodeImpl {
 		computeExitTypeDescriptor();
 		cf.enterCompilationScope();
 		this.children[0].generateCode(mv, cf);
-		if (!CodeFlow.isPrimitive(cf.lastDescriptor())) {
-			CodeFlow.insertUnboxInsns(mv, 'Z', cf.lastDescriptor());
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		if (!CodeFlow.isPrimitive(lastDesc)) {
+			CodeFlow.insertUnboxInsns(mv, 'Z', lastDesc);
 		}
 		cf.exitCompilationScope();
 		Label elseTarget = new Label();
@@ -104,7 +107,9 @@ public class Ternary extends SpelNodeImpl {
 		cf.enterCompilationScope();
 		this.children[1].generateCode(mv, cf);
 		if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			lastDesc = cf.lastDescriptor();
+			Assert.state(lastDesc != null, "No last descriptor");
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		cf.exitCompilationScope();
 		mv.visitJumpInsn(GOTO, endOfIf);
@@ -112,7 +117,9 @@ public class Ternary extends SpelNodeImpl {
 		cf.enterCompilationScope();
 		this.children[2].generateCode(mv, cf);
 		if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			lastDesc = cf.lastDescriptor();
+			Assert.state(lastDesc != null, "No last descriptor");
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		cf.exitCompilationScope();
 		mv.visitLabel(endOfIf);

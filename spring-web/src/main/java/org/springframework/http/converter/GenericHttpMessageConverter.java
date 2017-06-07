@@ -79,7 +79,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @return {@code true} if writable; {@code false} otherwise
 	 * @since 4.2
 	 */
-	boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType);
+	boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType);
 
 	/**
 	 * Write an given object to the given output message.

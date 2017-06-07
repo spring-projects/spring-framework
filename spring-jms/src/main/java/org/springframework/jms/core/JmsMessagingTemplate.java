@@ -96,6 +96,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Return the ConnectionFactory that the underlying {@link JmsTemplate} uses.
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public ConnectionFactory getConnectionFactory() {
 		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
 	}
@@ -150,6 +151,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	/**
 	 * Return the configured default destination name.
 	 */
+	@Nullable
 	public String getDefaultDestinationName() {
 		return this.defaultDestinationName;
 	}
@@ -198,14 +200,14 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public void convertAndSend(String destinationName, Object payload, Map<String, Object> headers)
+	public void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers)
 			throws MessagingException {
 
 		convertAndSend(destinationName, payload, headers, null);
 	}
 
 	@Override
-	public void convertAndSend(String destinationName, Object payload, MessagePostProcessor postProcessor)
+	public void convertAndSend(String destinationName, Object payload, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException {
 
 		convertAndSend(destinationName, payload, null, postProcessor);
@@ -305,7 +307,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@Override
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
-			MessagePostProcessor requestPostProcessor) throws MessagingException {
+			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException {
 
 		return convertSendAndReceive(destinationName, request, null, targetClass, requestPostProcessor);
 	}
@@ -350,6 +352,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		}
 	}
 
+	@Nullable
 	protected Message<?> doReceive(String destinationName) {
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.receive(destinationName);
@@ -372,6 +375,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		}
 	}
 
+	@Nullable
 	protected Message<?> doSendAndReceive(String destinationName, Message<?> requestMessage) {
 		try {
 			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
@@ -396,7 +400,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		return name;
 	}
 
-	protected Message<?> convertJmsMessage(javax.jms.Message message) {
+	@Nullable
+	protected Message<?> convertJmsMessage(@Nullable javax.jms.Message message) {
 		if (message == null) {
 			return null;
 		}

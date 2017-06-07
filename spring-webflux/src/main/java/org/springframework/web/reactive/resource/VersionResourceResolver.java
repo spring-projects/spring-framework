@@ -156,16 +156,16 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveResource(exchange, requestPath, locations)
 				.switchIfEmpty(Mono.defer(() ->
 						resolveVersionedResource(exchange, requestPath, locations, chain)));
 	}
 
-	private Mono<Resource> resolveVersionedResource(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	private Mono<Resource> resolveVersionedResource(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		VersionStrategy versionStrategy = getStrategyForPath(requestPath);
 		if (versionStrategy == null) {

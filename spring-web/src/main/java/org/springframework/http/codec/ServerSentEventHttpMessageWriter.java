@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	 * Support for {@code String} event data is built-in.
 	 * @param encoder the Encoder to use (may be {@code null})
 	 */
-	public ServerSentEventHttpMessageWriter(Encoder<?> encoder) {
+	public ServerSentEventHttpMessageWriter(@Nullable Encoder<?> encoder) {
 		this.encoder = encoder;
 	}
 
@@ -103,7 +104,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, DataBufferFactory factory,
 			ResolvableType elementType, Map<String, Object> hints) {
 
-		ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.getRawClass()) ?
+		Class<?> elementClass = elementType.getRawClass();
+		ResolvableType valueType = (elementClass != null && ServerSentEvent.class.isAssignableFrom(elementClass) ?
 				elementType.getGeneric() : elementType);
 
 		return Flux.from(input).map(element -> {
@@ -112,24 +114,29 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
 
 			StringBuilder sb = new StringBuilder();
-			if (sse.id() != null) {
-				writeField("id", sse.id(), sb);
+			String id = sse.id();
+			String event = sse.event();
+			Duration retry = sse.retry();
+			String comment = sse.comment();
+			Object data = sse.data();
+			if (id != null) {
+				writeField("id", id, sb);
 			}
-			if (sse.event() != null) {
-				writeField("event", sse.event(), sb);
+			if (event != null) {
+				writeField("event", event, sb);
 			}
-			if (sse.retry() != null) {
-				writeField("retry", sse.retry().toMillis(), sb);
+			if (retry != null) {
+				writeField("retry", retry.toMillis(), sb);
 			}
-			if (sse.comment() != null) {
-				sb.append(':').append(sse.comment().replaceAll("\\n", "\n:")).append("\n");
+			if (comment != null) {
+				sb.append(':').append(comment.replaceAll("\\n", "\n:")).append("\n");
 			}
-			if (sse.data() != null) {
+			if (data != null) {
 				sb.append("data:");
 			}
 
 			return Flux.concat(encodeText(sb, factory),
-					encodeData(sse.data(), valueType, factory, hints),
+					encodeData(data, valueType, factory, hints),
 					encodeText("\n", factory));
 		});
 	}
@@ -142,7 +149,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeData(T data, ResolvableType valueType,
+	private <T> Flux<DataBuffer> encodeData(@Nullable T data, ResolvableType valueType,
 			DataBufferFactory factory, Map<String, Object> hints) {
 
 		if (data == null) {
@@ -170,7 +177,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> input, @Nullable ResolvableType actualType, ResolvableType elementType,
+	public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
 			Map<String, Object> hints) {
 
@@ -182,7 +189,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.encoder instanceof HttpMessageEncoder) {
 			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;

@@ -109,7 +109,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * (plus a couple of autodetected vendor-specific properties).
 	 * @see DefaultJmsActivationSpecFactory
 	 */
-	public void setActivationSpecFactory(JmsActivationSpecFactory activationSpecFactory) {
+	public void setActivationSpecFactory(@Nullable JmsActivationSpecFactory activationSpecFactory) {
 		this.activationSpecFactory =
 				(activationSpecFactory != null ? activationSpecFactory : new DefaultJmsActivationSpecFactory());
 	}
@@ -162,6 +162,9 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	@Override
 	public void afterPropertiesSet() throws ResourceException {
+		if (getResourceAdapter() == null) {
+			throw new IllegalArgumentException("Property 'resourceAdapter' is required");
+		}
 		if (this.messageListenerSet) {
 			setMessageEndpointFactory(this.endpointFactory);
 		}
@@ -169,6 +172,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 			setActivationSpec(
 					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
 		}
+
 		super.afterPropertiesSet();
 	}
 

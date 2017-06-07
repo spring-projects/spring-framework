@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -68,7 +69,9 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param excludePatterns the path patterns to exclude
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(@Nullable String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, @Nullable String[] excludePatterns,
+			HandlerInterceptor interceptor) {
+
 		this.includePatterns = includePatterns;
 		this.excludePatterns = excludePatterns;
 		this.interceptor = interceptor;
@@ -89,7 +92,9 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(@Nullable String[] includePatterns, String[] excludePatterns, WebRequestInterceptor interceptor) {
+	public MappedInterceptor(@Nullable String[] includePatterns, @Nullable String[] excludePatterns,
+			WebRequestInterceptor interceptor) {
+
 		this(includePatterns, excludePatterns, new WebRequestHandlerInterceptorAdapter(interceptor));
 	}
 
@@ -100,8 +105,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * method. This is an advanced property that is only required when using custom
 	 * PathMatcher implementations that support mapping metadata other than the
 	 * Ant-style path patterns supported by default.
-	 *
-	 * @param pathMatcher the path matcher to use
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
@@ -135,12 +138,18 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+	public void postHandle(
+			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
+			throws Exception {
+
 		this.interceptor.postHandle(request, response, handler, modelAndView);
 	}
 
 	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+	public void afterCompletion(
+			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex)
+			throws Exception {
+
 		this.interceptor.afterCompletion(request, response, handler, ex);
 	}
 
@@ -158,7 +167,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 				}
 			}
 		}
-		if (this.includePatterns == null) {
+		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
 		else {

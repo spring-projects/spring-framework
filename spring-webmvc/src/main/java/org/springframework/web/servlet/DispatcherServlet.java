@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1013,9 +1012,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Do we need view name translation?
 	 */
-	private void applyDefaultViewName(HttpServletRequest request, ModelAndView mv) throws Exception {
+	private void applyDefaultViewName(HttpServletRequest request, @Nullable ModelAndView mv) throws Exception {
 		if (mv != null && !mv.hasView()) {
-			mv.setViewName(getDefaultViewName(request));
+			String defaultViewName = getDefaultViewName(request);
+			if (defaultViewName != null) {
+				mv.setViewName(defaultViewName);
+			}
 		}
 	}
 
@@ -1024,7 +1026,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
 	 */
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, ModelAndView mv, Exception exception) throws Exception {
+			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
+			@Nullable Exception exception) throws Exception {
 
 		boolean errorView = false;
 
@@ -1077,12 +1080,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			return ((LocaleContextResolver) this.localeResolver).resolveLocaleContext(request);
 		}
 		else {
-			return new LocaleContext() {
-				@Override
-				public Locale getLocale() {
-					return localeResolver.resolveLocale(request);
-				}
-			};
+			return () -> localeResolver.resolveLocale(request);
 		}
 	}
 
@@ -1237,7 +1235,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			// We might still need view name translation for a plain error model...
 			if (!exMv.hasView()) {
-				exMv.setViewName(getDefaultViewName(request));
+				String defaultViewName = getDefaultViewName(request);
+				if (defaultViewName != null) {
+					exMv.setViewName(defaultViewName);
+				}
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
@@ -1264,9 +1265,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		response.setLocale(locale);
 
 		View view;
-		if (mv.isReference()) {
+		String viewName = mv.getViewName();
+		if (viewName != null) {
 			// We need to resolve the view name.
-			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
+			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
 						"' in servlet with name '" + getServletName() + "'");
@@ -1326,8 +1328,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see ViewResolver#resolveViewName
 	 */
 	@Nullable
-	protected View resolveViewName(String viewName, Map<String, Object> model, Locale locale,
-			HttpServletRequest request) throws Exception {
+	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
+			Locale locale, HttpServletRequest request) throws Exception {
 
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
@@ -1339,7 +1341,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
+			@Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, ex);

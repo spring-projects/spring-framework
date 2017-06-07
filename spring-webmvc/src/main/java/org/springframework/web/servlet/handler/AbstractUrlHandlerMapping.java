@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -134,7 +135,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				// Bean name or resolved handler?
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
-					rawHandler = getApplicationContext().getBean(handlerName);
+					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
@@ -170,7 +171,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
-				handler = getApplicationContext().getBean(handlerName);
+				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
@@ -212,7 +213,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
-				handler = getApplicationContext().getBean(handlerName);
+				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
@@ -335,8 +336,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
-			if (getApplicationContext().isSingleton(handlerName)) {
-				resolvedHandler = getApplicationContext().getBean(handlerName);
+			ApplicationContext applicationContext = obtainApplicationContext();
+			if (applicationContext.isSingleton(handlerName)) {
+				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.ibm.wsspi.uow.UOWException;
 import com.ibm.wsspi.uow.UOWManager;
 import com.ibm.wsspi.uow.UOWManagerFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -219,7 +220,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 
 	@Override
-	public <T> T execute(TransactionDefinition definition, TransactionCallback<T> callback) throws TransactionException {
+	public <T> T execute(@Nullable TransactionDefinition definition, TransactionCallback<T> callback)
+			throws TransactionException {
+
 		if (definition == null) {
 			// Use defaults if no transaction definition given.
 			definition = new DefaultTransactionDefinition();

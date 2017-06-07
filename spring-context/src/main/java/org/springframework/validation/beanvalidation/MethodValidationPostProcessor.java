@@ -28,6 +28,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
@@ -115,7 +116,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * a {@link MethodValidationInterceptor} or subclass thereof)
 	 * @since 4.2
 	 */
-	protected Advice createMethodValidationAdvice(Validator validator) {
+	protected Advice createMethodValidationAdvice(@Nullable Validator validator) {
 		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
 	}
 

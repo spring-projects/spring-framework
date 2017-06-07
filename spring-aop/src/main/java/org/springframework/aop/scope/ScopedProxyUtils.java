@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility class for creating a scoped proxy.
@@ -102,7 +103,7 @@ public abstract class ScopedProxyUtils {
 	 * bean within a scoped proxy.
 	 * @since 4.1.4
 	 */
-	public static boolean isScopedTarget(String beanName) {
+	public static boolean isScopedTarget(@Nullable String beanName) {
 		return (beanName != null && beanName.startsWith(TARGET_NAME_PREFIX));
 	}
 

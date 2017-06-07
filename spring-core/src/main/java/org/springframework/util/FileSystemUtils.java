@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.io.File;
 import java.io.IOException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Utility methods for working with the file system.
  *
@@ -35,7 +37,7 @@ public abstract class FileSystemUtils {
 	 * @return {@code true} if the {@code File} was deleted,
 	 * otherwise {@code false}
 	 */
-	public static boolean deleteRecursively(File root) {
+	public static boolean deleteRecursively(@Nullable File root) {
 		if (root != null && root.exists()) {
 			if (root.isDirectory()) {
 				File[] children = root.listFiles();
@@ -57,7 +59,7 @@ public abstract class FileSystemUtils {
 	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void copyRecursively(File src, File dest) throws IOException {
+	public static void copyRecursively(@Nullable File src, File dest) throws IOException {
 		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()), "Source File must denote a directory or file");
 		Assert.notNull(dest, "Destination File must not be null");
 		doCopyRecursively(src, dest);

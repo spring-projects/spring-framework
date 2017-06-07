@@ -22,6 +22,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -78,7 +79,9 @@ public class Elvis extends SpelNodeImpl {
 		// exit type descriptor can be null if both components are literal expressions
 		computeExitTypeDescriptor();
 		this.children[0].generateCode(mv, cf);
-		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		mv.visitInsn(DUP);
@@ -93,7 +96,9 @@ public class Elvis extends SpelNodeImpl {
 		mv.visitInsn(POP);
 		this.children[1].generateCode(mv, cf);
 		if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			lastDesc = cf.lastDescriptor();
+			Assert.state(lastDesc != null, "No last descriptor");
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		mv.visitLabel(endOfIf);
 		cf.pushDescriptor(this.exitTypeDescriptor);

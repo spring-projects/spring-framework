@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public interface ConfigurableListableBeanFactory
 	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
 	 * interface, which allows for lazy resolution of the actual target value.
 	 */
-	void registerResolvableDependency(Class<?> dependencyType, Object autowiredValue);
+	void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 
 	/**
 	 * Determine whether the specified bean qualifies as an autowire candidate,
@@ -106,7 +106,7 @@ public interface ConfigurableListableBeanFactory
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * defined in this factory
 	 */
-	BeanDefinition getBeanDefinition(@Nullable String beanName) throws NoSuchBeanDefinitionException;
+	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Return a unified view over all bean names managed by this factory.

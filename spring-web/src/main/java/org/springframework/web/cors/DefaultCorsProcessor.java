@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-201/ the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * implementation simply delegates to
 	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}.
 	 */
-	protected String checkOrigin(CorsConfiguration config, String requestOrigin) {
+	@Nullable
+	protected String checkOrigin(CorsConfiguration config, @Nullable String requestOrigin) {
 		return config.checkOrigin(requestOrigin);
 	}
 
@@ -173,10 +174,12 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * pre-flight request. The default implementation simply delegates to
 	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}.
 	 */
-	protected List<HttpMethod> checkMethods(CorsConfiguration config, HttpMethod requestMethod) {
+	@Nullable
+	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {
 		return config.checkHttpMethod(requestMethod);
 	}
 
+	@Nullable
 	private HttpMethod getMethodToUse(ServerHttpRequest request, boolean isPreFlight) {
 		return (isPreFlight ? request.getHeaders().getAccessControlRequestMethod() : request.getMethod());
 	}
@@ -186,6 +189,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * pre-flight request. The default implementation simply delegates to
 	 * {@link org.springframework.web.cors.CorsConfiguration#checkOrigin(String)}.
 	 */
+	@Nullable
 	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
 		return config.checkHeaders(requestHeaders);
 	}

@@ -56,7 +56,7 @@ public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T>
 
 
 	/**
-	 * Return the message payload, never be {@code null}.
+	 * Return the message payload (never {@code null}).
 	 */
 	public T getPayload() {
 		return this.payload;

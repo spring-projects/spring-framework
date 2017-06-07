@@ -119,7 +119,7 @@ public abstract class SpringFactoriesLoader {
 		return loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
 	}
 
-	private static Map<String, List<String>> loadSpringFactories(ClassLoader classLoader) {
+	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
 		MultiValueMap<String, String> result = cache.get(classLoader);
 		if (result != null)
 			return result;

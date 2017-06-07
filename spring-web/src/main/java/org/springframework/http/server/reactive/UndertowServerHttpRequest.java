@@ -26,7 +26,6 @@ import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
-import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
@@ -118,7 +117,6 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 		private PooledByteBuffer pooledByteBuffer;
 
-
 		public RequestBodyPublisher(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
 			this.channel = exchange.getRequestChannel();
 			this.bufferFactory = bufferFactory;
@@ -130,13 +128,15 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				onAllDataRead();
 				next.proceed();
 			});
-			this.channel.getReadSetter().set((ChannelListener<StreamSourceChannel>) c -> onDataAvailable());
-			this.channel.getCloseSetter().set((ChannelListener<StreamSourceChannel>) c -> onAllDataRead());
+			this.channel.getReadSetter().set(c -> onDataAvailable());
+			this.channel.getCloseSetter().set(c -> onAllDataRead());
 			this.channel.resumeReads();
 		}
 
 		@Override
 		protected void checkOnDataAvailable() {
+			// TODO: The onDataAvailable() call below can cause a StackOverflowError
+			// since this method is being called from onDataAvailable() itself.
 			onDataAvailable();
 		}
 

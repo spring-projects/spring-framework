@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -26,6 +25,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -152,6 +152,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
 		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
 	}

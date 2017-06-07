@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,10 @@ public abstract class BridgeMethodResolver {
 	 * if no more specific one could be found)
 	 */
 	public static Method findBridgedMethod(Method bridgeMethod) {
-		if (bridgeMethod == null || !bridgeMethod.isBridge()) {
+		if (!bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
+
 		// Gather all methods with matching name and parameter size.
 		List<Method> candidateMethods = new ArrayList<>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
@@ -68,10 +69,12 @@ public abstract class BridgeMethodResolver {
 				candidateMethods.add(candidateMethod);
 			}
 		}
+
 		// Now perform simple quick check.
 		if (candidateMethods.size() == 1) {
 			return candidateMethods.get(0);
 		}
+
 		// Search for candidate match.
 		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
 		if (bridgedMethod != null) {
@@ -104,7 +107,7 @@ public abstract class BridgeMethodResolver {
 	 * @return the bridged method, or {@code null} if none found
 	 */
 	@Nullable
-	private static Method searchCandidates(@Nullable List<Method> candidateMethods, Method bridgeMethod) {
+	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
 		if (candidateMethods.isEmpty()) {
 			return null;
 		}

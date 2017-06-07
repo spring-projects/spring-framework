@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -202,16 +201,7 @@ public class ResourceServlet extends HttpServletBean {
 			try {
 				doInclude(request, response, resourceUrl);
 			}
-			catch (ServletException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
-				}
-				// Try including default URL if appropriate.
-				if (!includeDefaultUrl(request, response)) {
-					throw ex;
-				}
-			}
-			catch (IOException ex) {
+			catch (ServletException | IOException ex) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
 				}
@@ -275,16 +265,16 @@ public class ResourceServlet extends HttpServletBean {
 		}
 		String[] resourceUrls =
 			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
-		for (int i = 0; i < resourceUrls.length; i++) {
+		for (String url : resourceUrls) {
 			// check whether URL matches allowed resources
-			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {
-				throw new ServletException("Resource [" + resourceUrls[i] +
+			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, url)) {
+				throw new ServletException("Resource [" + url +
 						"] does not match allowed pattern [" + this.allowedResources + "]");
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Including resource [" + resourceUrls[i] + "]");
+				logger.debug("Including resource [" + url + "]");
 			}
-			RequestDispatcher rd = request.getRequestDispatcher(resourceUrls[i]);
+			RequestDispatcher rd = request.getRequestDispatcher(url);
 			rd.include(request, response);
 		}
 	}
@@ -312,8 +302,8 @@ public class ResourceServlet extends HttpServletBean {
 			if (resourceUrl != null) {
 				String[] resourceUrls = StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 				long latestTimestamp = -1;
-				for (int i = 0; i < resourceUrls.length; i++) {
-					long timestamp = getFileTimestamp(resourceUrls[i]);
+				for (String url : resourceUrls) {
+					long timestamp = getFileTimestamp(url);
 					if (timestamp > latestTimestamp) {
 						latestTimestamp = timestamp;
 					}

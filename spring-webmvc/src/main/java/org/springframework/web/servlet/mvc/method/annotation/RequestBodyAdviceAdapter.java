@@ -37,18 +37,6 @@ import org.springframework.lang.Nullable;
 public abstract class RequestBodyAdviceAdapter implements RequestBodyAdvice {
 
 	/**
-	 * The default implementation returns the body that was passed in.
-	 */
-	@Override
-	@Nullable
-	public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage,
-			MethodParameter parameter, Type targetType,
-			Class<? extends HttpMessageConverter<?>> converterType) {
-
-		return body;
-	}
-
-	/**
 	 * The default implementation returns the InputMessage that was passed in.
 	 */
 	@Override
@@ -65,6 +53,18 @@ public abstract class RequestBodyAdviceAdapter implements RequestBodyAdvice {
 	@Override
 	public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+		return body;
+	}
+
+	/**
+	 * The default implementation returns the body that was passed in.
+	 */
+	@Override
+	@Nullable
+	public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage,
+			MethodParameter parameter, Type targetType,
+			Class<? extends HttpMessageConverter<?>> converterType) {
 
 		return body;
 	}

@@ -46,6 +46,7 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -211,13 +212,10 @@ public class JmsListenerAnnotationBeanPostProcessor
 		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
 			Class<?> targetClass = AopUtils.getTargetClass(bean);
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
-						@Override
-						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-									method, JmsListener.class, JmsListeners.class);
-							return (!listenerMethods.isEmpty() ? listenerMethods : null);
-						}
+					(MethodIntrospector.MetadataLookup<Set<JmsListener>>) method -> {
+						Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+								method, JmsListener.class, JmsListeners.class);
+						return (!listenerMethods.isEmpty() ? listenerMethods : null);
 					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
@@ -301,6 +299,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		return new MethodJmsListenerEndpoint();
 	}
 
+	@Nullable
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
 			return resolve(jmsListener.id());
@@ -310,6 +309,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 	}
 
+	@Nullable
 	private String resolve(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}

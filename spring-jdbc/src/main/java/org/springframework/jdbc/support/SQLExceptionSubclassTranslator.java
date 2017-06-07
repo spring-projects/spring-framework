@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 
 	@Override
 	@Nullable
-	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
+	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
 		if (ex instanceof SQLTransientException) {
 			if (ex instanceof SQLTransientConnectionException) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);

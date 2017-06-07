@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when the BeanFactory cannot load the specified class
@@ -44,10 +45,10 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * @param cause the root cause
 	 */
 	public CannotLoadBeanClassException(
-			String resourceDescription, String beanName, String beanClassName, ClassNotFoundException cause) {
+			@Nullable String resourceDescription, String beanName, @Nullable String beanClassName, ClassNotFoundException cause) {
 
-		super("Cannot find class [" + beanClassName + "] for bean with name '" + beanName +
-				"' defined in " + resourceDescription, cause);
+		super("Cannot find class [" + String.valueOf(beanClassName) + "] for bean with name '" + beanName + "'" +
+				(resourceDescription != null ? " defined in " + resourceDescription : ""), cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 		this.beanClassName = beanClassName;
@@ -62,10 +63,11 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * @param cause the root cause
 	 */
 	public CannotLoadBeanClassException(
-			String resourceDescription, String beanName, String beanClassName, LinkageError cause) {
+			@Nullable String resourceDescription, String beanName, @Nullable String beanClassName, LinkageError cause) {
 
-		super("Error loading class [" + beanClassName + "] for bean with name '" + beanName +
-				"' defined in " + resourceDescription + ": problem with class file or dependent class", cause);
+		super("Error loading class [" + String.valueOf(beanClassName) + "] for bean with name '" + beanName + "'" +
+				(resourceDescription != null ? " defined in " + resourceDescription : "") +
+				": problem with class file or dependent class", cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 		this.beanClassName = beanClassName;

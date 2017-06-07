@@ -37,6 +37,7 @@ public interface MessageSourceResolvable {
 	 * they should get tried. The last code will therefore be the default one.
 	 * @return a String array of codes which are associated with this message
 	 */
+	@Nullable
 	String[] getCodes();
 
 	/**

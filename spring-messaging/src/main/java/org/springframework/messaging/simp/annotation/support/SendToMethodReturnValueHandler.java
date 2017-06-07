@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -142,7 +143,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, Message<?> message)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
@@ -152,7 +155,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		PlaceholderResolver varResolver = initVarResolver(headers);
 		Object annotation = findAnnotation(returnType);
 
-		if (annotation != null && annotation instanceof SendToUser) {
+		if (annotation instanceof SendToUser) {
 			SendToUser sendToUser = (SendToUser) annotation;
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
@@ -176,7 +179,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				}
 			}
 		}
-		else {
+		else if (annotation instanceof SendTo) {
 			SendTo sendTo = (SendTo) annotation;
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
@@ -189,8 +192,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	@Nullable
 	private Object findAnnotation(MethodParameter returnType) {
 		Annotation[] anns = new Annotation[4];
-		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
-		anns[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
+		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendToUser.class);
+		anns[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getExecutable(), SendTo.class);
 		anns[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
 		anns[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
 
@@ -233,13 +236,14 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		return null;
 	}
 
-	protected String[] getTargetDestinations(Annotation annotation, Message<?> message, String defaultPrefix) {
+	protected String[] getTargetDestinations(@Nullable Annotation annotation, Message<?> message, String defaultPrefix) {
 		if (annotation != null) {
 			String[] value = (String[]) AnnotationUtils.getValue(annotation);
 			if (!ObjectUtils.isEmpty(value)) {
 				return value;
 			}
 		}
+
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
 		String destination = (String) message.getHeaders().get(name);
 		if (!StringUtils.hasText(destination)) {
@@ -250,7 +254,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});
 	}
 
-	private MessageHeaders createHeaders(String sessionId, MethodParameter returnType) {
+	private MessageHeaders createHeaders(@Nullable String sessionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
@@ -274,7 +278,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 		private final Map<String, String> vars;
 
-		public DestinationVariablePlaceholderResolver(Map<String, String> vars) {
+		public DestinationVariablePlaceholderResolver(@Nullable Map<String, String> vars) {
 			this.vars = vars;
 		}
 

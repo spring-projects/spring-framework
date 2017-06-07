@@ -38,7 +38,7 @@ import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.NonNullApi;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -53,7 +53,6 @@ import org.springframework.util.StringUtils;
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
  */
-@NonNullApi
 class ComponentScanAnnotationParser {
 
 	private final Environment environment;
@@ -65,11 +64,11 @@ class ComponentScanAnnotationParser {
 	private final BeanDefinitionRegistry registry;
 
 
-	public ComponentScanAnnotationParser(Environment environment, ResourceLoader resourceLoader,
+	public ComponentScanAnnotationParser(@Nullable Environment environment, @Nullable ResourceLoader resourceLoader,
 			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry registry) {
 
-		this.resourceLoader = resourceLoader;
 		this.environment = environment;
+		this.resourceLoader = resourceLoader;
 		this.beanNameGenerator = beanNameGenerator;
 		this.registry = registry;
 	}

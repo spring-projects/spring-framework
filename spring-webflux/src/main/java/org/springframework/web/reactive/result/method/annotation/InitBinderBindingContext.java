@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -41,7 +43,7 @@ class InitBinderBindingContext extends BindingContext {
 	private final BindingContext binderMethodContext;
 
 
-	InitBinderBindingContext(WebBindingInitializer initializer,
+	InitBinderBindingContext(@Nullable WebBindingInitializer initializer,
 			List<SyncInvocableHandlerMethod> binderMethods) {
 
 		super(initializer);
@@ -56,8 +58,9 @@ class InitBinderBindingContext extends BindingContext {
 
 		this.binderMethods.stream()
 				.filter(binderMethod -> {
-					InitBinder annotation = binderMethod.getMethodAnnotation(InitBinder.class);
-					Collection<String> names = Arrays.asList(annotation.value());
+					InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
+					Assert.state(ann != null, "No InitBinder annotation");
+					Collection<String> names = Arrays.asList(ann.value());
 					return (names.size() == 0 || names.contains(dataBinder.getObjectName()));
 				})
 				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -61,7 +61,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public PatternsRequestCondition(String... patterns) {
-		this(asList(patterns), null, null, true, true, null);
+		this(Arrays.asList(patterns), null, null, true, true, null);
 	}
 
 	/**
@@ -73,10 +73,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 */
-	public PatternsRequestCondition(String[] patterns, UrlPathHelper urlPathHelper, PathMatcher pathMatcher,
-			boolean useSuffixPatternMatch, boolean useTrailingSlashMatch) {
+	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
+			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch) {
 
-		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, null);
+		this(Arrays.asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, null);
 	}
 
 	/**
@@ -89,25 +89,27 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param fileExtensions a list of file extensions to consider for path matching
 	 */
-	public PatternsRequestCondition(String[] patterns, UrlPathHelper urlPathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> fileExtensions) {
+	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
+			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch,
+			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
 
-		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, fileExtensions);
+		this(Arrays.asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch,
+				useTrailingSlashMatch, fileExtensions);
 	}
 
 	/**
 	 * Private constructor accepting a collection of patterns.
 	 */
-	private PatternsRequestCondition(Collection<String> patterns, UrlPathHelper urlPathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> fileExtensions) {
+	private PatternsRequestCondition(Collection<String> patterns, @Nullable UrlPathHelper urlPathHelper,
+			@Nullable PathMatcher pathMatcher, boolean useSuffixPatternMatch,
+			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.pathHelper = (urlPathHelper != null ? urlPathHelper : new UrlPathHelper());
 		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
+
 		if (fileExtensions != null) {
 			for (String fileExtension : fileExtensions) {
 				if (fileExtension.charAt(0) != '.') {
@@ -119,14 +121,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 
-	private static List<String> asList(String... patterns) {
-		return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
-	}
-
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
-		if (patterns == null) {
-			return Collections.emptySet();
-		}
 		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
 			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 		return doSendAndReceive(destination, requestMessage);
 	}
 
+	@Nullable
 	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 
@@ -67,7 +68,9 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
 

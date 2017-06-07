@@ -111,8 +111,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		Class<?> rawClass = elementType.getRawClass();
+		return (rawClass != null && MultiValueMap.class.isAssignableFrom(rawClass) &&
+				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType)));
 	}
 
 	@Override
@@ -156,6 +157,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		if (value instanceof HttpEntity) {
 			outputMessage.getHeaders().putAll(((HttpEntity<T>) value).getHeaders());
 			body = ((HttpEntity<T>) value).getBody();
+			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
 		}
 		else {
 			body = value;

@@ -147,7 +147,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 			super((Callable<T>) DUMMY_CALLABLE);
 		}
 
-		public boolean setResultValue(T value) {
+		public boolean setResultValue(@Nullable T value) {
 			set(value);
 			return checkCompletingThread();
 		}

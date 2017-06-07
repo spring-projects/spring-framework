@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,16 @@ import org.springframework.lang.Nullable;
 public interface NativeWebRequest extends WebRequest {
 
 	/**
-	 * Return the underlying native request object, if available.
+	 * Return the underlying native request object.
 	 * @see javax.servlet.http.HttpServletRequest
 	 */
 	Object getNativeRequest();
 
 	/**
-	 * Return the underlying native response object, if available.
+	 * Return the underlying native response object, if any.
 	 * @see javax.servlet.http.HttpServletResponse
 	 */
+	@Nullable
 	Object getNativeResponse();
 
 	/**
@@ -50,7 +51,7 @@ public interface NativeWebRequest extends WebRequest {
 	 * @see javax.servlet.http.HttpServletRequest
 	 */
 	@Nullable
-	<T> T getNativeRequest(Class<T> requiredType);
+	<T> T getNativeRequest(@Nullable Class<T> requiredType);
 
 	/**
 	 * Return the underlying native response object, if available.
@@ -60,6 +61,6 @@ public interface NativeWebRequest extends WebRequest {
 	 * @see javax.servlet.http.HttpServletResponse
 	 */
 	@Nullable
-	<T> T getNativeResponse(Class<T> requiredType);
+	<T> T getNativeResponse(@Nullable Class<T> requiredType);
 
 }

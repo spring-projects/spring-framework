@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,10 @@ public abstract class JmxUtils {
 	 * @return the parameter types as classes
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
-	public static Class<?>[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
+	@Nullable
+	public static Class<?>[] parameterInfoToTypes(@Nullable MBeanParameterInfo[] paramInfo)
+			throws ClassNotFoundException {
+
 		return parameterInfoToTypes(paramInfo, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -148,7 +151,9 @@ public abstract class JmxUtils {
 	 * @return the parameter types as classes
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
-	public static Class<?>[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo, ClassLoader classLoader)
+	@Nullable
+	public static Class<?>[] parameterInfoToTypes(
+			@Nullable MBeanParameterInfo[] paramInfo, @Nullable ClassLoader classLoader)
 			throws ClassNotFoundException {
 
 		Class<?>[] types = null;
@@ -255,7 +260,7 @@ public abstract class JmxUtils {
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
 	 */
-	public static boolean isMBean(Class<?> clazz) {
+	public static boolean isMBean(@Nullable Class<?> clazz) {
 		return (clazz != null &&
 				(DynamicMBean.class.isAssignableFrom(clazz) ||
 						(getMBeanInterface(clazz) != null || getMXBeanInterface(clazz) != null)));
@@ -269,7 +274,7 @@ public abstract class JmxUtils {
 	 * @return the Standard MBean interface for the given class
 	 */
 	@Nullable
-	public static Class<?> getMBeanInterface(Class<?> clazz) {
+	public static Class<?> getMBeanInterface(@Nullable Class<?> clazz) {
 		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
 		}
@@ -291,7 +296,7 @@ public abstract class JmxUtils {
 	 * @return whether there is an MXBean interface for the given class
 	 */
 	@Nullable
-	public static Class<?> getMXBeanInterface(Class<?> clazz) {
+	public static Class<?> getMXBeanInterface(@Nullable Class<?> clazz) {
 		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
 		}

@@ -118,6 +118,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -203,22 +204,23 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, @Nullable Object payload,
+	public void convertAndSendToUser(String user, String destination, Object payload,
 			@Nullable Map<String, Object> headers) throws MessagingException {
 
 		convertAndSendToUser(user, destination, payload, headers, null);
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, @Nullable Object payload,
-			MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSendToUser(String user, String destination, Object payload,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		convertAndSendToUser(user, destination, payload, null, postProcessor);
 	}
 
 	@Override
-	public void convertAndSendToUser(String user, String destination, Object payload, @Nullable Map<String, Object> headers,
-			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSendToUser(String user, String destination, Object payload,
+			@Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor)
+			throws MessagingException {
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");

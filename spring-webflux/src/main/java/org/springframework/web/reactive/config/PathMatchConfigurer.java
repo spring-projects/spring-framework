@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
@@ -90,26 +91,29 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+	@Nullable
 	protected Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
+	@Nullable
 	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
+	@Nullable
 	protected Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
+	@Nullable
 	protected HttpRequestPathHelper getPathHelper() {
 		return this.pathHelper;
 	}
 
+	@Nullable
 	public PathMatcher getPathMatcher() {
-		if(this.pathMatcher != null
-				&& this.pathMatcher.getClass().isAssignableFrom(ParsingPathMatcher.class)
-				&& (this.trailingSlashMatch || this.suffixPatternMatch)) {
+		if (this.pathMatcher instanceof ParsingPathMatcher && (this.trailingSlashMatch || this.suffixPatternMatch)) {
 			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
 					" and useSuffixPatternMatch should be set to 'false'.");
 		}

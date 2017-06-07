@@ -48,6 +48,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -201,7 +202,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.validation.Configuration#addProperty(String, String)
 	 */
-	public void setValidationPropertyMap(Map<String, String> validationProperties) {
+	public void setValidationPropertyMap(@Nullable Map<String, String> validationProperties) {
 		if (validationProperties != null) {
 			this.validationPropertyMap.putAll(validationProperties);
 		}
@@ -377,7 +378,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	*/
 
 	@Override
-	public <T> T unwrap(Class<T> type) {
+	public <T> T unwrap(@Nullable Class<T> type) {
 		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
 			try {
 				return super.unwrap(type);

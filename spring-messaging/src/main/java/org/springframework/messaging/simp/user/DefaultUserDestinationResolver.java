@@ -112,7 +112,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @param pathMatcher the PathMatcher used to work with destinations
 	 * @since 4.3
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 		if (pathMatcher != null) {
 			this.keepLeadingSlash = pathMatcher.combine("1", "2").equals("1/2");
 		}
@@ -148,15 +148,16 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return null;
 		}
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		switch (messageType) {
-			case SUBSCRIBE:
-			case UNSUBSCRIBE:
-				return parseSubscriptionMessage(message, sourceDestination);
-			case MESSAGE:
-				return parseMessage(headers, sourceDestination);
-			default:
-				return null;
+		if (messageType != null) {
+			switch (messageType) {
+				case SUBSCRIBE:
+				case UNSUBSCRIBE:
+					return parseSubscriptionMessage(message, sourceDestination);
+				case MESSAGE:
+					return parseMessage(headers, sourceDestination);
+			}
 		}
+		return null;
 	}
 
 	private ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
@@ -174,18 +175,18 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		String user = (principal != null ? principal.getName() : null);
 		Set<String> sessionIds = Collections.singleton(sessionId);
-		return new ParseResult(sourceDestination, actualDestination, sourceDestination,
-				sessionIds, user);
+		return new ParseResult(sourceDestination, actualDestination, sourceDestination, sessionIds, user);
 	}
 
-	private ParseResult parseMessage(MessageHeaders headers, String sourceDestination) {
+	private ParseResult parseMessage(MessageHeaders headers, String sourceDest) {
 		int prefixEnd = this.prefix.length();
-		int userEnd = sourceDestination.indexOf('/', prefixEnd);
+		int userEnd = sourceDest.indexOf('/', prefixEnd);
 		Assert.isTrue(userEnd > 0, "Expected destination pattern \"/user/{userId}/**\"");
-		String actualDestination = sourceDestination.substring(userEnd);
-		String subscribeDestination = this.prefix.substring(0, prefixEnd - 1) + actualDestination;
-		String userName = sourceDestination.substring(prefixEnd, userEnd);
+		String actualDest = sourceDest.substring(userEnd);
+		String subscribeDest = this.prefix.substring(0, prefixEnd - 1) + actualDest;
+		String userName = sourceDest.substring(prefixEnd, userEnd);
 		userName = StringUtils.replace(userName, "%2F", "/");
+
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		Set<String> sessionIds;
 		if (userName.equals(sessionId)) {
@@ -195,14 +196,14 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		else {
 			sessionIds = getSessionIdsByUser(userName, sessionId);
 		}
+
 		if (!this.keepLeadingSlash) {
-			actualDestination = actualDestination.substring(1);
+			actualDest = actualDest.substring(1);
 		}
-		return new ParseResult(sourceDestination, actualDestination, subscribeDestination,
-				sessionIds, userName);
+		return new ParseResult(sourceDest, actualDest, subscribeDest, sessionIds, userName);
 	}
 
-	private Set<String> getSessionIdsByUser(String userName, String sessionId) {
+	private Set<String> getSessionIdsByUser(String userName, @Nullable String sessionId) {
 		Set<String> sessionIds;
 		SimpUser user = this.userRegistry.getUser(userName);
 		if (user != null) {
@@ -265,9 +266,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final String user;
 
-
 		public ParseResult(String sourceDest, String actualDest, String subscribeDest,
-				Set<String> sessionIds, String user) {
+				Set<String> sessionIds, @Nullable String user) {
 
 			this.sourceDestination = sourceDest;
 			this.actualDestination = actualDest;
@@ -275,7 +275,6 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			this.sessionIds = sessionIds;
 			this.user = user;
 		}
-
 
 		public String getSourceDestination() {
 			return this.sourceDestination;
@@ -293,6 +292,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return this.sessionIds;
 		}
 
+		@Nullable
 		public String getUser() {
 			return this.user;
 		}

@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -335,19 +336,27 @@ class ReactiveTypeHandler {
 			}
 		}
 
-		private SseEmitter.SseEventBuilder adapt(ServerSentEvent<?> event) {
+		private SseEmitter.SseEventBuilder adapt(ServerSentEvent<?> sse) {
 			SseEmitter.SseEventBuilder builder = SseEmitter.event();
-			if (event.id() != null) {
-				builder.id(event.id());
+			String id = sse.id();
+			String event = sse.event();
+			Duration retry = sse.retry();
+			String comment = sse.comment();
+			Object data = sse.data();
+			if (id != null) {
+				builder.id(id);
 			}
-			if (event.comment() != null) {
-				builder.comment(event.comment());
+			if (event != null) {
+				builder.name(event);
 			}
-			if (event.data() != null) {
-				builder.data(event.data());
+			if (data != null) {
+				builder.data(data);
 			}
-			if (event.retry() != null) {
-				builder.reconnectTime(event.retry().toMillis());
+			if (retry != null) {
+				builder.reconnectTime(retry.toMillis());
+			}
+			if (comment != null) {
+				builder.comment(comment);
 			}
 			return builder;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsUtils;
 
@@ -43,7 +43,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	private static final RequestMethodsRequestCondition GET_CONDITION =
 			new RequestMethodsRequestCondition(RequestMethod.GET);
 
-
 	private final Set<RequestMethod> methods;
 
 
@@ -53,16 +52,11 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * if, 0 the condition will match to every request
 	 */
 	public RequestMethodsRequestCondition(RequestMethod... requestMethods) {
-		this(asList(requestMethods));
+		this(Arrays.asList(requestMethods));
 	}
 
 	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
 		this.methods = Collections.unmodifiableSet(new LinkedHashSet<>(requestMethods));
-	}
-
-
-	private static List<RequestMethod> asList(RequestMethod... requestMethods) {
-		return (requestMethods != null ? Arrays.asList(requestMethods) : Collections.emptyList());
 	}
 
 
@@ -126,6 +120,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Hence empty conditions is a match, otherwise try to match to the HTTP
 	 * method in the "Access-Control-Request-Method" header.
 	 */
+	@Nullable
 	private RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
 		if (getMethods().isEmpty()) {
 			return this;

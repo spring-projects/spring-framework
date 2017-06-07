@@ -262,7 +262,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 	@Test
 	public void testTypeConversion() throws EvaluationException {
 		ExpressionState state = getState();
-		String s = (String)state.convertValue(34, TypeDescriptor.valueOf(String.class));
+		String s = (String) state.convertValue(34, TypeDescriptor.valueOf(String.class));
 		assertEquals("34",s);
 
 		s = (String)state.convertValue(new TypedValue(34), TypeDescriptor.valueOf(String.class));

@@ -16,8 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.NonNullApi;
-
 /**
  * Parses a {@code String[]} of command line arguments in order to populate a
  * {@link CommandLineArgs} object.
@@ -51,7 +49,6 @@ import org.springframework.lang.NonNullApi;
  * @author Chris Beams
  * @since 3.1
  */
-@NonNullApi
 class SimpleCommandLineArgsParser {
 
 	/**

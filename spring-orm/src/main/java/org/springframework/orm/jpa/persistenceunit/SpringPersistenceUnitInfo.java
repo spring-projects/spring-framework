@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.persistence.spi.ClassTransformer;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,8 +57,7 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 * Initialize this PersistenceUnitInfo with the current class loader
 	 * (instead of with a LoadTimeWeaver).
 	 */
-	public void init(ClassLoader classLoader) {
-		Assert.notNull(classLoader, "ClassLoader must not be null");
+	public void init(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 

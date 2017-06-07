@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.dao.support.DaoSupport;
 import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
 import org.springframework.jca.cci.core.CciTemplate;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Convenient super class for CCI-based data access objects.
@@ -73,6 +75,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	/**
 	 * Return the ConnectionFactory used by this DAO.
 	 */
+	@Nullable
 	public final ConnectionFactory getConnectionFactory() {
 		return this.cciTemplate.getConnectionFactory();
 	}
@@ -122,7 +125,9 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#getConnection(javax.resource.cci.ConnectionFactory)
 	 */
 	protected final Connection getConnection() throws CannotGetCciConnectionException {
-		return ConnectionFactoryUtils.getConnection(getConnectionFactory());
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		Assert.state(connectionFactory != null, "No ConnectionFactory set");
+		return ConnectionFactoryUtils.getConnection(connectionFactory);
 	}
 
 	/**

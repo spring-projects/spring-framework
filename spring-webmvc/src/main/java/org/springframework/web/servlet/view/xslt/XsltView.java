@@ -22,7 +22,6 @@ import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -46,6 +45,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -133,7 +133,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * and rethrows errors to discontinue the XML transformation.
 	 * @see org.springframework.util.xml.SimpleTransformErrorListener
 	 */
-	public void setErrorListener(ErrorListener errorListener) {
+	public void setErrorListener(@Nullable ErrorListener errorListener) {
 		this.errorListener = (errorListener != null ? errorListener : new SimpleTransformErrorListener(logger));
 	}
 
@@ -454,11 +454,13 @@ public class XsltView extends AbstractUrlBasedView {
 	 */
 	protected Source getStylesheetSource() {
 		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading XSLT stylesheet from '" + url + "'");
 		}
 		try {
-			Resource resource = getApplicationContext().getResource(url);
+			Resource resource = obtainApplicationContext().getResource(url);
 			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		catch (IOException ex) {

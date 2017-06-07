@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,6 +151,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * should be read and which should be omitted.
 	 */
 	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
@@ -164,7 +165,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * (without explicit bean name specified).
 	 * <p>Default is a {@link DefaultBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
 	}
 

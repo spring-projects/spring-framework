@@ -77,7 +77,7 @@ public abstract class Jackson2CodecSupport {
 	}
 
 
-	protected boolean supportsMimeType(MimeType mimeType) {
+	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
@@ -86,8 +86,8 @@ public abstract class Jackson2CodecSupport {
 		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
-	protected Map<String, Object> getHints(ResolvableType actualType) {
-		return getParameter(actualType)
+	protected Map<String, Object> getHints(ResolvableType resolvableType) {
+		return getParameter(resolvableType)
 				.flatMap(parameter -> Optional.ofNullable(getAnnotation(parameter, JsonView.class))
 						.map(annotation -> {
 							Class<?>[] classes = annotation.value();
@@ -102,6 +102,7 @@ public abstract class Jackson2CodecSupport {
 				(MethodParameter) type.getSource() : null);
 	}
 
+	@Nullable
 	protected abstract <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType);
 
 }

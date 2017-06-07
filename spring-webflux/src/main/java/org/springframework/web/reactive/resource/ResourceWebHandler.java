@@ -85,8 +85,7 @@ import org.springframework.web.server.WebHandler;
  * @author Brian Clozel
  * @since 5.0
  */
-public class ResourceWebHandler
-		implements WebHandler, InitializingBean, SmartInitializingSingleton {
+public class ResourceWebHandler implements WebHandler, InitializingBean, SmartInitializingSingleton {
 
 	/** Set of supported HTTP methods */
 	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
@@ -113,10 +112,11 @@ public class ResourceWebHandler
 	 * Set the {@code List} of {@code Resource} paths to use as sources
 	 * for serving static resources.
 	 */
-	public void setLocations(List<Resource> locations) {
-		Assert.notNull(locations, "Locations list must not be null");
+	public void setLocations(@Nullable List<Resource> locations) {
 		this.locations.clear();
-		this.locations.addAll(locations);
+		if (locations != null) {
+			this.locations.addAll(locations);
+		}
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class ResourceWebHandler
 	 * <p>By default {@link PathResourceResolver} is configured. If using this property,
 	 * it is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+	public void setResourceResolvers(@Nullable List<ResourceResolver> resourceResolvers) {
 		this.resourceResolvers.clear();
 		if (resourceResolvers != null) {
 			this.resourceResolvers.addAll(resourceResolvers);
@@ -150,7 +150,7 @@ public class ResourceWebHandler
 	 * Configure the list of {@link ResourceTransformer}s to use.
 	 * <p>By default no transformers are configured for use.
 	 */
-	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
+	public void setResourceTransformers(@Nullable List<ResourceTransformer> resourceTransformers) {
 		this.resourceTransformers.clear();
 		if (resourceTransformers != null) {
 			this.resourceTransformers.addAll(resourceTransformers);
@@ -172,6 +172,11 @@ public class ResourceWebHandler
 		this.cacheControl = cacheControl;
 	}
 
+	/**
+	 * Return the {@link org.springframework.http.CacheControl} instance to build
+	 * the Cache-Control HTTP response header.
+	 */
+	@Nullable
 	public CacheControl getCacheControl() {
 		return this.cacheControl;
 	}
@@ -187,6 +192,7 @@ public class ResourceWebHandler
 	/**
 	 * Return the configured resource message writer.
 	 */
+	@Nullable
 	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
 		return this.resourceHttpMessageWriter;
 	}
@@ -204,21 +210,18 @@ public class ResourceWebHandler
 	/**
 	 * Return the configured {@link CompositeContentTypeResolver}.
 	 */
+	@Nullable
 	public CompositeContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
-			logger.warn("Locations list is empty. No resources will be served unless a " +
-					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
-		}
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
-		if (this.resourceHttpMessageWriter == null) {
+		if (getResourceHttpMessageWriter() == null) {
 			this.resourceHttpMessageWriter = new ResourceHttpMessageWriter();
 		}
 	}
@@ -230,6 +233,10 @@ public class ResourceWebHandler
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(this.locations)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Locations list is empty. No resources will be served unless a " +
+						"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
+			}
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
@@ -275,7 +282,6 @@ public class ResourceWebHandler
 	 */
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
 					logger.trace("No matching resource found - returning 404");
@@ -292,7 +298,8 @@ public class ResourceWebHandler
 						// Supported methods and required session
 						HttpMethod httpMethod = exchange.getRequest().getMethod();
 						if (!SUPPORTED_METHODS.contains(httpMethod)) {
-							return Mono.error(new MethodNotAllowedException(httpMethod, SUPPORTED_METHODS));
+							return Mono.error(new MethodNotAllowedException(
+									exchange.getRequest().getMethodValue(), SUPPORTED_METHODS));
 						}
 
 						// Header phase
@@ -332,7 +339,9 @@ public class ResourceWebHandler
 						}
 
 						setHeaders(exchange, resource, mediaType);
-						return this.resourceHttpMessageWriter.write(Mono.just(resource),
+						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
+						Assert.state(writer != null, "No ResourceHttpMessageWriter");
+						return writer.write(Mono.just(resource),
 								null, ResolvableType.forClass(Resource.class), mediaType,
 								exchange.getRequest(), exchange.getResponse(), Collections.emptyMap());
 					}
@@ -485,7 +494,7 @@ public class ResourceWebHandler
 	 * @param resource the identified resource (never {@code null})
 	 * @param mediaType the resource's media type (never {@code null})
 	 */
-	protected void setHeaders(ServerWebExchange exchange, Resource resource, MediaType mediaType)
+	protected void setHeaders(ServerWebExchange exchange, Resource resource, @Nullable MediaType mediaType)
 			throws IOException {
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();

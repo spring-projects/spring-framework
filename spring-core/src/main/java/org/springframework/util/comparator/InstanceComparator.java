@@ -18,6 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,7 +59,7 @@ public class InstanceComparator<T> implements Comparator<T> {
 		return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
 	}
 
-	private int getOrder(T object) {
+	private int getOrder(@Nullable T object) {
 		if (object != null) {
 			for (int i = 0; i < this.instanceOrder.length; i++) {
 				if (this.instanceOrder[i].isInstance(object)) {

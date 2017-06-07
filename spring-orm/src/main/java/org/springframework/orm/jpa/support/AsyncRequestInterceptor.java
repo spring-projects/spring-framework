@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,10 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 
 	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
-		bindSession();
+		bindEntityManager();
 	}
 
-	public void bindSession() {
+	public void bindEntityManager() {
 		this.timeoutInProgress = false;
 		TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
 	}

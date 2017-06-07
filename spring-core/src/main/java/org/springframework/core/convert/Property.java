@@ -67,7 +67,9 @@ public final class Property {
 		this(objectType, readMethod, writeMethod, null);
 	}
 
-	public Property(Class<?> objectType, Method readMethod, Method writeMethod, String name) {
+	public Property(
+			Class<?> objectType, @Nullable Method readMethod, @Nullable Method writeMethod, @Nullable String name) {
+
 		this.objectType = objectType;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
@@ -100,6 +102,7 @@ public final class Property {
 	/**
 	 * The property getter method: e.g. {@code getFoo()}
 	 */
+	@Nullable
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
@@ -107,6 +110,7 @@ public final class Property {
 	/**
 	 * The property setter method: e.g. {@code setFoo(String)}
 	 */
+	@Nullable
 	public Method getWriteMethod() {
 		return this.writeMethod;
 	}
@@ -208,8 +212,8 @@ public final class Property {
 	}
 
 	private void addAnnotationsToMap(
-		Map<Class<? extends Annotation>, Annotation> annotationMap,
-		AnnotatedElement object) {
+			Map<Class<? extends Annotation>, Annotation> annotationMap, @Nullable AnnotatedElement object) {
+
 		if (object != null) {
 			for (Annotation annotation : object.getAnnotations()) {
 				annotationMap.put(annotation.annotationType(), annotation);
@@ -223,26 +227,33 @@ public final class Property {
 		if (!StringUtils.hasLength(name)) {
 			return null;
 		}
+		Field field = null;
 		Class<?> declaringClass = declaringClass();
-		Field field = ReflectionUtils.findField(declaringClass, name);
-		if (field == null) {
-			// Same lenient fallback checking as in CachedIntrospectionResults...
-			field = ReflectionUtils.findField(declaringClass,
-					name.substring(0, 1).toLowerCase() + name.substring(1));
+		if (declaringClass != null) {
+			field = ReflectionUtils.findField(declaringClass, name);
 			if (field == null) {
+				// Same lenient fallback checking as in CachedIntrospectionResults...
 				field = ReflectionUtils.findField(declaringClass,
-						name.substring(0, 1).toUpperCase() + name.substring(1));
+						name.substring(0, 1).toLowerCase() + name.substring(1));
+				if (field == null) {
+					field = ReflectionUtils.findField(declaringClass,
+							name.substring(0, 1).toUpperCase() + name.substring(1));
+				}
 			}
 		}
 		return field;
 	}
 
+	@Nullable
 	private Class<?> declaringClass() {
 		if (getReadMethod() != null) {
 			return getReadMethod().getDeclaringClass();
 		}
-		else {
+		else if (getWriteMethod() != null) {
 			return getWriteMethod().getDeclaringClass();
+		}
+		else {
+			return null;
 		}
 	}
 

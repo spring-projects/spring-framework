@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jms.core;
 
 import java.util.Map;
-
 import javax.jms.Destination;
 
 import org.springframework.lang.Nullable;
@@ -93,8 +92,8 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(String destinationName, Object payload, @Nullable Map<String,
-			Object> headers, @Nullable MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination.

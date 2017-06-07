@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,21 +51,6 @@ public interface RequestBodyAdvice {
 			Class<? extends HttpMessageConverter<?>> converterType);
 
 	/**
-	 * Invoked second (and last) if the body is empty.
-	 * @param body set to {@code null} before the first advice is called
-	 * @param inputMessage the request
-	 * @param parameter the method parameter
-	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
-	 * @param converterType the selected converter type
-	 * @return the value to use or {@code null} which may then raise an
-	 * {@code HttpMessageNotReadableException} if the argument is required.
-	 */
-	@Nullable
-	Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
-
-	/**
 	 * Invoked second before the request body is read and converted.
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
@@ -79,7 +64,7 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked third (and last) after the request body is converted to an Object.
-	 * @param body set to the converter Object before the 1st advice is called
+	 * @param body set to the converter Object before the first advice is called
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
 	 * @param targetType the target type, not necessarily the same as the method
@@ -89,5 +74,21 @@ public interface RequestBodyAdvice {
 	 */
 	Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
+
+	/**
+	 * Invoked second (and last) if the body is empty.
+	 * @param body usually set to {@code null} before the first advice is called
+	 * @param inputMessage the request
+	 * @param parameter the method parameter
+	 * @param targetType the target type, not necessarily the same as the method
+	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * @param converterType the selected converter type
+	 * @return the value to use or {@code null} which may then raise an
+	 * {@code HttpMessageNotReadableException} if the argument is required.
+	 */
+	@Nullable
+	Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
+
 
 }

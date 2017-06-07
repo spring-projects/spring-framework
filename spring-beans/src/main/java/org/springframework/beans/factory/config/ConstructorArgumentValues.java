@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class ConstructorArgumentValues {
 	 * to allow for merging and re-merging of argument value definitions. Distinct
 	 * ValueHolder instances carrying the same content are of course allowed.
 	 */
-	public void addArgumentValues(ConstructorArgumentValues other) {
+	public void addArgumentValues(@Nullable ConstructorArgumentValues other) {
 		if (other != null) {
 			for (Map.Entry<Integer, ValueHolder> entry : other.indexedArgumentValues.entrySet()) {
 				addOrMergeIndexedArgumentValue(entry.getKey(), entry.getValue().copy());
@@ -89,7 +89,7 @@ public class ConstructorArgumentValues {
 	 * @param index the index in the constructor argument list
 	 * @param value the argument value
 	 */
-	public void addIndexedArgumentValue(int index, Object value) {
+	public void addIndexedArgumentValue(int index, @Nullable Object value) {
 		addIndexedArgumentValue(index, new ValueHolder(value));
 	}
 
@@ -99,7 +99,7 @@ public class ConstructorArgumentValues {
 	 * @param value the argument value
 	 * @param type the type of the constructor argument
 	 */
-	public void addIndexedArgumentValue(int index, Object value, String type) {
+	public void addIndexedArgumentValue(int index, @Nullable Object value, String type) {
 		addIndexedArgumentValue(index, new ValueHolder(value, type));
 	}
 
@@ -453,7 +453,7 @@ public class ConstructorArgumentValues {
 		 * Create a new ValueHolder for the given value.
 		 * @param value the argument value
 		 */
-		public ValueHolder(Object value) {
+		public ValueHolder(@Nullable Object value) {
 			this.value = value;
 		}
 
@@ -462,7 +462,7 @@ public class ConstructorArgumentValues {
 		 * @param value the argument value
 		 * @param type the type of the constructor argument
 		 */
-		public ValueHolder(Object value, String type) {
+		public ValueHolder(@Nullable Object value, @Nullable String type) {
 			this.value = value;
 			this.type = type;
 		}
@@ -473,7 +473,7 @@ public class ConstructorArgumentValues {
 		 * @param type the type of the constructor argument
 		 * @param name the name of the constructor argument
 		 */
-		public ValueHolder(Object value, String type, String name) {
+		public ValueHolder(@Nullable Object value, @Nullable String type, @Nullable String name) {
 			this.value = value;
 			this.type = type;
 			this.name = name;
@@ -483,13 +483,14 @@ public class ConstructorArgumentValues {
 		 * Set the value for the constructor argument.
 		 * @see PropertyPlaceholderConfigurer
 		 */
-		public void setValue(Object value) {
+		public void setValue(@Nullable Object value) {
 			this.value = value;
 		}
 
 		/**
 		 * Return the value for the constructor argument.
 		 */
+		@Nullable
 		public Object getValue() {
 			return this.value;
 		}
@@ -497,13 +498,14 @@ public class ConstructorArgumentValues {
 		/**
 		 * Set the type of the constructor argument.
 		 */
-		public void setType(String type) {
+		public void setType(@Nullable String type) {
 			this.type = type;
 		}
 
 		/**
 		 * Return the type of the constructor argument.
 		 */
+		@Nullable
 		public String getType() {
 			return this.type;
 		}
@@ -511,13 +513,14 @@ public class ConstructorArgumentValues {
 		/**
 		 * Set the name of the constructor argument.
 		 */
-		public void setName(String name) {
+		public void setName(@Nullable String name) {
 			this.name = name;
 		}
 
 		/**
 		 * Return the name of the constructor argument.
 		 */
+		@Nullable
 		public String getName() {
 			return this.name;
 		}
@@ -526,11 +529,12 @@ public class ConstructorArgumentValues {
 		 * Set the configuration source {@code Object} for this metadata element.
 		 * <p>The exact type of the object will depend on the configuration mechanism used.
 		 */
-		public void setSource(Object source) {
+		public void setSource(@Nullable Object source) {
 			this.source = source;
 		}
 
 		@Override
+		@Nullable
 		public Object getSource() {
 			return this.source;
 		}

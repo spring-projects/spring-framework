@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC URL to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getUrl() {
 		return this.url;
 	}
@@ -74,6 +75,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC username to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -89,6 +91,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC password to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}

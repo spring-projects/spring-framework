@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,6 @@ public interface RequestAttributes {
 	 * Return an id for the current underlying session.
 	 * @return the session id as String (never {@code null})
 	 */
-	@Nullable
 	String getSessionId();
 
 	/**
@@ -140,7 +139,6 @@ public interface RequestAttributes {
 	 * that is, an object to synchronize on for the underlying session.
 	 * @return the session mutex to use (never {@code null})
 	 */
-	@Nullable
 	Object getSessionMutex();
 
 }

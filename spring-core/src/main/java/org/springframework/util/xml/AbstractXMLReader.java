@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for SAX {@code XMLReader} implementations.
@@ -56,6 +58,7 @@ abstract class AbstractXMLReader implements XMLReader {
 	}
 
 	@Override
+	@Nullable
 	public ContentHandler getContentHandler() {
 		return this.contentHandler;
 	}
@@ -66,6 +69,7 @@ abstract class AbstractXMLReader implements XMLReader {
 	}
 
 	@Override
+	@Nullable
 	public DTDHandler getDTDHandler() {
 		return this.dtdHandler;
 	}
@@ -76,6 +80,7 @@ abstract class AbstractXMLReader implements XMLReader {
 	}
 
 	@Override
+	@Nullable
 	public EntityResolver getEntityResolver() {
 		return this.entityResolver;
 	}
@@ -86,10 +91,12 @@ abstract class AbstractXMLReader implements XMLReader {
 	}
 
 	@Override
+	@Nullable
 	public ErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
 
+	@Nullable
 	protected LexicalHandler getLexicalHandler() {
 		return this.lexicalHandler;
 	}

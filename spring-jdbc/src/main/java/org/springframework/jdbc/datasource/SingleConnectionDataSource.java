@@ -292,6 +292,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

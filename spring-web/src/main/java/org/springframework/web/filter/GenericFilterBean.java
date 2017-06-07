@@ -19,7 +19,6 @@ package org.springframework.web.filter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -277,7 +276,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @see javax.servlet.GenericServlet#getServletConfig()
 	 */
 	@Nullable
-	public final FilterConfig getFilterConfig() {
+	public FilterConfig getFilterConfig() {
 		return this.filterConfig;
 	}
 
@@ -293,7 +292,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @see #setBeanName
 	 */
 	@Nullable
-	protected final String getFilterName() {
+	protected String getFilterName() {
 		return (this.filterConfig != null ? this.filterConfig.getFilterName() : this.beanName);
 	}
 
@@ -303,14 +302,22 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * <p>Takes the FilterConfig's ServletContext by default.
 	 * If initialized as bean in a Spring application context,
 	 * it falls back to the ServletContext that the bean factory runs in.
-	 * @return the ServletContext instance, or {@code null} if none available
+	 * @return the ServletContext instance
+	 * @throws IllegalStateException if no ServletContext is available
 	 * @see javax.servlet.GenericServlet#getServletContext()
 	 * @see javax.servlet.FilterConfig#getServletContext()
 	 * @see #setServletContext
 	 */
-	@Nullable
-	protected final ServletContext getServletContext() {
-		return (this.filterConfig != null ? this.filterConfig.getServletContext() : this.servletContext);
+	protected ServletContext getServletContext() {
+		if (this.filterConfig != null) {
+			return this.filterConfig.getServletContext();
+		}
+		else if (this.servletContext != null) {
+			return this.servletContext;
+		}
+		else {
+			throw new IllegalStateException("No ServletContext");
+		}
 	}
 
 

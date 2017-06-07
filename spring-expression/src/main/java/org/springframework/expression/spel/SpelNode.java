@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public interface SpelNode {
 	 * @param expressionState the current expression state (includes the context)
 	 * @return the value of this node evaluated against the specified state
 	 */
+	@Nullable
 	Object getValue(ExpressionState expressionState) throws EvaluationException;
 
 	/**
@@ -62,7 +63,7 @@ public interface SpelNode {
 	 * @throws EvaluationException if any problem occurs evaluating the expression or
 	 * setting the new value
 	 */
-	void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException;
+	void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException;
 
 	/**
 	 * @return the string form of this AST node
@@ -87,7 +88,7 @@ public interface SpelNode {
 	 * or {@code null} if the object is {@code null}
 	 */
 	@Nullable
-	Class<?> getObjectClass(Object obj);
+	Class<?> getObjectClass(@Nullable Object obj);
 
 	/**
 	 * @return the start position of this Ast node in the expression string

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,13 @@ public interface Errors {
 	 * e.g. "address" (defaults to "", {@code null} is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
 	 */
-	void setNestedPath(@Nullable String nestedPath);
+	void setNestedPath(String nestedPath);
 
 	/**
 	 * Return the current nested path of this {@link Errors} object.
 	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
 	 * building of concatenated paths. Default is an empty String.
 	 */
-	@Nullable
 	String getNestedPath();
 
 	/**
@@ -167,7 +166,8 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 * @see #getNestedPath()
 	 */
-	void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
+	void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage);
 
 	/**
 	 * Add all errors from the given {@code Errors} instance to this
@@ -291,6 +291,7 @@ public interface Errors {
 	 * @param field the field name
 	 * @return the current value of the given field
 	 */
+	@Nullable
 	Object getFieldValue(String field);
 
 	/**
@@ -302,6 +303,6 @@ public interface Errors {
 	 * @return the type of the field, or {@code null} if not determinable
 	 */
 	@Nullable
-	Class<?> getFieldType(@Nullable String field);
+	Class<?> getFieldType(String field);
 
 }

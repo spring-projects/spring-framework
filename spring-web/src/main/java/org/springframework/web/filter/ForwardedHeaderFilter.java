@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -163,6 +164,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		// Override header accessors to not expose forwarded headers
 
 		@Override
+		@Nullable
 		public String getHeader(String name) {
 			List<String> value = this.headers.get(name);
 			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
@@ -218,6 +220,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
 		}
 
+		@Nullable
 		private static String getForwardedPrefix(HttpServletRequest request) {
 			String prefix = null;
 			Enumeration<String> names = request.getHeaderNames();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class NamedBeanHolder<T> implements NamedBean {
 	 * @param beanName the name of the bean
 	 * @param beanInstance the corresponding bean instance
 	 */
-	public NamedBeanHolder(String beanName, T beanInstance) {
+	public NamedBeanHolder(String beanName, @Nullable T beanInstance) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanName = beanName;
 		this.beanInstance = beanInstance;
@@ -47,7 +47,7 @@ public class NamedBeanHolder<T> implements NamedBean {
 
 
 	/**
-	 * Return the name of the bean (never {@code null}).
+	 * Return the name of the bean.
 	 */
 	@Override
 	public String getBeanName() {
@@ -55,9 +55,8 @@ public class NamedBeanHolder<T> implements NamedBean {
 	}
 
 	/**
-	 * Return the corresponding bean instance (can be {@code null}).
+	 * Return the corresponding bean instance.
 	 */
-	@Nullable
 	public T getBeanInstance() {
 		return this.beanInstance;
 	}

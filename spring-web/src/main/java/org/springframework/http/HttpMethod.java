@@ -51,7 +51,7 @@ public enum HttpMethod {
 	 * @since 4.2.4
 	 */
 	@Nullable
-	public static HttpMethod resolve(String method) {
+	public static HttpMethod resolve(@Nullable String method) {
 		return (method != null ? mappings.get(method) : null);
 	}
 

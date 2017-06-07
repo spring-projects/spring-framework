@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
@@ -61,7 +60,6 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  */
-@NonNullApi
 public class AnnotationConfigUtils {
 
 	/**
@@ -240,27 +238,34 @@ public class AnnotationConfigUtils {
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
-		if (metadata.isAnnotated(Lazy.class.getName())) {
-			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
+		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+		if (lazy != null) {
+			abd.setLazyInit(lazy.getBoolean("value"));
 		}
-		else if (abd.getMetadata() != metadata && abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-			abd.setLazyInit(attributesFor(abd.getMetadata(), Lazy.class).getBoolean("value"));
+		else if (abd.getMetadata() != metadata) {
+			lazy = attributesFor(abd.getMetadata(), Lazy.class);
+			if (lazy != null) {
+				abd.setLazyInit(lazy.getBoolean("value"));
+			}
 		}
 
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
-		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			abd.setDependsOn(attributesFor(metadata, DependsOn.class).getStringArray("value"));
+		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+		if (dependsOn != null) {
+			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
 		if (abd instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
-			if (metadata.isAnnotated(Role.class.getName())) {
-				absBd.setRole(attributesFor(metadata, Role.class).getNumber("value").intValue());
+			AnnotationAttributes role = attributesFor(metadata, Role.class);
+			if (role != null) {
+				absBd.setRole(role.getNumber("value").intValue());
 			}
-			if (metadata.isAnnotated(Description.class.getName())) {
-				absBd.setDescription(attributesFor(metadata, Description.class).getString("value"));
+			AnnotationAttributes description = attributesFor(metadata, Description.class);
+			if (description != null) {
+				absBd.setDescription(description.getString("value"));
 			}
 		}
 	}
@@ -276,10 +281,12 @@ public class AnnotationConfigUtils {
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
+	@Nullable
 	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationClass) {
 		return attributesFor(metadata, annotationClass.getName());
 	}
 
+	@Nullable
 	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
 		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName, false));
 	}
@@ -306,7 +313,9 @@ public class AnnotationConfigUtils {
 		return Collections.unmodifiableSet(result);
 	}
 
-	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result, Map<String, Object> attributes) {
+	private static void addAttributesIfNotNull(
+			Set<AnnotationAttributes> result, @Nullable Map<String, Object> attributes) {
+
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}

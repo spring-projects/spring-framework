@@ -28,6 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -104,6 +105,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found,
 	 * or if the method raised an exception
 	 */
+	@Nullable
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
@@ -161,9 +163,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	@Nullable
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (providedArgs == null) {
-			return null;
-		}
 		for (Object providedArg : providedArgs) {
 			if (parameter.getParameterType().isInstance(providedArg)) {
 				return providedArg;
@@ -176,6 +175,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
+	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
@@ -282,14 +282,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.resolve();
+				return this.returnType.resolve(Object.class);
 			}
 			return super.getParameterType();
 		}
 
 		@Override
 		public Type getGenericParameterType() {
-			return this.returnType.getType();
+			Type returnType = this.returnType.getType();
+			Assert.state(returnType != null, "No return type");
+			return returnType;
 		}
 
 		@Override

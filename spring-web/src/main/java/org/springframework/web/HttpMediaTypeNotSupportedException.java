@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web;
 import java.util.List;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a client POSTs, PUTs, or PATCHes content of a type
@@ -47,8 +48,8 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param contentType the unsupported content type
 	 * @param supportedMediaTypes the list of supported media types
 	 */
-	public HttpMediaTypeNotSupportedException(MediaType contentType, List<MediaType> supportedMediaTypes) {
-		this(contentType, supportedMediaTypes, "Content type '" + contentType + "' not supported");
+	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
+		this(contentType, supportedMediaTypes, "Content type '" + (contentType != null ? contentType : "") + "' not supported");
 	}
 
 	/**
@@ -57,7 +58,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param supportedMediaTypes the list of supported media types
 	 * @param msg the detail message
 	 */
-	public HttpMediaTypeNotSupportedException(MediaType contentType, List<MediaType> supportedMediaTypes, String msg) {
+	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes, String msg) {
 		super(msg, supportedMediaTypes);
 		this.contentType = contentType;
 	}

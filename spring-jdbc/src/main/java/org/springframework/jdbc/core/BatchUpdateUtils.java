@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,28 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Generic utility methods for working with JDBC batch statements. Mainly for internal use
  * within the framework.
  *
  * @author Thomas Risberg
+ * @since 3.0
  */
 public abstract class BatchUpdateUtils {
 
-	public static int[] executeBatchUpdate(String sql, final List<Object[]> batchValues, final int[] columnTypes, JdbcOperations jdbcOperations) {
+	public static int[] executeBatchUpdate(
+			String sql, final List<Object[]> batchValues, final int[] columnTypes, JdbcOperations jdbcOperations) {
+
 		return jdbcOperations.batchUpdate(
 				sql,
 				new BatchPreparedStatementSetter() {
-
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						Object[] values = batchValues.get(i);
 						setStatementParameters(values, ps, columnTypes);
 					}
-
 					@Override
 					public int getBatchSize() {
 						return batchValues.size();
@@ -46,7 +49,9 @@ public abstract class BatchUpdateUtils {
 				});
 	}
 
-	protected static void setStatementParameters(Object[] values, PreparedStatement ps, int[] columnTypes) throws SQLException {
+	protected static void setStatementParameters(Object[] values, PreparedStatement ps, @Nullable int[] columnTypes)
+			throws SQLException {
+
 		int colIndex = 0;
 		for (Object value : values) {
 			colIndex++;

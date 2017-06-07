@@ -19,7 +19,6 @@ package org.springframework.core.env;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -205,7 +204,6 @@ import org.springframework.util.StringUtils;
  * @see SimpleCommandLinePropertySource
  * @see JOptCommandLinePropertySource
  */
-@NonNullApi
 public abstract class CommandLinePropertySource<T> extends EnumerablePropertySource<T> {
 
 	/** The default name given to {@link CommandLinePropertySource} instances: {@value} */

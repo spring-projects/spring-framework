@@ -18,6 +18,8 @@ package org.springframework.http.converter.protobuf;
 
 import com.google.protobuf.util.JsonFormat;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Subclass of {@link ProtobufHttpMessageConverter} which enforces the use of Protobuf 3 and
  * its official library {@code "com.google.protobuf:protobuf-java-util"} for JSON processing.
@@ -51,7 +53,9 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * @param parser the JSON parser configuration
 	 * @param printer the JSON printer configuration
 	 */
-	public ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser parser, JsonFormat.Printer printer) {
+	public ProtobufJsonFormatHttpMessageConverter(
+			@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
+
 		this(parser, printer, null);
 	}
 
@@ -63,8 +67,8 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * @param printer the JSON printer configuration
 	 * @param registryInitializer an initializer for message extensions
 	 */
-	public ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser parser, JsonFormat.Printer printer,
-			ExtensionRegistryInitializer registryInitializer) {
+	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,
+			@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistryInitializer registryInitializer) {
 
 		super(new ProtobufJavaUtilSupport(parser, printer), registryInitializer);
 	}

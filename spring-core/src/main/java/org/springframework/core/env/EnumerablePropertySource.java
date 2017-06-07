@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -42,7 +41,6 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 3.1
  */
-@NonNullApi
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 
 	public EnumerablePropertySource(String name, T source) {

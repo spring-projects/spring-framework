@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Convenient superclass for application objects that want to be aware of
@@ -57,7 +59,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 
 	@Override
-	public final void setApplicationContext(ApplicationContext context) throws BeansException {
+	public final void setApplicationContext(@Nullable ApplicationContext context) throws BeansException {
 		if (context == null && !isContextRequired()) {
 			// Reset internal context state.
 			this.applicationContext = null;
@@ -136,6 +138,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Return the ApplicationContext that this object is associated with.
 	 * @throws IllegalStateException if not running in an ApplicationContext
 	 */
+	@Nullable
 	public final ApplicationContext getApplicationContext() throws IllegalStateException {
 		if (this.applicationContext == null && isContextRequired()) {
 			throw new IllegalStateException(
@@ -145,10 +148,23 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
+	 * Obtain the ApplicationContext for actual use.
+	 * @return the ApplicationContext (never {@code null})
+	 * @throws IllegalStateException in case of no ApplicationContext set
+	 * @since 5.0
+	 */
+	protected final ApplicationContext obtainApplicationContext() {
+		ApplicationContext applicationContext = getApplicationContext();
+		Assert.state(applicationContext != null, "No ApplicationContext");
+		return applicationContext;
+	}
+
+	/**
 	 * Return a MessageSourceAccessor for the application context
 	 * used by this object, for easy message access.
 	 * @throws IllegalStateException if not running in an ApplicationContext
 	 */
+	@Nullable
 	protected final MessageSourceAccessor getMessageSourceAccessor() throws IllegalStateException {
 		if (this.messageSourceAccessor == null && isContextRequired()) {
 			throw new IllegalStateException(

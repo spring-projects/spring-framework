@@ -124,7 +124,7 @@ public abstract class HttpRange {
 	 * @return the list of ranges
 	 * @throws IllegalArgumentException if the string cannot be parsed
 	 */
-	public static List<HttpRange> parseRanges(String ranges) {
+	public static List<HttpRange> parseRanges(@Nullable String ranges) {
 		if (!StringUtils.hasLength(ranges)) {
 			return Collections.emptyList();
 		}
@@ -220,7 +220,7 @@ public abstract class HttpRange {
 			this.lastPos = lastPos;
 		}
 
-		private void assertPositions(long firstBytePos, Long lastBytePos) {
+		private void assertPositions(long firstBytePos, @Nullable Long lastBytePos) {
 			if (firstBytePos < 0) {
 				throw new IllegalArgumentException("Invalid first byte position: " + firstBytePos);
 			}

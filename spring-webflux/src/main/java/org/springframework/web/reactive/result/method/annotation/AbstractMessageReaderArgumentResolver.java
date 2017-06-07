@@ -105,8 +105,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve());
-		ResolvableType elementType = (adapter != null ? bodyType.getGeneric(0) : bodyType);
+		Class<?> resolvedType = bodyType.resolve();
+		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
+		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -161,7 +162,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter param) {
-		return new ServerWebInputException("Request body is missing: " + param.getMethod().toGenericString());
+		return new ServerWebInputException("Request body is missing: " + param.getExecutable().toGenericString());
 	}
 
 	/**

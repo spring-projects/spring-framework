@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.Serializable;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -133,7 +132,6 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	 * will be used.
 	 * @return the Pointcut instance (never {@code null})
 	 */
-	@Nullable
 	protected AbstractRegexpMethodPointcut createPointcut() {
 		return new JdkRegexpMethodPointcut();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.object;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -26,7 +25,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Superclass for object abstractions of RDBMS stored procedures.
@@ -104,14 +102,13 @@ public abstract class StoredProcedure extends SqlCall {
 	 * a convenience method where the order of the passed in parameter values
 	 * must match the order that the parameters where declared in.
 	 * @param inParams variable number of input parameters. Output parameters should
-	 * not be included in this map.
-	 * It is legal for values to be {@code null}, and this will produce the
-	 * correct behavior using a NULL argument to the stored procedure.
+	 * not be included in this map. It is legal for values to be {@code null}, and this
+	 * will produce the correct behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
-	 * Output parameters will appear here, with their values after the
-	 * stored procedure has been called.
+	 * Output parameters will appear here, with their values after the stored procedure
+	 * has been called.
 	 */
-	public Map<String, Object> execute(@Nullable Object... inParams) {
+	public Map<String, Object> execute(Object... inParams) {
 		Map<String, Object> paramsToUse = new HashMap<>();
 		validateParameters(inParams);
 		int i = 0;
@@ -139,7 +136,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map<String, Object> execute(@Nullable Map<String, ?> inParams) throws DataAccessException {
+	public Map<String, Object> execute(Map<String, ?> inParams) throws DataAccessException {
 		validateParameters(inParams.values().toArray());
 		return getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
 	}
@@ -160,7 +157,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map<String, Object> execute(@Nullable ParameterMapper inParamMapper) throws DataAccessException {
+	public Map<String, Object> execute(ParameterMapper inParamMapper) throws DataAccessException {
 		checkCompiled();
 		return getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), getDeclaredParameters());
 	}

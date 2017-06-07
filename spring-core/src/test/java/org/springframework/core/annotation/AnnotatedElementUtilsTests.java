@@ -70,8 +70,8 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()));
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class).isEmpty());
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()).isEmpty());
 	}
 
 	@Test

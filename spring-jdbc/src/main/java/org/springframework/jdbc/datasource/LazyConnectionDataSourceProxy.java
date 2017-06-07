@@ -157,7 +157,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		// via a Connection from the target DataSource, if possible.
 		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
 			try {
-				Connection con = getTargetDataSource().getConnection();
+				Connection con = obtainTargetDataSource().getConnection();
 				try {
 					checkDefaultConnectionProperties(con);
 				}
@@ -398,8 +398,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 				// Fetch physical Connection from DataSource.
 				this.target = (this.username != null) ?
-						getTargetDataSource().getConnection(this.username, this.password) :
-						getTargetDataSource().getConnection();
+						obtainTargetDataSource().getConnection(this.username, this.password) :
+						obtainTargetDataSource().getConnection();
 
 				// If we still lack default connection properties, check them now.
 				checkDefaultConnectionProperties(this.target);
@@ -407,7 +407,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// Apply kept transaction settings, if any.
 				if (this.readOnly) {
 					try {
-						this.target.setReadOnly(this.readOnly);
+						this.target.setReadOnly(true);
 					}
 					catch (Exception ex) {
 						// "read-only not supported" -> ignore, it's just a hint anyway

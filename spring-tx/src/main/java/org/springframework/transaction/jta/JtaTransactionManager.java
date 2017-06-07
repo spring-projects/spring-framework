@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
-
 import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -251,6 +250,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JNDI environment to use for JNDI lookups.
 	 */
+	@Nullable
 	public Properties getJndiEnvironment() {
 		return this.jndiTemplate.getEnvironment();
 	}
@@ -270,6 +270,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA UserTransaction that this transaction manager uses.
 	 */
+	@Nullable
 	public UserTransaction getUserTransaction() {
 		return this.userTransaction;
 	}
@@ -958,7 +959,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	@Override
-	protected void doResume(Object transaction, Object suspendedResources) {
+	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
 			doJtaResume(txObject, suspendedResources);
@@ -984,7 +985,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #getTransactionManager()
 	 * @see javax.transaction.TransactionManager#resume(javax.transaction.Transaction)
 	 */
-	protected void doJtaResume(JtaTransactionObject txObject, Object suspendedTransaction)
+	protected void doJtaResume(@Nullable JtaTransactionObject txObject, Object suspendedTransaction)
 		throws InvalidTransactionException, SystemException {
 
 		if (getTransactionManager() == null) {

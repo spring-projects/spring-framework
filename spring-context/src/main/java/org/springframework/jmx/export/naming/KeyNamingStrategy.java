@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -89,14 +91,14 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * containing object name mappings.
 	 */
 	public void setMappingLocation(Resource location) {
-		this.mappingLocations = new Resource[]{location};
+		this.mappingLocations = new Resource[] {location};
 	}
 
 	/**
 	 * Set location of properties files to be loaded,
 	 * containing object name mappings.
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
@@ -110,12 +112,10 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws IOException {
 		this.mergedMappings = new Properties();
-
 		CollectionUtils.mergePropertiesIntoMap(this.mappings, this.mergedMappings);
 
 		if (this.mappingLocations != null) {
-			for (int i = 0; i < this.mappingLocations.length; i++) {
-				Resource location = this.mappingLocations[i];
+			for (Resource location : this.mappingLocations) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading JMX object name mappings file from " + location);
 				}
@@ -130,7 +130,8 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * find a mapped value in the mappings first.
 	 */
 	@Override
-	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
+	public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
+		Assert.notNull(beanKey, "KeyNamingStrategy requires bean key");
 		String objectName = null;
 		if (this.mergedMappings != null) {
 			objectName = this.mergedMappings.getProperty(beanKey);
