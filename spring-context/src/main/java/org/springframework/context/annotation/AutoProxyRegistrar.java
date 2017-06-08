@@ -65,17 +65,18 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 			}
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
-			if (mode != null && proxyTargetClass != null && AdviceMode.class == mode.getClass() &&
-					Boolean.class == proxyTargetClass.getClass()) {
-				candidateFound = true;
-				if (mode == AdviceMode.PROXY) {
-					AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
-					if ((Boolean) proxyTargetClass) {
-						AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-						return;
-					}
-				}
+			if (mode == null || proxyTargetClass == null || AdviceMode.class != mode.getClass() ||
+					Boolean.class != proxyTargetClass.getClass()) {
+				continue;
 			}
+			candidateFound = true;
+			if (mode == AdviceMode.PROXY) {
+                AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
+                if ((Boolean) proxyTargetClass) {
+                    AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+                    return;
+                }
+            }
 		}
 		if (!candidateFound) {
 			String name = getClass().getSimpleName();
