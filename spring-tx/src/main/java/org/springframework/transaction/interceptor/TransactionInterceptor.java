@@ -93,12 +93,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
-			@Override
-			public Object proceedWithInvocation() throws Throwable {
-				return invocation.proceed();
-			}
-		});
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, invocation::proceed);
 	}
 
 

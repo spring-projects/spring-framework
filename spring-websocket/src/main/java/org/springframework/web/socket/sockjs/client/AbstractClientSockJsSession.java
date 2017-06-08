@@ -116,12 +116,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	 * request.
 	 */
 	Runnable getTimeoutTask() {
-		return new Runnable() {
-			@Override
-			public void run() {
-				closeInternal(new CloseStatus(2007, "Transport timed out"));
-			}
-		};
+		return () -> closeInternal(new CloseStatus(2007, "Transport timed out"));
 	}
 
 	@Override

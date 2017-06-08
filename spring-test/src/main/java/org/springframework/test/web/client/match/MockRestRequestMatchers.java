@@ -55,11 +55,7 @@ public abstract class MockRestRequestMatchers {
 	 * Match to any request.
 	 */
 	public static RequestMatcher anything() {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws AssertionError {
-			}
-		};
+		return request -> {};
 	}
 
 	/**
@@ -69,12 +65,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher method(final HttpMethod method) {
 		Assert.notNull(method, "'method' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws AssertionError {
-				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
-			}
-		};
+		return request -> AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
 	}
 
 	/**
@@ -84,12 +75,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher requestTo(final Matcher<String> matcher) {
 		Assert.notNull(matcher, "'matcher' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				assertThat("Request URI", request.getURI().toString(), matcher);
-			}
-		};
+		return request -> assertThat("Request URI", request.getURI().toString(), matcher);
 	}
 
 	/**
@@ -99,12 +85,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher requestTo(final String expectedUri) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				assertEquals("Request URI", expectedUri, request.getURI().toString());
-			}
-		};
+		return request -> assertEquals("Request URI", expectedUri, request.getURI().toString());
 	}
 
 	/**
@@ -114,12 +95,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher requestTo(final URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				AssertionErrors.assertEquals("Unexpected request", uri, request.getURI());
-			}
-		};
+		return request -> AssertionErrors.assertEquals("Unexpected request", uri, request.getURI());
 	}
 
 	/**
@@ -127,14 +103,11 @@ public abstract class MockRestRequestMatchers {
 	 */
 	@SafeVarargs
 	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> params = getQueryParams(request);
-				assertValueCount("query param", name, params, matchers.length);
-				for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Query param", params.get(name).get(i), matchers[i]);
-				}
+		return request -> {
+			MultiValueMap<String, String> params = getQueryParams(request);
+			assertValueCount("query param", name, params, matchers.length);
+			for (int i = 0 ; i < matchers.length; i++) {
+				assertThat("Query param", params.get(name).get(i), matchers[i]);
 			}
 		};
 	}
@@ -143,14 +116,11 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request query parameter values.
 	 */
 	public static RequestMatcher queryParam(final String name, final String... expectedValues) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> params = getQueryParams(request);
-				assertValueCount("query param", name, params, expectedValues.length);
-				for (int i = 0 ; i < expectedValues.length; i++) {
-					assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
-				}
+		return request -> {
+			MultiValueMap<String, String> params = getQueryParams(request);
+			assertValueCount("query param", name, params, expectedValues.length);
+			for (int i = 0 ; i < expectedValues.length; i++) {
+				assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
 			}
 		};
 	}
@@ -176,13 +146,10 @@ public abstract class MockRestRequestMatchers {
 	 */
 	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				assertValueCount("header", name, request.getHeaders(), matchers.length);
-				for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
-				}
+		return request -> {
+			assertValueCount("header", name, request.getHeaders(), matchers.length);
+			for (int i = 0 ; i < matchers.length; i++) {
+				assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
 			}
 		};
 	}
@@ -191,14 +158,10 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request header values.
 	 */
 	public static RequestMatcher header(final String name, final String... expectedValues) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				assertValueCount("header", name, request.getHeaders(), expectedValues.length);
-				for (int i = 0 ; i < expectedValues.length; i++) {
-					assertEquals("Request header + [" + name + "]",
-							expectedValues[i], request.getHeaders().get(name).get(i));
-				}
+		return request -> {
+			assertValueCount("header", name, request.getHeaders(), expectedValues.length);
+			for (int i = 0 ; i < expectedValues.length; i++) {
+				assertEquals("Request header + [" + name + "]", expectedValues[i], request.getHeaders().get(name).get(i));
 			}
 		};
 	}

@@ -121,25 +121,22 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 			// Sort methods into a sensible order
 			if (methods.size() > 1) {
-				Collections.sort(methods, new Comparator<Method>() {
-					@Override
-					public int compare(Method m1, Method m2) {
-						int m1pl = m1.getParameterCount();
-						int m2pl = m2.getParameterCount();
-						// varargs methods go last
-						if (m1pl == m2pl) {
-						    if (!m1.isVarArgs() && m2.isVarArgs()) {
-						    	return -1;
-						    }
-						    else if (m1.isVarArgs() && !m2.isVarArgs()) {
-						    	return 1;
-						    }
-						    else {
-						    	return 0;
-						    }
+				Collections.sort(methods, (m1, m2) -> {
+					int m1pl = m1.getParameterCount();
+					int m2pl = m2.getParameterCount();
+					// varargs methods go last
+					if (m1pl == m2pl) {
+						if (!m1.isVarArgs() && m2.isVarArgs()) {
+							return -1;
 						}
-						return (m1pl < m2pl ? -1 : (m1pl > m2pl ? 1 : 0));
+						else if (m1.isVarArgs() && !m2.isVarArgs()) {
+							return 1;
+						}
+						else {
+							return 0;
+						}
 					}
+					return (m1pl < m2pl ? -1 : (m1pl > m2pl ? 1 : 0));
 				});
 			}
 

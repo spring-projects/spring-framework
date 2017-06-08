@@ -303,34 +303,26 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		else {
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
-				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
-						new TransactionCallback<Object>() {
-							@Override
-							public Object doInTransaction(TransactionStatus status) {
-								TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
-								try {
-									return invocation.proceedWithInvocation();
-								}
-								catch (Throwable ex) {
-									if (txAttr.rollbackOn(ex)) {
-										// A RuntimeException: will lead to a rollback.
-										if (ex instanceof RuntimeException) {
-											throw (RuntimeException) ex;
-										}
-										else {
-											throw new ThrowableHolderException(ex);
-										}
-									}
-									else {
-										// A normal return value: will lead to a commit.
-										return new ThrowableHolder(ex);
-									}
-								}
-								finally {
-									cleanupTransactionInfo(txInfo);
-								}
+				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr, status -> {
+					TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
+					try {
+						return invocation.proceedWithInvocation();
+					} catch (Throwable ex) {
+						if (txAttr.rollbackOn(ex)) {
+							// A RuntimeException: will lead to a rollback.
+							if (ex instanceof RuntimeException) {
+								throw (RuntimeException) ex;
+							} else {
+								throw new ThrowableHolderException(ex);
 							}
-						});
+						} else {
+							// A normal return value: will lead to a commit.
+							return new ThrowableHolder(ex);
+						}
+					} finally {
+						cleanupTransactionInfo(txInfo);
+					}
+				});
 
 				// Check result: It might indicate a Throwable to rethrow.
 				if (result instanceof ThrowableHolder) {
