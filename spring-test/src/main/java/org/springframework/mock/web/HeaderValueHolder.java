@@ -68,10 +68,12 @@ class HeaderValueHolder {
 		return Collections.unmodifiableList(stringList);
 	}
 
+	@Nullable
 	public Object getValue() {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
 	}
 
+	@Nullable
 	public String getStringValue() {
 		return (!this.values.isEmpty() ? String.valueOf(this.values.get(0)) : null);
 	}

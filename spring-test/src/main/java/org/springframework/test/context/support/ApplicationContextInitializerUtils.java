@@ -69,11 +69,11 @@ abstract class ApplicationContextInitializerUtils {
 	 * superclasses if appropriate (never {@code null})
 	 * @since 3.2
 	 */
-	static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> resolveInitializerClasses(
+	static Set<Class<? extends ApplicationContextInitializer<?>>> resolveInitializerClasses(
 			List<ContextConfigurationAttributes> configAttributesList) {
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
 
-		final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
+		final Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses = //
 				new HashSet<>();
 
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {

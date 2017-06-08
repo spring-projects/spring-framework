@@ -64,11 +64,13 @@ public class HandlerResultMatchers {
 		return result -> {
 			Object handler = result.getHandler();
 			assertTrue("No handler", handler != null);
-			Class<?> actual = handler.getClass();
-			if (HandlerMethod.class.isInstance(handler)) {
-				actual = ((HandlerMethod) handler).getBeanType();
+			if (handler != null) {
+				Class<?> actual = handler.getClass();
+				if (HandlerMethod.class.isInstance(handler)) {
+					actual = ((HandlerMethod) handler).getBeanType();
+				}
+				assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 			}
-			assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 		};
 	}
 
@@ -145,7 +147,9 @@ public class HandlerResultMatchers {
 	private static HandlerMethod getHandlerMethod(MvcResult result) {
 		Object handler = result.getHandler();
 		assertTrue("No handler", handler != null);
-		assertTrue("Not a HandlerMethod: " + handler, handler instanceof HandlerMethod);
+		if (!(handler instanceof HandlerMethod)) {
+			fail("Not a HandlerMethod: " + handler);
+		}
 		return (HandlerMethod) handler;
 	}
 

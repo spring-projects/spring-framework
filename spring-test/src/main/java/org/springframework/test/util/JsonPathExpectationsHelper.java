@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -95,7 +96,7 @@ public class JsonPathExpectationsHelper {
 	 * @param content the JSON content
 	 * @param expectedValue the expected value
 	 */
-	public void assertValue(String content, Object expectedValue) {
+	public void assertValue(String content, @Nullable Object expectedValue) {
 		Object actualValue = evaluateJsonPath(content);
 		if ((actualValue instanceof List) && !(expectedValue instanceof List)) {
 			@SuppressWarnings("rawtypes")
@@ -231,11 +232,12 @@ public class JsonPathExpectationsHelper {
 		assertTrue(failureReason("a non-empty value", value), !ObjectUtils.isEmpty(value));
 	}
 
-	private String failureReason(String expectedDescription, Object value) {
+	private String failureReason(String expectedDescription, @Nullable Object value) {
 		return String.format("Expected %s at JSON path \"%s\" but found: %s", expectedDescription, this.expression,
 				ObjectUtils.nullSafeToString(StringUtils.quoteIfString(value)));
 	}
 
+	@Nullable
 	private Object evaluateJsonPath(String content) {
 		String message = "No value at JSON path \"" + this.expression + "\"";
 		try {
@@ -256,6 +258,7 @@ public class JsonPathExpectationsHelper {
 		}
 	}
 
+	@Nullable
 	private Object assertExistsAndReturn(String content) {
 		Object value = evaluateJsonPath(content);
 		String reason = "No value at JSON path \"" + this.expression + "\"";

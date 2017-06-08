@@ -1482,8 +1482,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type of annotation to synthesize
 	 * @param annotatedElement the element that is annotated with the annotation
 	 * corresponding to the supplied attributes; may be {@code null} if unknown
-	 * @return the synthesized annotation, or {@code null} if the supplied attributes
-	 * map is {@code null}
+	 * @return the synthesized annotation
 	 * @throws IllegalArgumentException if a required attribute is missing or if an
 	 * attribute is not of the correct type
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1495,14 +1494,11 @@ public abstract class AnnotationUtils {
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <A extends Annotation> A synthesizeAnnotation(@Nullable Map<String, Object> attributes,
+	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
 			Class<A> annotationType, @Nullable AnnotatedElement annotatedElement) {
 
+		Assert.notNull(attributes, "'attributes' must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
-		if (attributes == null) {
-			return null;
-		}
 
 		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);

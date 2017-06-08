@@ -405,21 +405,21 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
+		public V getFirst(K key) {
+			List<V> values = this.map.get(key);
+			return (values != null ? values.get(0) : null);
+		}
+
+		@Override
 		public void add(K key, @Nullable V value) {
 			List<V> values = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			values.add(value);
 		}
 
 		@Override
-		public void addAll(K key, List<V> values) {
+		public void addAll(K key, List<? extends V> values) {
 			List<V> currentValues = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			currentValues.addAll(values);
-		}
-
-		@Override
-		public V getFirst(K key) {
-			List<V> values = this.map.get(key);
-			return (values != null ? values.get(0) : null);
 		}
 
 		@Override

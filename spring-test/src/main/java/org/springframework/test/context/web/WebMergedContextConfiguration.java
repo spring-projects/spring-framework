@@ -99,7 +99,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @since 4.1
 	 */
 	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
-			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
@@ -135,7 +135,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @since 4.3
 	 */
 	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
-			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
@@ -206,7 +206,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 				.append("propertySourceProperties", ObjectUtils.nullSafeToString(getPropertySourceProperties()))
 				.append("contextCustomizers", getContextCustomizers())
 				.append("resourceBasePath", getResourceBasePath())
-				.append("contextLoader", nullSafeToString(getContextLoader()))
+				.append("contextLoader", nullSafeClassName(getContextLoader()))
 				.append("parent", getParent())
 				.toString();
 	}

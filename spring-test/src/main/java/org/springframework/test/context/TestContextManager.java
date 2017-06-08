@@ -233,7 +233,6 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
@@ -501,7 +500,6 @@ public class TestContextManager {
 	}
 
 	private void prepareForBeforeCallback(String callbackName, Object testInstance, Method testMethod) {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("%s(): instance [%s], method [%s]", callbackName, testInstance, testMethod));
 		}
@@ -509,8 +507,8 @@ public class TestContextManager {
 	}
 
 	private void prepareForAfterCallback(String callbackName, Object testInstance, Method testMethod,
-			Throwable exception) {
-		Assert.notNull(testInstance, "Test instance must not be null");
+			@Nullable Throwable exception) {
+
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("%s(): instance [%s], method [%s], exception [%s]", callbackName, testInstance,
 					testMethod, exception));

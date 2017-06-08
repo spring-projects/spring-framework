@@ -49,7 +49,9 @@ public class ViewResultMatchers {
 	public ResultMatcher name(final Matcher<? super String> matcher) {
 		return result -> {
 			ModelAndView mav = result.getModelAndView();
-			assertTrue("No ModelAndView found", mav != null);
+			if (mav == null) {
+				fail("No ModelAndView found");
+			}
 			assertThat("View name", mav.getViewName(), matcher);
 		};
 	}
@@ -60,7 +62,9 @@ public class ViewResultMatchers {
 	public ResultMatcher name(final String expectedViewName) {
 		return result -> {
 			ModelAndView mav = result.getModelAndView();
-			assertTrue("No ModelAndView found", mav != null);
+			if (mav == null) {
+				fail("No ModelAndView found");
+			}
 			assertEquals("View name", expectedViewName, mav.getViewName());
 		};
 	}

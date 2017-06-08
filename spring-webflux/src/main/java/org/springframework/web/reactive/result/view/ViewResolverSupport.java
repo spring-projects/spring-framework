@@ -96,6 +96,7 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 		this.applicationContext = applicationContext;
 	}
 
+	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}

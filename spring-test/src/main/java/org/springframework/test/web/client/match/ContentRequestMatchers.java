@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,10 @@ public class ContentRequestMatchers {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MediaType actualContentType = request.getHeaders().getContentType();
 				assertTrue("Content type not set", actualContentType != null);
-				assertTrue("Content type [" + actualContentType + "] is not compatible with [" + contentType + "]",
-						actualContentType.isCompatibleWith(contentType));
+				if (actualContentType != null) {
+					assertTrue("Content type [" + actualContentType + "] is not compatible with [" + contentType + "]",
+							actualContentType.isCompatibleWith(contentType));
+				}
 			}
 		};
 	}

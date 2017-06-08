@@ -278,7 +278,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * Return the generic type of the {@code returnType} (or of the nested type
 	 * if it is an {@link HttpEntity}).
 	 */
-	@Nullable
 	private Type getGenericType(MethodParameter returnType) {
 		if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
 			return ResolvableType.forType(returnType.getGenericParameterType()).getGeneric().getType();

@@ -72,7 +72,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		super(uri, headers);
 		this.httpMethod = httpMethod;
-		this.contextPath = (contextPath != null ? contextPath : "");
+		this.contextPath = contextPath;
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
 		this.body = Flux.from(body);

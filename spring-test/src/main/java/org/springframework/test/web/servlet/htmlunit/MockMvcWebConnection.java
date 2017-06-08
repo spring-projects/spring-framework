@@ -154,9 +154,6 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
-		if (cookies == null) {
-			return;
-		}
 		Date now = new Date();
 		CookieManager cookieManager = this.webClient.getCookieManager();
 		for (javax.servlet.http.Cookie cookie : cookies) {

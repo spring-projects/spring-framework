@@ -417,7 +417,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	}
 
 	@Override
-	public void addAll(String headerName, List<String> headerValues) {
+	public void addAll(String headerName, List<? extends String> headerValues) {
 		List<String> currentValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		currentValues.addAll(headerValues);
 	}

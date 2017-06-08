@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -155,10 +156,12 @@ public class ModelResultMatchers {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
 			assertTrue("No errors for attribute '" + name + "'", result.hasErrors());
-			boolean hasFieldErrors = result.hasFieldErrors(fieldName);
-			assertTrue("No errors for field '" + fieldName + "' of attribute '" + name + "'", hasFieldErrors);
-			String code = result.getFieldError(fieldName).getCode();
-			assertTrue("Expected error code '" + error + "' but got '" + code + "'", code.equals(error));
+			FieldError fieldError = result.getFieldError(fieldName);
+			if (fieldError == null) {
+				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
+			}
+			String code = fieldError.getCode();
+			assertTrue("Expected error code '" + error + "' but got '" + code + "'", error.equals(code));
 		};
 	}
 
@@ -173,9 +176,11 @@ public class ModelResultMatchers {
 			ModelAndView mav = getModelAndView(mvcResult);
 			BindingResult result = getBindingResult(mav, name);
 			assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
-			boolean hasFieldErrors = result.hasFieldErrors(fieldName);
-			assertTrue("No errors for field '" + fieldName + "' of attribute '" + name + "'", hasFieldErrors);
-			String code = result.getFieldError(fieldName).getCode();
+			FieldError fieldError = result.getFieldError(fieldName);
+			if (fieldError == null) {
+				fail("No errors for field '" + fieldName + "' of attribute '" + name + "'");
+			}
+			String code = fieldError.getCode();
 			assertThat("Field name '" + fieldName + "' of attribute '" + name + "'", code, matcher);
 		};
 	}
@@ -232,13 +237,17 @@ public class ModelResultMatchers {
 
 	private ModelAndView getModelAndView(MvcResult mvcResult) {
 		ModelAndView mav = mvcResult.getModelAndView();
-		assertTrue("No ModelAndView found", mav != null);
+		if (mav == null) {
+			fail("No ModelAndView found");
+		};
 		return mav;
 	}
 
 	private BindingResult getBindingResult(ModelAndView mav, String name) {
 		BindingResult result = (BindingResult) mav.getModel().get(BindingResult.MODEL_KEY_PREFIX + name);
-		assertTrue("No BindingResult for attribute: " + name, result != null);
+		if (result == null) {
+			fail("No BindingResult for attribute: " + name);
+		}
 		return result;
 	}
 

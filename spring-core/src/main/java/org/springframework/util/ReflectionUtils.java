@@ -119,7 +119,7 @@ public abstract class ReflectionUtils {
 	 * @param target the target object on which to set the field
 	 * @param value the value to set (may be {@code null})
 	 */
-	public static void setField(Field field, Object target, @Nullable Object value) {
+	public static void setField(Field field, @Nullable Object target, @Nullable Object value) {
 		try {
 			field.set(target, value);
 		}

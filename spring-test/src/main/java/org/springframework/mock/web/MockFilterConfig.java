@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -64,7 +65,7 @@ public class MockFilterConfig implements FilterConfig {
 	 * Create a new MockFilterConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
-	public MockFilterConfig(ServletContext servletContext) {
+	public MockFilterConfig(@Nullable ServletContext servletContext) {
 		this(servletContext, "");
 	}
 
@@ -73,7 +74,7 @@ public class MockFilterConfig implements FilterConfig {
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param filterName the name of the filter
 	 */
-	public MockFilterConfig(ServletContext servletContext, String filterName) {
+	public MockFilterConfig(@Nullable ServletContext servletContext, String filterName) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.filterName = filterName;
 	}

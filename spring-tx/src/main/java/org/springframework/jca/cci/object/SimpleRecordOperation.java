@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * EIS operation object that accepts a passed-in CCI input Record
@@ -56,6 +57,7 @@ public class SimpleRecordOperation extends EisOperation {
 	 * @throws DataAccessException if there is any problem
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record)
 	 */
+	@Nullable
 	public Record execute(Record inputRecord) throws DataAccessException {
 		return getCciTemplate().execute(getInteractionSpec(), inputRecord);
 	}

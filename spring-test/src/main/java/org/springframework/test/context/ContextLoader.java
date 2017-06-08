@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public interface ContextLoader {
 	 * application context (can be {@code null} or empty)
 	 * @return an array of application context resource locations
 	 */
-	String[] processLocations(Class<?> clazz, @Nullable String... locations);
+	String[] processLocations(Class<?> clazz, String... locations);
 
 	/**
 	 * Loads a new {@link ApplicationContext context} based on the supplied

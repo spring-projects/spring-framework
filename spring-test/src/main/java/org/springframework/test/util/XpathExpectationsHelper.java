@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.util;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,7 +74,7 @@ public class XpathExpectationsHelper {
 	}
 
 
-	private XPathExpression compileXpathExpression(String expression, Map<String, String> namespaces)
+	private XPathExpression compileXpathExpression(String expression, @Nullable Map<String, String> namespaces)
 			throws XPathExpressionException {
 
 		SimpleNamespaceContext namespaceContext = new SimpleNamespaceContext();
@@ -96,7 +95,9 @@ public class XpathExpectationsHelper {
 	 * Parse the content, evaluate the XPath expression as a {@link Node},
 	 * and assert it with the given {@code Matcher<Node>}.
 	 */
-	public void assertNode(byte[] content, String encoding, final Matcher<? super Node> matcher) throws Exception {
+	public void assertNode(byte[] content, @Nullable String encoding, final Matcher<? super Node> matcher)
+			throws Exception {
+
 		Document document = parseXmlByteArray(content, encoding);
 		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
 		assertThat("XPath " + this.expression, node, matcher);
@@ -108,7 +109,7 @@ public class XpathExpectationsHelper {
 	 * @param encoding optional content encoding, if provided as metadata (e.g. in HTTP headers)
 	 * @return the parsed document
 	 */
-	protected Document parseXmlByteArray(byte[] xml, String encoding) throws Exception {
+	protected Document parseXmlByteArray(byte[] xml, @Nullable String encoding) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(this.hasNamespaces);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
@@ -124,6 +125,7 @@ public class XpathExpectationsHelper {
 	 * @throws XPathExpressionException
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected <T> T evaluateXpath(Document document, QName evaluationType, Class<T> expectedClass)
 			throws XPathExpressionException {
 
@@ -134,7 +136,7 @@ public class XpathExpectationsHelper {
 	 * Apply the XPath expression and assert the resulting content exists.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void exists(byte[] content, String encoding) throws Exception {
+	public void exists(byte[] content, @Nullable String encoding) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
 		assertTrue("XPath " + this.expression + " does not exist", node != null);
@@ -144,7 +146,7 @@ public class XpathExpectationsHelper {
 	 * Apply the XPath expression and assert the resulting content does not exist.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void doesNotExist(byte[] content, String encoding) throws Exception {
+	public void doesNotExist(byte[] content, @Nullable String encoding) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
 		assertTrue("XPath " + this.expression + " exists", node == null);
@@ -155,20 +157,22 @@ public class XpathExpectationsHelper {
 	 * given Hamcrest matcher.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertNodeCount(byte[] content, String encoding, Matcher<Integer> matcher) throws Exception {
+	public void assertNodeCount(byte[] content, @Nullable String encoding, Matcher<Integer> matcher) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
-		assertThat("nodeCount for XPath " + this.expression, nodeList.getLength(), matcher);
+		assertThat("nodeCount for XPath " + this.expression,
+				(nodeList != null ? nodeList.getLength() : 0), matcher);
 	}
 
 	/**
 	 * Apply the XPath expression and assert the resulting content as an integer.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertNodeCount(byte[] content, String encoding, int expectedCount) throws Exception {
+	public void assertNodeCount(byte[] content, @Nullable String encoding, int expectedCount) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
-		assertEquals("nodeCount for XPath " + this.expression, expectedCount, nodeList.getLength());
+		assertEquals("nodeCount for XPath " + this.expression, expectedCount,
+				(nodeList != null ? nodeList.getLength() : 0));
 	}
 
 	/**
@@ -176,7 +180,7 @@ public class XpathExpectationsHelper {
 	 * given Hamcrest matcher.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertString(byte[] content, String encoding, Matcher<? super String> matcher) throws Exception {
+	public void assertString(byte[] content, @Nullable String encoding, Matcher<? super String> matcher) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		String result = evaluateXpath(document,  XPathConstants.STRING, String.class);
 		assertThat("XPath " + this.expression, result, matcher);
@@ -186,7 +190,7 @@ public class XpathExpectationsHelper {
 	 * Apply the XPath expression and assert the resulting content as a String.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertString(byte[] content, String encoding, String expectedValue) throws Exception {
+	public void assertString(byte[] content, @Nullable String encoding, String expectedValue) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		String actual = evaluateXpath(document,  XPathConstants.STRING, String.class);
 		assertEquals("XPath " + this.expression, expectedValue, actual);
@@ -197,7 +201,7 @@ public class XpathExpectationsHelper {
 	 * given Hamcrest matcher.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertNumber(byte[] content, String encoding, Matcher<? super Double> matcher) throws Exception {
+	public void assertNumber(byte[] content, @Nullable String encoding, Matcher<? super Double> matcher) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		Double result = evaluateXpath(document, XPathConstants.NUMBER, Double.class);
 		assertThat("XPath " + this.expression, result, matcher);
@@ -207,7 +211,7 @@ public class XpathExpectationsHelper {
 	 * Apply the XPath expression and assert the resulting content as a Double.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertNumber(byte[] content, String encoding, Double expectedValue) throws Exception {
+	public void assertNumber(byte[] content, @Nullable String encoding, Double expectedValue) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		Double actual = evaluateXpath(document, XPathConstants.NUMBER, Double.class);
 		assertEquals("XPath " + this.expression, expectedValue, actual);
@@ -217,7 +221,7 @@ public class XpathExpectationsHelper {
 	 * Apply the XPath expression and assert the resulting content as a Boolean.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertBoolean(byte[] content, String encoding, boolean expectedValue) throws Exception {
+	public void assertBoolean(byte[] content, @Nullable String encoding, boolean expectedValue) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		String actual = evaluateXpath(document, XPathConstants.STRING, String.class);
 		assertEquals("XPath " + this.expression, expectedValue, Boolean.parseBoolean(actual));

@@ -180,8 +180,10 @@ public abstract class MockRestRequestMatchers {
 			@Override
 			public void match(ClientHttpRequest request) {
 				assertValueCount("header", name, request.getHeaders(), matchers.length);
-				for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
+				List<String> headerValues = request.getHeaders().get(name);
+				Assert.state(headerValues != null, "No header values");
+				for (int i = 0; i < matchers.length; i++) {
+					assertThat("Request header [" + name + "]", headerValues.get(i), matchers[i]);
 				}
 			}
 		};
@@ -195,9 +197,10 @@ public abstract class MockRestRequestMatchers {
 			@Override
 			public void match(ClientHttpRequest request) {
 				assertValueCount("header", name, request.getHeaders(), expectedValues.length);
+				List<String> headerValues = request.getHeaders().get(name);
+				Assert.state(headerValues != null, "No header values");
 				for (int i = 0 ; i < expectedValues.length; i++) {
-					assertEquals("Request header + [" + name + "]",
-							expectedValues[i], request.getHeaders().get(name).get(i));
+					assertEquals("Request header [" + name + "]", expectedValues[i], headerValues.get(i));
 				}
 			}
 		};

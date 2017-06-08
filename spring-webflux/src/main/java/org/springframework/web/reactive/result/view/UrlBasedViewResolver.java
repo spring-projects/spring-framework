@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
@@ -259,7 +260,14 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	}
 
 	private View applyLifecycleMethods(String viewName, AbstractView view) {
-		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		ApplicationContext context = getApplicationContext();
+		if (context != null) {
+			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+			if (initialized instanceof View) {
+				return (View) initialized;
+			}
+		}
+		return view;
 	}
 
 }

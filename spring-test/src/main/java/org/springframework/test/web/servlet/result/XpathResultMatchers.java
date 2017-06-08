@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
@@ -72,8 +71,9 @@ public class XpathResultMatchers {
 	/**
 	 * Get the response encoding if explicitly defined in the response, {code null} otherwise.
 	 */
+	@Nullable
 	private String getDefinedEncoding(MockHttpServletResponse response) {
-		return response.isCharset() ? response.getCharacterEncoding() : null;
+		return (response.isCharset() ? response.getCharacterEncoding() : null);
 	}
 
 	/**

@@ -84,8 +84,8 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 			initializers(BarInitializer.class), DelegatingSmartContextLoader.class);
 	}
 
-	private Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializers(
-			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>... classes) {
+	private Set<Class<? extends ApplicationContextInitializer<?>>> initializers(
+			Class<? extends ApplicationContextInitializer<?>>... classes) {
 
 		return new HashSet<>(Arrays.asList(classes));
 	}
