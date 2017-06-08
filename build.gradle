@@ -184,7 +184,11 @@ configure(allprojects) { project ->
 		testCompile("org.mockito:mockito-core:2.6.1") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("com.nhaarman:mockito-kotlin:1.5.0")
+		testCompile("com.nhaarman:mockito-kotlin:1.5.0") {
+			exclude module:'kotlin-stdlib'
+			exclude module:'kotlin-reflect'
+			exclude module:'mockito-core'
+		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 	}
@@ -378,7 +382,7 @@ project("spring-core") {
 		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
@@ -416,7 +420,7 @@ project("spring-beans") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	}
@@ -511,7 +515,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b5")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
@@ -589,7 +593,7 @@ project("spring-messaging") {
 		testCompile("io.netty:netty-all")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		testCompile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
@@ -646,7 +650,7 @@ project("spring-jdbc") {
 		optional("org.apache.derby:derby:10.13.1.1")
 		optional("org.apache.derby:derbyclient:10.13.1.1")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	}
 }
 
@@ -748,7 +752,7 @@ project("spring-web") {
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
@@ -806,7 +810,7 @@ project("spring-webflux") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
