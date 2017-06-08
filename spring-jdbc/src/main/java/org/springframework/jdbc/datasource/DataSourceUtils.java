@@ -78,7 +78,10 @@ public abstract class DataSourceUtils {
 			return doGetConnection(dataSource);
 		}
 		catch (SQLException ex) {
-			throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
+		}
+		catch (IllegalStateException ex) {
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection: " + ex.getMessage());
 		}
 	}
 
@@ -102,14 +105,14 @@ public abstract class DataSourceUtils {
 			conHolder.requested();
 			if (!conHolder.hasConnection()) {
 				logger.debug("Fetching resumed JDBC Connection from DataSource");
-				conHolder.setConnection(dataSource.getConnection());
+				conHolder.setConnection(fetchConnection(dataSource));
 			}
 			return conHolder.getConnection();
 		}
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
-		Connection con = dataSource.getConnection();
+		Connection con = fetchConnection(dataSource);
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC Connection");
@@ -131,6 +134,24 @@ public abstract class DataSourceUtils {
 			}
 		}
 
+		return con;
+	}
+
+	/**
+	 * Actually fetch a {@link Connection} from the given {@link DataSource},
+	 * defensively turning an unexpected {@code null} return value from
+	 * {@link DataSource#getConnection()} into an {@link IllegalStateException}.
+	 * @param dataSource the DataSource to obtain Connections from
+	 * @return a JDBC Connection from the given DataSource (never {@code null})
+	 * @throws SQLException if thrown by JDBC methods
+	 * @throws IllegalStateException if the DataSource returned a null value
+	 * @see DataSource#getConnection()
+	 */
+	private static Connection fetchConnection(DataSource dataSource) throws SQLException {
+		Connection con = dataSource.getConnection();
+		if (con == null) {
+			throw new IllegalStateException("DataSource returned null from getConnection(): " + dataSource);
+		}
 		return con;
 	}
 
