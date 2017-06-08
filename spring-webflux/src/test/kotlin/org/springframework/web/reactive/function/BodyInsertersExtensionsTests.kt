@@ -17,15 +17,15 @@ import org.reactivestreams.Publisher
 class BodyInsertersExtensionsTests {
 
 	@Test
-	fun `fromPublisher with reified type parameters`() {
+	fun `bodyFromPublisher with reified type parameters`() {
 		val publisher = mock<Publisher<Foo>>()
-		assertNotNull(fromPublisher(publisher))
+		assertNotNull(bodyFromPublisher(publisher))
 	}
 
 	@Test
-	fun `fromServerSentEvents with reified type parameters`() {
+	fun `bodyFromServerSentEvents with reified type parameters`() {
 		val publisher = mock<Publisher<Foo>>()
-		assertNotNull(fromServerSentEvents(publisher))
+		assertNotNull(bodyFromServerSentEvents(publisher))
 	}
 
 	class Foo

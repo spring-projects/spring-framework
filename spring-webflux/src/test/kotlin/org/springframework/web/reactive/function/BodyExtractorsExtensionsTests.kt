@@ -15,23 +15,23 @@ import org.mockito.junit.MockitoJUnitRunner
 class BodyExtractorsExtensionsTests {
 
 	@Test
-	fun `toMono with KClass`() {
-		assertNotNull(toMono(Foo::class))
+	fun `bodyToMono with KClass`() {
+		assertNotNull(bodyToMono(Foo::class))
 	}
 
 	@Test
-	fun `toMono with reified type parameter`() {
-		assertNotNull(toMono<Foo>())
+	fun `bodyToMono with reified type parameter`() {
+		assertNotNull(bodyToMono<Foo>())
 	}
 
 	@Test
-	fun `toFlux with KClass`() {
-		assertNotNull(toFlux(Foo::class))
+	fun `bodyToFlux with KClass`() {
+		assertNotNull(bodyToFlux(Foo::class))
 	}
 
 	@Test
-	fun `toFlux with reified type parameter`() {
-		assertNotNull(toFlux<Foo>())
+	fun `bodyToFlux with reified type parameter`() {
+		assertNotNull(bodyToFlux<Foo>())
 	}
 
 	class Foo
