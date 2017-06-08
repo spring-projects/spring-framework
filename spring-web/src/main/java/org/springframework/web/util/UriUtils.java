@@ -194,9 +194,9 @@ public abstract class UriUtils {
 	 */
 	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
 		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
-		uriVariables.entrySet().stream().forEach(entry -> {
-			String stringValue = (entry.getValue() != null ? entry.getValue().toString() : "");
-			result.put(entry.getKey(), encode(stringValue, StandardCharsets.UTF_8));
+		uriVariables.forEach((key, value) -> {
+			String stringValue = (value != null ? value.toString() : "");
+			result.put(key, encode(stringValue, StandardCharsets.UTF_8));
 		});
 		return result;
 	}

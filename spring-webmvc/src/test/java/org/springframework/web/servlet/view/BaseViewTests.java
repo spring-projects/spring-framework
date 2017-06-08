@@ -281,8 +281,8 @@ public class BaseViewTests {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void checkContainsAll(Map expected, Map<String, Object> actual) {
-		expected.keySet().stream().forEach(
-			key -> assertEquals("Values for model key '" + key + "' must match", expected.get(key), actual.get(key))
+		expected.forEach(
+			(k, v) -> assertEquals("Values for model key '" + k + "' must match", expected.get(k), actual.get(k))
 		);
 	}
 
