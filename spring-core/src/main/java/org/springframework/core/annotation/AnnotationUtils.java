@@ -531,7 +531,7 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(Method method, @Nullable Class<A> annotationType) {
 		Assert.notNull(method, "Method must not be null");
 		if (annotationType == null) {
 			return null;
@@ -656,7 +656,9 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
+	private static <A extends Annotation> A findAnnotation(
+			Class<?> clazz, @Nullable Class<A> annotationType, boolean synthesize) {
+
 		Assert.notNull(clazz, "Class must not be null");
 		if (annotationType == null) {
 			return null;
@@ -1316,7 +1318,7 @@ public abstract class AnnotationUtils {
 	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */
 	@Nullable
-	public static Object getValue(Annotation annotation, String attributeName) {
+	public static Object getValue(@Nullable Annotation annotation, @Nullable String attributeName) {
 		if (annotation == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
@@ -1356,7 +1358,7 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	@Nullable
-	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+	public static Object getDefaultValue(@Nullable Annotation annotation, @Nullable String attributeName) {
 		if (annotation == null) {
 			return null;
 		}
@@ -1384,7 +1386,9 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	@Nullable
-	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
+	public static Object getDefaultValue(
+			@Nullable Class<? extends Annotation> annotationType, @Nullable String attributeName) {
+
 		if (annotationType == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
@@ -1440,7 +1444,8 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
-		if (annotation == null || annotation instanceof SynthesizedAnnotation) {
+		Assert.notNull(annotation, "Annotation must not be null");
+		if (annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
 
