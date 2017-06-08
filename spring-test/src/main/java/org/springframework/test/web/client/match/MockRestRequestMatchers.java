@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.client.match;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher method(final HttpMethod method) {
 		Assert.notNull(method, "'method' must not be null");
-		return request -> AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
+		return request -> assertEquals("Unexpected HttpMethod", method, request.getMethod());
 	}
 
 	/**
@@ -95,7 +94,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher requestTo(final URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		return request -> AssertionErrors.assertEquals("Unexpected request", uri, request.getURI());
+		return request -> assertEquals("Unexpected request", uri, request.getURI());
 	}
 
 	/**
