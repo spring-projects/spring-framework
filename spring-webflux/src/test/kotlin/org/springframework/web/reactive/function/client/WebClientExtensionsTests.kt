@@ -5,8 +5,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
 
@@ -18,67 +17,67 @@ import org.reactivestreams.Publisher
 @RunWith(MockitoJUnitRunner::class)
 class WebClientExtensionsTests {
 
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    lateinit var requestBodySpec: WebClient.RequestBodySpec
+	@Mock(answer = Answers.RETURNS_MOCKS)
+	lateinit var requestBodySpec: WebClient.RequestBodySpec
 
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    lateinit var responseSpec: WebClient.ResponseSpec
+	@Mock(answer = Answers.RETURNS_MOCKS)
+	lateinit var responseSpec: WebClient.ResponseSpec
 
 
-    @Test
-    fun `RequestBodySpec#body with Publisher and reified type parameters`() {
-        val body = mock<Publisher<Foo>>()
-        requestBodySpec.body(body)
-        verify(requestBodySpec, Mockito.times(1)).body(body, Foo::class.java)
-    }
+	@Test
+	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
+		val body = mock<Publisher<Foo>>()
+		requestBodySpec.body(body)
+		verify(requestBodySpec, times(1)).body(body, Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#bodyToMono with KClass`() {
-        responseSpec.bodyToMono(Foo::class)
-        verify(responseSpec, Mockito.times(1)).bodyToMono(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#bodyToMono with KClass`() {
+		responseSpec.bodyToMono(Foo::class)
+		verify(responseSpec, times(1)).bodyToMono(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#bodyToMono with reified type parameters`() {
-        responseSpec.bodyToMono<Foo>()
-        verify(responseSpec, Mockito.times(1)).bodyToMono(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#bodyToMono with reified type parameters`() {
+		responseSpec.bodyToMono<Foo>()
+		verify(responseSpec, times(1)).bodyToMono(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#bodyToFlux with KClass`() {
-        responseSpec.bodyToFlux(Foo::class)
-        verify(responseSpec, Mockito.times(1)).bodyToFlux(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#bodyToFlux with KClass`() {
+		responseSpec.bodyToFlux(Foo::class)
+		verify(responseSpec, times(1)).bodyToFlux(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#bodyToFlux with reified type parameters`() {
-        responseSpec.bodyToFlux<Foo>()
-        verify(responseSpec, Mockito.times(1)).bodyToFlux(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#bodyToFlux with reified type parameters`() {
+		responseSpec.bodyToFlux<Foo>()
+		verify(responseSpec, times(1)).bodyToFlux(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#toEntity with KClass`() {
-        responseSpec.toEntity(Foo::class)
-        verify(responseSpec, Mockito.times(1)).toEntity(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#toEntity with KClass`() {
+		responseSpec.toEntity(Foo::class)
+		verify(responseSpec, times(1)).toEntity(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#toEntity with reified type parameters`() {
-        responseSpec.toEntity<Foo>()
-        verify(responseSpec, Mockito.times(1)).toEntity(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#toEntity with reified type parameters`() {
+		responseSpec.toEntity<Foo>()
+		verify(responseSpec, times(1)).toEntity(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#toEntityList with KClass`() {
-        responseSpec.toEntityList(Foo::class)
-        verify(responseSpec, Mockito.times(1)).toEntityList(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#toEntityList with KClass`() {
+		responseSpec.toEntityList(Foo::class)
+		verify(responseSpec, times(1)).toEntityList(Foo::class.java)
+	}
 
-    @Test
-    fun `ResponseSpec#toEntityList with reified type parameters`() {
-        responseSpec.toEntityList<Foo>()
-        verify(responseSpec, Mockito.times(1)).toEntityList(Foo::class.java)
-    }
+	@Test
+	fun `ResponseSpec#toEntityList with reified type parameters`() {
+		responseSpec.toEntityList<Foo>()
+		verify(responseSpec, times(1)).toEntityList(Foo::class.java)
+	}
 
-    class Foo
+	class Foo
 }

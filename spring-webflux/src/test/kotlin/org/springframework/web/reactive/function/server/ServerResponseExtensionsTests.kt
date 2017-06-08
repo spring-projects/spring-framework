@@ -5,7 +5,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
 
@@ -17,16 +17,16 @@ import org.reactivestreams.Publisher
 @RunWith(MockitoJUnitRunner::class)
 class ServerResponseExtensionsTests {
 
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    lateinit var bodyBuilder: ServerResponse.BodyBuilder
+	@Mock(answer = Answers.RETURNS_MOCKS)
+	lateinit var bodyBuilder: ServerResponse.BodyBuilder
 
 
-    @Test
-    fun `BodyBuilder#body with Publisher and reified type parameters`() {
-        val body = mock<Publisher<Foo>>()
-        bodyBuilder.body(body)
-        Mockito.verify(bodyBuilder, Mockito.times(1)).body(body, Foo::class.java)
-    }
+	@Test
+	fun `BodyBuilder#body with Publisher and reified type parameters`() {
+		val body = mock<Publisher<Foo>>()
+		bodyBuilder.body(body)
+		verify(bodyBuilder, times(1)).body(body, Foo::class.java)
+	}
 
-    class Foo
+	class Foo
 }

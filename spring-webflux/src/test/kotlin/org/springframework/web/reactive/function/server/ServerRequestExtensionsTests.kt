@@ -4,8 +4,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.bodyToFlux
@@ -19,32 +18,32 @@ import org.springframework.web.reactive.function.server.bodyToMono
 @RunWith(MockitoJUnitRunner::class)
 class ServerRequestExtensionsTests {
 
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    lateinit var request: ServerRequest
+	@Mock(answer = Answers.RETURNS_MOCKS)
+	lateinit var request: ServerRequest
 
-    @Test
-    fun `bodyToMono with KClass`() {
-        request.bodyToMono(Foo::class)
-        verify(request, Mockito.times(1)).bodyToMono(Foo::class.java)
-    }
+	@Test
+	fun `bodyToMono with KClass`() {
+		request.bodyToMono(Foo::class)
+		verify(request, times(1)).bodyToMono(Foo::class.java)
+	}
 
-    @Test
-    fun `bodyToMono with reified type parameters`() {
-        request.bodyToMono<Foo>()
-        verify(request, Mockito.times(1)).bodyToMono(Foo::class.java)
-    }
+	@Test
+	fun `bodyToMono with reified type parameters`() {
+		request.bodyToMono<Foo>()
+		verify(request, times(1)).bodyToMono(Foo::class.java)
+	}
 
-    @Test
-    fun `bodyToFlux with KClass`() {
-        request.bodyToFlux(Foo::class)
-        verify(request, Mockito.times(1)).bodyToFlux(Foo::class.java)
-    }
+	@Test
+	fun `bodyToFlux with KClass`() {
+		request.bodyToFlux(Foo::class)
+		verify(request, times(1)).bodyToFlux(Foo::class.java)
+	}
 
-    @Test
-    fun `bodyToFlux with reified type parameters`() {
-        request.bodyToFlux<Foo>()
-        verify(request, Mockito.times(1)).bodyToFlux(Foo::class.java)
-    }
+	@Test
+	fun `bodyToFlux with reified type parameters`() {
+		request.bodyToFlux<Foo>()
+		verify(request, times(1)).bodyToFlux(Foo::class.java)
+	}
 
-    class Foo
+	class Foo
 }

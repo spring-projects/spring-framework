@@ -38,7 +38,7 @@ class KotlinAutowiredTests {
 		bpp.setBeanFactory(bf)
 		bf.addBeanPostProcessor(bpp)
 		var bd = RootBeanDefinition(KotlinBean::class.java)
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
 		bf.registerBeanDefinition("annotatedBean", bd)
 		var tb = TestBean()
 		bf.registerSingleton("testBean", tb)
@@ -56,7 +56,7 @@ class KotlinAutowiredTests {
 		bpp.setBeanFactory(bf)
 		bf.addBeanPostProcessor(bpp)
 		var bd = RootBeanDefinition(KotlinBean::class.java)
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
 		bf.registerBeanDefinition("annotatedBean", bd)
 
 		var kb = bf.getBean("annotatedBean", KotlinBean::class.java)

@@ -16,17 +16,17 @@ import org.reactivestreams.Publisher
 @RunWith(MockitoJUnitRunner::class)
 class BodyInsertersExtensionsTests {
 
-    @Test
-    fun `fromPublisher with reified type parameters`() {
-        val publisher = mock<Publisher<Foo>>()
-        assertNotNull(fromPublisher(publisher))
-    }
+	@Test
+	fun `fromPublisher with reified type parameters`() {
+		val publisher = mock<Publisher<Foo>>()
+		assertNotNull(fromPublisher(publisher))
+	}
 
-    @Test
-    fun `fromServerSentEvents with reified type parameters`() {
-        val publisher = mock<Publisher<Foo>>()
-        assertNotNull(fromServerSentEvents(publisher))
-    }
+	@Test
+	fun `fromServerSentEvents with reified type parameters`() {
+		val publisher = mock<Publisher<Foo>>()
+		assertNotNull(fromServerSentEvents(publisher))
+	}
 
-    class Foo
+	class Foo
 }

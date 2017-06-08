@@ -12,15 +12,15 @@ import org.springframework.context.support.registerBean
  */
 class AnnotationConfigApplicationContextExtensionsTests {
  
-    @Test
-    fun `Instantiate AnnotationConfigApplicationContext`() {
-        val applicationContext = AnnotationConfigApplicationContext {
-            registerBean<Foo>()
-        }
-        applicationContext.refresh()
-        assertNotNull(applicationContext)
-        assertNotNull(applicationContext.getBean<Foo>())
-    }
+	@Test
+	fun `Instantiate AnnotationConfigApplicationContext`() {
+		val applicationContext = AnnotationConfigApplicationContext {
+			registerBean<Foo>()
+		}
+		applicationContext.refresh()
+		assertNotNull(applicationContext)
+		assertNotNull(applicationContext.getBean<Foo>())
+	}
 
-    class Foo
+	class Foo
 }
