@@ -53,18 +53,14 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	 */
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
-		this.completableFuture.handle(new BiFunction<T, Throwable, Object>() {
-			@Override
-			@Nullable
-			public Object apply(T result, @Nullable Throwable ex) {
-				if (ex != null) {
-					callbacks.failure(ex);
-				}
-				else {
-					callbacks.success(result);
-				}
-				return null;
+		this.completableFuture.handle((result, exception) -> {
+			if (exception != null) {
+				callbacks.failure(exception);
 			}
+			else {
+				callbacks.success(result);
+			}
+			return null;
 		});
 	}
 
