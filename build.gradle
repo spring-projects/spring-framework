@@ -184,6 +184,7 @@ configure(allprojects) { project ->
 		testCompile("org.mockito:mockito-core:2.6.1") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
+		testCompile("com.nhaarman:mockito-kotlin:1.5.0")
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 	}

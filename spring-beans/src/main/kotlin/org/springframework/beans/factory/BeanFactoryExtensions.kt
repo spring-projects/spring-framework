@@ -20,16 +20,6 @@ fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>): T = getBean(required
 inline fun <reified T : Any> BeanFactory.getBean(): T = getBean(T::class.java)
 
 /**
- * Extension for [BeanFactory.getBean] providing a [KClass] based variant.
- *
- * @see BeanFactory.getBean(String, Class<T>)
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <T : Any> BeanFactory.getBean(name: String, requiredType: KClass<T>): T =
-		getBean(name, requiredType.java)
-
-/**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>("foo")` variant.
  *
  * @see BeanFactory.getBean(String, Class<T>)

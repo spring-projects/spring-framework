@@ -92,15 +92,6 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, requiredType: KClass<T>
 
 
 /**
- * Extension for [JdbcOperations.queryForList] providing a [KClass] based variant.
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForList(sql: String, elementType: KClass<T>): List<T> =
-		queryForList(sql, elementType.java)
-
-/**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...")` variant.
  *
  * @author Mario Arias
@@ -111,15 +102,6 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
 		queryForList(sql, T::class.java)
 
 /**
- * Extension for [JdbcOperations.queryForList] providing a [KClass] based variant.
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>, argTypes: IntArray, elementType: KClass<T>): List<T> =
-		queryForList(sql, args, argTypes, elementType.java)
-
-/**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant
  *
  * @author Mario Arias
@@ -128,15 +110,6 @@ fun <T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>, arg
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>, argTypes: IntArray): List<T> =
 		queryForList(sql, args, argTypes, T::class.java)
-
-/**
- * Extension for [JdbcOperations.queryForList] providing a [KClass] based variant.
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>, elementType: KClass<T>): List<T> =
-		queryForList(sql, args, elementType.java)
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...", arrayOf(arg1, argN))` variant
@@ -174,4 +147,3 @@ fun JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet) ->
  */
 fun <T : Any> JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): List<T> =
 		query(sql, RowMapper { rs, i -> function(rs, i) }, *args)
-
