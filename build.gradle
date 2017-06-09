@@ -81,7 +81,7 @@ configure(allprojects) { project ->
 	ext.poiVersion             = "3.16"
 	ext.protobufVersion        = "3.3.1"
 	ext.quartzVersion          = "2.3.0"
-	ext.reactorVersion         = "Bismuth-M1"
+	ext.reactorVersion         = "Bismuth-M2"
 	ext.romeVersion            = "1.7.3"
 	ext.rxjavaVersion          = '1.3.0'
 	ext.rxjavaAdapterVersion   = '1.2.1'
@@ -389,7 +389,7 @@ project("spring-core") {
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		optional("io.netty:netty-buffer")
-		testCompile("io.projectreactor.addons:reactor-test")
+		testCompile("io.projectreactor:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
@@ -753,7 +753,7 @@ project("spring-web") {
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		testCompile("io.projectreactor.addons:reactor-test")
+		testCompile("io.projectreactor:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
@@ -811,7 +811,7 @@ project("spring-webflux") {
 		}
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		testCompile("io.projectreactor.addons:reactor-test")
+		testCompile("io.projectreactor:reactor-test")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
@@ -1037,7 +1037,7 @@ project("spring-test") {
 		optional("com.jayway.jsonpath:json-path:2.2.0")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
-		optional("io.projectreactor.addons:reactor-test")
+		optional("io.projectreactor:reactor-test")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
