@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.accept;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Query parameter based {@link AbstractMappingContentTypeResolver}.
+ * Resolver that checks a query parameter and uses it to lookup a matching
+ * MediaType. Lookup keys can be registered or as a fallback
+ * {@link MediaTypeFactory} can be used to perform a lookup.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ParameterContentTypeResolver extends AbstractMappingContentTypeResolver {
+public class ParameterContentTypeResolver implements RequestedContentTypeResolver {
+
+	/** Primary lookup for media types by key (e.g. "json" -> "application/json") */
+	private final Map<String, MediaType> mediaTypes = new ConcurrentHashMap<>(64);
 
 	private String parameterName = "format";
 
 
 	public ParameterContentTypeResolver(Map<String, MediaType> mediaTypes) {
-		super(mediaTypes);
+		mediaTypes.forEach((key, value) -> this.mediaTypes.put(formatKey(key), value));
+	}
+
+	private static String formatKey(String key) {
+		return key.toLowerCase(Locale.ENGLISH);
 	}
 
 
 	/**
 	 * Set the name of the parameter to use to determine requested media types.
-	 * <p>By default this is set to {@code "format"}.
+	 * <p>By default this is set to {@literal "format"}.
 	 */
 	public void setParameterName(String parameterName) {
 		Assert.notNull(parameterName, "'parameterName' is required");
@@ -53,8 +69,22 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 
 
 	@Override
-	protected String getKey(ServerWebExchange exchange) {
-		return exchange.getRequest().getQueryParams().getFirst(getParameterName());
+	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
+		String key = exchange.getRequest().getQueryParams().getFirst(getParameterName());
+		if (!StringUtils.hasText(key)) {
+			return Collections.emptyList();
+		}
+		key = formatKey(key);
+		MediaType match = this.mediaTypes.get(key);
+		if (match == null) {
+			match = MediaTypeFactory.getMediaType("filename." + key)
+					.orElseThrow(() -> {
+						List<MediaType> supported = new ArrayList<>(this.mediaTypes.values());
+						return new NotAcceptableStatusException(supported);
+					});
+		}
+		this.mediaTypes.putIfAbsent(key, match);
+		return Collections.singletonList(match);
 	}
 
 }

@@ -23,7 +23,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestedContentTypeResolver} that checks the 'Accept' request header.
+ * Resolver that looks at the 'Accept' header of the request.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

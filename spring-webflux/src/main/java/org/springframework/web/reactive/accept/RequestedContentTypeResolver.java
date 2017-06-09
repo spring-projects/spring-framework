@@ -23,8 +23,10 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Strategy for resolving the requested media types for a
- * {@code ServerWebExchange}.
+ * Strategy to resolve the requested media types for a {@code ServerWebExchange}.
+ *
+ * <p>See {@link RequestedContentTypeResolverBuilder} to create a sequence of
+ * strategies.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -36,7 +38,7 @@ public interface RequestedContentTypeResolver {
 	 * list is ordered by specificity first and by quality parameter second.
 	 * @param exchange the current exchange
 	 * @return the requested media types or an empty list
-	 * @throws NotAcceptableStatusException if the requested media types is invalid
+	 * @throws NotAcceptableStatusException if the requested media type is invalid
 	 */
 	List<MediaType> resolveMediaTypes(ServerWebExchange exchange);
 

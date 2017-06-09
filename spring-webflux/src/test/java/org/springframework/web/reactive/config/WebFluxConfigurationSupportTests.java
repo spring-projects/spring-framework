@@ -40,7 +40,6 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -76,6 +75,7 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -102,12 +102,8 @@ public class WebFluxConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		ServerWebExchange exchange = MockServerHttpRequest.get("/path.json").toExchange();
-		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
-		assertEquals(list, resolver.resolveMediaTypes(exchange));
-
-		exchange = MockServerHttpRequest.get("/path.foobar").toExchange();
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
+		ServerWebExchange exchange = get("/path").accept(MediaType.APPLICATION_JSON).toExchange();
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 
 	@Test

@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,6 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -47,7 +45,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
@@ -147,23 +145,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public CompositeContentTypeResolver webFluxContentTypeResolver() {
+	public RequestedContentTypeResolver webFluxContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
-		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureContentTypeResolver(builder);
 		return builder.build();
-	}
-
-	/**
-	 * Override to configure media type mappings.
-	 * @see RequestedContentTypeResolverBuilder#mediaTypes(Map)
-	 */
-	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
-		Map<String, MediaType> map = new HashMap<>();
-		if (jackson2Present) {
-			map.put("json", MediaType.APPLICATION_JSON);
-		}
-		return map;
 	}
 
 	/**

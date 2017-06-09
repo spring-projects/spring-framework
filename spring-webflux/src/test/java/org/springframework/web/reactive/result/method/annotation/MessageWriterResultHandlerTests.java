@@ -52,11 +52,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.method.ResolvableMethod.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
