@@ -1,0 +1,31 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# Matches multiple files with brace expansion notation
+# Set default charset
+[*.{adoc,bat,groovy,html,java,js,jsp,kt,kts,md,properties,py,rb,sh,sql,svg,txt,xml,xsd}]
+charset = utf-8
+
+# Tab indentation
+[*.{gradle,groovy,java,kt,kts,py,sql,svg,xml,xsd}]
+indent_style = tab
+tab_width = 4
+
+# 2 space indentation
+[*.{html,rb}]
+indent_style = space
+indent_size = 2
+
+# 4 space indentation
+[*.{js,jsp}]
+indent_style = space
+indent_size = 4
