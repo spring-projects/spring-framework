@@ -41,7 +41,7 @@ configure(allprojects) { project ->
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.cacheApiVersion        = "1.0.0"
 	ext.caffeineVersion        = "2.5.2"
-	ext.eclipselinkVersion     = "2.6.4"
+	ext.eclipselinkVersion     = "2.6.5-RC2"
 	ext.ehcacheVersion         = "2.10.4"
 	ext.ehcachejcacheVersion   = "1.0.1"
 	ext.ehcache3Version        = "3.3.1"
@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 	ext.fileuploadVersion      = "1.3.2"
 	ext.freemarkerVersion      = "2.3.26-incubating"
 	ext.groovyVersion          = "2.4.11"
-	ext.gsonVersion            = "2.8.0"
+	ext.gsonVersion            = "2.8.1"
 	ext.hamcrestVersion        = "1.3"
 	ext.hibernate5Version      = "5.2.10.Final"
 	ext.hibvalVersion          = "5.4.1.Final"
@@ -63,11 +63,12 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.5.v20170502"
+	ext.jettyVersion           = "9.4.6.v20170531"
 	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.9"
 	ext.jpaVersion             = "2.1.1"
 	ext.jsfVersion             = "2.2"
+	ext.jsonBindingVersion     = "1.0.0-RC2"
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
@@ -75,7 +76,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M4'
 	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.log4jVersion           = '2.8.2'
-	ext.nettyVersion           = "4.1.11.Final"
+	ext.nettyVersion           = "4.1.12.Final"
 	ext.niomultipartVersion    = "1.1.0"
 	ext.okhttp3Version         = "3.8.0"
 	ext.poiVersion             = "3.16"
@@ -738,7 +739,7 @@ project("spring-web") {
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
-		optional("javax.json.bind:javax.json.bind-api:1.0.0-M2")
+		optional("javax.json.bind:javax.json.bind-api:${jsonBindingVersion}")
 		optional("com.rometools:rome:${romeVersion}")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
