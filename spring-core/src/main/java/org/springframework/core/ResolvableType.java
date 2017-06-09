@@ -86,7 +86,7 @@ public class ResolvableType implements Serializable {
 	 * {@code ResolvableType} returned when no value is available. {@code NONE} is used
 	 * in preference to {@code null} so that multiple method calls can be safely chained.
 	 */
-	public static final ResolvableType NONE = new ResolvableType(null, null, null, 0);
+	public static final ResolvableType NONE = new ResolvableType(EmptyType.INSTANCE, null, null, 0);
 
 	private static final ResolvableType[] EMPTY_TYPES_ARRAY = new ResolvableType[0];
 
@@ -95,7 +95,7 @@ public class ResolvableType implements Serializable {
 
 
 	/**
-	 * The underlying Java type being managed (only ever {@code null} for {@link #NONE}).
+	 * The underlying Java type being managed.
 	 */
 	private final Type type;
 
@@ -146,7 +146,7 @@ public class ResolvableType implements Serializable {
 	 * with upfront resolution and a pre-calculated hash.
 	 * @since 4.2
 	 */
-	private ResolvableType(@Nullable Type type, @Nullable TypeProvider typeProvider,
+	private ResolvableType(Type type, @Nullable TypeProvider typeProvider,
 			@Nullable VariableResolver variableResolver, Integer hash) {
 
 		this.type = type;
@@ -188,10 +188,8 @@ public class ResolvableType implements Serializable {
 
 
 	/**
-	 * Return the underling Java {@link Type} being managed. With the exception of
-	 * the {@link #NONE} constant, this method will never return {@code null}.
+	 * Return the underling Java {@link Type} being managed.
 	 */
-	@Nullable
 	public Type getType() {
 		return SerializableTypeWrapper.unwrap(this.type);
 	}
@@ -761,7 +759,10 @@ public class ResolvableType implements Serializable {
 	}
 
 	private Class<?> resolveClass() {
-		if (this.type instanceof Class || this.type == null) {
+		if (this.type == EmptyType.INSTANCE) {
+			return null;
+		}
+		if (this.type instanceof Class) {
 			return (Class<?>) this.type;
 		}
 		if (this.type instanceof GenericArrayType) {
@@ -903,7 +904,7 @@ public class ResolvableType implements Serializable {
 	 * Custom serialization support for {@link #NONE}.
 	 */
 	private Object readResolve() {
-		return (this.type == null ? NONE : this);
+		return (this.type == EmptyType.INSTANCE ? NONE : this);
 	}
 
 	/**
@@ -1567,7 +1568,6 @@ public class ResolvableType implements Serializable {
 				resolveToWildcard = resolveToWildcard.resolveType();
 			}
 			WildcardType wildcardType = (WildcardType) resolveToWildcard.type;
-			Assert.state(wildcardType != null, "Wildcard type not resolved");
 			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
 			Type[] bounds = boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds();
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];
@@ -1581,6 +1581,17 @@ public class ResolvableType implements Serializable {
 		 * The various kinds of bounds.
 		 */
 		enum Kind {UPPER, LOWER}
+	}
+
+
+	@SuppressWarnings("serial")
+	static class EmptyType implements Type, Serializable {
+
+		static final Type INSTANCE = new EmptyType();
+
+		Object readResolve() {
+			return INSTANCE;
+		}
 	}
 
 }

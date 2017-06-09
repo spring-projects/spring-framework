@@ -531,8 +531,11 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(Method method, @Nullable Class<A> annotationType) {
 		Assert.notNull(method, "Method must not be null");
+		if (annotationType == null) {
+			return null;
+		}
 
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(method, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
@@ -653,8 +656,14 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
+	private static <A extends Annotation> A findAnnotation(
+			Class<?> clazz, @Nullable Class<A> annotationType, boolean synthesize) {
+
 		Assert.notNull(clazz, "Class must not be null");
+		if (annotationType == null) {
+			return null;
+		}
+
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
@@ -1309,8 +1318,8 @@ public abstract class AnnotationUtils {
 	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */
 	@Nullable
-	public static Object getValue(Annotation annotation, String attributeName) {
-		if (!StringUtils.hasText(attributeName)) {
+	public static Object getValue(@Nullable Annotation annotation, @Nullable String attributeName) {
+		if (annotation == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -1349,7 +1358,10 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	@Nullable
-	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+	public static Object getDefaultValue(@Nullable Annotation annotation, @Nullable String attributeName) {
+		if (annotation == null) {
+			return null;
+		}
 		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
@@ -1374,8 +1386,10 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	@Nullable
-	public static Object getDefaultValue(Class<? extends Annotation> annotationType, String attributeName) {
-		if (!StringUtils.hasText(attributeName)) {
+	public static Object getDefaultValue(
+			@Nullable Class<? extends Annotation> annotationType, @Nullable String attributeName) {
+
+		if (annotationType == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
 		try {
@@ -1430,6 +1444,7 @@ public abstract class AnnotationUtils {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A synthesizeAnnotation(A annotation, @Nullable Object annotatedElement) {
+		Assert.notNull(annotation, "Annotation must not be null");
 		if (annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
@@ -1467,8 +1482,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type of annotation to synthesize
 	 * @param annotatedElement the element that is annotated with the annotation
 	 * corresponding to the supplied attributes; may be {@code null} if unknown
-	 * @return the synthesized annotation, or {@code null} if the supplied attributes
-	 * map is {@code null}
+	 * @return the synthesized annotation
 	 * @throws IllegalArgumentException if a required attribute is missing or if an
 	 * attribute is not of the correct type
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1480,14 +1494,11 @@ public abstract class AnnotationUtils {
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <A extends Annotation> A synthesizeAnnotation(@Nullable Map<String, Object> attributes,
+	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
 			Class<A> annotationType, @Nullable AnnotatedElement annotatedElement) {
 
+		Assert.notNull(attributes, "'attributes' must not be null");
 		Assert.notNull(annotationType, "'annotationType' must not be null");
-		if (attributes == null) {
-			return null;
-		}
 
 		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);

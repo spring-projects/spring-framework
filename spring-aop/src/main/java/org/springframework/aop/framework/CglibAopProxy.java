@@ -326,8 +326,12 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
-				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
-						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
+				Object target = this.advised.getTargetSource().getTarget();
+				Class<?> targetClass = this.advised.getTargetClass();
+				if (targetClass == null) {
+					targetClass = target.getClass();
+				}
+				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(chain, target, targetClass);
 				this.fixedInterceptorMap.put(methods[x].toString(), x);
 			}
 
@@ -374,7 +378,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * {@code proxy} and also verifies that {@code null} is not returned as a primitive.
 	 */
 	@Nullable
-	private static Object processReturnType(Object proxy, @Nullable Object target, Method method, @Nullable Object retVal) {
+	private static Object processReturnType(Object proxy, Object target, Method method, @Nullable Object retVal) {
 		// Massage return value if necessary
 		if (retVal != null && retVal == target &&
 				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
@@ -409,7 +413,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final Object target;
 
-		public StaticUnadvisedInterceptor(@Nullable Object target) {
+		public StaticUnadvisedInterceptor(Object target) {
 			this.target = target;
 		}
 
@@ -430,7 +434,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final Object target;
 
-		public StaticUnadvisedExposedInterceptor(@Nullable Object target) {
+		public StaticUnadvisedExposedInterceptor(Object target) {
 			this.target = target;
 		}
 
@@ -472,9 +476,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				return processReturnType(proxy, target, method, retVal);
 			}
 			finally {
-				if (target != null) {
-					this.targetSource.releaseTarget(target);
-				}
+				this.targetSource.releaseTarget(target);
 			}
 		}
 	}
@@ -503,9 +505,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
-				if (target != null) {
-					this.targetSource.releaseTarget(target);
-				}
+				this.targetSource.releaseTarget(target);
 			}
 		}
 	}
@@ -612,9 +612,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final Class<?> targetClass;
 
-		public FixedChainStaticTargetInterceptor(
-				List<Object> adviceChain, @Nullable Object target, @Nullable Class<?> targetClass) {
-
+		public FixedChainStaticTargetInterceptor(List<Object> adviceChain, Object target, Class<?> targetClass) {
 			this.adviceChain = adviceChain;
 			this.target = target;
 			this.targetClass = targetClass;
@@ -650,7 +648,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			boolean setProxyContext = false;
-			Class<?> targetClass = null;
 			Object target = null;
 			try {
 				if (this.advised.exposeProxy) {
@@ -658,12 +655,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;
 				}
-				// May be null. Get as late as possible to minimize the time we
-				// "own" the target, in case it comes from a pool...
+				// Get as late as possible to minimize the time we "own" the target, in case it comes from a pool...
 				target = getTarget();
-				if (target != null) {
-					targetClass = target.getClass();
-				}
+				Class<?> targetClass = target.getClass();
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
@@ -709,7 +703,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 			return this.advised.hashCode();
 		}
 
-		@Nullable
 		protected Object getTarget() throws Exception {
 			return this.advised.getTargetSource().getTarget();
 		}
@@ -729,9 +722,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final boolean publicMethod;
 
-		public CglibMethodInvocation(Object proxy, @Nullable Object target, Method method,
-				Object[] arguments, @Nullable Class<?> targetClass,
-				List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
+		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
+				Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
 
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;

@@ -152,7 +152,7 @@ public class ToStringCreator {
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, Object value) {
+	public ToStringCreator append(String fieldName, @Nullable Object value) {
 		printFieldSeparatorIfNecessary();
 		this.styler.styleField(this.buffer, fieldName, value);
 		return this;

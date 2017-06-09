@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,9 @@ public abstract class MockMvcResultMatchers {
 	public static ResultMatcher forwardedUrlPattern(String urlPattern) {
 		return result -> {
 			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			String url = result.getResponse().getForwardedUrl();
 			assertTrue("Forwarded URL does not match the expected URL pattern",
-					pathMatcher.match(urlPattern, result.getResponse().getForwardedUrl()));
+					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
 
@@ -129,9 +130,10 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher redirectedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("No Ant-style path pattern", pathMatcher.isPattern(urlPattern));
+			String url = result.getResponse().getRedirectedUrl();
 			assertTrue("Redirected URL does not match the expected URL pattern",
-					pathMatcher.match(urlPattern, result.getResponse().getRedirectedUrl()));
+					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
 

@@ -159,7 +159,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		boolean setProxyContext = false;
 
 		TargetSource targetSource = this.advised.targetSource;
-		Class<?> targetClass = null;
 		Object target = null;
 
 		try {
@@ -189,12 +188,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				setProxyContext = true;
 			}
 
-			// May be null. Get as late as possible to minimize the time we "own" the target,
+			// Get as late as possible to minimize the time we "own" the target,
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
-			if (target != null) {
-				targetClass = target.getClass();
-			}
+			Class<?> targetClass = target.getClass();
 
 			// Get the interception chain for this method.
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);

@@ -16,8 +16,6 @@
 
 package org.springframework.aop;
 
-import org.springframework.lang.Nullable;
-
 /**
  * A {@code TargetSource} is used to obtain the current "target" of
  * an AOP invocation, which will be invoked via reflection if no around
@@ -59,7 +57,6 @@ public interface TargetSource extends TargetClassAware {
 	 * @return the target object, which contains the joinpoint
 	 * @throws Exception if the target object can't be resolved
 	 */
-	@Nullable
 	Object getTarget() throws Exception;
 
 	/**

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -109,7 +110,7 @@ public interface ClientRequest {
 	interface Builder {
 
 		/**
-		 * Add the given, single header value under the given name.
+		 * Add the given header value(s) under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -118,26 +119,48 @@ public interface ClientRequest {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing HttpHeaders to copy from
+		 * Add the given headers into this request's headers map.
+		 * @param headers the existing HttpHeaders to add from
 		 * @return this builder
 		 */
 		Builder headers(HttpHeaders headers);
 
 		/**
-		 * Add a cookie with the given name and value.
-		 * @param name the cookie name
-		 * @param value the cookie value
+		 * Manipulate this request's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
-		Builder cookie(String name, String value);
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Copy the given cookies into the entity's cookies map.
+		 * Add a cookie with the given name and value(s).
+		 * @param name the cookie name
+		 * @param values the cookie value(s)
+		 * @return this builder
+		 */
+		Builder cookie(String name, String... values);
+
+		/**
+		 * Add the given cookies into this request's cookies map.
 		 * @param cookies the existing cookies to copy from
 		 * @return this builder
 		 */
 		Builder cookies(MultiValueMap<String, String> cookies);
+
+		/**
+		 * Manipulate this request's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.

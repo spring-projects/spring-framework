@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License; Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public interface MvcResult {
 
 	/**
 	 * Return the {@code ModelAndView} prepared by the handler.
-	 * @return a {@code ModelAndView}, or {@code null}
+	 * @return a {@code ModelAndView}, or {@code null} if none
 	 */
 	@Nullable
 	ModelAndView getModelAndView();
@@ -68,7 +68,7 @@ public interface MvcResult {
 	/**
 	 * Return any exception raised by a handler and successfully resolved
 	 * through a {@link HandlerExceptionResolver}.
-	 * @return an exception, possibly {@code null}
+	 * @return an exception, or {@code null} if none
 	 */
 	@Nullable
  	Exception getResolvedException();

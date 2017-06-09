@@ -37,19 +37,19 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Internal utility class that can be used to obtain wrapped {@link Serializable} variants
- * of {@link java.lang.reflect.Type}s.
+ * Internal utility class that can be used to obtain wrapped {@link Serializable}
+ * variants of {@link java.lang.reflect.Type}s.
  *
  * <p>{@link #forField(Field) Fields} or {@link #forMethodParameter(MethodParameter)
- * MethodParameters} can be used as the root source for a serializable type. Alternatively
- * the {@link #forGenericSuperclass(Class) superclass},
+ * MethodParameters} can be used as the root source for a serializable type.
+ * Alternatively the {@link #forGenericSuperclass(Class) superclass},
  * {@link #forGenericInterfaces(Class) interfaces} or {@link #forTypeParameters(Class)
  * type parameters} or a regular {@link Class} can also be used as source.
  *
  * <p>The returned type will either be a {@link Class} or a serializable proxy of
  * {@link GenericArrayType}, {@link ParameterizedType}, {@link TypeVariable} or
- * {@link WildcardType}. With the exception of {@link Class} (which is final) calls to
- * methods that return further {@link Type}s (for example
+ * {@link WildcardType}. With the exception of {@link Class} (which is final) calls
+ * to methods that return further {@link Type}s (for example
  * {@link GenericArrayType#getGenericComponentType()}) will be automatically wrapped.
  *
  * @author Phillip Webb
@@ -123,13 +123,12 @@ abstract class SerializableTypeWrapper {
 	 * @return the original non-serializable type
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
 	public static <T extends Type> T unwrap(T type) {
 		Type unwrapped = type;
 		while (unwrapped instanceof SerializableTypeProxy) {
 			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
 		}
-		return (T) unwrapped;
+		return (unwrapped != null ? (T) unwrapped : type);
 	}
 
 	/**

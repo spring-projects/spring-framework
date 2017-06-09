@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
@@ -79,7 +78,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
 	@Override
-	public void processContextConfiguration(@Nullable ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (!configAttributes.hasClasses() && isGenerateDefaultLocations()) {
 			configAttributes.setClasses(detectDefaultConfigurationClasses(configAttributes.getDeclaringClass()));
 		}

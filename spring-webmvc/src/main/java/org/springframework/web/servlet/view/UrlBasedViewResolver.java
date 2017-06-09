@@ -519,11 +519,12 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	private View applyLifecycleMethods(String viewName, AbstractView view) {
 		ApplicationContext context = getApplicationContext();
 		if (context != null) {
-			return (View) context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+			if (initialized instanceof View) {
+				return (View) initialized;
+			}
 		}
-		else {
-			return view;
-		}
+		return view;
 	}
 
 	/**

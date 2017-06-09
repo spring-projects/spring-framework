@@ -26,6 +26,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
@@ -168,7 +169,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the handler.
 	 */
-	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
+	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors) throws Exception {
 		if (handler == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -187,7 +188,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print exceptions resolved through a HandlerExceptionResolver.
 	 */
-	protected void printResolvedException(Exception resolvedException) throws Exception {
+	protected void printResolvedException(@Nullable Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -199,7 +200,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the ModelAndView.
 	 */
-	protected void printModelAndView(ModelAndView mav) throws Exception {
+	protected void printModelAndView(@Nullable ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
 		if (mav == null || mav.getModel().size() == 0) {
@@ -292,7 +293,7 @@ public class PrintingResultHandler implements ResultHandler {
 
 		void printHeading(String heading);
 
-		void printValue(String label, Object value);
+		void printValue(String label, @Nullable Object value);
 	}
 
 }

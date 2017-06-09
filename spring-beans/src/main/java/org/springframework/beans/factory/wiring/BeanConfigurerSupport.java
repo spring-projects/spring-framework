@@ -141,13 +141,11 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 					!this.beanFactory.containsBean(bwi.getBeanName()))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
 				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
 			}
 			else {
 				// Perform explicit wiring based on the specified bean definition.
-				Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
 			}
 		}
 		catch (BeanCreationException ex) {
@@ -165,15 +163,6 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 				}
 			}
 			throw ex;
-		}
-	}
-
-	private void checkExposedObject(@Nullable Object exposedObject, Object originalBeanInstance) {
-		if (exposedObject != originalBeanInstance) {
-			throw new IllegalStateException("Post-processor tried to replace bean instance of type [" +
-					originalBeanInstance.getClass().getName() + "] with (proxy) object of type [" +
-					(exposedObject != null ? exposedObject.getClass().getName() : null) +
-					"] - not supported for aspect-configured classes!");
 		}
 	}
 

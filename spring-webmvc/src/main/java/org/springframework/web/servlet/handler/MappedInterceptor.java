@@ -111,7 +111,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * The configured PathMatcher, or {@code null}.
+	 * The configured PathMatcher, or {@code null} if none.
 	 */
 	@Nullable
 	public PathMatcher getPathMatcher() {
@@ -121,6 +121,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	/**
 	 * The path into the application the interceptor is mapped to.
 	 */
+	@Nullable
 	public String[] getPathPatterns() {
 		return this.includePatterns;
 	}

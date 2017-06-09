@@ -107,11 +107,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
 		UriComponents uriComponents = uriComponents();
+		String path = uriComponents.getPath();
 
 		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
-				servletContext, httpMethod, uriComponents.getPath());
+				servletContext, httpMethod, (path != null ? path : ""));
 		parent(request, this.parentBuilder);
-		request.setServerName(uriComponents.getHost());  // needs to be first for additional headers
+		String host = uriComponents.getHost();
+		request.setServerName(host != null ? host : "");  // needs to be first for additional headers
 		authType(request);
 		request.setCharacterEncoding(charset.name());
 		content(request, charset);
@@ -125,7 +127,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		ports(uriComponents, request);
 		request.setProtocol("HTTP/1.1");
 		request.setQueryString(uriComponents.getQuery());
-		request.setScheme(uriComponents.getScheme());
+		String scheme = uriComponents.getScheme();
+		request.setScheme(scheme != null ? scheme : "");
 		request.setPathInfo(null);
 
 		return postProcess(request);
@@ -146,7 +149,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		return request;
 	}
 
-	private void parent(MockHttpServletRequest request, RequestBuilder parent) {
+	private void parent(MockHttpServletRequest request, @Nullable RequestBuilder parent) {
 		if (parent == null) {
 			return;
 		}
@@ -156,11 +159,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		// session
 		HttpSession parentSession = parentRequest.getSession(false);
 		if (parentSession != null) {
+			HttpSession localSession = request.getSession();
+			Assert.state(localSession != null, "No local HttpSession");
 			Enumeration<String> attrNames = parentSession.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = attrNames.nextElement();
 				Object attrValue = parentSession.getAttribute(attrName);
-				request.getSession().setAttribute(attrName, attrValue);
+				localSession.setAttribute(attrName, attrValue);
 			}
 		}
 
@@ -254,7 +259,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			}
 		}
 		else {
-			Assert.isTrue(uriComponents.getPath().startsWith(this.contextPath),
+			String path = uriComponents.getPath();
+			Assert.isTrue(path != null && path.startsWith(this.contextPath),
 					() -> "\"" + uriComponents.getPath() +
 							"\" should start with context path \"" + this.contextPath + "\"");
 			request.setContextPath(this.contextPath);
@@ -302,6 +308,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
+	@Nullable
 	private String header(String headerName) {
 		return this.webRequest.getAdditionalHeaders().get(headerName);
 	}
@@ -376,9 +383,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private void servletPath(MockHttpServletRequest request, String requestPath) {
 		String servletPath = requestPath.substring(request.getContextPath().length());
-		if ("".equals(servletPath)) {
-			servletPath = null;
-		}
 		request.setServletPath(servletPath);
 	}
 
@@ -386,7 +390,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		if ("".equals(request.getPathInfo())) {
 			request.setPathInfo(null);
 		}
-		servletPath(request, uriComponents.getPath());
+		String path = uriComponents.getPath();
+		servletPath(request, (path != null ? path : ""));
 	}
 
 	private void ports(UriComponents uriComponents, MockHttpServletRequest request) {

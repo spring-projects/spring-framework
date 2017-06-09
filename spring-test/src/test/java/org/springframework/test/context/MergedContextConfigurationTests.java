@@ -171,12 +171,12 @@ public class MergedContextConfigurationTests {
 
 	@Test
 	public void hashCodeWithSameInitializers() {
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses1 =
 				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 		initializerClasses1.add(BarInitializer.class);
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses2 =
 				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 		initializerClasses2.add(FooInitializer.class);
@@ -190,11 +190,11 @@ public class MergedContextConfigurationTests {
 
 	@Test
 	public void hashCodeWithDifferentInitializers() {
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses1 =
 				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses2 =
 				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 
@@ -368,12 +368,12 @@ public class MergedContextConfigurationTests {
 
 	@Test
 	public void equalsWithSameInitializers() {
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses1 =
 				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 		initializerClasses1.add(BarInitializer.class);
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses2 =
 				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 		initializerClasses2.add(FooInitializer.class);
@@ -387,11 +387,11 @@ public class MergedContextConfigurationTests {
 
 	@Test
 	public void equalsWithDifferentInitializers() {
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses1 =
 				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses2 =
 				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 
