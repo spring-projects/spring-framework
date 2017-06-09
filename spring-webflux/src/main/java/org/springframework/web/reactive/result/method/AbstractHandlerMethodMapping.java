@@ -302,7 +302,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected HandlerMethod lookupHandlerMethod(LookupPath lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
-		List<Match> matches = new ArrayList<Match>();
+		List<Match> matches = new ArrayList<>();
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath.getPath());
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, exchange);

@@ -33,7 +33,7 @@ import javax.lang.model.element.TypeElement;
  */
 class MetadataCollector {
 
-	private final List<ItemMetadata> metadataItems = new ArrayList<ItemMetadata>();
+	private final List<ItemMetadata> metadataItems = new ArrayList<>();
 
 	private final ProcessingEnvironment processingEnvironment;
 
@@ -41,7 +41,7 @@ class MetadataCollector {
 
 	private final TypeHelper typeHelper;
 
-	private final Set<String> processedSourceTypes = new HashSet<String>();
+	private final Set<String> processedSourceTypes = new HashSet<>();
 
 
 	/**
