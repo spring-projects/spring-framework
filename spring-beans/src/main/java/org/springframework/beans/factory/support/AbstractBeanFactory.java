@@ -365,6 +365,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Check if required type matches the type of the actual bean instance.
+		// Note that the following return declarations are technically violating the
+		// non-null policy for the getBean methods: However, these will only result
+		// in null under very specific circumstances: such as a user-declared factory
+		// method returning null or a user-provided FactoryBean.getObject() returning
+		// null, without any custom post-processing of such null values. We will pass
+		// them on as null to corresponding injection points in that exceptional case
+		// but do not expect user-level getBean callers to deal with such null values.
+		// In the end, regular getBean callers should be able to assign the outcome
+		// to non-null variables/arguments without being compromised by rather esoteric
+		// corner cases, in particular in functional configuration and Kotlin scenarios.
+		// A future Spring generation might eventually forbid null values completely
+		// and throw IllegalStateExceptions instead of leniently passing them through.
 		if (requiredType != null && bean != null && !requiredType.isInstance(bean)) {
 			try {
 				return getTypeConverter().convertIfNecessary(bean, requiredType);
@@ -377,6 +389,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 			}
 		}
+		// For the nullability warning, see the elaboration in the comment above.
 		return (T) bean;
 	}
 

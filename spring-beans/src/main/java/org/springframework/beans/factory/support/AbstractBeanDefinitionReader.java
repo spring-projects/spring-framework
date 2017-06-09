@@ -136,7 +136,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * with the corresponding Classes to be resolved later (or never).
 	 * @see Thread#getContextClassLoader()
 	 */
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
