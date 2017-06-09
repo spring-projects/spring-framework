@@ -64,8 +64,6 @@ public class PathPatternMatcherTests {
 		checkNoMatch("foo", "foobar");
 		checkMatches("/foo/bar", "/foo/bar");
 		checkNoMatch("/foo/bar", "/foo/baz");
-		// TODO Need more tests for escaped separators in path patterns and paths?
-		checkMatches("/foo\\/bar", "/foo\\/bar"); // chain string is Separator(/) Literal(foo\) Separator(/) Literal(bar)
 	}
 
 	@Test
@@ -254,6 +252,108 @@ public class PathPatternMatcherTests {
 		assertEquals("a/",parse("/").getPathRemaining("/a/").getPathRemaining());
 		assertEquals("/bar",parse("/a{abc}").getPathRemaining("/a/bar").getPathRemaining());
 	}
+
+	@Test
+	public void encodingAndBoundVariablesCapturePathElement() {
+		checkCapture("{var}","f%20o","var","f o");
+		checkCapture("{var1}/{var2}","f%20o/f%7Co","var1","f o","var2","f|o");
+		checkCapture("{var1}/{var2}","f%20o/f%7co","var1","f o","var2","f|o"); // lower case encoding
+		// constraints 
+		// - constraint is expressed in non encoded form
+		// - returned values are decoded
+		checkCapture("{var:foo}","foo","var","foo");
+		checkCapture("{var:f o}","f%20o","var","f o"); // constraint is expressed in non encoded form
+		checkCapture("{var:f.o}","f%20o","var","f o");
+		checkCapture("{var:f\\|o}","f%7co","var","f|o");	
+	}
+	
+	@Test
+	public void encodingAndBoundVariablesCaptureTheRestPathElement() {
+		checkCapture("/{*var}","/f%20o","var","/f o");
+		checkCapture("{var1}/{*var2}","f%20o/f%7Co","var1","f o","var2","/f|o");
+		// constraints - decoding happens for constraint checking but returned value is undecoded
+		checkCapture("/{*var}","/foo","var","/foo");
+		checkCapture("/{*var}","/f%20o","var","/f o"); // constraint is expressed in non encoded form
+		checkCapture("/{*var}","/f%20o","var","/f o");
+		checkCapture("/{*var}","/f%7co","var","/f|o");
+	}
+	
+	@Test
+	public void encodingWithCaseSensitivity() {
+		// Concern here is that regardless of case sensitivity, %7c == %7C (for example)
+		// Need to test all path elements that might have literal components
+		
+		PathPatternParser ppp = new PathPatternParser();
+		ppp.setCaseSensitive(true);
+
+		// LiteralPathElement
+		PathPattern pp = ppp.parse("/this is a |");
+		assertTrue(pp.matches("/this%20is%20a%20%7C"));
+		assertTrue(pp.matches("/this%20is%20a%20%7c"));
+		assertFalse(pp.matches("/thIs%20is%20a%20%7c"));
+		assertFalse(pp.matches("/thIs%20is%20a%20%7C"));
+		assertEquals("Separator(/) Literal(this%20is%20a%20%7C)",pp.toChainString());
+		
+		// RegexPathElement
+		pp = ppp.parse("/{foo}this is a |");
+		assertTrue(pp.matches("/xxxthis%20is%20a%20%7C"));
+		assertTrue(pp.matches("/xxxthis%20is%20a%20%7c"));
+		assertFalse(pp.matches("/xxxXhis%20is%20a%20%7C"));
+		assertFalse(pp.matches("/xxxXhis%20is%20a%20%7c"));
+		assertEquals("Separator(/) Regex({foo}this%20is%20a%20%7C)",pp.toChainString());
+		
+		// SingleCharWildcardedPathElement
+		pp = ppp.parse("/th?s is a |");
+		assertTrue(pp.matches("/this%20is%20a%20%7C"));
+		assertTrue(pp.matches("/this%20is%20a%20%7c"));
+		assertFalse(pp.matches("/xhis%20is%20a%20%7C"));
+		assertFalse(pp.matches("/xhis%20is%20a%20%7c"));
+		assertEquals("Separator(/) SingleCharWildcarded(th?s%20is%20a%20%7C)",pp.toChainString());
+		
+		ppp = new PathPatternParser();
+		ppp.setCaseSensitive(false);
+
+		// LiteralPathElement
+		pp = ppp.parse("/this is a |");
+		assertTrue(pp.matches("/this%20is%20a%20%7C"));
+		assertTrue(pp.matches("/this%20is%20a%20%7c"));
+		assertTrue(pp.matches("/thIs%20is%20a%20%7C"));
+		assertTrue(pp.matches("/tHis%20is%20a%20%7c"));
+		// For case insensitive matches we make all the chars lower case
+		assertEquals("Separator(/) Literal(this%20is%20a%20%7c)",pp.toChainString());
+		
+		// RegexPathElement
+		pp = ppp.parse("/{foo}this is a |");
+		assertTrue(pp.matches("/xxxthis%20is%20a%20%7C"));
+		assertTrue(pp.matches("/xxxthis%20is%20a%20%7c"));
+		assertTrue(pp.matches("/xxxThis%20is%20a%20%7C"));
+		assertTrue(pp.matches("/xxxThis%20is%20a%20%7c"));
+		assertEquals("Separator(/) Regex({foo}this%20is%20a%20%7C)",pp.toChainString());
+		
+		// SingleCharWildcardedPathElement
+		pp = ppp.parse("/th?s is a |");
+		assertTrue(pp.matches("/this%20is%20a%20%7C"));
+		assertTrue(pp.matches("/this%20is%20a%20%7c"));
+		assertTrue(pp.matches("/This%20is%20a%20%7C"));
+		assertTrue(pp.matches("/This%20is%20a%20%7c"));
+		assertEquals("Separator(/) SingleCharWildcarded(th?s%20is%20a%20%7c)",pp.toChainString());
+	}
+
+	@Test
+	public void encodingAndBoundVariablesRegexPathElement() {
+		checkCapture("/{var1:f o}_ _{var2}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1}_{var2}","/f%20o_foo","var1","f o","var2","foo");
+		checkCapture("/{var1}_ _{var2}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+	}
+	
+	@Test
+	public void encodedPaths() {
+		checkMatches("/foo bar", "/foo%20bar");
+		checkMatches("/foo*bar", "/fooboobar");
+		checkMatches("/f?o","/f%7co");
+	}
 		
 	@Test
 	public void pathRemainingCornerCases_spr15336() {
@@ -303,6 +403,7 @@ public class PathPatternMatcherTests {
 		checkNoMatch("tes?", "tsst");
 		checkMatches(".?.a", ".a.a");
 		checkNoMatch(".?.a", ".aba");
+		checkMatches("/f?o/bar","/f%20o/bar");
 	}
 
 	@Test

@@ -16,6 +16,10 @@
 
 package org.springframework.web.util.pattern;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -65,7 +69,7 @@ abstract class PathElement {
 	public abstract boolean matches(int candidatePos, MatchingContext matchingContext);
 
 	/**
-	 * Return the length of the path element where captures are considered to be one character long.
+	 * @return the length of the path element where captures are considered to be one character long.
 	 */
 	public abstract int getNormalizedLength();
 
@@ -96,6 +100,52 @@ abstract class PathElement {
 	protected boolean nextIfExistsIsSeparator(int nextIndex, MatchingContext matchingContext) {
 		return (nextIndex >= matchingContext.candidateLength ||
 				matchingContext.candidate[nextIndex] == this.separator);
+	}
+
+	/**
+	 * Decode an input CharSequence if necessary.
+	 * @param toDecode the input char sequence that should be decoded if necessary
+	 * @returns the decoded result
+	 */
+	protected String decode(CharSequence toDecode) {
+		CharSequence decoded = toDecode;
+		if (includesPercent(toDecode)) {
+			try {
+				decoded = UriUtils.decode(toDecode.toString(), StandardCharsets.UTF_8.name());
+			}
+			catch (UnsupportedEncodingException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		return decoded.toString();
+	}
+
+	/**
+	 * @param char sequence of characters
+	 * @param from start position (included in check)
+	 * @param to end position (excluded from check)
+	 * @return true if the chars array includes a '%' character between the specified positions
+	 */
+	protected boolean includesPercent(char[] chars, int from, int to) {
+		for (int i = from; i < to; i++) {
+			if (chars[i] == '%') {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @param chars string that may include a '%' character indicating it is encoded
+	 * @return true if the string contains a '%' character
+	 */
+	protected boolean includesPercent(CharSequence chars) {
+		for (int i = 0, max = chars.length(); i < max; i++) {
+			if (chars.charAt(i) == '%') {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
