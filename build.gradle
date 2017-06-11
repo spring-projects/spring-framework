@@ -775,7 +775,7 @@ project("spring-web") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.json:javax.json-api:1.1")
-		testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.0")
+		testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.1")
 	}
 }
 
