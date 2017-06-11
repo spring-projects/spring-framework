@@ -143,7 +143,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Map<String, List<String>> headers;
 
-
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
 			this.headers = initHeaders(request);
@@ -182,6 +181,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+
 	/**
 	 * Extract and use "Forwarded" or "X-Forwarded-*" headers.
 	 */
@@ -200,7 +200,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final String requestUri;
 
 		private final String requestUrl;
-
 
 		public ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
 			super(request);
@@ -279,9 +278,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private static final String FOLDER_SEPARATOR = "/";
 
-
 		private final HttpServletRequest request;
-
 
 		public ForwardedHeaderExtractingResponse(HttpServletResponse response, HttpServletRequest request) {
 			super(response);

@@ -100,24 +100,38 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	}
 
 	/**
-	 * Open a Session for the SessionFactory that this interceptor uses.
+	 * Open a Session for the given SessionFactory.
 	 * <p>The default implementation delegates to the {@link SessionFactory#openSession}
 	 * method and sets the {@link Session}'s flush mode to "MANUAL".
+	 * @param sessionFactory the SessionFactory to use
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
-	 * @since 4.3.9
+	 * @since 5.0
 	 * @see FlushMode#MANUAL
 	 */
 	@SuppressWarnings("deprecation")
 	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
-		try {
-			Session session = sessionFactory.openSession();
-			session.setFlushMode(FlushMode.MANUAL);
-			return session;
+		Session session = openSession();
+		if (session == null) {
+			try {
+				session = sessionFactory.openSession();
+				session.setFlushMode(FlushMode.MANUAL);
+			}
+			catch (HibernateException ex) {
+				throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
+			}
 		}
-		catch (HibernateException ex) {
-			throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
-		}
+		return session;
+	}
+
+	/**
+	 * Open a Session for the given SessionFactory.
+	 * @deprecated as of 5.0, in favor of {@link #openSession(SessionFactory)}
+	 */
+	@Deprecated
+	@Nullable
+	protected Session openSession() throws DataAccessResourceFailureException {
+		return null;
 	}
 
 }

@@ -298,6 +298,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
 		bd.setScope(SCOPE_PROTOTYPE);
 		bd.allowCaching = ClassUtils.isCacheSafe(beanClass, getBeanClassLoader());
+		// For the nullability warning, see the elaboration in AbstractBeanFactory.doGetBean;
+		// in short: This is never going to be null unless user-declared code enforces null.
 		return (T) createBean(beanClass.getName(), bd, null);
 	}
 
@@ -331,6 +333,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
 		populateBean(beanName, bd, bw);
+		// For the nullability warning, see the elaboration in AbstractBeanFactory.doGetBean;
+		// in short: This is never going to be null unless user-declared code enforces null.
 		return initializeBean(beanName, existingBean, bd);
 	}
 
@@ -349,6 +353,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		// For the nullability warning, see the elaboration in AbstractBeanFactory.doGetBean;
+		// in short: This is never going to be null unless user-declared code enforces null.
 		return createBean(beanClass.getName(), bd, null);
 	}
 
