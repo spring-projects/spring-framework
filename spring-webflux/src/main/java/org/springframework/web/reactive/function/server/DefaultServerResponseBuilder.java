@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -74,8 +75,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder headers(HttpHeaders headers) {
-		this.headers.putAll(headers);
+	public ServerResponse.BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 

@@ -22,7 +22,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -292,7 +291,9 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
-			return ClientRequest.method(this.httpMethod, this.uri).headers(initHeaders()).cookies(initCookies());
+			return ClientRequest.method(this.httpMethod, this.uri)
+					.headers(headers -> headers.addAll(initHeaders()))
+					.cookies(cookies -> cookies.addAll(initCookies()));
 		}
 
 		private HttpHeaders initHeaders() {

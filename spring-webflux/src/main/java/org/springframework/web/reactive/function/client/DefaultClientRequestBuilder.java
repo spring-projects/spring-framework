@@ -73,18 +73,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
-	public ClientRequest.Builder headers(HttpHeaders headers) {
-		Assert.notNull(headers, "'headers' must not be null");
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				this.headers.add(headerName, headerValue);
-			}
-		}
-		return this;
-	}
-
-	@Override
 	public ClientRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
 		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 		headersConsumer.accept(this.headers);
@@ -95,18 +83,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	public ClientRequest.Builder cookie(String name, String... values) {
 		for (String value : values) {
 			this.cookies.add(name, value);
-		}
-		return this;
-	}
-
-	@Override
-	public ClientRequest.Builder cookies(MultiValueMap<String, String> cookies) {
-		Assert.notNull(cookies, "'cookies' must not be null");
-		for (Map.Entry<String, List<String>> entry : cookies.entrySet()) {
-			String cookieName = entry.getKey();
-			for (String cookieValue : entry.getValue()) {
-				this.cookies.add(cookieName, cookieValue);
-			}
 		}
 		return this;
 	}

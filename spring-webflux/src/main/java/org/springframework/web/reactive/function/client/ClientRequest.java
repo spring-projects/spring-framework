@@ -88,8 +88,8 @@ public interface ClientRequest {
 	static Builder from(ClientRequest other) {
 		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other.method(), other.url())
-				.headers(other.headers())
-				.cookies(other.cookies())
+				.headers(headers -> headers.addAll(other.headers()))
+				.cookies(cookies -> cookies.addAll(other.cookies()))
 				.body(other.body());
 	}
 
@@ -119,13 +119,6 @@ public interface ClientRequest {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Add the given headers into this request's headers map.
-		 * @param headers the existing HttpHeaders to add from
-		 * @return this builder
-		 */
-		Builder headers(HttpHeaders headers);
-
-		/**
 		 * Manipulate this request's headers with the given consumer. The
 		 * headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
@@ -143,13 +136,6 @@ public interface ClientRequest {
 		 * @return this builder
 		 */
 		Builder cookie(String name, String... values);
-
-		/**
-		 * Add the given cookies into this request's cookies map.
-		 * @param cookies the existing cookies to copy from
-		 * @return this builder
-		 */
-		Builder cookies(MultiValueMap<String, String> cookies);
 
 		/**
 		 * Manipulate this request's cookies with the given consumer. The
