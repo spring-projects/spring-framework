@@ -175,11 +175,10 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();
 			if (!this.cookies.isEmpty()) {
-				this.cookies.forEach(( name , values) ->
-						values.forEach(value -> {
-						HttpCookie cookie = new HttpCookie(name, value);
-						requestCookies.add(name, cookie);
-					}));
+				this.cookies.forEach((name, values) -> values.forEach(value -> {
+					HttpCookie cookie = new HttpCookie(name, value);
+					requestCookies.add(name, cookie);
+				}));
 			}
 
 			return this.inserter.insert(request, new BodyInserter.Context() {
