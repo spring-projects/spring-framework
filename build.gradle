@@ -1039,6 +1039,7 @@ project("spring-test") {
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
 		optional("io.projectreactor:reactor-test")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")

@@ -536,7 +536,7 @@ public interface WebTestClient {
 		 */
 		<B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType);
 
-			/**
+		/**
 		 * Declare expectations on the response body decoded to {@code List<E>}.
 		 * @param elementType the expected List element type
 		 */
