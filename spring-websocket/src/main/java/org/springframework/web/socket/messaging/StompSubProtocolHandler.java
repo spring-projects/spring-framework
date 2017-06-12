@@ -102,7 +102,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private MessageHeaderInitializer headerInitializer;
 
-	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<String, Principal>();
+	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<>();
 
 	private Boolean immutableMessageInterceptorPresent;
 
