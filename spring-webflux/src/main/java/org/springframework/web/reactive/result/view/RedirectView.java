@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -260,14 +259,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	private String encodeUriVariable(String text) {
-		try {
-			// Strict encoding of all reserved URI characters
-			return UriUtils.encode(text, StandardCharsets.UTF_8.name());
-		}
-		catch (UnsupportedEncodingException ex) {
-			// Should never happen...
-			throw new IllegalStateException(ex);
-		}
+		// Strict encoding of all reserved URI characters
+		return UriUtils.encode(text, StandardCharsets.UTF_8);
 	}
 
 	/**

@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,12 +83,7 @@ class CaptureVariablePathElement extends PathElement {
 			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
 			if (includesPercent(matchingContext.candidate, candidateIndex, nextPos)) {
 				substringForDecoding = new String(matchingContext.candidate, candidateIndex, nextPos);
-				try {
-					candidateCapture = UriUtils.decode(substringForDecoding,StandardCharsets.UTF_8.name());
-				}
-				catch (UnsupportedEncodingException e) {
-					throw new IllegalStateException(e);
-				}
+				candidateCapture = UriUtils.decode(substringForDecoding, StandardCharsets.UTF_8);
 			}
 			else {
 				candidateCapture = new SubSequence(matchingContext.candidate, candidateIndex, nextPos);

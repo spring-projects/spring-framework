@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -132,13 +131,8 @@ class RegexPathElement extends PathElement {
 			return "";
 		}
 		String substring = s.substring(start, end);
-		try {
-			String encodedSubString = UriUtils.encodePath(substring, StandardCharsets.UTF_8.name());
-			encodedRegexBuilder.append(encodedSubString);
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException(e);
-		}
+		String encodedSubString = UriUtils.encodePath(substring, StandardCharsets.UTF_8);
+		encodedRegexBuilder.append(encodedSubString);
 		return Pattern.quote(substring);
 	}
 

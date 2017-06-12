@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.web.util.UriUtils;
@@ -105,23 +104,18 @@ abstract class PathElement {
 	/**
 	 * Decode an input CharSequence if necessary.
 	 * @param toDecode the input char sequence that should be decoded if necessary
-	 * @returns the decoded result
+	 * @return the decoded result
 	 */
 	protected String decode(CharSequence toDecode) {
 		CharSequence decoded = toDecode;
 		if (includesPercent(toDecode)) {
-			try {
-				decoded = UriUtils.decode(toDecode.toString(), StandardCharsets.UTF_8.name());
-			}
-			catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException(e);
-			}
+			decoded = UriUtils.decode(toDecode.toString(), StandardCharsets.UTF_8);
 		}
 		return decoded.toString();
 	}
 
 	/**
-	 * @param char sequence of characters
+	 * @param chars sequence of characters
 	 * @param from start position (included in check)
 	 * @param to end position (excluded from check)
 	 * @return true if the chars array includes a '%' character between the specified positions

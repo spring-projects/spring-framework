@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -311,15 +310,9 @@ class InternalPathPatternParser {
 	private char[] getPathElementText(boolean encodeElement) {
 		char[] pathElementText = new char[this.pos - this.pathElementStart];
 		if (encodeElement) {
-			try {
-				String unencoded = new String(this.pathPatternData, this.pathElementStart, this.pos - this.pathElementStart);
-				String encoded = UriUtils.encodeFragment(unencoded, StandardCharsets.UTF_8.name());
-				pathElementText = encoded.toCharArray();
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
-				throw new IllegalStateException(ex);
-			}
+			String unencoded = new String(this.pathPatternData, this.pathElementStart, this.pos - this.pathElementStart);
+			String encoded = UriUtils.encodeFragment(unencoded, StandardCharsets.UTF_8);
+			pathElementText = encoded.toCharArray();
 		}
 		else {
 			System.arraycopy(this.pathPatternData, this.pathElementStart, pathElementText, 0,

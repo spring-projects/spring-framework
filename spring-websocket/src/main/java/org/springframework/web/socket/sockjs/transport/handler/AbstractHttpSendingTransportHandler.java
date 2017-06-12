@@ -17,7 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
@@ -121,14 +121,8 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		if (StringUtils.isEmpty(value)) {
 			return null;
 		}
-		try {
-			String result = UriUtils.decode(value, "UTF-8");
-			return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, ex);
-		}
+		String result = UriUtils.decode(value, StandardCharsets.UTF_8);
+		return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
 	}
 
 }

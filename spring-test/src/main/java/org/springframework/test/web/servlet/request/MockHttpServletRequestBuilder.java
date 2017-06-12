@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.request;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -698,16 +697,11 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
-		try {
-			for (Entry<String, List<String>> entry : map.entrySet()) {
-				for (String value : entry.getValue()) {
-					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
-					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
-				}
+		for (Entry<String, List<String>> entry : map.entrySet()) {
+			for (String value : entry.getValue()) {
+				value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
+				request.addParameter(UriUtils.decode(entry.getKey(), StandardCharsets.UTF_8), value);
 			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			// shouldn't happen
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.sql.Clob;
@@ -72,19 +71,14 @@ class PassThroughClob implements Clob {
 
 	@Override
 	public Reader getCharacterStream() throws SQLException {
-		try {
-			if (this.content != null) {
-				return new StringReader(this.content);
-			}
-			else if (this.characterStream != null) {
-				return this.characterStream;
-			}
-			else {
-				return new InputStreamReader(this.asciiStream, "US-ASCII");
-			}
+		if (this.content != null) {
+			return new StringReader(this.content);
 		}
-		catch (UnsupportedEncodingException ex) {
-			throw new SQLException("US-ASCII encoding not supported: " + ex);
+		else if (this.characterStream != null) {
+			return this.characterStream;
+		}
+		else {
+			return new InputStreamReader(this.asciiStream, StandardCharsets.US_ASCII);
 		}
 	}
 
@@ -101,9 +95,6 @@ class PassThroughClob implements Clob {
 			else {
 				return this.asciiStream;
 			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new SQLException("US-ASCII encoding not supported: " + ex);
 		}
 		catch (IOException ex) {
 			throw new SQLException("Failed to read stream content: " + ex);
