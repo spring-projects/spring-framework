@@ -32,13 +32,6 @@ import org.springframework.util.ObjectUtils;
  */
 public class EmptyTargetSource implements TargetSource, Serializable {
 
-	/**
-	 * The canonical (Singleton) instance of this {@link EmptyTargetSource}.
-	 */
-	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource(null, true);
-
-	private static final Object EMPTY_TARGET = new Object();
-
 	/** use serialVersionUID from Spring 1.2 for interoperability */
 	private static final long serialVersionUID = 3680494563553489691L;
 
@@ -46,6 +39,12 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	//---------------------------------------------------------------------
 	// Static factory methods
 	//---------------------------------------------------------------------
+
+	/**
+	 * The canonical (Singleton) instance of this {@link EmptyTargetSource}.
+	 */
+	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource(null, true);
+
 
 	/**
 	 * Return an EmptyTargetSource for the given target Class.
@@ -106,11 +105,11 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	}
 
 	/**
-	 * Always returns {@code DUMMY_TARGET}.
+	 * Always returns {@code null}.
 	 */
 	@Override
 	public Object getTarget() {
-		return EMPTY_TARGET;
+		return null;
 	}
 
 	/**

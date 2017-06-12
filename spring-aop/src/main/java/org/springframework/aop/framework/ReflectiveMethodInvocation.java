@@ -103,8 +103,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
 	protected ReflectiveMethodInvocation(
-			Object proxy, Object target, Method method, Object[] arguments,
-			Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
+			Object proxy, @Nullable Object target, Method method, Object[] arguments,
+			@Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
 		this.target = target;
@@ -121,6 +121,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	@Override
+	@Nullable
 	public final Object getThis() {
 		return this.target;
 	}

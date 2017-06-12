@@ -35,6 +35,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
@@ -367,6 +368,16 @@ public class ProxyFactoryTests {
 		AnnotationAwareOrderComparator.sort(list);
 		assertSame(proxy2, list.get(0));
 		assertSame(proxy1, list.get(1));
+	}
+
+	@Test
+	public void testInterceptorWithoutJoinpoint() {
+		final TestBean target = new TestBean("tb");
+		ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, (MethodInterceptor) invocation -> {
+			assertNull(invocation.getThis());
+			return invocation.getMethod().invoke(target, invocation.getArguments());
+		});
+		assertEquals("tb", proxy.getName());
 	}
 
 
