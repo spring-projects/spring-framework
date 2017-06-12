@@ -224,10 +224,10 @@ class ControllerMethodResolver {
 		Class<?> handlerType = handlerMethod.getBeanType();
 
 		// Global methods first
-		this.initBinderAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(getInitBinderMethod(bean, method)));
+		this.initBinderAdviceCache.forEach((adviceBean, methods) -> {
+			if (adviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = adviceBean.resolveBean();
+				methods.forEach(method -> result.add(getInitBinderMethod(bean, method)));
 			}
 		});
 
@@ -257,10 +257,10 @@ class ControllerMethodResolver {
 		Class<?> handlerType = handlerMethod.getBeanType();
 
 		// Global methods first
-		this.modelAttributeAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(createAttributeMethod(bean, method)));
+		this.modelAttributeAdviceCache.forEach((adviceBean, methods) -> {
+			if (adviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = adviceBean.resolveBean();
+				methods.forEach(method -> result.add(createAttributeMethod(bean, method)));
 			}
 		});
 
