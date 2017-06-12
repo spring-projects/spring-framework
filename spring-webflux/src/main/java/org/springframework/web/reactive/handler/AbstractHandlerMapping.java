@@ -24,7 +24,6 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsProcessor;
@@ -34,7 +33,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.util.pattern.ParsingPathMatcher;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for {@link org.springframework.web.reactive.HandlerMapping}
@@ -52,7 +51,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
+	private PathPatternParser patternParser = new PathPatternParser();
 
 	private final UrlBasedCorsConfigurationSource globalCorsConfigSource = new UrlBasedCorsConfigurationSource();
 
@@ -74,22 +73,28 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	}
 
 	/**
-	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns.
-	 * <p>The default is a {@link ParsingPathMatcher}.
+	 * Whether to match to URLs irrespective of their case.
+	 * If enabled a method mapped to "/users" won't match to "/Users/".
+	 * <p>The default value is {@code false}.
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
-		this.globalCorsConfigSource.setPathMatcher(pathMatcher);
+	public void setUseCaseSensitiveMatch(boolean caseSensitiveMatch) {
+		this.patternParser.setCaseSensitive(caseSensitiveMatch);
 	}
 
 	/**
-	 * Return the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns.
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 * If enabled a method mapped to "/users" also matches to "/users/".
+	 * <p>The default value is {@code true}.
 	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
+	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
+		this.patternParser.setMatchOptionalTrailingSlash(trailingSlashMatch);
+	}
+
+	/**
+	 * Return the {@link PathPatternParser} instance.
+	 */
+	public PathPatternParser getPathPatternParser() {
+		return this.patternParser;
 	}
 
 	/**

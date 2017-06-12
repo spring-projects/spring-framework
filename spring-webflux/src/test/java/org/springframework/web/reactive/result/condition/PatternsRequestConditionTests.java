@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,13 +37,14 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void prependSlash() {
 		PatternsRequestCondition c = new PatternsRequestCondition("foo");
-		assertEquals("/foo", c.getPatterns().iterator().next());
+		assertEquals("/foo", c.getPatterns().iterator().next().getPatternString());
 	}
 
 	@Test
 	public void prependNonEmptyPatternsOnly() {
 		PatternsRequestCondition c = new PatternsRequestCondition("");
-		assertEquals("Do not prepend empty patterns (SPR-8255)", "", c.getPatterns().iterator().next());
+		assertEquals("Do not prepend empty patterns (SPR-8255)", "",
+				c.getPatterns().iterator().next().getPatternString());
 	}
 
 	@Test
@@ -107,16 +109,19 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
-		assertEquals("Should match by default", "/foo/", match.getPatterns().iterator().next());
+		assertEquals("Should match by default", "/foo",
+				match.getPatterns().iterator().next().getPatternString());
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, false, true, null);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null);
 		match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
 		assertEquals("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)",
-				"/foo/", match.getPatterns().iterator().next());
+				"/foo", match.getPatterns().iterator().next().getPatternString());
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, false, false, null);
+		PathPatternParser parser = new PathPatternParser();
+		parser.setMatchOptionalTrailingSlash(false);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, parser);
 		match = condition.getMatchingCondition(get("/foo/").toExchange());
 
 		assertNull(match);

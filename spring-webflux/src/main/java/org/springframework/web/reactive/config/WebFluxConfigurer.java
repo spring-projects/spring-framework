@@ -58,13 +58,6 @@ public interface WebFluxConfigurer {
 	/**
 	 * Configure path matching options.
 	 * 
-	 * <p>Note that if a {@link org.springframework.web.util.pattern.ParsingPathMatcher}
-	 * is configured here,
-	 * the {@link PathMatchConfigurer#setUseTrailingSlashMatch(Boolean)} and
-	 * {@link PathMatchConfigurer#setUseSuffixPatternMatch(Boolean)} options must be set
-	 * to {@literal false}as they can lead to illegal patterns,
-	 * see {@link org.springframework.web.util.pattern.ParsingPathMatcher}.
-	 * 
 	 * {@code HandlerMapping}s with path matching options.
 	 * @param configurer the {@link PathMatchConfigurer} instance
 	 */

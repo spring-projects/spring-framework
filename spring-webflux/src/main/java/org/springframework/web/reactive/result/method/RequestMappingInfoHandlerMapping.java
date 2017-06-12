@@ -47,6 +47,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.util.pattern.PathPattern;
 
 
 /**
@@ -76,7 +77,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
-		return info.getPatternsCondition().getPatterns();
+		return info.getPatternsCondition().getPatternStrings();
 	}
 
 	/**
@@ -108,17 +109,17 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
 		super.handleMatch(info, lookupPath, exchange);
 
-		String bestPattern;
+		PathPattern bestPattern;
 		Map<String, String> uriVariables;
 
-		Set<String> patterns = info.getPatternsCondition().getPatterns();
+		Set<PathPattern> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
-			bestPattern = lookupPath;
+			bestPattern = getPathPatternParser().parse(lookupPath);
 			uriVariables = Collections.emptyMap();
 		}
 		else {
 			bestPattern = patterns.iterator().next();
-			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+			uriVariables = bestPattern.matchAndExtract(lookupPath);
 		}
 
 		// Let URI vars be stripped of semicolon content..

@@ -26,7 +26,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.handler.AbstractHandlerMapping;
+import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.server.WebHandler;
@@ -76,7 +76,7 @@ public class ResourceHandlerRegistry {
 	 * URL path patterns. The handler will be invoked for every incoming request
 	 * that matches to one of the specified path patterns.
 	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
-	 * are allowed. See {@link org.springframework.web.util.pattern.ParsingPathMatcher}
+	 * are allowed. See {@link org.springframework.web.util.pattern.PathPattern}
 	 * for more details on the syntax.
 	 * @return A {@link ResourceHandlerRegistration} to use to further
 	 * configure the registered resource handler
@@ -115,7 +115,7 @@ public class ResourceHandlerRegistry {
 	 * of no registrations.
 	 */
 	@Nullable
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected AbstractUrlHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}

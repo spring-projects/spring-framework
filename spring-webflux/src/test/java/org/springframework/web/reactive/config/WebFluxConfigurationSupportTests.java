@@ -16,9 +16,11 @@
 
 package org.springframework.web.reactive.config;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
@@ -43,11 +45,12 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.handler.AbstractHandlerMapping;
+import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -61,6 +64,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -87,6 +91,8 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
 		ApplicationContext context = loadConfig(WebFluxConfig.class);
+		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSlash");
+		ReflectionUtils.makeAccessible(trailingSlashField);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
@@ -94,9 +100,10 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, mapping.getOrder());
 
-		assertTrue(mapping.useSuffixPatternMatch());
-		assertTrue(mapping.useTrailingSlashMatch());
-		assertTrue(mapping.useRegisteredSuffixPatternMatch());
+		assertNotNull(mapping.getPathPatternParser());
+		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils
+				.getField(trailingSlashField, mapping.getPathPatternParser());
+		assertTrue(matchOptionalTrailingSlash);
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -109,13 +116,17 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void customPathMatchConfig() throws Exception {
 		ApplicationContext context = loadConfig(CustomPatchMatchConfig.class);
+		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSlash");
+		ReflectionUtils.makeAccessible(trailingSlashField);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
+		assertNotNull(mapping.getPathPatternParser());
 
-		assertFalse(mapping.useSuffixPatternMatch());
-		assertFalse(mapping.useTrailingSlashMatch());
+		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils
+				.getField(trailingSlashField, mapping.getPathPatternParser());
+		assertFalse(matchOptionalTrailingSlash);
 	}
 
 	@Test
@@ -245,12 +256,12 @@ public class WebFluxConfigurationSupportTests {
 		ApplicationContext context = loadConfig(CustomResourceHandlingConfig.class);
 
 		String name = "resourceHandlerMapping";
-		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
+		AbstractUrlHandlerMapping handlerMapping = context.getBean(name, AbstractUrlHandlerMapping.class);
 		assertNotNull(handlerMapping);
 
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
-		assertNotNull(handlerMapping.getPathMatcher());
+		assertNotNull(handlerMapping.getPatternRegistry());
 
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
@@ -284,7 +295,6 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
-			configurer.setUseSuffixPatternMatch(false);
 			configurer.setUseTrailingSlashMatch(false);
 		}
 	}

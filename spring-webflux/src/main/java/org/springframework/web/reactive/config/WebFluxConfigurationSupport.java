@@ -36,7 +36,6 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -72,13 +71,6 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  * @since 5.0
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
-
-	static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebFluxConfigurationSupport.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebFluxConfigurationSupport.class.getClassLoader());
-
 
 	private Map<String, CorsConfiguration> corsConfigurations;
 
@@ -118,21 +110,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
-		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
-		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
-		if (useSuffixPatternMatch != null) {
-			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+		if (configurer.isUseTrailingSlashMatch() != null) {
+			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
-		if (useRegisteredSuffixPatternMatch != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
-		}
-		if (useTrailingSlashMatch != null) {
-			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
-		}
-		PathMatcher pathMatcher = configurer.getPathMatcher();
-		if (pathMatcher != null) {
-			mapping.setPathMatcher(pathMatcher);
+		if (configurer.isUseCaseSensitiveMatch() != null) {
+			mapping.setUseCaseSensitiveMatch(configurer.isUseCaseSensitiveMatch());
 		}
 		return mapping;
 	}
@@ -224,9 +206,12 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
-			if (pathMatchConfigurer.getPathMatcher() != null) {
-				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
+			PathMatchConfigurer configurer = getPathMatchConfigurer();
+			if (configurer.isUseTrailingSlashMatch() != null) {
+				handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+			}
+			if (configurer.isUseCaseSensitiveMatch() != null) {
+				handlerMapping.setUseCaseSensitiveMatch(configurer.isUseCaseSensitiveMatch());
 			}
 		}
 		else {

@@ -64,23 +64,6 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void useSuffixPatternMatch() {
-		assertTrue(this.handlerMapping.useSuffixPatternMatch());
-		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
-
-		this.handlerMapping.setUseSuffixPatternMatch(false);
-		assertFalse(this.handlerMapping.useSuffixPatternMatch());
-
-		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);
-		assertFalse("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch",
-				this.handlerMapping.useSuffixPatternMatch());
-
-		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		assertTrue("'true' registeredSuffixPatternMatch should enable suffixPatternMatch",
-				this.handlerMapping.useSuffixPatternMatch());
-	}
-
-	@Test
 	public void resolveEmbeddedValuesInPatterns() {
 		this.handlerMapping.setEmbeddedValueResolver(
 				value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value
@@ -152,7 +135,7 @@ public class RequestMappingHandlerMappingTests {
 
 		assertNotNull(info);
 
-		Set<String> paths = info.getPatternsCondition().getPatterns();
+		Set<String> paths = info.getPatternsCondition().getPatternStrings();
 		assertEquals(1, paths.size());
 		assertEquals(path, paths.iterator().next());
 

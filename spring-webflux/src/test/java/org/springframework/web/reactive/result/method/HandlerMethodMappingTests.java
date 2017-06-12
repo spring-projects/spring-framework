@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -102,11 +103,8 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(),
+				Matchers.contains(key1, key2));
 	}
 
 	@Test
@@ -118,11 +116,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.contains(key1, key2));
 	}
 
 	@Test
@@ -137,7 +131,7 @@ public class HandlerMethodMappingTests {
 		result = this.mapping.getHandler(MockServerHttpRequest.get(key).toExchange());
 
 		assertNull(result.block());
-		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.not(Matchers.contains(key)));
 	}
 
 

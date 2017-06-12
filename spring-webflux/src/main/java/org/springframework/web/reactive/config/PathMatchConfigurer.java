@@ -17,34 +17,27 @@
 package org.springframework.web.reactive.config;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.PathMatcher;
-import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class PathMatchConfigurer {
 
-	private Boolean suffixPatternMatch;
-
 	private Boolean trailingSlashMatch;
 
-	private Boolean registeredSuffixPatternMatch;
-
-	private PathMatcher pathMatcher;
-
+	private Boolean caseSensitiveMatch;
 
 	/**
-	 * Whether to use suffix pattern match (".*") when matching patterns to
-	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>By default this is set to {@code true}.
-	 * @see #registeredSuffixPatternMatch
+	 * Whether to match to URLs irrespective of their case.
+	 * If enabled a method mapped to "/users" won't match to "/Users/".
+	 * <p>The default value is {@code false}.
 	 */
-	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
-		this.suffixPatternMatch = suffixPatternMatch;
+	public PathMatchConfigurer setUseCaseSensitiveMatch(Boolean caseSensitiveMatch) {
+		this.caseSensitiveMatch = caseSensitiveMatch;
 		return this;
 	}
 
@@ -58,49 +51,14 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
-	/**
-	 * Whether suffix pattern matching should work only against path extensions
-	 * that are explicitly registered. This is generally recommended to reduce
-	 * ambiguity and to avoid issues such as when a "." (dot) appears in the path
-	 * for other reasons.
-	 * <p>By default this is set to "true".
-	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
-		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-		return this;
-	}
-
-	/**
-	 * Set the PathMatcher for matching URL paths against registered URL patterns.
-	 * <p>The default is a {@link org.springframework.web.util.pattern.ParsingPathMatcher}.
-	 */
-	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
-		return this;
-	}
-
-	@Nullable
-	protected Boolean isUseSuffixPatternMatch() {
-		return this.suffixPatternMatch;
-	}
-
 	@Nullable
 	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
 	@Nullable
-	protected Boolean isUseRegisteredSuffixPatternMatch() {
-		return this.registeredSuffixPatternMatch;
-	}
-
-	@Nullable
-	public PathMatcher getPathMatcher() {
-		if (this.pathMatcher instanceof ParsingPathMatcher && (this.trailingSlashMatch || this.suffixPatternMatch)) {
-			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
-					" and useSuffixPatternMatch should be set to 'false'.");
-		}
-		return this.pathMatcher;
+	protected Boolean isUseCaseSensitiveMatch() {
+		return this.caseSensitiveMatch;
 	}
 
 }
