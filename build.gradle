@@ -647,7 +647,7 @@ project("spring-jdbc") {
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.195")
+		optional("com.h2database:h2:1.4.196")
 		optional("org.apache.derby:derby:10.13.1.1")
 		optional("org.apache.derby:derbyclient:10.13.1.1")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -1016,7 +1016,7 @@ project("spring-test") {
 		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
-		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
+		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		optional("javax.el:javax.el-api:${elApiVersion}")
@@ -1027,10 +1027,10 @@ project("spring-test") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
 		optional("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		optional("net.sourceforge.htmlunit:htmlunit:2.26") {
+		optional("net.sourceforge.htmlunit:htmlunit:2.27") {
 			exclude group: "commons-logging", module: "commons-logging"
 		}
-		optional("org.seleniumhq.selenium:htmlunit-driver:2.26")
+		optional("org.seleniumhq.selenium:htmlunit-driver:2.27")
 		optional("org.seleniumhq.selenium:selenium-java:3.4.0") {
 			exclude group: "io.netty", module: "netty"
 		}
