@@ -367,17 +367,16 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		List<NotificationListenerBean> notificationListeners =
 				new ArrayList<>(listeners.size());
 
-		for (Map.Entry<?, ? extends NotificationListener> entry : listeners.entrySet()) {
+		listeners.forEach((key, listener) -> {
 			// Get the listener from the map value.
-			NotificationListenerBean bean = new NotificationListenerBean(entry.getValue());
+			NotificationListenerBean bean = new NotificationListenerBean(listener);
 			// Get the ObjectName from the map key.
-			Object key = entry.getKey();
 			if (key != null && !WILDCARD.equals(key)) {
 				// This listener is mapped to a specific ObjectName.
-				bean.setMappedObjectName(entry.getKey());
+				bean.setMappedObjectName(key);
 			}
 			notificationListeners.add(bean);
-		}
+		});
 
 		this.notificationListeners =
 				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
@@ -545,9 +544,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		}
 
 		if (!this.beans.isEmpty()) {
-			for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
-				registerBeanNameOrInstance(entry.getValue(), entry.getKey());
-			}
+			this.beans.forEach((beanName, instance) ->
+					registerBeanNameOrInstance(instance, beanName));
 		}
 	}
 
@@ -1008,9 +1006,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * from the {@link MBeanServer}.
 	 */
 	private void unregisterNotificationListeners() {
-		for (Map.Entry<NotificationListenerBean, ObjectName[]> entry : this.registeredNotificationListeners.entrySet()) {
-			NotificationListenerBean bean = entry.getKey();
-			ObjectName[] mappedObjectNames = entry.getValue();
+		this.registeredNotificationListeners.forEach((bean, mappedObjectNames) -> {
 			for (ObjectName mappedObjectName : mappedObjectNames) {
 				try {
 					this.server.removeNotificationListener(mappedObjectName, bean.getNotificationListener(),
@@ -1022,7 +1018,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					}
 				}
 			}
-		}
+		});
 		this.registeredNotificationListeners.clear();
 	}
 

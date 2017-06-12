@@ -215,16 +215,14 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<>();
-		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
-			String attributeName = entry.getKey();
-			Object attributeValue = entry.getValue();
+		descriptor.getAttributes().forEach((attributeName, attributeValue) -> {
 			if (!internalAnnotationAttributes.contains(attributeName)) {
 				if (attributeValue instanceof String) {
 					attributeValue = new ResolvableAttribute(attributeValue.toString());
 				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
-		}
+		});
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
 	}

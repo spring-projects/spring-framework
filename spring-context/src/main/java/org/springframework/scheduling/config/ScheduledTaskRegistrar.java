@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-201 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,9 +114,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setTriggerTasks(Map<Runnable, Trigger> triggerTasks) {
 		this.triggerTasks = new ArrayList<>();
-		for (Map.Entry<Runnable, Trigger> task : triggerTasks.entrySet()) {
-			addTriggerTask(new TriggerTask(task.getKey(), task.getValue()));
-		}
+		triggerTasks.forEach((task, trigger) -> addTriggerTask(new TriggerTask(task, trigger)));
 	}
 
 	/**
@@ -145,9 +143,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setCronTasks(Map<Runnable, String> cronTasks) {
 		this.cronTasks = new ArrayList<>();
-		for (Map.Entry<Runnable, String> task : cronTasks.entrySet()) {
-			addCronTask(task.getKey(), task.getValue());
-		}
+		cronTasks.forEach(this::addCronTask);
 	}
 
 	/**
@@ -176,9 +172,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setFixedRateTasks(Map<Runnable, Long> fixedRateTasks) {
 		this.fixedRateTasks = new ArrayList<>();
-		for (Map.Entry<Runnable, Long> task : fixedRateTasks.entrySet()) {
-			addFixedRateTask(task.getKey(), task.getValue());
-		}
+		fixedRateTasks.forEach(this::addFixedRateTask);
 	}
 
 	/**
@@ -207,9 +201,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
 		this.fixedDelayTasks = new ArrayList<>();
-		for (Map.Entry<Runnable, Long> task : fixedDelayTasks.entrySet()) {
-			addFixedDelayTask(task.getKey(), task.getValue());
-		}
+		fixedDelayTasks.forEach(this::addFixedDelayTask);
 	}
 
 	/**

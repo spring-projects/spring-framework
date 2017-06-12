@@ -111,9 +111,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 			// Convert Map elements.
 			Map<?, ?> source = (Map<?, ?>) value;
 			Map<Object, Object> target = createMap(this.mapType, source.size());
-			for (Map.Entry<?, ?> entry : source.entrySet()) {
-				target.put(convertKey(entry.getKey()), convertValue(entry.getValue()));
-			}
+			source.forEach((key, val) -> target.put(convertKey(key), convertValue(val)));
 			super.setValue(target);
 		}
 		else {

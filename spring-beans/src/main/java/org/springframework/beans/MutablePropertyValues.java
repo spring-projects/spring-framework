@@ -87,9 +87,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		// There is no replacement of existing property values.
 		if (original != null) {
 			this.propertyValueList = new ArrayList<>(original.size());
-			for (Map.Entry<?, ?> entry : original.entrySet()) {
-				this.propertyValueList.add(new PropertyValue(entry.getKey().toString(), entry.getValue()));
-			}
+			original.forEach((attrName, attrValue) -> this.propertyValueList.add(
+					new PropertyValue(attrName.toString(), attrValue)));
 		}
 		else {
 			this.propertyValueList = new ArrayList<>(0);
@@ -151,9 +150,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public MutablePropertyValues addPropertyValues(@Nullable Map<?, ?> other) {
 		if (other != null) {
-			for (Map.Entry<?, ?> entry : other.entrySet()) {
-				addPropertyValue(new PropertyValue(entry.getKey().toString(), entry.getValue()));
-			}
+			other.forEach((attrName, attrValue) -> addPropertyValue(
+					new PropertyValue(attrName.toString(), attrValue)));
 		}
 		return this;
 	}

@@ -132,8 +132,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
-		for (Map.Entry<String, ? extends Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
@@ -141,9 +140,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
-				group.add(entry.getKey(), bean);
+				group.add(beanName, bean);
 			}
-		}
+		});
 		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
@@ -187,16 +186,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void stopBeans() {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
-		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			int shutdownOrder = getPhase(bean);
 			LifecycleGroup group = phases.get(shutdownOrder);
 			if (group == null) {
 				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
 				phases.put(shutdownOrder, group);
 			}
-			group.add(entry.getKey(), bean);
-		}
+			group.add(beanName, bean);
+		});
 		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());

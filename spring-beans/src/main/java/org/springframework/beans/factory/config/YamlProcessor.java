@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,12 +202,10 @@ public abstract class YamlProcessor {
 		}
 
 		Map<Object, Object> map = (Map<Object, Object>) object;
-		for (Entry<Object, Object> entry : map.entrySet()) {
-			Object value = entry.getValue();
+		map.forEach((key, value) -> {
 			if (value instanceof Map) {
 				value = asMap(value);
 			}
-			Object key = entry.getKey();
 			if (key instanceof CharSequence) {
 				result.put(key.toString(), value);
 			}
@@ -215,7 +213,7 @@ public abstract class YamlProcessor {
 				// It has to be a map key in this case
 				result.put("[" + key.toString() + "]", value);
 			}
-		}
+		});
 		return result;
 	}
 

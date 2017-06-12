@@ -147,9 +147,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 			for (AnnotationAttributes annotationAttributes : attributesList) {
 				AnnotationAttributes convertedAttributes = AnnotationReadingVisitorUtils.convertClassValues(
 						"method '" + getMethodName() + "'", this.classLoader, annotationAttributes, classValuesAsString);
-				for (Map.Entry<String, Object> entry : convertedAttributes.entrySet()) {
-					allAttributes.add(entry.getKey(), entry.getValue());
-				}
+				convertedAttributes.forEach(allAttributes::add);
 			}
 		}
 		return allAttributes;
