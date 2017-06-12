@@ -315,12 +315,11 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			else {
 				// Non-empty set of methods
-				for (Map.Entry<Method, Set<Scheduled>> entry : annotatedMethods.entrySet()) {
-					Method method = entry.getKey();
-					for (Scheduled scheduled : entry.getValue()) {
+				annotatedMethods.forEach((method, scheduleds) -> {
+					for (Scheduled scheduled : scheduleds) {
 						processScheduled(scheduled, method, bean);
 					}
-				}
+				});
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);

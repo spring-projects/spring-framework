@@ -187,11 +187,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			}
 		}
 		if (!entityHeaders.isEmpty()) {
-			for (Map.Entry<String, List<String>> entry : entityHeaders.entrySet()) {
-				if (!outputHeaders.containsKey(entry.getKey())) {
-					outputHeaders.put(entry.getKey(), entry.getValue());
+			entityHeaders.forEach((key, value) -> {
+				if (!outputHeaders.containsKey(key)) {
+					outputHeaders.put(key, value);
 				}
-			}
+			});
 		}
 
 		if (responseEntity instanceof ResponseEntity) {

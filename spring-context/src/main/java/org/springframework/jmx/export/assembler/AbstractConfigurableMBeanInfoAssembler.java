@@ -53,9 +53,10 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 	}
 
 	public void setNotificationInfoMappings(Map<String, Object> notificationInfoMappings) {
-		for (Map.Entry<String, Object> entry : notificationInfoMappings.entrySet()) {
-			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetadata(entry.getValue()));
-		}
+		notificationInfoMappings.forEach(
+				(beanKey, result)
+						-> this.notificationInfoMappings.put(beanKey, extractNotificationMetadata(result))
+		);
 	}
 
 

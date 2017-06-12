@@ -169,9 +169,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof ManagedProperties) {
 			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			for (Map.Entry<Object, Object> propEntry : original.entrySet()) {
-				Object propKey = propEntry.getKey();
-				Object propValue = propEntry.getValue();
+			original.forEach((propKey, propValue) -> {
 				if (propKey instanceof TypedStringValue) {
 					propKey = evaluate((TypedStringValue) propKey);
 				}
@@ -184,7 +182,7 @@ class BeanDefinitionValueResolver {
 							"Error converting Properties key/value pair for " + argName + ": resolved to null");
 				}
 				copy.put(propKey, propValue);
-			}
+			});
 			return copy;
 		}
 		else if (value instanceof TypedStringValue) {

@@ -57,9 +57,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	 * @see CacheOperation
 	 */
 	public void setNameMap(Map<String, Collection<CacheOperation>> nameMap) {
-		for (Map.Entry<String, Collection<CacheOperation>> entry : nameMap.entrySet()) {
-			addCacheMethod(entry.getKey(), entry.getValue());
-		}
+		nameMap.forEach(this::addCacheMethod);
 	}
 
 	/**

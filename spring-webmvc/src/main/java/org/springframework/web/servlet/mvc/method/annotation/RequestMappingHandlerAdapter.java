@@ -889,14 +889,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
 		// Global methods first
-		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				for (Method method : entry.getValue()) {
+		this.modelAttributeAdviceCache.forEach((clazz, methodSet) -> {
+			if (clazz.isApplicableToBeanType(handlerType)) {
+				Object bean = clazz.resolveBean();
+				for (Method method : methodSet) {
 					attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
 				}
 			}
-		}
+		});
 		for (Method method : methods) {
 			Object bean = handlerMethod.getBean();
 			attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
@@ -921,14 +921,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
 		// Global methods first
-		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache.entrySet()) {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				for (Method method : entry.getValue()) {
+		this.initBinderAdviceCache.forEach((clazz, methodSet) -> {
+			if (clazz.isApplicableToBeanType(handlerType)) {
+				Object bean = clazz.resolveBean();
+				for (Method method : methodSet) {
 					initBinderMethods.add(createInitBinderMethod(bean, method));
 				}
 			}
-		}
+		});
 		for (Method method : methods) {
 			Object bean = handlerMethod.getBean();
 			initBinderMethods.add(createInitBinderMethod(bean, method));
