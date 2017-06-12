@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  * @since 2.0.3
  * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
  */
+@FunctionalInterface
 public interface TargetClassAware {
 
 	/**

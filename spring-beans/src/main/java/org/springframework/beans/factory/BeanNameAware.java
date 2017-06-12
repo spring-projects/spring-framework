@@ -33,6 +33,7 @@ package org.springframework.beans.factory;
  * @see BeanFactoryAware
  * @see InitializingBean
  */
+@FunctionalInterface
 public interface BeanNameAware extends Aware {
 
 	/**
