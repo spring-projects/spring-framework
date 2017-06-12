@@ -423,6 +423,13 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
+		public void addAll(MultiValueMap<K, V> values) {
+			for (Entry<K, List<V>> entry : values.entrySet()) {
+				addAll(entry.getKey(), entry.getValue());
+			}
+		}
+
+		@Override
 		public void set(K key, V value) {
 			List<V> values = new LinkedList<>();
 			values.add(value);

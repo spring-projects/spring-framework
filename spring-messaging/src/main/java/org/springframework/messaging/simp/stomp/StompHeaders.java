@@ -422,6 +422,13 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		currentValues.addAll(headerValues);
 	}
 
+	@Override
+	public void addAll(MultiValueMap<String, String> values) {
+		for (Entry<String, List<String>> entry : values.entrySet()) {
+			addAll(entry.getKey(), entry.getValue());
+		}
+	}
+
 	/**
 	 * Set the given, single header value under the given name.
 	 * @param headerName the header name
