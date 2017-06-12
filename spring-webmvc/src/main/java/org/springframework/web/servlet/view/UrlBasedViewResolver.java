@@ -516,17 +516,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		return (view.checkResource(locale) ? result : null);
 	}
 
-	private View applyLifecycleMethods(String viewName, AbstractView view) {
-		ApplicationContext context = getApplicationContext();
-		if (context != null) {
-			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
-			if (initialized instanceof View) {
-				return (View) initialized;
-			}
-		}
-		return view;
-	}
-
 	/**
 	 * Creates a new View instance of the specified view class and configures it.
 	 * Does <i>not</i> perform any lookup for pre-defined View instances.
@@ -569,6 +558,30 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 			view.setExposedContextBeanNames(exposedContextBeanNames);
 		}
 
+		return view;
+	}
+
+	/**
+	 * Apply the containing {@link ApplicationContext}'s lifecycle methods
+	 * to the given {@link View} instance, if such a context is available.
+	 * @param viewName the name of the view
+	 * @param view the freshly created View instance, pre-configured with
+	 * {@link AbstractUrlBasedView}'s properties
+	 * @return the {@link View} instance to use (either the original one
+	 * or a decorated variant)
+	 * @since 5.0
+	 * @see #getApplicationContext()
+	 * @see ApplicationContext#getAutowireCapableBeanFactory()
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#initializeBean
+	 */
+	protected View applyLifecycleMethods(String viewName, AbstractUrlBasedView view) {
+		ApplicationContext context = getApplicationContext();
+		if (context != null) {
+			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+			if (initialized instanceof View) {
+				return (View) initialized;
+			}
+		}
 		return view;
 	}
 

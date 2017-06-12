@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
@@ -57,9 +58,11 @@ import org.springframework.util.PatternMatchUtils;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  */
-public class UrlBasedViewResolver extends ViewResolverSupport implements ViewResolver, InitializingBean {
+public class UrlBasedViewResolver extends ViewResolverSupport
+		implements ViewResolver, ApplicationContextAware, InitializingBean {
 
 	/**
 	 * Prefix for special view names that specify a redirect URL (usually
@@ -82,11 +85,13 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 
 	private String requestContextAttribute;
 
+	private ApplicationContext applicationContext;
+
 
 	/**
-	 * Set the view class to instantiate through {@link #createUrlBasedView(String)}.
+	 * Set the view class to instantiate through {@link #createView(String)}.
 	 * @param viewClass a class that is assignable to the required view class
-	 * which by default is AbstractUrlBasedView.
+	 * which by default is AbstractUrlBasedView
 	 */
 	public void setViewClass(Class<?> viewClass) {
 		if (!requiredViewClass().isAssignableFrom(viewClass)) {
@@ -170,7 +175,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	}
 
 	/**
-	 * Set the name of the RequestContext attribute for all views.
+	 * Set the name of the {@link RequestContext} attribute for all views.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 * @see AbstractView#setRequestContextAttribute
 	 */
@@ -179,11 +184,33 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	}
 
 	/**
-	 * Return the name of the RequestContext attribute for all views, if any.
+	 * Return the name of the @link RequestContext} attribute for all views, if any.
 	 */
 	@Nullable
 	protected String getRequestContextAttribute() {
 		return this.requestContextAttribute;
+	}
+
+	/**
+	 * Accept the containing {@code ApplicationContext}, if any.
+	 * <p>To be used for the initialization of newly created {@link View} instances,
+	 * applying lifecycle callbacks and providing access to the containing environment.
+	 * @see #setViewClass
+	 * @see #createView
+	 * @see #applyLifecycleMethods
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Return the containing {@code ApplicationContext}, if any.
+	 * @see #setApplicationContext
+	 */
+	@Nullable
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 
@@ -207,7 +234,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 			urlBasedView = this.redirectViewProvider.apply(redirectUrl);
 		}
 		else {
-			urlBasedView = createUrlBasedView(viewName);
+			urlBasedView = createView(viewName);
 		}
 
 		View view = applyLifecycleMethods(viewName, urlBasedView);
@@ -220,10 +247,9 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	}
 
 	/**
-	 * Indicates whether or not this {@link ViewResolver} can handle the
-	 * supplied view name. If not, an empty result is returned. The default
-	 * implementation checks against the configured {@link #setViewNames
-	 * view names}.
+	 * Indicates whether or not this {@link ViewResolver} can handle the supplied
+	 * view name. If not, an empty result is returned. The default implementation
+	 * checks against the configured {@link #setViewNames view names}.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
 	 * @return whether this resolver applies to the specified view
@@ -238,15 +264,14 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	 * Creates a new View instance of the specified view class and configures it.
 	 * Does <i>not</i> perform any lookup for pre-defined View instances.
 	 * <p>Spring lifecycle methods as defined by the bean container do not have to
-	 * be called here; those will be applied by the {@code loadView} method
-	 * after this method returns.
-	 * <p>Subclasses will typically call {@code super.buildView(viewName)}
-	 * first, before setting further properties themselves. {@code loadView}
-	 * will then apply Spring lifecycle methods at the end of this process.
+	 * be called here: They will be automatically applied afterwards, provided
+	 * that an {@link #setApplicationContext ApplicationContext} is available.
 	 * @param viewName the name of the view to build
 	 * @return the View instance
+	 * @see #getViewClass()
+	 * @see #applyLifecycleMethods
 	 */
-	protected AbstractUrlBasedView createUrlBasedView(String viewName) {
+	protected AbstractUrlBasedView createView(String viewName) {
 		Class<?> viewClass = getViewClass();
 		Assert.state(viewClass != null, "No view class");
 
@@ -259,7 +284,19 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 		return view;
 	}
 
-	private View applyLifecycleMethods(String viewName, AbstractView view) {
+	/**
+	 * Apply the containing {@link ApplicationContext}'s lifecycle methods
+	 * to the given {@link View} instance, if such a context is available.
+	 * @param viewName the name of the view
+	 * @param view the freshly created View instance, pre-configured with
+	 * {@link AbstractUrlBasedView}'s properties
+	 * @return the {@link View} instance to use (either the original one
+	 * or a decorated variant)
+	 * @see #getApplicationContext()
+	 * @see ApplicationContext#getAutowireCapableBeanFactory()
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#initializeBean
+	 */
+	protected View applyLifecycleMethods(String viewName, AbstractUrlBasedView view) {
 		ApplicationContext context = getApplicationContext();
 		if (context != null) {
 			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
