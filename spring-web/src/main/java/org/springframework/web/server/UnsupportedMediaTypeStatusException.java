@@ -40,7 +40,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	/**
 	 * Constructor for when the specified Content-Type is invalid.
 	 */
-	public UnsupportedMediaTypeStatusException(String reason) {
+	public UnsupportedMediaTypeStatusException(@Nullable String reason) {
 		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason);
 		this.contentType = null;
 		this.supportedMediaTypes = Collections.emptyList();
@@ -49,8 +49,9 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	/**
 	 * Constructor for when the Content-Type can be parsed but is not supported.
 	 */
-	public UnsupportedMediaTypeStatusException(MediaType contentType, List<MediaType> supportedMediaTypes) {
-		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type '" + contentType + "' not supported");
+	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
+		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+				"Content type '" + (contentType != null ? contentType : "") + "' not supported");
 		this.contentType = contentType;
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
 	}

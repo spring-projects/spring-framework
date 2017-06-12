@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -327,10 +326,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		if (beanType != null) {
-			InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
-			metadata.checkConfigMembers(beanDefinition);
-		}
+		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
 	}
 
 	@Override
@@ -459,7 +456,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @see #setPersistenceUnits
 	 */
 	@Nullable
-	protected EntityManagerFactory getPersistenceUnit(String unitName) {
+	protected EntityManagerFactory getPersistenceUnit(@Nullable String unitName) {
 		if (this.persistenceUnits != null) {
 			String unitNameForLookup = (unitName != null ? unitName : "");
 			if ("".equals(unitNameForLookup)) {
@@ -491,7 +488,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @see #setExtendedPersistenceContexts
 	 */
 	@Nullable
-	protected EntityManager getPersistenceContext(String unitName, boolean extended) {
+	protected EntityManager getPersistenceContext(@Nullable String unitName, boolean extended) {
 		Map<String, String> contexts = (extended ? this.extendedPersistenceContexts : this.persistenceContexts);
 		if (contexts != null) {
 			String unitNameForLookup = (unitName != null ? unitName : "");
@@ -523,7 +520,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, String requestingBeanName)
+	protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
 		if (this.beanFactory == null) {
@@ -549,11 +546,11 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName, String requestingBeanName)
+	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
 		EntityManagerFactory emf = EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
 			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
 		}
 		return emf;
@@ -564,14 +561,16 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @return the default EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no single EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findDefaultEntityManagerFactory(String requestingBeanName)
+	protected EntityManagerFactory findDefaultEntityManagerFactory(@Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
 		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
 			// Fancy variant with dependency registration
 			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
 			NamedBeanHolder<EntityManagerFactory> emfHolder = clbf.resolveNamedBean(EntityManagerFactory.class);
-			clbf.registerDependentBean(emfHolder.getBeanName(), requestingBeanName);
+			if (requestingBeanName != null) {
+				clbf.registerDependentBean(emfHolder.getBeanName(), requestingBeanName);
+			}
 			return emfHolder.getBeanInstance();
 		}
 		else {
@@ -665,7 +664,7 @@ public class PersistenceAnnotationBeanPostProcessor
 		 * Resolve the object against the application context.
 		 */
 		@Override
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			// Resolves to EntityManagerFactory or EntityManager.
 			if (this.type != null) {
 				return (this.type == PersistenceContextType.EXTENDED ?
@@ -678,7 +677,7 @@ public class PersistenceAnnotationBeanPostProcessor
 			}
 		}
 
-		private EntityManagerFactory resolveEntityManagerFactory(String requestingBeanName) {
+		private EntityManagerFactory resolveEntityManagerFactory(@Nullable String requestingBeanName) {
 			// Obtain EntityManagerFactory from JNDI?
 			EntityManagerFactory emf = getPersistenceUnit(this.unitName);
 			if (emf == null) {
@@ -688,7 +687,7 @@ public class PersistenceAnnotationBeanPostProcessor
 			return emf;
 		}
 
-		private EntityManager resolveEntityManager(String requestingBeanName) {
+		private EntityManager resolveEntityManager(@Nullable String requestingBeanName) {
 			// Obtain EntityManager reference from JNDI?
 			EntityManager em = getPersistenceContext(this.unitName, false);
 			if (em == null) {
@@ -716,7 +715,7 @@ public class PersistenceAnnotationBeanPostProcessor
 			return em;
 		}
 
-		private EntityManager resolveExtendedEntityManager(Object target, String requestingBeanName) {
+		private EntityManager resolveExtendedEntityManager(Object target, @Nullable String requestingBeanName) {
 			// Obtain EntityManager reference from JNDI?
 			EntityManager em = getPersistenceContext(this.unitName, true);
 			if (em == null) {
@@ -731,7 +730,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(
 						emf, this.properties, this.synchronizedWithTransaction);
 			}
-			if (em instanceof EntityManagerProxy && beanFactory != null &&
+			if (em instanceof EntityManagerProxy && beanFactory != null && requestingBeanName != null &&
 					beanFactory.containsBean(requestingBeanName) && !beanFactory.isPrototype(requestingBeanName)) {
 				extendedEntityManagersToClose.put(target, ((EntityManagerProxy) em).getTargetEntityManager());
 			}

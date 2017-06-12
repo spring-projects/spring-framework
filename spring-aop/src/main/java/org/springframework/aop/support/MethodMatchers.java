@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,11 +125,11 @@ public abstract class MethodMatchers {
 					(matchesClass2(targetClass) && this.mm2.matches(method, targetClass));
 		}
 
-		protected boolean matchesClass1(Class<?> targetClass) {
+		protected boolean matchesClass1(@Nullable Class<?> targetClass) {
 			return true;
 		}
 
-		protected boolean matchesClass2(Class<?> targetClass) {
+		protected boolean matchesClass2(@Nullable Class<?> targetClass) {
 			return true;
 		}
 
@@ -183,13 +183,13 @@ public abstract class MethodMatchers {
 		}
 
 		@Override
-		protected boolean matchesClass1(Class<?> targetClass) {
-			return this.cf1.matches(targetClass);
+		protected boolean matchesClass1(@Nullable Class<?> targetClass) {
+			return (targetClass != null && this.cf1.matches(targetClass));
 		}
 
 		@Override
-		protected boolean matchesClass2(Class<?> targetClass) {
-			return this.cf2.matches(targetClass);
+		protected boolean matchesClass2(@Nullable Class<?> targetClass) {
+			return (targetClass != null && this.cf2.matches(targetClass));
 		}
 
 		@Override

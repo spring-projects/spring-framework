@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jpa;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -68,8 +67,21 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	 * Return the JPA EntityManagerFactory that should be used to create
 	 * EntityManagers.
 	 */
+	@Nullable
 	public EntityManagerFactory getEntityManagerFactory() {
 		return this.entityManagerFactory;
+	}
+
+	/**
+	 * Obtain the EntityManagerFactory for actual use.
+	 * @return the EntityManagerFactory (never {@code null})
+	 * @throws IllegalStateException in case of no EntityManagerFactory set
+	 * @since 5.0
+	 */
+	protected final EntityManagerFactory obtainEntityManagerFactory() {
+		EntityManagerFactory emf = getEntityManagerFactory();
+		Assert.state(emf != null, "No EntityManagerFactory set");
+		return emf;
 	}
 
 	/**
@@ -151,8 +163,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	protected EntityManager createEntityManager() throws IllegalStateException {
-		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.state(emf != null, "No EntityManagerFactory specified");
+		EntityManagerFactory emf = obtainEntityManagerFactory();
 		Map<String, Object> properties = getJpaPropertyMap();
 		return (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 	}
@@ -166,8 +177,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	 */
 	@Nullable
 	protected EntityManager getTransactionalEntityManager() throws IllegalStateException{
-		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.state(emf != null, "No EntityManagerFactory specified");
+		EntityManagerFactory emf = obtainEntityManagerFactory();
 		return EntityManagerFactoryUtils.getTransactionalEntityManager(emf, getJpaPropertyMap());
 	}
 

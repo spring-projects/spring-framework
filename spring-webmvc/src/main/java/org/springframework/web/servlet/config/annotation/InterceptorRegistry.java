@@ -46,7 +46,7 @@ public class InterceptorRegistry {
 	 */
 	public InterceptorRegistration addInterceptor(HandlerInterceptor interceptor) {
 		InterceptorRegistration registration = new InterceptorRegistration(interceptor);
-		registrations.add(registration);
+		this.registrations.add(registration);
 		return registration;
 	}
 
@@ -59,12 +59,12 @@ public class InterceptorRegistry {
 	public InterceptorRegistration addWebRequestInterceptor(WebRequestInterceptor interceptor) {
 		WebRequestHandlerInterceptorAdapter adapted = new WebRequestHandlerInterceptorAdapter(interceptor);
 		InterceptorRegistration registration = new InterceptorRegistration(adapted);
-		registrations.add(registration);
+		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Returns all registered interceptors.
+	 * Return all registered interceptors.
 	 */
 	protected List<Object> getInterceptors() {
 		return registrations.stream()

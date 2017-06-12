@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,7 +312,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}
 
@@ -328,8 +328,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		this.persistenceUnitInfo = determinePersistenceUnitInfo(managerToUse);
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
 		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof SmartPersistenceUnitInfo) {
-			((SmartPersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(
-					jpaVendorAdapter.getPersistenceProviderRootPackage());
+			String rootPackage = jpaVendorAdapter.getPersistenceProviderRootPackage();
+			if (rootPackage != null) {
+				((SmartPersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(rootPackage);
+			}
 		}
 
 		PersistenceProvider provider = getPersistenceProvider();

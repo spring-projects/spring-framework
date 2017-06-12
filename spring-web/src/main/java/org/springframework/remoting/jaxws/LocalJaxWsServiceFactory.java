@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.HandlerResolver;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -77,6 +78,7 @@ public class LocalJaxWsServiceFactory {
 	/**
 	 * Return the URL of the WSDL document that describes the service.
 	 */
+	@Nullable
 	public URL getWsdlDocumentUrl() {
 		return this.wsdlDocumentUrl;
 	}
@@ -85,13 +87,14 @@ public class LocalJaxWsServiceFactory {
 	 * Set the namespace URI of the service.
 	 * Corresponds to the WSDL "targetNamespace".
 	 */
-	public void setNamespaceUri(String namespaceUri) {
+	public void setNamespaceUri(@Nullable String namespaceUri) {
 		this.namespaceUri = (namespaceUri != null ? namespaceUri.trim() : null);
 	}
 
 	/**
 	 * Return the namespace URI of the service.
 	 */
+	@Nullable
 	public String getNamespaceUri() {
 		return this.namespaceUri;
 	}
@@ -107,6 +110,7 @@ public class LocalJaxWsServiceFactory {
 	/**
 	 * Return the name of the service.
 	 */
+	@Nullable
 	public String getServiceName() {
 		return this.serviceName;
 	}

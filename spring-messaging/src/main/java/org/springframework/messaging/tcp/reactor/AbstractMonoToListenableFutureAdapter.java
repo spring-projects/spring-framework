@@ -62,7 +62,7 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 					registry.success(adapted);
 				})
 				.doOnError(this.registry::failure)
-				.subscribe();
+				.toProcessor();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -109,8 +110,10 @@ public class SpelExpression implements Expression {
 		Object result;
 		if (this.compiledAst != null) {
 			try {
-				TypedValue contextRoot = evaluationContext == null ? null : evaluationContext.getRootObject();
-				return this.compiledAst.getValue(contextRoot == null ? null : contextRoot.getValue(), evaluationContext);
+				TypedValue contextRoot =
+						(this.evaluationContext != null ? this.evaluationContext.getRootObject() : null);
+				return this.compiledAst.getValue(
+						(contextRoot != null ? contextRoot.getValue() : null), this.evaluationContext);
 			}
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
@@ -157,13 +160,14 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
-				TypedValue contextRoot = evaluationContext == null ? null : evaluationContext.getRootObject();
-				Object result = this.compiledAst.getValue(contextRoot == null ? null : contextRoot.getValue(), evaluationContext);
+				TypedValue contextRoot = (this.evaluationContext != null ? this.evaluationContext.getRootObject() : null);
+				Object result = this.compiledAst.getValue(
+						(contextRoot != null ? contextRoot.getValue() : null), this.evaluationContext);
 				if (expectedResultType == null) {
-					return (T)result;
+					return (T) result;
 				}
 				else {
 					return ExpressionUtils.convertTypedValue(getEvaluationContext(), new TypedValue(result), expectedResultType);
@@ -189,7 +193,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getValue(Object rootObject, Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
 				Object result = this.compiledAst.getValue(rootObject, null);
@@ -223,8 +227,8 @@ public class SpelExpression implements Expression {
 		Assert.notNull(context, "EvaluationContext is required");
 		if (compiledAst!= null) {
 			try {
-				TypedValue contextRoot = context == null ? null : context.getRootObject();
-				return this.compiledAst.getValue(contextRoot != null ? contextRoot.getValue() : null, context);
+				TypedValue contextRoot = context.getRootObject();
+				return this.compiledAst.getValue(contextRoot.getValue(), context);
 			}
 			catch (Throwable ex) {
 				// If running in mixed mode, revert to interpreted
@@ -271,11 +275,11 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
-				TypedValue contextRoot = context == null ? null : context.getRootObject();
-				Object result = this.compiledAst.getValue(contextRoot==null?null:contextRoot.getValue(),context);
+				TypedValue contextRoot = context.getRootObject();
+				Object result = this.compiledAst.getValue(contextRoot.getValue(), context);
 				if (expectedResultType != null) {
 					return ExpressionUtils.convertTypedValue(context, new TypedValue(result), expectedResultType);
 				}
@@ -303,7 +307,9 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> expectedResultType) throws EvaluationException {
+	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> expectedResultType)
+			throws EvaluationException {
+
 		if (this.compiledAst != null) {
 			try {
 				Object result = this.compiledAst.getValue(rootObject,context);
@@ -501,13 +507,8 @@ public class SpelExpression implements Expression {
 		return this.ast.toStringAST();
 	}
 
-	private TypedValue toTypedValue(Object object) {
-		if (object == null) {
-			return TypedValue.NULL;
-		}
-		else {
-			return new TypedValue(object);
-		}
+	private TypedValue toTypedValue(@Nullable Object object) {
+		return (object != null ? new TypedValue(object) : TypedValue.NULL);
 	}
 
 }

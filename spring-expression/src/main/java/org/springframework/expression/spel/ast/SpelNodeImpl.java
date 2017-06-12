@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -77,19 +77,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 
-	protected SpelNodeImpl getPreviousChild() {
-		SpelNodeImpl result = null;
-		if (this.parent != null) {
-			for (SpelNodeImpl child : this.parent.children) {
-				if (this == child) {
-					break;
-				}
-				result = child;
-			}
-		}
-		return result;
-	}
-
 	/**
      * @return true if the next child is one of the specified classes
      */
@@ -116,24 +103,12 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	@Override
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState).getValue();
-		}
-		else {
-			// configuration not set - does that matter?
-			return getValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState).getValue();
 	}
 
 	@Override
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState);
-		}
-		else {
-			// configuration not set - does that matter?
-			return getTypedValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState);
 	}
 
 	// by default Ast nodes are not writable
@@ -143,7 +118,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
+	public void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException {
 		throw new SpelEvaluationException(getStartPosition(),
 				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
@@ -159,13 +134,14 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public Class<?> getObjectClass(Object obj) {
+	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
 		}
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
+	@Nullable
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
 		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
@@ -283,15 +259,17 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected static void generateCodeForArgument(MethodVisitor mv, CodeFlow cf, SpelNodeImpl argument, String paramDesc) {
 		cf.enterCompilationScope();
 		argument.generateCode(mv, cf);
-		boolean primitiveOnStack = CodeFlow.isPrimitive(cf.lastDescriptor());
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		boolean primitiveOnStack = CodeFlow.isPrimitive(lastDesc);
 		// Check if need to box it for the method reference?
 		if (primitiveOnStack && paramDesc.charAt(0) == 'L') {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		else if (paramDesc.length() == 1 && !primitiveOnStack) {
-			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), cf.lastDescriptor());
+			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), lastDesc);
 		}
-		else if (!cf.lastDescriptor().equals(paramDesc)) {
+		else if (!paramDesc.equals(lastDesc)) {
 			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
 			CodeFlow.insertCheckCast(mv, paramDesc);
 		}

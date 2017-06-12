@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +44,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 		this(method.name(), supportedMethods);
 	}
 
-	public MethodNotAllowedException(String method, Collection<HttpMethod> supportedMethods) {
+	public MethodNotAllowedException(String method, @Nullable Collection<HttpMethod> supportedMethods) {
 		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' not supported");
 		Assert.notNull(method, "'method' is required");
 		if (supportedMethods == null) {

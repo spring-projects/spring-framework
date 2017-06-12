@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	@Override
-	protected AbstractBeanDefinition parseInternal(@Nullable Element element, @Nullable ParserContext parserContext) {
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		String agentId = element.getAttribute(AGENT_ID_ATTRIBUTE);
 		if (StringUtils.hasText(agentId)) {
 			RootBeanDefinition bd = new RootBeanDefinition(MBeanServerFactoryBean.class);

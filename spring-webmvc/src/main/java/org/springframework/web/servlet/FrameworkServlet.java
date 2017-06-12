@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -288,6 +287,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * Return the name of the ServletContext attribute which should be used to retrieve the
 	 * {@link WebApplicationContext} that this servlet is supposed to use.
 	 */
+	@Nullable
 	public String getContextAttribute() {
 		return this.contextAttribute;
 	}
@@ -368,7 +368,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #applyInitializers
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+	public void setContextInitializers(@Nullable ApplicationContextInitializer<?>... initializers) {
 		if (initializers != null) {
 			for (ApplicationContextInitializer<?> initializer : initializers) {
 				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
@@ -629,8 +629,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		wac.setEnvironment(getEnvironment());
 		wac.setParent(parent);
-		wac.setConfigLocation(getContextConfigLocation());
-
+		String configLocation = getContextConfigLocation();
+		if (configLocation != null) {
+			wac.setConfigLocation(configLocation);
+		}
 		configureAndRefreshWebApplicationContext(wac);
 
 		return wac;
@@ -968,11 +970,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		try {
 			doService(request, response);
 		}
-		catch (ServletException ex) {
-			failureCause = ex;
-			throw ex;
-		}
-		catch (IOException ex) {
+		catch (ServletException | IOException ex) {
 			failureCause = ex;
 			throw ex;
 		}
@@ -1029,8 +1027,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see RequestContextHolder#setRequestAttributes
 	 */
 	@Nullable
-	protected ServletRequestAttributes buildRequestAttributes(
-			HttpServletRequest request, HttpServletResponse response, @Nullable RequestAttributes previousAttributes) {
+	protected ServletRequestAttributes buildRequestAttributes(HttpServletRequest request,
+			@Nullable HttpServletResponse response, @Nullable RequestAttributes previousAttributes) {
 
 		if (previousAttributes == null || previousAttributes instanceof ServletRequestAttributes) {
 			return new ServletRequestAttributes(request, response);
@@ -1040,8 +1038,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void initContextHolders(
-			HttpServletRequest request, LocaleContext localeContext, RequestAttributes requestAttributes) {
+	private void initContextHolders(HttpServletRequest request,
+			@Nullable LocaleContext localeContext, @Nullable RequestAttributes requestAttributes) {
 
 		if (localeContext != null) {
 			LocaleContextHolder.setLocaleContext(localeContext, this.threadContextInheritable);
@@ -1064,8 +1062,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void publishRequestHandledEvent(
-			HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+	private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response,
+			long startTime, @Nullable Throwable failureCause) {
 
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
@@ -1135,7 +1133,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
 				HttpServletResponse response = webRequest.getNativeRequest(HttpServletResponse.class);
-				initContextHolders(request, buildLocaleContext(request), buildRequestAttributes(request, response, null));
+				initContextHolders(request, buildLocaleContext(request),
+						buildRequestAttributes(request, response, null));
 			}
 		}
 		@Override

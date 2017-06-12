@@ -122,7 +122,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	}
 
 	@Nullable
-	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
+	private Collection<CacheOperation> computeCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;

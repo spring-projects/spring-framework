@@ -61,7 +61,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -86,7 +85,6 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * @author Phillip Webb
  * @since 3.0
  */
-@NonNullApi
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
 		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
@@ -118,14 +116,16 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private boolean localBeanNameGeneratorSet = false;
 
-	/* using short class names as default bean names */
+	/* Using short class names as default bean names */
 	private BeanNameGenerator componentScanBeanNameGenerator = new AnnotationBeanNameGenerator();
 
-	/* using fully qualified class names as default bean names */
+	/* Using fully qualified class names as default bean names */
 	private BeanNameGenerator importBeanNameGenerator = new AnnotationBeanNameGenerator() {
 		@Override
 		protected String buildDefaultBeanName(BeanDefinition definition) {
-			return definition.getBeanClassName();
+			String beanClassName = definition.getBeanClassName();
+			Assert.state(beanClassName != null, "No bean class name set");
+			return beanClassName;
 		}
 	};
 
@@ -139,7 +139,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
 	 * that correspond to {@link Bean} factory methods.
 	 */
-	public void setSourceExtractor(SourceExtractor sourceExtractor) {
+	public void setSourceExtractor(@Nullable SourceExtractor sourceExtractor) {
 		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new PassThroughSourceExtractor());
 	}
 
@@ -149,7 +149,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * declarations. For instance, an @Bean method marked as {@code final} is illegal
 	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
-	public void setProblemReporter(ProblemReporter problemReporter) {
+	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {
 		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
@@ -204,7 +204,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
 			this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
@@ -293,10 +293,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		SingletonBeanRegistry sbr = null;
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
-			if (!this.localBeanNameGeneratorSet && sbr.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
+			if (!this.localBeanNameGeneratorSet) {
 				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
-				this.componentScanBeanNameGenerator = generator;
-				this.importBeanNameGenerator = generator;
+				if (generator != null) {
+					this.componentScanBeanNameGenerator = generator;
+					this.importBeanNameGenerator = generator;
+				}
 			}
 		}
 
@@ -387,6 +389,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// nothing to enhance -> return immediately
 			return;
 		}
+
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
@@ -395,13 +398,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			try {
 				// Set enhanced subclass of the user-specified bean class
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
-				Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
-				if (configClass != enhancedClass) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
-								"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+				if (configClass != null) {
+					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
+					if (configClass != enhancedClass) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
+									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+						}
+						beanDef.setBeanClass(enhancedClass);
 					}
-					beanDef.setBeanClass(enhancedClass);
 				}
 			}
 			catch (Throwable ex) {

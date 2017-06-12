@@ -57,7 +57,11 @@ class LiteralPathElement extends PathElement {
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
 				if (matchingContext.candidate[candidateIndex++] != this.text[i]) {
-					return false;
+					// TODO unfortunate performance hit here on comparison when encoded data is the less likely case
+					if (i < 3 || matchingContext.candidate[candidateIndex-3] != '%' ||
+							Character.toUpperCase(matchingContext.candidate[candidateIndex-1]) != this.text[i]) {
+						return false;
+					}
 				}
 			}
 		}

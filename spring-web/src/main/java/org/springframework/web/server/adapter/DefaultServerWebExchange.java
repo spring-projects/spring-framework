@@ -233,7 +233,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 
 		boolean validated = validateIfNoneMatch(etag);
-
 		if (!validated) {
 			validateIfModifiedSince(lastModified);
 		}
@@ -271,7 +270,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean validateIfNoneMatch(String etag) {
+	private boolean validateIfNoneMatch(@Nullable String etag) {
 		if (!StringUtils.hasLength(etag)) {
 			return false;
 		}

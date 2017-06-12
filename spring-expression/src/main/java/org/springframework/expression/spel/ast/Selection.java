@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -167,18 +168,28 @@ public class Selection extends SpelNodeImpl {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
 			}
 
-			Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(
-					op.getTypeDescriptor().getElementTypeDescriptor().getType());
+			Class<?> elementType = null;
+			TypeDescriptor typeDesc = op.getTypeDescriptor();
+			if (typeDesc != null) {
+				TypeDescriptor elementTypeDesc = typeDesc.getElementTypeDescriptor();
+				if (elementTypeDesc != null) {
+					elementType = ClassUtils.resolvePrimitiveIfNecessary(elementTypeDesc.getType());
+				}
+			}
+			Assert.state(elementType != null, "Unresolvable element type");
+
 			Object resultArray = Array.newInstance(elementType, result.size());
 			System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray), this);
 		}
+
 		if (operand == null) {
 			if (this.nullSafe) {
 				return ValueRef.NullValueRef.INSTANCE;
 			}
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
 		}
+
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 				operand.getClass().getName());
 	}

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -191,7 +192,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Add interceptors mapped to a set of path patterns.
 	 */
-	public StandaloneMockMvcBuilder addMappedInterceptors(String[] pathPatterns, HandlerInterceptor... interceptors) {
+	public StandaloneMockMvcBuilder addMappedInterceptors(
+			@Nullable String[] pathPatterns, HandlerInterceptor... interceptors) {
+
 		for (HandlerInterceptor interceptor : interceptors) {
 			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, interceptor));
 		}
@@ -352,21 +355,26 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
 		config.setApplicationContext(wac);
+		ServletContext sc = wac.getServletContext();
 
 		wac.addBeans(this.controllers);
 		wac.addBeans(this.controllerAdvice);
 
 		RequestMappingHandlerMapping hm = config.getHandlerMapping();
-		hm.setServletContext(wac.getServletContext());
+		if (sc != null) {
+			hm.setServletContext(sc);
+		}
 		hm.setApplicationContext(wac);
 		hm.afterPropertiesSet();
 		wac.addBean("requestMappingHandlerMapping", hm);
 
-		RequestMappingHandlerAdapter handlerAdapter = config.requestMappingHandlerAdapter();
-		handlerAdapter.setServletContext(wac.getServletContext());
-		handlerAdapter.setApplicationContext(wac);
-		handlerAdapter.afterPropertiesSet();
-		wac.addBean("requestMappingHandlerAdapter", handlerAdapter);
+		RequestMappingHandlerAdapter ha = config.requestMappingHandlerAdapter();
+		if (sc != null) {
+			ha.setServletContext(sc);
+		}
+		ha.setApplicationContext(wac);
+		ha.afterPropertiesSet();
+		wac.addBean("requestMappingHandlerAdapter", ha);
 
 		wac.addBean("handlerExceptionResolver", config.handlerExceptionResolver());
 
@@ -496,16 +504,11 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		public StaticStringValueResolver(final Map<String, String> values) {
 			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
-			this.resolver = new PlaceholderResolver() {
-				@Override
-				public String resolvePlaceholder(String placeholderName) {
-					return values.get(placeholderName);
-				}
-			};
+			this.resolver = values::get;
 		}
 
 		@Override
-		public String resolveStringValue(@Nullable String strVal) throws BeansException {
+		public String resolveStringValue(String strVal) throws BeansException {
 			return this.helper.replacePlaceholders(strVal, this.resolver);
 		}
 	}

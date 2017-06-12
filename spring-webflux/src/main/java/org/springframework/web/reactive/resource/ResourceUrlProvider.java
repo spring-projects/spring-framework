@@ -33,11 +33,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -55,30 +54,12 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
-
 	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private final Map<String, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
 	private boolean autodetect = true;
 
-
-	/**
-	 * Configure a {@code HttpRequestPathHelper} to use in
-	 * {@link #getForRequestUrl(ServerWebExchange, String)}
-	 * in order to derive the lookup path for a target request URL path.
-	 */
-	public void setPathHelper(HttpRequestPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
-	}
-
-	/**
-	 * Return the configured {@code HttpRequestPathHelper}.
-	 */
-	public HttpRequestPathHelper getPathHelper() {
-		return this.pathHelper;
-	}
 
 	/**
 	 * Configure a {@code PathMatcher} to use when comparing target lookup path
@@ -101,7 +82,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceWebHandler> handlerMap) {
+	public void setHandlerMap(@Nullable Map<String, ResourceWebHandler> handlerMap) {
 		if (handlerMap != null) {
 			this.handlerMap.clear();
 			this.handlerMap.putAll(handlerMap);
@@ -185,8 +166,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String requestPath = request.getURI().getPath();
-		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
-		return requestPath.indexOf(lookupPath.getPath());
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
+		return requestPath.indexOf(lookupPath);
 	}
 
 	private int getEndPathIndex(String lookupPath) {

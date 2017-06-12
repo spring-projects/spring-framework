@@ -39,8 +39,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -97,7 +97,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 					return request.getInputStream();
 				}
 			};
-			MultiValueMap<String, String> formParameters = formConverter.read(null, inputMessage);
+			MultiValueMap<String, String> formParameters = this.formConverter.read(null, inputMessage);
 			HttpServletRequest wrapper = new HttpPutFormContentRequestWrapper(request, formParameters);
 			filterChain.doFilter(wrapper, response);
 		}
@@ -129,10 +129,11 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {
 			super(request);
-			this.formParameters = (parameters != null ? parameters : new LinkedMultiValueMap<>());
+			this.formParameters = parameters;
 		}
 
 		@Override
+		@Nullable
 		public String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
 			String formValue = this.formParameters.getFirst(name);

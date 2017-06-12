@@ -125,6 +125,7 @@ public class CookieGenerator {
 	/**
 	 * Return the maximum age for cookies created by this generator.
 	 */
+	@Nullable
 	public Integer getCookieMaxAge() {
 		return this.cookieMaxAge;
 	}

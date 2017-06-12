@@ -19,7 +19,6 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.lang.NonNullApi;
 
 /**
  * Represents a {@link Configuration} class method marked with the
@@ -32,7 +31,6 @@ import org.springframework.lang.NonNullApi;
  * @see ConfigurationClassParser
  * @see ConfigurationClassBeanDefinitionReader
  */
-@NonNullApi
 final class BeanMethod extends ConfigurationMethod {
 
 	public BeanMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.context.i18n;
 
 import java.util.Locale;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple implementation of the {@link LocaleContext} interface,
@@ -36,9 +38,9 @@ public class SimpleLocaleContext implements LocaleContext {
 	/**
 	 * Create a new SimpleLocaleContext that exposes the specified Locale.
 	 * Every {@link #getLocale()} call will return this Locale.
-	 * @param locale the Locale to expose
+	 * @param locale the Locale to expose, or {@code null} for no specific one
 	 */
-	public SimpleLocaleContext(Locale locale) {
+	public SimpleLocaleContext(@Nullable Locale locale) {
 		this.locale = locale;
 	}
 

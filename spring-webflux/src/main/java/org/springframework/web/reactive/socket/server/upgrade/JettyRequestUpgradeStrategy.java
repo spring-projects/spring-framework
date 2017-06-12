@@ -152,7 +152,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
@@ -177,7 +177,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final String protocol;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, String protocol) {
+		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {
 			this.adapter = adapter;
 			this.protocol = protocol;
 		}
@@ -186,6 +186,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			return this.adapter;
 		}
 
+		@Nullable
 		public String getProtocol() {
 			return this.protocol;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -102,7 +103,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * <p>Default is a {@link JndiDataSourceLookup}, allowing the JNDI names
 	 * of application server DataSources to be specified directly.
 	 */
-	public void setDataSourceLookup(DataSourceLookup dataSourceLookup) {
+	public void setDataSourceLookup(@Nullable DataSourceLookup dataSourceLookup) {
 		this.dataSourceLookup = (dataSourceLookup != null ? dataSourceLookup : new JndiDataSourceLookup());
 	}
 
@@ -211,6 +212,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * to match the stored lookup key type, as resolved by the
 	 * {@link #resolveSpecifiedLookupKey} method.
 	 */
+	@Nullable
 	protected abstract Object determineCurrentLookupKey();
 
 }

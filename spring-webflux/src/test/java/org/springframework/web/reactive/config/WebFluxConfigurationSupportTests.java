@@ -40,7 +40,6 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -63,7 +62,11 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -72,6 +75,7 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -98,12 +102,8 @@ public class WebFluxConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		ServerWebExchange exchange = MockServerHttpRequest.get("/path.json").toExchange();
-		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
-		assertEquals(list, resolver.resolveMediaTypes(exchange));
-
-		exchange = MockServerHttpRequest.get("/path.foobar").toExchange();
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
+		ServerWebExchange exchange = get("/path").accept(MediaType.APPLICATION_JSON).toExchange();
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 
 	@Test
@@ -250,7 +250,6 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
-		assertNotNull(handlerMapping.getPathHelper());
 		assertNotNull(handlerMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;

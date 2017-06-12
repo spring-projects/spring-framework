@@ -191,12 +191,6 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void nullParameterName() {
-		assertNull(request.getParameter(null));
-		assertNull(request.getParameterValues(null));
-	}
-
-	@Test
 	public void setMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");

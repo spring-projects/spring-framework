@@ -45,7 +45,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.LookupPath;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define
@@ -158,13 +157,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for request mappings in application context: " + getApplicationContext());
 		}
-		String[] beanNames = getApplicationContext().getBeanNamesForType(Object.class);
+		String[] beanNames = obtainApplicationContext().getBeanNamesForType(Object.class);
 
 		for (String beanName : beanNames) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				Class<?> beanType = null;
 				try {
-					beanType = getApplicationContext().getType(beanName);
+					beanType = obtainApplicationContext().getType(beanName);
 				}
 				catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
@@ -186,19 +185,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
-				getApplicationContext().getType((String) handler) : handler.getClass());
-		final Class<?> userType = ClassUtils.getUserClass(handlerType);
+				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
-		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
-				(MethodIntrospector.MetadataLookup<T>) method -> getMappingForMethod(method, userType));
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
+		if (handlerType != null) {
+			final Class<?> userType = ClassUtils.getUserClass(handlerType);
+			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+					(MethodIntrospector.MetadataLookup<T>) method -> getMappingForMethod(method, userType));
+			if (logger.isDebugEnabled()) {
+				logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
+			}
+			methods.forEach((key, mapping) -> {
+				Method invocableMethod = AopUtils.selectInvocableMethod(key, userType);
+				registerHandlerMethod(handler, invocableMethod, mapping);
+			});
 		}
-		methods.forEach((key, mapping) -> {
-			Method invocableMethod = AopUtils.selectInvocableMethod(key, userType);
-			registerHandlerMethod(handler, invocableMethod, mapping);
-		});
 	}
 
 	/**
@@ -225,7 +225,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (handler instanceof String) {
 			String beanName = (String) handler;
 			handlerMethod = new HandlerMethod(beanName,
-					getApplicationContext().getAutowireCapableBeanFactory(), method);
+					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
 		else {
 			handlerMethod = new HandlerMethod(handler, method);
@@ -257,7 +257,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		LookupPath lookupPath = LookupPath.getOrCreate(exchange, getPathHelper());
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
@@ -294,15 +294,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * @see #handleMatch(Object, LookupPath,  ServerWebExchange)
-	 * @see #handleNoMatch(Set, LookupPath, ServerWebExchange)
+	 * @see #handleMatch(Object, String,  ServerWebExchange)
+	 * @see #handleNoMatch(Set, String, ServerWebExchange)
 	 */
 	@Nullable
-	protected HandlerMethod lookupHandlerMethod(LookupPath lookupPath, ServerWebExchange exchange)
+	protected HandlerMethod lookupHandlerMethod(String lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
 		List<Match> matches = new ArrayList<Match>();
-		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath.getPath());
+		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, exchange);
 		}
@@ -354,7 +354,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 */
-	protected void handleMatch(T mapping, LookupPath lookupPath, ServerWebExchange exchange) {
+	protected void handleMatch(T mapping, String lookupPath, ServerWebExchange exchange) {
 	}
 
 	/**
@@ -366,7 +366,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @throws Exception provides details that can be translated into an error status code
 	 */
 	@Nullable
-	protected HandlerMethod handleNoMatch(Set<T> mappings, LookupPath lookupPath, ServerWebExchange exchange)
+	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, ServerWebExchange exchange)
 			throws Exception {
 
 		return null;
@@ -428,7 +428,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 * @return the comparator (never {@code null})
 	 */
-	@Nullable
 	protected abstract Comparator<T> getMappingComparator(ServerWebExchange exchange);
 
 
@@ -462,6 +461,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 * Return matches for the given URL path. Not thread-safe.
 		 * @see #acquireReadLock()
 		 */
+		@Nullable
 		public List<T> getMappingsByUrl(String urlPath) {
 			return this.urlLookup.get(urlPath);
 		}
@@ -572,7 +572,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final List<String> directUrls;
 
-		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls) {
+		public MappingRegistration(T mapping, HandlerMethod handlerMethod, @Nullable List<String> directUrls) {
 			Assert.notNull(mapping, "Mapping must not be null");
 			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
 			this.mapping = mapping;

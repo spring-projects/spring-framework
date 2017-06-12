@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +47,6 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.server.support.LookupPath;
 
 
 /**
@@ -105,30 +105,35 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
-	protected void handleMatch(RequestMappingInfo info, LookupPath lookupPath, ServerWebExchange exchange) {
+	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
 		super.handleMatch(info, lookupPath, exchange);
 
 		String bestPattern;
 		Map<String, String> uriVariables;
-		Map<String, String> decodedUriVariables;
 
 		Set<String> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
-			bestPattern = lookupPath.getPath();
+			bestPattern = lookupPath;
 			uriVariables = Collections.emptyMap();
-			decodedUriVariables = Collections.emptyMap();
 		}
 		else {
 			bestPattern = patterns.iterator().next();
-			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath.getPath());
-			decodedUriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
+			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+		}
+
+		// Let URI vars be stripped of semicolon content..
+		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
+		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+
+		// Now decode URI variables
+		if (!uriVariables.isEmpty()) {
+			uriVariables = uriVariables.entrySet().stream().collect(Collectors.toMap(
+					Entry::getKey, e -> StringUtils.uriDecode(e.getValue(), StandardCharsets.UTF_8)
+			));
 		}
 
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
-		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
-
-		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
-		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
@@ -157,9 +162,39 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				semicolonContent = uriVarValue.substring(semicolonIndex + 1);
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
-			result.put(uriVar.getKey(), getPathHelper().parseMatrixVariables(exchange, semicolonContent));
+			result.put(uriVar.getKey(), parseMatrixVariables(exchange, semicolonContent));
 		}
 		return result;
+	}
+
+	private static MultiValueMap<String, String> parseMatrixVariables(ServerWebExchange exchange,
+			String semicolonContent) {
+
+		MultiValueMap<String, String> vars = new LinkedMultiValueMap<>();
+		if (!StringUtils.hasText(semicolonContent)) {
+			return vars;
+		}
+		StringTokenizer pairs = new StringTokenizer(semicolonContent, ";");
+		while (pairs.hasMoreTokens()) {
+			String pair = pairs.nextToken();
+			int index = pair.indexOf('=');
+			if (index != -1) {
+				String name = pair.substring(0, index);
+				String rawValue = pair.substring(index + 1);
+				for (String value : StringUtils.commaDelimitedListToStringArray(rawValue)) {
+					vars.add(name, value);
+				}
+			}
+			else {
+				vars.add(pair, "");
+			}
+		}
+		MultiValueMap<String, String> decoded = new LinkedMultiValueMap<>(vars.size());
+		vars.forEach((key, values) -> values.forEach(value -> {
+			String decodedValue = StringUtils.uriDecode(value, StandardCharsets.UTF_8);
+			decoded.add(key, decodedValue);
+		}));
+		return decoded;
 	}
 
 	/**
@@ -174,7 +209,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * method but not by query parameter conditions
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, LookupPath lookupPath,
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath,
 			ServerWebExchange exchange) throws Exception {
 
 		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);

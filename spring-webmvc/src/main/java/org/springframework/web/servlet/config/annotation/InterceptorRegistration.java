@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
@@ -91,8 +91,8 @@ public class InterceptorRegistration implements Ordered {
 			return this.interceptor;
 		}
 
-		String[] include = toArray(this.includePatterns);
-		String[] exclude = toArray(this.excludePatterns);
+		String[] include = StringUtils.toStringArray(this.includePatterns);
+		String[] exclude = StringUtils.toStringArray(this.excludePatterns);
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
 
 		if (this.pathMatcher != null) {
@@ -100,10 +100,6 @@ public class InterceptorRegistration implements Ordered {
 		}
 
 		return mappedInterceptor;
-	}
-
-	private static String[] toArray(List<String> list) {
-		return (CollectionUtils.isEmpty(list) ? null : list.toArray(new String[list.size()]));
 	}
 
 	/**

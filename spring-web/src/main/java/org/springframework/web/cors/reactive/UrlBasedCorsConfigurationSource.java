@@ -20,11 +20,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.LookupPath;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
@@ -57,7 +57,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	/**
 	 * Set CORS configuration based on URL patterns.
 	 */
-	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
 			this.corsConfigurations.putAll(corsConfigurations);
@@ -80,7 +80,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
-		String lookupPath = LookupPath.getCurrent(exchange).getPath();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
 				return entry.getValue();

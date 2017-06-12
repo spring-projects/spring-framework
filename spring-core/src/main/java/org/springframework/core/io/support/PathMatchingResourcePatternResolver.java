@@ -363,7 +363,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param result the set of resources to add jar roots to
 	 * @since 4.1.1
 	 */
-	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
+	protected void addAllClassLoaderJarRoots(@Nullable ClassLoader classLoader, Set<Resource> result) {
 		if (classLoader instanceof URLClassLoader) {
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
@@ -462,18 +462,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set<Resource> result = new LinkedHashSet<>(16);
 		for (Resource rootDirResource : rootDirResources) {
 			rootDirResource = resolveRootDirResource(rootDirResource);
-			URL rootDirURL = rootDirResource.getURL();
+			URL rootDirUrl = rootDirResource.getURL();
 			if (equinoxResolveMethod != null) {
-				if (rootDirURL.getProtocol().startsWith("bundle")) {
-					rootDirURL = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirURL);
-					rootDirResource = new UrlResource(rootDirURL);
+				if (rootDirUrl.getProtocol().startsWith("bundle")) {
+					URL resolvedUrl = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirUrl);
+					if (resolvedUrl != null) {
+						rootDirUrl = resolvedUrl;
+					}
+					rootDirResource = new UrlResource(rootDirUrl);
 				}
 			}
-			if (rootDirURL.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirURL, subPattern, getPathMatcher()));
+			if (rootDirUrl.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirUrl, subPattern, getPathMatcher()));
 			}
-			else if (ResourceUtils.isJarURL(rootDirURL) || isJarResource(rootDirResource)) {
-				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirURL, subPattern));
+			else if (ResourceUtils.isJarURL(rootDirUrl) || isJarResource(rootDirResource)) {
+				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
 			}
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
@@ -851,8 +854,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 
+		@Nullable
 		public Object getAttributes() {
-			return VfsPatternUtils.getVisitorAttribute();
+			return VfsPatternUtils.getVisitorAttributes();
 		}
 
 		public Set<Resource> getResources() {

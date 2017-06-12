@@ -69,7 +69,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	/**
 	 * Create an instance with the given map of file extensions and media types.
 	 */
-	public PathExtensionContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
+	public PathExtensionContentNegotiationStrategy(@Nullable Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 		this.urlPathHelper.setUrlDecode(false);
 	}

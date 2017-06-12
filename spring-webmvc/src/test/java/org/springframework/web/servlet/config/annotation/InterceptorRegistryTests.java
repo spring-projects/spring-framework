@@ -40,10 +40,7 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with a {@link InterceptorRegistry}, two {@link HandlerInterceptor}s and two
@@ -144,14 +141,12 @@ public class InterceptorRegistryTests {
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor2);
 	}
 
-	// SPR-11130
-
-	@Test
+	@Test  // SPR-11130
 	public void addInterceptorWithExcludePathPatternOnly() {
 		this.registry.addInterceptor(this.interceptor1).excludePathPatterns("/path1/secret");
 		this.registry.addInterceptor(this.interceptor2).addPathPatterns("/path2");
 
-		assertEquals(Arrays.asList(this.interceptor1), getInterceptorsForPath("/path1"));
+		assertEquals(Collections.singletonList(this.interceptor1), getInterceptorsForPath("/path1"));
 		assertEquals(Arrays.asList(this.interceptor1, this.interceptor2), getInterceptorsForPath("/path2"));
 		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
 	}

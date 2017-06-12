@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
 import org.springframework.util.CommonsLogWriter;
@@ -74,7 +75,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	 * of type {@code com.caucho.hessian.io.SerializerFactory},
 	 * with custom bean property values applied.
 	 */
-	public void setSerializerFactory(SerializerFactory serializerFactory) {
+	public void setSerializerFactory(@Nullable SerializerFactory serializerFactory) {
 		this.serializerFactory = (serializerFactory != null ? serializerFactory : new SerializerFactory());
 	}
 

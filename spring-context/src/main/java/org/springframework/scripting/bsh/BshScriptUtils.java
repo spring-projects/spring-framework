@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -146,7 +147,8 @@ public abstract class BshScriptUtils {
 	 * @return the scripted Java class or Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	static Object evaluateBshScript(String scriptSource, @Nullable Class<?>[] scriptInterfaces, ClassLoader classLoader)
+	static Object evaluateBshScript(
+			String scriptSource, @Nullable Class<?>[] scriptInterfaces, @Nullable ClassLoader classLoader)
 			throws EvalError {
 
 		Assert.hasText(scriptSource, "Script source must not be empty");
@@ -158,8 +160,10 @@ public abstract class BshScriptUtils {
 		}
 		else {
 			// Simple BeanShell script: Let's create a proxy for it, implementing the given interfaces.
-			Assert.notEmpty(scriptInterfaces,
-					"Given script requires a script proxy: At least one script interface is required.");
+			if (ObjectUtils.isEmpty(scriptInterfaces)) {
+				throw new IllegalArgumentException("Given script requires a script proxy: " +
+						"At least one script interface is required.\nScript: " + scriptSource);
+			}
 			XThis xt = (XThis) interpreter.eval("return this");
 			return Proxy.newProxyInstance(classLoader, scriptInterfaces, new BshObjectInvocationHandler(xt));
 		}

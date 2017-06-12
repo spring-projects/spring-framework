@@ -18,7 +18,6 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 import java.util.TimeZone;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -260,6 +259,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return the corresponding {@code Locale} instance
 	 * @since 4.3
 	 */
+	@Nullable
 	protected Locale parseLocaleValue(String locale) {
 		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.test.web.servlet;
 
 import java.util.List;
 import javax.servlet.Filter;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -43,9 +43,7 @@ public abstract class MockMvcBuilderSupport {
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
 			WebApplicationContext webAppContext, RequestBuilder defaultRequestBuilder,
 			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
-			List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
-
-		ServletContext servletContext = webAppContext.getServletContext();
+			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 
 		TestDispatcherServlet dispatcherServlet = new TestDispatcherServlet(webAppContext);
 		if (dispatcherServletCustomizers != null) {
@@ -61,13 +59,14 @@ public abstract class MockMvcBuilderSupport {
 			throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
 		}
 
-		MockMvc mockMvc = new MockMvc(dispatcherServlet, filters, servletContext);
+		MockMvc mockMvc = new MockMvc(dispatcherServlet, filters);
 		mockMvc.setDefaultRequest(defaultRequestBuilder);
 		mockMvc.setGlobalResultMatchers(globalResultMatchers);
 		mockMvc.setGlobalResultHandlers(globalResultHandlers);
 
 		return mockMvc;
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MockMvcBuildException extends NestedRuntimeException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.Exceptions;
 import reactor.core.publisher.MonoSource;
 import reactor.core.publisher.Operators;
 
@@ -246,17 +245,11 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 
 		@Override
 		public final void onError(Throwable t) {
-			if (t == null) {
-				throw Exceptions.argumentIsNullException();
-			}
 			doError(t);
 		}
 
 		@Override
 		public final void onNext(I i) {
-			if (i == null) {
-				throw Exceptions.argumentIsNullException();
-			}
 			try {
 				doNext(i);
 			}

@@ -65,8 +65,18 @@ class SingleCharWildcardedPathElement extends PathElement {
 		if (this.caseSensitive) {
 			for (int i = 0; i <this.len; i++) {
 				char t = this.text[i];
-				if (t != '?' && candidate[candidateIndex] != t) {
-					return false;
+				if (t == '?') {
+					if (candidate[candidateIndex] == '%') {
+						// encoded value, skip next two as well!
+						candidateIndex += 2;
+					}
+				}
+				else if (candidate[candidateIndex] != t) {
+					// TODO unfortunate performance hit here on comparison when encoded data is the less likely case
+					if (i < 3 || matchingContext.candidate[candidateIndex-2] != '%' ||
+							Character.toUpperCase(matchingContext.candidate[candidateIndex]) != this.text[i]) {
+						return false;
+					}
 				}
 				candidateIndex++;
 			}
@@ -74,7 +84,13 @@ class SingleCharWildcardedPathElement extends PathElement {
 		else {
 			for (int i = 0; i < this.len; i++) {
 				char t = this.text[i];
-				if (t != '?' && Character.toLowerCase(candidate[candidateIndex]) != t) {
+				if (t == '?') {
+					if (candidate[candidateIndex] == '%') {
+						// encoded value, skip next two as well!
+						candidateIndex += 2;
+					}
+				}
+				else if (Character.toLowerCase(candidate[candidateIndex]) != t) {
 					return false;
 				}
 				candidateIndex++;
@@ -117,7 +133,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 
 
 	public String toString() {
-		return "SingleCharWildcarding(" + String.valueOf(this.text) + ")";
+		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
 	}
 
 }

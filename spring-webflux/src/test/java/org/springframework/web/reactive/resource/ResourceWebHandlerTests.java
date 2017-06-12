@@ -49,8 +49,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -86,7 +84,6 @@ public class ResourceWebHandlerTests {
 		this.handler.setLocations(paths);
 		this.handler.setCacheControl(CacheControl.maxAge(3600, TimeUnit.SECONDS));
 		this.handler.afterPropertiesSet();
-		this.handler.afterSingletonsInstantiated();
 	}
 
 
@@ -159,7 +156,6 @@ public class ResourceWebHandlerTests {
 		versionResolver.addFixedVersionStrategy("versionString", "/**");
 		this.handler.setResourceResolvers(Arrays.asList(versionResolver, new PathResourceResolver()));
 		this.handler.afterPropertiesSet();
-		this.handler.afterSingletonsInstantiated();
 
 		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
 		setPathWithinHandlerMapping(exchange, "versionString/foo.css");
@@ -222,39 +218,12 @@ public class ResourceWebHandlerTests {
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 	}
 
-	@Test // SPR-13658
-	public void getResourceWithRegisteredMediaType() throws Exception {
-		CompositeContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder()
-				.mediaType("css", new MediaType("foo", "bar"))
-				.build();
-
-		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
-		ResourceWebHandler handler = new ResourceWebHandler();
-		handler.setLocations(paths);
-		handler.setContentTypeResolver(contentTypeResolver);
-		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
-
-		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
-		setPathWithinHandlerMapping(exchange, "foo.css");
-		handler.handle(exchange).block(TIMEOUT);
-
-		assertEquals(MediaType.parseMediaType("foo/bar"), exchange.getResponse().getHeaders().getContentType());
-		assertResponseBody(exchange, "h1 { color:red; }");
-	}
-
 	@Test // SPR-14577
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
-		CompositeContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder()
-				.favorPathExtension(false)
-				.build();
-
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
 		ResourceWebHandler handler = new ResourceWebHandler();
 		handler.setLocations(paths);
-		handler.setContentTypeResolver(contentTypeResolver);
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		MockServerWebExchange exchange = MockServerHttpRequest.get("")
 				.header("Accept", "application/json,text/plain,*/*").toExchange();
@@ -367,7 +336,6 @@ public class ResourceWebHandlerTests {
 		handler.setResourceResolvers(Collections.singletonList(pathResolver));
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		Resource[] locations = pathResolver.getAllowedLocations();
 		assertEquals(1, locations.length);

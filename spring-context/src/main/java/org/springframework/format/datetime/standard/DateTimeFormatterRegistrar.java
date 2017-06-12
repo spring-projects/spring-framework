@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,9 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 	 * properties are effectively ignored.
 	 */
 	public void setUseIsoFormat(boolean useIsoFormat) {
-		this.factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : null);
-		this.factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : null);
-		this.factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : null);
+		this.factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : ISO.NONE);
+		this.factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : ISO.NONE);
+		this.factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : ISO.NONE);
 	}
 
 	/**

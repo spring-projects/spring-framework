@@ -193,7 +193,6 @@ public class ExecutorSubscribableChannelTests {
 
 		private volatile boolean afterHandledInvoked;
 
-
 		public AtomicInteger getCounter() {
 			return this.counter;
 		}
@@ -215,12 +214,12 @@ public class ExecutorSubscribableChannelTests {
 		}
 	}
 
+
 	private static class BeforeHandleInterceptor extends AbstractTestInterceptor {
 
 		private Message<?> messageToReturn;
 
 		private RuntimeException exceptionToRaise;
-
 
 		public void setMessageToReturn(Message<?> messageToReturn) {
 			this.messageToReturn = messageToReturn;
@@ -241,6 +240,7 @@ public class ExecutorSubscribableChannelTests {
 			return (this.messageToReturn != null ? this.messageToReturn : message);
 		}
 	}
+
 
 	private static class NullReturningBeforeHandleInterceptor extends AbstractTestInterceptor {
 

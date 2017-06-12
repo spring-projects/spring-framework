@@ -121,10 +121,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		if (beanType != null) {
-			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
-			metadata.checkConfigMembers(beanDefinition);
-		}
+		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+		metadata.checkConfigMembers(beanDefinition);
 	}
 
 	@Override

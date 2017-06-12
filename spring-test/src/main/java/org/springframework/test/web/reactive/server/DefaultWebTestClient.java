@@ -32,29 +32,29 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static java.nio.charset.StandardCharsets.*;
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -73,7 +73,7 @@ class DefaultWebTestClient implements WebTestClient {
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector, Duration timeout) {
+	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector, @Nullable Duration timeout) {
 		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
@@ -179,14 +179,12 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final String requestId;
 
-
-		DefaultRequestBodySpec(WebClient.RequestBodySpec spec, String uriTemplate) {
+		DefaultRequestBodySpec(WebClient.RequestBodySpec spec, @Nullable String uriTemplate) {
 			this.bodySpec = spec;
 			this.uriTemplate = uriTemplate;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
 			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
-
 
 		@Override
 		public RequestBodySpec header(String headerName, String... headerValues) {
@@ -276,7 +274,6 @@ class DefaultWebTestClient implements WebTestClient {
 			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
 			return new DefaultResponseSpec(exchangeResult, clientResponse, this.uriTemplate, getTimeout());
 		}
-
 	}
 
 
@@ -286,7 +283,6 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final Duration timeout;
 
-
 		UndecodedExchangeResult(ExchangeResult result, ClientResponse response,
 				String uriTemplate, Duration timeout) {
 
@@ -295,21 +291,19 @@ class DefaultWebTestClient implements WebTestClient {
 			this.timeout = timeout;
 		}
 
-
-		@SuppressWarnings("unchecked")
-		public <T> EntityExchangeResult<T> decode(ResolvableType bodyType) {
-			T body = (T) this.response.body(toMono(bodyType)).block(this.timeout);
+		public <T> EntityExchangeResult<T> decode(BodyExtractor<Mono<T>, ? super ClientHttpResponse> extractor) {
+			T body = this.response.body(extractor).block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public <T> EntityExchangeResult<List<T>> decodeToList(ResolvableType elementType) {
-			Flux<T> flux = this.response.body(toFlux(elementType));
+		public <T> EntityExchangeResult<List<T>> decodeToList(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> flux = this.response.body(extractor);
 			List<T> body = flux.collectList().block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public <T> FluxExchangeResult<T> decodeToFlux(ResolvableType elementType) {
-			Flux<T> body = this.response.body(toFlux(elementType));
+		public <T> FluxExchangeResult<T> decodeToFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> body = this.response.body(extractor);
 			return new FluxExchangeResult<>(this, body, this.timeout);
 		}
 
@@ -318,14 +312,12 @@ class DefaultWebTestClient implements WebTestClient {
 			byte[] body = (resource != null ? resource.getByteArray() : null);
 			return new EntityExchangeResult<>(this, body);
 		}
-
 	}
 
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
 		private final UndecodedExchangeResult result;
-
 
 		DefaultResponseSpec(ExchangeResult result, ClientResponse response, String uriTemplate, Duration timeout) {
 			this.result = new UndecodedExchangeResult(result, response, uriTemplate, timeout);
@@ -343,22 +335,22 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
-			return expectBody(ResolvableType.forClass(bodyType));
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
-		public <B> BodySpec<B, ?> expectBody(ResolvableType bodyType) {
-			return new DefaultBodySpec<>(this.result.decode(bodyType));
+		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
 		public <E> ListBodySpec<E> expectBodyList(Class<E> elementType) {
-			return expectBodyList(ResolvableType.forClass(elementType));
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
 		}
 
 		@Override
-		public <E> ListBodySpec<E> expectBodyList(ResolvableType elementType) {
-			return new DefaultListBodySpec<>(this.result.decodeToList(elementType));
+		public <E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
 		}
 
 		@Override
@@ -368,14 +360,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
-			return returnResult(ResolvableType.forClass(elementType));
+			return this.result.decodeToFlux(toFlux(elementType));
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(ResolvableType elementType) {
-			return this.result.decodeToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
+			return this.result.decodeToFlux(toFlux(elementType));
 		}
-
 	}
 
 
@@ -383,11 +374,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final EntityExchangeResult<B> result;
 
-
 		DefaultBodySpec(EntityExchangeResult<B> result) {
 			this.result = result;
 		}
-
 
 		protected EntityExchangeResult<B> getResult() {
 			return this.result;
@@ -395,14 +384,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T extends S> T isEqualTo(B expected) {
-			B actual = this.result.getResponseBody();
-			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
+			this.result.assertWithDiagnostics(() ->
+					assertEquals("Response body", expected, this.result.getResponseBody()));
 			return self();
 		}
 
 		@Override
 		public <T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer) {
-			B actual = this.result.getResponseBody();
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
 			return self();
 		}
@@ -416,24 +404,21 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<B> returnResult() {
 			return this.result;
 		}
-
 	}
 
 
 	private static class DefaultListBodySpec<E> extends DefaultBodySpec<List<E>, ListBodySpec<E>>
 			implements ListBodySpec<E> {
 
-
 		DefaultListBodySpec(EntityExchangeResult<List<E>> result) {
 			super(result);
 		}
-
 
 		@Override
 		public ListBodySpec<E> hasSize(int size) {
 			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + size + " elements";
-			getResult().assertWithDiagnostics(() -> assertEquals(message, size, actual.size()));
+			getResult().assertWithDiagnostics(() -> assertEquals(message, size, (actual != null ? actual.size() : 0)));
 			return this;
 		}
 
@@ -443,7 +428,7 @@ class DefaultWebTestClient implements WebTestClient {
 			List<E> expected = Arrays.asList(elements);
 			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + expected;
-			getResult().assertWithDiagnostics(() -> assertTrue(message, actual.containsAll(expected)));
+			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual != null && actual.containsAll(expected))));
 			return this;
 		}
 
@@ -452,8 +437,8 @@ class DefaultWebTestClient implements WebTestClient {
 		public ListBodySpec<E> doesNotContain(E... elements) {
 			List<E> expected = Arrays.asList(elements);
 			List<E> actual = getResult().getResponseBody();
-			String message = "Response body should have contained " + expected;
-			getResult().assertWithDiagnostics(() -> assertTrue(message, !actual.containsAll(expected)));
+			String message = "Response body should not have contained " + expected;
+			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual == null || !actual.containsAll(expected))));
 			return this;
 		}
 
@@ -461,7 +446,6 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<List<E>> returnResult() {
 			return getResult();
 		}
-
 	}
 
 
@@ -471,12 +455,10 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final boolean isEmpty;
 
-
 		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
 			this.result = result;
 			this.isEmpty = (result.getResponseBody() == null);
 		}
-
 
 		@Override
 		public EntityExchangeResult<Void> isEmpty() {
@@ -502,14 +484,14 @@ class DefaultWebTestClient implements WebTestClient {
 			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
 		}
 
-		@Nullable
 		private String getBodyAsString() {
-			if (this.isEmpty) {
-				return null;
+			byte[] body = this.result.getResponseBody();
+			if (body == null || body.length == 0) {
+				return "";
 			}
 			MediaType mediaType = this.result.getResponseHeaders().getContentType();
 			Charset charset = Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(UTF_8);
-			return new String(this.result.getResponseBody(), charset);
+			return new String(body, charset);
 		}
 
 		@Override
@@ -522,7 +504,6 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<byte[]> returnResult() {
 			return this.result;
 		}
-
 	}
 
 }

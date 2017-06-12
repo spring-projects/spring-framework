@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -120,7 +121,9 @@ public abstract class BeanFactoryAnnotationUtils {
 	 * qualifier value (through {@code <qualifier>} or {@code @Qualifier})
 	 * @since 5.0
 	 */
-	public static boolean isQualifierMatch(Predicate<String> qualifier, String beanName, BeanFactory beanFactory) {
+	public static boolean isQualifierMatch(Predicate<String> qualifier, String beanName,
+			@Nullable BeanFactory beanFactory) {
+
 		// Try quick bean name or alias match first...
 		if (qualifier.test(beanName)) {
 			return true;

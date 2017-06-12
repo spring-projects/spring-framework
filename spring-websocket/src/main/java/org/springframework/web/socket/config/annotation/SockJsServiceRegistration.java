@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -29,7 +30,6 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
-
 
 /**
  * A helper class for configuring SockJS fallback options for use with an
@@ -260,6 +260,7 @@ public class SockJsServiceRegistration {
 	protected SockJsService getSockJsService() {
 		TransportHandlingSockJsService service = createSockJsService();
 		service.setHandshakeInterceptors(this.interceptors);
+
 		if (this.clientLibraryUrl != null) {
 			service.setSockJsClientLibraryUrl(this.clientLibraryUrl);
 		}
@@ -281,12 +282,11 @@ public class SockJsServiceRegistration {
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
 		}
-		if (this.allowedOrigins != null) {
-			service.setAllowedOrigins(this.allowedOrigins);
-		}
 		if (this.suppressCors != null) {
 			service.setSuppressCors(this.suppressCors);
 		}
+		service.setAllowedOrigins(this.allowedOrigins);
+
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);
 		}
@@ -296,18 +296,18 @@ public class SockJsServiceRegistration {
 	/**
 	 * Return the TaskScheduler, if configured.
 	 */
+	@Nullable
 	protected TaskScheduler getTaskScheduler() {
 		return this.scheduler;
 	}
 
 	private TransportHandlingSockJsService createSockJsService() {
-
 		Assert.state(this.transportHandlers.isEmpty() || this.transportHandlerOverrides.isEmpty(),
 				"Specify either TransportHandlers or TransportHandler overrides, not both");
 
-		return !this.transportHandlers.isEmpty() ?
+		return (!this.transportHandlers.isEmpty() ?
 				new TransportHandlingSockJsService(this.scheduler, this.transportHandlers) :
-				new DefaultSockJsService(this.scheduler, this.transportHandlerOverrides);
+				new DefaultSockJsService(this.scheduler, this.transportHandlerOverrides));
 	}
 
 }

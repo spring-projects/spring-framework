@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,12 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
@@ -83,8 +86,21 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Return the FreeMarker configuration used by this view.
 	 */
+	@Nullable
 	protected Configuration getConfiguration() {
 		return this.configuration;
+	}
+
+	/**
+	 * Obtain the FreeMarker configuration for actual use.
+	 * @return the FreeMarker configuration (never {@code null})
+	 * @throws IllegalStateException in case of no Configuration object set
+	 * @since 5.0
+	 */
+	protected Configuration obtainConfiguration() {
+		Configuration configuration = getConfiguration();
+		Assert.state(configuration != null, "No Configuration set");
+		return configuration;
 	}
 
 	/**
@@ -101,6 +117,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Return the encoding for the FreeMarker template.
 	 */
+	@Nullable
 	protected String getEncoding() {
 		return this.encoding;
 	}
@@ -124,7 +141,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	protected FreeMarkerConfig autodetectConfiguration() throws BeansException {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
-					getApplicationContext(), FreeMarkerConfig.class, true, false);
+					obtainApplicationContext(), FreeMarkerConfig.class, true, false);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException(
@@ -164,8 +181,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	@Override
-	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, MediaType contentType,
-			ServerWebExchange exchange) {
+	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes,
+			@Nullable MediaType contentType, ServerWebExchange exchange) {
 
 		// Expose all standard FreeMarker hash models.
 		SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
@@ -192,7 +209,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
 	}
 
-	private Charset getCharset(MediaType mediaType) {
+	private Charset getCharset(@Nullable MediaType mediaType) {
 		return Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(getDefaultCharset());
 	}
 
@@ -215,7 +232,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * @see freemarker.template.Configuration#getObjectWrapper()
 	 */
 	protected ObjectWrapper getObjectWrapper() {
-		ObjectWrapper ow = getConfiguration().getObjectWrapper();
+		ObjectWrapper ow = obtainConfiguration().getObjectWrapper();
 		Version version = Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
 		return (ow != null ? ow : new DefaultObjectWrapperBuilder(version).build());
 	}
@@ -230,8 +247,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 */
 	protected Template getTemplate(Locale locale) throws IOException {
 		return (getEncoding() != null ?
-				getConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
-				getConfiguration().getTemplate(getUrl(), locale));
+				obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
+				obtainConfiguration().getTemplate(getUrl(), locale));
 	}
 
 }

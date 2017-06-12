@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation based on OkHttp 3.x.
@@ -57,7 +59,8 @@ class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		return this.response.body().byteStream();
+		ResponseBody body = this.response.body();
+		return (body != null ? body.byteStream() : StreamUtils.emptyInput());
 	}
 
 	@Override
@@ -76,7 +79,10 @@ class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public void close() {
-		this.response.body().close();
+		ResponseBody body = this.response.body();
+		if (body != null) {
+			body.close();
+		}
 	}
 
 }

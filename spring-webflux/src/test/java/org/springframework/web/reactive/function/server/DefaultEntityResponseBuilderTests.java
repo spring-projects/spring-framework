@@ -30,7 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -70,10 +70,10 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void fromPublisherResolvableType() throws Exception {
+	public void fromPublisher() throws Exception {
 		Flux<String> body = Flux.just("foo", "bar");
-		ResolvableType type = ResolvableType.forClass(String.class);
-		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, type).build().block();
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, typeReference).build().block();
 		assertSame(body, response.entity());
 	}
 

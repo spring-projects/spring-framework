@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ public class HtmlUtilsTests {
 
 	@Test
 	public void testEncodeIntoHtmlCharacterSet() {
-		assertNull("A null string should be converted to a null string",
-				HtmlUtils.htmlEscape(null));
 		assertEquals("An empty string should be converted to an empty string",
 				"", HtmlUtils.htmlEscape(""));
 		assertEquals("A string containing no special characters should not be affected",
@@ -75,8 +73,6 @@ public class HtmlUtilsTests {
 	@Test
 	public void testEncodeIntoHtmlCharacterSetFromUtf8() {
 		String utf8 = ("UTF-8");
-		assertNull("A null string should be converted to a null string",
-				HtmlUtils.htmlEscape(null, utf8));
 		assertEquals("An empty string should be converted to an empty string",
 				"", HtmlUtils.htmlEscape("", utf8));
 		assertEquals("A string containing no special characters should not be affected",
@@ -95,8 +91,6 @@ public class HtmlUtilsTests {
 
 	@Test
 	public void testDecodeFromHtmlCharacterSet() {
-		assertNull("A null string should be converted to a null string",
-				HtmlUtils.htmlUnescape(null));
 		assertEquals("An empty string should be converted to an empty string",
 				"", HtmlUtils.htmlUnescape(""));
 		assertEquals("A string containing no special characters should not be affected",

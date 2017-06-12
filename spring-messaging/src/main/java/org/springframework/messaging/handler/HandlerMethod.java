@@ -28,6 +28,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -107,7 +108,8 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		this.beanType = ClassUtils.getUserClass(beanFactory.getType(beanName));
+		Class<?> beanType = beanFactory.getType(beanName);
+		this.beanType = (beanType != null ? ClassUtils.getUserClass(beanType) : null);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
@@ -222,6 +224,7 @@ public class HandlerMethod {
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
+	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}

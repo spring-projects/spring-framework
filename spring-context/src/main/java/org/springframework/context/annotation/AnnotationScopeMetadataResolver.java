@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 
 /**
@@ -37,7 +36,6 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
  */
-@NonNullApi
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
 	private final ScopedProxyMode defaultProxyMode;
@@ -86,7 +84,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 			if (attributes != null) {
 				metadata.setScopeName(attributes.getString("value"));
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
-				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
+				if (proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}
 				metadata.setScopedProxyMode(proxyMode);

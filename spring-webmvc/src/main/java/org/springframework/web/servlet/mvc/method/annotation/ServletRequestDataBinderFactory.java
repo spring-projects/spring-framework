@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,9 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	 * @param binderMethods one or more {@code @InitBinder} methods
 	 * @param initializer provides global data binder initialization
 	 */
-	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> binderMethods, WebBindingInitializer initializer) {
+	public ServletRequestDataBinderFactory(@Nullable List<InvocableHandlerMethod> binderMethods,
+			@Nullable WebBindingInitializer initializer) {
+
 		super(binderMethods, initializer);
 	}
 
@@ -46,7 +48,9 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	 * Returns an instance of {@link ExtendedServletRequestDataBinder}.
 	 */
 	@Override
-	protected ServletRequestDataBinder createBinderInstance(@Nullable Object target, String objectName, NativeWebRequest request) {
+	protected ServletRequestDataBinder createBinderInstance(
+			@Nullable Object target, @Nullable String objectName, NativeWebRequest request) throws Exception  {
+
 		return new ExtendedServletRequestDataBinder(target, objectName);
 	}
 

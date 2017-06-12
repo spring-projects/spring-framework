@@ -474,7 +474,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parser.parseExpression("T(Integer).valueOf(42)");
 		expression.getValue(Integer.class);
 		assertCanCompile(expression);
-		assertEquals(new Integer(42), expression.getValue(null, Integer.class));
+		assertEquals(new Integer(42), expression.getValue(new StandardEvaluationContext(), Integer.class));
 
 		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those
 		// values

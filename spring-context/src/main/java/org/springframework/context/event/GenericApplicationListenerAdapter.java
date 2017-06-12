@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,9 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
-		if (this.delegate instanceof SmartApplicationListener) {
-			return ((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
-		}
-		else {
-			return true;
-		}
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
+		return !(this.delegate instanceof SmartApplicationListener) ||
+				((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
 	}
 
 	@Override
@@ -92,12 +88,10 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	@Nullable
 	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);
-		if (resolvableType == null || !resolvableType.hasGenerics()) {
-			return null;
-		}
-		return resolvableType.getGeneric();
+		return (resolvableType.hasGenerics() ? resolvableType.getGeneric() : null);
 	}
 
+	@Nullable
 	private static ResolvableType resolveDeclaredEventType(ApplicationListener<ApplicationEvent> listener) {
 		ResolvableType declaredEventType = resolveDeclaredEventType(listener.getClass());
 		if (declaredEventType == null || declaredEventType.isAssignableFrom(

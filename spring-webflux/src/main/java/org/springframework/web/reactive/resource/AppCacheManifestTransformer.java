@@ -201,7 +201,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			this.link = iniLinkFlag(line, this.cacheSection);
 		}
 
-		private static boolean initCacheSectionFlag(String line, LineInfo previousLine) {
+		private static boolean initCacheSectionFlag(String line, @Nullable LineInfo previousLine) {
 			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
 				return line.trim().equals(CACHE_HEADER);
 			}
@@ -252,6 +252,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return this.line;
 		}
 
+		@Nullable
 		public Resource getResource() {
 			return this.resource;
 		}

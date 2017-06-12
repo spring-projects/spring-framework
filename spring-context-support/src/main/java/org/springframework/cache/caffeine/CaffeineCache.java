@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public ValueWrapper get(@Nullable Object key) {
+	public ValueWrapper get(Object key) {
 		if (this.cache instanceof LoadingCache) {
 			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
 			return toValueWrapper(value);
@@ -94,7 +94,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T get(@Nullable Object key, final Callable<T> valueLoader) {
+	public <T> T get(Object key, final Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
 	}
 
@@ -104,20 +104,20 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public void put(@Nullable Object key, @Nullable Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
 	@Nullable
-	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable final Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable final Object value) {
 		PutIfAbsentFunction callable = new PutIfAbsentFunction(value);
 		Object result = this.cache.get(key, callable);
 		return (callable.called ? null : toValueWrapper(result));
 	}
 
 	@Override
-	public void evict(@Nullable Object key) {
+	public void evict(Object key) {
 		this.cache.invalidate(key);
 	}
 
@@ -133,7 +133,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 		private boolean called;
 
-		public PutIfAbsentFunction(Object value) {
+		public PutIfAbsentFunction(@Nullable Object value) {
 			this.value = value;
 		}
 

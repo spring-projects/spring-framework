@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base class for classes that are accessing a CommonJ {@link commonj.timers.TimerManager}
@@ -105,7 +107,23 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 		}
 	}
 
+	/**
+	 * Return the configured TimerManager, if any.
+	 * @return the TimerManager, or {@code null} if not available
+	 */
+	@Nullable
 	protected final TimerManager getTimerManager() {
+		return this.timerManager;
+	}
+
+	/**
+	 * Obtain the TimerManager for actual use.
+	 * @return the TimerManager (never {@code null})
+	 * @throws IllegalStateException in case of no TimerManager set
+	 * @since 5.0
+	 */
+	protected TimerManager obtainTimerManager() {
+		Assert.notNull(this.timerManager, "No TimerManager set");
 		return this.timerManager;
 	}
 

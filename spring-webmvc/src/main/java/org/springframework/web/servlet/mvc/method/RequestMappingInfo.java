@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
@@ -407,17 +406,17 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static class DefaultBuilder implements Builder {
 
-		private String[] paths;
+		private String[] paths = new String[0];
 
-		private RequestMethod[] methods;
+		private RequestMethod[] methods = new RequestMethod[0];
 
-		private String[] params;
+		private String[] params = new String[0];
 
-		private String[] headers;
+		private String[] headers = new String[0];
 
-		private String[] consumes;
+		private String[] consumes = new String[0];
 
-		private String[] produces;
+		private String[] produces = new String[0];
 
 		private String mappingName;
 
@@ -493,7 +492,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 					this.options.getFileExtensions());
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
-					new RequestMethodsRequestCondition(methods),
+					new RequestMethodsRequestCondition(this.methods),
 					new ParamsRequestCondition(this.params),
 					new HeadersRequestCondition(this.headers),
 					new ConsumesRequestCondition(this.consumes, this.headers),
@@ -536,7 +535,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Return a custom UrlPathHelper to use for the PatternsRequestCondition, if any.
 		 */
-
+		@Nullable
 		public UrlPathHelper getUrlPathHelper() {
 			return this.urlPathHelper;
 		}
@@ -613,6 +612,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
 		 * from the configured {@code contentNegotiationManager}.
 		 */
+		@Nullable
 		public List<String> getFileExtensions() {
 			if (useRegisteredSuffixPatternMatch() && getContentNegotiationManager() != null) {
 				return this.contentNegotiationManager.getAllFileExtensions();

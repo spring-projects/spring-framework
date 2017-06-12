@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -173,7 +173,7 @@ public class MockHttpServletRequestBuilder
 			Assert.isTrue(contextPath.startsWith("/"), "Context path must start with a '/'");
 			Assert.isTrue(!contextPath.endsWith("/"), "Context path must not end with a '/'");
 		}
-		this.contextPath = (contextPath != null ? contextPath : "");
+		this.contextPath = contextPath;
 		return this;
 	}
 
@@ -195,7 +195,7 @@ public class MockHttpServletRequestBuilder
 			Assert.isTrue(servletPath.startsWith("/"), "Servlet path must start with a '/'");
 			Assert.isTrue(!servletPath.endsWith("/"), "Servlet path must not end with a '/'");
 		}
-		this.servletPath = (servletPath != null ? servletPath : "");
+		this.servletPath = servletPath;
 		return this;
 	}
 
@@ -311,9 +311,8 @@ public class MockHttpServletRequestBuilder
 	 * @param httpHeaders the headers and values to add
 	 */
 	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
-		for (String name : httpHeaders.keySet()) {
-			Object[] values = ObjectUtils.toObjectArray(httpHeaders.get(name).toArray());
-			addToMultiValueMap(this.headers, name, values);
+		for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
+			this.headers.addAll(entry.getKey(), entry.getValue());
 		}
 		return this;
 	}
@@ -654,7 +653,9 @@ public class MockHttpServletRequestBuilder
 			request.setAttribute(name, this.requestAttributes.get(name));
 		}
 		for (String name : this.sessionAttributes.keySet()) {
-			request.getSession().setAttribute(name, this.sessionAttributes.get(name));
+			HttpSession session = request.getSession();
+			Assert.state(session != null, "No HttpSession");
+			session.setAttribute(name, this.sessionAttributes.get(name));
 		}
 
 		FlashMap flashMap = new FlashMap();
@@ -739,10 +740,7 @@ public class MockHttpServletRequestBuilder
 			WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 			flashMapManager = wac.getBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 		}
-		catch (IllegalStateException ex) {
-			// ignore
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (IllegalStateException | NoSuchBeanDefinitionException ex) {
 			// ignore
 		}
 		return (flashMapManager != null ? flashMapManager : new SessionFlashMapManager());
@@ -752,8 +750,6 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			Assert.state(request != null,
-					() -> "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 		return request;
 	}

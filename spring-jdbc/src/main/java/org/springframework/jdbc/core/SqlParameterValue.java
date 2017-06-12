@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Object to represent a SQL parameter value, including parameter metadata
  * such as the SQL type and the scale for numeric values.
@@ -44,7 +46,7 @@ public class SqlParameterValue extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param value the value object
 	 */
-	public SqlParameterValue(int sqlType, Object value) {
+	public SqlParameterValue(int sqlType, @Nullable Object value) {
 		super(sqlType);
 		this.value = value;
 	}
@@ -55,7 +57,7 @@ public class SqlParameterValue extends SqlParameter {
 	 * @param typeName the type name of the parameter (optional)
 	 * @param value the value object
 	 */
-	public SqlParameterValue(int sqlType, String typeName, Object value) {
+	public SqlParameterValue(int sqlType, @Nullable String typeName, @Nullable Object value) {
 		super(sqlType, typeName);
 		this.value = value;
 	}
@@ -67,7 +69,7 @@ public class SqlParameterValue extends SqlParameter {
 	 * (for DECIMAL and NUMERIC types)
 	 * @param value the value object
 	 */
-	public SqlParameterValue(int sqlType, int scale, Object value) {
+	public SqlParameterValue(int sqlType, int scale, @Nullable Object value) {
 		super(sqlType, scale);
 		this.value = value;
 	}
@@ -77,7 +79,7 @@ public class SqlParameterValue extends SqlParameter {
 	 * @param declaredParam the declared SqlParameter to define a value for
 	 * @param value the value object
 	 */
-	public SqlParameterValue(SqlParameter declaredParam, Object value) {
+	public SqlParameterValue(SqlParameter declaredParam, @Nullable Object value) {
 		super(declaredParam);
 		this.value = value;
 	}

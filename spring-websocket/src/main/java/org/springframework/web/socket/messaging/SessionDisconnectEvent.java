@@ -18,6 +18,7 @@ package org.springframework.web.socket.messaging;
 
 import java.security.Principal;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -43,7 +44,7 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	/**
 	 * Create a new SessionDisconnectEvent.
 	 * @param source the component that published the event (never {@code null})
-	 * @param message the message
+	 * @param message the message (never {@code null})
 	 * @param sessionId the disconnect message
 	 * @param closeStatus the status object
 	 */
@@ -56,13 +57,13 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	/**
 	 * Create a new SessionDisconnectEvent.
 	 * @param source the component that published the event (never {@code null})
-	 * @param message the message
+	 * @param message the message (never {@code null})
 	 * @param sessionId the disconnect message
 	 * @param closeStatus the status object
 	 * @param user the current session user
 	 */
 	public SessionDisconnectEvent(Object source, Message<byte[]> message, String sessionId,
-			CloseStatus closeStatus, Principal user) {
+			CloseStatus closeStatus, @Nullable Principal user) {
 
 		super(source, message, user);
 		Assert.notNull(sessionId, "Session id must not be null");

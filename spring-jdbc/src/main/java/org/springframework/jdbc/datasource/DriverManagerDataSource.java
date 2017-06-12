@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	@Override
 	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
 		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new JDBC DriverManager Connection to [" + url + "]");
 		}

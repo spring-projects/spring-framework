@@ -30,8 +30,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.server.support.LookupPath;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -67,7 +65,6 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchPatternsCondition() {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("/foo").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 
 		RequestMappingInfo info = paths("/foo*", "/bar").build();
 		RequestMappingInfo expected = paths("/foo*").build();
@@ -83,7 +80,6 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchParamsCondition() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo?foo=bar").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -99,7 +95,6 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchHeadersCondition() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo").header("foo", "bar").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 
 		RequestMappingInfo info = paths("/foo").headers("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -115,7 +110,6 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchConsumesCondition() {
 		ServerWebExchange exchange = MockServerHttpRequest.post("/foo").contentType(MediaType.TEXT_PLAIN).toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 
 		RequestMappingInfo info = paths("/foo").consumes("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -131,7 +125,6 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchProducesCondition() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo").accept(MediaType.TEXT_PLAIN).toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 
 		RequestMappingInfo info = paths("/foo").produces("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -147,8 +140,7 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchCustomCondition() {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo?foo=bar").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
-		
+
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
 
@@ -169,7 +161,6 @@ public class RequestMappingInfoTests {
 		RequestMappingInfo oneMethodOneParam = paths().methods(RequestMethod.GET).params("foo").build();
 
 		ServerWebExchange exchange = MockServerHttpRequest.get("/foo").toExchange();
-		LookupPath.getOrCreate(exchange, new HttpRequestPathHelper());
 		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, exchange);
 
 		List<RequestMappingInfo> list = asList(none, oneMethod, oneMethodOneParam);

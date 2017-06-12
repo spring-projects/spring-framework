@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Allows customizing the response after the execution of an {@code @ResponseBody}
@@ -58,7 +59,8 @@ public interface ResponseBodyAdvice<T> {
 	 * @param response the current response
 	 * @return the body that was passed in or a modified (possibly new) instance
 	 */
-	T beforeBodyWrite(T body, MethodParameter returnType, MediaType selectedContentType,
+	@Nullable
+	T beforeBodyWrite(@Nullable T body, MethodParameter returnType, MediaType selectedContentType,
 			Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response);
 

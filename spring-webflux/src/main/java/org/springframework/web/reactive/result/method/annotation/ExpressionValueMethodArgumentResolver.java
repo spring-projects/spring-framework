@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -50,13 +51,14 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, Value.class, (annot, type) -> true);
+		return checkAnnotatedParamNoReactiveWrapper(param, Value.class, (ann, type) -> true);
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		Value annotation = parameter.getParameterAnnotation(Value.class);
-		return new ExpressionValueNamedValueInfo(annotation);
+		Value ann = parameter.getParameterAnnotation(Value.class);
+		Assert.state(ann != null, "No Value annotation");
+		return new ExpressionValueNamedValueInfo(ann);
 	}
 
 	@Override

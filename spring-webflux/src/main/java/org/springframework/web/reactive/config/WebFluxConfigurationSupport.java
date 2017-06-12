@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,10 +33,10 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -46,7 +45,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
@@ -119,22 +118,22 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseSuffixPatternMatch() != null) {
-			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
+		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		if (useSuffixPatternMatch != null) {
+			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 		}
-		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		if (useRegisteredSuffixPatternMatch != null) {
+			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
 		}
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-		if (configurer.getPathMatcher() != null) {
-			mapping.setPathMatcher(configurer.getPathMatcher());
+		PathMatcher pathMatcher = configurer.getPathMatcher();
+		if (pathMatcher != null) {
+			mapping.setPathMatcher(pathMatcher);
 		}
-		if (configurer.getPathHelper() != null) {
-			mapping.setPathHelper(configurer.getPathHelper());
-		}
-
 		return mapping;
 	}
 
@@ -146,23 +145,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public CompositeContentTypeResolver webFluxContentTypeResolver() {
+	public RequestedContentTypeResolver webFluxContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
-		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureContentTypeResolver(builder);
 		return builder.build();
-	}
-
-	/**
-	 * Override to configure media type mappings.
-	 * @see RequestedContentTypeResolverBuilder#mediaTypes(Map)
-	 */
-	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
-		Map<String, MediaType> map = new HashMap<>();
-		if (jackson2Present) {
-			map.put("json", MediaType.APPLICATION_JSON);
-		}
-		return map;
 	}
 
 	/**
@@ -233,8 +219,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, webFluxContentTypeResolver());
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -242,9 +227,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
 			if (pathMatchConfigurer.getPathMatcher() != null) {
 				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
-			}
-			if (pathMatchConfigurer.getPathHelper() != null) {
-				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
 		}
 		else {
@@ -313,7 +295,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(webFluxConversionService());
 		initializer.setValidator(webFluxValidator());
-		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = getMessageCodesResolver();
+		if (messageCodesResolver != null) {
+			initializer.setMessageCodesResolver(messageCodesResolver);
+		}
 		return initializer;
 	}
 

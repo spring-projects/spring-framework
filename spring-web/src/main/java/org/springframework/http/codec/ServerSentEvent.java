@@ -40,19 +40,19 @@ public class ServerSentEvent<T> {
 
     private final String event;
 
-    private final T data;
-
     private final Duration retry;
 
     private final String comment;
 
+	private final T data;
 
-    private ServerSentEvent(String id, String event, T data, Duration retry, String comment) {
+
+    private ServerSentEvent(String id, String event, Duration retry, String comment, T data) {
         this.id = id;
         this.event = event;
-        this.data = data;
         this.retry = retry;
         this.comment = comment;
+		this.data = data;
     }
 
 
@@ -73,14 +73,6 @@ public class ServerSentEvent<T> {
     }
 
     /**
-     * Return the {@code data} field of this event, if available.
-     */
-	@Nullable
-    public T data() {
-        return this.data;
-    }
-
-    /**
      * Return the {@code retry} field of this event, if available.
      */
 	@Nullable
@@ -96,11 +88,19 @@ public class ServerSentEvent<T> {
         return this.comment;
     }
 
+	/**
+	 * Return the {@code data} field of this event, if available.
+	 */
+	@Nullable
+	public T data() {
+		return this.data;
+	}
+
 
     @Override
     public String toString() {
-        return ("ServerSentEvent [id = '" + this.id + '\'' + ", event='" + this.event + '\'' +
-                ", data=" + this.data + ", retry=" + this.retry + ", comment='" + this.comment + '\'' + ']');
+        return ("ServerSentEvent [id = '" + this.id + "\', event='" + this.event + "\', retry=" +
+				this.retry + ", comment='" + this.comment + "', data=" + this.data + ']');
     }
 
 
@@ -132,7 +132,6 @@ public class ServerSentEvent<T> {
 
         /**
          * Set the value of the {@code id} field.
-         *
          * @param id the value of the id field
          * @return {@code this} builder
          */
@@ -140,26 +139,13 @@ public class ServerSentEvent<T> {
 
         /**
          * Set the value of the {@code event} field.
-         *
          * @param event the value of the event field
          * @return {@code this} builder
          */
         Builder<T> event(String event);
 
         /**
-         * Set the value of the {@code data} field. If the {@code data} argument is a multi-line {@code String}, it
-         * will be turned into multiple {@code data} field lines as defined in Server-Sent Events
-         * W3C recommendation. If {@code data} is not a String, it will be
-         * {@linkplain Jackson2JsonEncoder encoded} into JSON.
-         *
-         * @param data the value of the data field
-         * @return {@code this} builder
-         */
-        Builder<T> data(T data);
-
-        /**
          * Set the value of the {@code retry} field.
-         *
          * @param retry the value of the retry field
          * @return {@code this} builder
          */
@@ -167,17 +153,24 @@ public class ServerSentEvent<T> {
 
         /**
          * Set SSE comment. If a multi-line comment is provided, it will be turned into multiple
-         * SSE comment lines as defined in Server-Sent Events W3C
-         * recommendation.
-         *
+         * SSE comment lines as defined in Server-Sent Events W3C recommendation.
          * @param comment the comment to set
          * @return {@code this} builder
          */
         Builder<T> comment(String comment);
 
+		/**
+		 * Set the value of the {@code data} field. If the {@code data} argument is a
+		 * multi-line {@code String}, it will be turned into multiple {@code data} field lines
+		 * as defined in the Server-Sent Events W3C recommendation. If {@code data} is not a
+		 * String, it will be {@linkplain Jackson2JsonEncoder encoded} into JSON.
+		 * @param data the value of the data field
+		 * @return {@code this} builder
+		 */
+		Builder<T> data(T data);
+
         /**
          * Builds the event.
-         *
          * @return the built event
          */
         ServerSentEvent<T> build();
@@ -185,8 +178,6 @@ public class ServerSentEvent<T> {
     }
 
     private static class BuilderImpl<T> implements Builder<T> {
-
-        private T data;
 
         private String id;
 
@@ -196,7 +187,9 @@ public class ServerSentEvent<T> {
 
         private String comment;
 
-	    public BuilderImpl() {
+		private T data;
+
+		public BuilderImpl() {
 	    }
 
 	    public BuilderImpl(T data) {
@@ -216,12 +209,6 @@ public class ServerSentEvent<T> {
         }
 
         @Override
-        public Builder<T> data(T data) {
-            this.data = data;
-            return this;
-        }
-
-        @Override
         public Builder<T> retry(Duration retry) {
             this.retry = retry;
             return this;
@@ -233,9 +220,15 @@ public class ServerSentEvent<T> {
             return this;
         }
 
+		@Override
+		public Builder<T> data(T data) {
+			this.data = data;
+			return this;
+		}
+
         @Override
         public ServerSentEvent<T> build() {
-            return new ServerSentEvent<T>(this.id, this.event, this.data, this.retry, this.comment);
+            return new ServerSentEvent<T>(this.id, this.event, this.retry, this.comment, this.data);
         }
     }
 

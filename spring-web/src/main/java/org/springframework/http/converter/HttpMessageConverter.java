@@ -66,7 +66,7 @@ public interface HttpMessageConverter<T> {
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotReadableException in case of conversion errors
 	 */
-	T read(@Nullable Class<? extends T> clazz, HttpInputMessage inputMessage)
+	T read(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException;
 
 	/**

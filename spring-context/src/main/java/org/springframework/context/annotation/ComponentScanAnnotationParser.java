@@ -38,7 +38,6 @@ import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -53,7 +52,6 @@ import org.springframework.util.StringUtils;
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
  */
-@NonNullApi
 class ComponentScanAnnotationParser {
 
 	private final Environment environment;
@@ -68,17 +66,14 @@ class ComponentScanAnnotationParser {
 	public ComponentScanAnnotationParser(Environment environment, ResourceLoader resourceLoader,
 			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry registry) {
 
-		this.resourceLoader = resourceLoader;
 		this.environment = environment;
+		this.resourceLoader = resourceLoader;
 		this.beanNameGenerator = beanNameGenerator;
 		this.registry = registry;
 	}
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
-		Assert.state(this.environment != null, "Environment must not be null");
-		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
-
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 

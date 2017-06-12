@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public abstract class CollectionFactory {
 	 * @param collectionType the collection type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableCollectionType(Class<?> collectionType) {
+	public static boolean isApproximableCollectionType(@Nullable Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
 	}
 
@@ -216,7 +216,7 @@ public abstract class CollectionFactory {
 	 * @param mapType the map type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableMapType(Class<?> mapType) {
+	public static boolean isApproximableMapType(@Nullable Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
 	}
 
@@ -334,6 +334,7 @@ public abstract class CollectionFactory {
 	public static Properties createStringAdaptingProperties() {
 		return new Properties() {
 			@Override
+			@Nullable
 			public String getProperty(String key) {
 				Object value = get(key);
 				return (value != null ? value.toString() : null);

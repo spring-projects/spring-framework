@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
@@ -564,13 +563,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
 		 * from the configured {@code contentTypeResolver}.
 		 */
+		@Nullable
 		public Set<String> getFileExtensions() {
-			RequestedContentTypeResolver resolver = getContentTypeResolver();
-			if (useRegisteredSuffixPatternMatch() && resolver != null) {
-				if (resolver instanceof MappingContentTypeResolver) {
-					return ((MappingContentTypeResolver) resolver).getKeys();
-				}
-			}
 			return null;
 		}
 
@@ -582,6 +576,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.contentTypeResolver = resolver;
 		}
 
+		@Nullable
 		public RequestedContentTypeResolver getContentTypeResolver() {
 			return this.contentTypeResolver;
 		}

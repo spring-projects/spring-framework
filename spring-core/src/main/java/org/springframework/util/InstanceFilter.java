@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public class InstanceFilter<T> {
 	 * @param matchIfEmpty the matching result if both the includes and the excludes
 	 * collections are empty
 	 */
-	public InstanceFilter(Collection<? extends T> includes,
-			Collection<? extends T> excludes, boolean matchIfEmpty) {
+	public InstanceFilter(@Nullable Collection<? extends T> includes,
+			@Nullable Collection<? extends T> excludes, boolean matchIfEmpty) {
 
 		this.includes = (includes != null ? includes : Collections.emptyList());
 		this.excludes = (excludes != null ? excludes : Collections.emptyList());
@@ -103,7 +103,7 @@ public class InstanceFilter<T> {
 	 * @param candidates a list of candidates
 	 * @return {@code true} if the instance match or the candidates collection is null
 	 */
-	protected boolean match(@Nullable T instance, Collection<? extends T> candidates) {
+	protected boolean match(T instance, Collection<? extends T> candidates) {
 		for (T candidate : candidates) {
 			if (match(instance, candidate)) {
 				return true;

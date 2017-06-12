@@ -40,6 +40,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getObject(Object... args) throws BeansException;
 
 	/**

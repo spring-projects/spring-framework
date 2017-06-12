@@ -19,8 +19,6 @@ package org.springframework.core.env;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.lang.NonNullApi;
-
 /**
  * Exception thrown when required properties are not found.
  *
@@ -31,7 +29,6 @@ import org.springframework.lang.NonNullApi;
  * @see org.springframework.context.support.AbstractApplicationContext#prepareRefresh()
  */
 @SuppressWarnings("serial")
-@NonNullApi
 public class MissingRequiredPropertiesException extends IllegalStateException {
 
 	private final Set<String> missingRequiredProperties = new LinkedHashSet<>();

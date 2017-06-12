@@ -33,6 +33,7 @@ import org.apache.http.protocol.HttpContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link ClientHttpRequest} implementation based on
@@ -126,12 +127,14 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		}
 
 		@Override
+		@Nullable
 		public Header getContentType() {
 			MediaType contentType = this.headers.getContentType();
 			return (contentType != null ? new BasicHeader("Content-Type", contentType.toString()) : null);
 		}
 
 		@Override
+		@Nullable
 		public Header getContentEncoding() {
 			String contentEncoding = this.headers.getFirst("Content-Encoding");
 			return (contentEncoding != null ? new BasicHeader("Content-Encoding", contentEncoding) : null);

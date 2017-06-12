@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public abstract class MethodIntrospector {
 	 * @return the selected methods associated with their metadata (in the order of retrieval),
 	 * or an empty map in case of no match
 	 */
-	public static <T> Map<Method, T> selectMethods(Class<?> targetType, @Nullable final MetadataLookup<T> metadataLookup) {
+	public static <T> Map<Method, T> selectMethods(Class<?> targetType, final MetadataLookup<T> metadataLookup) {
 		final Map<Method, T> methodMap = new LinkedHashMap<>();
 		Set<Class<?>> handlerTypes = new LinkedHashSet<>();
 		Class<?> specificHandlerType = null;
@@ -66,16 +66,13 @@ public abstract class MethodIntrospector {
 		for (Class<?> currentHandlerType : handlerTypes) {
 			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);
 
-			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) {
-					Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-					T result = metadataLookup.inspect(specificMethod);
-					if (result != null) {
-						Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-						if (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == null) {
-							methodMap.put(specificMethod, result);
-						}
+			ReflectionUtils.doWithMethods(currentHandlerType, method -> {
+				Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+				T result = metadataLookup.inspect(specificMethod);
+				if (result != null) {
+					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+					if (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == null) {
+						methodMap.put(specificMethod, result);
 					}
 				}
 			}, ReflectionUtils.USER_DECLARED_METHODS);
@@ -93,12 +90,8 @@ public abstract class MethodIntrospector {
 	 * @return the selected methods, or an empty set in case of no match
 	 */
 	public static Set<Method> selectMethods(Class<?> targetType, final ReflectionUtils.MethodFilter methodFilter) {
-		return selectMethods(targetType, new MetadataLookup<Boolean>() {
-			@Override
-			public Boolean inspect(Method method) {
-				return (methodFilter.matches(method) ? Boolean.TRUE : null);
-			}
-		}).keySet();
+		return selectMethods(targetType,
+				(MetadataLookup<Boolean>) method -> (methodFilter.matches(method) ? Boolean.TRUE : null)).keySet();
 	}
 
 	/**

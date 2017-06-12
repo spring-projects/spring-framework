@@ -94,8 +94,6 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("/anotherTest", mainController, handlerMapping, "anotherTest");
 		testUrl("/stillAnotherTest", null, handlerMapping, null);
 		testUrl("outofpattern*ye", null, handlerMapping, null);
-		testUrl("/test%26t%20est/path%26m%20atching.html", null, handlerMapping, null);
-
 	}
 
 	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {

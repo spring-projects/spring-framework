@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ContextLoader;
 
@@ -225,7 +226,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		if (configLocations != null) {
 			for (String configLocation : configLocations) {
 				try {
-					Class<?> clazz = getClassLoader().loadClass(configLocation);
+					Class<?> clazz = ClassUtils.forName(configLocation, getClassLoader());
 					if (logger.isInfoEnabled()) {
 						logger.info("Successfully resolved class for [" + configLocation + "]");
 					}

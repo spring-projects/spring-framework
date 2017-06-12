@@ -23,7 +23,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -87,8 +89,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	 * which by default is AbstractUrlBasedView.
 	 */
 	public void setViewClass(Class<?> viewClass) {
-		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
-			String name = (viewClass != null ? viewClass.getName() : null);
+		if (!requiredViewClass().isAssignableFrom(viewClass)) {
+			String name = viewClass.getName();
 			throw new IllegalArgumentException("Given view class [" + name + "] " +
 					"is not of type [" + requiredViewClass().getName() + "]");
 		}
@@ -98,6 +100,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	/**
 	 * Return the view class to be used to create views.
 	 */
+	@Nullable
 	protected Class<?> getViewClass() {
 		return this.viewClass;
 	}
@@ -114,7 +117,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	/**
 	 * Set the prefix that gets prepended to view names when building a URL.
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
 	}
 
@@ -128,7 +131,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	/**
 	 * Set the suffix that gets appended to view names when building a URL.
 	 */
-	public void setSuffix(String suffix) {
+	public void setSuffix(@Nullable String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
@@ -153,6 +156,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	 * Return the view names (or name patterns) that can be handled by this
 	 * {@link ViewResolver}.
 	 */
+	@Nullable
 	protected String[] getViewNames() {
 		return this.viewNames;
 	}
@@ -243,16 +247,27 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	 * @return the View instance
 	 */
 	protected AbstractUrlBasedView createUrlBasedView(String viewName) {
-		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
+		Class<?> viewClass = getViewClass();
+		Assert.state(viewClass != null, "No view class");
+
+		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
 		view.setSupportedMediaTypes(getSupportedMediaTypes());
 		view.setRequestContextAttribute(getRequestContextAttribute());
 		view.setDefaultCharset(getDefaultCharset());
 		view.setUrl(getPrefix() + viewName + getSuffix());
+
 		return view;
 	}
 
 	private View applyLifecycleMethods(String viewName, AbstractView view) {
-		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		ApplicationContext context = getApplicationContext();
+		if (context != null) {
+			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
+			if (initialized instanceof View) {
+				return (View) initialized;
+			}
+		}
+		return view;
 	}
 
 }

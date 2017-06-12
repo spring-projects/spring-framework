@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * Create a new OverridingClassLoader for the given ClassLoader.
 	 * @param parent the ClassLoader to build an overriding ClassLoader for
 	 */
-	public OverridingClassLoader(ClassLoader parent) {
+	public OverridingClassLoader(@Nullable ClassLoader parent) {
 		this(parent, null);
 	}
 
@@ -64,7 +64,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @param overrideDelegate the ClassLoader to delegate to for overriding
 	 * @since 4.3
 	 */
-	public OverridingClassLoader(ClassLoader parent, ClassLoader overrideDelegate) {
+	public OverridingClassLoader(@Nullable ClassLoader parent, @Nullable ClassLoader overrideDelegate) {
 		super(parent);
 		this.overrideDelegate = overrideDelegate;
 		for (String packageName : DEFAULT_EXCLUDED_PACKAGES) {
@@ -160,6 +160,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @param name the name of the class
 	 * @return the InputStream containing the byte code for the specified class
 	 */
+	@Nullable
 	protected InputStream openStreamForClass(String name) {
 		String internalName = name.replace('.', '/') + CLASS_FILE_SUFFIX;
 		return getParent().getResourceAsStream(internalName);

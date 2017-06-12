@@ -31,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -110,6 +111,7 @@ public class ExchangeResult {
 	/**
 	 * Return the original URI template used to prepare the request, if any.
 	 */
+	@Nullable
 	public String getUriTemplate() {
 		return this.uriTemplate;
 	}
@@ -194,11 +196,7 @@ public class ExchangeResult {
 	}
 
 	private String getStatusReason() {
-		String reason = "";
-		if (getStatus() != null && getStatus().getReasonPhrase() != null) {
-			reason = getStatus().getReasonPhrase();
-		}
-		return reason;
+		return getStatus().getReasonPhrase();
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {
@@ -207,7 +205,7 @@ public class ExchangeResult {
 				.collect(Collectors.joining(delimiter));
 	}
 
-	private String formatBody(MediaType contentType, MonoProcessor<byte[]> body) {
+	private String formatBody(@Nullable MediaType contentType, MonoProcessor<byte[]> body) {
 		if (body.isSuccess()) {
 			byte[] bytes = body.block(Duration.ZERO);
 			if (bytes.length == 0) {

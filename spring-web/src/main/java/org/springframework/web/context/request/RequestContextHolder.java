@@ -68,7 +68,7 @@ public abstract class RequestContextHolder  {
 	 * @param attributes the RequestAttributes to expose
 	 * @see #setRequestAttributes(RequestAttributes, boolean)
 	 */
-	public static void setRequestAttributes(RequestAttributes attributes) {
+	public static void setRequestAttributes(@Nullable RequestAttributes attributes) {
 		setRequestAttributes(attributes, false);
 	}
 

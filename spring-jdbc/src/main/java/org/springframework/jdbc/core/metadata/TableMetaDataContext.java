@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Class to manage context metadata used for the configuration
@@ -81,6 +82,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the table for this context.
 	 */
+	@Nullable
 	public String getTableName() {
 		return this.tableName;
 	}
@@ -95,6 +97,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the catalog for this context.
 	 */
+	@Nullable
 	public String getCatalogName() {
 		return this.catalogName;
 	}
@@ -109,6 +112,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the schema for this context.
 	 */
+	@Nullable
 	public String getSchemaName() {
 		return this.schemaName;
 	}
@@ -171,6 +175,7 @@ public class TableMetaDataContext {
 	 * when the JDBC 3.0 feature is not supported.
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
+	@Nullable
 	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return this.metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
 	}

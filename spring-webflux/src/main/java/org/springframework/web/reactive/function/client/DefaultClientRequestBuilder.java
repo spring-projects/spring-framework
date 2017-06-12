@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -73,29 +74,52 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
+		Assert.notNull(headers, "'headers' must not be null");
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				this.headers.add(headerName, headerValue);
+			}
 		}
 		return this;
 	}
 
 	@Override
-	public ClientRequest.Builder cookie(String name, String value) {
-		this.cookies.add(name, value);
+	public ClientRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.headers);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder cookie(String name, String... values) {
+		for (String value : values) {
+			this.cookies.add(name, value);
+		}
 		return this;
 	}
 
 	@Override
 	public ClientRequest.Builder cookies(MultiValueMap<String, String> cookies) {
-		if (cookies != null) {
-			this.cookies.putAll(cookies);
+		Assert.notNull(cookies, "'cookies' must not be null");
+		for (Map.Entry<String, List<String>> entry : cookies.entrySet()) {
+			String cookieName = entry.getKey();
+			for (String cookieValue : entry.getValue()) {
+				this.cookies.add(cookieName, cookieValue);
+			}
 		}
 		return this;
 	}
 
 	@Override
-	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
-			Class<S> elementClass) {
+	public ClientRequest.Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		cookiesConsumer.accept(this.cookies);
+		return this;
+	}
+
+	@Override
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
@@ -105,7 +129,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-		this.inserter = inserter != null ? inserter : BodyInserters.empty();
+		this.inserter = inserter;
 		return this;
 	}
 
@@ -175,13 +199,10 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();
 			if (!this.cookies.isEmpty()) {
-				this.cookies.entrySet().forEach(entry -> {
-					String name = entry.getKey();
-					entry.getValue().forEach(value -> {
-						HttpCookie cookie = new HttpCookie(name, value);
-						requestCookies.add(name, cookie);
-					});
-				});
+				this.cookies.forEach((name, values) -> values.forEach(value -> {
+					HttpCookie cookie = new HttpCookie(name, value);
+					requestCookies.add(name, cookie);
+				}));
 			}
 
 			return this.inserter.insert(request, new BodyInserter.Context() {

@@ -23,9 +23,10 @@ import java.sql.Types;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 /**
- * Oracle specific implementation for the {@link org.springframework.jdbc.core.metadata.CallMetaDataProvider} interface.
+ * Postgres-specific implementation for the {@link CallMetaDataProvider} interface.
  * This class is intended for internal use by the Simple JDBC classes.
  *
  * @author Thomas Risberg
@@ -57,9 +58,9 @@ public class PostgresCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
-	public String metaDataSchemaNameToUse(String schemaName) {
+	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		// Use public schema if no schema specified
-		return schemaName == null ? "public" : super.metaDataSchemaNameToUse(schemaName);
+		return (schemaName == null ? "public" : super.metaDataSchemaNameToUse(schemaName));
 	}
 
 	@Override
@@ -74,7 +75,6 @@ public class PostgresCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	@Override
 	public boolean byPassReturnParameter(String parameterName) {
-		return (RETURN_VALUE_NAME.equals(parameterName) ||
-				super.byPassReturnParameter(parameterName));
+		return RETURN_VALUE_NAME.equals(parameterName);
 	}
 }

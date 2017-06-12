@@ -134,7 +134,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * @param constructorArgs the constructor argument values
 	 * @param constructorArgTypes the constructor argument types
 	 */
-	public void setConstructorArguments(Object[] constructorArgs, Class<?>[] constructorArgTypes) {
+	public void setConstructorArguments(@Nullable Object[] constructorArgs, @Nullable Class<?>[] constructorArgTypes) {
 		if (constructorArgs == null || constructorArgTypes == null) {
 			throw new IllegalArgumentException("Both 'constructorArgs' and 'constructorArgTypes' need to be specified");
 		}
@@ -233,7 +233,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Checks to see whether the supplied {@code Class} has already been validated and
 	 * validates it if not.
 	 */
-	private void validateClassIfNecessary(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
+	private void validateClassIfNecessary(Class<?> proxySuperClass, @Nullable ClassLoader proxyClassLoader) {
 		if (logger.isWarnEnabled()) {
 			synchronized (validatedClasses) {
 				if (!validatedClasses.containsKey(proxySuperClass)) {
@@ -249,7 +249,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Checks for final methods on the given {@code Class}, as well as package-visible
 	 * methods across ClassLoaders, and writes warnings to the log for each one found.
 	 */
-	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader, Set<Class<?>> ifcs) {
+	private void doValidateClass(Class<?> proxySuperClass, @Nullable ClassLoader proxyClassLoader, Set<Class<?>> ifcs) {
 		if (proxySuperClass != Object.class) {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
@@ -326,8 +326,12 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
-				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
-						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
+				Object target = this.advised.getTargetSource().getTarget();
+				Class<?> targetClass = this.advised.getTargetClass();
+				if (targetClass == null) {
+					targetClass = target.getClass();
+				}
+				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(chain, target, targetClass);
 				this.fixedInterceptorMap.put(methods[x].toString(), x);
 			}
 
@@ -414,6 +418,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object retVal = methodProxy.invoke(this.target, args);
 			return processReturnType(proxy, this.target, method, retVal);
@@ -434,6 +439,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			try {
@@ -462,6 +468,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object target = this.targetSource.getTarget();
 			try {
@@ -487,6 +494,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			Object target = this.targetSource.getTarget();
@@ -512,7 +520,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private Object target;
 
-		public StaticDispatcher(Object target) {
+		public StaticDispatcher(@Nullable Object target) {
 			this.target = target;
 		}
 
@@ -611,6 +619,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			MethodInvocation invocation = new CglibMethodInvocation(proxy, this.target, method, args,
 					this.targetClass, this.adviceChain, methodProxy);
@@ -635,10 +644,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			boolean setProxyContext = false;
-			Class<?> targetClass = null;
 			Object target = null;
 			try {
 				if (this.advised.exposeProxy) {
@@ -646,12 +655,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;
 				}
-				// May be null. Get as late as possible to minimize the time we
-				// "own" the target, in case it comes from a pool...
+				// Get as late as possible to minimize the time we "own" the target, in case it comes from a pool...
 				target = getTarget();
-				if (target != null) {
-					targetClass = target.getClass();
-				}
+				Class<?> targetClass = target.getClass();
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
@@ -751,7 +757,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final int fixedInterceptorOffset;
 
-		public ProxyCallbackFilter(AdvisedSupport advised, Map<String, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
+		public ProxyCallbackFilter(
+				AdvisedSupport advised, Map<String, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
+
 			this.advised = advised;
 			this.fixedInterceptorMap = fixedInterceptorMap;
 			this.fixedInterceptorOffset = fixedInterceptorOffset;
@@ -859,7 +867,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					return INVOKE_TARGET;
 				}
 				Class<?> returnType = method.getReturnType();
-				if (returnType.isAssignableFrom(targetClass)) {
+				if (targetClass != null && returnType.isAssignableFrom(targetClass)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Method return type is assignable from target type and " +
 								"may therefore return 'this' - using INVOKE_TARGET: " + method);
@@ -886,9 +894,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			ProxyCallbackFilter otherCallbackFilter = (ProxyCallbackFilter) other;
 			AdvisedSupport otherAdvised = otherCallbackFilter.advised;
-			if (this.advised == null || otherAdvised == null) {
-				return false;
-			}
 			if (this.advised.isFrozen() != otherAdvised.isFrozen()) {
 				return false;
 			}
@@ -922,12 +927,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		private boolean equalsAdviceClasses(Advisor a, Advisor b) {
-			Advice aa = a.getAdvice();
-			Advice ba = b.getAdvice();
-			if (aa == null || ba == null) {
-				return (aa == ba);
-			}
-			return (aa.getClass() == ba.getClass());
+			return (a.getAdvice().getClass() == b.getAdvice().getClass());
 		}
 
 		private boolean equalsPointcuts(Advisor a, Advisor b) {
@@ -944,9 +944,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Advisor[] advisors = this.advised.getAdvisors();
 			for (Advisor advisor : advisors) {
 				Advice advice = advisor.getAdvice();
-				if (advice != null) {
-					hashCode = 13 * hashCode + advice.getClass().hashCode();
-				}
+				hashCode = 13 * hashCode + advice.getClass().hashCode();
 			}
 			hashCode = 13 * hashCode + (this.advised.isFrozen() ? 1 : 0);
 			hashCode = 13 * hashCode + (this.advised.isExposeProxy() ? 1 : 0);
@@ -966,7 +964,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final ClassLoader classLoader;
 
-		public ClassLoaderAwareUndeclaredThrowableStrategy(ClassLoader classLoader) {
+		public ClassLoaderAwareUndeclaredThrowableStrategy(@Nullable ClassLoader classLoader) {
 			super(UndeclaredThrowableException.class);
 			this.classLoader = classLoader;
 		}

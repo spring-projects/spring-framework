@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -67,8 +68,8 @@ class DefaultWebClient implements WebClient {
 	private final MultiValueMap<String, String> defaultCookies;
 
 
-	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory factory,
-			HttpHeaders defaultHeaders, MultiValueMap<String, String> defaultCookies) {
+	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable UriBuilderFactory factory,
+			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
@@ -205,9 +206,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public DefaultRequestBodySpec headers(HttpHeaders headers) {
-			if (headers != null) {
-				getHeaders().putAll(headers);
-			}
+			getHeaders().putAll(headers);
 			return this;
 		}
 
@@ -243,9 +242,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public DefaultRequestBodySpec cookies(MultiValueMap<String, String> cookies) {
-			if (cookies != null) {
-				getCookies().putAll(cookies);
-			}
+			getCookies().putAll(cookies);
 			return this;
 		}
 
@@ -298,10 +295,9 @@ class DefaultWebClient implements WebClient {
 			return ClientRequest.method(this.httpMethod, this.uri).headers(initHeaders()).cookies(initCookies());
 		}
 
-		@Nullable
 		private HttpHeaders initHeaders() {
 			if (CollectionUtils.isEmpty(defaultHeaders) && CollectionUtils.isEmpty(this.headers)) {
-				return null;
+				return new HttpHeaders();
 			}
 			else if (CollectionUtils.isEmpty(defaultHeaders)) {
 				return this.headers;
@@ -321,10 +317,9 @@ class DefaultWebClient implements WebClient {
 			}
 		}
 
-		@Nullable
 		private MultiValueMap<String, String> initCookies() {
 			if (CollectionUtils.isEmpty(defaultCookies) && CollectionUtils.isEmpty(this.cookies)) {
-				return null;
+				return new LinkedMultiValueMap<>(0);
 			}
 			else if (CollectionUtils.isEmpty(defaultCookies)) {
 				return this.cookies;

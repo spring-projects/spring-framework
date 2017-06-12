@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,10 @@ public abstract class StatementCreatorUtils {
 	 * @param javaType the Java type to translate
 	 * @return the corresponding SQL type, or {@link SqlTypeValue#TYPE_UNKNOWN} if none found
 	 */
-	public static int javaTypeToSqlParameterType(Class<?> javaType) {
+	public static int javaTypeToSqlParameterType(@Nullable Class<?> javaType) {
+		if (javaType == null) {
+			return SqlTypeValue.TYPE_UNKNOWN;
+		}
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {
 			return sqlType;
@@ -193,7 +196,7 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	private static void setParameterValueInternal(PreparedStatement ps, int paramIndex, int sqlType,
-			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
+			@Nullable String typeName, @Nullable Integer scale, @Nullable Object inValue) throws SQLException {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;
@@ -234,7 +237,9 @@ public abstract class StatementCreatorUtils {
 	 * Set the specified PreparedStatement parameter to null,
 	 * respecting database-specific peculiarities.
 	 */
-	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
+	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
+			throws SQLException {
+
 		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
@@ -274,8 +279,8 @@ public abstract class StatementCreatorUtils {
 		}
 	}
 
-	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-			Integer scale, Object inValue) throws SQLException {
+	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType,
+			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
 
 		if (inValue instanceof SqlTypeValue) {
 			((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);

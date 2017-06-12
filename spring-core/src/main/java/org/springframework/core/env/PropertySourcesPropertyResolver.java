@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -30,7 +29,6 @@ import org.springframework.lang.Nullable;
  * @see PropertySources
  * @see AbstractEnvironment
  */
-@NonNullApi
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
 	private final PropertySources propertySources;

@@ -43,7 +43,8 @@ public interface Decoder<T> {
 	 * Whether the decoder supports the given target element type and the MIME
 	 * type of the source stream.
 	 * @param elementType the target element type for the output stream
-	 * @param mimeType the mime type associated with the stream to decode, can be {@code null} if not specified.
+	 * @param mimeType the mime type associated with the stream to decode
+	 * (can be {@code null} if not specified)
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
 	boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType);
@@ -54,11 +55,11 @@ public interface Decoder<T> {
 	 * @param elementType the expected type of elements in the output stream;
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
-	 * @param mimeType the MIME type associated with the input stream, optional
+	 * @param mimeType the MIME type associated with the input stream (optional)
 	 * @param hints additional information about how to do encode
 	 * @return the output stream with decoded elements
 	 */
-	Flux<T> decode(Publisher<DataBuffer> inputStream, @Nullable ResolvableType elementType,
+	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
@@ -67,7 +68,7 @@ public interface Decoder<T> {
 	 * @param elementType the expected type of elements in the output stream;
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
-	 * @param mimeType the MIME type associated with the input stream, optional
+	 * @param mimeType the MIME type associated with the input stream (optional)
 	 * @param hints additional information about how to do encode
 	 * @return the output stream with the decoded element
 	 */

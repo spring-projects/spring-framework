@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMessage;
@@ -68,11 +69,25 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
-	 * @param elementType the type of element in the {@code Mono}
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Mono&lt;Map&lt;String, String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toMono(new ParameterizedTypeReference&lt;Map&lt;String,String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Mono}
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ParameterizedTypeReference<T> typeReference) {
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return toMono(ResolvableType.forType(typeReference.getType()));
+	}
+
+	static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
@@ -93,7 +108,7 @@ public abstract class BodyExtractors {
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a {@code BodyExtractor} that reads a mono
+	 * @return a {@code BodyExtractor} that reads a flux
 	 */
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass) {
 		Assert.notNull(elementClass, "'elementClass' must not be null");
@@ -102,11 +117,25 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Flux}.
-	 * @param elementType the type of element in the {@code Flux}
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information, for
+	 * instance when using the {@link org.springframework.web.reactive.function.client.WebClient WebClient}
+	 * <pre class="code">
+	 * Flux&lt;ServerSentEvent&lt;String&gt;&gt; body = this.webClient
+	 *  .get()
+	 *  .uri("http://example.com")
+	 *  .exchange()
+	 *  .flatMap(r -> r.body(toFlux(new ParameterizedTypeReference&lt;ServerSentEvent&lt;String&gt;&gt;() {})));
+	 * </pre>
+	 * @param typeReference a reference to the type of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a {@code BodyExtractor} that reads a mono
+	 * @return a {@code BodyExtractor} that reads a flux
 	 */
-	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ParameterizedTypeReference<T> typeReference) {
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return toFlux(ResolvableType.forType(typeReference.getType()));
+	}
+
+	static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,

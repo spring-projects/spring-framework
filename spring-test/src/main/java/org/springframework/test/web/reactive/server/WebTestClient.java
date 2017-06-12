@@ -28,7 +28,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -534,7 +534,7 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #expectBody(Class)} for a body type with generics.
 		 */
-		<B> BodySpec<B, ?> expectBody(ResolvableType bodyType);
+		<B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType);
 
 			/**
 		 * Declare expectations on the response body decoded to {@code List<E>}.
@@ -545,7 +545,7 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #expectBodyList(Class)} for element types with generics.
 		 */
-		<E> ListBodySpec<E> expectBodyList(ResolvableType elementType);
+		<E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType);
 
 		/**
 		 * Declare expectations on the response body content.
@@ -565,7 +565,7 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #returnResult(Class)} for element types with generics.
 		 */
-		<T> FluxExchangeResult<T> returnResult(ResolvableType elementType);
+		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
 	}
 
 	/**

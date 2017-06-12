@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 
@@ -45,7 +46,7 @@ public class BasicAuthorizationInterceptor implements ClientHttpRequestIntercept
 	 * @param username the username to use
 	 * @param password the password to use
 	 */
-	public BasicAuthorizationInterceptor(String username, String password) {
+	public BasicAuthorizationInterceptor(String username, @Nullable String password) {
 		Assert.hasLength(username, "Username must not be empty");
 		this.username = username;
 		this.password = (password != null ? password : "");

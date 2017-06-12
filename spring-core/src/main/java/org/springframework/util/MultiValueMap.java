@@ -32,7 +32,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	/**
 	 * Return the first value for the given key.
 	 * @param key the key
-	 * @return the first value for the specified key, or {@code null}
+	 * @return the first value for the specified key, or {@code null} if none
 	 */
 	@Nullable
 	V getFirst(K key);
@@ -50,7 +50,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @param values the values to be added
 	 * @since 5.0
 	 */
-	void addAll(K key, List<V> values);
+	void addAll(K key, List<? extends V> values);
 
 	/**
 	 * Set the given single value under the given key.

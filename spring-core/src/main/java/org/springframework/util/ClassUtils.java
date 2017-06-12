@@ -189,7 +189,7 @@ public abstract class ClassUtils {
 	 * @return the original thread context ClassLoader, or {@code null} if not overridden
 	 */
 	@Nullable
-	public static ClassLoader overrideThreadContextClassLoader(ClassLoader classLoaderToUse) {
+	public static ClassLoader overrideThreadContextClassLoader(@Nullable ClassLoader classLoaderToUse) {
 		Thread currentThread = Thread.currentThread();
 		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
 		if (classLoaderToUse != null && !classLoaderToUse.equals(threadContextClassLoader)) {
@@ -214,7 +214,9 @@ public abstract class ClassUtils {
 	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
-	public static Class<?> forName(String name, @Nullable ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
+	public static Class<?> forName(String name, @Nullable ClassLoader classLoader)
+			throws ClassNotFoundException, LinkageError {
+
 		Assert.notNull(name, "Name must not be null");
 
 		Class<?> clazz = resolvePrimitiveClassName(name);
@@ -307,7 +309,7 @@ public abstract class ClassUtils {
 	 * a primitive class or primitive array class
 	 */
 	@Nullable
-	public static Class<?> resolvePrimitiveClassName(String name) {
+	public static Class<?> resolvePrimitiveClassName(@Nullable String name) {
 		Class<?> result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
@@ -357,7 +359,7 @@ public abstract class ClassUtils {
 	 * @return the user-defined class
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
-		if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != null && Object.class != superclass) {
 				return superclass;
@@ -519,7 +521,8 @@ public abstract class ClassUtils {
 	 * @param value the value to introspect
 	 * @return the qualified name of the class
 	 */
-	public static String getDescriptiveType(Object value) {
+	@Nullable
+	public static String getDescriptiveType(@Nullable Object value) {
 		if (value == null) {
 			return null;
 		}
@@ -546,7 +549,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @param typeName the type name to match
 	 */
-	public static boolean matchesTypeName(Class<?> clazz, String typeName) {
+	public static boolean matchesTypeName(Class<?> clazz, @Nullable String typeName) {
 		return (typeName != null &&
 				(typeName.equals(clazz.getTypeName()) || typeName.equals(clazz.getSimpleName())));
 	}
@@ -755,9 +758,8 @@ public abstract class ClassUtils {
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} doesn't implement it or is {@code null}
 	 */
-	@Nullable
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		if (method != null && isOverridable(method, targetClass) &&
+		if (isOverridable(method, targetClass) &&
 				targetClass != null && targetClass != method.getDeclaringClass()) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
@@ -806,14 +808,15 @@ public abstract class ClassUtils {
 	 * @param method the method to check
 	 * @param targetClass the target class to check against
 	 */
-	private static boolean isOverridable(Method method, Class<?> targetClass) {
+	private static boolean isOverridable(Method method, @Nullable Class<?> targetClass) {
 		if (Modifier.isPrivate(method.getModifiers())) {
 			return false;
 		}
 		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
 			return true;
 		}
-		return getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass));
+		return (targetClass == null ||
+				getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass)));
 	}
 
 	/**
@@ -932,7 +935,7 @@ public abstract class ClassUtils {
 	 * @param value the value that should be assigned to the type
 	 * @return if the type is assignable from the value
 	 */
-	public static boolean isAssignableValue(Class<?> type, Object value) {
+	public static boolean isAssignableValue(Class<?> type, @Nullable Object value) {
 		Assert.notNull(type, "Type must not be null");
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
@@ -1014,11 +1017,11 @@ public abstract class ClassUtils {
 	 * in the given array.
 	 * <p>Basically like {@code AbstractCollection.toString()}, but stripping
 	 * the "class "/"interface " prefix before every class name.
-	 * @param classes a Collection of Class objects (may be {@code null})
+	 * @param classes an array of Class objects
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(@Nullable Class<?>... classes) {
+	public static String classNamesToString(Class<?>... classes) {
 		return classNamesToString(Arrays.asList(classes));
 	}
 
@@ -1135,12 +1138,13 @@ public abstract class ClassUtils {
 			return Collections.<Class<?>>singleton(clazz);
 		}
 		Set<Class<?>> interfaces = new LinkedHashSet<>();
-		while (clazz != null) {
-			Class<?>[] ifcs = clazz.getInterfaces();
+		Class<?> current = clazz;
+		while (current != null) {
+			Class<?>[] ifcs = current.getInterfaces();
 			for (Class<?> ifc : ifcs) {
 				interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
 			}
-			clazz = clazz.getSuperclass();
+			current = current.getSuperclass();
 		}
 		return interfaces;
 	}
@@ -1155,7 +1159,7 @@ public abstract class ClassUtils {
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
 	@SuppressWarnings("deprecation")
-	public static Class<?> createCompositeInterface(Class<?>[] interfaces, ClassLoader classLoader) {
+	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interfaces must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);
 	}
@@ -1170,7 +1174,7 @@ public abstract class ClassUtils {
 	 * @since 3.2.6
 	 */
 	@Nullable
-	public static Class<?> determineCommonAncestor(Class<?> clazz1, Class<?> clazz2) {
+	public static Class<?> determineCommonAncestor(@Nullable Class<?> clazz1, @Nullable Class<?> clazz2) {
 		if (clazz1 == null) {
 			return clazz2;
 		}
@@ -1228,7 +1232,7 @@ public abstract class ClassUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 */
-	public static boolean isCglibProxyClass(Class<?> clazz) {
+	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
 
@@ -1236,7 +1240,7 @@ public abstract class ClassUtils {
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
 	 */
-	public static boolean isCglibProxyClassName(String className) {
+	public static boolean isCglibProxyClassName(@Nullable String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
 

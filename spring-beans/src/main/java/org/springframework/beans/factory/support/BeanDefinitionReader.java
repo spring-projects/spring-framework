@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ public interface BeanDefinitionReader {
 	 * Return the resource loader to use for resource locations.
 	 * Can be checked for the <b>ResourcePatternResolver</b> interface and cast
 	 * accordingly, for loading multiple resources for a given resource pattern.
-	 * <p>Null suggests that absolute resource loading is not available
-	 * for this bean definition reader.
+	 * <p>A {@code null} return value suggests that absolute resource loading
+	 * is not available for this bean definition reader.
 	 * <p>This is mainly meant to be used for importing further resources
 	 * from within a bean definition resource, for example via the "import"
 	 * tag in XML bean definitions. It is recommended, however, to apply
@@ -63,6 +63,7 @@ public interface BeanDefinitionReader {
 	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
+	@Nullable
 	ResourceLoader getResourceLoader();
 
 	/**

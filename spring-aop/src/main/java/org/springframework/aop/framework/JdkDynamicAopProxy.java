@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,13 +152,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * unless a hook method throws an exception.
 	 */
 	@Override
+	@Nullable
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		MethodInvocation invocation;
 		Object oldProxy = null;
 		boolean setProxyContext = false;
 
 		TargetSource targetSource = this.advised.targetSource;
-		Class<?> targetClass = null;
 		Object target = null;
 
 		try {
@@ -188,12 +188,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				setProxyContext = true;
 			}
 
-			// May be null. Get as late as possible to minimize the time we "own" the target,
+			// Get as late as possible to minimize the time we "own" the target,
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
-			if (target != null) {
-				targetClass = target.getClass();
-			}
+			Class<?> targetClass = target.getClass();
 
 			// Get the interception chain for this method.
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
@@ -249,7 +247,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * or a dynamic proxy wrapping a JdkDynamicAopProxy instance.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (other == this) {
 			return true;
 		}

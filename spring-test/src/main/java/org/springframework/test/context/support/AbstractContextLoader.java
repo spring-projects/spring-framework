@@ -91,7 +91,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #processLocations(Class, String...)
 	 */
 	@Override
-	public void processContextConfiguration(@Nullable ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations =
 				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
@@ -143,7 +143,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	private void invokeApplicationContextInitializers(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedConfig) {
 
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses =
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses =
 				mergedConfig.getContextInitializerClasses();
 		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
@@ -153,7 +153,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<>();
 		Class<?> contextClass = context.getClass();
 
-		for (Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializerClass : initializerClasses) {
+		for (Class<? extends ApplicationContextInitializer<?>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
 			if (initializerContextClass != null && !initializerContextClass.isInstance(context)) {
@@ -213,7 +213,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
 	@Override
-	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
+	public final String[] processLocations(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
 				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
 	}

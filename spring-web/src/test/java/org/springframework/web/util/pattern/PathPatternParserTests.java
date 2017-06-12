@@ -22,20 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-
-import org.springframework.web.util.pattern.CaptureTheRestPathElement;
-import org.springframework.web.util.pattern.CaptureVariablePathElement;
-import org.springframework.web.util.pattern.LiteralPathElement;
-import org.springframework.web.util.pattern.PathElement;
-import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
-import org.springframework.web.util.pattern.PatternParseException;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
-import org.springframework.web.util.pattern.RegexPathElement;
-import org.springframework.web.util.pattern.SeparatorPathElement;
-import org.springframework.web.util.pattern.SingleCharWildcardedPathElement;
-import org.springframework.web.util.pattern.WildcardPathElement;
-import org.springframework.web.util.pattern.WildcardTheRestPathElement;
 
 import static org.junit.Assert.*;
 
@@ -82,7 +69,7 @@ public class PathPatternParserTests {
 		assertEquals("Literal(abc)", checkStructure("abc").toChainString());
 		assertEquals("Regex({a}_*_{b})", checkStructure("{a}_*_{b}").toChainString());
 		assertEquals("Separator(/)", checkStructure("/").toChainString());
-		assertEquals("SingleCharWildcarding(?a?b?c)", checkStructure("?a?b?c").toChainString());
+		assertEquals("SingleCharWildcarded(?a?b?c)", checkStructure("?a?b?c").toChainString());
 		assertEquals("Wildcard(*)", checkStructure("*").toChainString());
 		assertEquals("WildcardTheRest(/**)", checkStructure("/**").toChainString());
 	}
@@ -100,6 +87,7 @@ public class PathPatternParserTests {
 		checkError("/{*foobar}abc", 10, PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
 		checkError("/{f*oobar}", 3, PatternMessage.ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR);
 		checkError("/{*foobar}/abc", 10, PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
+		checkError("/{*foobar:.*}/abc", 9, PatternMessage.ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR);
 		checkError("/{abc}{*foobar}", 1, PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
 		checkError("/{abc}{*foobar}{foo}", 15, PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
 	}
@@ -192,6 +180,73 @@ public class PathPatternParserTests {
 		checkStructure("/{foo}");
 		checkStructure("/{f}/");
 		checkStructure("/{foo}/{bar}/{wibble}");
+	}
+	
+	/**
+	 * During a parse some elements of the path are encoded for use when matching an encoded path.
+	 * The patterns a developer writes are not encoded, hence we decode them when turning them
+	 * into PathPattern objects. The encoding is visible through the toChainString() method.
+	 */
+	@Test
+	public void encodingDuringParse() throws Exception {
+		PathPattern pp;
+		
+		// CaptureTheRest
+		pp = parse("/{*var}");
+		assertEquals("CaptureTheRest(/{*var})",pp.toChainString());
+
+		// CaptureVariable
+		pp = parse("/{var}");
+		assertEquals("Separator(/) CaptureVariable({var})",pp.toChainString());
+		
+		// Literal
+		pp = parse("/foo bar/b_oo");
+		assertEquals("Separator(/) Literal(foo%20bar) Separator(/) Literal(b_oo)",pp.toChainString());
+		pp = parse("foo:bar");
+		assertEquals("Literal(foo:bar)",pp.toChainString());
+		
+		// Regex
+		pp = parse("{foo}_{bar}");
+		assertEquals("Regex({foo}_{bar})",pp.toChainString());
+		pp = parse("{foo}_ _{bar}");
+		assertEquals("Regex({foo}_%20_{bar})",pp.toChainString());
+
+		// Separator
+		pp = parse("/");
+		assertEquals("Separator(/)",pp.toChainString());
+		
+		// SingleCharWildcarded
+		pp = parse("/foo?bar");
+		assertEquals("Separator(/) SingleCharWildcarded(foo?bar)",pp.toChainString());
+		pp = parse("/f o?bar");
+		assertEquals("Separator(/) SingleCharWildcarded(f%20o?bar)",pp.toChainString());
+
+		// Wildcard
+		pp = parse("/foo*bar");
+		assertEquals("Separator(/) Regex(foo*bar)",pp.toChainString());
+		pp = parse("f oo:*bar");
+		assertEquals("Regex(f%20oo:*bar)",pp.toChainString());
+		pp = parse("/f oo:*bar");
+		assertEquals("Separator(/) Regex(f%20oo:*bar)",pp.toChainString());
+		pp = parse("/f|!oo:*bar");
+		assertEquals("Separator(/) Regex(f%7C!oo:*bar)",pp.toChainString());
+		
+		// WildcardTheRest
+		pp = parse("/**");
+		assertEquals("WildcardTheRest(/**)",pp.toChainString());
+	}
+	
+	@Test
+	public void encodingWithConstraints() {
+		// Constraint regex expressions are not URL encoded
+		PathPattern pp = parse("/{var:f o}");
+		assertEquals("Separator(/) CaptureVariable({var:f o})",pp.toChainString());
+
+		pp = parse("/{var:f o}_");
+		assertEquals("Separator(/) Regex({var:f o}_)",pp.toChainString());
+		
+		pp = parse("{foo:f o}_ _{bar:b\\|o}");
+		assertEquals("Regex({foo:f o}_%20_{bar:b\\|o})",pp.toChainString());
 	}
 
 	@Test

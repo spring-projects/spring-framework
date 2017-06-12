@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.servlet.tags;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Bean used to pass name-value pair parameters from a {@link ParamTag} to a
@@ -33,12 +35,6 @@ public class Param {
 
 	private String value;
 
-	/**
-	 * @return the raw parameter name
-	 */
-	public String getName() {
-		return name;
-	}
 
 	/**
 	 * Set the raw name of the parameter
@@ -48,10 +44,10 @@ public class Param {
 	}
 
 	/**
-	 * @return the raw parameter value
+	 * Return the raw parameter name.
 	 */
-	public String getValue() {
-		return value;
+	public String getName() {
+		return this.name;
 	}
 
 	/**
@@ -61,9 +57,18 @@ public class Param {
 		this.value = value;
 	}
 
+	/**
+	 * Return the raw parameter value
+	 */
+	@Nullable
+	public String getValue() {
+		return this.value;
+	}
+
+
 	@Override
 	public String toString() {
-		return "JSP Tag Param: name '" + name + "', value '" + value + "'";
+		return "JSP Tag Param: name '" + this.name + "', value '" + this.value + "'";
 	}
 
 }

@@ -21,6 +21,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 
+/**
+ * Tests for [ModelMap] Kotlin extensions
+ *
+ * @author Sebastien Deleuze
+ */
 class ModelMapExtensionsTests {
 
 	@Test
@@ -30,4 +35,5 @@ class ModelMapExtensionsTests {
 		assertTrue(model.containsAttribute("foo"))
 		assertEquals("bing", model["foo"])
 	}
+
 }

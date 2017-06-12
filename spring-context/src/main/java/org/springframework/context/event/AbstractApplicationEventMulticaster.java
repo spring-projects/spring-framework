@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -72,7 +73,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -208,7 +209,7 @@ public abstract class AbstractApplicationEventMulticaster
 	 * @return the pre-filtered list of application listeners for the given event and source type
 	 */
 	private Collection<ApplicationListener<?>> retrieveApplicationListeners(
-			ResolvableType eventType, Class<?> sourceType, @Nullable ListenerRetriever retriever) {
+			ResolvableType eventType, @Nullable Class<?> sourceType, @Nullable ListenerRetriever retriever) {
 
 		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 		Set<ApplicationListener<?>> listeners;
@@ -283,7 +284,9 @@ public abstract class AbstractApplicationEventMulticaster
 	 * @return whether the given listener should be included in the candidates
 	 * for the given event type
 	 */
-	protected boolean supportsEvent(ApplicationListener<?> listener, ResolvableType eventType, Class<?> sourceType) {
+	protected boolean supportsEvent(
+			ApplicationListener<?> listener, ResolvableType eventType, @Nullable Class<?> sourceType) {
+
 		GenericApplicationListener smartListener = (listener instanceof GenericApplicationListener ?
 				(GenericApplicationListener) listener : new GenericApplicationListenerAdapter(listener));
 		return (smartListener.supportsEventType(eventType) && smartListener.supportsSourceType(sourceType));
@@ -299,7 +302,8 @@ public abstract class AbstractApplicationEventMulticaster
 
 		private final Class<?> sourceType;
 
-		public ListenerCacheKey(ResolvableType eventType, Class<?> sourceType) {
+		public ListenerCacheKey(ResolvableType eventType, @Nullable Class<?> sourceType) {
+			Assert.notNull(eventType, "Event type must not be null");
 			this.eventType = eventType;
 			this.sourceType = sourceType;
 		}
@@ -310,27 +314,30 @@ public abstract class AbstractApplicationEventMulticaster
 				return true;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
-			return (ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType) &&
+			return (this.eventType.equals(otherKey.eventType) &&
 					ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType));
 		}
 
 		@Override
 		public int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(this.eventType) * 29 + ObjectUtils.nullSafeHashCode(this.sourceType));
+			return this.eventType.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.sourceType);
 		}
 
 		@Override
 		public String toString() {
-			return "ListenerCacheKey [eventType = " + this.eventType + ", sourceType = " + this.sourceType.getName() + "]";
+			return "ListenerCacheKey [eventType = " + this.eventType + ", sourceType = " + this.sourceType + "]";
 		}
 
 		@Override
 		public int compareTo(ListenerCacheKey other) {
-			int result = 0;
-			if (this.eventType != null) {
-				result = this.eventType.toString().compareTo(other.eventType.toString());
-			}
-			if (result == 0 && this.sourceType != null) {
+			int result = this.eventType.toString().compareTo(other.eventType.toString());
+			if (result == 0) {
+				if (this.sourceType == null) {
+					return (other.sourceType == null ? 0 : -1);
+				}
+				if (other.sourceType == null) {
+					return 1;
+				}
 				result = this.sourceType.getName().compareTo(other.sourceType.getName());
 			}
 			return result;

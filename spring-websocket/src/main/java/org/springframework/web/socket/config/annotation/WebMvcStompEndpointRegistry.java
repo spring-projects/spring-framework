@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -79,7 +78,6 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		}
 
 		this.stompHandler = new StompSubProtocolHandler();
-
 		if (transportRegistration.getMessageSizeLimit() != null) {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
@@ -144,10 +142,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	}
 
 	/**
-	 * Return a handler mapping with the mapped ViewControllers; or {@code null}
-	 * in case of no registrations.
+	 * Return a handler mapping with the mapped ViewControllers.
 	 */
-	@Nullable
 	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (WebMvcStompWebSocketEndpointRegistration registration : this.registrations) {

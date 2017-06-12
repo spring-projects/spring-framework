@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,16 @@ public class DefaultTestContext implements TestContext {
 
 	/**
 	 * Construct a new {@code DefaultTestContext} from the supplied arguments.
-	 * @param testClass the test class for this test context; never {@code null}
+	 * @param testClass the test class for this test context
 	 * @param mergedContextConfiguration the merged application context
-	 * configuration for this test context; never {@code null}
+	 * configuration for this test context
 	 * @param cacheAwareContextLoaderDelegate the delegate to use for loading
-	 * and closing the application context for this test context; never {@code null}
+	 * and closing the application context for this test context
 	 */
 	public DefaultTestContext(Class<?> testClass, MergedContextConfiguration mergedContextConfiguration,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
-		Assert.notNull(testClass, "testClass must not be null");
+
+		Assert.notNull(testClass, "Test Class must not be null");
 		Assert.notNull(mergedContextConfiguration, "MergedContextConfiguration must not be null");
 		Assert.notNull(cacheAwareContextLoaderDelegate, "CacheAwareContextLoaderDelegate must not be null");
 		this.testClass = testClass;
@@ -132,10 +133,12 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	public final Object getTestInstance() {
+		Assert.state(this.testInstance != null, "No test instance");
 		return this.testInstance;
 	}
 
 	public final Method getTestMethod() {
+		Assert.state(this.testMethod != null, "No test method");
 		return this.testMethod;
 	}
 

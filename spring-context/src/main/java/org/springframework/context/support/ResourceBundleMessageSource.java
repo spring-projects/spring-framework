@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,8 +114,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
-		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -321,6 +321,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	private class MessageSourceControl extends ResourceBundle.Control {
 
 		@Override
+		@Nullable
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
 
@@ -332,27 +333,23 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final boolean reloadFlag = reload;
 				InputStream stream;
 				try {
-					stream = AccessController.doPrivileged(
-							new PrivilegedExceptionAction<InputStream>() {
-								@Override
-								public InputStream run() throws IOException {
-									InputStream is = null;
-									if (reloadFlag) {
-										URL url = classLoader.getResource(resourceName);
-										if (url != null) {
-											URLConnection connection = url.openConnection();
-											if (connection != null) {
-												connection.setUseCaches(false);
-												is = connection.getInputStream();
-											}
-										}
-									}
-									else {
-										is = classLoader.getResourceAsStream(resourceName);
-									}
-									return is;
+					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+						InputStream is = null;
+						if (reloadFlag) {
+							URL url = classLoader.getResource(resourceName);
+							if (url != null) {
+								URLConnection connection = url.openConnection();
+								if (connection != null) {
+									connection.setUseCaches(false);
+									is = connection.getInputStream();
 								}
-							});
+							}
+						}
+						else {
+							is = classLoader.getResourceAsStream(resourceName);
+						}
+						return is;
+					});
 				}
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
@@ -380,6 +377,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 
 		@Override
+		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
 			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
 		}

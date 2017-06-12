@@ -62,7 +62,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @param locale the Locale to use for lower-case conversion
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
-	public LinkedCaseInsensitiveMap(Locale locale) {
+	public LinkedCaseInsensitiveMap(@Nullable Locale locale) {
 		this(16, locale);
 	}
 
@@ -85,7 +85,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @param locale the Locale to use for lower-case conversion
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
-	public LinkedCaseInsensitiveMap(int initialCapacity, Locale locale) {
+	public LinkedCaseInsensitiveMap(int initialCapacity, @Nullable Locale locale) {
 		this.targetMap = new LinkedHashMap<String, V>(initialCapacity) {
 			@Override
 			public boolean containsKey(Object key) {

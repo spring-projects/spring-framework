@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 	private static Collection<ParamExpression> parseExpressions(String... params) {
 		Set<ParamExpression> expressions = new LinkedHashSet<>();
-		if (params != null) {
-			for (String param : params) {
-				expressions.add(new ParamExpression(param));
-			}
+		for (String param : params) {
+			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
 	}

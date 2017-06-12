@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -411,7 +410,7 @@ public class MvcUriComponentsBuilder {
 	 * @since 4.2
 	 */
 	public static UriComponentsBuilder fromMethod(UriComponentsBuilder baseUrl,
-			Class<?> controllerType, Method method, Object... args) {
+			@Nullable Class<?> controllerType, Method method, Object... args) {
 
 		return fromMethodInternal(baseUrl,
 				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
@@ -429,7 +428,7 @@ public class MvcUriComponentsBuilder {
 		return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
 	}
 
-	private static UriComponentsBuilder getBaseUrlToUse(UriComponentsBuilder baseUrl) {
+	private static UriComponentsBuilder getBaseUrlToUse(@Nullable UriComponentsBuilder baseUrl) {
 		if (baseUrl != null) {
 			return baseUrl.cloneBuilder();
 		}
@@ -741,14 +740,15 @@ public class MvcUriComponentsBuilder {
 		}
 
 		@Override
+		@Nullable
 		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
-			if (getControllerMethod.equals(method)) {
+			if (method.equals(getControllerMethod)) {
 				return this.controllerMethod;
 			}
-			else if (getArgumentValues.equals(method)) {
+			else if (method.equals(getArgumentValues)) {
 				return this.argumentValues;
 			}
-			else if (getControllerType.equals(method)) {
+			else if (method.equals(getControllerType)) {
 				return this.controllerType;
 			}
 			else if (ReflectionUtils.isObjectMethod(method)) {
@@ -799,7 +799,7 @@ public class MvcUriComponentsBuilder {
 		/**
 		 * @since 4.2
 		 */
-		public MethodArgumentBuilder(UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
+		public MethodArgumentBuilder(@Nullable UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
 			Assert.notNull(controllerType, "'controllerType' is required");
 			Assert.notNull(method, "'method' is required");
 			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
@@ -813,7 +813,8 @@ public class MvcUriComponentsBuilder {
 
 		private static UriComponentsBuilder initBaseUrl() {
 			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-			return UriComponentsBuilder.fromPath(builder.build().getPath());
+			String path = builder.build().getPath();
+			return (path != null ? UriComponentsBuilder.fromPath(path) : UriComponentsBuilder.newInstance());
 		}
 
 		public MethodArgumentBuilder arg(int index, Object value) {

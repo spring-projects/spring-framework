@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -73,7 +74,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	 * or {@link java.util.concurrent.ExecutorService}) to delegate to;
 	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 */
-	public AsyncExecutionInterceptor(Executor defaultExecutor) {
+	public AsyncExecutionInterceptor(@Nullable Executor defaultExecutor) {
 		super(defaultExecutor);
 	}
 
@@ -84,7 +85,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
-	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	public AsyncExecutionInterceptor(@Nullable Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		super(defaultExecutor, exceptionHandler);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>The default is a DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
 				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
@@ -464,7 +464,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		InputStream is = resource.getInputStream();
 		Properties props = newProperties();
 		try {
-			if (resource.getFilename().endsWith(XML_SUFFIX)) {
+			String resourceFilename = resource.getFilename();
+			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loading properties [" + resource.getFilename() + "]");
 				}
@@ -570,6 +571,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			this.fileTimestamp = fileTimestamp;
 		}
 
+		@Nullable
 		public Properties getProperties() {
 			return this.properties;
 		}

@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.NonNullApi;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
@@ -60,7 +60,6 @@ import org.springframework.util.PatternMatchUtils;
  * @see org.springframework.stereotype.Service
  * @see org.springframework.stereotype.Controller
  */
-@NonNullApi
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
 
 	private final BeanDefinitionRegistry registry;
@@ -157,7 +156,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @since 4.3.6
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
-			Environment environment, ResourceLoader resourceLoader) {
+			Environment environment, @Nullable ResourceLoader resourceLoader) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
@@ -181,7 +180,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the defaults to use for detected beans.
 	 * @see BeanDefinitionDefaults
 	 */
-	public void setBeanDefinitionDefaults(BeanDefinitionDefaults beanDefinitionDefaults) {
+	public void setBeanDefinitionDefaults(@Nullable BeanDefinitionDefaults beanDefinitionDefaults) {
 		this.beanDefinitionDefaults =
 				(beanDefinitionDefaults != null ? beanDefinitionDefaults : new BeanDefinitionDefaults());
 	}
@@ -198,7 +197,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the name-matching patterns for determining autowire candidates.
 	 * @param autowireCandidatePatterns the patterns to match against
 	 */
-	public void setAutowireCandidatePatterns(String... autowireCandidatePatterns) {
+	public void setAutowireCandidatePatterns(@Nullable String... autowireCandidatePatterns) {
 		this.autowireCandidatePatterns = autowireCandidatePatterns;
 	}
 
@@ -206,7 +205,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the BeanNameGenerator to use for detected bean classes.
 	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
 
@@ -216,7 +215,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 * @see #setScopedProxyMode
 	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver =
 				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
@@ -360,7 +359,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
 		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
+				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
 				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
 	}
 

@@ -32,6 +32,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -194,7 +195,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private IllegalStateException getArgumentError(String text, MethodParameter parameter, Throwable ex) {
+	private IllegalStateException getArgumentError(String text, MethodParameter parameter, @Nullable Throwable ex) {
 		return new IllegalStateException(getDetailedErrorMessage(text, parameter), ex);
 	}
 

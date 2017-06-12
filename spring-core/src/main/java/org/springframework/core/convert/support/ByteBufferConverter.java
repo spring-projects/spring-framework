@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		throw new IllegalStateException("Unexpected source/target types");
 	}
 
+	@Nullable
 	private Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
 		byte[] bytes = new byte[source.remaining()];
 		source.get(bytes);
@@ -110,9 +111,13 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		return this.conversionService.convert(bytes, BYTE_ARRAY_TYPE, targetType);
 	}
 
-	private Object convertToByteBuffer(Object source, TypeDescriptor sourceType) {
+	private Object convertToByteBuffer(@Nullable Object source, TypeDescriptor sourceType) {
 		byte[] bytes = (byte[]) (source instanceof byte[] ? source :
 				this.conversionService.convert(source, sourceType, BYTE_ARRAY_TYPE));
+
+		if (bytes == null) {
+			return ByteBuffer.wrap(new byte[0]);
+		}
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
 		byteBuffer.put(bytes);

@@ -72,7 +72,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(initUri(request), initHeaders(request));
+		super(initUri(request), request.getContextPath(), initHeaders(request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
@@ -152,11 +152,6 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public String getMethodValue() {
 		return getServletRequest().getMethod();
-	}
-
-	@Override
-	public String getContextPath() {
-		return getServletRequest().getContextPath();
 	}
 
 	@Override

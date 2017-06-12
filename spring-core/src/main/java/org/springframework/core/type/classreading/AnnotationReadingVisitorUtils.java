@@ -27,6 +27,7 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -43,11 +44,7 @@ import org.springframework.util.ObjectUtils;
 abstract class AnnotationReadingVisitorUtils {
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,
-			ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
-
-		if (original == null) {
-			return null;
-		}
+			@Nullable ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
 
 		AnnotationAttributes result = new AnnotationAttributes(original);
 		AnnotationUtils.postProcessAnnotationAttributes(annotatedElement, result, classValuesAsString);
@@ -68,7 +65,7 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				else if (value instanceof Type) {
 					value = (classValuesAsString ? ((Type) value).getClassName() :
-							classLoader.loadClass(((Type) value).getClassName()));
+							ClassUtils.forName(((Type) value).getClassName(), classLoader));
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
@@ -76,7 +73,7 @@ abstract class AnnotationReadingVisitorUtils {
 							(classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
 						convArray[i] = (classValuesAsString ? array[i].getClassName() :
-								classLoader.loadClass(array[i].getClassName()));
+								ClassUtils.forName(array[i].getClassName(), classLoader));
 					}
 					value = convArray;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,10 +226,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	protected String unquote(String s) {
-		if (s == null) {
-			return null;
-		}
-		return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
+		return (isQuotedString(s) ? s.substring(1, s.length() - 1) : s);
 	}
 
 	/**
@@ -311,7 +308,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return {@code true} if this media type includes the given media type;
 	 * {@code false} otherwise
 	 */
-	public boolean includes(MimeType other) {
+	public boolean includes(@Nullable MimeType other) {
 		if (other == null) {
 			return false;
 		}
@@ -355,7 +352,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return {@code true} if this media type is compatible with the given media type;
 	 * {@code false} otherwise
 	 */
-	public boolean isCompatibleWith(MimeType other) {
+	public boolean isCompatibleWith(@Nullable MimeType other) {
 		if (other == null) {
 			return false;
 		}

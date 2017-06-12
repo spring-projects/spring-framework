@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Return the ClassLoader for aspect instances.
 	 */
+	@Nullable
 	public final ClassLoader getAspectClassLoader() {
 		return this.aspectInstanceFactory.getAspectClassLoader();
 	}
@@ -296,8 +297,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
-						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
-						"Root cause: " + ex);
+						"' is neither a valid argument name nor the fully-qualified " +
+						"name of a Java type on the classpath. Root cause: " + ex);
 			}
 		}
 	}
@@ -306,6 +307,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.discoveredReturningType;
 	}
 
+	@Nullable
 	protected Type getDiscoveredReturningGenericType() {
 		return this.discoveredReturningGenericType;
 	}
@@ -330,8 +332,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Throwing name '" + name  +
-						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
-						"Root cause: " + ex);
+						"' is neither a valid argument name nor the fully-qualified " +
+						"name of a Java type on the classpath. Root cause: " + ex);
 			}
 		}
 	}
@@ -549,7 +551,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @param ex the exception thrown by the method execution (may be null)
 	 * @return the empty array if there are no arguments
 	 */
-	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex) {
+	protected Object[] argBinding(JoinPoint jp, @Nullable JoinPointMatch jpMatch,
+			@Nullable Object returnValue, @Nullable Throwable ex) {
+
 		calculateArgumentBindings();
 
 		// AMC start
@@ -608,13 +612,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @return the invocation result
 	 * @throws Throwable in case of invocation failure
 	 */
-	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex) throws Throwable {
+	protected Object invokeAdviceMethod(
+			@Nullable JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex)
+			throws Throwable {
+
 		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
 	}
 
 	// As above, but in this case we are given the join point.
-	protected Object invokeAdviceMethod(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t)
-			throws Throwable {
+	protected Object invokeAdviceMethod(JoinPoint jp, @Nullable JoinPointMatch jpMatch,
+			@Nullable Object returnValue, @Nullable Throwable t) throws Throwable {
 
 		return invokeAdviceMethodWithGivenArgs(argBinding(jp, jpMatch, returnValue, t));
 	}
@@ -649,6 +656,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Get the current join point match at the join point we are being dispatched on.
 	 */
+	@Nullable
 	protected JoinPointMatch getJoinPointMatch() {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 		if (!(mi instanceof ProxyMethodInvocation)) {
@@ -663,8 +671,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	// 'last man wins' which is not what we want at all.
 	// Using the expression is guaranteed to be safe, since 2 identical expressions
 	// are guaranteed to bind in exactly the same way.
+	@Nullable
 	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation pmi) {
-		return (JoinPointMatch) pmi.getUserAttribute(this.pointcut.getExpression());
+		String expression = this.pointcut.getExpression();
+		return (expression != null ? (JoinPointMatch) pmi.getUserAttribute(expression) : null);
 	}
 
 

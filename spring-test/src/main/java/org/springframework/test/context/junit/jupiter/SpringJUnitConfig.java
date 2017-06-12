@@ -73,7 +73,7 @@ public @interface SpringJUnitConfig {
 	 * Alias for {@link ContextConfiguration#initializers}.
 	 */
 	@AliasFor(annotation = ContextConfiguration.class)
-	Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers() default {};
+	Class<? extends ApplicationContextInitializer<?>>[] initializers() default {};
 
 	/**
 	 * Alias for {@link ContextConfiguration#inheritLocations}.

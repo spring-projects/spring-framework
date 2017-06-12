@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,20 +196,14 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void onMessage(Message message, @Nullable Session session) throws JMSException {
+	public void onMessage(Message message, Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.
 		Object delegate = getDelegate();
 		if (delegate != this) {
 			if (delegate instanceof SessionAwareMessageListener) {
-				if (session != null) {
-					((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
-					return;
-				}
-				else if (!(delegate instanceof MessageListener)) {
-					throw new javax.jms.IllegalStateException("MessageListenerAdapter cannot handle a " +
-							"SessionAwareMessageListener delegate if it hasn't been invoked with a Session itself");
-				}
+				((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
+				return;
 			}
 			if (delegate instanceof MessageListener) {
 				((MessageListener) delegate).onMessage(message);
@@ -260,6 +254,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setDefaultListenerMethod
 	 */
+	@Nullable
 	protected String getListenerMethodName(Message originalMessage, Object extractedMessage) throws JMSException {
 		return getDefaultListenerMethod();
 	}
@@ -292,6 +287,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @see #getListenerMethodName
 	 * @see #buildListenerArguments
 	 */
+	@Nullable
 	protected Object invokeListenerMethod(String methodName, Object[] arguments) throws JMSException {
 		try {
 			MethodInvoker methodInvoker = new MethodInvoker();

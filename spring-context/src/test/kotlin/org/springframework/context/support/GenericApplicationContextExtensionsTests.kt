@@ -4,6 +4,11 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.springframework.beans.factory.getBean
 
+/**
+ * Tests for [GenericApplicationContext] Kotlin extensions
+ *
+ * @author Sebastien Deleuze
+ */
 class GenericApplicationContextExtensionsTests {
 
 	@Test
@@ -69,8 +74,8 @@ class GenericApplicationContextExtensionsTests {
 		assertNotNull(context.getBean<BeanB>())
 	}
 
-	internal class BeanA
+	class BeanA
 
-	internal class BeanB(val a: BeanA)
+	class BeanB(val a: BeanA)
 
 }

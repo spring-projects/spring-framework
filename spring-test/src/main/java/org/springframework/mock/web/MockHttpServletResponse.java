@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -171,6 +170,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Nullable
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -224,7 +224,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;
 		if (contentType != null) {
 			try {
@@ -247,6 +247,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Nullable
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -302,7 +303,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public void setLocale(@Nullable Locale locale) {
 		this.locale = locale;
 		if (locale != null) {
 			doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
@@ -357,6 +358,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.cookies.toArray(new Cookie[this.cookies.size()]);
 	}
 
+	@Nullable
 	public Cookie getCookie(String name) {
 		Assert.notNull(name, "Cookie name must not be null");
 		for (Cookie cookie : this.cookies) {
@@ -502,6 +504,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setCommitted(true);
 	}
 
+	@Nullable
 	public String getRedirectedUrl() {
 		return getHeader(HttpHeaders.LOCATION);
 	}
@@ -639,17 +642,19 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.forwardedUrl = forwardedUrl;
 	}
 
+	@Nullable
 	public String getForwardedUrl() {
 		return this.forwardedUrl;
 	}
 
-	public void setIncludedUrl(String includedUrl) {
+	public void setIncludedUrl(@Nullable String includedUrl) {
 		this.includedUrls.clear();
 		if (includedUrl != null) {
 			this.includedUrls.add(includedUrl);
 		}
 	}
 
+	@Nullable
 	public String getIncludedUrl() {
 		int count = this.includedUrls.size();
 		Assert.state(count <= 1,

@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -142,7 +143,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Map<String, List<String>> headers;
 
-
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
 			this.headers = initHeaders(request);
@@ -163,6 +163,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		// Override header accessors to not expose forwarded headers
 
 		@Override
+		@Nullable
 		public String getHeader(String name) {
 			List<String> value = this.headers.get(name);
 			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
@@ -179,6 +180,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			return Collections.enumeration(this.headers.keySet());
 		}
 	}
+
 
 	/**
 	 * Extract and use "Forwarded" or "X-Forwarded-*" headers.
@@ -199,7 +201,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final String requestUrl;
 
-
 		public ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
 			super(request);
 
@@ -218,6 +219,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
 		}
 
+		@Nullable
 		private static String getForwardedPrefix(HttpServletRequest request) {
 			String prefix = null;
 			Enumeration<String> names = request.getHeaderNames();
@@ -276,9 +278,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private static final String FOLDER_SEPARATOR = "/";
 
-
 		private final HttpServletRequest request;
-
 
 		public ForwardedHeaderExtractingResponse(HttpServletResponse response, HttpServletRequest request) {
 			super(response);

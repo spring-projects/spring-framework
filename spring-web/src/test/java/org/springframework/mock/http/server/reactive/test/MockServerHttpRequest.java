@@ -56,8 +56,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpMethod httpMethod;
 
-	private final String contextPath;
-
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	private final InetSocketAddress remoteAddress;
@@ -70,9 +68,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 			InetSocketAddress remoteAddress,
 			Publisher<? extends DataBuffer> body) {
 
-		super(uri, headers);
+		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
-		this.contextPath = (contextPath != null ? contextPath : "");
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
 		this.body = Flux.from(body);
@@ -87,11 +84,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public String getMethodValue() {
 		return this.httpMethod.name();
-	}
-
-	@Override
-	public String getContextPath() {
-		return this.contextPath;
 	}
 
 	@Override

@@ -33,21 +33,15 @@ public class StandardReflectionParameterNameDiscoverer implements ParameterNameD
 
 	@Override
 	public String[] getParameterNames(Method method) {
-		Parameter[] parameters = method.getParameters();
-		String[] parameterNames = new String[parameters.length];
-		for (int i = 0; i < parameters.length; i++) {
-			Parameter param = parameters[i];
-			if (!param.isNamePresent()) {
-				return null;
-			}
-			parameterNames[i] = param.getName();
-		}
-		return parameterNames;
+		return getParameterNames(method.getParameters());
 	}
 
 	@Override
 	public String[] getParameterNames(Constructor<?> ctor) {
-		Parameter[] parameters = ctor.getParameters();
+		return getParameterNames(ctor.getParameters());
+	}
+
+	private String[] getParameterNames(Parameter[] parameters) {
 		String[] parameterNames = new String[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			Parameter param = parameters[i];

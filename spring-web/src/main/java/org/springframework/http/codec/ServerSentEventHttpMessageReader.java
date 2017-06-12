@@ -71,10 +71,10 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	/**
-	 * Constructor with JSON {@code Decoder} for decoding to Objects. Support
-	 * for decoding to {@code String} event data is built-in.
+	 * Constructor with JSON {@code Decoder} for decoding to Objects.
+	 * Support for decoding to {@code String} event data is built-in.
 	 */
-	public ServerSentEventHttpMessageReader(Decoder<?> decoder) {
+	public ServerSentEventHttpMessageReader(@Nullable Decoder<?> decoder) {
 		this.decoder = decoder;
 	}
 
@@ -82,6 +82,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	/**
 	 * Return the configured {@code Decoder}.
 	 */
+	@Nullable
 	public Decoder<?> getDecoder() {
 		return this.decoder;
 	}
@@ -93,8 +94,12 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
-				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
+		return (MediaType.TEXT_EVENT_STREAM.includes(mediaType) || isServerSentEvent(elementType));
+	}
+
+	private boolean isServerSentEvent(ResolvableType elementType) {
+		Class<?> rawClass = elementType.getRawClass();
+		return (rawClass != null && ServerSentEvent.class.isAssignableFrom(rawClass));
 	}
 
 
@@ -102,8 +107,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		boolean shouldWrap = ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
-		ResolvableType valueType = shouldWrap ? elementType.getGeneric(0) : elementType;
+		boolean shouldWrap = isServerSentEvent(elementType);
+		ResolvableType valueType = (shouldWrap ? elementType.getGeneric(0) : elementType);
 
 		return Flux.from(message.getBody())
 				.concatMap(ServerSentEventHttpMessageReader::splitOnNewline)
@@ -174,8 +179,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
-
-		if (String.class.isAssignableFrom(dataType.getRawClass())) {
+		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);
 		}
 

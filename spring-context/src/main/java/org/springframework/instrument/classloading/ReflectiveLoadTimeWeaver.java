@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -93,7 +94,7 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	 * @throws IllegalStateException if the supplied {@code ClassLoader}
 	 * does not support the required weaving methods
 	 */
-	public ReflectiveLoadTimeWeaver(ClassLoader classLoader) {
+	public ReflectiveLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
 		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(

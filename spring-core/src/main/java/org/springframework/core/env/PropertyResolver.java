@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 
 /**
@@ -28,7 +27,6 @@ import org.springframework.lang.Nullable;
  * @see Environment
  * @see PropertySourcesPropertyResolver
  */
-@NonNullApi
 public interface PropertyResolver {
 
 	/**

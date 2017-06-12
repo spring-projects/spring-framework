@@ -556,7 +556,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	 * Returns a request callback implementation that writes the given object to the
 	 * request stream.
 	 */
-	protected <T> AsyncRequestCallback httpEntityCallback(HttpEntity<T> requestBody) {
+	protected <T> AsyncRequestCallback httpEntityCallback(@Nullable HttpEntity<T> requestBody) {
 		return new AsyncRequestCallbackAdapter(this.syncTemplate.httpEntityCallback(requestBody));
 	}
 
@@ -564,7 +564,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	 * Returns a request callback implementation that writes the given object to the
 	 * request stream.
 	 */
-	protected <T> AsyncRequestCallback httpEntityCallback(HttpEntity<T> request, Type responseType) {
+	protected <T> AsyncRequestCallback httpEntityCallback(@Nullable HttpEntity<T> request, Type responseType) {
 		return new AsyncRequestCallbackAdapter(this.syncTemplate.httpEntityCallback(request, responseType));
 	}
 
@@ -596,7 +596,9 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		private final ResponseExtractor<T> responseExtractor;
 
 		public ResponseExtractorFuture(HttpMethod method, URI url,
-				ListenableFuture<ClientHttpResponse> clientHttpResponseFuture, ResponseExtractor<T> responseExtractor) {
+				ListenableFuture<ClientHttpResponse> clientHttpResponseFuture,
+				@Nullable ResponseExtractor<T> responseExtractor) {
+
 			super(clientHttpResponseFuture);
 			this.method = method;
 			this.url = url;
@@ -618,12 +620,11 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 				throw new ExecutionException(ex);
 			}
 			finally {
-				if (response != null) {
-					response.close();
-				}
+				response.close();
 			}
 		}
 
+		@Nullable
 		protected T convertResponse(ClientHttpResponse response) throws IOException {
 			return (this.responseExtractor != null ? this.responseExtractor.extractData(response) : null);
 		}
@@ -648,34 +649,32 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 
 		@Override
 		public void doWithRequest(final org.springframework.http.client.AsyncClientHttpRequest request) throws IOException {
-			if (this.adaptee != null) {
-				this.adaptee.doWithRequest(new ClientHttpRequest() {
-					@Override
-					public ClientHttpResponse execute() throws IOException {
-						throw new UnsupportedOperationException("execute not supported");
-					}
-					@Override
-					public OutputStream getBody() throws IOException {
-						return request.getBody();
-					}
-					@Override
-					public HttpMethod getMethod() {
-						return request.getMethod();
-					}
-					@Override
-					public String getMethodValue() {
-						return request.getMethodValue();
-					}
-					@Override
-					public URI getURI() {
-						return request.getURI();
-					}
-					@Override
-					public HttpHeaders getHeaders() {
-						return request.getHeaders();
-					}
-				});
-			}
+			this.adaptee.doWithRequest(new ClientHttpRequest() {
+				@Override
+				public ClientHttpResponse execute() throws IOException {
+					throw new UnsupportedOperationException("execute not supported");
+				}
+				@Override
+				public OutputStream getBody() throws IOException {
+					return request.getBody();
+				}
+				@Override
+				public HttpMethod getMethod() {
+					return request.getMethod();
+				}
+				@Override
+				public String getMethodValue() {
+					return request.getMethodValue();
+				}
+				@Override
+				public URI getURI() {
+					return request.getURI();
+				}
+				@Override
+				public HttpHeaders getHeaders() {
+					return request.getHeaders();
+				}
+			});
 		}
 	}
 

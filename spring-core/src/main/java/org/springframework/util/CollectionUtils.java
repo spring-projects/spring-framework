@@ -87,9 +87,6 @@ public abstract class CollectionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
-		if (collection == null) {
-			throw new IllegalArgumentException("Collection must not be null");
-		}
 		Object[] arr = ObjectUtils.toObjectArray(array);
 		for (Object elem : arr) {
 			collection.add((E) elem);
@@ -106,9 +103,6 @@ public abstract class CollectionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <K, V> void mergePropertiesIntoMap(@Nullable Properties props, Map<K, V> map) {
-		if (map == null) {
-			throw new IllegalArgumentException("Map must not be null");
-		}
 		if (props != null) {
 			for (Enumeration<?> en = props.propertyNames(); en.hasMoreElements();) {
 				String key = (String) en.nextElement();
@@ -129,7 +123,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean contains(Iterator<?> iterator, Object element) {
+	public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
 		if (iterator != null) {
 			while (iterator.hasNext()) {
 				Object candidate = iterator.next();
@@ -147,7 +141,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean contains(Enumeration<?> enumeration, Object element) {
+	public static boolean contains(@Nullable Enumeration<?> enumeration, Object element) {
 		if (enumeration != null) {
 			while (enumeration.hasMoreElements()) {
 				Object candidate = enumeration.nextElement();
@@ -167,7 +161,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} else
 	 */
-	public static boolean containsInstance(Collection<?> collection, Object element) {
+	public static boolean containsInstance(@Nullable Collection<?> collection, Object element) {
 		if (collection != null) {
 			for (Object candidate : collection) {
 				if (candidate == element) {
@@ -229,7 +223,7 @@ public abstract class CollectionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <T> T findValueOfType(Collection<?> collection, Class<T> type) {
+	public static <T> T findValueOfType(Collection<?> collection, @Nullable Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
 		}
@@ -411,21 +405,21 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
+		public V getFirst(K key) {
+			List<V> values = this.map.get(key);
+			return (values != null ? values.get(0) : null);
+		}
+
+		@Override
 		public void add(K key, @Nullable V value) {
 			List<V> values = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			values.add(value);
 		}
 
 		@Override
-		public void addAll(K key, List<V> values) {
+		public void addAll(K key, List<? extends V> values) {
 			List<V> currentValues = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			currentValues.addAll(values);
-		}
-
-		@Override
-		public V getFirst(K key) {
-			List<V> values = this.map.get(key);
-			return (values != null ? values.get(0) : null);
 		}
 
 		@Override

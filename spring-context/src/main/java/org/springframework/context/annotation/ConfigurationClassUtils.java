@@ -35,7 +35,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,7 +44,6 @@ import org.springframework.stereotype.Component;
  * @author Juergen Hoeller
  * @since 3.1
  */
-@NonNullApi
 abstract class ConfigurationClassUtils {
 
 	private static final String CONFIGURATION_CLASS_FULL = "full";

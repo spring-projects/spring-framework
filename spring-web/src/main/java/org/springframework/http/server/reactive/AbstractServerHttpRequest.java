@@ -41,6 +41,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final URI uri;
 
+	private final RequestPath path;
+
 	private final HttpHeaders headers;
 
 	private MultiValueMap<String, String> queryParams;
@@ -51,10 +53,12 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * Constructor with the URI and headers for the request.
 	 * @param uri the URI for the request
+	 * @param contextPath the context path for the request
 	 * @param headers the headers for the request
 	 */
-	public AbstractServerHttpRequest(URI uri, HttpHeaders headers) {
+	public AbstractServerHttpRequest(URI uri, String contextPath, HttpHeaders headers) {
 		this.uri = uri;
+		this.path = new DefaultRequestPath(uri, contextPath, StandardCharsets.UTF_8);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
@@ -62,6 +66,11 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		return this.uri;
+	}
+
+	@Override
+	public RequestPath getPath() {
+		return this.path;
 	}
 
 	@Override
@@ -90,11 +99,11 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		if (query != null) {
 			Matcher matcher = QUERY_PATTERN.matcher(query);
 			while (matcher.find()) {
-				String name = matcher.group(1);
+				String name = decodeQueryParam(matcher.group(1));
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
-				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
+				value = (value != null ? decodeQueryParam(value) : (StringUtils.hasLength(eq) ? "" : null));
+				queryParams.add(name, value);
 			}
 		}
 		return queryParams;

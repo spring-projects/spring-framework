@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * Create a new InstrumentationLoadTimeWeaver for the given ClassLoader.
 	 * @param classLoader the ClassLoader that registered transformers are supposed to apply to
 	 */
-	public InstrumentationLoadTimeWeaver(ClassLoader classLoader) {
-		Assert.notNull(classLoader, "ClassLoader must not be null");
+	public InstrumentationLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 		this.instrumentation = getInstrumentation();
 	}
@@ -85,10 +84,8 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		FilteringClassFileTransformer actualTransformer =
 				new FilteringClassFileTransformer(transformer, this.classLoader);
 		synchronized (this.transformers) {
-			if (this.instrumentation == null) {
-				throw new IllegalStateException(
-						"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
-			}
+			Assert.state(this.instrumentation != null,
+					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 			this.instrumentation.addTransformer(actualTransformer);
 			this.transformers.add(actualTransformer);
 		}
@@ -101,6 +98,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	@Override
 	public ClassLoader getInstrumentableClassLoader() {
+		Assert.state(this.classLoader != null, "No ClassLoader available");
 		return this.classLoader;
 	}
 
