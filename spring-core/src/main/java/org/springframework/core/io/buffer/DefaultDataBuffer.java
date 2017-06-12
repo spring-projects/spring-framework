@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,11 @@ import org.springframework.util.ObjectUtils;
  * @see DefaultDataBufferFactory
  */
 public class DefaultDataBuffer implements DataBuffer {
+
+	private static final int MAX_CAPACITY = Integer.MAX_VALUE;
+
+	private static final int CAPACITY_THRESHOLD = 1024 * 1024 * 4;
+
 
 	private final DefaultDataBufferFactory dataBufferFactory;
 
@@ -259,17 +264,45 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	private void ensureExtraCapacity(int extraCapacity) {
-		int neededCapacity = this.writePosition + extraCapacity;
+		int neededCapacity = calculateCapacity(this.writePosition + extraCapacity);
 		if (neededCapacity > this.byteBuffer.capacity()) {
 			grow(neededCapacity);
 		}
 	}
 
-	void grow(int minCapacity) {
+	/**
+	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
+	 */
+	private int calculateCapacity(int neededCapacity) {
+		Assert.isTrue(neededCapacity >= 0, "'neededCapacity' must >= 0");
+
+		if (neededCapacity == CAPACITY_THRESHOLD) {
+			return CAPACITY_THRESHOLD;
+		}
+		else if (neededCapacity > CAPACITY_THRESHOLD) {
+			int newCapacity = neededCapacity / CAPACITY_THRESHOLD * CAPACITY_THRESHOLD;
+			if (newCapacity > MAX_CAPACITY - CAPACITY_THRESHOLD) {
+				newCapacity = MAX_CAPACITY;
+			}
+			else {
+				newCapacity += CAPACITY_THRESHOLD;
+			}
+			return newCapacity;
+		}
+		else {
+			int newCapacity = 64;
+			while (newCapacity < neededCapacity) {
+				newCapacity <<= 1;
+			}
+			return Math.min(newCapacity, MAX_CAPACITY);
+		}
+	}
+
+	void grow(int capacity) {
 		ByteBuffer oldBuffer = this.byteBuffer;
 		ByteBuffer newBuffer =
-				(oldBuffer.isDirect() ? ByteBuffer.allocateDirect(minCapacity) :
-						ByteBuffer.allocate(minCapacity));
+				(oldBuffer.isDirect() ? ByteBuffer.allocateDirect(capacity) :
+						ByteBuffer.allocate(capacity));
 
 		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
 		final int remaining = readableByteCount();
@@ -362,7 +395,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 
 		@Override
-		void grow(int minCapacity) {
+		void grow(int capacity) {
 			throw new UnsupportedOperationException(
 					"Growing the capacity of a sliced buffer is not supported");
 		}
