@@ -544,7 +544,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		}
 
 		if (!this.beans.isEmpty()) {
-			this.beans.forEach((beanName, instance) -> registerBeanNameOrInstance(instance, beanName));
+			this.beans.forEach((beanName, instance) ->
+					registerBeanNameOrInstance(instance, beanName));
 		}
 	}
 

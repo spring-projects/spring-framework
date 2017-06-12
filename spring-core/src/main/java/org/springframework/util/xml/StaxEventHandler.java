@@ -99,10 +99,8 @@ class StaxEventHandler extends AbstractStaxHandler {
 
 	private List<Namespace> getNamespaces(Map<String, String> namespaceMapping) {
 		List<Namespace> result = new ArrayList<>();
-		namespaceMapping.forEach(
-			(prefix, namespaceUri)
-				-> result.add(this.eventFactory.createNamespace(prefix, namespaceUri))
-		);
+		namespaceMapping.forEach((prefix, namespaceUri) ->
+				result.add(this.eventFactory.createNamespace(prefix, namespaceUri)));
 		return result;
 	}
 

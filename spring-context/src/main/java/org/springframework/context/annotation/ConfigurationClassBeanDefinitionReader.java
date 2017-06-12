@@ -351,7 +351,8 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
-		registrars.forEach((registrar, metadata) -> registrar.registerBeanDefinitions(metadata, this.registry));
+		registrars.forEach((registrar, metadata) ->
+				registrar.registerBeanDefinitions(metadata, this.registry));
 	}
 
 

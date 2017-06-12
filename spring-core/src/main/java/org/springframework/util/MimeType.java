@@ -455,7 +455,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private void appendTo(Map<String, String> map, StringBuilder builder) {
 		map.forEach((key, val) -> {
-			builder.append(";");
+			builder.append(';');
 			builder.append(key);
 			builder.append('=');
 			builder.append(val);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -141,7 +140,9 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
-			Arrays.stream(this.propertyEditorRegistrars).forEach(beanFactory::addPropertyEditorRegistrar);
+			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
+				beanFactory.addPropertyEditorRegistrar(propertyEditorRegistrar);
+			}
 		}
 		if (this.customEditors != null) {
 			this.customEditors.forEach(beanFactory::registerCustomEditor);
