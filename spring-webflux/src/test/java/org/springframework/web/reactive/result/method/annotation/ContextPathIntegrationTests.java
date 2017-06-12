@@ -117,7 +117,7 @@ public class ContextPathIntegrationTests {
 
 		@GetMapping("/test")
 		public String handle(ServerHttpRequest request) {
-			return "Tested in " + request.getContextPath();
+			return "Tested in " + request.getPath().contextPath().value();
 		}
 	}
 

@@ -49,7 +49,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
-		super(initUri(request), initHeaders(request));
+		super(initUri(request), "", initHeaders(request));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;

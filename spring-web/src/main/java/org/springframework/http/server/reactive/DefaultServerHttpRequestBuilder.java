@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -79,18 +80,51 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest build() {
-		URI uri = null;
-		if (this.path != null) {
-			uri = this.delegate.getURI();
-			try {
-				uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(),
-						this.path, uri.getQuery(), uri.getFragment());
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Invalid URI path: \"" + this.path + "\"");
-			}
+		URI uriToUse = getUriToUse();
+		RequestPath path = getRequestPathToUse(uriToUse);
+		HttpHeaders headers = getHeadersToUse();
+		return new MutativeDecorator(this.delegate, this.httpMethod, uriToUse, path, headers);
+	}
+
+	@Nullable
+	private URI getUriToUse() {
+		if (this.path == null) {
+			return null;
 		}
-		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath, this.httpHeaders);
+		URI uri = this.delegate.getURI();
+		try {
+			return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(),
+					this.path, uri.getQuery(), uri.getFragment());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Invalid URI path: \"" + this.path + "\"");
+		}
+	}
+
+	@Nullable
+	private RequestPath getRequestPathToUse(@Nullable URI uriToUse) {
+		if (uriToUse == null && this.contextPath == null) {
+			return null;
+		}
+		else if (uriToUse == null) {
+			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath, StandardCharsets.UTF_8);
+		}
+		else {
+			return new DefaultRequestPath(uriToUse, this.contextPath, StandardCharsets.UTF_8);
+		}
+	}
+
+	@Nullable
+	private HttpHeaders getHeadersToUse() {
+		if (this.httpHeaders != null) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.putAll(this.delegate.getHeaders());
+			headers.putAll(this.httpHeaders);
+			return headers;
+		}
+		else {
+			return null;
+		}
 	}
 
 
@@ -104,25 +138,20 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final URI uri;
 
-		private final String contextPath;
+		private final RequestPath requestPath;
 
 		private final HttpHeaders httpHeaders;
 
-		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
-				@Nullable URI uri, String contextPath, @Nullable HttpHeaders httpHeaders) {
+
+		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod method,
+				@Nullable URI uri, @Nullable RequestPath requestPath,
+				@Nullable HttpHeaders httpHeaders) {
 
 			super(delegate);
-			this.httpMethod = httpMethod;
+			this.httpMethod = method;
 			this.uri = uri;
-			this.contextPath = contextPath;
-			if (httpHeaders != null) {
-				this.httpHeaders = new HttpHeaders();
-				this.httpHeaders.putAll(super.getHeaders());
-				this.httpHeaders.putAll(httpHeaders);
-			}
-			else {
-				this.httpHeaders = null;
-			}
+			this.requestPath = requestPath;
+			this.httpHeaders = httpHeaders;
 		}
 
 		@Override
@@ -136,8 +165,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
-		public String getContextPath() {
-			return (this.contextPath != null ? this.contextPath : super.getContextPath());
+		public RequestPath getPath() {
+			return (this.requestPath != null ? this.requestPath : super.getPath());
 		}
 
 		@Override

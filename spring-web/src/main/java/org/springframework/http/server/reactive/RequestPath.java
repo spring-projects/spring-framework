@@ -24,7 +24,12 @@ package org.springframework.http.server.reactive;
 public interface RequestPath extends PathSegmentContainer {
 
 	/**
-	 * The contextPath portion of the request if any.
+	 * Returns the portion of the URL path that represents the application.
+	 * The context path is always at the beginning of the path and starts but
+	 * does not end with "/". It is shared for URLs of the same application.
+	 * <p>The context path may come from the underlying runtime API such as
+	 * when deploying as a WAR to a Servlet container or it may also be assigned
+	 * through the use of {@link ContextPathCompositeHandler} or both.
 	 */
 	PathSegmentContainer contextPath();
 

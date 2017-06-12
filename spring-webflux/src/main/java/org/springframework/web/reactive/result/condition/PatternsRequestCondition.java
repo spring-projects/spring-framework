@@ -186,7 +186,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return this;
 		}
 
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		List<String> matches = getMatchingPatterns(lookupPath);
 
 		return matches.isEmpty() ? null :
@@ -243,7 +243,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public int compareTo(PatternsRequestCondition other, ServerWebExchange exchange) {
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();

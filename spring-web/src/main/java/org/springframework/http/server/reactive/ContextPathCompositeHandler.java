@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
  * <p>This is intended as a coarse-grained mechanism for delegating requests to
  * one of several applications -- each represented by an {@code HttpHandler}, with
  * the application "context path" (the prefix-based mapping) exposed via
- * {@link ServerHttpRequest#getContextPath()}.
+ * {@link ServerHttpRequest#getPath()}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -49,12 +49,12 @@ public class ContextPathCompositeHandler implements HttpHandler {
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		// Remove underlying context path first (e.g. Servlet container)
-		String path = request.getPathWithinApplication();
+		String path = request.getPath().pathWithinApplication().value();
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> path.startsWith(entry.getKey()))
 				.findFirst()
 				.map(entry -> {
-					String contextPath = request.getContextPath() + entry.getKey();
+					String contextPath = request.getPath().contextPath().value() + entry.getKey();
 					ServerHttpRequest newRequest = request.mutate().contextPath(contextPath).build();
 					return entry.getValue().handle(newRequest, response);
 				})

@@ -105,7 +105,7 @@ public class ContextPathCompositeHandlerTests {
 		new ContextPathCompositeHandler(map).handle(request, new MockServerHttpResponse());
 
 		assertTrue(handler.wasInvoked());
-		assertEquals("/yet/another/path", handler.getRequest().getContextPath());
+		assertEquals("/yet/another/path", handler.getRequest().getPath().contextPath().value());
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class ContextPathCompositeHandlerTests {
 
 	private void assertInvoked(TestHttpHandler handler, String contextPath) {
 		assertTrue(handler.wasInvoked());
-		assertEquals(contextPath, handler.getRequest().getContextPath());
+		assertEquals(contextPath, handler.getRequest().getPath().contextPath().value());
 	}
 
 	private void assertNotInvoked(TestHttpHandler... handlers) {

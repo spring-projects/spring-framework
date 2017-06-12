@@ -213,7 +213,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	@SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
 		ServerWebExchange exchange = get("/1/2").toExchange();
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 
 		RequestMappingInfo key = paths("/{path1}/{path2}").build();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
@@ -232,7 +232,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		URI url = URI.create("/group/a%2Fb");
 		ServerWebExchange exchange = method(HttpMethod.GET, url).toExchange();
 
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
@@ -248,7 +248,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchBestMatchingPatternAttribute() throws Exception {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		assertEquals("/{path1}/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
@@ -258,7 +258,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() throws Exception {
 		RequestMappingInfo key = paths().build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		assertEquals("/1/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
@@ -367,7 +367,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private void handleMatch(ServerWebExchange exchange, String pattern) {
 		RequestMappingInfo info = paths(pattern).build();
-		String lookupPath = exchange.getRequest().getPathWithinApplication();
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		this.handlerMapping.handleMatch(info, lookupPath, exchange);
 	}
 

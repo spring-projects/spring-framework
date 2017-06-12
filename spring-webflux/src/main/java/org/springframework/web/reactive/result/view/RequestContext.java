@@ -28,6 +28,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -180,10 +181,10 @@ public class RequestContext {
 	/**
 	 * Return the context path of the current web application. This is
 	 * useful for building links to other resources within the application.
-	 * <p>Delegates to {@link ServerHttpRequest#getContextPath()}.
+	 * <p>Delegates to {@link ServerHttpRequest#getPath()}.
 	 */
 	public String getContextPath() {
-		return this.exchange.getRequest().getContextPath();
+		return this.exchange.getRequest().getPath().contextPath().value();
 	}
 
 	/**
@@ -193,7 +194,7 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl) {
-		String url = getContextPath() + relativeUrl;
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		return getExchange().getResponse().encodeUrl(url);
 	}
 
@@ -208,7 +209,7 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
-		String url = getContextPath() + relativeUrl;
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
 		return getExchange().getResponse().encodeUrl(url);

@@ -34,7 +34,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class RequestContextTests {
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").contextPath("foo/").toExchange();
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/foo/path")
+			.contextPath("/foo").toExchange();
 
 	private GenericApplicationContext applicationContext;
 
@@ -50,7 +51,7 @@ public class RequestContextTests {
 	@Test
 	public void testGetContextUrl() throws Exception {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
-		assertEquals("foo/bar", context.getContextUrl("bar"));
+		assertEquals("/foo/bar", context.getContextUrl("bar"));
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("spam", "bucket");
-		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
+		assertEquals("/foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
 	}
 
 	@Test
@@ -68,7 +69,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");
 		map.put("spam", "&bucket=");
-		assertEquals("foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
+		assertEquals("/foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
 	}
 
 }

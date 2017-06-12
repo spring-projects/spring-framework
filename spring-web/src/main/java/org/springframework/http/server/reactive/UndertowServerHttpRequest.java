@@ -53,7 +53,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
-		super(initUri(exchange), initHeaders(exchange));
+		super(initUri(exchange), "", initHeaders(exchange));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);

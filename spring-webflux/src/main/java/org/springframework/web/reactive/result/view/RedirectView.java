@@ -202,9 +202,11 @@ public class RedirectView extends AbstractUrlBasedView {
 		String url = getUrl();
 		Assert.state(url != null, "'url' not set");
 
+		ServerHttpRequest request = exchange.getRequest();
+
 		StringBuilder targetUrl = new StringBuilder();
 		if (isContextRelative() && url.startsWith("/")) {
-			targetUrl.append(exchange.getRequest().getContextPath());
+			targetUrl.append(request.getPath().contextPath().value());
 		}
 		targetUrl.append(url);
 
@@ -214,7 +216,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		}
 
 		if (isPropagateQuery()) {
-			targetUrl = appendCurrentRequestQuery(targetUrl.toString(), exchange.getRequest());
+			targetUrl = appendCurrentRequestQuery(targetUrl.toString(), request);
 		}
 
 		String result = targetUrl.toString();

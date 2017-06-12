@@ -58,6 +58,11 @@ class DefaultRequestPath implements RequestPath {
 		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
+	DefaultRequestPath(RequestPath requestPath, String contextPath, Charset charset) {
+		this.fullPath = new DefaultPathSegmentContainer(requestPath.value(), requestPath.pathSegments());
+		this.contextPath = initContextPath(this.fullPath, contextPath);
+		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
+	}
 
 	private static PathSegmentContainer parsePath(String path, Charset charset) {
 		path = StringUtils.hasText(path) ? path : "";

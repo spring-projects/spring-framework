@@ -24,7 +24,6 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Represents a reactive server-side HTTP request
@@ -36,35 +35,11 @@ import org.springframework.util.StringUtils;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
-	 * Returns the portion of the URL path that represents the application.
-	 * The context path is always at the beginning of the path and starts but
-	 * does not end with "/". It is shared for URLs of the same application.
-	 * <p>The context path may come from the underlying runtime API such as
-	 * when deploying as a WAR to a Servlet container or it may also be assigned
-	 * through the use of {@link ContextPathCompositeHandler} or both.
-	 * <p>The context path is not decoded.
-	 * @return the context path (not decoded) or an empty string
+	 * Returns a structured representation of the request path including the
+	 * context path + path within application portions, path segments with
+	 * encoded and decoded values, and path parameters.
 	 */
-	default String getContextPath() {
-		return "";
-	}
-
-	/**
-	 * Returns the portion of the URL path after the {@link #getContextPath()
-	 * contextPath}. The returned path is not decoded.
-	 * @return the path under the contextPath
-	 */
-	default String getPathWithinApplication() {
-		String path = getURI().getRawPath();
-		String contextPath = getContextPath();
-		if (StringUtils.hasText(contextPath)) {
-			int length = contextPath.length();
-			return (path.length() > length ? path.substring(length) : "");
-		}
-		else {
-			return path;
-		}
-	}
+	RequestPath getPath();
 
 	/**
 	 * Return a read-only map with parsed and decoded query parameter values.
@@ -104,12 +79,13 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder method(HttpMethod httpMethod);
 
 		/**
-		 * Set the request URI to return.
+		 * Set the path to use instead of the {@code "rawPath"} of
+		 * {@link ServerHttpRequest#getURI()}.
 		 */
 		Builder path(String path);
 
 		/**
-		 * Set the contextPath to return.
+		 * Set the contextPath to use.
 		 */
 		Builder contextPath(String contextPath);
 
