@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import javax.servlet.ServletContext;
@@ -182,11 +181,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 		// parameter
 		Map<String, String[]> parentParams = parentRequest.getParameterMap();
-		for (Map.Entry<String, String[]> parentParam : parentParams.entrySet()) {
-			String paramName = parentParam.getKey();
-			String[] paramValues = parentParam.getValue();
-			request.addParameter(paramName, paramValues);
-		}
+		parentParams.forEach(request::addParameter);
 
 		// cookie
 		Cookie[] parentCookies = parentRequest.getCookies();
@@ -314,9 +309,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void headers(MockHttpServletRequest request) {
-		for (Entry<String, String> header : this.webRequest.getAdditionalHeaders().entrySet()) {
-			request.addHeader(header.getKey(), header.getValue());
-		}
+		this.webRequest.getAdditionalHeaders().forEach(request::addHeader);
 	}
 
 	private MockHttpSession httpSession(MockHttpServletRequest request, final String sessionid) {
@@ -359,14 +352,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
-		for (Entry<String, List<String>> entry : uriComponents.getQueryParams().entrySet()) {
-			String name = entry.getKey();
+		uriComponents.getQueryParams().forEach((name, values) -> {
 			String urlDecodedName = urlDecode(name);
-			for (String value : entry.getValue()) {
+			values.forEach(value -> {
 				value = (value != null ? urlDecode(value) : "");
 				request.addParameter(urlDecodedName, value);
-			}
-		}
+			});
+		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
 			request.addParameter(param.getName(), param.getValue());
 		}

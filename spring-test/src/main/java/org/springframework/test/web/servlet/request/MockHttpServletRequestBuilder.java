@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -310,9 +309,7 @@ public class MockHttpServletRequestBuilder
 	 * @param httpHeaders the headers and values to add
 	 */
 	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
-		for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
-			this.headers.addAll(entry.getKey(), entry.getValue());
-		}
+		httpHeaders.forEach(this.headers::addAll);
 		return this;
 	}
 
@@ -697,12 +694,10 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
-		for (Entry<String, List<String>> entry : map.entrySet()) {
-			for (String value : entry.getValue()) {
-				value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
-				request.addParameter(UriUtils.decode(entry.getKey(), StandardCharsets.UTF_8), value);
-			}
-		}
+		map.forEach((key, values) -> values.forEach(value -> {
+			value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
+			request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
+		}));
 	}
 
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {

@@ -149,11 +149,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
 		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
-		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
-			if (!keysToIgnore.contains(entry.getKey())) {
-				this.headers.put(entry.getKey(), entry.getValue());
+		original.headers.forEach((key, value) -> {
+			if (!keysToIgnore.contains(key)) {
+				this.headers.put(key, value);
 			}
-		}
+		});
 	}
 
 
@@ -276,11 +276,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		Set<String> keysToIgnore = new HashSet<>();
-		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
-			if (!(entry.getValue() instanceof Serializable)) {
-				keysToIgnore.add(entry.getKey());
+		this.headers.forEach((key, value) -> {
+			if (!(value instanceof Serializable)) {
+				keysToIgnore.add(key);
 			}
-		}
+		});
 
 		if (keysToIgnore.isEmpty()) {
 			// All entries are serializable -> serialize the regular MessageHeaders instance

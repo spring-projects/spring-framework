@@ -61,9 +61,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
 	public void setNameMap(Map<String, TransactionAttribute> nameMap) {
-		for (Map.Entry<String, TransactionAttribute> entry : nameMap.entrySet()) {
-			addTransactionalMethod(entry.getKey(), entry.getValue());
-		}
+		nameMap.forEach(this::addTransactionalMethod);
 	}
 
 	/**
