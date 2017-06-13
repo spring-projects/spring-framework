@@ -225,12 +225,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 			}
 			else {
 				// Non-empty set of methods
-				for (Map.Entry<Method, Set<JmsListener>> entry : annotatedMethods.entrySet()) {
-					Method method = entry.getKey();
-					for (JmsListener listener : entry.getValue()) {
-						processJmsListener(listener, method, bean);
-					}
-				}
+				annotatedMethods.forEach((method, listeners) ->
+						listeners.forEach(listener -> processJmsListener(listener, method, bean)));
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @JmsListener methods processed on bean '" + beanName +
 							"': " + annotatedMethods);

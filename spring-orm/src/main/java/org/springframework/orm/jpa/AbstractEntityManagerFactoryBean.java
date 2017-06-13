@@ -325,11 +325,11 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			}
 			Map<String, ?> vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
 			if (vendorPropertyMap != null) {
-				for (Map.Entry<String, ?> entry : vendorPropertyMap.entrySet()) {
-					if (!this.jpaPropertyMap.containsKey(entry.getKey())) {
-						this.jpaPropertyMap.put(entry.getKey(), entry.getValue());
+				vendorPropertyMap.forEach((key, value) -> {
+					if (!this.jpaPropertyMap.containsKey(key)) {
+						this.jpaPropertyMap.put(key, value);
 					}
-				}
+				});
 			}
 			if (this.entityManagerFactoryInterface == null) {
 				this.entityManagerFactoryInterface = this.jpaVendorAdapter.getEntityManagerFactoryInterface();

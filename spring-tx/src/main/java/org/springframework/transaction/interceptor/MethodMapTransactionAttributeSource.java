@@ -106,9 +106,7 @@ public class MethodMapTransactionAttributeSource
 	 */
 	protected void initMethodMap(@Nullable Map<String, TransactionAttribute> methodMap) {
 		if (methodMap != null) {
-			for (Map.Entry<String, TransactionAttribute> entry : methodMap.entrySet()) {
-				addTransactionalMethod(entry.getKey(), entry.getValue());
-			}
+			methodMap.forEach(this::addTransactionalMethod);
 		}
 	}
 

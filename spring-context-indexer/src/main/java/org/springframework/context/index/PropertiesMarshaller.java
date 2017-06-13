@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -43,11 +42,10 @@ abstract class PropertiesMarshaller {
 		CandidateComponentsMetadata result = new CandidateComponentsMetadata();
 		Properties props = new Properties();
 		props.load(in);
-		for (Map.Entry<Object, Object> entry : props.entrySet()) {
-			String type = (String) entry.getKey();
-			Set<String> candidates = new HashSet<>(Arrays.asList(((String) entry.getValue()).split(",")));
-			result.add(new ItemMetadata(type, candidates));
-		}
+		props.forEach((type, value) -> {
+			Set<String> candidates = new HashSet<>(Arrays.asList(((String) value).split(",")));
+			result.add(new ItemMetadata((String) type, candidates));
+		});
 		return result;
 	}
 

@@ -387,11 +387,11 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
-				if (!isReadOnly(entry.getKey())) {
-					setHeader(entry.getKey(), entry.getValue());
+			headersToCopy.forEach((key, value) -> {
+				if (!isReadOnly(key)) {
+					setHeader(key, value);
 				}
-			}
+			});
 		}
 	}
 
@@ -401,11 +401,11 @@ public class MessageHeaderAccessor {
 	 */
 	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		if (headersToCopy != null) {
-			for (Map.Entry<String, ?> entry : headersToCopy.entrySet()) {
-				if (!isReadOnly(entry.getKey())) {
-					setHeaderIfAbsent(entry.getKey(), entry.getValue());
+			headersToCopy.forEach((key, value) -> {
+				if (!isReadOnly(key)) {
+					setHeaderIfAbsent(key, value);
 				}
-			}
+			});
 		}
 	}
 
