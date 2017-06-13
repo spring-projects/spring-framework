@@ -328,7 +328,7 @@ public class WebAsyncManagerTests {
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
-		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);;
+		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);
 
 		setupDefaultAsyncScenario();
 

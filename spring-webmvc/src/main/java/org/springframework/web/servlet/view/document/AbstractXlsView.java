@@ -70,7 +70,7 @@ public abstract class AbstractXlsView extends AbstractView {
 		response.setContentType(getContentType());
 
 		// Flush byte array to servlet output stream.
-		renderWorkbook(workbook, response);;
+		renderWorkbook(workbook, response);
 	}
 
 
