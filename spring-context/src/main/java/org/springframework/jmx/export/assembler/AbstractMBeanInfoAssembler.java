@@ -27,7 +27,6 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.support.JmxUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract implementation of the {@code MBeanInfoAssembler} interface

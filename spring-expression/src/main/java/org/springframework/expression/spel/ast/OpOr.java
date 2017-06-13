@@ -25,7 +25,6 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Represents the boolean OR operation.

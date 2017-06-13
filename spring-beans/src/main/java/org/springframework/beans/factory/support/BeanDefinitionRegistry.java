@@ -20,7 +20,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.AliasRegistry;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface for registries that hold bean definitions, for example RootBeanDefinition

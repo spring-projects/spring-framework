@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 import org.hamcrest.Matchers;

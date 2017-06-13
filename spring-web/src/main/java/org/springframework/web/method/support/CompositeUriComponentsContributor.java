@@ -26,7 +26,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**

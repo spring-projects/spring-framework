@@ -19,7 +19,6 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;

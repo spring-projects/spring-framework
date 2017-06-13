@@ -27,7 +27,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**

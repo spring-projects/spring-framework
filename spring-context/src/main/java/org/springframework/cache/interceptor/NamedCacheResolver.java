@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 
 /**
  * A {@link CacheResolver} that forces the resolution to a configurable

@@ -17,7 +17,6 @@
 package org.springframework.test.context;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for loading an {@link ApplicationContext application context}

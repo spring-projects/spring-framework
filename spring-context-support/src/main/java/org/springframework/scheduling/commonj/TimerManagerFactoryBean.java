@@ -27,7 +27,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
-import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that retrieves a

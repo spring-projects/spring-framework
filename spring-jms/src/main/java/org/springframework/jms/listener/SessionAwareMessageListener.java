@@ -20,8 +20,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Variant of the standard JMS {@link javax.jms.MessageListener} interface,
  * offering not only the received Message but also the underlying

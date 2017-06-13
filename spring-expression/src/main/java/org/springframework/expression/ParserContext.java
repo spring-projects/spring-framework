@@ -16,8 +16,6 @@
 
 package org.springframework.expression;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Input provided to an expression parser that can influence an expression
  * parsing/compilation routine.

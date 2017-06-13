@@ -25,7 +25,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**

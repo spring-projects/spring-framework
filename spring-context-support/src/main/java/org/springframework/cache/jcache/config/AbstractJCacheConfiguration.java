@@ -25,7 +25,6 @@ import org.springframework.cache.jcache.interceptor.JCacheOperationSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract JSR-107 specific {@code @Configuration} class providing common
