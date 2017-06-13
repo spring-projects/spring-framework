@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
@@ -37,7 +38,6 @@ public interface ClientHttpConnector {
 	 * {@code URI}, then apply the given {@code requestCallback} on the
 	 * {@link ClientHttpRequest} once the connection has been established.
 	 * <p>Return a publisher of the {@link ClientHttpResponse}.
-	 *
 	 * @param method the HTTP request method
 	 * @param uri the HTTP request URI
 	 * @param requestCallback a function that prepares and writes the request,
