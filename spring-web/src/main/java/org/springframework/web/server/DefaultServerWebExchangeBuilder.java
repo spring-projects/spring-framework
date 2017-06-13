@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server;
 
 import java.security.Principal;
@@ -25,7 +26,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Package private implementation of {@link ServerWebExchange.Builder}.
+ * Package-private implementation of {@link ServerWebExchange.Builder}.
  * 
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -42,7 +43,7 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 
 	DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+		Assert.notNull(delegate, "Delegate is required");
 		this.delegate = delegate;
 	}
 
@@ -90,7 +91,6 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 		private final Mono<Principal> principalMono;
 
-
 		public MutativeDecorator(ServerWebExchange delegate, ServerHttpRequest request,
 				ServerHttpResponse response, Mono<Principal> principalMono) {
 
@@ -99,7 +99,6 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 			this.response = response;
 			this.principalMono = principalMono;
 		}
-
 
 		@Override
 		public ServerHttpRequest getRequest() {
