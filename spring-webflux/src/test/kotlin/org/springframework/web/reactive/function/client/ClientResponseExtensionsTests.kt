@@ -19,21 +19,9 @@ class ClientResponseExtensionsTests {
 	lateinit var response: ClientResponse
 
 	@Test
-	fun `bodyToMono with KClass`() {
-		response.bodyToMono(Foo::class)
-		verify(response, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
 	fun `bodyToMono with reified type parameters`() {
 		response.bodyToMono<Foo>()
 		verify(response, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
-	fun `bodyToFlux with KClass`() {
-		response.bodyToFlux(Foo::class)
-		verify(response, times(1)).bodyToFlux(Foo::class.java)
 	}
 
 	@Test

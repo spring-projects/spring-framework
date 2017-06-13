@@ -15,18 +15,8 @@ import org.mockito.junit.MockitoJUnitRunner
 class BodyExtractorsExtensionsTests {
 
 	@Test
-	fun `bodyToMono with KClass`() {
-		assertNotNull(bodyToMono(Foo::class))
-	}
-
-	@Test
 	fun `bodyToMono with reified type parameter`() {
 		assertNotNull(bodyToMono<Foo>())
-	}
-
-	@Test
-	fun `bodyToFlux with KClass`() {
-		assertNotNull(bodyToFlux(Foo::class))
 	}
 
 	@Test

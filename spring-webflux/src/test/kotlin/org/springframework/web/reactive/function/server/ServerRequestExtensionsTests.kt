@@ -22,21 +22,9 @@ class ServerRequestExtensionsTests {
 	lateinit var request: ServerRequest
 
 	@Test
-	fun `bodyToMono with KClass`() {
-		request.bodyToMono(Foo::class)
-		verify(request, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
 	fun `bodyToMono with reified type parameters`() {
 		request.bodyToMono<Foo>()
 		verify(request, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
-	fun `bodyToFlux with KClass`() {
-		request.bodyToFlux(Foo::class)
-		verify(request, times(1)).bodyToFlux(Foo::class.java)
 	}
 
 	@Test

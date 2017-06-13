@@ -19,12 +19,6 @@ class BeanFactoryExtensionsTests {
 	lateinit var bf: BeanFactory
 
 	@Test
-	fun `getBean with KClass`() {
-		bf.getBean(Foo::class)
-		verify(bf, times(1)).getBean(Foo::class.java)
-	}
-
-	@Test
 	fun `getBean with reified type parameters`() {
 		bf.getBean<Foo>()
 		verify(bf, times(1)).getBean(Foo::class.java)
@@ -35,14 +29,6 @@ class BeanFactoryExtensionsTests {
 		val name = "foo"
 		bf.getBean<Foo>(name)
 		verify(bf, times(1)).getBean(name, Foo::class.java)
-	}
-
-	@Test
-	fun `getBean with KClass and varargs`() {
-		val arg1 = "arg1"
-		val arg2 = "arg2"
-		bf.getBean(Foo::class, arg1, arg2)
-		verify(bf, times(1)).getBean(Foo::class.java, arg1, arg2)
 	}
 
 	@Test

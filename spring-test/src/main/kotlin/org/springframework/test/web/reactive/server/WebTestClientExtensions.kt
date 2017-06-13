@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server
 
 import org.reactivestreams.Publisher
-import kotlin.reflect.KClass
 
 /**
  * Extension for [WebTestClient.RequestBodySpec.body] providing a variant without explicit class
@@ -30,15 +29,6 @@ inline fun <reified T : Any, S : Publisher<T>> WebTestClient.RequestBodySpec.bod
 		= body(publisher, T::class.java)
 
 /**
- * Extension for [WebTestClient.ResponseSpec.expectBody] providing a [KClass] based variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <B : Any> WebTestClient.ResponseSpec.expectBody(type: KClass<B>): WebTestClient.BodySpec<B, *> =
-		expectBody(type.java)
-
-/**
  * Extension for [WebTestClient.ResponseSpec.expectBody] providing a `expectBody<Foo>()` variant.
  *
  * @author Sebastien Deleuze
@@ -48,15 +38,6 @@ inline fun <reified B : Any> WebTestClient.ResponseSpec.expectBody(): WebTestCli
 		expectBody(B::class.java)
 
 /**
- * Extension for [WebTestClient.ResponseSpec.expectBodyList] providing a [KClass] based variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <E : Any> WebTestClient.ResponseSpec.expectBodyList(type: KClass<E>): WebTestClient.ListBodySpec<E> =
-		expectBodyList(type.java)
-
-/**
  * Extension for [WebTestClient.ResponseSpec.expectBodyList] providing a `expectBodyList<Foo>()` variant.
  *
  * @author Sebastien Deleuze
@@ -64,15 +45,6 @@ fun <E : Any> WebTestClient.ResponseSpec.expectBodyList(type: KClass<E>): WebTes
  */
 inline fun <reified E : Any> WebTestClient.ResponseSpec.expectBodyList(): WebTestClient.ListBodySpec<E> =
 		expectBodyList(E::class.java)
-
-/**
- * Extension for [WebTestClient.ResponseSpec.returnResult] providing a [KClass] based variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <T : Any> WebTestClient.ResponseSpec.returnResult(type: KClass<T>): FluxExchangeResult<T> =
-		returnResult(type.java)
 
 /**
  * Extension for [WebTestClient.ResponseSpec.returnResult] providing a `returnResult<Foo>()` variant.

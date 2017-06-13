@@ -39,14 +39,6 @@ class JdbcOperationsExtensionsTests {
 	lateinit var template: JdbcTemplate
 
 	@Test
-	fun `queryForObject with KClass`() {
-		val sql = "select age from customer where id = 3"
-		val requiredType = Int::class
-		template.queryForObject(sql, requiredType)
-		verify(template, times(1)).queryForObject(sql, requiredType)
-	}
-
-	@Test
 	fun `queryForObject with reified type parameters`() {
 		val sql = "select age from customer where id = 3"
 		template.queryForObject<Int>(sql)
@@ -61,16 +53,6 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `queryForObject with argTypes`() {
-		val sql = "select age from customer where id = ?"
-		val args = arrayOf(3)
-		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
-		val requiredType = Int::class
-		template.queryForObject(sql, args, argTypes, requiredType)
-		verify(template, times(1)).queryForObject(sql, args, argTypes, requiredType)
-	}
-
-	@Test
 	fun `queryForObject with reified type parameters and argTypes`() {
 		val sql = "select age from customer where id = ?"
 		val args = arrayOf(3)
@@ -80,26 +62,11 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
-	fun `queryForObject with args`() {
-		val sql = "select age from customer where id = ?"
-		val args = arrayOf(3)
-		template.queryForObject(sql, args, Int::class)
-		verify(template, times(1)).queryForObject(sql, args, Int::class.java)
-	}
-
-	@Test
 	fun `queryForObject with reified type parameters and args`() {
 		val sql = "select age from customer where id = ?"
 		val args = arrayOf(3)
 		template.queryForObject<Int>(sql, args)
 		verify(template, times(1)).queryForObject(sql, args, Integer::class.java)
-	}
-
-	@Test
-	fun `queryForObject with varargs`() {
-		val sql = "select age from customer where id = ?"
-		template.queryForObject(sql, Int::class, 3)
-		verify(template, times(1)).queryForObject(sql, Int::class.java, 3)
 	}
 
 	@Test

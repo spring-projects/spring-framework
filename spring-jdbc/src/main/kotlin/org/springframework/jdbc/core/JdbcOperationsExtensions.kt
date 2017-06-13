@@ -17,16 +17,7 @@
 package org.springframework.jdbc.core
 
 import java.sql.ResultSet
-import kotlin.reflect.KClass
 
-
-/**
- * Extension for [JdbcOperations.queryForObject] providing a [KClass] based variant
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, elementType: KClass<T>): T? = queryForObject(sql, elementType.java)
 
 /**
  * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...")` variant
@@ -46,15 +37,6 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, funct
 		queryForObject(sql, RowMapper { resultSet, i -> function(resultSet, i) }, *args)
 
 /**
- * Extension for [JdbcOperations.queryForObject] providing a [KClass] based variant
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray, requiredType: KClass<T>): T? =
-		queryForObject(sql, args, argTypes, requiredType.java)
-
-/**
  * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...", arrayOf(arg1, argN), intArray(type1, typeN))` variant
  *
  * @author Mario Arias
@@ -64,15 +46,6 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Ar
 		queryForObject(sql, args, argTypes, T::class.java)
 
 /**
- * Extension for [JdbcOperations.queryForObject] providing a [KClass] based variant
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, requiredType: KClass<T>): T? =
-		queryForObject(sql, args, requiredType.java)
-
-/**
  * Extension for [JdbcOperations.queryForObject] providing a `queryForObject<Foo>("...", arrayOf(arg1, argN))` variant
  *
  * @author Mario Arias
@@ -80,15 +53,6 @@ fun <T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, r
  */
 inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
 		queryForObject(sql, args, T::class.java)
-
-/**
- * Extension for [JdbcOperations.queryForObject] providing a [KClass] based variant
- *
- * @author Mario Arias
- * @since 5.0
- */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, requiredType: KClass<T>, vararg args: Any): T? =
-		queryForObject(sql, requiredType.java, *args)
 
 
 /**

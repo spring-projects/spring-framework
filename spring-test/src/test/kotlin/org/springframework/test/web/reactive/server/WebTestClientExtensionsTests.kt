@@ -34,33 +34,15 @@ class WebTestClientExtensionsTests {
 	}
 
 	@Test
-	fun `ResponseSpec#expectBody with KClass`() {
-		responseSpec.expectBody(Foo::class)
-		verify(responseSpec, times(1)).expectBody(Foo::class.java)
-	}
-
-	@Test
 	fun `ResponseSpec#expectBody with reified type parameters`() {
 		responseSpec.expectBody<Foo>()
 		verify(responseSpec, times(1)).expectBody(Foo::class.java)
 	}
 
 	@Test
-	fun `ResponseSpec#expectBodyList with KClass`() {
-		responseSpec.expectBodyList(Foo::class)
-		verify(responseSpec, times(1)).expectBodyList(Foo::class.java)
-	}
-
-	@Test
 	fun `ResponseSpec#expectBodyList with reified type parameters`() {
 		responseSpec.expectBodyList<Foo>()
 		verify(responseSpec, times(1)).expectBodyList(Foo::class.java)
-	}
-
-	@Test
-	fun `ResponseSpec#returnResult with KClass`() {
-		responseSpec.returnResult(Foo::class)
-		verify(responseSpec, times(1)).returnResult(Foo::class.java)
 	}
 
 	@Test

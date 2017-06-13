@@ -32,21 +32,9 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun `ResponseSpec#bodyToMono with KClass`() {
-		responseSpec.bodyToMono(Foo::class)
-		verify(responseSpec, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
 	fun `ResponseSpec#bodyToMono with reified type parameters`() {
 		responseSpec.bodyToMono<Foo>()
 		verify(responseSpec, times(1)).bodyToMono(Foo::class.java)
-	}
-
-	@Test
-	fun `ResponseSpec#bodyToFlux with KClass`() {
-		responseSpec.bodyToFlux(Foo::class)
-		verify(responseSpec, times(1)).bodyToFlux(Foo::class.java)
 	}
 
 	@Test
@@ -56,21 +44,9 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun `ResponseSpec#toEntity with KClass`() {
-		responseSpec.toEntity(Foo::class)
-		verify(responseSpec, times(1)).toEntity(Foo::class.java)
-	}
-
-	@Test
 	fun `ResponseSpec#toEntity with reified type parameters`() {
 		responseSpec.toEntity<Foo>()
 		verify(responseSpec, times(1)).toEntity(Foo::class.java)
-	}
-
-	@Test
-	fun `ResponseSpec#toEntityList with KClass`() {
-		responseSpec.toEntityList(Foo::class)
-		verify(responseSpec, times(1)).toEntityList(Foo::class.java)
 	}
 
 	@Test

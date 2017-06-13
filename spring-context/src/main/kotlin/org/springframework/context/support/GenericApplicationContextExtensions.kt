@@ -3,18 +3,7 @@ package org.springframework.context.support
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
 import org.springframework.context.ApplicationContext
 import java.util.function.Supplier
-import kotlin.reflect.KClass
 
-
-/**
- * Extension for [GenericApplicationContext.registerBean] providing a [KClass] based variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <T : Any> GenericApplicationContext.registerBean(beanClass: KClass<T>, vararg customizers: BeanDefinitionCustomizer) {
-	registerBean(beanClass.java, *customizers)
-}
 
 /**
  * Extension for [GenericApplicationContext.registerBean] providing a `registerBean<Foo>()` variant.
@@ -24,16 +13,6 @@ fun <T : Any> GenericApplicationContext.registerBean(beanClass: KClass<T>, varar
  */
 inline fun <reified T : Any> GenericApplicationContext.registerBean(vararg customizers: BeanDefinitionCustomizer) {
 	registerBean(T::class.java, *customizers)
-}
-
-/**
- * Extension for [GenericApplicationContext.registerBean] providing a [KClass] based variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun <T : Any> GenericApplicationContext.registerBean(beanName: String, beanClass: KClass<T>, vararg customizers: BeanDefinitionCustomizer) {
-	registerBean(beanName, beanClass.java, *customizers)
 }
 
 /**

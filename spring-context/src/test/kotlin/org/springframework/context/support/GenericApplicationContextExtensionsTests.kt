@@ -14,15 +14,15 @@ class GenericApplicationContextExtensionsTests {
 	@Test
 	fun registerBeanWithClass() {
 		val context = GenericApplicationContext()
-		context.registerBean(BeanA::class)
+		context.registerBean<BeanA>()
 		context.refresh()
-		assertNotNull(context.getBean(BeanA::class))
+		assertNotNull(context.getBean<BeanA>())
 	}
 
 	@Test
 	fun registerBeanWithNameAndClass() {
 		val context = GenericApplicationContext()
-		context.registerBean("a", BeanA::class)
+		context.registerBean<BeanA>("a")
 		context.refresh()
 		assertNotNull(context.getBean("a"))
 	}
@@ -32,7 +32,7 @@ class GenericApplicationContextExtensionsTests {
 		val context = GenericApplicationContext()
 		context.registerBean { BeanA() }
 		context.refresh()
-		assertNotNull(context.getBean(BeanA::class))
+		assertNotNull(context.getBean<BeanA>())
 	}
 
 	@Test
@@ -46,32 +46,21 @@ class GenericApplicationContextExtensionsTests {
 	@Test
 	fun registerBeanWithFunction() {
 		val context = GenericApplicationContext()
-		context.registerBean(BeanA::class)
-		context.registerBean { BeanB(it.getBean(BeanA::class)) }
+		context.registerBean<BeanA>()
+		context.registerBean { BeanB(it.getBean<BeanA>()) }
 		context.refresh()
-		assertNotNull(context.getBean(BeanA::class))
-		assertNotNull(context.getBean(BeanB::class))
+		assertNotNull(context.getBean<BeanA>())
+		assertNotNull(context.getBean<BeanB>())
 	}
 
 	@Test
 	fun registerBeanWithNameAndFunction() {
 		val context = GenericApplicationContext()
-		context.registerBean("a", BeanA::class)
-		context.registerBean("b") { BeanB(it.getBean(BeanA::class)) }
+		context.registerBean<BeanA>("a")
+		context.registerBean("b") { BeanB(it.getBean<BeanA>()) }
 		context.refresh()
 		assertNotNull(context.getBean("a"))
 		assertNotNull(context.getBean("b"))
-	}
-
-	@Test
-	fun registerBeanWithGradleStyleApi() {
-		val context = GenericApplicationContext {
-			registerBean<BeanA>()
-			registerBean { BeanB(it.getBean<BeanA>()) }
-		}
-		context.refresh()
-		assertNotNull(context.getBean<BeanA>())
-		assertNotNull(context.getBean<BeanB>())
 	}
 
 	class BeanA
