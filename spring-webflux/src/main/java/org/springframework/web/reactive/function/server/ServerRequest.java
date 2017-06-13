@@ -67,7 +67,7 @@ public interface ServerRequest {
 	 * Return the request path.
 	 */
 	default String path() {
-		return uri().getPath();
+		return uri().getRawPath();
 	}
 
 	/**
