@@ -109,15 +109,17 @@ configure(allprojects) { project ->
 	apply from: "${gradleScriptDir}/ide.gradle"
 	apply from: "${gradleScriptDir}/sniffer.gradle"
 
-	apply plugin: "kotlin"
-	compileKotlin {
-		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+	if(!JavaVersion.current().java9Compatible) {
+		apply plugin: "kotlin"
+		compileKotlin {
+			kotlinOptions.jvmTarget = "1.8"
+			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 
-	}
-	compileTestKotlin {
-		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+		}
+		compileTestKotlin {
+			kotlinOptions.jvmTarget = "1.8"
+			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+		}
 	}
 
 	configurations.all {
