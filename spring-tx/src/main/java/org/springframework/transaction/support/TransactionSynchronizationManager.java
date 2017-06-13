@@ -463,8 +463,8 @@ public abstract class TransactionSynchronizationManager {
 	public static void clear() {
 		synchronizations.remove();
 		currentTransactionName.remove();
-		currentTransactionReadOnly.remove();;
-		currentTransactionIsolationLevel.remove();;
+		currentTransactionReadOnly.remove();
+		currentTransactionIsolationLevel.remove();
 		actualTransactionActive.remove();
 	}
 
