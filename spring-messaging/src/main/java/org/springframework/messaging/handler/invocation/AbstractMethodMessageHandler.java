@@ -288,9 +288,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (logger.isDebugEnabled()) {
 				logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
 			}
-			for (Map.Entry<Method, T> entry : methods.entrySet()) {
-				registerHandlerMethod(handler, entry.getKey(), entry.getValue());
-			}
+			methods.forEach((key, value) -> registerHandlerMethod(handler, key, value));
 		}
 	}
 

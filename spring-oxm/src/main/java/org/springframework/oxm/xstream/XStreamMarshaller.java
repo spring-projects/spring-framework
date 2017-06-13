@@ -469,15 +469,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		try {
 			if (this.aliases != null) {
 				Map<String, Class<?>> classMap = toClassMap(this.aliases);
-				for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-					xstream.alias(entry.getKey(), entry.getValue());
-				}
+				classMap.forEach(xstream::alias);
 			}
 			if (this.aliasesByType != null) {
 				Map<String, Class<?>> classMap = toClassMap(this.aliasesByType);
-				for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-					xstream.aliasType(entry.getKey(), entry.getValue());
-				}
+				classMap.forEach(xstream::aliasType);
 			}
 			if (this.fieldAliases != null) {
 				for (Map.Entry<String, String> entry : this.fieldAliases.entrySet()) {
@@ -543,20 +539,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		}
 
 		if (this.implicitCollections != null) {
-			for (Map.Entry<Class<?>, String> entry : this.implicitCollections.entrySet()) {
-				String[] collectionFields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
+			this.implicitCollections.forEach((key, fields) -> {
+				String[] collectionFields = StringUtils.commaDelimitedListToStringArray(fields);
 				for (String collectionField : collectionFields) {
-					xstream.addImplicitCollection(entry.getKey(), collectionField);
+					xstream.addImplicitCollection(key, collectionField);
 				}
-			}
+			});
 		}
 		if (this.omittedFields != null) {
-			for (Map.Entry<Class<?>, String> entry : this.omittedFields.entrySet()) {
-				String[] fields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
+			this.omittedFields.forEach((key, value) -> {
+				String[] fields = StringUtils.commaDelimitedListToStringArray(value);
 				for (String field : fields) {
-					xstream.omitField(entry.getKey(), field);
+					xstream.omitField(key, field);
 				}
-			}
+			});
 		}
 
 		if (this.annotatedClasses != null) {

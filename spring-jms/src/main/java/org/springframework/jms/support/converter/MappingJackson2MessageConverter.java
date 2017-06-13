@@ -158,12 +158,10 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 */
 	public void setTypeIdMappings(Map<String, Class<?>> typeIdMappings) {
 		this.idClassMappings = new HashMap<>();
-		for (Map.Entry<String, Class<?>> entry : typeIdMappings.entrySet()) {
-			String id = entry.getKey();
-			Class<?> clazz = entry.getValue();
+		typeIdMappings.forEach((id, clazz) -> {
 			this.idClassMappings.put(id, clazz);
 			this.classIdMappings.put(clazz, id);
-		}
+		});
 	}
 
 	@Override
