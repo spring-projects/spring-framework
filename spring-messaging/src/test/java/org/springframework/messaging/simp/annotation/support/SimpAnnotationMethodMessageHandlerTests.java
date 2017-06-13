@@ -26,7 +26,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -238,7 +237,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	@SuppressWarnings("unchecked")
 	public void listenableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
@@ -277,7 +275,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	@SuppressWarnings("unchecked")
 	public void completableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();

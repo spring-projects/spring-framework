@@ -200,11 +200,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
 					}
 					if (message.hasBody()) {
-						HttpInputMessage inputMessageToUse =
+						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
-						body = (genericConverter != null ? genericConverter.read(targetType, contextClass, message) :
-								((HttpMessageConverter<T>) converter).read(targetClass, message));
-						body = getAdvice().afterBodyRead(body, inputMessageToUse, parameter, targetType, converterType);
+						body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) :
+								((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
+						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterType);
 					}
 					else {
 						body = getAdvice().handleEmptyBody(null, message, parameter, targetType, converterType);

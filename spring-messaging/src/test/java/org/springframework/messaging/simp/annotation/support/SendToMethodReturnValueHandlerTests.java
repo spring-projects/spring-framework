@@ -27,7 +27,6 @@ import javax.security.auth.Subject;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -176,7 +175,6 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	public void sendToNoAnnotations() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
@@ -346,7 +344,6 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	public void testHeadersToSend() throws Exception {
 		Message<?> message = createMessage("sess1", "sub1", "/app", "/dest", null);
 
@@ -530,7 +527,6 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	public void jsonView() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 

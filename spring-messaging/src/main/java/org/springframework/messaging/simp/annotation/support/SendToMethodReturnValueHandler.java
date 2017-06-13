@@ -179,8 +179,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				}
 			}
 		}
-		else if (annotation instanceof SendTo) {
-			SendTo sendTo = (SendTo) annotation;
+		else {
+			SendTo sendTo = (SendTo) annotation;  // possibly null
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);

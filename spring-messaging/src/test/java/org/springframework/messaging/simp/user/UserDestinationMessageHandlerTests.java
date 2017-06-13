@@ -19,7 +19,6 @@ package org.springframework.messaging.simp.user;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -123,7 +122,6 @@ public class UserDestinationMessageHandlerTests {
 	}
 
 	@Test
-	@Ignore  // TODO: NULLABLE
 	public void handleMessageFromBrokerWithActiveSession() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));

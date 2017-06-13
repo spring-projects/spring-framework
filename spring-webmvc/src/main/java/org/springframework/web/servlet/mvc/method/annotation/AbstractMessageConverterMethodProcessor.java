@@ -117,6 +117,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
 
 		super(converters, requestResponseBodyAdvice);
+
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 		this.pathStrategy = initPathStrategy(this.contentNegotiationManager);
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
@@ -163,7 +164,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * @throws HttpMediaTypeNotAcceptableException thrown when the conditions indicated
 	 * by the {@code Accept} header on the request cannot be met by the message converters
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected <T> void writeWithMessageConverters(@Nullable T value, MethodParameter returnType,
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
@@ -223,35 +224,26 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
-			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
-					if (((GenericHttpMessageConverter) messageConverter).canWrite(
-							declaredType, valueType, selectedMediaType)) {
-						outputValue = (T) getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
-								(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
-								inputMessage, outputMessage);
-						if (outputValue != null) {
-							addContentDispositionHeader(inputMessage, outputMessage);
-							((GenericHttpMessageConverter) messageConverter).write(
-									outputValue, declaredType, selectedMediaType, outputMessage);
-							if (logger.isDebugEnabled()) {
-								logger.debug("Written [" + outputValue + "] as \"" + selectedMediaType +
-										"\" using [" + messageConverter + "]");
-							}
-						}
-						return;
-					}
-				}
-				else if (messageConverter.canWrite(valueType, selectedMediaType)) {
+			for (HttpMessageConverter<?> converter : this.messageConverters) {
+				GenericHttpMessageConverter genericConverter =
+						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
+				if (genericConverter != null ?
+						((GenericHttpMessageConverter) converter).canWrite(declaredType, valueType, selectedMediaType) :
+						converter.canWrite(valueType, selectedMediaType)) {
 					outputValue = (T) getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
-							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
+							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
 					if (outputValue != null) {
 						addContentDispositionHeader(inputMessage, outputMessage);
-						((HttpMessageConverter) messageConverter).write(outputValue, selectedMediaType, outputMessage);
+						if (genericConverter != null) {
+							genericConverter.write(outputValue, declaredType, selectedMediaType, outputMessage);
+						}
+						else {
+							((HttpMessageConverter) converter).write(outputValue, selectedMediaType, outputMessage);
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Written [" + outputValue + "] as \"" + selectedMediaType +
-									"\" using [" + messageConverter + "]");
+									"\" using [" + converter + "]");
 						}
 					}
 					return;
@@ -305,7 +297,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass, @Nullable Type declaredType) {
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass,
+			@Nullable Type declaredType) {
+
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -67,7 +66,6 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.*
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-@Ignore  // TODO: NULLABLE
 public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	private static final long TIMEOUT = 10;
@@ -120,8 +118,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
-	// SPR-10930
-	@Test
+	@Test  // SPR-10930
 	public void sendMessageToBrokerAndReceiveReplyViaTopic() throws Exception {
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
@@ -140,8 +137,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
-	// SPR-11648
-	@Test
+	@Test  // SPR-11648
 	public void sendSubscribeToControllerAndReceiveReply() throws Exception {
 		String destHeader = "destination:/app/number";
 		TextMessage message = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();

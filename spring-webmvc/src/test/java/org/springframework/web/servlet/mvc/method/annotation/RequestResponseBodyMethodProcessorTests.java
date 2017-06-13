@@ -507,7 +507,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
-	@Ignore  // TODO: NULLABLE
 	public void resolveArgumentWithJacksonJsonView() throws Exception {
 		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
@@ -534,7 +533,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
-	@Ignore  // TODO: NULLABLE
 	public void resolveHttpEntityArgumentWithJacksonJsonView() throws Exception {
 		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
@@ -562,7 +560,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
-	@Ignore  // TODO: NULLABLE
 	public void resolveArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
 		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
@@ -589,7 +586,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
-	@Ignore  // TODO: NULLABLE
 	public void resolveHttpEntityArgumentWithJacksonJsonViewAndXmlMessageConverter() throws Exception {
 		String content = "<root><withView1>with</withView1><withView2>with</withView2><withoutView>without</withoutView></root>";
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
