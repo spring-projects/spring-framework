@@ -872,12 +872,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * certain internal classes from being registered automatically.
 	 */
 	private void autodetectBeans(final AutodetectCapableMBeanInfoAssembler assembler) {
-		autodetect(new AutodetectCallback() {
-			@Override
-			public boolean include(Class<?> beanClass, String beanName) {
-				return assembler.includeBean(beanClass, beanName);
-			}
-		});
+		autodetect((beanClass, beanName) -> assembler.includeBean(beanClass, beanName));
 	}
 
 	/**
@@ -885,12 +880,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * valid MBeans and registers them automatically with the {@code MBeanServer}.
 	 */
 	private void autodetectMBeans() {
-		autodetect(new AutodetectCallback() {
-			@Override
-			public boolean include(Class<?> beanClass, String beanName) {
-				return isMBean(beanClass);
-			}
-		});
+		autodetect((beanClass, beanName) -> isMBean(beanClass));
 	}
 
 	/**

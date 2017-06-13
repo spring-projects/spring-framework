@@ -585,13 +585,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.debug("TCP connection opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
-			this.tcpConnection.onReadInactivity(new Runnable() {
-				@Override
-				public void run() {
-					if (tcpConnection != null && !isStompConnected) {
-						handleTcpConnectionFailure("No CONNECTED frame received in " +
-								MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
-					}
+			this.tcpConnection.onReadInactivity(() -> {
+				if (this.tcpConnection != null && !this.isStompConnected) {
+					handleTcpConnectionFailure("No CONNECTED frame received in " +
+							MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
 				}
 			}, MAX_TIME_TO_CONNECTED_FRAME);
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
@@ -700,33 +697,26 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			long serverReceiveInterval = connectedHeaders.getHeartbeat()[1];
 
 			if (clientSendInterval > 0 && serverReceiveInterval > 0) {
-				long interval = Math.max(clientSendInterval,  serverReceiveInterval);
-				this.tcpConnection.onWriteInactivity(new Runnable() {
-					@Override
-					public void run() {
-						TcpConnection<byte[]> conn = tcpConnection;
-						if (conn != null) {
-							conn.send(HEARTBEAT_MESSAGE).addCallback(
-									new ListenableFutureCallback<Void>() {
-										public void onSuccess(Void result) {
-										}
-										public void onFailure(Throwable ex) {
-											handleTcpConnectionFailure(
-													"Failed to forward heartbeat: " + ex.getMessage(), ex);
-										}
-									});
-						}
+				long interval = Math.max(clientSendInterval, serverReceiveInterval);
+				this.tcpConnection.onWriteInactivity(() -> {
+					TcpConnection<byte[]> conn = this.tcpConnection;
+					if (conn != null) {
+						conn.send(HEARTBEAT_MESSAGE).addCallback(
+								new ListenableFutureCallback<Void>() {
+									public void onSuccess(Void result) {
+									}
+
+									public void onFailure(Throwable ex) {
+										handleTcpConnectionFailure("Failed to forward heartbeat: " + ex.getMessage(), ex);
+									}
+								});
 					}
 				}, interval);
 			}
 			if (clientReceiveInterval > 0 && serverSendInterval > 0) {
 				final long interval = Math.max(clientReceiveInterval, serverSendInterval) * HEARTBEAT_MULTIPLIER;
-				this.tcpConnection.onReadInactivity(new Runnable() {
-					@Override
-					public void run() {
-						handleTcpConnectionFailure("No messages received in " + interval + " ms.", null);
-					}
-				}, interval);
+				this.tcpConnection.onReadInactivity(()
+						-> handleTcpConnectionFailure("No messages received in " + interval + " ms.", null), interval);
 			}
 		}
 

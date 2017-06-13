@@ -37,11 +37,8 @@ import org.springframework.util.Assert;
  */
 public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
-	private static final Callable<Object> DUMMY_CALLABLE = new Callable<Object>() {
-		@Override
-		public Object call() throws Exception {
-			throw new IllegalStateException("Should never be called");
-		}
+	private static final Callable<Object> DUMMY_CALLABLE = () -> {
+		throw new IllegalStateException("Should never be called");
 	};
 
 

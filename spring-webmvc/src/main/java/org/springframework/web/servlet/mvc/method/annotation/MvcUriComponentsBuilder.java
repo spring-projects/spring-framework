@@ -470,13 +470,10 @@ public class MvcUriComponentsBuilder {
 	}
 
 	private static Method getMethod(Class<?> controllerType, final String methodName, final Object... args) {
-		MethodFilter selector = new MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				String name = method.getName();
-				int argLength = method.getParameterCount();
-				return (name.equals(methodName) && argLength == args.length);
-			}
+		MethodFilter selector = method -> {
+			String name = method.getName();
+			int argLength = method.getParameterCount();
+			return (name.equals(methodName) && argLength == args.length);
 		};
 		Set<Method> methods = MethodIntrospector.selectMethods(controllerType, selector);
 		if (methods.size() == 1) {

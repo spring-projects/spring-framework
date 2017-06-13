@@ -384,12 +384,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		private final Future<SessionFactory> sessionFactoryFuture;
 
 		public BootstrapSessionFactoryInvocationHandler(AsyncTaskExecutor bootstrapExecutor) {
-			this.sessionFactoryFuture = bootstrapExecutor.submit(new Callable<SessionFactory>() {
-				@Override
-				public SessionFactory call() throws Exception {
-					return buildSessionFactory();
-				}
-			});
+			this.sessionFactoryFuture = bootstrapExecutor.submit(
+					(Callable<SessionFactory>) LocalSessionFactoryBuilder.this::buildSessionFactory);
 		}
 
 		@Override

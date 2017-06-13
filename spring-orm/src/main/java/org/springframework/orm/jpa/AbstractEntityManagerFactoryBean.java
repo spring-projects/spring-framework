@@ -30,7 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.persistence.EntityManager;
@@ -350,12 +349,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		}
 
 		if (this.bootstrapExecutor != null) {
-			this.nativeEntityManagerFactoryFuture = this.bootstrapExecutor.submit(new Callable<EntityManagerFactory>() {
-				@Override
-				public EntityManagerFactory call() {
-					return buildNativeEntityManagerFactory();
-				}
-			});
+			this.nativeEntityManagerFactoryFuture = this.bootstrapExecutor.submit(
+					this::buildNativeEntityManagerFactory);
 		}
 		else {
 			this.nativeEntityManagerFactory = buildNativeEntityManagerFactory();

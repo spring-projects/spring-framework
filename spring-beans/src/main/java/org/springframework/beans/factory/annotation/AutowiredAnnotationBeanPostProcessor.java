@@ -239,20 +239,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		// Let's check for lookup methods here..
 		if (!this.lookupMethodsChecked.contains(beanName)) {
 			try {
-				ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
-					@Override
-					public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-						Lookup lookup = method.getAnnotation(Lookup.class);
-						if (lookup != null) {
-							LookupOverride override = new LookupOverride(method, lookup.value());
-							try {
-								RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
-								mbd.getMethodOverrides().addOverride(override);
-							}
-							catch (NoSuchBeanDefinitionException ex) {
-								throw new BeanCreationException(beanName,
-										"Cannot apply @Lookup to beans without corresponding bean definition");
-							}
+				ReflectionUtils.doWithMethods(beanClass, method -> {
+					Lookup lookup = method.getAnnotation(Lookup.class);
+					if (lookup != null) {
+						LookupOverride override = new LookupOverride(method, lookup.value());
+						try {
+							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+							mbd.getMethodOverrides().addOverride(override);
+						}
+						catch (NoSuchBeanDefinitionException ex) {
+							throw new BeanCreationException(beanName,
+								"Cannot apply @Lookup to beans without corresponding bean definition");
 						}
 					}
 				});
@@ -414,48 +411,42 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
 
-			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
-				@Override
-				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-					AnnotationAttributes ann = findAutowiredAnnotation(field);
-					if (ann != null) {
-						if (Modifier.isStatic(field.getModifiers())) {
-							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation is not supported on static fields: " + field);
-							}
-							return;
+			ReflectionUtils.doWithLocalFields(targetClass, field -> {
+				AnnotationAttributes ann = findAutowiredAnnotation(field);
+				if (ann != null) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static fields: " + field);
 						}
-						boolean required = determineRequiredStatus(ann);
-						currElements.add(new AutowiredFieldElement(field, required));
+						return;
 					}
+					boolean required = determineRequiredStatus(ann);
+					currElements.add(new AutowiredFieldElement(field, required));
 				}
 			});
 
-			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+					return;
+				}
+				AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
+				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (Modifier.isStatic(method.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static methods: " + method);
+						}
 						return;
 					}
-					AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
-					if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-						if (Modifier.isStatic(method.getModifiers())) {
-							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation is not supported on static methods: " + method);
-							}
-							return;
+					if (method.getParameterCount() == 0) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation should only be used on methods with parameters: " +
+									method);
 						}
-						if (method.getParameterCount() == 0) {
-							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation should only be used on methods with parameters: " +
-										method);
-							}
-						}
-						boolean required = determineRequiredStatus(ann);
-						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-						currElements.add(new AutowiredMethodElement(method, required, pd));
 					}
+					boolean required = determineRequiredStatus(ann);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			});
 

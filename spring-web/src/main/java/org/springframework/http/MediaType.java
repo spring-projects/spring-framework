@@ -653,40 +653,36 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Comparator used by {@link #sortByQualityValue(List)}.
 	 */
-	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
-
-		@Override
-		public int compare(MediaType mediaType1, MediaType mediaType2) {
-			double quality1 = mediaType1.getQualityValue();
-			double quality2 = mediaType2.getQualityValue();
-			int qualityComparison = Double.compare(quality2, quality1);
-			if (qualityComparison != 0) {
-				return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
-			}
-			else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
+	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
+		double quality1 = mediaType1.getQualityValue();
+		double quality2 = mediaType2.getQualityValue();
+		int qualityComparison = Double.compare(quality2, quality1);
+		if (qualityComparison != 0) {
+			return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
+		}
+		else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
+			return 1;
+		}
+		else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) { // audio/* > */*
+			return -1;
+		}
+		else if (!mediaType1.getType().equals(mediaType2.getType())) { // audio/basic == text/html
+			return 0;
+		}
+		else { // mediaType1.getType().equals(mediaType2.getType())
+			if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) { // audio/* < audio/basic
 				return 1;
 			}
-			else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) { // audio/* > */*
+			else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) { // audio/basic > audio/*
 				return -1;
 			}
-			else if (!mediaType1.getType().equals(mediaType2.getType())) { // audio/basic == text/html
+			else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
 				return 0;
 			}
-			else { // mediaType1.getType().equals(mediaType2.getType())
-				if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) { // audio/* < audio/basic
-					return 1;
-				}
-				else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) { // audio/basic > audio/*
-					return -1;
-				}
-				else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
-					return 0;
-				}
-				else {
-					int paramsSize1 = mediaType1.getParameters().size();
-					int paramsSize2 = mediaType2.getParameters().size();
-					return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
-				}
+			else {
+				int paramsSize1 = mediaType1.getParameters().size();
+				int paramsSize2 = mediaType2.getParameters().size();
+				return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
 			}
 		}
 	};

@@ -245,13 +245,10 @@ public abstract class PropertyMatches {
 
 		private static String[] calculateMatches(final String propertyName, Class<?> beanClass, final int maxDistance) {
 			final List<String> candidates = new ArrayList<>();
-			ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
-				@Override
-				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-					String possibleAlternative = field.getName();
-					if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
-						candidates.add(possibleAlternative);
-					}
+			ReflectionUtils.doWithFields(beanClass, field -> {
+				String possibleAlternative = field.getName();
+				if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
+					candidates.add(possibleAlternative);
 				}
 			});
 			Collections.sort(candidates);
