@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
@@ -137,10 +136,11 @@ public class InlineList extends SpelNodeImpl {
 		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
 		final String className = codeflow.getClassName();
 
-		codeflow.registerNewField((cw, codeflow1)
-				-> cw.visitField(ACC_PRIVATE|ACC_STATIC|ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null));
-		
-		codeflow.registerNewClinit((mv1, codeflow12) -> generateClinitCode(className, constantFieldName, mv1, codeflow12, false));
+		codeflow.registerNewField((cw, cflow) ->
+				cw.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null));
+
+		codeflow.registerNewClinit((mVisitor, cflow) ->
+				generateClinitCode(className, constantFieldName, mVisitor, cflow, false));
 		
 		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");

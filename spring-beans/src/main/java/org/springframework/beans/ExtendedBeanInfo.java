@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -139,7 +138,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
 		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
-		Collections.sort(matches, (m1, m2) -> m2.toString().compareTo(m1.toString()));
+		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
 		return matches;
 	}
 

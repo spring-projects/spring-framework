@@ -586,9 +586,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			this.tcpConnection = connection;
 			this.tcpConnection.onReadInactivity(() -> {
-				if (tcpConnection != null && !isStompConnected) {
+				if (this.tcpConnection != null && !this.isStompConnected) {
 					handleTcpConnectionFailure("No CONNECTED frame received in " +
-						MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
+							MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
 				}
 			}, MAX_TIME_TO_CONNECTED_FRAME);
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
@@ -697,18 +697,19 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			long serverReceiveInterval = connectedHeaders.getHeartbeat()[1];
 
 			if (clientSendInterval > 0 && serverReceiveInterval > 0) {
-				long interval = Math.max(clientSendInterval,  serverReceiveInterval);
+				long interval = Math.max(clientSendInterval, serverReceiveInterval);
 				this.tcpConnection.onWriteInactivity(() -> {
-					TcpConnection<byte[]> conn = tcpConnection;
+					TcpConnection<byte[]> conn = this.tcpConnection;
 					if (conn != null) {
 						conn.send(HEARTBEAT_MESSAGE).addCallback(
-							new ListenableFutureCallback<Void>() {
-								public void onSuccess(Void result) {
-								}
-								public void onFailure(Throwable ex) {
-									handleTcpConnectionFailure("Failed to forward heartbeat: " + ex.getMessage(), ex);
-								}
-							});
+								new ListenableFutureCallback<Void>() {
+									public void onSuccess(Void result) {
+									}
+
+									public void onFailure(Throwable ex) {
+										handleTcpConnectionFailure("Failed to forward heartbeat: " + ex.getMessage(), ex);
+									}
+								});
 					}
 				}, interval);
 			}

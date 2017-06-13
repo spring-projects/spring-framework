@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.hamcrest.Matcher;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
@@ -145,11 +144,12 @@ public abstract class MockRestRequestMatchers {
 	 */
 	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
-		return  request-> {
-				assertValueCount("header", name, request.getHeaders(), matchers.length);
-				List<String> headerValues = request.getHeaders().get(name);
-				Assert.state(headerValues != null, "No header values");for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Request header["+name+ "]", headerValues.get(i), matchers[i]);
+		return request -> {
+			assertValueCount("header", name, request.getHeaders(), matchers.length);
+			List<String> headerValues = request.getHeaders().get(name);
+			Assert.state(headerValues != null, "No header values");
+			for (int i = 0; i < matchers.length; i++) {
+				assertThat("Request header[" + name + "]", headerValues.get(i), matchers[i]);
 
 			}
 		};
@@ -159,12 +159,13 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request header values.
 	 */
 	public static RequestMatcher header(final String name, final String... expectedValues) {
-		return  request-> {
-				assertValueCount("header", name, request.getHeaders(), expectedValues.length);
-				List<String> headerValues = request.getHeaders().get(name);
-				Assert.state(headerValues != null, "No header values");for (int i = 0 ; i < expectedValues.length; i++) {
-					assertEquals("Request header  [" + name + "]",
-							expectedValues[i], headerValues.get(i));
+		return request -> {
+			assertValueCount("header", name, request.getHeaders(), expectedValues.length);
+			List<String> headerValues = request.getHeaders().get(name);
+			Assert.state(headerValues != null, "No header values");
+			for (int i = 0; i < expectedValues.length; i++) {
+				assertEquals("Request header  [" + name + "]",
+						expectedValues[i], headerValues.get(i));
 
 			}
 		};

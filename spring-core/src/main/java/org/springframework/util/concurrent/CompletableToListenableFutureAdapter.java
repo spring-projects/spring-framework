@@ -21,9 +21,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Adapts a {@link CompletableFuture} or {@link CompletionStage} into a
@@ -53,9 +50,9 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	 */
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
-		this.completableFuture.handle((result, exception) -> {
-			if (exception != null) {
-				callbacks.failure(exception);
+		this.completableFuture.handle((result, ex) -> {
+			if (ex != null) {
+				callbacks.failure(ex);
 			}
 			else {
 				callbacks.success(result);

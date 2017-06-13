@@ -107,8 +107,8 @@ public final class WebAsyncManager {
 	public void setAsyncWebRequest(final AsyncWebRequest asyncWebRequest) {
 		Assert.notNull(asyncWebRequest, "AsyncWebRequest must not be null");
 		this.asyncWebRequest = asyncWebRequest;
-		this.asyncWebRequest.addCompletionHandler(()
-				-> asyncWebRequest.removeAttribute(WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST));
+		this.asyncWebRequest.addCompletionHandler(() -> asyncWebRequest.removeAttribute(
+				WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST));
 	}
 
 	/**
@@ -287,13 +287,14 @@ public final class WebAsyncManager {
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
 			logger.debug("Processing timeout");
-			Object result = interceptorChain.triggerAfterTimeout(asyncWebRequest, callable);
+			Object result = interceptorChain.triggerAfterTimeout(this.asyncWebRequest, callable);
 			if (result != CallableProcessingInterceptor.RESULT_NONE) {
 				setConcurrentResultAndDispatch(result);
 			}
 		});
 
-		this.asyncWebRequest.addCompletionHandler(() -> interceptorChain.triggerAfterCompletion(asyncWebRequest, callable));
+		this.asyncWebRequest.addCompletionHandler(() ->
+				interceptorChain.triggerAfterCompletion(this.asyncWebRequest, callable));
 
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, callable);
 		startAsyncProcessing(processingContext);
@@ -301,14 +302,14 @@ public final class WebAsyncManager {
 			this.taskExecutor.submit(() -> {
 				Object result = null;
 				try {
-					interceptorChain.applyPreProcess(asyncWebRequest, callable);
+					interceptorChain.applyPreProcess(this.asyncWebRequest, callable);
 					result = callable.call();
 				}
 				catch (Throwable ex) {
 					result = ex;
 				}
 				finally {
-					result = interceptorChain.applyPostProcess(asyncWebRequest, callable, result);
+					result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, result);
 				}
 				setConcurrentResultAndDispatch(result);
 			});
@@ -375,7 +376,7 @@ public final class WebAsyncManager {
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
 			try {
-				interceptorChain.triggerAfterTimeout(asyncWebRequest, deferredResult);
+				interceptorChain.triggerAfterTimeout(this.asyncWebRequest, deferredResult);
 			}
 			catch (Throwable ex) {
 				setConcurrentResultAndDispatch(ex);
@@ -383,7 +384,7 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addCompletionHandler(()
-				-> interceptorChain.triggerAfterCompletion(asyncWebRequest, deferredResult));
+				-> interceptorChain.triggerAfterCompletion(this.asyncWebRequest, deferredResult));
 
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, deferredResult);
 		startAsyncProcessing(processingContext);
@@ -391,7 +392,7 @@ public final class WebAsyncManager {
 		try {
 			interceptorChain.applyPreProcess(this.asyncWebRequest, deferredResult);
 			deferredResult.setResultHandler(result -> {
-				result = interceptorChain.applyPostProcess(asyncWebRequest, deferredResult, result);
+				result = interceptorChain.applyPostProcess(this.asyncWebRequest, deferredResult, result);
 				setConcurrentResultAndDispatch(result);
 			});
 		}

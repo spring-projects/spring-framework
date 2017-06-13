@@ -47,8 +47,8 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
-	public static final MethodFilter EXCEPTION_HANDLER_METHODS =
-			method -> (AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
+	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
+			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 
 	/**
 	 * Arbitrary {@link Method} reference, indicating no method found in the cache.

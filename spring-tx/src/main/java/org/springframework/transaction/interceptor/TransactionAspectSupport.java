@@ -34,7 +34,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -307,19 +306,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 					try {
 						return invocation.proceedWithInvocation();
-					} catch (Throwable ex) {
+					}
+					catch (Throwable ex) {
 						if (txAttr.rollbackOn(ex)) {
 							// A RuntimeException: will lead to a rollback.
 							if (ex instanceof RuntimeException) {
 								throw (RuntimeException) ex;
-							} else {
+							}
+							else {
 								throw new ThrowableHolderException(ex);
 							}
-						} else {
+						}
+						else {
 							// A normal return value: will lead to a commit.
 							return new ThrowableHolder(ex);
 						}
-					} finally {
+					}
+					finally {
 						cleanupTransactionInfo(txInfo);
 					}
 				});

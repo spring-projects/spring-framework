@@ -412,43 +412,43 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			final LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-        AnnotationAttributes ann = findAutowiredAnnotation(field);
-        if (ann != null) {
-          if (Modifier.isStatic(field.getModifiers())) {
-            if (logger.isWarnEnabled()) {
-              logger.warn("Autowired annotation is not supported on static fields: " + field);
-            }
-            return;
-          }
-          boolean required = determineRequiredStatus(ann);
-          currElements.add(new AutowiredFieldElement(field, required));
-        }
-      });
+				AnnotationAttributes ann = findAutowiredAnnotation(field);
+				if (ann != null) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static fields: " + field);
+						}
+						return;
+					}
+					boolean required = determineRequiredStatus(ann);
+					currElements.add(new AutowiredFieldElement(field, required));
+				}
+			});
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-        Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-        if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
-          return;
-        }
-        AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
-        if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-          if (Modifier.isStatic(method.getModifiers())) {
-            if (logger.isWarnEnabled()) {
-              logger.warn("Autowired annotation is not supported on static methods: " + method);
-            }
-            return;
-          }
-          if (method.getParameterCount() == 0) {
-            if (logger.isWarnEnabled()) {
-              logger.warn("Autowired annotation should only be used on methods with parameters: " +
-                  method);
-            }
-          }
-          boolean required = determineRequiredStatus(ann);
-          PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-          currElements.add(new AutowiredMethodElement(method, required, pd));
-        }
-      });
+				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+					return;
+				}
+				AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
+				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (Modifier.isStatic(method.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static methods: " + method);
+						}
+						return;
+					}
+					if (method.getParameterCount() == 0) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation should only be used on methods with parameters: " +
+									method);
+						}
+					}
+					boolean required = determineRequiredStatus(ann);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+					currElements.add(new AutowiredMethodElement(method, required, pd));
+				}
+			});
 
 			elements.addAll(0, currElements);
 			targetClass = targetClass.getSuperclass();

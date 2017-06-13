@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,19 +115,6 @@ import org.springframework.web.util.WebUtils;
  */
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
-
-	/**
-	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
-	 */
-	public static final MethodFilter INIT_BINDER_METHODS =
-			method -> AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
-
-	/**
-	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
-	 */
-	public static final MethodFilter MODEL_ATTRIBUTE_METHODS =
-			method -> ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null)
-					&& (AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
@@ -993,5 +979,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		return mav;
 	}
+
+
+	/**
+	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
+	 */
+	public static final MethodFilter INIT_BINDER_METHODS = method ->
+			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
+
+	/**
+	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
+	 */
+	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+			((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
+			(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
 
 }

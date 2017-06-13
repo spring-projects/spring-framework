@@ -21,8 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,7 +119,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 			// Sort methods into a sensible order
 			if (methods.size() > 1) {
-				Collections.sort(methods, (m1, m2) -> {
+				methods.sort((m1, m2) -> {
 					int m1pl = m1.getParameterCount();
 					int m2pl = m2.getParameterCount();
 					// varargs methods go last

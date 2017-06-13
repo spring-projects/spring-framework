@@ -48,12 +48,6 @@ import org.springframework.lang.Nullable;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Pre-built FieldFilter that matches all non-static, non-final fields.
-	 */
-	public static final FieldFilter COPYABLE_FIELDS =
-			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
-
-	/**
 	 * Naming prefix for CGLIB-renamed methods.
 	 * @see #isCglibRenamedMethod
 	 */
@@ -849,6 +843,13 @@ public abstract class ReflectionUtils {
 		 */
 		boolean matches(Field field);
 	}
+
+
+	/**
+	 * Pre-built FieldFilter that matches all non-static, non-final fields.
+	 */
+	public static final FieldFilter COPYABLE_FIELDS =
+			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
 
 
 	/**
