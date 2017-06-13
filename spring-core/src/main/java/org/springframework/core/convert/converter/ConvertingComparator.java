@@ -87,12 +87,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, K> mapEntryKeys(Comparator<K> comparator) {
-		return new ConvertingComparator<>(comparator, new Converter<Map.Entry<K, V>, K>() {
-			@Override
-			public K convert(Map.Entry<K, V> source) {
-				return source.getKey();
-			}
-		});
+		return new ConvertingComparator<>(comparator, source -> source.getKey());
 	}
 
 	/**
@@ -102,12 +97,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, V> mapEntryValues(Comparator<V> comparator) {
-		return new ConvertingComparator<>(comparator, new Converter<Map.Entry<K, V>, V>() {
-			@Override
-			public V convert(Map.Entry<K, V> source) {
-				return source.getValue();
-			}
-		});
+		return new ConvertingComparator<>(comparator, source -> source.getValue());
 	}
 
 

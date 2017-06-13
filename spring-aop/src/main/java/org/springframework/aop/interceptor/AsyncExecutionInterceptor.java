@@ -109,23 +109,20 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Callable<Object> task = new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				try {
-					Object result = invocation.proceed();
-					if (result instanceof Future) {
-						return ((Future<?>) result).get();
-					}
+		Callable<Object> task = () -> {
+			try {
+				Object result = invocation.proceed();
+				if (result instanceof Future) {
+					return ((Future<?>) result).get();
 				}
-				catch (ExecutionException ex) {
-					handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
-				}
-				catch (Throwable ex) {
-					handleError(ex, userDeclaredMethod, invocation.getArguments());
-				}
-				return null;
 			}
+			catch (ExecutionException ex) {
+				handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
+			}
+			catch (Throwable ex) {
+				handleError(ex, userDeclaredMethod, invocation.getArguments());
+			}
+			return null;
 		};
 
 		return doSubmit(task, executor, invocation.getMethod().getReturnType());

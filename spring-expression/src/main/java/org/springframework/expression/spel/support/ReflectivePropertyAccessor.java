@@ -391,12 +391,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	private Method[] getSortedClassMethods(Class<?> clazz) {
 		Method[] methods = clazz.getMethods();
-		Arrays.sort(methods, new Comparator<Method>() {
-			@Override
-			public int compare(Method o1, Method o2) {
-				return (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1);
-			}
-		});
+		Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1));
 		return methods;
 	}
 

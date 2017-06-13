@@ -137,17 +137,10 @@ public class InlineList extends SpelNodeImpl {
 		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
 		final String className = codeflow.getClassName();
 
-		codeflow.registerNewField(new CodeFlow.FieldAdder() {
-			public void generateField(ClassWriter cw, CodeFlow codeflow) {
-				cw.visitField(ACC_PRIVATE|ACC_STATIC|ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null);
-			}
-		});
+		codeflow.registerNewField((cw, codeflow1)
+				-> cw.visitField(ACC_PRIVATE|ACC_STATIC|ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null));
 		
-		codeflow.registerNewClinit(new CodeFlow.ClinitAdder() {
-			public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-				generateClinitCode(className, constantFieldName, mv, codeflow, false);
-			}
-		});
+		codeflow.registerNewClinit((mv1, codeflow12) -> generateClinitCode(className, constantFieldName, mv1, codeflow12, false));
 		
 		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");

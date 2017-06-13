@@ -368,26 +368,23 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
-			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
-				@Override
-				public void run() {
-					List<String> removedIds = new ArrayList<>();
-					for (SockJsSession session : sessions.values()) {
-						try {
-							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-								sessions.remove(session.getId());
-								removedIds.add(session.getId());
-								session.close();
-							}
-						}
-						catch (Throwable ex) {
-							// Could be part of normal workflow (e.g. browser tab closed)
-							logger.debug("Failed to close " + session, ex);
+			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
+				List<String> removedIds = new ArrayList<>();
+				for (SockJsSession session : sessions.values()) {
+					try {
+						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
+							sessions.remove(session.getId());
+							removedIds.add(session.getId());
+							session.close();
 						}
 					}
-					if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
-						logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
+					catch (Throwable ex) {
+						// Could be part of normal workflow (e.g. browser tab closed)
+						logger.debug("Failed to close " + session, ex);
 					}
+				}
+				if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
+					logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 				}
 			}, getDisconnectDelay());
 		}

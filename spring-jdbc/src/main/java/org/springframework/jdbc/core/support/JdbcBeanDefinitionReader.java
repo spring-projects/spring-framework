@@ -105,15 +105,12 @@ public class JdbcBeanDefinitionReader {
 	public void loadBeanDefinitions(String sql) {
 		Assert.notNull(this.jdbcTemplate, "Not fully configured - specify DataSource or JdbcTemplate");
 		final Properties props = new Properties();
-		this.jdbcTemplate.query(sql, new RowCallbackHandler() {
-			@Override
-			public void processRow(ResultSet rs) throws SQLException {
-				String beanName = rs.getString(1);
-				String property = rs.getString(2);
-				String value = rs.getString(3);
-				// Make a properties entry by combining bean name and property.
-				props.setProperty(beanName + '.' + property, value);
-			}
+		this.jdbcTemplate.query(sql, resultSet -> {
+			String beanName = resultSet.getString(1);
+			String property = resultSet.getString(2);
+			String value = resultSet.getString(3);
+			// Make a properties entry by combining bean name and property.
+			props.setProperty(beanName + '.' + property, value);
 		});
 		this.propReader.registerBeanDefinitions(props);
 	}

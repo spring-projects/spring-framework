@@ -201,24 +201,21 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<>();
 			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
 
-			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					if (initAnnotationType != null) {
-						if (method.getAnnotation(initAnnotationType) != null) {
-							LifecycleElement element = new LifecycleElement(method);
-							currInitMethods.add(element);
-							if (debug) {
-								logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
-							}
+			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				if (initAnnotationType != null) {
+					if (method.getAnnotation(initAnnotationType) != null) {
+						LifecycleElement element = new LifecycleElement(method);
+						currInitMethods.add(element);
+						if (debug) {
+							logger.debug("Found init method on class [" + clazz.getName() + "]: " + method);
 						}
 					}
-					if (destroyAnnotationType != null) {
-						if (method.getAnnotation(destroyAnnotationType) != null) {
-							currDestroyMethods.add(new LifecycleElement(method));
-							if (debug) {
-								logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
-							}
+				}
+				if (destroyAnnotationType != null) {
+					if (method.getAnnotation(destroyAnnotationType) != null) {
+						currDestroyMethods.add(new LifecycleElement(method));
+						if (debug) {
+							logger.debug("Found destroy method on class [" + clazz.getName() + "]: " + method);
 						}
 					}
 				}

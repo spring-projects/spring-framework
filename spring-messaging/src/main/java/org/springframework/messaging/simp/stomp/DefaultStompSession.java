@@ -535,12 +535,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			Assert.notNull(getTaskScheduler(), "To track receipts, a TaskScheduler must be configured");
 			DefaultStompSession.this.receiptHandlers.put(this.receiptId, this);
 			Date startTime = new Date(System.currentTimeMillis() + getReceiptTimeLimit());
-			this.future = getTaskScheduler().schedule(new Runnable() {
-				@Override
-				public void run() {
-					handleReceiptNotReceived();
-				}
-			}, startTime);
+			this.future = getTaskScheduler().schedule(this::handleReceiptNotReceived, startTime);
 		}
 
 		@Override

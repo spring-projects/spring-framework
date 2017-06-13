@@ -226,14 +226,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
-						((SmartLifecycle) bean).stop(new Runnable() {
-							@Override
-							public void run() {
-								latch.countDown();
-								countDownBeanNames.remove(beanName);
-								if (logger.isDebugEnabled()) {
-									logger.debug("Bean '" + beanName + "' completed its stop procedure");
-								}
+						((SmartLifecycle) bean).stop(() -> {
+							latch.countDown();
+							countDownBeanNames.remove(beanName);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Bean '" + beanName + "' completed its stop procedure");
 							}
 						});
 					}
