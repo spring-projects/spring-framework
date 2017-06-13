@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cache.caffeine;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -222,7 +223,9 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Create the known caches again with the current state of this manager.
 	 */
 	private void refreshKnownCaches() {
-		this.cacheMap.forEach((key, value) -> createCaffeineCache(key));
+		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
+			entry.setValue(createCaffeineCache(entry.getKey()));
+		}
 	}
 
 }

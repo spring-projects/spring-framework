@@ -197,7 +197,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (headers == null) {
 			return;
 		}
-		headers.forEach((key, values) -> values.forEach(value -> addNativeHeader(key, value)));
+		headers.forEach((key, values) ->
+				values.forEach(value -> addNativeHeader(key, value)));
 	}
 
 	@Nullable
