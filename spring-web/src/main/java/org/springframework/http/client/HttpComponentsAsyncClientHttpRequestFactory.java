@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
@@ -47,7 +48,7 @@ import org.springframework.util.Assert;
 public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
-	private CloseableHttpAsyncClient httpAsyncClient;
+	private HttpAsyncClient asyncClient;
 
 
 	/**
@@ -55,49 +56,98 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 * with a default {@link HttpAsyncClient} and {@link HttpClient}.
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory() {
-		this(HttpAsyncClients.createSystem());
+		super();
+		this.asyncClient = HttpAsyncClients.createSystem();
 	}
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsAsyncClientHttpRequestFactory}
 	 * with the given {@link HttpAsyncClient} instance and a default {@link HttpClient}.
-	 * @param httpAsyncClient the HttpAsyncClient instance to use for this request factory
+	 * @param asyncClient the HttpAsyncClient instance to use for this request factory
+	 * @since 4.3.10
 	 */
-	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient httpAsyncClient) {
+	public HttpComponentsAsyncClientHttpRequestFactory(HttpAsyncClient asyncClient) {
 		super();
-		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
-		this.httpAsyncClient = httpAsyncClient;
+		setAsyncClient(asyncClient);
+	}
+
+	/**
+	 * Create a new instance of the {@code HttpComponentsAsyncClientHttpRequestFactory}
+	 * with the given {@link CloseableHttpAsyncClient} instance and a default {@link HttpClient}.
+	 * @param asyncClient the CloseableHttpAsyncClient instance to use for this request factory
+	 */
+	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient asyncClient) {
+		super();
+		setAsyncClient(asyncClient);
 	}
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsAsyncClientHttpRequestFactory}
 	 * with the given {@link HttpClient} and {@link HttpAsyncClient} instances.
 	 * @param httpClient the HttpClient instance to use for this request factory
-	 * @param httpAsyncClient the HttpAsyncClient instance to use for this request factory
+	 * @param asyncClient the HttpAsyncClient instance to use for this request factory
+	 * @since 4.3.10
+	 */
+	public HttpComponentsAsyncClientHttpRequestFactory(HttpClient httpClient, HttpAsyncClient asyncClient) {
+		super(httpClient);
+		setAsyncClient(asyncClient);
+	}
+
+	/**
+	 * Create a new instance of the {@code HttpComponentsAsyncClientHttpRequestFactory}
+	 * with the given {@link CloseableHttpClient} and {@link CloseableHttpAsyncClient} instances.
+	 * @param httpClient the CloseableHttpClient instance to use for this request factory
+	 * @param asyncClient the CloseableHttpAsyncClient instance to use for this request factory
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(
-			CloseableHttpClient httpClient, CloseableHttpAsyncClient httpAsyncClient) {
+			CloseableHttpClient httpClient, CloseableHttpAsyncClient asyncClient) {
 
 		super(httpClient);
-		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
-		this.httpAsyncClient = httpAsyncClient;
+		setAsyncClient(asyncClient);
 	}
 
 
 	/**
-	 * Set the {@code HttpClient} used for
-	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
+	 * Set the {@code HttpAsyncClient} used for
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) synchronous execution}.
+	 * @since 4.3.10
+	 * @see #setHttpClient(HttpClient)
 	 */
-	public void setHttpAsyncClient(CloseableHttpAsyncClient httpAsyncClient) {
-		this.httpAsyncClient = httpAsyncClient;
+	public void setAsyncClient(HttpAsyncClient asyncClient) {
+		Assert.notNull(asyncClient, "HttpAsyncClient must not be null");
+		this.asyncClient = asyncClient;
 	}
 
 	/**
-	 * Return the {@code HttpClient} used for
-	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
+	 * Return the {@code HttpAsyncClient} used for
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) synchronous execution}.
+	 * @since 4.3.10
+	 * @see #getHttpClient()
 	 */
+	public HttpAsyncClient getAsyncClient() {
+		return this.asyncClient;
+	}
+
+	/**
+	 * Set the {@code CloseableHttpAsyncClient} used for
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
+	 * @deprecated as of 4.3.10, in favor of {@link #setAsyncClient(HttpAsyncClient)}
+	 */
+	@Deprecated
+	public void setHttpAsyncClient(CloseableHttpAsyncClient asyncClient) {
+		this.asyncClient = asyncClient;
+	}
+
+	/**
+	 * Return the {@code CloseableHttpAsyncClient} used for
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
+	 * @deprecated as of 4.3.10, in favor of {@link #getAsyncClient()}
+	 */
+	@Deprecated
 	public CloseableHttpAsyncClient getHttpAsyncClient() {
-		return this.httpAsyncClient;
+		Assert.state(this.asyncClient == null || this.asyncClient instanceof CloseableHttpAsyncClient,
+				"No CloseableHttpAsyncClient - use getAsyncClient() instead");
+		return (CloseableHttpAsyncClient) this.asyncClient;
 	}
 
 
@@ -107,22 +157,26 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	}
 
 	private void startAsyncClient() {
-        CloseableHttpAsyncClient asyncClient = getHttpAsyncClient();
-		if (!asyncClient.isRunning()) {
-			asyncClient.start();
+        HttpAsyncClient asyncClient = getAsyncClient();
+		if (asyncClient instanceof CloseableHttpAsyncClient) {
+			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) asyncClient;
+			if (!closeableAsyncClient.isRunning()) {
+				closeableAsyncClient.start();
+			}
 		}
 	}
 
 	@Override
 	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		HttpAsyncClient asyncClient = getHttpAsyncClient();
 		startAsyncClient();
+
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
         HttpContext context = createHttpContext(httpMethod, uri);
         if (context == null) {
             context = HttpClientContext.create();
         }
+
 		// Request configuration not set in the context
 		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			// Use request configuration given by the user, when available
@@ -131,13 +185,14 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				config = createRequestConfig(asyncClient);
+				config = createRequestConfig(getAsyncClient());
 			}
 			if (config != null) {
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
-		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
+
+		return new HttpComponentsAsyncClientHttpRequest(getAsyncClient(), httpRequest, context);
 	}
 
 	@Override
@@ -146,7 +201,10 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			super.destroy();
 		}
 		finally {
-			getHttpAsyncClient().close();
+			HttpAsyncClient asyncClient = getAsyncClient();
+			if (asyncClient instanceof Closeable) {
+				((Closeable) asyncClient).close();
+			}
 		}
 	}
 
