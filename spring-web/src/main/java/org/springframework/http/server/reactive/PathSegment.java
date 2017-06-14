@@ -15,6 +15,8 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.nio.charset.Charset;
+
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -32,9 +34,20 @@ public interface PathSegment {
 	String value();
 
 	/**
-	 * The path {@link #value()} decoded.
+	 * Return the path {@link #value()} decoded.
 	 */
 	String valueDecoded();
+
+	/**
+	 * Return the same as {@link #valueDecoded()} but as a {@code char[]}.
+	 */
+	char[] valueCharsDecoded();
+
+	/**
+	 * Whether the path value (encoded or decoded) is empty meaning that it has
+	 * {@link Character#isWhitespace whitespace} characters or none.
+	 */
+	boolean isEmpty();
 
 	/**
 	 * Return the portion of the path segment after and including the first
@@ -47,5 +60,16 @@ public interface PathSegment {
 	 * Path parameters parsed from the path segment.
 	 */
 	MultiValueMap<String, String> parameters();
+
+
+	/**
+	 * Parse the given path segment value.
+	 * @param path the value to parse
+	 * @param encoding the charset to use for the decoded value
+	 * @return the parsed path segment
+	 */
+	static PathSegment parse(String path, Charset encoding) {
+		return DefaultRequestPath.parsePathSegment(path, encoding);
+	}
 
 }

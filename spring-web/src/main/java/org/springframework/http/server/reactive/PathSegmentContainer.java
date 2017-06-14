@@ -15,13 +15,18 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
  * Container for 0..N path segments.
  *
+ * <p>Typically consumed via {@link ServerHttpRequest#getPath()} but can also
+ * be created by parsing a path value via {@link #parse(String, Charset)}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see RequestPath
  */
 public interface PathSegmentContainer {
 
@@ -31,8 +36,35 @@ public interface PathSegmentContainer {
 	String value();
 
 	/**
+	 * Whether the path (encoded or decoded) is empty meaning that it has
+	 * {@link Character#isWhitespace whitespace} characters or none.
+	 */
+	boolean isEmpty();
+
+	/**
+	 * Whether the path {@link #value()} starts with "/".
+	 */
+	boolean isAbsolute();
+
+	/**
 	 * The list of path segments contained.
 	 */
 	List<PathSegment> pathSegments();
+
+	/**
+	 * Whether the path {@link #value()} ends with "/".
+	 */
+	boolean hasTrailingSlash();
+
+
+	/**
+	 * Parse the given path value into a {@link PathSegmentContainer}.
+	 * @param path the value to parse
+	 * @param encoding the charset to use for decoded path segment values
+	 * @return the parsed path
+	 */
+	static PathSegmentContainer parse(String path, Charset encoding) {
+		return DefaultRequestPath.parsePath(path, encoding);
+	}
 
 }

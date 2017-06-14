@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
+ * Default implementation of {@link RequestPath}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -58,13 +59,13 @@ class DefaultRequestPath implements RequestPath {
 		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	DefaultRequestPath(RequestPath requestPath, String contextPath, Charset charset) {
+	DefaultRequestPath(RequestPath requestPath, String contextPath) {
 		this.fullPath = new DefaultPathSegmentContainer(requestPath.value(), requestPath.pathSegments());
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	private static PathSegmentContainer parsePath(String path, Charset charset) {
+	static PathSegmentContainer parsePath(String path, Charset charset) {
 		path = StringUtils.hasText(path) ? path : "";
 		if ("".equals(path)) {
 			return EMPTY_PATH;
@@ -73,8 +74,8 @@ class DefaultRequestPath implements RequestPath {
 			return ROOT_PATH;
 		}
 		List<PathSegment> result = new ArrayList<>();
-		int begin = 1;
-		while (true) {
+		int begin = (path.charAt(0) == '/' ? 1 : 0);
+		while (begin < path.length()) {
 			int end = path.indexOf('/', begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
 			result.add(parsePathSegment(segment, charset));
@@ -82,22 +83,18 @@ class DefaultRequestPath implements RequestPath {
 				break;
 			}
 			begin = end + 1;
-			if (begin == path.length()) {
-				// trailing slash
-				result.add(EMPTY_PATH_SEGMENT);
-				break;
-			}
 		}
 		return new DefaultPathSegmentContainer(path, result);
 	}
 
-	private static PathSegment parsePathSegment(String input, Charset charset) {
+	static PathSegment parsePathSegment(String input, Charset charset) {
 		if ("".equals(input)) {
 			return EMPTY_PATH_SEGMENT;
 		}
 		int index = input.indexOf(';');
 		if (index == -1) {
-			return new DefaultPathSegment(input, StringUtils.uriDecode(input, charset), "", EMPTY_MAP);
+			String inputDecoded = StringUtils.uriDecode(input, charset);
+			return new DefaultPathSegment(input, inputDecoded, "", EMPTY_MAP);
 		}
 		String value = input.substring(0, index);
 		String valueDecoded = StringUtils.uriDecode(value, charset);
@@ -180,15 +177,36 @@ class DefaultRequestPath implements RequestPath {
 	}
 
 
+	// PathSegmentContainer methods..
+
+
+	@Override
+	public boolean isEmpty() {
+		return this.contextPath.isEmpty() && this.pathWithinApplication.isEmpty();
+	}
+
 	@Override
 	public String value() {
 		return this.fullPath.value();
 	}
 
 	@Override
+	public boolean isAbsolute() {
+		return !this.contextPath.isEmpty() && this.contextPath.isAbsolute() || this.pathWithinApplication.isAbsolute();
+	}
+
+	@Override
 	public List<PathSegment> pathSegments() {
 		return this.fullPath.pathSegments();
 	}
+
+	@Override
+	public boolean hasTrailingSlash() {
+		return this.pathWithinApplication.hasTrailingSlash();
+	}
+
+
+	// RequestPath methods..
 
 	@Override
 	public PathSegmentContainer contextPath() {
@@ -205,12 +223,22 @@ class DefaultRequestPath implements RequestPath {
 
 		private final String path;
 
+		private final boolean empty;
+
+		private final boolean absolute;
+
 		private final List<PathSegment> pathSegments;
 
+		private final boolean trailingSlash;
 
-		DefaultPathSegmentContainer(String path, List<PathSegment> pathSegments) {
+
+
+		DefaultPathSegmentContainer(String path, List<PathSegment> segments) {
 			this.path = path;
-			this.pathSegments = Collections.unmodifiableList(pathSegments);
+			this.absolute = path.startsWith("/");
+			this.pathSegments = Collections.unmodifiableList(segments);
+			this.trailingSlash = path.endsWith("/") && path.length() > 1;
+			this.empty = !this.absolute && !this.trailingSlash && segments.stream().allMatch(PathSegment::isEmpty);
 		}
 
 
@@ -220,8 +248,23 @@ class DefaultRequestPath implements RequestPath {
 		}
 
 		@Override
+		public boolean isEmpty() {
+			return this.empty;
+		}
+
+		@Override
+		public boolean isAbsolute() {
+			return this.absolute;
+		}
+
+		@Override
 		public List<PathSegment> pathSegments() {
 			return this.pathSegments;
+		}
+
+		@Override
+		public boolean hasTrailingSlash() {
+			return this.trailingSlash;
 		}
 
 
@@ -254,6 +297,10 @@ class DefaultRequestPath implements RequestPath {
 
 		private final String valueDecoded;
 
+		private final char[] valueCharsDecoded;
+
+		private final boolean empty;
+
 		private final String semicolonContent;
 
 		private final MultiValueMap<String, String> parameters;
@@ -262,8 +309,12 @@ class DefaultRequestPath implements RequestPath {
 		DefaultPathSegment(String value, String valueDecoded, String semicolonContent,
 				MultiValueMap<String, String> params) {
 
+			Assert.isTrue(!value.contains("/"), "Invalid path segment value: " + value);
+
 			this.value = value;
 			this.valueDecoded = valueDecoded;
+			this.valueCharsDecoded = valueDecoded.toCharArray();
+			this.empty = !StringUtils.hasText(this.valueDecoded);
 			this.semicolonContent = semicolonContent;
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
@@ -277,6 +328,16 @@ class DefaultRequestPath implements RequestPath {
 		@Override
 		public String valueDecoded() {
 			return this.valueDecoded;
+		}
+
+		@Override
+		public char[] valueCharsDecoded() {
+			return this.valueCharsDecoded;
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return this.empty;
 		}
 
 		@Override

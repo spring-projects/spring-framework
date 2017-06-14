@@ -107,7 +107,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return null;
 		}
 		else if (uriToUse == null) {
-			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath, StandardCharsets.UTF_8);
+			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath);
 		}
 		else {
 			return new DefaultRequestPath(uriToUse, this.contextPath, StandardCharsets.UTF_8);
