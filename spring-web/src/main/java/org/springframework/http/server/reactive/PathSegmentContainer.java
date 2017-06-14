@@ -64,7 +64,7 @@ public interface PathSegmentContainer {
 	 * @return the parsed path
 	 */
 	static PathSegmentContainer parse(String path, Charset encoding) {
-		return DefaultRequestPath.parsePath(path, encoding);
+		return DefaultPathSegmentContainer.parsePath(path, encoding);
 	}
 
 }
