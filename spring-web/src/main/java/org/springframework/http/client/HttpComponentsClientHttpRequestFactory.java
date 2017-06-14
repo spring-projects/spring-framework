@@ -71,7 +71,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * with a default {@link HttpClient}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
-		this(HttpClients.createSystem());
+		this.httpClient = HttpClients.createSystem();
 	}
 
 	/**
@@ -80,8 +80,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		Assert.notNull(httpClient, "HttpClient must not be null");
-		this.httpClient = httpClient;
+		setHttpClient(httpClient);
 	}
 
 
@@ -90,6 +89,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
 	public void setHttpClient(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient must not be null");
 		this.httpClient = httpClient;
 	}
 
@@ -97,7 +97,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
-	@Nullable
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
@@ -153,9 +152,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		HttpClient client = getHttpClient();
-		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
-
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		HttpContext context = createHttpContext(httpMethod, uri);
@@ -171,7 +167,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				config = createRequestConfig(client);
+				config = createRequestConfig(getHttpClient());
 			}
 			if (config != null) {
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
@@ -179,10 +175,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 
 		if (this.bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
+			return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, context);
 		}
 		else {
-			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
+			return new HttpComponentsStreamingClientHttpRequest(getHttpClient(), httpRequest, context);
 		}
 	}
 
@@ -301,8 +297,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Override
 	public void destroy() throws Exception {
-		if (this.httpClient instanceof Closeable) {
-			((Closeable) this.httpClient).close();
+		HttpClient httpClient = getHttpClient();
+		if (httpClient instanceof Closeable) {
+			((Closeable) httpClient).close();
 		}
 	}
 
@@ -312,7 +309,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * extends {@link org.apache.http.client.methods.HttpEntityEnclosingRequestBase}
 	 * rather than {@link org.apache.http.client.methods.HttpRequestBase} and
 	 * hence allows HTTP delete with a request body. For use with the RestTemplate
-	 * exchange methods which allow the combination of HTTP DELETE with entity.
+	 * exchange methods which allow the combination of HTTP DELETE with an entity.
 	 * @since 4.1.2
 	 */
 	private static class HttpDelete extends HttpEntityEnclosingRequestBase {
