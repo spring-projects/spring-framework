@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -56,7 +57,7 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 	private final boolean trailingSlash;
 
 
-	DefaultPathSegmentContainer(String path, List<PathSegment> segments) {
+	private DefaultPathSegmentContainer(String path, List<PathSegment> segments) {
 		this.path = path;
 		this.absolute = path.startsWith("/");
 		this.pathSegments = Collections.unmodifiableList(segments);
@@ -188,6 +189,21 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 		}
 	}
 
+	static PathSegmentContainer subPath(PathSegmentContainer container, int fromIndex, int toIndex) {
+		List<PathSegment> segments = container.pathSegments();
+		if (fromIndex == 0 && toIndex == segments.size()) {
+			return container;
+		}
+		Assert.isTrue(fromIndex < toIndex, "fromIndex: " + fromIndex + " should be < toIndex " + toIndex);
+		Assert.isTrue(fromIndex >= 0 && fromIndex < segments.size(), "Invalid fromIndex: " + fromIndex);
+		Assert.isTrue(toIndex >= 0 && toIndex <= segments.size(), "Invalid toIndex: " + toIndex);
+
+		List<PathSegment> subList = segments.subList(fromIndex, toIndex);
+		String prefix = fromIndex > 0 || container.isAbsolute() ? "/" : "";
+		String suffix = toIndex == segments.size() && container.hasTrailingSlash() ? "/" : "";
+		String path = subList.stream().map(PathSegment::value).collect(Collectors.joining(prefix, "/", suffix));
+		return new DefaultPathSegmentContainer(path, subList);
+	}
 
 
 	private static class DefaultPathSegment implements PathSegment {

@@ -27,6 +27,7 @@ import org.springframework.util.MultiValueMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link DefaultPathSegmentContainer}.
@@ -119,6 +120,19 @@ public class DefaultPathSegmentContainerTests {
 		assertEquals("isAbsolute: '" + input + "'", absolute, path.isAbsolute());
 		assertEquals("pathSegments: " + input, segments, segmentValues);
 		assertEquals("hasTrailingSlash: '" + input + "'", trailingSlash, path.hasTrailingSlash());
+	}
+
+	@Test
+	public void subPath() throws Exception {
+		// basic
+		PathSegmentContainer path = PathSegmentContainer.parse("/a/b/c", UTF_8);
+		assertSame(path, PathSegmentContainer.subPath(path, 0));
+		assertEquals("/b/c", PathSegmentContainer.subPath(path, 1).value());
+		assertEquals("/c", PathSegmentContainer.subPath(path, 2).value());
+
+		// trailing slash
+		path = PathSegmentContainer.parse("/a/b/", UTF_8);
+		assertEquals("/b/", PathSegmentContainer.subPath(path, 1).value());
 	}
 
 }

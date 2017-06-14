@@ -67,4 +67,14 @@ public interface PathSegmentContainer {
 		return DefaultPathSegmentContainer.parsePath(path, encoding);
 	}
 
+	/**
+	 * Extract a sub-path starting at the given offset into the path segment list.
+	 * @param path the path to extract from
+	 * @param pathSegmentIndex the start index (inclusive)
+	 * @return the sub-path
+	 */
+	static PathSegmentContainer subPath(PathSegmentContainer path, int pathSegmentIndex) {
+		return DefaultPathSegmentContainer.subPath(path, pathSegmentIndex, path.pathSegments().size());
+	}
+
 }

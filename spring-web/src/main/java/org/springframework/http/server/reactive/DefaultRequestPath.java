@@ -17,7 +17,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -41,15 +40,14 @@ class DefaultRequestPath implements RequestPath {
 	DefaultRequestPath(URI uri, String contextPath, Charset charset) {
 		this.fullPath = PathSegmentContainer.parse(uri.getRawPath(), charset);
 		this.contextPath = initContextPath(this.fullPath, contextPath);
-		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
+		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
 	DefaultRequestPath(RequestPath requestPath, String contextPath) {
 		this.fullPath = requestPath;
 		this.contextPath = initContextPath(this.fullPath, contextPath);
-		this.pathWithinApplication = initPathWithinApplication(this.fullPath, this.contextPath);
+		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
-
 
 	private static PathSegmentContainer initContextPath(PathSegmentContainer path, String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
@@ -62,14 +60,13 @@ class DefaultRequestPath implements RequestPath {
 		int length = contextPath.length();
 		int counter = 0;
 
-		List<PathSegment> result = new ArrayList<>();
-		for (PathSegment pathSegment : path.pathSegments()) {
-			result.add(pathSegment);
-			counter += 1; // for '/' separators
+		for (int i=0; i < path.pathSegments().size(); i++) {
+			PathSegment pathSegment = path.pathSegments().get(i);
+			counter += 1; // for slash separators
 			counter += pathSegment.value().length();
 			counter += pathSegment.semicolonContent().length();
 			if (length == counter) {
-				return new DefaultPathSegmentContainer(contextPath, result);
+				return DefaultPathSegmentContainer.subPath(path, 0, i + 1);
 			}
 		}
 
@@ -78,13 +75,10 @@ class DefaultRequestPath implements RequestPath {
 				" given path='" + path.value() + "'");
 	}
 
-	private static PathSegmentContainer initPathWithinApplication(PathSegmentContainer path,
+	private static PathSegmentContainer extractPathWithinApplication(PathSegmentContainer fullPath,
 			PathSegmentContainer contextPath) {
 
-		String value = path.value().substring(contextPath.value().length());
-		List<PathSegment> pathSegments = new ArrayList<>(path.pathSegments());
-		pathSegments.removeAll(contextPath.pathSegments());
-		return new DefaultPathSegmentContainer(value, pathSegments);
+		return PathSegmentContainer.subPath(fullPath, contextPath.pathSegments().size());
 	}
 
 
