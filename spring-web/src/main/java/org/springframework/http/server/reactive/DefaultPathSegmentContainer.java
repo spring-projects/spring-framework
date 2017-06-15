@@ -190,10 +190,14 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 	}
 
 	static PathSegmentContainer subPath(PathSegmentContainer container, int fromIndex, int toIndex) {
+		if (fromIndex == toIndex) {
+			return EMPTY_PATH;
+		}
 		List<PathSegment> segments = container.pathSegments();
 		if (fromIndex == 0 && toIndex == segments.size()) {
 			return container;
 		}
+
 		Assert.isTrue(fromIndex < toIndex, "fromIndex: " + fromIndex + " should be < toIndex " + toIndex);
 		Assert.isTrue(fromIndex >= 0 && fromIndex < segments.size(), "Invalid fromIndex: " + fromIndex);
 		Assert.isTrue(toIndex >= 0 && toIndex <= segments.size(), "Invalid toIndex: " + toIndex);

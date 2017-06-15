@@ -36,6 +36,9 @@ public class DefaultRequestPathTests {
 		// no context path
 		testRequestPath("/a/b/c", "", "/a/b/c", false, true, false);
 
+		// context path only
+		testRequestPath("/a/b", "/a/b", "", false, true, false);
+
 		// empty path
 		testRequestPath("", "", "", true, false, false);
 		testRequestPath("", "/", "", true, false, false);
