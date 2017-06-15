@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * @param payload the Object to use as payload
  	 * @param headers headers for the message to send
 	 */
-	<T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers)
+	<T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers)
 			throws MessagingException;
 
 	/**
@@ -73,7 +73,7 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	<T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor)
+	<T> void convertAndSend(String destinationName, T payload, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException;
 
 	/**

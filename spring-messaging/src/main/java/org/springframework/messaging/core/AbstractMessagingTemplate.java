@@ -58,12 +58,16 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+	public <T> T convertSendAndReceive(
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
 

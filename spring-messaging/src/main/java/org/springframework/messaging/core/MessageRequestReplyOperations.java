@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,8 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
+	<T> T convertSendAndReceive(
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
 			throws MessagingException;
 
 	/**
@@ -108,7 +109,8 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor)
+	<T> T convertSendAndReceive(
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor)
 			throws MessagingException;
 
 	/**
@@ -142,7 +144,8 @@ public interface MessageRequestReplyOperations<D> {
 	 * could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
-			Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
+	<T> T convertSendAndReceive(
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass,
+			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }

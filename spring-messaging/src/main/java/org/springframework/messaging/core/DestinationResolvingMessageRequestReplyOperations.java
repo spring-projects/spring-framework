@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * the message could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
-			Class<T> targetClass) throws MessagingException;
+	<T> T convertSendAndReceive(String destinationName, Object request,
+			@Nullable Map<String, Object> headers, Class<T> targetClass) throws MessagingException;
 
 	/**
 	 * Resolve the given destination name, convert the payload request Object
@@ -92,8 +92,8 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * the message could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request,
-			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
+	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
+			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 	/**
 	 * Resolve the given destination name, convert the payload request Object
@@ -111,7 +111,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * the message could not be received, for example due to a timeout
 	 */
 	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor requestPostProcessor) throws MessagingException;
+	<T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }
