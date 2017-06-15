@@ -70,6 +70,9 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 class ReactiveTypeHandler {
 
+	private static final long STREAMING_TIMEOUT_VALUE = -1;
+
+
 	private static Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
 
 	private final ReactiveAdapterRegistry reactiveRegistry;
@@ -126,7 +129,7 @@ class ReactiveTypeHandler {
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementClass)) {
-				SseEmitter emitter = new SseEmitter();
+				SseEmitter emitter = new SseEmitter(STREAMING_TIMEOUT_VALUE);
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
@@ -162,7 +165,7 @@ class ReactiveTypeHandler {
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
-		return new ResponseBodyEmitter() {
+		return new ResponseBodyEmitter(STREAMING_TIMEOUT_VALUE) {
 			@Override
 			protected void extendResponse(ServerHttpResponse outputMessage) {
 				outputMessage.getHeaders().setContentType(mediaType);
