@@ -130,6 +130,10 @@ public class DefaultPathSegmentContainerTests {
 		assertEquals("/b/c", PathSegmentContainer.subPath(path, 1).value());
 		assertEquals("/c", PathSegmentContainer.subPath(path, 2).value());
 
+		// root path
+		path = PathSegmentContainer.parse("/", UTF_8);
+		assertEquals("/", PathSegmentContainer.subPath(path, 0).value());
+
 		// trailing slash
 		path = PathSegmentContainer.parse("/a/b/", UTF_8);
 		assertEquals("/b/", PathSegmentContainer.subPath(path, 1).value());
