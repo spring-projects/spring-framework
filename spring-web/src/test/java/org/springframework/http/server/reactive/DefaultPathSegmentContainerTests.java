@@ -92,7 +92,7 @@ public class DefaultPathSegmentContainerTests {
 		testPath("/a/b/c", "/a/b/c", false, true, Arrays.asList("a", "b", "c"), false);
 
 		// root path
-		testPath("/", "/", false, true, Collections.singletonList(""), false);
+		testPath("/", "/", false, true, Collections.emptyList(), false);
 
 		// empty path
 		testPath("",   "", true, false, Collections.emptyList(), false);

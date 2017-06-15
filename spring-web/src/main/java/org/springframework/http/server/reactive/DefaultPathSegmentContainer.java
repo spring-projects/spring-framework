@@ -43,7 +43,7 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 			new DefaultPathSegmentContainer("", Collections.emptyList());
 
 	private static final PathSegmentContainer ROOT_PATH =
-			new DefaultPathSegmentContainer("/", Collections.singletonList(EMPTY_PATH_SEGMENT));
+			new DefaultPathSegmentContainer("/", Collections.emptyList());
 
 
 	private final String path;
