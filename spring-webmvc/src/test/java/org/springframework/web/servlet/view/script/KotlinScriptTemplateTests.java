@@ -74,6 +74,19 @@ public class KotlinScriptTemplateTests {
 				response.getContentAsString());
 	}
 
+	@Test
+	public void renderTemplateWithoutRenderFunction() throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		model.put("header", "<html><body>");
+		model.put("hello", "Hello");
+		model.put("foo", "Foo");
+		model.put("footer", "</body></html>");
+		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/eval.kts",
+				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
+				response.getContentAsString());
+	}
+
 	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		view.setLocale(locale);
@@ -113,6 +126,15 @@ public class KotlinScriptTemplateTests {
 			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 			messageSource.setBasename("org/springframework/web/servlet/view/script/messages");
 			return messageSource;
+		}
+	}
+
+	@Configuration
+	static class ScriptTemplatingConfigurationWithoutRenderFunction {
+
+		@Bean
+		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
+			return new ScriptTemplateConfigurer("kotlin");
 		}
 	}
 

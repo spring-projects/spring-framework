@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.result.view.script;
 
 import java.nio.charset.Charset;
+
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
 import org.springframework.lang.Nullable;
@@ -63,7 +65,8 @@ public interface ScriptTemplateConfig {
 	String getRenderObject();
 
 	/**
-	 * Return the render function name (mandatory).
+	 * Return the render function name (optional). If not specified, the script templates
+	 * will be evaluated with {@link ScriptEngine#eval(String, Bindings)}.
 	 */
 	@Nullable
 	String getRenderFunction();
