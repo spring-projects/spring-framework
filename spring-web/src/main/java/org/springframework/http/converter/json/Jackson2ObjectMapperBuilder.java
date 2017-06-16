@@ -53,6 +53,8 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
@@ -93,6 +95,16 @@ import org.springframework.util.StringUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
+	private final Log logger = LogFactory.getLog(getClass());
+
+	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
+
+	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
+
+	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
+
+	private final Map<Object, Boolean> features = new HashMap<>();
+
 	private boolean createXmlMapper = false;
 
 	private JsonFactory factory;
@@ -112,14 +124,6 @@ public class Jackson2ObjectMapperBuilder {
 	private JsonInclude.Include serializationInclusion;
 
 	private FilterProvider filters;
-
-	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
-
-	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
-
-	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
-
-	private final Map<Object, Boolean> features = new HashMap<>();
 
 	private List<Module> modules;
 
@@ -762,7 +766,7 @@ public class Jackson2ObjectMapperBuilder {
 				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
 			}
 			catch (ClassNotFoundException ex) {
-				// jackson-module-kotlin not available
+				logger.warn("For Jackson Kotlin classes support please add \"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
 			}
 		}
 	}
