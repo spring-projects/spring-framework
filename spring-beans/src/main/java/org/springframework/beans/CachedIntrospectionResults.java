@@ -213,12 +213,7 @@ public class CachedIntrospectionResults {
 	 * @see #acceptClassLoader
 	 */
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
-		for (ClassLoader acceptedLoader : acceptedClassLoaders) {
-			if (isUnderneathClassLoader(classLoader, acceptedLoader)) {
-				return true;
-			}
-		}
-		return false;
+		return acceptedClassLoaders.stream().anyMatch(acceptedLoader -> isUnderneathClassLoader(classLoader, acceptedLoader));
 	}
 
 	/**

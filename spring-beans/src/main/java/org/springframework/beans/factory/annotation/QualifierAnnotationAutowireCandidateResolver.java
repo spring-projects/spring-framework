@@ -206,12 +206,8 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Checks whether the given annotation type is a recognized qualifier type.
 	 */
 	protected boolean isQualifier(Class<? extends Annotation> annotationType) {
-		for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {
-			if (annotationType.equals(qualifierType) || annotationType.isAnnotationPresent(qualifierType)) {
-				return true;
-			}
-		}
-		return false;
+		return this.qualifierTypes.stream().anyMatch(qualifierType -> annotationType.equals(qualifierType)
+                                  || annotationType.isAnnotationPresent(qualifierType));
 	}
 
 	/**
