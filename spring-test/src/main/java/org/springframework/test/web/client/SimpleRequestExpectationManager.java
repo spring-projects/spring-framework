@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * Subsequent request executions may be inserted anywhere thereafter.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.3
  */
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
@@ -49,27 +50,17 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 
 	@Override
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		RequestExpectation expectation;
-		try {
-			expectation = next(request);
-			expectation.match(request);
-		}
-		catch (AssertionError error) {
-			expectation = this.repeatExpectations.findExpectation(request);
-			if (expectation == null) {
-				throw error;
+		RequestExpectation expectation = this.repeatExpectations.findExpectation(request);
+		if (expectation == null) {
+			if (!this.expectationIterator.hasNext()) {
+				throw createUnexpectedRequestError(request);
 			}
+			expectation = this.expectationIterator.next();
+			expectation.match(request);
 		}
 		ClientHttpResponse response = expectation.createResponse(request);
 		this.repeatExpectations.update(expectation);
 		return response;
-	}
-
-	private RequestExpectation next(ClientHttpRequest request) {
-		if (this.expectationIterator.hasNext()) {
-			return this.expectationIterator.next();
-		}
-		throw createUnexpectedRequestError(request);
 	}
 
 	@Override
