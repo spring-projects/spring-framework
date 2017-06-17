@@ -284,7 +284,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		String defaultMessage = resolvable.getDefaultMessage();
 		String[] codes = resolvable.getCodes();
 		if (defaultMessage != null) {
-			if (!ObjectUtils.isEmpty(codes) && defaultMessage.equals(codes[0])) {
+			if (!ObjectUtils.isEmpty(codes) && defaultMessage.equals(codes[codes.length -1])) {
 				// Never format a code-as-default-message, even with alwaysUseMessageFormat=true
 				return defaultMessage;
 			}
