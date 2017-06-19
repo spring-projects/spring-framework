@@ -21,17 +21,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Default implementation of {@link HandlerStrategies.Builder}.
@@ -63,18 +62,9 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
-	public HandlerStrategies.Builder defaultCodecs(
-			Consumer<ServerCodecConfigurer.ServerDefaultCodecs> consumer) {
+	public HandlerStrategies.Builder codecs(Consumer<ServerCodecConfigurer> consumer) {
 		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.defaultCodecs());
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customCodecs(
-			Consumer<CodecConfigurer.CustomCodecs> consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.customCodecs());
+		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 

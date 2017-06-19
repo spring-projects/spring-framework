@@ -19,14 +19,13 @@ package org.springframework.web.reactive.function.server;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
@@ -118,20 +117,11 @@ public interface HandlerStrategies {
 	interface Builder {
 
 		/**
-		 * Customize the list of default server-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the default codecs
+		 * Customize the list of server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the codecs
 		 * @return this builder
-		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecs> consumer);
-
-		/**
-		 * Customize the list of custom server-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the custom codecs
-		 * @return this builder
-		 * @see #defaultCodecs(Consumer)
-		 */
-		Builder customCodecs(Consumer<CodecConfigurer.CustomCodecs> consumer);
+		Builder codecs(Consumer<ServerCodecConfigurer> consumer);
 
 		/**
 		 * Add the given view resolver to this builder.

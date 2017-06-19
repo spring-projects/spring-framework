@@ -48,7 +48,8 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Arjen Poutsma
@@ -203,10 +204,6 @@ public class DefaultEntityResponseBuilderTests {
 				return Collections.<ViewResolver>emptyList();
 			}
 		};
-		HandlerStrategies strategies = HandlerStrategies.empty()
-				.customCodecs(configurer -> configurer.writer(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes())))
-				.build();
-
 		StepVerifier.create(result)
 				.consumeNextWith(response -> {
 					StepVerifier.create(response.entity())
