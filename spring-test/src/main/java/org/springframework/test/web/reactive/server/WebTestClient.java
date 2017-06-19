@@ -43,7 +43,6 @@ import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
@@ -126,15 +125,6 @@ public interface WebTestClient {
 	 * @return a spec for specifying the target URL
 	 */
 	UriSpec<RequestHeadersSpec<?>> options();
-
-
-	/**
-	 * Filter the client with the given {@code ExchangeFilterFunction}.
-	 * @param filterFunction the filter to apply to this client
-	 * @return the filtered client
-	 * @see ExchangeFilterFunction#apply(ExchangeFunction)
-	 */
-	WebTestClient filter(ExchangeFilterFunction filterFunction);
 
 
 	// Static, factory methods
@@ -322,11 +312,48 @@ public interface WebTestClient {
 		Builder defaultHeader(String headerName, String... headerValues);
 
 		/**
+		 * Manipulate the default headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+
+		/**
 		 * Add the given header to all requests that haven't added it.
 		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
 		 */
 		Builder defaultCookie(String cookieName, String... cookieValues);
+
+		/**
+		 * Manipulate the default cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Add the given filter to the filter chain.
+		 * @param filter the filter to be added to the chain
+		 */
+		Builder filter(ExchangeFilterFunction filter);
+
+		/**
+		 * Manipulate the filters with the given consumer. The
+		 * list provided to the consumer is "live", so that the consumer can be used to remove
+		 * filters, change ordering, etc.
+		 * @param filtersConsumer a function that consumes the filter list
+		 * @return this builder
+		 */
+		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
@@ -417,12 +444,15 @@ public interface WebTestClient {
 		S cookie(String name, String value);
 
 		/**
-		 * Copy the given cookies into the entity's cookies map.
-		 *
-		 * @param cookies the existing cookies to copy from
-		 * @return the same instance
+		 * Manipulate this request's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
 		 */
-		S cookies(MultiValueMap<String, String> cookies);
+		S cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
@@ -449,11 +479,15 @@ public interface WebTestClient {
 		S header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing headers to copy from
-		 * @return the same instance
+		 * Manipulate the request's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
 		 */
-		S headers(HttpHeaders headers);
+		S headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Perform the exchange without a request body.

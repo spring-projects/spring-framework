@@ -52,11 +52,12 @@ public class WebClientIntegrationTests {
 
 	private WebClient webClient;
 
+	private String baseUrl;
 
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		String baseUrl = this.server.url("/").toString();
+		baseUrl = this.server.url("/").toString();
 		this.webClient = WebClient.create(baseUrl);
 	}
 
@@ -394,13 +395,16 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void filter() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
 
-		WebClient filteredClient = this.webClient.filter(
-				(request, next) -> {
-					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+		WebClient filteredClient = this.webClient.mutate()
+				.filter((request, next) -> {
+					ClientRequest filteredRequest =
+							ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
-				});
+				})
+				.build();
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
@@ -429,7 +433,9 @@ public class WebClientIntegrationTests {
 						}
 				);
 
-		WebClient filteredClient = this.webClient.filter(filter);
+		WebClient filteredClient = this.webClient.mutate()
+				.filter(filter)
+				.build();
 
 		// header not present
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
@@ -461,6 +467,7 @@ public class WebClientIntegrationTests {
 
 		Assert.assertEquals(2, server.getRequestCount());
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyException extends RuntimeException {

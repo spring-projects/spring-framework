@@ -59,8 +59,14 @@ public class ExchangeMutatorWebFilterTests {
 
 	@Test
 	public void perRequestMutators() throws Exception {
-		this.webTestClient
+
+		this.webTestClient = WebTestClient.bindToController(new TestController())
+				.webFilter(this.exchangeMutator)
+				.configureClient()
 				.filter(this.exchangeMutator.perClient(userIdentity("Giovanni")))
+				.build();
+
+		this.webTestClient
 				.get().uri("/userIdentity")
 				.exchange()
 				.expectStatus().isOk()

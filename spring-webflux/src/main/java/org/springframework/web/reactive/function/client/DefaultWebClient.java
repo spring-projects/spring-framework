@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -66,16 +67,18 @@ class DefaultWebClient implements WebClient {
 
 	private final MultiValueMap<String, String> defaultCookies;
 
+	private final DefaultWebClientBuilder builder;
+
 
 	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable UriBuilderFactory factory,
-			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies) {
+			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
+			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
-		this.defaultHeaders = (defaultHeaders != null ?
-				HttpHeaders.readOnlyHttpHeaders(defaultHeaders) : null);
-		this.defaultCookies = (defaultCookies != null ?
-				CollectionUtils.unmodifiableMultiValueMap(defaultCookies) : null);
+		this.defaultHeaders = defaultHeaders;
+		this.defaultCookies = defaultCookies;
+		this.builder = builder;
 	}
 
 
@@ -125,12 +128,9 @@ class DefaultWebClient implements WebClient {
 	}
 
 	@Override
-	public WebClient filter(ExchangeFilterFunction filterFunction) {
-		ExchangeFunction filteredExchangeFunction = this.exchangeFunction.filter(filterFunction);
-		return new DefaultWebClient(filteredExchangeFunction,
-				this.uriBuilderFactory, this.defaultHeaders, this.defaultCookies);
+	public Builder mutate() {
+		return this.builder;
 	}
-
 
 	private class DefaultUriSpec<S extends RequestHeadersSpec<?>> implements UriSpec<S> {
 
@@ -204,8 +204,9 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec headers(HttpHeaders headers) {
-			getHeaders().putAll(headers);
+		public DefaultRequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
+			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+			headersConsumer.accept(this.headers);
 			return this;
 		}
 
@@ -240,8 +241,10 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec cookies(MultiValueMap<String, String> cookies) {
-			getCookies().putAll(cookies);
+		public DefaultRequestBodySpec cookies(
+				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+			Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+			cookiesConsumer.accept(this.cookies);
 			return this;
 		}
 

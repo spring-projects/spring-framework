@@ -17,10 +17,15 @@
 package org.springframework.test.web.reactive.server;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.function.Consumer;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilderFactory;
@@ -72,8 +77,33 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	@Override
+	public WebTestClient.Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
+		this.webClientBuilder.defaultHeaders(headersConsumer);
+		return this;
+	}
+
+	@Override
 	public WebTestClient.Builder defaultCookie(String cookieName, String... cookieValues) {
 		this.webClientBuilder.defaultCookie(cookieName, cookieValues);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder defaultCookies(
+			Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		this.webClientBuilder.defaultCookies(cookiesConsumer);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder filter(ExchangeFilterFunction filter) {
+		this.webClientBuilder.filter(filter);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer) {
+		this.webClientBuilder.filters(filtersConsumer);
 		return this;
 	}
 

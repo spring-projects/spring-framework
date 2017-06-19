@@ -48,13 +48,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -78,12 +79,6 @@ class DefaultWebTestClient implements WebTestClient {
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
-	}
-
-	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
-		this.webClient = webTestClient.webClient.filter(filter);
-		this.wiretapConnector = webTestClient.wiretapConnector;
-		this.timeout = webTestClient.timeout;
 	}
 
 
@@ -131,12 +126,6 @@ class DefaultWebTestClient implements WebTestClient {
 			Function<WebClient, WebClient.UriSpec<WebClient.RequestBodySpec>> function) {
 
 		return new DefaultUriSpec<>(function.apply(this.webClient));
-	}
-
-
-	@Override
-	public WebTestClient filter(ExchangeFilterFunction filter) {
-		return new DefaultWebTestClient(this, filter);
 	}
 
 
@@ -193,8 +182,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestBodySpec headers(HttpHeaders headers) {
-			this.bodySpec.headers(headers);
+		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
+			this.bodySpec.headers(headersConsumer);
 			return this;
 		}
 
@@ -229,8 +218,9 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestBodySpec cookies(MultiValueMap<String, String> cookies) {
-			this.bodySpec.cookies(cookies);
+		public RequestBodySpec cookies(
+				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+			this.bodySpec.cookies(cookiesConsumer);
 			return this;
 		}
 
