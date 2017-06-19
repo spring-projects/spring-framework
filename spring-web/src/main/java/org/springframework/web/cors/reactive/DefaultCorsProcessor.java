@@ -52,7 +52,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 
 	@Override
-	public boolean processRequest(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
+	public boolean process(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
