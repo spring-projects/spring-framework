@@ -22,14 +22,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
  * For example in '<tt>/foo/&ast;_&ast;/&ast;_{foobar}</tt>' both <tt>*_*</tt> and <tt>*_{foobar}</tt>
- * are {@link RegexPathElement} path elements. Derived from the general {@link AntPathMatcher} approach.
+ * are {@link RegexPathElement} path elements. Derived from the general
+ * {@link org.springframework.util.AntPathMatcher} approach.
  *
  * @author Andy Clement
  * @since 5.0

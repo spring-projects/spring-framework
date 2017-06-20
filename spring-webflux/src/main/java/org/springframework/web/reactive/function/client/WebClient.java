@@ -339,6 +339,7 @@ public interface WebClient {
 		S uri(Function<UriBuilder, URI> uriFunction);
 	}
 
+
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
 	 */
@@ -417,22 +418,19 @@ public interface WebClient {
 		/**
 		 * Exchange the request for a {@code ClientResponse} with full access
 		 * to the response status and headers before extracting the body.
-		 *
 		 * <p>Use {@link Mono#flatMap(Function)} or
 		 * {@link Mono#flatMapMany(Function)} to compose further on the response:
-		 *
 		 * <pre>
-		 *	Mono&lt;Pojo&gt; mono = client.get().uri("/")
-		 *		.accept(MediaType.APPLICATION_JSON)
-		 *		.exchange()
-		 *		.flatMap(response -> response.bodyToMono(Pojo.class));
+		 * Mono&lt;Pojo&gt; mono = client.get().uri("/")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange()
+		 *     .flatMap(response -> response.bodyToMono(Pojo.class));
 		 *
-		 *	Flux&lt;Pojo&gt; flux = client.get().uri("/")
-		 *		.accept(MediaType.APPLICATION_STREAM_JSON)
-		 *		.exchange()
-		 *		.flatMapMany(response -> response.bodyToFlux(Pojo.class));
+		 * Flux&lt;Pojo&gt; flux = client.get().uri("/")
+		 *     .accept(MediaType.APPLICATION_STREAM_JSON)
+		 *     .exchange()
+		 *     .flatMapMany(response -> response.bodyToFlux(Pojo.class));
 		 * </pre>
-		 *
 		 * @return a {@code Mono} with the response
 		 * @see #retrieve()
 		 */
@@ -443,28 +441,25 @@ public interface WebClient {
 		 * retrieving the full response (i.e. status, headers, and body) where
 		 * instead of returning {@code Mono<ClientResponse>} it exposes shortcut
 		 * methods to extract the response body.
-		 *
 		 * <p>Use of this method is simpler when you don't need to deal directly
 		 * with {@link ClientResponse}, e.g. to use a custom {@code BodyExtractor}
 		 * or to check the status and headers before extracting the response.
-		 *
 		 * <pre>
-		 *	Mono&lt;Pojo&gt; bodyMono = client.get().uri("/")
-		 *		.accept(MediaType.APPLICATION_JSON)
-		 *		.retrieve()
-		 *		.bodyToMono(Pojo.class);
+		 * Mono&lt;Pojo&gt; bodyMono = client.get().uri("/")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .retrieve()
+		 *     .bodyToMono(Pojo.class);
 		 *
-		 *	Mono&lt;ResponseEntity&lt;Pojo&gt;&gt; entityMono = client.get().uri("/")
-		 *		.accept(MediaType.APPLICATION_JSON)
-		 *		.retrieve()
-		 *		.bodyToEntity(Pojo.class);
+		 * Mono&lt;ResponseEntity&lt;Pojo&gt;&gt; entityMono = client.get().uri("/")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .retrieve()
+		 *     .bodyToEntity(Pojo.class);
 		 * </pre>
-		 *
 		 * @return spec with options for extracting the response body
 		 */
 		ResponseSpec retrieve();
-
 	}
+
 
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 
@@ -515,15 +510,14 @@ public interface WebClient {
 		 * @return this builder
 		 */
 		RequestHeadersSpec<?> syncBody(Object body);
-
 	}
+
 
 	interface ResponseSpec {
 
 		/**
 		 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
 		 * {@code Mono} will contain a {@link WebClientException}.
-		 *
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
@@ -534,7 +528,6 @@ public interface WebClient {
 		/**
 		 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
 		 * {@code Flux} will contain a {@link WebClientException}.
-		 *
 		 * @param elementType the type of element in the response
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
@@ -546,7 +539,6 @@ public interface WebClient {
 		 * Returns the response as a delayed {@code ResponseEntity}. Unlike
 		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
 		 * for a 4xx or 5xx status code before extracting the body.
-		 *
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
 		 * @return {@code Mono} with the {@code ResponseEntity}
@@ -557,7 +549,6 @@ public interface WebClient {
 		 * Returns the response as a delayed list of {@code ResponseEntity}s. Unlike
 		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
 		 * for a 4xx or 5xx status code before extracting the body.
-		 *
 		 * @param elementType the expected response body list element type
 		 * @param <T> the type of elements in the list
 		 * @return {@code Mono} with the list of {@code ResponseEntity}s
