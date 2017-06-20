@@ -387,11 +387,14 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-			return this.responseMono.flatMap(response ->
-					response.bodyToMono(bodyType).map(body -> {
+			return this.responseMono.flatMap(response -> {
 						HttpHeaders headers = response.headers().asHttpHeaders();
-						return new ResponseEntity<>(body, headers, response.statusCode());
-					})
+						HttpStatus statusCode = response.statusCode();
+						return response.bodyToMono(bodyType)
+								.map(body -> new ResponseEntity<>(body, headers, statusCode))
+								.switchIfEmpty(Mono.defer(
+										() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
+					}
 			);
 		}
 

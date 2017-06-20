@@ -52,12 +52,10 @@ public class WebClientIntegrationTests {
 
 	private WebClient webClient;
 
-	private String baseUrl;
-
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		baseUrl = this.server.url("/").toString();
+		String baseUrl = this.server.url("/").toString();
 		this.webClient = WebClient.create(baseUrl);
 	}
 
@@ -466,6 +464,35 @@ public class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 
 		Assert.assertEquals(2, server.getRequestCount());
+	}
+
+	@Test
+	public void exchangeNoContent() throws Exception  {
+		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/noContent")
+				.exchange();
+
+		StepVerifier.create(result).assertNext(r -> {
+			assertTrue(r.statusCode().is2xxSuccessful());
+			StepVerifier.create(r.bodyToMono(Void.class)).verifyComplete();
+		}).verifyComplete();
+	}
+
+	@Test
+	public void retrieveNoContent() throws Exception  {
+		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
+				.uri("/noContent")
+				.retrieve()
+				.toEntity(Void.class);
+
+		StepVerifier.create(result).assertNext(r -> {
+			assertFalse(r.hasBody());
+			assertTrue(r.getStatusCode().is2xxSuccessful());
+		}).verifyComplete();
 	}
 
 

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -101,7 +102,8 @@ public abstract class BodyExtractors {
 						return reader.readMono(elementType, inputMessage, context.hints());
 					}
 				},
-				Mono::error);
+				Mono::error,
+				Mono::empty);
 	}
 
 	/**
@@ -149,7 +151,8 @@ public abstract class BodyExtractors {
 						return reader.read(elementType, inputMessage, context.hints());
 					}
 				},
-				Flux::error);
+				Flux::error,
+				Flux::empty);
 	}
 
 	/**
@@ -221,8 +224,12 @@ public abstract class BodyExtractors {
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
 			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context, ResolvableType elementType,
-			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError) {
+			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError,
+			Supplier<S> empty) {
 
+		if (elementType.equals(ResolvableType.forClass(Void.class))) {
+			return empty.get();
+		}
 		MediaType contentType = contentType(inputMessage);
 		List<HttpMessageReader<?>> messageReaders = context.messageReaders();
 		return messageReaders.stream()
