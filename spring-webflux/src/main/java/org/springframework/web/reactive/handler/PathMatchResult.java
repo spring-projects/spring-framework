@@ -22,8 +22,10 @@ import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Result of matching an request lookup path against {@link PathPattern} instances.
- * <p>Each result optionnally associates the matching {@link PathPattern}
+ *
+ * <p>Each result optionally associates the matching {@link PathPattern}
  * with a request handler of type {@code T}.
+ *
  * @author Brian Clozel
  * @since 5.0
  * @see PathPatternRegistry
@@ -34,17 +36,19 @@ public class PathMatchResult<T> {
 
 	private final T handler;
 
-	public PathMatchResult(PathPattern pattern, T handler) {
-		Assert.notNull(pattern, "PathPattern should not be null");
+
+	public PathMatchResult(PathPattern pattern, @Nullable T handler) {
+		Assert.notNull(pattern, "PathPattern must not be null");
 		this.pattern = pattern;
 		this.handler = handler;
 	}
+
 
 	/**
 	 * Return the {@link PathPattern} that matched the incoming request.
 	 */
 	public PathPattern getPattern() {
-		return pattern;
+		return this.pattern;
 	}
 
 	/**
@@ -52,7 +56,7 @@ public class PathMatchResult<T> {
 	 */
 	@Nullable
 	public T getHandler() {
-		return handler;
+		return this.handler;
 	}
 
 }

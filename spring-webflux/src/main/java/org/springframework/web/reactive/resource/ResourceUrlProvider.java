@@ -32,12 +32,12 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.web.reactive.handler.PathMatchResult;
+import org.springframework.web.reactive.handler.PathPatternRegistry;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.reactive.handler.PathMatchResult;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
-import org.springframework.web.reactive.handler.PathPatternRegistry;
 
 /**
  * A central component to use to obtain the public URL path that clients should
@@ -205,6 +205,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + result.getPattern() + "\"");
 					}
 					ResourceWebHandler handler = result.getHandler();
+					if (handler == null) {
+						throw new IllegalStateException("No handler for URL pattern \"" + result.getPattern() + "\"");
+					}
 					ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
 					return chain.resolveUrlPath(pathWithinMapping, handler.getLocations())
 							.map(resolvedPath -> {

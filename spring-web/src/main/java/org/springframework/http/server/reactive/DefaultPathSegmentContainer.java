@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.nio.charset.Charset;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -93,7 +95,7 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -224,12 +226,10 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 
 		private final MultiValueMap<String, String> parameters;
 
-
 		DefaultPathSegment(String value, String valueDecoded, String semicolonContent,
 				MultiValueMap<String, String> params) {
 
 			Assert.isTrue(!value.contains("/"), "Invalid path segment value: " + value);
-
 			this.value = value;
 			this.valueDecoded = valueDecoded;
 			this.valueCharsDecoded = valueDecoded.toCharArray();
@@ -237,7 +237,6 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 			this.semicolonContent = semicolonContent;
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
-
 
 		@Override
 		public String value() {
@@ -269,9 +268,8 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 			return this.parameters;
 		}
 
-
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

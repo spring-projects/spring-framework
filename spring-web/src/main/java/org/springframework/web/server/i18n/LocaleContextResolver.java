@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ public interface LocaleContextResolver {
 
 	/**
 	 * Resolve the current locale context via the given exchange.
-	 *
 	 * <p>The returned context may be a
 	 * {@link org.springframework.context.i18n.TimeZoneAwareLocaleContext},
 	 * containing a locale with associated time zone information.
@@ -44,7 +43,7 @@ public interface LocaleContextResolver {
 	 * <p>Custom resolver implementations may also return extra settings in
 	 * the returned context, which again can be accessed through downcasting.
 	 * @param exchange current server exchange
-	 * @return the current locale context (never {@code null}
+	 * @return the current locale context (never {@code null})
 	 */
 	LocaleContext resolveLocaleContext(ServerWebExchange exchange);
 

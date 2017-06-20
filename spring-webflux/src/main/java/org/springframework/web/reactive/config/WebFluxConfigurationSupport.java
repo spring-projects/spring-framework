@@ -112,11 +112,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-		if (configurer.isUseCaseSensitiveMatch() != null) {
-			mapping.setUseCaseSensitiveMatch(configurer.isUseCaseSensitiveMatch());
+		if (useCaseSensitiveMatch != null) {
+			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
 		return mapping;
 	}
@@ -209,11 +211,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
 			PathMatchConfigurer configurer = getPathMatchConfigurer();
-			if (configurer.isUseTrailingSlashMatch() != null) {
-				handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+			Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+			Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+			if (useTrailingSlashMatch != null) {
+				handlerMapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 			}
-			if (configurer.isUseCaseSensitiveMatch() != null) {
-				handlerMapping.setUseCaseSensitiveMatch(configurer.isUseCaseSensitiveMatch());
+			if (useCaseSensitiveMatch != null) {
+				handlerMapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 			}
 		}
 		else {

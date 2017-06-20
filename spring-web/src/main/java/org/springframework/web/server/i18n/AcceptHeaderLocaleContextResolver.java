@@ -50,7 +50,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 	 * determined via {@link HttpHeaders#getAcceptLanguageAsLocales()}.
 	 * @param locales the supported locales
 	 */
-	public void setSupportedLocales(List<Locale> locales) {
+	public void setSupportedLocales(@Nullable List<Locale> locales) {
 		this.supportedLocales.clear();
 		if (locales != null) {
 			this.supportedLocales.addAll(locales);

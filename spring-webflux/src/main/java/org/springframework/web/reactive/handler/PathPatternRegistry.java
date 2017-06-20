@@ -25,6 +25,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternComparator;
@@ -55,7 +56,6 @@ public class PathPatternRegistry<T> {
 	/**
 	 * Create a new {@code PathPatternRegistry} using
 	 * the provided instance of {@link PathPatternParser}.
-	 *
 	 * @param patternParser the {@link PathPatternParser} to use
 	 */
 	public PathPatternRegistry(PathPatternParser patternParser) {
@@ -66,7 +66,6 @@ public class PathPatternRegistry<T> {
 	 * Create a new {@code PathPatternRegistry} using
 	 * the provided instance of {@link PathPatternParser}
 	 * and the given map of {@link PathPattern}.
-	 *
 	 * @param patternParser the {@link PathPatternParser} to use
 	 * @param patternsMap the map of {@link PathPattern} to use
 	 */
@@ -74,6 +73,7 @@ public class PathPatternRegistry<T> {
 		this.pathPatternParser = patternParser;
 		this.patternsMap = new HashMap<>(patternsMap);
 	}
+
 
 	/**
 	 * Return a (read-only) map of all patterns and associated values.
@@ -84,7 +84,6 @@ public class PathPatternRegistry<T> {
 
 	/**
 	 * Return a {@code SortedSet} of {@code PathPattern}s matching the given {@code lookupPath}.
-	 *
 	 * <p>The returned set sorted with the most specific
 	 * patterns first, according to the given {@code lookupPath}.
 	 * @param lookupPath the URL lookup path to be matched against
@@ -99,7 +98,6 @@ public class PathPatternRegistry<T> {
 
 	/**
 	 * Return, if any, the most specific {@code PathPattern} matching the given {@code lookupPath}.
-	 *
 	 * @param lookupPath the URL lookup path to be matched against
 	 */
 	public Optional<PathMatchResult<T>> findFirstMatch(String lookupPath) {
@@ -120,7 +118,7 @@ public class PathPatternRegistry<T> {
 	/**
 	 * Parse the given {@code rawPattern} and adds it to this registry.
 	 * @param rawPattern raw path pattern to parse and register
-	 * @param handler
+	 * @param handler the associated handler object
 	 */
 	public void register(String rawPattern, T handler) {
 		String fixedPattern = prependLeadingSlash(rawPattern);
@@ -137,6 +135,7 @@ public class PathPatternRegistry<T> {
 		}
 	}
 
+
 	private class PathMatchResultComparator<T> implements Comparator<PathMatchResult<T>> {
 
 		private final String path;
@@ -146,7 +145,7 @@ public class PathPatternRegistry<T> {
 		}
 
 		@Override
-		public int compare(PathMatchResult<T> o1, PathMatchResult<T> o2) {
+		public int compare(@Nullable PathMatchResult<T> o1, @Nullable PathMatchResult<T> o2) {
 			// Nulls get sorted to the end
 			if (o1 == null) {
 				return (o2 == null ? 0 : +1);
@@ -171,7 +170,6 @@ public class PathPatternRegistry<T> {
 			}
 			return result;
 		}
-
 	}
 
 }
