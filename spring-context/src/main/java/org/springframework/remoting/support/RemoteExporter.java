@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * @see RemoteInvocationTraceInterceptor
 	 */
 	public void setRegisterTraceInterceptor(boolean registerTraceInterceptor) {
-		this.registerTraceInterceptor = Boolean.valueOf(registerTraceInterceptor);
+		this.registerTraceInterceptor = registerTraceInterceptor;
 	}
 
 	/**
@@ -153,20 +153,23 @@ public abstract class RemoteExporter extends RemotingSupport {
 	protected Object getProxyForService() {
 		checkService();
 		checkServiceInterface();
+
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.addInterface(getServiceInterface());
-		if (this.registerTraceInterceptor != null ?
-				this.registerTraceInterceptor.booleanValue() : this.interceptors == null) {
+
+		if (this.registerTraceInterceptor != null ? this.registerTraceInterceptor : this.interceptors == null) {
 			proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
 		}
 		if (this.interceptors != null) {
 			AdvisorAdapterRegistry adapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
-			for (int i = 0; i < this.interceptors.length; i++) {
-				proxyFactory.addAdvisor(adapterRegistry.wrap(this.interceptors[i]));
+			for (Object interceptor : this.interceptors) {
+				proxyFactory.addAdvisor(adapterRegistry.wrap(interceptor));
 			}
 		}
+
 		proxyFactory.setTarget(getService());
 		proxyFactory.setOpaque(true);
+
 		return proxyFactory.getProxy(getBeanClassLoader());
 	}
 
