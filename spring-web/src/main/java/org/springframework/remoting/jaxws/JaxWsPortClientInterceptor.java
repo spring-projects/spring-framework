@@ -278,16 +278,14 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (!serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
 	/**
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
-	@Nullable
 	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}

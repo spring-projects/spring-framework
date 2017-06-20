@@ -59,9 +59,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
 		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
-		if (!serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -73,9 +71,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		if (this.serviceInterface == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
+		Assert.notNull(this.serviceInterface, "Property 'serviceInterface' is required");
 		this.serviceProxy = new ProxyFactory(this.serviceInterface, this).getProxy(this.beanClassLoader);
 	}
 

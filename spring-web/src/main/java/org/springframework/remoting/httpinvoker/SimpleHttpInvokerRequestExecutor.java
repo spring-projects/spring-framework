@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,8 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	protected HttpURLConnection openConnection(HttpInvokerClientConfiguration config) throws IOException {
 		URLConnection con = new URL(config.getServiceUrl()).openConnection();
 		if (!(con instanceof HttpURLConnection)) {
-			throw new IOException("Service URL [" + config.getServiceUrl() + "] is not an HTTP URL");
+			throw new IOException(
+					"Service URL [" + config.getServiceUrl() + "] does not resolve to an HTTP connection");
 		}
 		return (HttpURLConnection) con;
 	}
@@ -130,6 +131,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 		if (this.readTimeout >= 0) {
 			connection.setReadTimeout(this.readTimeout);
 		}
+
 		connection.setDoOutput(true);
 		connection.setRequestMethod(HTTP_METHOD_POST);
 		connection.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, getContentType());
@@ -142,6 +144,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 				connection.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, StringUtils.toLanguageTag(locale));
 			}
 		}
+
 		if (isAcceptGzipEncoding()) {
 			connection.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 		}
