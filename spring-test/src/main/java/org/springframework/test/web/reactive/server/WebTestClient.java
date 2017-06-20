@@ -127,6 +127,11 @@ public interface WebTestClient {
 	UriSpec<RequestHeadersSpec<?>> options();
 
 
+	/**
+	 * Return a builder to mutate properties of this web test client.
+	 */
+	Builder mutate();
+
 	// Static, factory methods
 
 	/**

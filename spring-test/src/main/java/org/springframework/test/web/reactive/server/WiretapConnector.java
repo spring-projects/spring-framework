@@ -50,6 +50,9 @@ class WiretapConnector implements ClientHttpConnector {
 		this.delegate = delegate;
 	}
 
+	public ClientHttpConnector getDelegate() {
+		return this.delegate;
+	}
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,

@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -38,7 +39,7 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
-	private final WebClient.Builder webClientBuilder = WebClient.builder();
+	private final WebClient.Builder webClientBuilder;
 
 	private final ClientHttpConnector connector;
 
@@ -49,12 +50,21 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		this(new ReactorClientHttpConnector());
 	}
 
-	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
-		this.connector = connector;
+	DefaultWebTestClientBuilder(HttpHandler httpHandler) {
+		this(new HttpHandlerConnector(httpHandler));
 	}
 
-	DefaultWebTestClientBuilder(HttpHandler httpHandler) {
-		this.connector = new HttpHandlerConnector(httpHandler);
+	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
+		this(connector, null, null);
+	}
+
+	DefaultWebTestClientBuilder(ClientHttpConnector connector,
+			@Nullable WebClient.Builder webClientBuilder,
+			@Nullable Duration responseTimeout) {
+
+		this.connector = connector;
+		this.webClientBuilder = (webClientBuilder != null ? webClientBuilder : WebClient.builder());
+		this.responseTimeout = responseTimeout;
 	}
 
 
