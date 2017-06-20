@@ -56,6 +56,7 @@ public abstract class BodyExtractors {
 
 	private static final ResolvableType PART_TYPE = ResolvableType.forClass(Part.class);
 
+	private static final ResolvableType VOID_TYPE = ResolvableType.forClass(Void.class);
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
@@ -227,7 +228,7 @@ public abstract class BodyExtractors {
 			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError,
 			Supplier<S> empty) {
 
-		if (elementType.equals(ResolvableType.forClass(Void.class))) {
+		if (VOID_TYPE.equals(elementType)) {
 			return empty.get();
 		}
 		MediaType contentType = contentType(inputMessage);
