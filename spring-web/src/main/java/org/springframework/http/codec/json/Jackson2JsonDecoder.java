@@ -111,20 +111,23 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 				this.objectMapper.readerFor(javaType));
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
-				.map(dataBuffer -> {
+				.flatMap(dataBuffer -> {
+					if (dataBuffer.readableByteCount() == 0) {
+						return Mono.empty();
+					}
 					try {
 						Object value = reader.readValue(dataBuffer.asInputStream());
 						DataBufferUtils.release(dataBuffer);
-						return value;
+						return Mono.just(value);
 					}
 					catch (InvalidDefinitionException ex) {
-						throw new CodecException("Type definition error: " + ex.getType(), ex);
+						return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
 					}
 					catch (JsonProcessingException ex) {
-						throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
+						return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
 					}
 					catch (IOException ex) {
-						throw new DecodingException("I/O error while parsing input stream", ex);
+						return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
 					}
 				});
 	}
