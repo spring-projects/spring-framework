@@ -21,6 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -34,6 +36,7 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static java.time.format.DateTimeFormatter.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -464,6 +467,42 @@ public class HttpHeadersTests {
 	public void contentLanguageSerialized() {
 		headers.set(HttpHeaders.CONTENT_LANGUAGE,  "de, en_CA");
 		assertEquals("Expected one (first) locale", Locale.GERMAN, headers.getContentLanguage());
+	}
+
+	@Test
+	public void firstDate() {
+		headers.setDate(HttpHeaders.DATE, 1229595600000L);
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+
+		headers.clear();
+
+		headers.add(HttpHeaders.DATE, "Thu, 18 Dec 2008 10:20:00 GMT");
+		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+	}
+
+	@Test
+	public void firstZonedDateTime() {
+		ZonedDateTime date = ZonedDateTime.of(2017, 6, 22, 22, 22, 0, 0, ZoneId.of("GMT"));
+		headers.setZonedDateTime(HttpHeaders.DATE, date);
+		assertThat(headers.getFirst(HttpHeaders.DATE), is("Thu, 22 Jun 2017 22:22:00 GMT"));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		headers.clear();
+		ZonedDateTime otherDate = ZonedDateTime.of(2010, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(date));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(otherDate));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// obsolete RFC 850 format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thursday, 22-Jun-17 22:22:00 GMT");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// ANSI C's asctime() format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thu Jun 22 22:22:00 2017");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 	}
 
 }

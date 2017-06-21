@@ -160,7 +160,7 @@ public class ResponseEntityTests {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertEquals("GET", responseHeaders.getFirst("Allow"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
+		assertEquals("Thu, 1 Jan 1970 00:00:12 GMT",
 				responseHeaders.getFirst("Last-Modified"));
 		assertEquals(location.toASCIIString(),
 				responseHeaders.getFirst("Location"));

@@ -22,12 +22,14 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -36,7 +38,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+
 
 /**
  * Represents HTTP request and response headers, mapping string header names to a list of string values.
@@ -373,16 +375,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
 	/**
-	 * Date formats as specified in the HTTP RFC
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
-	 */
-	private static final String[] DATE_FORMATS = new String[] {
-			"EEE, dd MMM yyyy HH:mm:ss zzz",
-			"EEE, dd-MMM-yy HH:mm:ss zzz",
-			"EEE MMM dd HH:mm:ss yyyy"
-	};
-
-	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
 	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
 	 */
@@ -390,7 +382,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
 
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final ZoneId GMT = ZoneId.of("GMT");
+
+	/**
+	 * Date formats with time zone as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
+			DateTimeFormatter.RFC_1123_DATE_TIME,
+			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zz", Locale.US),
+			DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy",Locale.US).withZone(GMT)
+	};
 
 
 	private final Map<String, List<String>> headers;
@@ -924,6 +926,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Expires} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @see #getFirstZonedDateTime(String)
 	 */
 	public long getExpires() {
 		return getFirstDate(EXPIRES, false);
@@ -1010,6 +1013,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code If-Modified-Since} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @see #getFirstZonedDateTime(String)
 	 */
 	public long getIfModifiedSince() {
 		return getFirstDate(IF_MODIFIED_SINCE, false);
@@ -1051,6 +1055,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 * @since 4.3
+	 * @see #getFirstZonedDateTime(String)
 	 */
 	public long getIfUnmodifiedSince() {
 		return getFirstDate(IF_UNMODIFIED_SINCE, false);
@@ -1071,6 +1076,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@code Last-Modified} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @see #getFirstZonedDateTime(String)
 	 */
 	public long getLastModified() {
 		return getFirstDate(LAST_MODIFIED, false);
@@ -1178,14 +1184,25 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the given date under the given header name after formatting it as a string
-	 * using the pattern {@code "EEE, dd MMM yyyy HH:mm:ss zzz"}. The equivalent of
+	 * using the RFC-1123 date-time formatter. The equivalent of
 	 * {@link #set(String, String)} but for date headers.
 	 * @since 3.2.4
+	 * @see #setZonedDateTime(String, ZonedDateTime)
 	 */
 	public void setDate(String headerName, long date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0], Locale.US);
-		dateFormat.setTimeZone(GMT);
-		set(headerName, dateFormat.format(new Date(date)));
+		Instant instant = Instant.ofEpochMilli(date);
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, GMT);
+		set(headerName, DATE_FORMATTERS[0].format(zonedDateTime));
+	}
+
+	/**
+	 * Set the given date under the given header name after formatting it as a string
+	 * using the RFC-1123 date-time formatter. The equivalent of
+	 * {@link #set(String, String)} but for date headers.
+	 * @since 5.0
+	 */
+	public void setZonedDateTime(String headerName, ZonedDateTime date) {
+		set(headerName, DATE_FORMATTERS[0].format(date));
 	}
 
 	/**
@@ -1195,6 +1212,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param headerName the header name
 	 * @return the parsed date header, or -1 if none
 	 * @since 3.2.4
+	 * @see #getFirstZonedDateTime(String)
 	 */
 	public long getFirstDate(String headerName) {
 		return getFirstDate(headerName, true);
@@ -1210,32 +1228,69 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@link IllegalArgumentException} ({@code true}) or rather return -1
 	 * in that case ({@code false})
 	 * @return the parsed date header, or -1 if none (or invalid)
- 	 */
+	 * @see #getFirstZonedDateTime(String, boolean)
+	 */
 	private long getFirstDate(String headerName, boolean rejectInvalid) {
+		ZonedDateTime zonedDateTime = getFirstZonedDateTime(headerName, rejectInvalid);
+		return (zonedDateTime != null ? zonedDateTime.toInstant().toEpochMilli() : -1);
+	}
+
+	/**
+	 * Parse the first header value for the given header name as a date,
+	 * return {@code null} if there is no value, or raise {@link IllegalArgumentException}
+	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @return the parsed date header, or {@code null} if none
+	 * @since 5.0
+	 */
+	@Nullable
+	public ZonedDateTime getFirstZonedDateTime(String headerName) {
+		return getFirstZonedDateTime(headerName, true);
+	}
+
+	/**
+	 * Parse the first header value for the given header name as a date,
+	 * return {@code null} if there is no value or also in case of an invalid value
+	 * (if {@code rejectInvalid=false}), or raise {@link IllegalArgumentException}
+	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @param rejectInvalid whether to reject invalid values with an
+	 * {@link IllegalArgumentException} ({@code true}) or rather return {@code null}
+	 * in that case ({@code false})
+	 * @return the parsed date header, or {@code null} if none (or invalid)
+ 	 */
+	@Nullable
+	private ZonedDateTime getFirstZonedDateTime(String headerName, boolean rejectInvalid) {
 		String headerValue = getFirst(headerName);
 		if (headerValue == null) {
 			// No header value sent at all
-			return -1;
+			return null;
 		}
 		if (headerValue.length() >= 3) {
 			// Short "0" or "-1" like values are never valid HTTP date headers...
-			// Let's only bother with SimpleDateFormat parsing for long enough values.
-			for (String dateFormat : DATE_FORMATS) {
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
-				simpleDateFormat.setTimeZone(GMT);
+			// Let's only bother with DateTimeFormatter parsing for long enough values.
+
+			// See https://stackoverflow.com/questions/12626699/if-modified-since-http-header-passed-by-ie9-includes-length
+			int parametersIndex = headerValue.indexOf(";");
+			if (parametersIndex != -1) {
+				headerValue = headerValue.substring(0, parametersIndex);
+			}
+
+			for (DateTimeFormatter dateFormatter : DATE_FORMATTERS) {
 				try {
-					return simpleDateFormat.parse(headerValue).getTime();
+					return ZonedDateTime.parse(headerValue, dateFormatter);
 				}
-				catch (ParseException ex) {
+				catch (DateTimeParseException ex) {
 					// ignore
 				}
 			}
+
 		}
 		if (rejectInvalid) {
 			throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
 					"\" for \"" + headerName + "\" header");
 		}
-		return -1;
+		return null;
 	}
 
 	/**

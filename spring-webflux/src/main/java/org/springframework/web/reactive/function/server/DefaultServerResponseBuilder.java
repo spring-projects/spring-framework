@@ -125,9 +125,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
-		ZonedDateTime gmt = lastModified.withZoneSameInstant(ZoneId.of("GMT"));
-		String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
-		this.headers.set(HttpHeaders.LAST_MODIFIED, headerValue);
+		this.headers.setZonedDateTime(HttpHeaders.LAST_MODIFIED, lastModified);
 		return this;
 	}
 
