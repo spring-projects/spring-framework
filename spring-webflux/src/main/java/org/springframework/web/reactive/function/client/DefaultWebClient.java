@@ -206,7 +206,7 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultRequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
 			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
-			headersConsumer.accept(this.headers);
+			headersConsumer.accept(getHeaders());
 			return this;
 		}
 
