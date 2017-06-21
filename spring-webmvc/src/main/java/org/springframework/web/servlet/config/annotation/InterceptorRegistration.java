@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -31,9 +32,10 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
+ * @author Eko Kurniawan Khannedy
  * @since 3.1
  */
-public class InterceptorRegistration {
+public class InterceptorRegistration implements Ordered {
 
 	private final HandlerInterceptor interceptor;
 
@@ -43,6 +45,7 @@ public class InterceptorRegistration {
 
 	private PathMatcher pathMatcher;
 
+	private int order = 0;
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -99,4 +102,16 @@ public class InterceptorRegistration {
 		return mappedInterceptor;
 	}
 
+	/**
+	 * An order position to be used, default is 0.
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	@Override
+	public int getOrder() {
+		return order;
+	}
 }
