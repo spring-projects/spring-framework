@@ -26,6 +26,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -260,9 +261,8 @@ public class CronSequenceGenerator {
 	 * Parse the given pattern expression.
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
-		if (expression == null) {
-			throw new IllegalArgumentException("Cron expression cannot be null!");
-		}
+		Assert.notNull(expression, "Cron expression cannot be null!");
+		
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
 		if (!areValidCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
