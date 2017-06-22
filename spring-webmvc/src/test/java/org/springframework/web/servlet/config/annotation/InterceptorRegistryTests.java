@@ -40,7 +40,10 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test fixture with a {@link InterceptorRegistry}, two {@link HandlerInterceptor}s and two
@@ -198,25 +201,25 @@ public class InterceptorRegistryTests {
 
 	@Test
 	public void orderedInterceptors() throws Exception {
-		registry.addInterceptor(interceptor1).order(Ordered.LOWEST_PRECEDENCE);
-		registry.addInterceptor(interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
+		this.registry.addInterceptor(this.interceptor1).order(Ordered.LOWEST_PRECEDENCE);
+		this.registry.addInterceptor(this.interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
 
-		List<Object> interceptors = registry.getInterceptors();
+		List<Object> interceptors = this.registry.getInterceptors();
 		assertEquals(2, interceptors.size());
 
-		assertSame(interceptor2, interceptors.get(0));
-		assertSame(interceptor1, interceptors.get(1));
+		assertSame(this.interceptor2, interceptors.get(0));
+		assertSame(this.interceptor1, interceptors.get(1));
 	}
 
 	@Test
 	public void nonOrderedInterceptors() throws Exception {
-		registry.addInterceptor(interceptor1).order(0);
-		registry.addInterceptor(interceptor2).order(0);
+		this.registry.addInterceptor(this.interceptor1).order(0);
+		this.registry.addInterceptor(this.interceptor2).order(0);
 
-		List<Object> interceptors = registry.getInterceptors();
+		List<Object> interceptors = this.registry.getInterceptors();
 		assertEquals(2, interceptors.size());
 
-		assertSame(interceptor1, interceptors.get(0));
-		assertSame(interceptor2, interceptors.get(1));
+		assertSame(this.interceptor1, interceptors.get(0));
+		assertSame(this.interceptor2, interceptors.get(1));
 	}
 }

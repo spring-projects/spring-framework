@@ -34,7 +34,7 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
  * @author Keith Donald
  * @since 3.1
  */
-public class InterceptorRegistration implements Ordered {
+public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
 
@@ -42,9 +42,10 @@ public class InterceptorRegistration implements Ordered {
 
 	private final List<String> excludePatterns = new ArrayList<>();
 
+	private int order = 0;
+
 	private PathMatcher pathMatcher;
 
-	private int order = 0;
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -68,6 +69,18 @@ public class InterceptorRegistration implements Ordered {
 	public InterceptorRegistration excludePathPatterns(String... patterns) {
 		this.excludePatterns.addAll(Arrays.asList(patterns));
 		return this;
+	}
+
+	/**
+	 * An order position to be used, default is 0.
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	protected int getOrder() {
+		return this.order;
 	}
 
 	/**
@@ -99,19 +112,6 @@ public class InterceptorRegistration implements Ordered {
 		}
 
 		return mappedInterceptor;
-	}
-
-	/**
-	 * An order position to be used, default is 0.
-	 */
-	public InterceptorRegistration order(int order){
-		this.order = order;
-		return this;
-	}
-
-	@Override
-	public int getOrder() {
-		return order;
 	}
 
 }
