@@ -93,6 +93,11 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder cloneBuilder() {
+		return new DefaultWebClientBuilder(this);
+	}
+
+	@Override
 	public WebClient.Builder defaultUriVariables(Map<String, ?> defaultUriVariables) {
 		this.defaultUriVariables = defaultUriVariables;
 		return this;
