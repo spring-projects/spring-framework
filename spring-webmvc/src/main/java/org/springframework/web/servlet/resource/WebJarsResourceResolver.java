@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.webjars.WebJarAssetLocator;
@@ -72,7 +71,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);

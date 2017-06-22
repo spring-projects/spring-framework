@@ -234,7 +234,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @return true if the request does not require further processing.
 	 * @since 4.2
 	 */
-	boolean checkNotModified(String etag, long lastModifiedTimestamp);
+	boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp);
 
 	/**
 	 * Get a short description of this request,

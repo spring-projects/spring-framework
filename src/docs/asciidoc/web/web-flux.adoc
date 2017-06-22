@@ -327,9 +327,10 @@ For the **functional programming model** bootstrap as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-ApplicationContext context = new AnnotationConfigApplicationContext(); // (1)
+AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(); // (1)
 context.registerBean(FooBean.class, () -> new FooBeanImpl()); // (2)
 context.registerBean(BarBean.class); // (3)
+context.refresh();
 
 HttpHandler handler = WebHttpHandlerBuilder
 		.webHandler(RouterFunctions.toHttpHandler(...))

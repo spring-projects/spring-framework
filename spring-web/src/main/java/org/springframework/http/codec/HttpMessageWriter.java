@@ -54,7 +54,7 @@ public interface HttpMessageWriter<T> {
 	 * @param mediaType the media type for the write, possibly {@code null}
 	 * @return {@code true} if writable, {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType elementType, MediaType mediaType);
+	boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
 	 * Write an given stream of object to the output message.
@@ -74,7 +74,6 @@ public interface HttpMessageWriter<T> {
 	 * Server-side only alternative to
 	 * {@link #write(Publisher, ResolvableType, MediaType, ReactiveHttpOutputMessage, Map)}
 	 * with additional context available.
-	 *
 	 * @param actualType the actual return type of the method that returned the
 	 * value; for annotated controllers, the {@link MethodParameter} can be
 	 * accessed via {@link ResolvableType#getSource()}.

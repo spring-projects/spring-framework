@@ -162,6 +162,15 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected void writingComplete() {
 	}
 
+	/**
+	 * Invoked when an error happens while writing.
+	 * <p>Defaults to no-op. Servlet 3.1 based implementations will receive
+	 * {@code javax.servlet.WriteListener#onError(Throwable)} event.
+	 */
+	protected void writingFailed(Throwable ex) {
+	}
+
+
 
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
@@ -276,8 +285,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						}
 					}
 					catch (IOException ex) {
-						processor.cancel();
-						processor.onError(ex);
+						processor.writingFailed(ex);
 					}
 				}
 			}

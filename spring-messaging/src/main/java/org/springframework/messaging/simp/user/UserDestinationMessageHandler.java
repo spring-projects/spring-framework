@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	/**
 	 * Return the configured destination for unresolved messages.
 	 */
+	@Nullable
 	public String getBroadcastDestination() {
 		return (this.broadcastHandler != null ? this.broadcastHandler.getBroadcastDestination() : null);
 	}
@@ -138,6 +139,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -189,35 +191,40 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
+		Message<?> messageToUse = message;
 		if (this.broadcastHandler != null) {
-			message = this.broadcastHandler.preHandle(message);
-			if (message == null) {
+			messageToUse = this.broadcastHandler.preHandle(message);
+			if (messageToUse == null) {
 				return;
 			}
 		}
-		UserDestinationResult result = this.destinationResolver.resolveDestination(message);
+
+		UserDestinationResult result = this.destinationResolver.resolveDestination(messageToUse);
 		if (result == null) {
 			return;
 		}
+
 		if (result.getTargetDestinations().isEmpty()) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No active sessions for user destination: " + result.getSourceDestination());
 			}
 			if (this.broadcastHandler != null) {
-				this.broadcastHandler.handleUnresolved(message);
+				this.broadcastHandler.handleUnresolved(messageToUse);
 			}
 			return;
 		}
-		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(message);
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(messageToUse);
 		initHeaders(accessor);
 		accessor.setNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, result.getSubscribeDestination());
 		accessor.setLeaveMutable(true);
-		message = MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
+
+		messageToUse = MessageBuilder.createMessage(messageToUse.getPayload(), accessor.getMessageHeaders());
 		if (logger.isTraceEnabled()) {
 			logger.trace("Translated " + result.getSourceDestination() + " -> " + result.getTargetDestinations());
 		}
 		for (String target : result.getTargetDestinations()) {
-			this.messagingTemplate.send(target, message);
+			this.messagingTemplate.send(target, messageToUse);
 		}
 	}
 
@@ -262,6 +269,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			}
 			SimpMessageHeaderAccessor accessor =
 					SimpMessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+			Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
 			if (accessor.getSessionId() == null) {
 				// Our own broadcast
 				return null;
@@ -277,7 +285,9 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 				}
 				newAccessor.setNativeHeader(name, accessor.getFirstNativeHeader(name));
 			}
-			newAccessor.setDestination(destination);
+			if (destination != null) {
+				newAccessor.setDestination(destination);
+			}
 			newAccessor.setHeader(SimpMessageHeaderAccessor.IGNORE_ERROR, true); // ensure send doesn't block
 			return MessageBuilder.createMessage(message.getPayload(), newAccessor.getMessageHeaders());
 		}

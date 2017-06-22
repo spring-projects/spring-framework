@@ -20,6 +20,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Extension of {@link FutureTask} that implements {@link ListenableFuture}.
  *
@@ -47,7 +49,7 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	 * @param runnable the runnable task
 	 * @param result the result to return on successful completion
 	 */
-	public ListenableFutureTask(Runnable runnable, T result) {
+	public ListenableFutureTask(Runnable runnable, @Nullable T result) {
 		super(runnable, result);
 	}
 

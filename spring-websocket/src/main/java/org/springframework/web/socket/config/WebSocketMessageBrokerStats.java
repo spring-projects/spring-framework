@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,12 +110,9 @@ public class WebSocketMessageBrokerStats {
 	@Nullable
 	private ScheduledFuture<?> initLoggingTask(long initialDelay) {
 		if (logger.isInfoEnabled() && this.loggingPeriod > 0) {
-			return this.sockJsTaskScheduler.scheduleAtFixedRate(new Runnable() {
-				@Override
-				public void run() {
-					logger.info(WebSocketMessageBrokerStats.this.toString());
-				}
-			}, initialDelay, this.loggingPeriod, TimeUnit.MILLISECONDS);
+			return this.sockJsTaskScheduler.scheduleAtFixedRate(() ->
+							logger.info(WebSocketMessageBrokerStats.this.toString()),
+					initialDelay, this.loggingPeriod, TimeUnit.MILLISECONDS);
 		}
 		return null;
 	}

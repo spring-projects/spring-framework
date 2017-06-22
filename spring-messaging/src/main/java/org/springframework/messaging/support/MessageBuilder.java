@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public final class MessageBuilder<T> {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	public MessageBuilder<T> copyHeaders(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeaders(headersToCopy);
 		return this;
 	}
@@ -119,7 +119,7 @@ public final class MessageBuilder<T> {
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	public MessageBuilder<T> copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
 		return this;
 	}

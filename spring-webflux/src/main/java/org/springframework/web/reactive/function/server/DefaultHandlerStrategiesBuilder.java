@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -30,6 +29,8 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Default implementation of {@link HandlerStrategies.Builder}.
@@ -47,6 +48,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
+	private LocaleContextResolver localeContextResolver;
+
 
 	public DefaultHandlerStrategiesBuilder() {
 		this.codecConfigurer.registerDefaults(false);
@@ -55,21 +58,13 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
 		exceptionHandler(new ResponseStatusExceptionHandler());
+		localeContextResolver(new AcceptHeaderLocaleContextResolver());
 	}
 
 	@Override
-	public HandlerStrategies.Builder defaultCodecs(
-			Consumer<ServerCodecConfigurer.ServerDefaultCodecs> consumer) {
+	public HandlerStrategies.Builder codecs(Consumer<ServerCodecConfigurer> consumer) {
 		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.defaultCodecs());
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customCodecs(
-			Consumer<CodecConfigurer.CustomCodecs> consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.customCodecs());
+		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 
@@ -95,10 +90,17 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
+	public HandlerStrategies.Builder localeContextResolver(LocaleContextResolver localeContextResolver) {
+		Assert.notNull(localeContextResolver, "'localeContextResolver' must not be null");
+		this.localeContextResolver = localeContextResolver;
+		return this;
+	}
+
+	@Override
 	public HandlerStrategies build() {
 		return new DefaultHandlerStrategies(this.codecConfigurer.getReaders(),
 				this.codecConfigurer.getWriters(), this.viewResolvers, this.webFilters,
-				this.exceptionHandlers);
+				this.exceptionHandlers, this.localeContextResolver);
 	}
 
 
@@ -114,18 +116,23 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<WebExceptionHandler> exceptionHandlers;
 
+		private final LocaleContextResolver localeContextResolver;
+
+
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
 				List<WebFilter> webFilters,
-				List<WebExceptionHandler> exceptionHandlers) {
+				List<WebExceptionHandler> exceptionHandlers,
+				LocaleContextResolver localeContextResolver) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);
 			this.webFilters = unmodifiableCopy(webFilters);
 			this.exceptionHandlers = unmodifiableCopy(exceptionHandlers);
+			this.localeContextResolver = localeContextResolver;
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
@@ -155,6 +162,11 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		@Override
 		public List<WebExceptionHandler> exceptionHandlers() {
 			return this.exceptionHandlers;
+		}
+
+		@Override
+		public LocaleContextResolver localeContextResolver() {
+			return this.localeContextResolver;
 		}
 	}
 

@@ -111,8 +111,8 @@ public abstract class MessageSourceSupport {
 	 * @param locale the Locale used for formatting
 	 * @return the formatted message (with resolved arguments)
 	 */
-	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (msg == null || (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args))) {
+	protected String formatMessage(String msg, @Nullable Object[] args, Locale locale) {
+		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			return msg;
 		}
 		MessageFormat messageFormat = null;
@@ -156,7 +156,7 @@ public abstract class MessageSourceSupport {
 	 * @return the MessageFormat instance
 	 */
 	protected MessageFormat createMessageFormat(String msg, Locale locale) {
-		return new MessageFormat((msg != null ? msg : ""), locale);
+		return new MessageFormat(msg, locale);
 	}
 
 	/**
@@ -167,8 +167,8 @@ public abstract class MessageSourceSupport {
 	 * @param locale the Locale to resolve against
 	 * @return the resolved argument array
 	 */
-	protected Object[] resolveArguments(Object[] args, Locale locale) {
-		return args;
+	protected Object[] resolveArguments(@Nullable Object[] args, Locale locale) {
+		return (args != null ? args : new Object[0]);
 	}
 
 }

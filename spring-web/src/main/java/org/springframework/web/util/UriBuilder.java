@@ -83,7 +83,7 @@ public interface UriBuilder {
 
 	/**
 	 * Set the path of this builder overriding the existing path values.
-	 * @param path the URI path or {@code null} for an empty path.
+	 * @param path the URI path, or {@code null} for an empty path
 	 */
 	UriBuilder replacePath(@Nullable String path);
 
@@ -112,7 +112,7 @@ public interface UriBuilder {
 
 	/**
 	 * Set the query of this builder overriding all existing query parameters.
-	 * @param query the query string or {@code null} to remove all query params
+	 * @param query the query string, or {@code null} to remove all query params
 	 */
 	UriBuilder replaceQuery(@Nullable String query);
 

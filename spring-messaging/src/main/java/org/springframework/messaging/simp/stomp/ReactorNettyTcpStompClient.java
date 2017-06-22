@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
@@ -75,7 +76,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @param handler the handler for the STOMP session
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
-	public ListenableFuture<StompSession> connect(StompHeaders connectHeaders, StompSessionHandler handler) {
+	public ListenableFuture<StompSession> connect(@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
 		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);
 		this.tcpClient.connect(session);
 		return session.getSessionFuture();

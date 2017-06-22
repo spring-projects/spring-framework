@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.request;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -29,11 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -173,7 +171,7 @@ public class MockHttpServletRequestBuilder
 			Assert.isTrue(contextPath.startsWith("/"), "Context path must start with a '/'");
 			Assert.isTrue(!contextPath.endsWith("/"), "Context path must not end with a '/'");
 		}
-		this.contextPath = (contextPath != null ? contextPath : "");
+		this.contextPath = contextPath;
 		return this;
 	}
 
@@ -195,7 +193,7 @@ public class MockHttpServletRequestBuilder
 			Assert.isTrue(servletPath.startsWith("/"), "Servlet path must start with a '/'");
 			Assert.isTrue(!servletPath.endsWith("/"), "Servlet path must not end with a '/'");
 		}
-		this.servletPath = (servletPath != null ? servletPath : "");
+		this.servletPath = servletPath;
 		return this;
 	}
 
@@ -288,7 +286,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
+		List<MediaType> result = new ArrayList<>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
 		}
@@ -311,10 +309,7 @@ public class MockHttpServletRequestBuilder
 	 * @param httpHeaders the headers and values to add
 	 */
 	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
-		for (String name : httpHeaders.keySet()) {
-			Object[] values = ObjectUtils.toObjectArray(httpHeaders.get(name).toArray());
-			addToMultiValueMap(this.headers, name, values);
-		}
+		httpHeaders.forEach(this.headers::addAll);
 		return this;
 	}
 
@@ -654,7 +649,9 @@ public class MockHttpServletRequestBuilder
 			request.setAttribute(name, this.requestAttributes.get(name));
 		}
 		for (String name : this.sessionAttributes.keySet()) {
-			request.getSession().setAttribute(name, this.sessionAttributes.get(name));
+			HttpSession session = request.getSession();
+			Assert.state(session != null, "No HttpSession");
+			session.setAttribute(name, this.sessionAttributes.get(name));
 		}
 
 		FlashMap flashMap = new FlashMap();
@@ -697,17 +694,10 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
-		try {
-			for (Entry<String, List<String>> entry : map.entrySet()) {
-				for (String value : entry.getValue()) {
-					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
-					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
-				}
-			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			// shouldn't happen
-		}
+		map.forEach((key, values) -> values.forEach(value -> {
+			value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
+			request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
+		}));
 	}
 
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
@@ -739,10 +729,7 @@ public class MockHttpServletRequestBuilder
 			WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 			flashMapManager = wac.getBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 		}
-		catch (IllegalStateException ex) {
-			// ignore
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (IllegalStateException | NoSuchBeanDefinitionException ex) {
 			// ignore
 		}
 		return (flashMapManager != null ? flashMapManager : new SessionFlashMapManager());
@@ -752,8 +739,6 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			Assert.state(request != null,
-					() -> "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 		return request;
 	}

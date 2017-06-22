@@ -24,6 +24,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
+import org.springframework.lang.Nullable;
 
 /**
  * An expression parser that understands templates. It can be subclassed by expression
@@ -41,16 +42,16 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 */
 	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
 		@Override
+		public boolean isTemplate() {
+			return false;
+		}
+		@Override
 		public String getExpressionPrefix() {
-			return null;
+			return "";
 		}
 		@Override
 		public String getExpressionSuffix() {
-			return null;
-		}
-		@Override
-		public boolean isTemplate() {
-			return false;
+			return "";
 		}
 	};
 
@@ -62,10 +63,6 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 
 	@Override
 	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
-		if (context == null) {
-			context = NON_TEMPLATE_PARSER_CONTEXT;
-		}
-
 		if (context.isTemplate()) {
 			return parseTemplate(expressionString, context);
 		}
@@ -255,7 +252,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @return an evaluator for the parsed expression
 	 * @throws ParseException an exception occurred during parsing
 	 */
-	protected abstract Expression doParseExpression(String expressionString, ParserContext context)
+	protected abstract Expression doParseExpression(String expressionString, @Nullable ParserContext context)
 			throws ParseException;
 
 

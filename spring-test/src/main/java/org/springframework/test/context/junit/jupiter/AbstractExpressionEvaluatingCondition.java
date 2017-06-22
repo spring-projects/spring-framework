@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ContainerExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -142,7 +141,8 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 
 		if (loadContext) {
 			applicationContext = SpringExtension.getApplicationContext(extensionContext);
-		} else {
+		}
+		else {
 			gac = new GenericApplicationContext();
 			gac.refresh();
 			applicationContext = gac;
@@ -150,7 +150,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 
 		if (!(applicationContext instanceof ConfigurableApplicationContext)) {
 			if (logger.isWarnEnabled()) {
-				String contextType = (applicationContext != null ? applicationContext.getClass().getName() : "null");
+				String contextType = applicationContext.getClass().getName();
 				logger.warn(String.format("@%s(\"%s\") could not be evaluated on [%s] since the test " +
 						"ApplicationContext [%s] is not a ConfigurableApplicationContext",
 						annotationType.getSimpleName(), expression, element, contextType));
@@ -160,17 +160,18 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 
 		ConfigurableBeanFactory configurableBeanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
 		BeanExpressionResolver expressionResolver = configurableBeanFactory.getBeanExpressionResolver();
+		Assert.state(expressionResolver != null, "No BeanExpressionResolver");
 		BeanExpressionContext beanExpressionContext = new BeanExpressionContext(configurableBeanFactory, null);
 
-		Object result = expressionResolver.evaluate(configurableBeanFactory.resolveEmbeddedValue(expression),
-			beanExpressionContext);
+		Object result = expressionResolver.evaluate(
+				configurableBeanFactory.resolveEmbeddedValue(expression), beanExpressionContext);
 
 		if (gac != null) {
 			gac.close();
 		}
 
 		if (result instanceof Boolean) {
-			return ((Boolean) result).booleanValue();
+			return (Boolean) result;
 		}
 		else if (result instanceof String) {
 			String str = ((String) result).trim().toLowerCase();

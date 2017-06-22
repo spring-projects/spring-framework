@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -200,7 +201,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			this.link = iniLinkFlag(line, this.cacheSection);
 		}
 
-		private static boolean initCacheSectionFlag(String line, LineInfo previousLine) {
+		private static boolean initCacheSectionFlag(String line, @Nullable LineInfo previousLine) {
 			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
 				return line.trim().equals(CACHE_HEADER);
 			}
@@ -242,7 +243,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		private final Resource resource;
 
 
-		public LineOutput(String line, Resource resource) {
+		public LineOutput(String line, @Nullable Resource resource) {
 			this.line = line;
 			this.resource = resource;
 		}
@@ -251,6 +252,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return this.line;
 		}
 
+		@Nullable
 		public Resource getResource() {
 			return this.resource;
 		}

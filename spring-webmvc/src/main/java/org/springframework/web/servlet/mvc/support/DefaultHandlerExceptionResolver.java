@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.support;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -208,7 +207,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
@@ -232,7 +231,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		return new ModelAndView();
@@ -252,7 +251,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @since 4.2
 	 */
 	protected ModelAndView handleMissingPathVariable(MissingPathVariableException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
 		return new ModelAndView();
@@ -271,7 +270,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
@@ -289,7 +288,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleServletRequestBindingException(ServletRequestBindingException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
@@ -307,7 +306,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleConversionNotSupported(ConversionNotSupportedException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (logger.isWarnEnabled()) {
 			logger.warn("Failed to convert request element: " + ex);
@@ -328,7 +327,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleTypeMismatch(TypeMismatchException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (logger.isWarnEnabled()) {
 			logger.warn("Failed to bind request element: " + ex);
@@ -351,7 +350,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (logger.isWarnEnabled()) {
 			logger.warn("Failed to read HTTP message: " + ex);
@@ -374,7 +373,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (logger.isWarnEnabled()) {
 			logger.warn("Failed to write HTTP message: " + ex);
@@ -394,7 +393,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
  		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
@@ -411,7 +410,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
@@ -429,7 +428,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
-			HttpServletResponse response, Object handler) throws IOException {
+			HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();

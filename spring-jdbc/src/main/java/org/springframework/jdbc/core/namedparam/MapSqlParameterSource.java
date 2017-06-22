@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,13 +131,12 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 */
 	public MapSqlParameterSource addValues(@Nullable Map<String, ?> values) {
 		if (values != null) {
-			for (Map.Entry<String, ?> entry : values.entrySet()) {
-				this.values.put(entry.getKey(), entry.getValue());
-				if (entry.getValue() instanceof SqlParameterValue) {
-					SqlParameterValue value = (SqlParameterValue) entry.getValue();
-					registerSqlType(entry.getKey(), value.getSqlType());
+			values.forEach((key, value) -> {
+				this.values.put(key, value);
+				if (value instanceof SqlParameterValue) {
+					registerSqlType(key, ((SqlParameterValue) value).getSqlType());
 				}
-			}
+			});
 		}
 		return this;
 	}

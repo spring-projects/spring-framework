@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * Set the BeanNameGenerator to use for detected bean classes.
 	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
 
@@ -117,7 +117,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * Set the ScopeMetadataResolver to use for detected bean classes.
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver =
 				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
@@ -210,7 +210,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, String name,
+	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
@@ -237,10 +237,8 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
-		if (definitionCustomizers != null) {
-			for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
-				customizer.customize(abd);
-			}
+		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
+			customizer.customize(abd);
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);

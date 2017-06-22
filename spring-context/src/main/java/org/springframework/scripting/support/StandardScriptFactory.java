@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,9 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement
 	 */
-	public StandardScriptFactory(String scriptEngineName, String scriptSourceLocator, Class<?>... scriptInterfaces) {
+	public StandardScriptFactory(
+			@Nullable String scriptEngineName, String scriptSourceLocator, @Nullable Class<?>... scriptInterfaces) {
+
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptEngineName = scriptEngineName;
 		this.scriptSourceLocator = scriptSourceLocator;
@@ -108,7 +110,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -191,6 +193,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 		}
 	}
 
+	@Nullable
 	protected ScriptEngine retrieveScriptEngine(ScriptSource scriptSource) {
 		ScriptEngineManager scriptEngineManager = new ScriptEngineManager(this.beanClassLoader);
 
@@ -214,7 +217,8 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 		return null;
 	}
 
-	protected Object adaptToInterfaces(Object script, ScriptSource scriptSource, Class<?>... actualInterfaces) {
+	@Nullable
+	protected Object adaptToInterfaces(@Nullable Object script, ScriptSource scriptSource, Class<?>... actualInterfaces) {
 		Class<?> adaptedIfc;
 		if (actualInterfaces.length == 1) {
 			adaptedIfc = actualInterfaces[0];

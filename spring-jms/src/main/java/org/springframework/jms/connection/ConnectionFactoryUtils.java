@@ -65,7 +65,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @see SmartConnectionFactory#shouldStop
 	 * @see org.springframework.jms.support.JmsUtils#closeConnection
 	 */
-	public static void releaseConnection(Connection con, @Nullable ConnectionFactory cf, boolean started) {
+	public static void releaseConnection(@Nullable Connection con, @Nullable ConnectionFactory cf, boolean started) {
 		if (con == null) {
 			return;
 		}
@@ -110,7 +110,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @param cf the JMS ConnectionFactory that the Session originated from
 	 * @return whether the Session is transactional
 	 */
-	public static boolean isSessionTransactional(Session session, ConnectionFactory cf) {
+	public static boolean isSessionTransactional(@Nullable Session session, @Nullable ConnectionFactory cf) {
 		if (session == null || cf == null) {
 			return false;
 		}

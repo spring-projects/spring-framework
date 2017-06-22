@@ -17,11 +17,9 @@
 package org.springframework.web.reactive.resource;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +31,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.PathMatcher;
+import org.springframework.lang.Nullable;
+import org.springframework.web.reactive.handler.PathMatchResult;
+import org.springframework.web.reactive.handler.PathPatternRegistry;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.pattern.ParsingPathMatcher;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A central component to use to obtain the public URL path that clients should
@@ -54,44 +54,17 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
-
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
-
-	private final Map<String, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
+	private PathPatternRegistry<ResourceWebHandler> patternRegistry = new PathPatternRegistry<>();
 
 	private boolean autodetect = true;
 
 
 	/**
-	 * Configure a {@code HttpRequestPathHelper} to use in
-	 * {@link #getForRequestUrl(ServerWebExchange, String)}
-	 * in order to derive the lookup path for a target request URL path.
-	 */
-	public void setPathHelper(HttpRequestPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
-	}
-
-	/**
-	 * Return the configured {@code HttpRequestPathHelper}.
-	 */
-	public HttpRequestPathHelper getPathHelper() {
-		return this.pathHelper;
-	}
-
-	/**
-	 * Configure a {@code PathMatcher} to use when comparing target lookup path
+	 * Configure a {@code PathPatternParser} to use when comparing target lookup path
 	 * against resource mappings.
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
-	}
-
-	/**
-	 * Return the configured {@code PathMatcher}.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
+	public void setPathPatternParser(PathPatternParser patternParser) {
+		this.patternRegistry = new PathPatternRegistry<>(patternParser);
 	}
 
 	/**
@@ -100,10 +73,10 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceWebHandler> handlerMap) {
+	public void setHandlerMap(@Nullable Map<String, ResourceWebHandler> handlerMap) {
 		if (handlerMap != null) {
-			this.handlerMap.clear();
-			this.handlerMap.putAll(handlerMap);
+			this.patternRegistry.clear();
+			handlerMap.forEach(this.patternRegistry::register);
 			this.autodetect = false;
 		}
 	}
@@ -112,8 +85,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * Return the resource mappings, either manually configured or auto-detected
 	 * when the Spring {@code ApplicationContext} is refreshed.
 	 */
-	public Map<String, ResourceWebHandler> getHandlerMap() {
-		return this.handlerMap;
+	public Map<PathPattern, ResourceWebHandler> getHandlerMap() {
+		return this.patternRegistry.getPatternsMap();
 	}
 
 	/**
@@ -127,13 +100,13 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (isAutodetect()) {
-			this.handlerMap.clear();
+			this.patternRegistry.clear();
 			detectResourceHandlers(event.getApplicationContext());
-			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
-				logger.debug("No resource handling mappings found");
-			}
-			if (!this.handlerMap.isEmpty()) {
+			if (!this.patternRegistry.getPatternsMap().isEmpty()) {
 				this.autodetect = false;
+			}
+			else if(logger.isDebugEnabled()) {
+				logger.debug("No resource handling mappings found");
 			}
 		}
 	}
@@ -147,7 +120,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		AnnotationAwareOrderComparator.sort(handlerMappings);
 
 		for (SimpleUrlHandlerMapping hm : handlerMappings) {
-			for (String pattern : hm.getHandlerMap().keySet()) {
+			for (PathPattern pattern : hm.getHandlerMap().keySet()) {
 				Object handler = hm.getHandlerMap().get(pattern);
 				if (handler instanceof ResourceWebHandler) {
 					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
@@ -156,7 +129,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 								"locations=" + resourceHandler.getLocations() + ", " +
 								"resolvers=" + resourceHandler.getResourceResolvers());
 					}
-					this.handlerMap.put(pattern, resourceHandler);
+					this.patternRegistry.register(pattern.getPatternString(), resourceHandler);
 				}
 			}
 		}
@@ -184,18 +157,18 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String requestPath = request.getURI().getPath();
-		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		return requestPath.indexOf(lookupPath);
 	}
 
 	private int getEndPathIndex(String lookupPath) {
 		int suffixIndex = lookupPath.length();
 		int queryIndex = lookupPath.indexOf("?");
-		if(queryIndex > 0) {
+		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
 		int hashIndex = lookupPath.indexOf("#");
-		if(hashIndex > 0) {
+		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
 		return suffixIndex;
@@ -218,28 +191,23 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}
 
-		List<String> matchingPatterns = new ArrayList<>();
-		for (String pattern : this.handlerMap.keySet()) {
-			if (getPathMatcher().match(pattern, lookupPath)) {
-				matchingPatterns.add(pattern);
-			}
-		}
+		Set<PathMatchResult<ResourceWebHandler>> matchResults = this.patternRegistry.findMatches(lookupPath);
 
-		if (matchingPatterns.isEmpty()) {
+		if (matchResults.isEmpty()) {
 			return Mono.empty();
 		}
 
-		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
-		Collections.sort(matchingPatterns, patternComparator);
-
-		return Flux.fromIterable(matchingPatterns)
-				.concatMap(pattern -> {
-					String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
+		return Flux.fromIterable(matchResults)
+				.concatMap(result -> {
+					String pathWithinMapping = result.getPattern().extractPathWithinPattern(lookupPath);
 					String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
 					if (logger.isTraceEnabled()) {
-						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + pattern + "\"");
+						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + result.getPattern() + "\"");
 					}
-					ResourceWebHandler handler = this.handlerMap.get(pattern);
+					ResourceWebHandler handler = result.getHandler();
+					if (handler == null) {
+						throw new IllegalStateException("No handler for URL pattern \"" + result.getPattern() + "\"");
+					}
 					ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
 					return chain.resolveUrlPath(pathWithinMapping, handler.getLocations())
 							.map(resolvedPath -> {

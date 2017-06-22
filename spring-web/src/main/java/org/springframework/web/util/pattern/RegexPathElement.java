@@ -16,18 +16,20 @@
 
 package org.springframework.web.util.pattern;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.util.AntPathMatcher;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
  * For example in '<tt>/foo/&ast;_&ast;/&ast;_{foobar}</tt>' both <tt>*_*</tt> and <tt>*_{foobar}</tt>
- * are {@link RegexPathElement} path elements. Derived from the general {@link AntPathMatcher} approach.
+ * are {@link RegexPathElement} path elements. Derived from the general
+ * {@link org.springframework.util.AntPathMatcher} approach.
  *
  * @author Andy Clement
  * @since 5.0
@@ -39,7 +41,7 @@ class RegexPathElement extends PathElement {
 	private final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 
-	private final char[] regex;
+	private char[] regex;
 
 	private final boolean caseSensitive;
 
@@ -61,20 +63,29 @@ class RegexPathElement extends PathElement {
 	public Pattern buildPattern(char[] regex, char[] completePattern) {
 		StringBuilder patternBuilder = new StringBuilder();
 		String text = new String(regex);
+		StringBuilder encodedRegexBuilder = new StringBuilder();
 		Matcher matcher = GLOB_PATTERN.matcher(text);
 		int end = 0;
 
 		while (matcher.find()) {
-			patternBuilder.append(quote(text, end, matcher.start()));
+			patternBuilder.append(quote(text, end, matcher.start(), encodedRegexBuilder));
 			String match = matcher.group();
 			if ("?".equals(match)) {
 				patternBuilder.append('.');
+				encodedRegexBuilder.append('?');
 			}
 			else if ("*".equals(match)) {
 				patternBuilder.append(".*");
-				this.wildcardCount++;
+				encodedRegexBuilder.append('*');
+				int pos = matcher.start();
+				if (pos < 1 || text.charAt(pos-1) != '.') {
+					// To be compatible with the AntPathMatcher comparator, 
+					// '.*' is not considered a wildcard usage
+					this.wildcardCount++;
+				}
 			}
 			else if (match.startsWith("{") && match.endsWith("}")) {
+				encodedRegexBuilder.append(match);
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
@@ -101,7 +112,8 @@ class RegexPathElement extends PathElement {
 			end = matcher.end();
 		}
 
-		patternBuilder.append(quote(text, end, text.length()));
+		patternBuilder.append(quote(text, end, text.length(), encodedRegexBuilder));
+		this.regex = encodedRegexBuilder.toString().toCharArray();
 		if (this.caseSensitive) {
 			return Pattern.compile(patternBuilder.toString());
 		}
@@ -114,17 +126,28 @@ class RegexPathElement extends PathElement {
 		return this.variableNames;
 	}
 
-	private String quote(String s, int start, int end) {
+	private String quote(String s, int start, int end, StringBuilder encodedRegexBuilder) {
 		if (start == end) {
 			return "";
 		}
-		return Pattern.quote(s.substring(start, end));
+		String substring = s.substring(start, end);
+		String encodedSubString = UriUtils.encodePath(substring, StandardCharsets.UTF_8);
+		encodedRegexBuilder.append(encodedSubString);
+		return Pattern.quote(substring);
 	}
 
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		int pos = matchingContext.scanAhead(candidateIndex);
-		Matcher matcher = this.pattern.matcher(new SubSequence(matchingContext.candidate, candidateIndex, pos));
+		
+		CharSequence textToMatch = null;
+		if (includesPercent(matchingContext.candidate, candidateIndex, pos)) {
+			textToMatch = decode(new SubSequence(matchingContext.candidate, candidateIndex, pos));
+		}
+		else {
+			textToMatch = new SubSequence(matchingContext.candidate, candidateIndex, pos);
+		}
+		Matcher matcher = this.pattern.matcher(textToMatch);
 		boolean matches = matcher.matches();
 
 		if (matches) {

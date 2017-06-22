@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,6 +47,8 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.util.pattern.PathPattern;
+
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -74,7 +77,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
-		return info.getPatternsCondition().getPatterns();
+		return info.getPatternsCondition().getPatternStrings();
 	}
 
 	/**
@@ -106,27 +109,32 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
 		super.handleMatch(info, lookupPath, exchange);
 
-		String bestPattern;
+		PathPattern bestPattern;
 		Map<String, String> uriVariables;
-		Map<String, String> decodedUriVariables;
 
-		Set<String> patterns = info.getPatternsCondition().getPatterns();
+		Set<PathPattern> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
-			bestPattern = lookupPath;
+			bestPattern = getPathPatternParser().parse(lookupPath);
 			uriVariables = Collections.emptyMap();
-			decodedUriVariables = Collections.emptyMap();
 		}
 		else {
 			bestPattern = patterns.iterator().next();
-			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
-			decodedUriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
+			uriVariables = bestPattern.matchAndExtract(lookupPath);
+		}
+
+		// Let URI vars be stripped of semicolon content..
+		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
+		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+
+		// Now decode URI variables
+		if (!uriVariables.isEmpty()) {
+			uriVariables = uriVariables.entrySet().stream().collect(Collectors.toMap(
+					Entry::getKey, e -> StringUtils.uriDecode(e.getValue(), StandardCharsets.UTF_8)
+			));
 		}
 
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
-		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
-
-		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);
-		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
@@ -146,37 +154,28 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				continue;
 			}
 
-			String matrixVariables;
-
+			String semicolonContent;
 			int semicolonIndex = uriVarValue.indexOf(';');
 			if ((semicolonIndex == -1) || (semicolonIndex == 0) || (equalsIndex < semicolonIndex)) {
-				matrixVariables = uriVarValue;
+				semicolonContent = uriVarValue;
 			}
 			else {
-				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
+				semicolonContent = uriVarValue.substring(semicolonIndex + 1);
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
-
-			MultiValueMap<String, String> vars = parseMatrixVariables(matrixVariables);
-			result.put(uriVar.getKey(), getPathHelper().decodeMatrixVariables(exchange, vars));
+			result.put(uriVar.getKey(), parseMatrixVariables(exchange, semicolonContent));
 		}
 		return result;
 	}
 
-	/**
-	 * Parse the given string with matrix variables. An example string would look
-	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
-	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
-	 * {@code ["a","b","c"]} respectively.
-	 * @param matrixVariables the unparsed matrix variables string
-	 * @return a map with matrix variable names and values (never {@code null})
-	 */
-	private static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-		if (!StringUtils.hasText(matrixVariables)) {
-			return result;
+	private static MultiValueMap<String, String> parseMatrixVariables(ServerWebExchange exchange,
+			String semicolonContent) {
+
+		MultiValueMap<String, String> vars = new LinkedMultiValueMap<>();
+		if (!StringUtils.hasText(semicolonContent)) {
+			return vars;
 		}
-		StringTokenizer pairs = new StringTokenizer(matrixVariables, ";");
+		StringTokenizer pairs = new StringTokenizer(semicolonContent, ";");
 		while (pairs.hasMoreTokens()) {
 			String pair = pairs.nextToken();
 			int index = pair.indexOf('=');
@@ -184,14 +183,19 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				String name = pair.substring(0, index);
 				String rawValue = pair.substring(index + 1);
 				for (String value : StringUtils.commaDelimitedListToStringArray(rawValue)) {
-					result.add(name, value);
+					vars.add(name, value);
 				}
 			}
 			else {
-				result.add(pair, "");
+				vars.add(pair, "");
 			}
 		}
-		return result;
+		MultiValueMap<String, String> decoded = new LinkedMultiValueMap<>(vars.size());
+		vars.forEach((key, values) -> values.forEach(value -> {
+			String decodedValue = StringUtils.uriDecode(value, StandardCharsets.UTF_8);
+			decoded.add(key, decodedValue);
+		}));
+		return decoded;
 	}
 
 	/**

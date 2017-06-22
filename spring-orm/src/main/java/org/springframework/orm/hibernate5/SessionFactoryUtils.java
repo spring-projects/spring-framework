@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -123,7 +122,9 @@ public abstract class SessionFactoryUtils {
 	 * @since 4.3
 	 */
 	static FlushMode getFlushMode(Session session) {
-		return (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		Assert.state(flushMode != null, "No FlushMode from Session");
+		return flushMode;
 	}
 
 	/**
@@ -188,9 +189,11 @@ public abstract class SessionFactoryUtils {
 		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
 		if (getProperties != null) {
 			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
-			Object dataSourceValue = props.get(Environment.DATASOURCE);
-			if (dataSourceValue instanceof DataSource) {
-				return (DataSource) dataSourceValue;
+			if (props != null) {
+				Object dataSourceValue = props.get(Environment.DATASOURCE);
+				if (dataSourceValue instanceof DataSource) {
+					return (DataSource) dataSourceValue;
+				}
 			}
 		}
 		if (sessionFactory instanceof SessionFactoryImplementor) {

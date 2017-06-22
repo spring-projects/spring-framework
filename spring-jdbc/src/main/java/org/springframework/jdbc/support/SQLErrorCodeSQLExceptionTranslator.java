@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Arrays;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.CannotAcquireLockException;
@@ -167,7 +166,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 
 	@Override
-	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
+	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
 		SQLException sqlEx = ex;
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
@@ -315,6 +314,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * sqlEx parameter as a nested root cause.
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
+	@Nullable
 	protected DataAccessException createCustomException(
 			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 

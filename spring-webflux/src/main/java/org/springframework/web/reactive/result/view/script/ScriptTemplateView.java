@@ -26,6 +26,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import reactor.core.publisher.Mono;
 
@@ -112,7 +113,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
 	 */
 	public void setEngine(ScriptEngine engine) {
-		Assert.isInstanceOf(Invocable.class, engine, "ScriptEngine must implement Invocable");
 		this.engine = engine;
 	}
 
@@ -225,7 +225,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			setEngine(createEngineFromName());
 		}
 
-		Assert.isTrue(this.renderFunction != null, "The 'renderFunction' property must be defined.");
+		if (this.renderFunction != null && this.engine != null) {
+			Assert.isInstanceOf(Invocable.class, this.engine, "ScriptEngine must implement Invocable when 'renderFunction' is specified.");
+		}
 	}
 
 	protected ScriptEngine getEngine() {
@@ -234,7 +236,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected ScriptEngine createEngineFromName() {
 		if (this.scriptEngineManager == null) {
-			this.scriptEngineManager = new ScriptEngineManager(getApplicationContext().getClassLoader());
+			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
 		}
 
 		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, this.engineName);
@@ -273,7 +275,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	protected ScriptTemplateConfig autodetectViewConfig() throws BeansException {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
-					getApplicationContext(), ScriptTemplateConfig.class, true, false);
+					obtainApplicationContext(), ScriptTemplateConfig.class, true, false);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException("Expected a single ScriptTemplateConfig bean in the current " +
@@ -284,18 +286,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Override
 	public boolean checkResourceExists(Locale locale) throws Exception {
-		return (getResource(getUrl()) != null);
+		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+		return (getResource(url) != null);
 	}
 
 	@Override
-	protected Mono<Void> renderInternal(Map<String, Object> model, MediaType contentType, ServerWebExchange exchange) {
+	protected Mono<Void> renderInternal(
+			Map<String, Object> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
+
 		return Mono.defer(() -> {
 			ServerHttpResponse response = exchange.getResponse();
 			try {
 				ScriptEngine engine = getEngine();
-				Invocable invocable = (Invocable) engine;
 				String url = getUrl();
+				Assert.state(url != null, "'url' not set");
 				String template = getTemplate(url);
+
 				Function<String, String> templateLoader = path -> {
 					try {
 						return getTemplate(path);
@@ -304,15 +311,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 						throw new IllegalStateException(ex);
 					}
 				};
-				RenderingContext context = new RenderingContext(this.getApplicationContext(), this.locale, templateLoader, url);
+
+				RenderingContext context = new RenderingContext(
+						obtainApplicationContext(), this.locale, templateLoader, url);
 
 				Object html;
-				if (this.renderObject != null) {
+				if (this.renderFunction == null) {
+					SimpleBindings bindings = new SimpleBindings();
+					bindings.putAll(model);
+					model.put("renderingContext", context);
+					html = engine.eval(template, bindings);
+				}
+				else if (this.renderObject != null) {
 					Object thiz = engine.eval(this.renderObject);
-					html = invocable.invokeMethod(thiz, this.renderFunction, template, model, context);
+					html = ((Invocable)engine).invokeMethod(thiz, this.renderFunction, template, model, context);
 				}
 				else {
-					html = invocable.invokeFunction(this.renderFunction, template, model, context);
+					html = ((Invocable)engine).invokeFunction(this.renderFunction, template, model, context);
 				}
 
 				byte[] bytes = String.valueOf(html).getBytes(StandardCharsets.UTF_8);

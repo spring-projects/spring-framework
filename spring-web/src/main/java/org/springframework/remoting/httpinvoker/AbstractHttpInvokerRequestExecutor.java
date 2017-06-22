@@ -33,6 +33,7 @@ import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base implementation of the HttpInvokerRequestExecutor interface.
@@ -113,7 +114,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -234,7 +235,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see #createObjectInputStream
 	 * @see #doReadRemoteInvocationResult
 	 */
-	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
+	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, @Nullable String codebaseUrl)
 			throws IOException, ClassNotFoundException {
 
 		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
@@ -291,7 +292,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocationResult)) {
 			throw new RemoteException("Deserialized object needs to be assignable to type [" +
-					RemoteInvocationResult.class.getName() + "]: " + obj);
+					RemoteInvocationResult.class.getName() + "]: " + ClassUtils.getDescriptiveType(obj));
 		}
 		return (RemoteInvocationResult) obj;
 	}

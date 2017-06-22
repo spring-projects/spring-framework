@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -42,6 +43,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 		return doSendAndReceive(destination, requestMessage);
 	}
 
+	@Nullable
 	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 
@@ -56,24 +58,30 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers, Class<T> targetClass) {
+	public <T> T convertSendAndReceive(
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) {
+
 		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);

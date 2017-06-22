@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 		this(httpClient, null);
 	}
 
-	private HttpComponentsHttpInvokerRequestExecutor(HttpClient httpClient, RequestConfig requestConfig) {
+	private HttpComponentsHttpInvokerRequestExecutor(HttpClient httpClient, @Nullable RequestConfig requestConfig) {
 		this.httpClient = httpClient;
 		this.requestConfig = requestConfig;
 	}
@@ -212,10 +212,12 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 */
 	protected HttpPost createHttpPost(HttpInvokerClientConfiguration config) throws IOException {
 		HttpPost httpPost = new HttpPost(config.getServiceUrl());
+
 		RequestConfig requestConfig = createRequestConfig(config);
 		if (requestConfig != null) {
 			httpPost.setConfig(requestConfig);
 		}
+
 		LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
 		if (localeContext != null) {
 			Locale locale = localeContext.getLocale();
@@ -223,9 +225,11 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 				httpPost.addHeader(HTTP_HEADER_ACCEPT_LANGUAGE, StringUtils.toLanguageTag(locale));
 			}
 		}
+
 		if (isAcceptGzipEncoding()) {
 			httpPost.addHeader(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 		}
+
 		return httpPost;
 	}
 
@@ -250,9 +254,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	}
 
 	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
-		if (this.requestConfig == null) { // nothing to merge
+		if (this.requestConfig == null) {  // nothing to merge
 			return defaultRequestConfig;
 		}
+
 		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
 		int connectTimeout = this.requestConfig.getConnectTimeout();
 		if (connectTimeout >= 0) {

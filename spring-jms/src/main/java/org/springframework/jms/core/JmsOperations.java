@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem
 	 */
+	@Nullable
 	<T> T execute(SessionCallback<T> action) throws JmsException;
 
 	/**
@@ -64,6 +65,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T execute(ProducerCallback<T> action) throws JmsException;
 
 	/**
@@ -74,6 +76,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T execute(Destination destination, ProducerCallback<T> action) throws JmsException;
 
 	/**
@@ -85,6 +88,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T execute(String destinationName, ProducerCallback<T> action) throws JmsException;
 
 
@@ -428,6 +432,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browse(BrowserCallback<T> action) throws JmsException;
 
 	/**
@@ -438,6 +443,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browse(Queue queue, BrowserCallback<T> action) throws JmsException;
 
 	/**
@@ -449,6 +455,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browse(String queueName, BrowserCallback<T> action) throws JmsException;
 
 	/**
@@ -460,6 +467,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
@@ -472,6 +480,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browseSelected(Queue queue, String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
@@ -485,6 +494,7 @@ public interface JmsOperations {
 	 * @return the result object from working with the session
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
+	@Nullable
 	<T> T browseSelected(String queueName, String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 }

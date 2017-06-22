@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.security.Principal;
-import java.util.Optional;
 
 import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;

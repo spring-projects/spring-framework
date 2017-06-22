@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,21 +130,18 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	@Override
 	protected void openConnection() {
-		this.taskExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Connecting to WebSocket at " + getUri());
-					}
-					Endpoint endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
-					ClientEndpointConfig endpointConfig = configBuilder.build();
-					session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
-					logger.info("Successfully connected to WebSocket");
+		this.taskExecutor.execute(() -> {
+			try {
+				if (logger.isInfoEnabled()) {
+					logger.info("Connecting to WebSocket at " + getUri());
 				}
-				catch (Throwable ex) {
-					logger.error("Failed to connect to WebSocket", ex);
-				}
+				Endpoint endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
+				ClientEndpointConfig endpointConfig = configBuilder.build();
+				session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
+				logger.info("Successfully connected to WebSocket");
+			}
+			catch (Throwable ex) {
+				logger.error("Failed to connect to WebSocket", ex);
 			}
 		});
 	}

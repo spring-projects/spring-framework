@@ -100,7 +100,7 @@ public abstract class MetaAnnotationUtils {
 	 */
 	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
-			Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
+			@Nullable Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
@@ -187,7 +187,7 @@ public abstract class MetaAnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(Class<?> clazz,
+	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(@Nullable Class<?> clazz,
 			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
@@ -298,7 +298,7 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				Annotation composedAnnotation, T annotation) {
+				@Nullable Annotation composedAnnotation, T annotation) {
 
 			Assert.notNull(rootDeclaringClass, "'rootDeclaringClass' must not be null");
 			Assert.notNull(annotation, "Annotation must not be null");
@@ -349,6 +349,7 @@ public abstract class MetaAnnotationUtils {
 			return this.composedAnnotation;
 		}
 
+		@Nullable
 		public Class<? extends Annotation> getComposedAnnotationType() {
 			return (this.composedAnnotation != null ? this.composedAnnotation.annotationType() : null);
 		}
@@ -380,7 +381,7 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				Annotation composedAnnotation, Annotation annotation) {
+				@Nullable Annotation composedAnnotation, Annotation annotation) {
 
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
 		}

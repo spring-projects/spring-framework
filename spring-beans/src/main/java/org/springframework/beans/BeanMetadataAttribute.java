@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -40,7 +41,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	 * @param name the name of the attribute (never {@code null})
 	 * @param value the value of the attribute (possibly before type conversion)
 	 */
-	public BeanMetadataAttribute(String name, Object value) {
+	public BeanMetadataAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "Name must not be null");
 		this.name = name;
 		this.value = value;
@@ -65,7 +66,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setSource(Object source) {
+	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
 

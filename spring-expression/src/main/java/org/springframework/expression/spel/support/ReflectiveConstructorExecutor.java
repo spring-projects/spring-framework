@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,11 +53,11 @@ public class ReflectiveConstructorExecutor implements ConstructorExecutor {
 	@Override
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
-			if (arguments != null) {
-				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.ctor, this.varargsPosition);
-			}
+			ReflectionHelper.convertArguments(
+					context.getTypeConverter(), arguments, this.ctor, this.varargsPosition);
 			if (this.ctor.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(), arguments);
+				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
+						this.ctor.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.ctor);
 			return new TypedValue(this.ctor.newInstance(arguments));

@@ -38,20 +38,20 @@ public class ServerWebInputException extends ResponseStatusException {
 	 * Constructor with an explanation only.
 	 */
 	public ServerWebInputException(String reason) {
-		this(reason, null);
+		this(reason, null, null);
 	}
 
 	/**
 	 * Constructor for a 400 error linked to a specific {@code MethodParameter}.
 	 */
-	public ServerWebInputException(String reason, MethodParameter parameter) {
+	public ServerWebInputException(String reason, @Nullable MethodParameter parameter) {
 		this(reason, parameter, null);
 	}
 
 	/**
 	 * Constructor for a 400 error with a root cause.
 	 */
-	public ServerWebInputException(String reason, MethodParameter parameter, Throwable cause) {
+	public ServerWebInputException(String reason, @Nullable MethodParameter parameter, @Nullable Throwable cause) {
 		super(HttpStatus.BAD_REQUEST, reason, cause);
 		this.parameter = parameter;
 	}

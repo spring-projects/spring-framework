@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
-		if (servletConfig != null && this.servletContext == null) {
+		if (this.servletContext == null) {
 			this.servletContext = servletConfig.getServletContext();
 		}
 	}
@@ -99,9 +99,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	@Override
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
-		if (namespace != null) {
-			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
-		}
+		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
 	}
 
 	@Override
@@ -115,9 +113,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 */
 	@Override
 	public void setConfigLocation(String configLocation) {
-		if (configLocation != null) {
-			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
-		}
+		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
 	}
 
 	/**
@@ -126,9 +122,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 */
 	@Override
 	public void setConfigLocations(String... configLocations) {
-		if (configLocations != null) {
-			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
-		}
+		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
 	}
 
 	@Override

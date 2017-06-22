@@ -17,6 +17,7 @@
 package org.springframework.web.method.support;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * A return value handler that supports async types. Such return value types
@@ -39,8 +40,8 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * Whether the given return value represents asynchronous computation.
 	 * @param returnValue the return value
 	 * @param returnType the return type
-	 * @return {@code true} if the return value is asynchronous.
+	 * @return {@code true} if the return value is asynchronous
 	 */
-	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
+	boolean isAsyncReturnValue(@Nullable Object returnValue, MethodParameter returnType);
 
 }

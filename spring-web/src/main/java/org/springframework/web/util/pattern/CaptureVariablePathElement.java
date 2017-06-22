@@ -16,8 +16,11 @@
 
 package org.springframework.web.util.pattern;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.web.util.UriUtils;
 
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern
@@ -74,10 +77,17 @@ class CaptureVariablePathElement extends PathElement {
 			return false;
 		}
 
+		String substringForDecoding = null;
 		CharSequence candidateCapture = null;
 		if (this.constraintPattern != null) {
 			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
-			candidateCapture = new SubSequence(matchingContext.candidate, candidateIndex, nextPos);
+			if (includesPercent(matchingContext.candidate, candidateIndex, nextPos)) {
+				substringForDecoding = new String(matchingContext.candidate, candidateIndex, nextPos);
+				candidateCapture = UriUtils.decode(substringForDecoding, StandardCharsets.UTF_8);
+			}
+			else {
+				candidateCapture = new SubSequence(matchingContext.candidate, candidateIndex, nextPos);
+			}
 			Matcher matcher = constraintPattern.matcher(candidateCapture);
 			if (matcher.groupCount() != 0) {
 				throw new IllegalArgumentException(
@@ -115,7 +125,8 @@ class CaptureVariablePathElement extends PathElement {
 
 		if (match && matchingContext.extractingVariables) {
 			matchingContext.set(this.variableName,
-					new String(matchingContext.candidate, candidateIndex, nextPos - candidateIndex));
+					candidateCapture != null ? candidateCapture.toString():
+					decode(new String(matchingContext.candidate, candidateIndex, nextPos - candidateIndex)));
 		}
 		return match;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.xml.transform.dom.DOMSource;
 import org.w3c.dom.Document;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of the {@link SqlXmlHandler} interface.
@@ -88,7 +89,9 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
-	public Source getXmlAsSource(ResultSet rs, String columnName, Class<? extends Source> sourceClass) throws SQLException {
+	public Source getXmlAsSource(ResultSet rs, String columnName, @Nullable Class<? extends Source> sourceClass)
+			throws SQLException {
+
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		if (xmlObject == null) {
 			return null;
@@ -97,7 +100,9 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
-	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class<? extends Source> sourceClass) throws SQLException {
+	public Source getXmlAsSource(ResultSet rs, int columnIndex, @Nullable Class<? extends Source> sourceClass)
+			throws SQLException {
+
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		if (xmlObject == null) {
 			return null;

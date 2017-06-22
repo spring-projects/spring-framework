@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -96,7 +96,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @param request current HTTP request
 	 * @param response current HTTP response (for automatic last-modified handling)
 	 */
-	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
+	public ServletWebRequest(HttpServletRequest request, @Nullable HttpServletResponse response) {
 		super(request, response);
 	}
 
@@ -112,19 +112,21 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	public <T> T getNativeRequest(Class<T> requiredType) {
+	public <T> T getNativeRequest(@Nullable Class<T> requiredType) {
 		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
 	@Override
-	public <T> T getNativeResponse(Class<T> requiredType) {
-		return WebUtils.getNativeResponse(getResponse(), requiredType);
+	public <T> T getNativeResponse(@Nullable Class<T> requiredType) {
+		HttpServletResponse response = getResponse();
+		return (response != null ? WebUtils.getNativeResponse(response, requiredType) : null);
 	}
 
 	/**
 	 * Return the HTTP method of the request.
 	 * @since 4.0.2
 	 */
+	@Nullable
 	public HttpMethod getHttpMethod() {
 		return HttpMethod.resolve(getRequest().getMethod());
 	}
@@ -207,9 +209,9 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
-		if (this.notModified || HttpStatus.OK.value() != response.getStatus()) {
+		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {
 			return this.notModified;
 		}
 
@@ -217,31 +219,31 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		// See https://tools.ietf.org/html/rfc7232#section-6
 
 		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
-			if (this.notModified) {
+			if (this.notModified && response != null) {
 				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			}
 			return this.notModified;
 		}
 
 		boolean validated = validateIfNoneMatch(etag);
-
 		if (!validated) {
 			validateIfModifiedSince(lastModifiedTimestamp);
 		}
 
 		// Update response
-
-		boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
-		if (this.notModified) {
-			response.setStatus(isHttpGetOrHead ?
-					HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
-		}
-		if (isHttpGetOrHead) {
-			if(lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(LAST_MODIFIED)) == -1) {
-				response.setDateHeader(LAST_MODIFIED, lastModifiedTimestamp);
+		if (response != null) {
+			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+			if (this.notModified) {
+				response.setStatus(isHttpGetOrHead ?
+						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
 			}
-			if (StringUtils.hasLength(etag) && response.getHeader(ETAG) == null) {
-				response.setHeader(ETAG, padEtagIfNecessary(etag));
+			if (isHttpGetOrHead) {
+				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(LAST_MODIFIED)) == -1) {
+					response.setDateHeader(LAST_MODIFIED, lastModifiedTimestamp);
+				}
+				if (StringUtils.hasLength(etag) && response.getHeader(ETAG) == null) {
+					response.setHeader(ETAG, padEtagIfNecessary(etag));
+				}
 			}
 		}
 
@@ -261,10 +263,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
-	private boolean validateIfNoneMatch(String etag) {
+	private boolean validateIfNoneMatch(@Nullable String etag) {
 		if (!StringUtils.hasLength(etag)) {
 			return false;
 		}
+
 		Enumeration<String> ifNoneMatch;
 		try {
 			ifNoneMatch = getRequest().getHeaders(IF_NONE_MATCH);
@@ -275,21 +278,22 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (!ifNoneMatch.hasMoreElements()) {
 			return false;
 		}
+
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
-
 			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 			while (eTagMatcher.find()) {
-				if (StringUtils.hasLength(eTagMatcher.group())
-						&& etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
+				if (StringUtils.hasLength(eTagMatcher.group()) &&
+						etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}
 			}
 		}
+
 		return true;
 	}
 
@@ -328,16 +332,18 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		catch (IllegalArgumentException ex) {
 			String headerValue = getHeader(headerName);
 			// Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
-			int separatorIndex = headerValue.indexOf(';');
-			if (separatorIndex != -1) {
-				String datePart = headerValue.substring(0, separatorIndex);
-				dateValue = parseDateValue(datePart);
+			if (headerValue != null) {
+				int separatorIndex = headerValue.indexOf(';');
+				if (separatorIndex != -1) {
+					String datePart = headerValue.substring(0, separatorIndex);
+					dateValue = parseDateValue(datePart);
+				}
 			}
 		}
 		return dateValue;
 	}
 
-	private long parseDateValue(String headerValue) {
+	private long parseDateValue(@Nullable String headerValue) {
 		if (headerValue == null) {
 			// No header value sent at all
 			return -1;

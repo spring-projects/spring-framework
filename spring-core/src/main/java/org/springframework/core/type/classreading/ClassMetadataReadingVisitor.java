@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -70,7 +71,9 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 
 	@Override
-	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
+	public void visit(
+			int version, int access, String name, String signature, @Nullable String supername, String[] interfaces) {
+
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
 		this.isAnnotation = ((access & Opcodes.ACC_ANNOTATION) != 0);
@@ -91,7 +94,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
-	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+	public void visitInnerClass(String name, @Nullable String outerName, String innerName, int access) {
 		if (outerName != null) {
 			String fqName = ClassUtils.convertResourcePathToClassName(name);
 			String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);

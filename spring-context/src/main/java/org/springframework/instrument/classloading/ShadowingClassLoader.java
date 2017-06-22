@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.DecoratingClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -190,6 +191,7 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	}
 
 	@Override
+	@Nullable
 	public InputStream getResourceAsStream(String name) {
 		return this.enclosingClassLoader.getResourceAsStream(name);
 	}

@@ -85,7 +85,7 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 			if (this.sseDecoder != null) {
 				return this.sseDecoder;
 			}
-			return jackson2Present ? jackson2Decoder() : null;
+			return (jackson2Present ? jackson2Decoder() : null);
 		}
 
 		@Override

@@ -76,21 +76,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
-				new Converter<Method, Annotation>() {
-					@Override
-					public Annotation convert(Method method) {
-						AspectJAnnotation<?> annotation =
-								AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
-						return (annotation != null ? annotation.getAnnotation() : null);
-					}
+				(Converter<Method, Annotation>) method -> {
+					AspectJAnnotation<?> annotation =
+						AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+					return (annotation != null ? annotation.getAnnotation() : null);
 				});
-		Comparator<Method> methodNameComparator = new ConvertingComparator<>(
-				new Converter<Method, String>() {
-					@Override
-					public String convert(Method method) {
-						return method.getName();
-					}
-				});
+		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
 		METHOD_COMPARATOR = adviceKindComparator.thenComparing(methodNameComparator);
 	}
 
@@ -157,13 +148,10 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new LinkedList<>();
-		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException {
-				// Exclude pointcuts
-				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
-					methods.add(method);
-				}
+		ReflectionUtils.doWithMethods(aspectClass, method -> {
+			// Exclude pointcuts
+			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+				methods.add(method);
 			}
 		});
 		Collections.sort(methods, METHOD_COMPARATOR);

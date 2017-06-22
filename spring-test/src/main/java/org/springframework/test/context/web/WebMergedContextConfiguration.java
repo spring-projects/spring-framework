@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.web;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -99,7 +98,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @since 4.1
 	 */
 	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
-			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
@@ -135,7 +134,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @since 4.3
 	 */
 	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
-			@Nullable Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
 			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
@@ -206,7 +205,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 				.append("propertySourceProperties", ObjectUtils.nullSafeToString(getPropertySourceProperties()))
 				.append("contextCustomizers", getContextCustomizers())
 				.append("resourceBasePath", getResourceBasePath())
-				.append("contextLoader", nullSafeToString(getContextLoader()))
+				.append("contextLoader", nullSafeClassName(getContextLoader()))
 				.append("parent", getParent())
 				.toString();
 	}

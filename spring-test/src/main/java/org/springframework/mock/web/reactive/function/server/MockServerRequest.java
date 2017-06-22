@@ -47,6 +47,7 @@ import org.springframework.web.server.WebSession;
 
 /**
  * Mock implementation of {@link ServerRequest}.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
@@ -70,9 +71,9 @@ public class MockServerRequest implements ServerRequest {
 
 	private Principal principal;
 
-	private MockServerRequest(HttpMethod method, URI uri,
-			MockHeaders headers, @Nullable Object body, Map<String, Object> attributes,
-			MultiValueMap<String, String> queryParams,
+
+	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers, @Nullable Object body,
+			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, WebSession session, Principal principal) {
 
 		this.method = method;
@@ -104,25 +105,29 @@ public class MockServerRequest implements ServerRequest {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor){
+	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor) {
+		Assert.state(this.body != null, "No body");
 		return (S) this.body;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+		Assert.state(this.body != null, "No body");
 		return (S) this.body;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S> Mono<S> bodyToMono(Class<? extends S> elementClass) {
+		Assert.state(this.body != null, "No body");
 		return (Mono<S>) this.body;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S> Flux<S> bodyToFlux(Class<? extends S> elementClass) {
+		Assert.state(this.body != null, "No body");
 		return (Flux<S>) this.body;
 	}
 

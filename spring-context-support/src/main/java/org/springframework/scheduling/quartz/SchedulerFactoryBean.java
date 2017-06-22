@@ -42,6 +42,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.util.CollectionUtils;
 
@@ -114,6 +115,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setApplicationContext
 	 * @see ResourceLoaderClassLoadHelper
 	 */
+	@Nullable
 	public static ResourceLoader getConfigTimeResourceLoader() {
 		return configTimeResourceLoaderHolder.get();
 	}
@@ -127,6 +129,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setTaskExecutor
 	 * @see LocalTaskExecutorThreadPool
 	 */
+	@Nullable
 	public static Executor getConfigTimeTaskExecutor() {
 		return configTimeTaskExecutorHolder.get();
 	}
@@ -140,6 +143,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setDataSource
 	 * @see LocalDataSourceJobStore
 	 */
+	@Nullable
 	public static DataSource getConfigTimeDataSource() {
 		return configTimeDataSourceHolder.get();
 	}
@@ -153,6 +157,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setNonTransactionalDataSource
 	 * @see LocalDataSourceJobStore
 	 */
+	@Nullable
 	public static DataSource getConfigTimeNonTransactionalDataSource() {
 		return configTimeNonTransactionalDataSourceHolder.get();
 	}
@@ -578,14 +583,14 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #afterPropertiesSet
 	 * @see org.quartz.SchedulerFactory#getScheduler
 	 */
-	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, @Nullable String schedulerName)
 			throws SchedulerException {
 
 		// Override thread context ClassLoader to work around naive Quartz ClassLoadHelper loading.
 		Thread currentThread = Thread.currentThread();
 		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
 		boolean overrideClassLoader = (this.resourceLoader != null &&
-				!this.resourceLoader.getClassLoader().equals(threadContextClassLoader));
+				this.resourceLoader.getClassLoader() != threadContextClassLoader);
 		if (overrideClassLoader) {
 			currentThread.setContextClassLoader(this.resourceLoader.getClassLoader());
 		}

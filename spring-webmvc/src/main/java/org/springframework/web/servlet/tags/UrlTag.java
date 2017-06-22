@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,8 +292,9 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
 				usedParams.add(param.getName());
+				String value = param.getValue();
 				try {
-					uri = uri.replace(template, UriUtils.encodePath(param.getValue(), encoding));
+					uri = uri.replace(template, (value != null ? UriUtils.encodePath(value, encoding) : ""));
 				}
 				catch (UnsupportedEncodingException ex) {
 					throw new JspException(ex);
@@ -303,8 +304,10 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				template = URL_TEMPLATE_DELIMITER_PREFIX + '/' + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 				if (uri.contains(template)) {
 					usedParams.add(param.getName());
+					String value = param.getValue();
 					try {
-						uri = uri.replace(template, UriUtils.encodePathSegment(param.getValue(), encoding));
+						uri = uri.replace(template,
+								(value != null ? UriUtils.encodePathSegment(param.getValue(), encoding) : ""));
 					}
 					catch (UnsupportedEncodingException ex) {
 						throw new JspException(ex);

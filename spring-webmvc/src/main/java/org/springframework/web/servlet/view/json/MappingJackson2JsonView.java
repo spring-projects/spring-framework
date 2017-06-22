@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,13 +217,13 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<>(model.size());
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (!(entry.getValue() instanceof BindingResult) && modelKeys.contains(entry.getKey()) &&
-					!entry.getKey().equals(JsonView.class.getName()) &&
-					!entry.getKey().equals(FilterProvider.class.getName())) {
-				result.put(entry.getKey(), entry.getValue());
+		model.forEach((clazz, value) -> {
+			if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&
+					!clazz.equals(JsonView.class.getName()) &&
+					!clazz.equals(FilterProvider.class.getName())) {
+				result.put(clazz, value);
 			}
-		}
+		});
 		return (this.extractValueFromSingleKeyModel && result.size() == 1 ? result.values().iterator().next() : result);
 	}
 

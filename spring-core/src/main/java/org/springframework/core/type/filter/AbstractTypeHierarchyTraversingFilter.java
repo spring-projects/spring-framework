@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,9 +68,10 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		}
 
 		if (this.considerInherited) {
-			if (metadata.hasSuperClass()) {
+			String superClassName = metadata.getSuperClassName();
+			if (superClassName != null) {
 				// Optimization to avoid creating ClassReader for super class.
-				Boolean superClassMatch = matchSuperClass(metadata.getSuperClassName());
+				Boolean superClassMatch = matchSuperClass(superClassName);
 				if (superClassMatch != null) {
 					if (superClassMatch.booleanValue()) {
 						return true;

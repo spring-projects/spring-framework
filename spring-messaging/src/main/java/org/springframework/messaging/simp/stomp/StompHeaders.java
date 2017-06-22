@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
@@ -112,10 +113,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
 			Map<String, List<String>> map = new LinkedMultiValueMap<>(headers.size());
-			for (Entry<String, List<String>> entry : headers.entrySet()) {
-				List<String> values = Collections.unmodifiableList(entry.getValue());
-				map.put(entry.getKey(), values);
-			}
+			headers.forEach((key, value) -> map.put(key, Collections.unmodifiableList(value)));
 			this.headers = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -137,6 +135,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return the content-type header value.
 	 */
+	@Nullable
 	public MimeType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MimeTypeUtils.parseMimeType(value) : null);
@@ -169,6 +168,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceipt() {
 		return getFirst(RECEIPT);
 	}
@@ -184,6 +184,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the host header.
 	 */
+	@Nullable
 	public String getHost() {
 		return getFirst(HOST);
 	}
@@ -199,6 +200,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the login header.
 	 */
+	@Nullable
 	public String getLogin() {
 		return getFirst(LOGIN);
 	}
@@ -214,6 +216,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the passcode header.
 	 */
+	@Nullable
 	public String getPasscode() {
 		return getFirst(PASSCODE);
 	}
@@ -222,7 +225,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the heartbeat header.
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
-	public void setHeartbeat(long[] heartbeat) {
+	public void setHeartbeat(@Nullable long[] heartbeat) {
 		if (heartbeat == null || heartbeat.length != 2) {
 			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
 					(heartbeat != null ? heartbeat.length : "null"));
@@ -237,6 +240,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the heartbeat header.
 	 */
+	@Nullable
 	public long[] getHeartbeat() {
 		String rawValue = getFirst(HEARTBEAT);
 		String[] rawValues = StringUtils.split(rawValue, ",");
@@ -266,6 +270,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the session header.
 	 */
+	@Nullable
 	public String getSession() {
 		return getFirst(SESSION);
 	}
@@ -282,6 +287,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the server header.
 	 * Applies to the CONNECTED frame.
 	 */
+	@Nullable
 	public String getServer() {
 		return getFirst(SERVER);
 	}
@@ -297,6 +303,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the destination header.
 	 * Applies to the SEND, SUBSCRIBE, and MESSAGE frames.
 	 */
+	@Nullable
 	public String getDestination() {
 		return getFirst(DESTINATION);
 	}
@@ -312,6 +319,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the id header.
 	 */
+	@Nullable
 	public String getId() {
 		return getFirst(ID);
 	}
@@ -327,6 +335,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the ack header.
 	 */
+	@Nullable
 	public String getAck() {
 		return getFirst(ACK);
 	}
@@ -342,6 +351,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the subscription header.
 	 */
+	@Nullable
 	public String getSubscription() {
 		return getFirst(SUBSCRIPTION);
 	}
@@ -357,6 +367,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the message-id header.
 	 */
+	@Nullable
 	public String getMessageId() {
 		return getFirst(MESSAGE_ID);
 	}
@@ -372,6 +383,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
+	@Nullable
 	public String getReceiptId() {
 		return getFirst(RECEIPT_ID);
 	}
@@ -396,15 +408,20 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @see #set(String, String)
 	 */
 	@Override
-	public void add(String headerName, String headerValue) {
+	public void add(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
 	}
 
 	@Override
-	public void addAll(String headerName, List<String> headerValues) {
+	public void addAll(String headerName, List<? extends String> headerValues) {
 		List<String> currentValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		currentValues.addAll(headerValues);
+	}
+
+	@Override
+	public void addAll(MultiValueMap<String, String> values) {
+		values.forEach(this::addAll);
 	}
 
 	/**
@@ -424,17 +441,13 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	@Override
 	public void setAll(Map<String, String> values) {
-		for (Entry<String, String> entry : values.entrySet()) {
-			set(entry.getKey(), entry.getValue());
-		}
+		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
-		for (Entry<String, List<String>> entry : headers.entrySet()) {
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
-		}
+		headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 		return singleValueMap;
 	}
 
@@ -522,8 +535,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return a {@code StompHeaders} object that can only be read, not written to.
 	 */
-	public static StompHeaders readOnlyStompHeaders(Map<String, List<String>> headers) {
-		return new StompHeaders(headers, true);
+	public static StompHeaders readOnlyStompHeaders(@Nullable Map<String, List<String>> headers) {
+		return new StompHeaders((headers != null ? headers : Collections.emptyMap()), true);
 	}
 
 }

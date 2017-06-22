@@ -87,7 +87,8 @@ class ClassPathJaxb2TypeScanner {
 					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 					if (isJaxb2Class(metadataReader, metadataReaderFactory)) {
 						String className = metadataReader.getClassMetadata().getClassName();
-						Class<?> jaxb2AnnotatedClass = this.resourcePatternResolver.getClassLoader().loadClass(className);
+						Class<?> jaxb2AnnotatedClass =
+								ClassUtils.forName(className, this.resourcePatternResolver.getClassLoader());
 						jaxb2Classes.add(jaxb2AnnotatedClass);
 					}
 				}

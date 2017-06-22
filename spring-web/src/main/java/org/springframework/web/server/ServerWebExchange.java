@@ -24,10 +24,13 @@ import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Contract for an HTTP request-response interaction. Provides access to the HTTP
@@ -98,6 +101,11 @@ public interface ServerWebExchange {
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
+	 * Return the {@link LocaleContext} using the configured {@link LocaleContextResolver}.
+	 */
+	LocaleContext getLocaleContext();
+
+	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
 	 * in this contract were used and they returned true.
 	 */
@@ -137,7 +145,7 @@ public interface ServerWebExchange {
 	 * determined for the underlying resource
 	 * @return true if the request does not require further processing.
 	 */
-	boolean checkNotModified(String etag, Instant lastModified);
+	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
 
 	/**

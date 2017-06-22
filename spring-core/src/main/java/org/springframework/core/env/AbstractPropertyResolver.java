@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,10 +129,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	@Override
 	public void setRequiredProperties(String... requiredProperties) {
-		if (requiredProperties != null) {
-			for (String key : requiredProperties) {
-				this.requiredProperties.add(key);
-			}
+		for (String key : requiredProperties) {
+			this.requiredProperties.add(key);
 		}
 	}
 
@@ -228,12 +226,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
-		return helper.replacePlaceholders(text, new PropertyPlaceholderHelper.PlaceholderResolver() {
-			@Override
-			public String resolvePlaceholder(String placeholderName) {
-				return getPropertyAsRawString(placeholderName);
-			}
-		});
+		return helper.replacePlaceholders(text, placeholderName -> getPropertyAsRawString(placeholderName));
 	}
 
 	/**
@@ -245,7 +238,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @since 4.3.5
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T convertValueIfNecessary(Object value, Class<T> targetType) {
+	@Nullable
+	protected <T> T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
 		if (targetType == null) {
 			return (T) value;
 		}

@@ -134,6 +134,7 @@ public interface StompSession {
 		void addReceiptLostTask(Runnable runnable);
 	}
 
+
 	/**
 	 * A handle to use to unsubscribe or to track a receipt.
 	 */
@@ -142,6 +143,7 @@ public interface StompSession {
 		/**
 		 * Return the id for the subscription.
 		 */
+		@Nullable
 		String getSubscriptionId();
 
 		/**
@@ -159,7 +161,7 @@ public interface StompSession {
 		 * to send to the server.
 		 * <p><strong>Note:</strong> There is no need to set the subscription id.
 		 */
-		void unsubscribe(StompHeaders stompHeaders);
+		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}
 
 }

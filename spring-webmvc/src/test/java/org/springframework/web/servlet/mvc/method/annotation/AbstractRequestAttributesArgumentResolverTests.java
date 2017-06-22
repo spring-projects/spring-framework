@@ -43,7 +43,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Base class for {@code @RequestAttribute} and {@code @SessionAttribute} method

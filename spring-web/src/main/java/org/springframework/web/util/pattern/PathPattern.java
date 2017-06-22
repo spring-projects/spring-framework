@@ -22,8 +22,7 @@ import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
-
-import static org.springframework.util.StringUtils.*;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a parsed path pattern. Includes a chain of path elements
@@ -154,9 +153,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matches(String path) {
 		if (this.head == null) {
-			return !hasLength(path);
+			return !StringUtils.hasLength(path);
 		}
-		else if (!hasLength(path)) {
+		else if (!StringUtils.hasLength(path)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
 				path = ""; // Will allow CaptureTheRest to bind the variable to empty
 			}
@@ -171,20 +170,15 @@ public class PathPattern implements Comparable<PathPattern> {
 	/**
 	 * For a given path return the remaining piece that is not covered by this PathPattern.
 	 * @param path a path that may or may not match this path pattern
-	 * @return a {@link PathRemainingMatchInfo} describing the match result or null if
-	 * the path does not match this pattern
+	 * @return a {@link PathRemainingMatchInfo} describing the match result,
+	 * or {@code null} if the path does not match this pattern
 	 */
 	@Nullable
 	public PathRemainingMatchInfo getPathRemaining(String path) {
 		if (this.head == null) {
-			if (path == null) {
-				return new PathRemainingMatchInfo(null);
-			}
-			else {
-				return new PathRemainingMatchInfo(hasLength(path) ? path : "");
-			}
+			return new PathRemainingMatchInfo(path);
 		}
-		else if (!hasLength(path)) {
+		else if (!StringUtils.hasLength(path)) {
 			return null;
 		}
 
@@ -213,9 +207,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matchStart(String path) {
 		if (this.head == null) {
-			return !hasLength(path);
+			return !StringUtils.hasLength(path);
 		}
-		else if (!hasLength(path)) {
+		else if (!StringUtils.hasLength(path)) {
 			return true;
 		}
 		MatchingContext matchingContext = new MatchingContext(path, false);
@@ -233,13 +227,11 @@ public class PathPattern implements Comparable<PathPattern> {
 		if (this.head != null && this.head.matches(0, matchingContext)) {
 			return matchingContext.getExtractedVariables();
 		}
+		else if (!StringUtils.hasLength(path)) {
+			return Collections.emptyMap();
+		}
 		else {
-			if (!hasLength(path)) {
-				return Collections.emptyMap();
-			}
-			else {
-				throw new IllegalStateException("Pattern \"" + this + "\" is not a match for \"" + path + "\"");
-			}
+			throw new IllegalStateException("Pattern \"" + this + "\" is not a match for \"" + path + "\"");
 		}
 	}
 
@@ -338,7 +330,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * The aim is to sort more specific patterns first.
 	 */
 	@Override
-	public int compareTo(PathPattern otherPattern) {
+	public int compareTo(@Nullable PathPattern otherPattern) {
 		// 1) null is sorted last
 		if (otherPattern == null) {
 			return -1;
@@ -405,15 +397,15 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public String combine(String pattern2string) {
 		// If one of them is empty the result is the other. If both empty the result is ""
-		if (!hasLength(this.patternString)) {
-			if (!hasLength(pattern2string)) {
+		if (!StringUtils.hasLength(this.patternString)) {
+			if (!StringUtils.hasLength(pattern2string)) {
 				return "";
 			}
 			else {
 				return pattern2string;
 			}
 		}
-		else if (!hasLength(pattern2string)) {
+		else if (!StringUtils.hasLength(pattern2string)) {
 			return this.patternString;
 		}
 

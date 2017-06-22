@@ -120,6 +120,7 @@ public abstract class ResponseEntityExceptionHandler {
 			NoHandlerFoundException.class,
 			AsyncRequestTimeoutException.class
 		})
+	@Nullable
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		if (ex instanceof HttpRequestMethodNotSupportedException) {
@@ -203,7 +204,7 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the response status
 	 * @param request the current request
 	 */
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
@@ -452,10 +453,10 @@ public abstract class ResponseEntityExceptionHandler {
 			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
 
 		if (webRequest instanceof ServletWebRequest) {
-			ServletWebRequest servletRequest = (ServletWebRequest) webRequest;
-			HttpServletRequest request = servletRequest.getNativeRequest(HttpServletRequest.class);
-			HttpServletResponse response = servletRequest.getNativeResponse(HttpServletResponse.class);
-			if (response.isCommitted()) {
+			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
+			HttpServletRequest request = servletWebRequest.getRequest();
+			HttpServletResponse response = servletWebRequest.getResponse();
+			if (response != null && response.isCommitted()) {
 				if (logger.isErrorEnabled()) {
 					logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
 				}

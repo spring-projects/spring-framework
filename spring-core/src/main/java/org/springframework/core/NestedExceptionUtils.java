@@ -40,7 +40,8 @@ public abstract class NestedExceptionUtils {
 	 * @param cause the root cause
 	 * @return the full exception message
 	 */
-	public static String buildMessage(String message, Throwable cause) {
+	@Nullable
+	public static String buildMessage(@Nullable String message, @Nullable Throwable cause) {
 		if (cause == null) {
 			return message;
 		}
@@ -59,7 +60,7 @@ public abstract class NestedExceptionUtils {
 	 * @since 4.3.9
 	 */
 	@Nullable
-	public static Throwable getRootCause(Throwable original) {
+	public static Throwable getRootCause(@Nullable Throwable original) {
 		if (original == null) {
 			return null;
 		}

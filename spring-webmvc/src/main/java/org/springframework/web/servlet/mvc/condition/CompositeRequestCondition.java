@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -51,7 +50,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * same number of conditions so they may be compared and combined.
 	 * It is acceptable to provide {@code null} conditions.
 	 */
-	public CompositeRequestCondition(@Nullable RequestCondition<?>... requestConditions) {
+	public CompositeRequestCondition(RequestCondition<?>... requestConditions) {
 		this.requestConditions = wrap(requestConditions);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.CookieGenerator;
@@ -103,7 +104,7 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	}
 
 	@Override
-	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
+	public void setThemeName(HttpServletRequest request, HttpServletResponse response, @Nullable String themeName) {
 		if (StringUtils.hasText(themeName)) {
 			// Set request attribute and add cookie.
 			request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);

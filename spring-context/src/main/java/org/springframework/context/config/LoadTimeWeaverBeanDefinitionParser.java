@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.weaving.AspectJWeavingEnabler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -94,12 +95,12 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 		}
 		else {
 			// Determine default...
-			ClassLoader cl = parserContext.getReaderContext().getResourceLoader().getClassLoader();
-			return (cl.getResource(AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE) != null);
+			ClassLoader cl = parserContext.getReaderContext().getBeanClassLoader();
+			return (cl != null && cl.getResource(AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE) != null);
 		}
 	}
 
-	protected boolean isBeanConfigurerAspectEnabled(ClassLoader beanClassLoader) {
+	protected boolean isBeanConfigurerAspectEnabled(@Nullable ClassLoader beanClassLoader) {
 		return ClassUtils.isPresent(SpringConfiguredBeanDefinitionParser.BEAN_CONFIGURER_ASPECT_CLASS_NAME,
 				beanClassLoader);
 	}

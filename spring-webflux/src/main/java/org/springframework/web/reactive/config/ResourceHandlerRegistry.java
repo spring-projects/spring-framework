@@ -26,8 +26,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
-import org.springframework.web.reactive.handler.AbstractHandlerMapping;
+import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.server.WebHandler;
@@ -56,8 +55,6 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
-	private final CompositeContentTypeResolver contentTypeResolver;
-
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
 	private int order = Integer.MAX_VALUE -1;
@@ -68,20 +65,9 @@ public class ResourceHandlerRegistry {
 	 * @param applicationContext the Spring application context
 	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext) {
-		this(applicationContext, null);
-	}
-
-	/**
-	 * Create a new resource handler registry for the given application context.
-	 * @param applicationContext the Spring application context
-	 * @param contentTypeResolver the content type resolver to use
-	 */
-	public ResourceHandlerRegistry(ApplicationContext applicationContext,
-			CompositeContentTypeResolver contentTypeResolver) {
 
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
-		this.contentTypeResolver = contentTypeResolver;
 	}
 
 
@@ -90,7 +76,7 @@ public class ResourceHandlerRegistry {
 	 * URL path patterns. The handler will be invoked for every incoming request
 	 * that matches to one of the specified path patterns.
 	 * <p>Patterns like {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
-	 * are allowed. See {@link org.springframework.web.util.pattern.ParsingPathMatcher}
+	 * are allowed. See {@link org.springframework.web.util.pattern.PathPattern}
 	 * for more details on the syntax.
 	 * @return A {@link ResourceHandlerRegistration} to use to further
 	 * configure the registered resource handler
@@ -129,19 +115,16 @@ public class ResourceHandlerRegistry {
 	 * of no registrations.
 	 */
 	@Nullable
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected AbstractUrlHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}
-
 		Map<String, WebHandler> urlMap = new LinkedHashMap<>();
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceWebHandler handler = registration.getRequestHandler();
-				handler.setContentTypeResolver(this.contentTypeResolver);
 				try {
 					handler.afterPropertiesSet();
-					handler.afterSingletonsInstantiated();
 				}
 				catch (Exception ex) {
 					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
@@ -149,7 +132,6 @@ public class ResourceHandlerRegistry {
 				urlMap.put(pathPattern, handler);
 			}
 		}
-
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
 		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);

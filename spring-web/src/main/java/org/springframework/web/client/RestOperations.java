@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(String url, @Nullable Object request, Object... uriVariables) throws RestClientException;
 
 	/**
@@ -168,6 +169,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -180,6 +182,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
+	@Nullable
 	URI postForLocation(URI url, @Nullable Object request) throws RestClientException;
 
 	/**
@@ -593,8 +596,8 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException;
+	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, preparing the request with the
@@ -608,8 +611,8 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException;
+	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URL, preparing the request with the
@@ -621,7 +624,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(URI url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor) throws RestClientException;
+	<T> T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException;
 
 }

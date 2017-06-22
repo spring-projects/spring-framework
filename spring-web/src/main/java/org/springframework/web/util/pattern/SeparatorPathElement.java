@@ -48,7 +48,7 @@ class SeparatorPathElement extends PathElement {
 					matched = true;
 				}
 				else {
-					matched = ((candidateIndex + 1) == matchingContext.candidateLength);
+					matched = (candidateIndex + 1 == matchingContext.candidateLength);
 				}
 			}
 			else {

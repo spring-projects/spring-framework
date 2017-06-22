@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
-	public void inject(Object target, String beanName, PropertyValues pvs) throws Throwable {
+	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 		Collection<InjectedElement> elementsToIterate =
 				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
@@ -94,7 +94,7 @@ public class InjectionMetadata {
 	/**
 	 * @since 3.2.13
 	 */
-	public void clear(PropertyValues pvs) {
+	public void clear(@Nullable PropertyValues pvs) {
 		Collection<InjectedElement> elementsToIterate =
 				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
@@ -105,7 +105,7 @@ public class InjectionMetadata {
 	}
 
 
-	public static boolean needsRefresh(InjectionMetadata metadata, Class<?> clazz) {
+	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
 		return (metadata == null || metadata.targetClass != clazz);
 	}
 
@@ -120,7 +120,7 @@ public class InjectionMetadata {
 
 		protected volatile Boolean skip;
 
-		protected InjectedElement(Member member, PropertyDescriptor pd) {
+		protected InjectedElement(Member member, @Nullable PropertyDescriptor pd) {
 			this.member = member;
 			this.isField = (member instanceof Field);
 			this.pd = pd;
@@ -163,7 +163,9 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
-		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
+		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
+				throws Throwable {
+
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
@@ -189,7 +191,7 @@ public class InjectionMetadata {
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
 		 */
-		protected boolean checkPropertySkipping(PropertyValues pvs) {
+		protected boolean checkPropertySkipping(@Nullable PropertyValues pvs) {
 			if (this.skip != null) {
 				return this.skip;
 			}
@@ -219,7 +221,7 @@ public class InjectionMetadata {
 		/**
 		 * @since 3.2.13
 		 */
-		protected void clearPropertySkipping(PropertyValues pvs) {
+		protected void clearPropertySkipping(@Nullable PropertyValues pvs) {
 			if (pvs == null) {
 				return;
 			}
@@ -234,7 +236,7 @@ public class InjectionMetadata {
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
 		@Nullable
-		protected Object getResourceToInject(Object target, String requestingBeanName) {
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return null;
 		}
 

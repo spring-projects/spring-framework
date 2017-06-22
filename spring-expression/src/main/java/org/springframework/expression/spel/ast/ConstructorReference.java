@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
-import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represents the invocation of a constructor. Either a constructor on a regular type or
@@ -153,6 +153,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 		// Either there was no accessor or it no longer exists
 		String typeName = (String) this.children[0].getValueInternal(state).getValue();
+		Assert.state(typeName != null, "No type name");
 		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
@@ -179,26 +180,22 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
-	@Nullable
 	private ConstructorExecutor findExecutorForConstructor(String typeName,
-			List<TypeDescriptor> argumentTypes, ExpressionState state)
-			throws SpelEvaluationException {
+			List<TypeDescriptor> argumentTypes, ExpressionState state) throws SpelEvaluationException {
 
 		EvaluationContext evalContext = state.getEvaluationContext();
 		List<ConstructorResolver> ctorResolvers = evalContext.getConstructorResolvers();
-		if (ctorResolvers != null) {
-			for (ConstructorResolver ctorResolver : ctorResolvers) {
-				try {
-					ConstructorExecutor ce = ctorResolver.resolve(state.getEvaluationContext(), typeName, argumentTypes);
-					if (ce != null) {
-						return ce;
-					}
+		for (ConstructorResolver ctorResolver : ctorResolvers) {
+			try {
+				ConstructorExecutor ce = ctorResolver.resolve(state.getEvaluationContext(), typeName, argumentTypes);
+				if (ce != null) {
+					return ce;
 				}
-				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
-							FormatHelper.formatMethodForMessage("", argumentTypes));
-				}
+			}
+			catch (AccessException ex) {
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
+						FormatHelper.formatMethodForMessage("", argumentTypes));
 			}
 		}
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND, typeName,
@@ -233,7 +230,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		if (!(intendedArrayType instanceof String)) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
-					FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
+					FormatHelper.formatClassNameForMessage(
+							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
 		String type = (String) intendedArrayType;
 		Class<?> componentType;

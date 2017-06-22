@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
-		if (servletConfig != null && this.servletContext == null) {
+		if (this.servletContext == null) {
 			setServletContext(servletConfig.getServletContext());
 		}
 	}
@@ -123,9 +123,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
-		if (namespace != null) {
-			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
-		}
+		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
 	}
 
 	@Override

@@ -16,13 +16,20 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -46,12 +53,38 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private MultiValueMap<String, String> defaultCookies;
 
+	private List<ExchangeFilterFunction> filters;
+
 	private ClientHttpConnector connector;
 
 	private ExchangeStrategies exchangeStrategies = ExchangeStrategies.withDefaults();
 
 	private ExchangeFunction exchangeFunction;
 
+	public DefaultWebClientBuilder() {
+	}
+
+	public DefaultWebClientBuilder(DefaultWebClientBuilder other) {
+		Assert.notNull(other, "'other' must not be null");
+
+		this.baseUrl = other.baseUrl;
+		this.defaultUriVariables = (other.defaultUriVariables != null ?
+				new LinkedHashMap<>(other.defaultUriVariables) : null);
+		this.uriBuilderFactory = other.uriBuilderFactory;
+		if (other.defaultHeaders != null) {
+			this.defaultHeaders = new HttpHeaders();
+			this.defaultHeaders.putAll(other.defaultHeaders);
+		}
+		else {
+			this.defaultHeaders = null;
+		}
+		this.defaultCookies = (other.defaultCookies != null ?
+				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
+		this.connector = other.connector;
+		this.exchangeStrategies = other.exchangeStrategies;
+		this.exchangeFunction = other.exchangeFunction;
+	}
 
 	@Override
 	public WebClient.Builder baseUrl(String baseUrl) {
@@ -73,9 +106,7 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient.Builder defaultHeader(String headerName, String... headerValues) {
-		if (this.defaultHeaders == null) {
-			this.defaultHeaders = new HttpHeaders();
-		}
+		initHeaders();
 		for (String headerValue : headerValues) {
 			this.defaultHeaders.add(headerName, headerValue);
 		}
@@ -83,12 +114,39 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		initHeaders();
+		headersConsumer.accept(this.defaultHeaders);
+		return this;
+	}
+
+	private void initHeaders() {
+		if (this.defaultHeaders == null) {
+			this.defaultHeaders = new HttpHeaders();
+		}
+	}
+
+	@Override
 	public WebClient.Builder defaultCookie(String cookieName, String... cookieValues) {
+		initCookies();
+		this.defaultCookies.addAll(cookieName, Arrays.asList(cookieValues));
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder defaultCookies(
+			Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		initCookies();
+		cookiesConsumer.accept(this.defaultCookies);
+		return this;
+	}
+
+	private void initCookies() {
 		if (this.defaultCookies == null) {
 			this.defaultCookies = new LinkedMultiValueMap<>(4);
 		}
-		this.defaultCookies.addAll(cookieName, Arrays.asList(cookieValues));
-		return this;
 	}
 
 	@Override
@@ -98,8 +156,30 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder filter(ExchangeFilterFunction filter) {
+		Assert.notNull(filter, "'filter' must not be null");
+		initFilters();
+		this.filters.add(filter);
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer) {
+		Assert.notNull(filtersConsumer, "'filtersConsumer' must not be null");
+		initFilters();
+		filtersConsumer.accept(this.filters);
+		return this;
+	}
+
+	private void initFilters() {
+		if (this.filters == null) {
+			this.filters = new ArrayList<>();
+		}
+	}
+
+	@Override
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies is required.");
+		Assert.notNull(strategies, "'strategies' must not be null");
 		this.exchangeStrategies = strategies;
 		return this;
 	}
@@ -112,8 +192,37 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient build() {
-		return new DefaultWebClient(initExchangeFunction(), initUriBuilderFactory(),
-				this.defaultHeaders, this.defaultCookies);
+		ExchangeFunction exchange = initExchangeFunction();
+		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
+				.reduce(ExchangeFilterFunction::andThen)
+				.map(filter -> filter.apply(exchange))
+				.orElse(exchange) : exchange);
+		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
+				unmodifiableCopy(this.defaultHeaders), unmodifiableCopy(this.defaultCookies),
+				new DefaultWebClientBuilder(this));
+	}
+
+	private static @Nullable HttpHeaders unmodifiableCopy(@Nullable HttpHeaders original) {
+		if (original != null) {
+			HttpHeaders copy = new HttpHeaders();
+			copy.putAll(original);
+			return HttpHeaders.readOnlyHttpHeaders(copy);
+		} else {
+			return null;
+		}
+	}
+
+	private static @Nullable <K, V> MultiValueMap<K, V> unmodifiableCopy(@Nullable MultiValueMap<K, V> original) {
+		if (original != null) {
+			return CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(original));
+		}
+		else {
+			return null;
+		}
+	}
+
+	private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
+		return Collections.unmodifiableList(new ArrayList<>(list));
 	}
 
 	private UriBuilderFactory initUriBuilderFactory() {

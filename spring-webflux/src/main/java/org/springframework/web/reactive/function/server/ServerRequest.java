@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -54,6 +55,7 @@ public interface ServerRequest {
 	/**
 	 * Return the HTTP method.
 	 */
+	@Nullable
 	HttpMethod method();
 
 	/**
@@ -65,7 +67,7 @@ public interface ServerRequest {
 	 * Return the request path.
 	 */
 	default String path() {
-		return uri().getPath();
+		return uri().getRawPath();
 	}
 
 	/**
@@ -129,7 +131,16 @@ public interface ServerRequest {
 	 */
 	default Optional<String> queryParam(String name) {
 		List<String> queryParams = this.queryParams(name);
-		return (!queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty());
+		if (queryParams.isEmpty()) {
+			return Optional.empty();
+		}
+		else {
+			String value = queryParams.get(0);
+			if (value == null) {
+				value = "";
+			}
+			return Optional.of(value);
+		}
 	}
 
 	/**
@@ -232,6 +243,7 @@ public interface ServerRequest {
 		 * <p>If the header value does not contain a port, the returned
 		 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
 		 */
+		@Nullable
 		InetSocketAddress host();
 
 		/**

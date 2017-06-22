@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getResolvableType() != null) {
+		if (targetType.getResolvableType().hasGenerics()) {
 			return this.conversionService.canConvert(sourceType, new GenericTypeDescriptor(targetType));
 		}
 		else {
@@ -68,7 +68,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		else if (source instanceof Optional) {
 			return source;
 		}
-		else if (targetType.getResolvableType() != null) {
+		else if (targetType.getResolvableType().hasGenerics()) {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
 			return Optional.ofNullable(target);
 		}
@@ -82,7 +82,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 	private static class GenericTypeDescriptor extends TypeDescriptor {
 
 		public GenericTypeDescriptor(TypeDescriptor typeDescriptor) {
-			super(typeDescriptor.getResolvableType().getGeneric(0), null, typeDescriptor.getAnnotations());
+			super(typeDescriptor.getResolvableType().getGeneric(), null, typeDescriptor.getAnnotations());
 		}
 	}
 

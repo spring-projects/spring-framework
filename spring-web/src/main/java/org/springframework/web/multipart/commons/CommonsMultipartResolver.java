@@ -120,7 +120,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public boolean isMultipart(HttpServletRequest request) {
-		return (request != null && ServletFileUpload.isMultipartContent(request));
+		return ServletFileUpload.isMultipartContent(request);
 	}
 
 	@Override
@@ -188,13 +188,11 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		if (request != null) {
-			try {
-				cleanupFileItems(request.getMultiFileMap());
-			}
-			catch (Throwable ex) {
-				logger.warn("Failed to perform multipart cleanup for servlet request", ex);
-			}
+		try {
+			cleanupFileItems(request.getMultiFileMap());
+		}
+		catch (Throwable ex) {
+			logger.warn("Failed to perform multipart cleanup for servlet request", ex);
 		}
 	}
 

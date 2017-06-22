@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -72,7 +73,9 @@ public class BeanDefinitionBuilder {
 	 * @param instanceSupplier a callback for creating an instance of the bean
 	 * @since 5.0
 	 */
-	public static <T> BeanDefinitionBuilder genericBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
+	public static <T> BeanDefinitionBuilder genericBeanDefinition(
+			@Nullable Class<T> beanClass, Supplier<T> instanceSupplier) {
+
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new GenericBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);
@@ -93,7 +96,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClassName the class name for the bean that the definition is being created for
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, String factoryMethodName) {
+	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, @Nullable String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClassName(beanClassName);
@@ -114,7 +117,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, String factoryMethodName) {
+	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, @Nullable String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);
@@ -320,10 +323,8 @@ public class BeanDefinitionBuilder {
 	 * @since 5.0
 	 */
 	public BeanDefinitionBuilder applyCustomizers(BeanDefinitionCustomizer... customizers) {
-		if (customizers != null) {
-			for (BeanDefinitionCustomizer customizer : customizers) {
-				customizer.customize(beanDefinition);
-			}
+		for (BeanDefinitionCustomizer customizer : customizers) {
+			customizer.customize(beanDefinition);
 		}
 		return this;
 	}

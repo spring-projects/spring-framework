@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ public interface TransactionAttributeSource {
 	 * Return the transaction attribute for the given method,
 	 * or {@code null} if the method is non-transactional.
 	 * @param method the method to introspect
-	 * @param targetClass the target class. May be {@code null},
-	 * in which case the declaring class of the method must be used.
+	 * @param targetClass the target class (may be {@code null},
+	 * in which case the declaring class of the method must be used)
 	 * @return TransactionAttribute the matching transaction attribute,
 	 * or {@code null} if none found
 	 */

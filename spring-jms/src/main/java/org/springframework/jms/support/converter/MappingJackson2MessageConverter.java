@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -159,16 +158,14 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 */
 	public void setTypeIdMappings(Map<String, Class<?>> typeIdMappings) {
 		this.idClassMappings = new HashMap<>();
-		for (Map.Entry<String, Class<?>> entry : typeIdMappings.entrySet()) {
-			String id = entry.getKey();
-			Class<?> clazz = entry.getValue();
+		typeIdMappings.forEach((id, clazz) -> {
 			this.idClassMappings.put(id, clazz);
 			this.classIdMappings.put(clazz, id);
-		}
+		});
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
+	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
@@ -213,7 +210,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * @throws MessageConversionException in case of conversion failure
 	 * @since 4.3
 	 */
-	public Message toMessage(Object object, Session session, Class<?> jsonView)
+	public Message toMessage(Object object, Session session, @Nullable Class<?> jsonView)
 			throws JMSException, MessageConversionException {
 
 		if (jsonView != null) {
@@ -459,7 +456,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * @return the serialization view class, or {@code null} if none
 	 */
 	@Nullable
-	protected Class<?> getSerializationView(Object conversionHint) {
+	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter methodParam = (MethodParameter) conversionHint;
 			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);

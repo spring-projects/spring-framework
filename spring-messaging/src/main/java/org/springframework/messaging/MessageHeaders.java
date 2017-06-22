@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
 	 * @param headers a map with headers to add
 	 */
-	public MessageHeaders(Map<String, Object> headers) {
+	public MessageHeaders(@Nullable Map<String, Object> headers) {
 		this(headers, null, null);
 	}
 
@@ -117,8 +117,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
-	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
+	protected MessageHeaders(@Nullable Map<String, Object> headers, @Nullable UUID id, @Nullable Long timestamp) {
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -149,11 +149,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
 		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
-		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
-			if (!keysToIgnore.contains(entry.getKey())) {
-				this.headers.put(entry.getKey(), entry.getValue());
+		original.headers.forEach((key, value) -> {
+			if (!keysToIgnore.contains(key)) {
+				this.headers.put(key, value);
 			}
-		}
+		});
 	}
 
 
@@ -276,11 +276,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		Set<String> keysToIgnore = new HashSet<>();
-		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
-			if (!(entry.getValue() instanceof Serializable)) {
-				keysToIgnore.add(entry.getKey());
+		this.headers.forEach((key, value) -> {
+			if (!(value instanceof Serializable)) {
+				keysToIgnore.add(key);
 			}
-		}
+		});
 
 		if (keysToIgnore.isEmpty()) {
 			// All entries are serializable -> serialize the regular MessageHeaders instance

@@ -19,8 +19,6 @@ package org.springframework.context.annotation;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -116,14 +114,16 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private boolean localBeanNameGeneratorSet = false;
 
-	/* using short class names as default bean names */
+	/* Using short class names as default bean names */
 	private BeanNameGenerator componentScanBeanNameGenerator = new AnnotationBeanNameGenerator();
 
-	/* using fully qualified class names as default bean names */
+	/* Using fully qualified class names as default bean names */
 	private BeanNameGenerator importBeanNameGenerator = new AnnotationBeanNameGenerator() {
 		@Override
 		protected String buildDefaultBeanName(BeanDefinition definition) {
-			return definition.getBeanClassName();
+			String beanClassName = definition.getBeanClassName();
+			Assert.state(beanClassName != null, "No bean class name set");
+			return beanClassName;
 		}
 	};
 
@@ -137,7 +137,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
 	 * that correspond to {@link Bean} factory methods.
 	 */
-	public void setSourceExtractor(SourceExtractor sourceExtractor) {
+	public void setSourceExtractor(@Nullable SourceExtractor sourceExtractor) {
 		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new PassThroughSourceExtractor());
 	}
 
@@ -147,7 +147,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * declarations. For instance, an @Bean method marked as {@code final} is illegal
 	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
-	public void setProblemReporter(ProblemReporter problemReporter) {
+	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {
 		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
@@ -193,7 +193,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
@@ -202,7 +202,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	public void setBeanClassLoader(@Nullable ClassLoader beanClassLoader) {
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
 			this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
@@ -278,23 +278,22 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Sort by previously determined @Order value, if applicable
-		Collections.sort(configCandidates, new Comparator<BeanDefinitionHolder>() {
-			@Override
-			public int compare(BeanDefinitionHolder bd1, BeanDefinitionHolder bd2) {
-				int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
-				int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
-				return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
-			}
+		configCandidates.sort((bd1, bd2) -> {
+			int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
+			int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
+			return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
 		SingletonBeanRegistry sbr = null;
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
-			if (!this.localBeanNameGeneratorSet && sbr.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
+			if (!this.localBeanNameGeneratorSet) {
 				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
-				this.componentScanBeanNameGenerator = generator;
-				this.importBeanNameGenerator = generator;
+				if (generator != null) {
+					this.componentScanBeanNameGenerator = generator;
+					this.importBeanNameGenerator = generator;
+				}
 			}
 		}
 
@@ -385,6 +384,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// nothing to enhance -> return immediately
 			return;
 		}
+
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
@@ -393,13 +393,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			try {
 				// Set enhanced subclass of the user-specified bean class
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
-				Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
-				if (configClass != enhancedClass) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
-								"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+				if (configClass != null) {
+					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
+					if (configClass != enhancedClass) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
+									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+						}
+						beanDef.setBeanClass(enhancedClass);
 					}
-					beanDef.setBeanClass(enhancedClass);
 				}
 			}
 			catch (Throwable ex) {

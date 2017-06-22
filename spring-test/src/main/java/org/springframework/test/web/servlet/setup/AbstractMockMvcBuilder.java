@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvcBuilder;
  * configuring filters, default request properties, global expectations and
  * global result actions.
  *
- * <p>Sub-classes can use different strategies to prepare the Spring
+ * <p>Subclasses can use different strategies to prepare the Spring
  * {@code WebApplicationContext} that will be passed to the
  * {@code DispatcherServlet}.
  *
@@ -126,9 +126,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	@Override
 	@SuppressWarnings("rawtypes")
 	public final MockMvc build() {
-
 		WebApplicationContext wac = initWebAppContext();
-
 		ServletContext servletContext = wac.getServletContext();
 		MockServletConfig mockServletConfig = new MockServletConfig(servletContext);
 

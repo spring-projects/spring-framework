@@ -467,7 +467,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
-		return value != null ? Locale.LanguageRange.parse(value) : Collections.emptyList();
+		return (StringUtils.hasText(value) ? Locale.LanguageRange.parse(value) : Collections.emptyList());
 	}
 
 	/**
@@ -560,6 +560,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Access-Control-Allow-Origin} response header.
 	 */
+	@Nullable
 	public String getAccessControlAllowOrigin() {
 		return getFieldValues(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
@@ -618,6 +619,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Access-Control-Request-Method} request header.
 	 */
+	@Nullable
 	public HttpMethod getAccessControlRequestMethod() {
 		return HttpMethod.resolve(getFirst(ACCESS_CONTROL_REQUEST_METHOD));
 	}
@@ -708,6 +710,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Cache-Control} header.
 	 */
+	@Nullable
 	public String getCacheControl() {
 		return getFieldValues(CACHE_CONTROL);
 	}
@@ -759,9 +762,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename, @Nullable Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
-		ContentDisposition disposition = ContentDisposition.builder("form-data")
-				.name(name).filename(filename, charset).build();
-		setContentDisposition(disposition);
+		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
+		if (filename != null) {
+			if (charset != null) {
+				disposition.filename(filename, charset);
+			}
+			else {
+				disposition.filename(filename);
+			}
+		}
+		setContentDisposition(disposition.build());
 	}
 
 	/**
@@ -884,18 +894,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
 	 */
-	public void setETag(String eTag) {
-		if (eTag != null) {
-			Assert.isTrue(eTag.startsWith("\"") || eTag.startsWith("W/"),
-					"Invalid eTag, does not start with W/ or \"");
-			Assert.isTrue(eTag.endsWith("\""), "Invalid eTag, does not end with \"");
-		}
-		set(ETAG, eTag);
+	public void setETag(String etag) {
+		Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
+				"Invalid ETag: does not start with W/ or \"");
+		Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+		set(ETAG, etag);
 	}
 
 	/**
 	 * Return the entity tag of the body, as specified by the {@code ETag} header.
 	 */
+	@Nullable
 	public String getETag() {
 		return getFirst(ETAG);
 	}
@@ -1096,6 +1105,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Origin} header.
 	 */
+	@Nullable
 	public String getOrigin() {
 		return getFirst(ORIGIN);
 	}
@@ -1110,6 +1120,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Pragma} header.
 	 */
+	@Nullable
 	public String getPragma() {
 		return getFirst(PRAGMA);
 	}
@@ -1141,6 +1152,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Upgrade} header.
 	 */
+	@Nullable
 	public String getUpgrade() {
 		return getFirst(UPGRADE);
 	}
@@ -1288,6 +1300,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the combined result
 	 * @since 4.3
 	 */
+	@Nullable
 	protected String getFieldValues(String headerName) {
 		List<String> headerValues = get(headerName);
 		return (headerValues != null ? toCommaDelimitedString(headerValues) : null);
@@ -1333,15 +1346,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #set(String, String)
 	 */
 	@Override
-	public void add(String headerName, String headerValue) {
+	public void add(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
 	}
 
 	@Override
-	public void addAll(String key, List<String> values) {
+	public void addAll(String key, List<? extends String> values) {
 		List<String> currentValues = this.headers.computeIfAbsent(key, k -> new LinkedList<>());
 		currentValues.addAll(values);
+	}
+
+	@Override
+	public void addAll(MultiValueMap<String, String> values) {
+		for (Entry<String, List<String>> entry : values.entrySet()) {
+			addAll(entry.getKey(), entry.getValue());
+		}
 	}
 
 	/**
@@ -1399,6 +1419,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	@Override
+	@Nullable
 	public List<String> get(Object key) {
 		return this.headers.get(key);
 	}

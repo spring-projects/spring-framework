@@ -36,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -110,7 +111,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
@@ -119,6 +120,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
 		if (returnValue instanceof ResponseEntity) {
@@ -135,6 +137,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
+		Assert.state(request != null, "No ServletRequest");
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		ResponseBodyEmitter emitter;
@@ -180,12 +183,12 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 
 		@Override
-		public void send(Object data, MediaType mediaType) throws IOException {
+		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
 			sendInternal(data, mediaType);
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> void sendInternal(T data, MediaType mediaType) throws IOException {
+		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Writing [" + data + "]");
 			}

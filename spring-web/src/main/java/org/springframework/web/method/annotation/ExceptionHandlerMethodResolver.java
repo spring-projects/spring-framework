@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,8 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
-	public static final MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
-		@Override
-		public boolean matches(Method method) {
-			return (AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
-		}
-	};
+	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
+			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 
 	/**
 	 * Arbitrary {@link Method} reference, indicating no method found in the cache.
@@ -101,6 +97,7 @@ public class ExceptionHandlerMethodResolver {
 
 	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
 		ExceptionHandler ann = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		Assert.state(ann != null, "No ExceptionHandler annotation");
 		result.addAll(Arrays.asList(ann.value()));
 	}
 

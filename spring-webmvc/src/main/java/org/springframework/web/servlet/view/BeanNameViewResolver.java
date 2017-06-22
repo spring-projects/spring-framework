@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 
 	@Override
 	public View resolveViewName(String viewName, Locale locale) throws BeansException {
-		ApplicationContext context = getApplicationContext();
+		ApplicationContext context = obtainApplicationContext();
 		if (!context.containsBean(viewName)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No matching bean found for view name '" + viewName + "'");

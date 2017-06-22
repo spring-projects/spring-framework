@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import static java.util.Collections.*;
 import org.junit.Test;
 import static org.springframework.http.MediaType.*;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import static org.springframework.http.codec.json.Jackson2JsonEncoder.*;
 import static org.springframework.http.codec.json.JacksonViewBean.*;
 import reactor.core.publisher.Flux;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,13 +170,10 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		final JettyWebSocketSession wsSession = new JettyWebSocketSession(attributes, user);
 		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
-		Callable<WebSocketSession> connectTask = new Callable<WebSocketSession>() {
-			@Override
-			public WebSocketSession call() throws Exception {
-				Future<Session> future = client.connect(listener, uri, request);
-				future.get();
-				return wsSession;
-			}
+		Callable<WebSocketSession> connectTask = () -> {
+			Future<Session> future = client.connect(listener, uri, request);
+			future.get();
+			return wsSession;
 		};
 
 		if (this.taskExecutor != null) {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.HashMap;
@@ -24,9 +25,12 @@ import java.util.TimeZone;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -73,7 +77,7 @@ public class RequestContext {
 	}
 
 	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource,
-			RequestDataValueProcessor dataValueProcessor) {
+			@Nullable RequestDataValueProcessor dataValueProcessor) {
 
 		Assert.notNull(exchange, "'exchange' is required");
 		Assert.notNull(model, "'model' is required");
@@ -82,9 +86,10 @@ public class RequestContext {
 		this.model = model;
 		this.messageSource = messageSource;
 
-		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-		this.locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
-		this.timeZone = TimeZone.getDefault(); // TODO
+		LocaleContext localeContext = exchange.getLocaleContext();
+		this.locale = localeContext.getLocale();
+		this.timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
+				((TimeZoneAwareLocaleContext)localeContext).getTimeZone() : TimeZone.getDefault());
 
 		this.defaultHtmlEscape = null; // TODO
 		this.dataValueProcessor = dataValueProcessor;
@@ -179,10 +184,10 @@ public class RequestContext {
 	/**
 	 * Return the context path of the current web application. This is
 	 * useful for building links to other resources within the application.
-	 * <p>Delegates to {@link ServerHttpRequest#getContextPath()}.
+	 * <p>Delegates to {@link ServerHttpRequest#getPath()}.
 	 */
 	public String getContextPath() {
-		return this.exchange.getRequest().getContextPath();
+		return this.exchange.getRequest().getPath().contextPath().value();
 	}
 
 	/**
@@ -192,7 +197,7 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl) {
-		String url = getContextPath() + relativeUrl;
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		return getExchange().getResponse().encodeUrl(url);
 	}
 
@@ -207,7 +212,7 @@ public class RequestContext {
 	 * absolute path also URL-encoded accordingly
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
-		String url = getContextPath() + relativeUrl;
+		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
 		return getExchange().getResponse().encodeUrl(url);
@@ -368,7 +373,11 @@ public class RequestContext {
 		Errors errors = this.errorsMap.get(name);
 		if (errors == null) {
 			errors = getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+			if (errors == null) {
+				return null;
+			}
 		}
+
 		if (errors instanceof BindException) {
 			errors = ((BindException) errors).getBindingResult();
 		}

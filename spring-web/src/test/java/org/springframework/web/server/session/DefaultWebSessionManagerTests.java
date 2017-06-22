@@ -32,6 +32,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,7 +61,8 @@ public class DefaultWebSessionManagerTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response, this.manager, ServerCodecConfigurer.create());
+		this.exchange = new DefaultServerWebExchange(request, response, this.manager,
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
 	}
 
 

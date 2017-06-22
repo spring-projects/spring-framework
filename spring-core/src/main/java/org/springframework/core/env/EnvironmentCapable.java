@@ -16,8 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Interface indicating a component that contains and exposes an {@link Environment} reference.
  *
@@ -43,10 +41,8 @@ import org.springframework.lang.Nullable;
 public interface EnvironmentCapable {
 
 	/**
-	 * Return the {@link Environment} associated with this component
-	 * (may be {@code null} or a default environment).
+	 * Return the {@link Environment} associated with this component.
 	 */
-	@Nullable
 	Environment getEnvironment();
 
 }

@@ -28,7 +28,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,7 +43,6 @@ import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
@@ -129,13 +128,9 @@ public interface WebTestClient {
 
 
 	/**
-	 * Filter the client with the given {@code ExchangeFilterFunction}.
-	 * @param filterFunction the filter to apply to this client
-	 * @return the filtered client
-	 * @see ExchangeFilterFunction#apply(ExchangeFunction)
+	 * Return a builder to mutate properties of this web test client.
 	 */
-	WebTestClient filter(ExchangeFilterFunction filterFunction);
-
+	Builder mutate();
 
 	// Static, factory methods
 
@@ -322,11 +317,48 @@ public interface WebTestClient {
 		Builder defaultHeader(String headerName, String... headerValues);
 
 		/**
+		 * Manipulate the default headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+
+		/**
 		 * Add the given header to all requests that haven't added it.
 		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
 		 */
 		Builder defaultCookie(String cookieName, String... cookieValues);
+
+		/**
+		 * Manipulate the default cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Add the given filter to the filter chain.
+		 * @param filter the filter to be added to the chain
+		 */
+		Builder filter(ExchangeFilterFunction filter);
+
+		/**
+		 * Manipulate the filters with the given consumer. The
+		 * list provided to the consumer is "live", so that the consumer can be used to remove
+		 * filters, change ordering, etc.
+		 * @param filtersConsumer a function that consumes the filter list
+		 * @return this builder
+		 */
+		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
@@ -417,12 +449,15 @@ public interface WebTestClient {
 		S cookie(String name, String value);
 
 		/**
-		 * Copy the given cookies into the entity's cookies map.
-		 *
-		 * @param cookies the existing cookies to copy from
-		 * @return the same instance
+		 * Manipulate this request's cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
 		 */
-		S cookies(MultiValueMap<String, String> cookies);
+		S cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
@@ -449,11 +484,15 @@ public interface WebTestClient {
 		S header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing headers to copy from
-		 * @return the same instance
+		 * Manipulate the request's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
 		 */
-		S headers(HttpHeaders headers);
+		S headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Perform the exchange without a request body.
@@ -534,9 +573,9 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #expectBody(Class)} for a body type with generics.
 		 */
-		<B> BodySpec<B, ?> expectBody(ResolvableType bodyType);
+		<B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType);
 
-			/**
+		/**
 		 * Declare expectations on the response body decoded to {@code List<E>}.
 		 * @param elementType the expected List element type
 		 */
@@ -545,7 +584,7 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #expectBodyList(Class)} for element types with generics.
 		 */
-		<E> ListBodySpec<E> expectBodyList(ResolvableType elementType);
+		<E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType);
 
 		/**
 		 * Declare expectations on the response body content.
@@ -565,7 +604,7 @@ public interface WebTestClient {
 		/**
 		 * Variant of {@link #returnResult(Class)} for element types with generics.
 		 */
-		<T> FluxExchangeResult<T> returnResult(ResolvableType elementType);
+		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
 	}
 
 	/**

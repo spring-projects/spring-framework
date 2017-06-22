@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -132,7 +135,7 @@ public class ResourceUrlProviderTests {
 		context.refresh();
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
-		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
+		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey(pattern("/resources/**")));
 		assertFalse(urlProviderBean.isAutodetect());
 	}
 
@@ -154,6 +157,32 @@ public class ResourceUrlProviderTests {
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {
 			return new ResourceUrlProvider();
+		}
+	}
+
+	private static PathPatternMatcher pattern(String pattern) {
+		return new PathPatternMatcher(pattern);
+	}
+
+	private static class PathPatternMatcher extends BaseMatcher<PathPattern> {
+
+		private final String pattern;
+
+		public PathPatternMatcher(String pattern) {
+			this.pattern = pattern;
+		}
+
+		@Override
+		public boolean matches(Object item) {
+			if (item != null && item instanceof PathPattern) {
+				return ((PathPattern) item).getPatternString().equals(pattern);
+			}
+			return false;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+
 		}
 	}
 

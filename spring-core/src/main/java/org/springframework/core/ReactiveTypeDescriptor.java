@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,7 +44,7 @@ public class ReactiveTypeDescriptor {
 	/**
 	 * Private constructor. See static factory methods.
 	 */
-	private ReactiveTypeDescriptor(Class<?> reactiveType, Supplier<?> emptySupplier,
+	private ReactiveTypeDescriptor(Class<?> reactiveType, @Nullable Supplier<?> emptySupplier,
 			boolean multiValue, boolean canBeEmpty, boolean noValue) {
 
 		Assert.notNull(reactiveType, "'reactiveType' must not be null");
@@ -98,7 +100,7 @@ public class ReactiveTypeDescriptor {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

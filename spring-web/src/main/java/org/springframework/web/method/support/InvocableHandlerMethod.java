@@ -123,7 +123,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found,
 	 * or if the method raised an exception
 	 */
-	public Object invokeForRequest(NativeWebRequest request, ModelAndViewContainer mavContainer,
+	@Nullable
+	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
@@ -142,7 +143,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(NativeWebRequest request, ModelAndViewContainer mavContainer,
+	private Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
@@ -169,7 +170,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 			if (args[i] == null) {
 				throw new IllegalStateException("Could not resolve method parameter at index " +
-						parameter.getParameterIndex() + " in " + parameter.getMethod().toGenericString() +
+						parameter.getParameterIndex() + " in " + parameter.getExecutable().toGenericString() +
 						": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
 			}
 		}
@@ -185,7 +186,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
 	@Nullable
-	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
+	private Object resolveProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
 		if (providedArgs == null) {
 			return null;
 		}

@@ -59,15 +59,17 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
-		this.returnValueHandlers.add(returnValuehandler);
+	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValueHandler) {
+		this.returnValueHandlers.add(returnValueHandler);
 		return this;
 	}
 
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandlers(List<? extends HandlerMethodReturnValueHandler> handlers) {
+	public HandlerMethodReturnValueHandlerComposite addHandlers(
+			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
+
 		if (handlers != null) {
 			for (HandlerMethodReturnValueHandler handler : handlers) {
 				this.returnValueHandlers.add(handler);
@@ -92,7 +94,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);

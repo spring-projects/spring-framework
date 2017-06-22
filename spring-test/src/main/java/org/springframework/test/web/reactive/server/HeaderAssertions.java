@@ -23,9 +23,9 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Assertions on headers of the response.
@@ -62,7 +62,9 @@ public class HeaderAssertions {
 	 */
 	public WebTestClient.ResponseSpec valueMatches(String name, String pattern) {
 		String value = getHeaders().getFirst(name);
-		assertTrue(getMessage(name) + " not found", value != null);
+		if (value == null) {
+			fail(getMessage(name) + " not found");
+		}
 		boolean match = Pattern.compile(pattern).matcher(value).matches();
 		String message = getMessage(name) + "=\'" + value + "\' does not match \'" + pattern + "\'";
 		this.exchangeResult.assertWithDiagnostics(() -> assertTrue(message, match));
@@ -122,7 +124,7 @@ public class HeaderAssertions {
 		return "Response header [" + headerName + "]";
 	}
 
-	private WebTestClient.ResponseSpec assertHeader(String name, Object expected, Object actual) {
+	private WebTestClient.ResponseSpec assertHeader(String name, @Nullable Object expected, @Nullable Object actual) {
 		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(getMessage(name), expected, actual));
 		return this.responseSpec;
 	}

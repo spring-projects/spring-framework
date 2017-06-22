@@ -21,6 +21,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 
+/**
+ * Tests for [Model] Kotlin extensions
+ *
+ * @author Sebastien Deleuze
+ */
 class ModelExtensionsTests {
 
 	@Test

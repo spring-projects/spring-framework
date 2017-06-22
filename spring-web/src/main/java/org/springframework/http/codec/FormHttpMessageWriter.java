@@ -76,7 +76,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
 				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
 	}
@@ -107,7 +107,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	}
 
-	private Charset getMediaTypeCharset(MediaType mediaType) {
+	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {
 		if (mediaType != null && mediaType.getCharset() != null) {
 			return mediaType.getCharset();
 		}

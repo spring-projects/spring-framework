@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,7 +226,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * sibling {@link #afterDelivery()} explicitly, as part of its own processing.
 		 */
 		@Override
-		public void beforeDelivery(Method method) throws ResourceException {
+		public void beforeDelivery(@Nullable Method method) throws ResourceException {
 			this.beforeDeliveryCalled = true;
 			try {
 				this.transactionDelegate.beginTransaction();
@@ -311,7 +311,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 		private boolean rollbackOnly;
 
-		public TransactionDelegate(XAResource xaResource) {
+		public TransactionDelegate(@Nullable XAResource xaResource) {
 			if (xaResource == null) {
 				if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
 					throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " +

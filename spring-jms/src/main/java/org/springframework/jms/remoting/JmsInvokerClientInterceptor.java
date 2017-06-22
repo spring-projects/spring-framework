@@ -38,6 +38,7 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteTimeoutException;
@@ -45,6 +46,7 @@ import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
@@ -95,6 +97,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	/**
 	 * Return the QueueConnectionFactory to use for obtaining JMS QueueConnections.
 	 */
+	@Nullable
 	protected ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
 	}
@@ -123,7 +126,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
-	public void setDestinationResolver(DestinationResolver destinationResolver) {
+	public void setDestinationResolver(@Nullable DestinationResolver destinationResolver) {
 		this.destinationResolver =
 				(destinationResolver != null ? destinationResolver : new DynamicDestinationResolver());
 	}
@@ -134,7 +137,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * <p>A custom invocation factory can add further context information
 	 * to the invocation, for example user credentials.
 	 */
-	public void setRemoteInvocationFactory(RemoteInvocationFactory remoteInvocationFactory) {
+	public void setRemoteInvocationFactory(@Nullable RemoteInvocationFactory remoteInvocationFactory) {
 		this.remoteInvocationFactory =
 				(remoteInvocationFactory != null ? remoteInvocationFactory : new DefaultRemoteInvocationFactory());
 	}
@@ -151,7 +154,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * objects into special kinds of messages, or might be specifically tailored for
 	 * translating {@code RemoteInvocation(Result)s} into specific kinds of messages.
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = (messageConverter != null ? messageConverter : new SimpleMessageConverter());
 	}
 
@@ -263,7 +266,9 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * Create a new JMS Connection for this JMS invoker.
 	 */
 	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		Assert.state(connectionFactory != null, "No ConnectionFactory set");
+		return connectionFactory.createConnection();
 	}
 
 	/**
@@ -329,6 +334,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @return the RemoteInvocationResult object
 	 * @throws JMSException in case of JMS failure
 	 */
+	@Nullable
 	protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
 		TemporaryQueue responseQueue = null;
 		MessageProducer producer = null;
@@ -408,6 +414,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * @throws Throwable if the invocation result is an exception
 	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate()
 	 */
+	@Nullable
 	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
 		return result.recreate();
 	}

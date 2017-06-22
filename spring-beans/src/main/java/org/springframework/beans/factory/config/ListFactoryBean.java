@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -54,7 +55,7 @@ public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 	 * @see java.util.ArrayList
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setTargetListClass(Class<? extends List> targetListClass) {
+	public void setTargetListClass(@Nullable Class<? extends List> targetListClass) {
 		if (targetListClass == null) {
 			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}

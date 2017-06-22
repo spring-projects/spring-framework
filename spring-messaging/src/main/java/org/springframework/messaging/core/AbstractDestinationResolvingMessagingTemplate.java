@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -79,17 +80,19 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers) {
+	public <T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers) {
 		convertAndSend(destinationName, payload, headers, null);
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T payload, MessagePostProcessor postProcessor) {
+	public <T> void convertAndSend(String destinationName, T payload, @Nullable MessagePostProcessor postProcessor) {
 		convertAndSend(destinationName, payload, null, postProcessor);
 	}
 
 	@Override
-	public <T> void convertAndSend(String destinationName, T payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
+	public <T> void convertAndSend(String destinationName, T payload,
+			@Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor) {
+
 		D destination = resolveDestination(destinationName);
 		super.convertAndSend(destination, payload, headers, postProcessor);
 	}
@@ -119,8 +122,8 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
-			Class<T> targetClass) {
+	public <T> T convertSendAndReceive(String destinationName, Object request,
+			@Nullable Map<String, Object> headers, Class<T> targetClass) {
 
 		D destination = resolveDestination(destinationName);
 		return super.convertSendAndReceive(destination, request, headers, targetClass);
@@ -128,15 +131,16 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 
 	@Override
 	public <T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
-			MessagePostProcessor postProcessor) {
+			@Nullable MessagePostProcessor postProcessor) {
 
 		D destination = resolveDestination(destinationName);
 		return super.convertSendAndReceive(destination, request, targetClass, postProcessor);
 	}
 
 	@Override
-	public <T> T convertSendAndReceive(String destinationName, Object request, Map<String, Object> headers,
-			Class<T> targetClass, MessagePostProcessor postProcessor) {
+	public <T> T convertSendAndReceive(String destinationName, Object request,
+			@Nullable Map<String, Object> headers, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) {
 
 		D destination = resolveDestination(destinationName);
 		return super.convertSendAndReceive(destination, request, headers, targetClass, postProcessor);

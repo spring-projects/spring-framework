@@ -161,7 +161,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public boolean isOpen() {
-		return (getNativeSession() != null && getNativeSession().isOpen());
+		return getNativeSession().isOpen();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for classes that are setting up a
@@ -76,7 +77,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see javax.enterprise.concurrent.ManagedThreadFactory
 	 * @see DefaultManagedAwareThreadFactory
 	 */
-	public void setThreadFactory(ThreadFactory threadFactory) {
+	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {
 		this.threadFactory = (threadFactory != null ? threadFactory : this);
 	}
 
@@ -91,7 +92,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Default is the ExecutorService's default abort policy.
 	 * @see java.util.concurrent.ThreadPoolExecutor.AbortPolicy
 	 */
-	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
+	public void setRejectedExecutionHandler(@Nullable RejectedExecutionHandler rejectedExecutionHandler) {
 		this.rejectedExecutionHandler =
 				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
 	}

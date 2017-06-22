@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -196,6 +197,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Determine the ClassLoader to use for pointcut evaluation.
 	 */
+	@Nullable
 	private ClassLoader determinePointcutClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
@@ -209,21 +211,27 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Build the underlying AspectJ pointcut expression.
 	 */
-	private PointcutExpression buildPointcutExpression(ClassLoader classLoader) {
+	private PointcutExpression buildPointcutExpression(@Nullable ClassLoader classLoader) {
 		PointcutParser parser = initializePointcutParser(classLoader);
 		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
 		for (int i = 0; i < pointcutParameters.length; i++) {
 			pointcutParameters[i] = parser.createPointcutParameter(
 					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
-		return parser.parsePointcutExpression(replaceBooleanOperators(getExpression()),
+		return parser.parsePointcutExpression(replaceBooleanOperators(resolveExpression()),
 				this.pointcutDeclarationScope, pointcutParameters);
+	}
+
+	private String resolveExpression() {
+		String expression = getExpression();
+		Assert.state(expression != null, "No expression set");
+		return expression;
 	}
 
 	/**
 	 * Initialize the underlying AspectJ pointcut parser.
 	 */
-	private PointcutParser initializePointcutParser(ClassLoader classLoader) {
+	private PointcutParser initializePointcutParser(@Nullable ClassLoader classLoader) {
 		PointcutParser parser = PointcutParser
 				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
 						SUPPORTED_PRIMITIVES, classLoader);
@@ -301,7 +309,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			// we say this is not a match as in Spring there will never be a different
 			// runtime subtype.
 			RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
-			return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
+			return (!walker.testsSubtypeSensitiveVars() ||
+					(targetClass != null && walker.testTargetInstanceOfResidue(targetClass)));
 		}
 	}
 
@@ -354,7 +363,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			 * type but not 'this' (as would be the case of JDK dynamic proxies).
 			 * <p>See SPR-2979 for the original bug.
 			 */
-			if (pmi != null) {  // there is a current invocation
+			if (pmi != null && thisObject != null) {  // there is a current invocation
 				RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(originalShadowMatch);
 				if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
 					return false;
@@ -375,6 +384,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 	}
 
+	@Nullable
 	protected String getCurrentProxiedBeanName() {
 		return ProxyCreationContext.getCurrentProxiedBeanName();
 	}
@@ -411,7 +421,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		// 'last man wins' which is not what we want at all.
 		// Using the expression is guaranteed to be safe, since 2 identical expressions
 		// are guaranteed to bind in exactly the same way.
-		invocation.setUserAttribute(getExpression(), jpm);
+		invocation.setUserAttribute(resolveExpression(), jpm);
 	}
 
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
@@ -600,7 +610,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return false;
 		}
 
-		private FuzzyBoolean contextMatch(Class<?> targetType) {
+		private FuzzyBoolean contextMatch(@Nullable Class<?> targetType) {
 			String advisedBeanName = getCurrentProxiedBeanName();
 			if (advisedBeanName == null) {  // no proxy creation in progress
 				// abstain; can't return YES, since that will make pointcut with negation fail

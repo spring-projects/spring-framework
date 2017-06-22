@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -44,12 +45,16 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	private final Cache cache;
 
 
-	public CachingResourceResolver(CacheManager cacheManager, String cacheName) {
-		this(cacheManager.getCache(cacheName));
-	}
-
 	public CachingResourceResolver(Cache cache) {
 		Assert.notNull(cache, "Cache is required");
+		this.cache = cache;
+	}
+
+	public CachingResourceResolver(CacheManager cacheManager, String cacheName) {
+		Cache cache = cacheManager.getCache(cacheName);
+		if (cache == null) {
+			throw new IllegalArgumentException("Cache '" + cacheName + "' not found");
+		}
 		this.cache = cache;
 	}
 
@@ -63,8 +68,8 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String key = computeKey(exchange, requestPath);
 		Resource cachedResource = this.cache.get(key, Resource.class);
@@ -85,7 +90,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 				});
 	}
 
-	protected String computeKey(ServerWebExchange exchange, String requestPath) {
+	protected String computeKey(@Nullable ServerWebExchange exchange, String requestPath) {
 		StringBuilder key = new StringBuilder(RESOLVED_RESOURCE_CACHE_KEY_PREFIX);
 		key.append(requestPath);
 		if (exchange != null) {

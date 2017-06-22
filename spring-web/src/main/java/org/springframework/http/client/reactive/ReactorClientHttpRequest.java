@@ -81,14 +81,12 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
-				map(ReactorClientHttpRequest::toByteBufs);
+		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).map(ReactorClientHttpRequest::toByteBufs);
 		return doCommit(() -> this.httpRequest.sendGroups(byteBufs).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
-		return Flux.from(dataBuffers).
-				map(NettyDataBufferFactory::toByteBuf);
+		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 
 	@Override
@@ -98,8 +96,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyHeaders() {
-		getHeaders().entrySet()
-				.forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
+		getHeaders().entrySet().forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
 	}
 
 	@Override

@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -79,7 +78,10 @@ public abstract class DataSourceUtils {
 			return doGetConnection(dataSource);
 		}
 		catch (SQLException ex) {
-			throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
+		}
+		catch (IllegalStateException ex) {
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection: " + ex.getMessage());
 		}
 	}
 
@@ -103,14 +105,14 @@ public abstract class DataSourceUtils {
 			conHolder.requested();
 			if (!conHolder.hasConnection()) {
 				logger.debug("Fetching resumed JDBC Connection from DataSource");
-				conHolder.setConnection(dataSource.getConnection());
+				conHolder.setConnection(fetchConnection(dataSource));
 			}
 			return conHolder.getConnection();
 		}
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
-		Connection con = dataSource.getConnection();
+		Connection con = fetchConnection(dataSource);
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC Connection");
@@ -136,6 +138,24 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
+	 * Actually fetch a {@link Connection} from the given {@link DataSource},
+	 * defensively turning an unexpected {@code null} return value from
+	 * {@link DataSource#getConnection()} into an {@link IllegalStateException}.
+	 * @param dataSource the DataSource to obtain Connections from
+	 * @return a JDBC Connection from the given DataSource (never {@code null})
+	 * @throws SQLException if thrown by JDBC methods
+	 * @throws IllegalStateException if the DataSource returned a null value
+	 * @see DataSource#getConnection()
+	 */
+	private static Connection fetchConnection(DataSource dataSource) throws SQLException {
+		Connection con = dataSource.getConnection();
+		if (con == null) {
+			throw new IllegalStateException("DataSource returned null from getConnection(): " + dataSource);
+		}
+		return con;
+	}
+
+	/**
 	 * Prepare the given Connection with the given transaction semantics.
 	 * @param con the Connection to prepare
 	 * @param definition the transaction definition to apply
@@ -144,7 +164,7 @@ public abstract class DataSourceUtils {
 	 * @see #resetConnectionAfterTransaction
 	 */
 	@Nullable
-	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
+	public static Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
 			throws SQLException {
 
 		Assert.notNull(con, "No Connection specified");
@@ -244,7 +264,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
-	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
+	public static void applyTransactionTimeout(Statement stmt, @Nullable DataSource dataSource) throws SQLException {
 		applyTimeout(stmt, dataSource, -1);
 	}
 
@@ -257,10 +277,12 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
-	public static void applyTimeout(Statement stmt, DataSource dataSource, int timeout) throws SQLException {
+	public static void applyTimeout(Statement stmt, @Nullable DataSource dataSource, int timeout) throws SQLException {
 		Assert.notNull(stmt, "No Statement specified");
-		Assert.notNull(dataSource, "No DataSource specified");
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		ConnectionHolder holder = null;
+		if (dataSource != null) {
+			holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		}
 		if (holder != null && holder.hasTimeout()) {
 			// Remaining transaction timeout overrides specified value.
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
@@ -280,7 +302,7 @@ public abstract class DataSourceUtils {
 	 * (may be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, @Nullable DataSource dataSource) {
+	public static void releaseConnection(@Nullable Connection con, @Nullable DataSource dataSource) {
 		try {
 			doReleaseConnection(con, dataSource);
 		}
@@ -303,7 +325,7 @@ public abstract class DataSourceUtils {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
+	public static void doReleaseConnection(@Nullable Connection con, @Nullable DataSource dataSource) throws SQLException {
 		if (con == null) {
 			return;
 		}
@@ -327,7 +349,7 @@ public abstract class DataSourceUtils {
 	 * @see Connection#close()
 	 * @see SmartDataSource#shouldClose(Connection)
 	 */
-	public static void doCloseConnection(Connection con, DataSource dataSource) throws SQLException {
+	public static void doCloseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
 		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
 			con.close();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ public class TransactionSupportTests {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
-		assertTrue("Must not have transaction", status1.getTransaction() == null);
+		assertFalse("Must not have transaction", status1.hasTransaction());
 
 		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-		assertTrue("Must have transaction", status2.getTransaction() != null);
+		assertTrue("Must have transaction", status2.hasTransaction());
 		assertTrue("Must be new transaction", status2.isNewTransaction());
 
 		try {

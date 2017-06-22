@@ -121,6 +121,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * {@linkplain #getSource source} that corresponds to the supplied
 	 * attribute method.
 	 */
+	@Nullable
 	protected abstract Object getRawAttributeValue(Method attributeMethod);
 
 	/**
@@ -128,6 +129,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * {@linkplain #getSource source} that corresponds to the supplied
 	 * attribute name.
 	 */
+	@Nullable
 	protected abstract Object getRawAttributeValue(String attributeName);
 
 }

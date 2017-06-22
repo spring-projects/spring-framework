@@ -55,7 +55,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
-	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
+	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
 
@@ -95,7 +95,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	@Override
 	public boolean isCommitted() {
-		return this.state.get() != State.NEW;
+		return (this.state.get() != State.NEW);
 	}
 
 	/**

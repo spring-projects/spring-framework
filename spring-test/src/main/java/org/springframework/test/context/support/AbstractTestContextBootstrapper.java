@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +300,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 
 			// Return the last level in the context hierarchy
+			Assert.state(mergedConfig != null, "No merged context configuration");
 			return mergedConfig;
 		}
 		else {
@@ -462,7 +463,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
-			Assert.state(contextLoaderClass != null, "getDefaultContextLoaderClass() must not return null");
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",

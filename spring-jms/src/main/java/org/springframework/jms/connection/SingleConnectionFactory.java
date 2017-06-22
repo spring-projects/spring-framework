@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -394,7 +393,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			return ((TopicConnectionFactory) cf).createTopicConnection();
 		}
 		else {
-			return getTargetConnectionFactory().createConnection();
+			return obtainTargetConnectionFactory().createConnection();
 		}
 	}
 
@@ -531,8 +530,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 		private boolean locallyStarted = false;
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("equals")) {
+		@Nullable
+		public Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
+			if (method.getName().equals("equals") && args != null) {
 				Object other = args[0];
 				if (proxy == other) {
 					return true;
@@ -551,7 +551,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			else if (method.getName().equals("toString")) {
 				return "Shared JMS Connection: " + getConnection();
 			}
-			else if (method.getName().equals("setClientID")) {
+			else if (method.getName().equals("setClientID") && args != null) {
 				// Handle setClientID method: throw exception if not compatible.
 				String currentClientId = getConnection().getClientID();
 				if (currentClientId != null && currentClientId.equals(args[0])) {
@@ -563,7 +563,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 							"Set the 'clientId' property on the SingleConnectionFactory instead.");
 				}
 			}
-			else if (method.getName().equals("setExceptionListener")) {
+			else if (method.getName().equals("setExceptionListener") && args != null) {
 				// Handle setExceptionListener method: add to the chain.
 				synchronized (connectionMonitor) {
 					if (aggregatedExceptionListener != null) {

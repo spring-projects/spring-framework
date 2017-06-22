@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private void setupDomain(AnnotationMBeanExporter exporter) {
 		String defaultDomain = this.enableMBeanExport.getString("defaultDomain");
-		if (defaultDomain != null && this.environment != null) {
+		if (StringUtils.hasLength(defaultDomain) && this.environment != null) {
 			defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
 		}
 		if (StringUtils.hasText(defaultDomain)) {
@@ -102,7 +102,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private void setupServer(AnnotationMBeanExporter exporter) {
 		String server = this.enableMBeanExport.getString("server");
-		if (server != null && this.environment != null) {
+		if (StringUtils.hasLength(server) && this.environment != null) {
 			server = this.environment.resolvePlaceholders(server);
 		}
 		if (StringUtils.hasText(server)) {
@@ -111,7 +111,10 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 		else {
 			SpecificPlatform specificPlatform = SpecificPlatform.get();
 			if (specificPlatform != null) {
-				exporter.setServer(specificPlatform.getMBeanServer());
+				MBeanServer mbeanServer = specificPlatform.getMBeanServer();
+				if (mbeanServer != null) {
+					exporter.setServer(mbeanServer);
+				}
 			}
 		}
 	}
@@ -122,7 +125,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 
-	public static enum SpecificPlatform {
+	public enum SpecificPlatform {
 
 		WEBLOGIC("weblogic.management.Helper") {
 			@Override
@@ -147,10 +150,11 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 		private final String identifyingClass;
 
-		private SpecificPlatform(String identifyingClass) {
+		SpecificPlatform(String identifyingClass) {
 			this.identifyingClass = identifyingClass;
 		}
 
+		@Nullable
 		public abstract MBeanServer getMBeanServer();
 
 		@Nullable

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Create a new AbstractBeanDefinition with the given
 	 * constructor argument values and property values.
 	 */
-	protected AbstractBeanDefinition(ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+	protected AbstractBeanDefinition(@Nullable ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
 		setConstructorArgumentValues(cargs);
 		setPropertyValues(pvs);
 	}
@@ -340,7 +340,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Specify the bean class name of this bean definition.
 	 */
 	@Override
-	public void setBeanClassName(String beanClassName) {
+	public void setBeanClassName(@Nullable String beanClassName) {
 		this.beanClass = beanClassName;
 	}
 
@@ -361,7 +361,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify the class for this bean.
 	 */
-	public void setBeanClass(Class<?> beanClass) {
+	public void setBeanClass(@Nullable Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
 
@@ -371,7 +371,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
-	@Nullable
 	public Class<?> getBeanClass() throws IllegalStateException {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject == null) {
@@ -399,6 +398,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @return the resolved bean class
 	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
+	@Nullable
 	public Class<?> resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
 		String className = getBeanClassName();
 		if (className == null) {
@@ -420,7 +420,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	@Override
-	public void setScope(String scope) {
+	public void setScope(@Nullable String scope) {
 		this.scope = scope;
 	}
 
@@ -566,7 +566,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
 	@Override
-	public void setDependsOn(String... dependsOn) {
+	public void setDependsOn(@Nullable String... dependsOn) {
 		this.dependsOn = dependsOn;
 	}
 
@@ -637,6 +637,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the qualifier mapped to the provided type name.
 	 */
+	@Nullable
 	public AutowireCandidateQualifier getQualifier(String typeName) {
 		return this.qualifiers.get(typeName);
 	}
@@ -668,7 +669,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #setConstructorArgumentValues(ConstructorArgumentValues)
 	 * @see #setPropertyValues(MutablePropertyValues)
 	 */
-	public void setInstanceSupplier(Supplier<?> instanceSupplier) {
+	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
 		this.instanceSupplier = instanceSupplier;
 	}
 
@@ -726,7 +727,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #setFactoryMethodName
 	 */
 	@Override
-	public void setFactoryBeanName(String factoryBeanName) {
+	public void setFactoryBeanName(@Nullable String factoryBeanName) {
 		this.factoryBeanName = factoryBeanName;
 	}
 
@@ -747,7 +748,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #setBeanClassName
 	 */
 	@Override
-	public void setFactoryMethodName(String factoryMethodName) {
+	public void setFactoryMethodName(@Nullable String factoryMethodName) {
 		this.factoryMethodName = factoryMethodName;
 	}
 
@@ -762,7 +763,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify constructor argument values for this bean.
 	 */
-	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
+	public void setConstructorArgumentValues(@Nullable ConstructorArgumentValues constructorArgumentValues) {
 		this.constructorArgumentValues =
 				(constructorArgumentValues != null ? constructorArgumentValues : new ConstructorArgumentValues());
 	}
@@ -785,7 +786,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify property values for this bean, if any.
 	 */
-	public void setPropertyValues(MutablePropertyValues propertyValues) {
+	public void setPropertyValues(@Nullable MutablePropertyValues propertyValues) {
 		this.propertyValues = (propertyValues != null ? propertyValues : new MutablePropertyValues());
 	}
 
@@ -800,24 +801,24 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Specify method overrides for the bean, if any.
 	 */
-	public void setMethodOverrides(MethodOverrides methodOverrides) {
+	public void setMethodOverrides(@Nullable MethodOverrides methodOverrides) {
 		this.methodOverrides = (methodOverrides != null ? methodOverrides : new MethodOverrides());
 	}
 
 	/**
 	 * Return information about methods to be overridden by the IoC
 	 * container. This will be empty if there are no method overrides.
-	 * Never returns {@code null}.
+	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is {@code null}
-	 * in which case there is no initializer method.
+	 * Set the name of the initializer method.
+	 * <p>The default is {@code null} in which case there is no initializer method.
 	 */
-	public void setInitMethodName(String initMethodName) {
+	public void setInitMethodName(@Nullable String initMethodName) {
 		this.initMethodName = initMethodName;
 	}
 
@@ -831,7 +832,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured init method is the default.
-	 * Default value is {@code false}.
+	 * <p>The default value is {@code false}.
 	 * @see #setInitMethodName
 	 */
 	public void setEnforceInitMethod(boolean enforceInitMethod) {
@@ -847,10 +848,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the name of the destroy method. The default is {@code null}
-	 * in which case there is no destroy method.
+	 * Set the name of the destroy method.
+	 * <p>The default is {@code null} in which case there is no destroy method.
 	 */
-	public void setDestroyMethodName(String destroyMethodName) {
+	public void setDestroyMethodName(@Nullable String destroyMethodName) {
 		this.destroyMethodName = destroyMethodName;
 	}
 
@@ -864,7 +865,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured destroy method is the default.
-	 * Default value is {@code false}.
+	 * <p>The default value is {@code false}.
 	 * @see #setDestroyMethodName
 	 */
 	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {
@@ -914,7 +915,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set a human-readable description of this bean definition.
 	 */
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}
 
@@ -945,8 +946,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
-	public void setResourceDescription(String resourceDescription) {
-		this.resource = new DescriptiveResource(resourceDescription);
+	public void setResourceDescription(@Nullable String resourceDescription) {
+		this.resource = (resourceDescription != null ? new DescriptiveResource(resourceDescription) : null);
 	}
 
 	/**

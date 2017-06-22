@@ -138,36 +138,31 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T get(@Nullable Object key, Callable<T> valueLoader) {
-		if (this.store.containsKey(key)) {
-			return (T) get(key).get();
-		}
-		else {
-			return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
-				try {
-					return toStoreValue(valueLoader.call());
-				}
-				catch (Throwable ex) {
-					throw new ValueRetrievalException(key, valueLoader, ex);
-				}
-			}));
-		}
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
+			try {
+				return toStoreValue(valueLoader.call());
+			}
+			catch (Throwable ex) {
+				throw new ValueRetrievalException(key, valueLoader, ex);
+			}
+		}));
 	}
 
 	@Override
-	public void put(@Nullable Object key, @Nullable Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.store.put(key, toStoreValue(value));
 	}
 
 	@Override
 	@Nullable
-	public ValueWrapper putIfAbsent(@Nullable Object key, @Nullable Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Object existing = this.store.putIfAbsent(key, toStoreValue(value));
 		return toValueWrapper(existing);
 	}
 
 	@Override
-	public void evict(@Nullable Object key) {
+	public void evict(Object key) {
 		this.store.remove(key);
 	}
 
@@ -205,7 +200,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	protected Object fromStoreValue(@Nullable Object storeValue) {
+	protected Object fromStoreValue(Object storeValue) {
 		if (this.serialization != null) {
 			try {
 				return super.fromStoreValue(deserializeValue(storeValue));

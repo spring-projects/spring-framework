@@ -132,8 +132,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
-		for (Map.Entry<String, ? extends Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
@@ -141,9 +140,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
-				group.add(entry.getKey(), bean);
+				group.add(beanName, bean);
 			}
-		}
+		});
 		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
@@ -187,16 +186,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void stopBeans() {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
-		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			int shutdownOrder = getPhase(bean);
 			LifecycleGroup group = phases.get(shutdownOrder);
 			if (group == null) {
 				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
 				phases.put(shutdownOrder, group);
 			}
-			group.add(entry.getKey(), bean);
-		}
+			group.add(beanName, bean);
+		});
 		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());
@@ -228,14 +226,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
-						((SmartLifecycle) bean).stop(new Runnable() {
-							@Override
-							public void run() {
-								latch.countDown();
-								countDownBeanNames.remove(beanName);
-								if (logger.isDebugEnabled()) {
-									logger.debug("Bean '" + beanName + "' completed its stop procedure");
-								}
+						((SmartLifecycle) bean).stop(() -> {
+							latch.countDown();
+							countDownBeanNames.remove(beanName);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Bean '" + beanName + "' completed its stop procedure");
 							}
 						});
 					}
@@ -278,8 +273,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			boolean isFactoryBean = this.beanFactory.isFactoryBean(beanNameToRegister);
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
 			if ((this.beanFactory.containsSingleton(beanNameToRegister) &&
-					(!isFactoryBean || Lifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck)))) ||
-					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck))) {
+					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck))) ||
+					matchesBeanType(SmartLifecycle.class, beanNameToCheck)) {
 				Lifecycle bean = this.beanFactory.getBean(beanNameToCheck, Lifecycle.class);
 				if (bean != this) {
 					beans.put(beanNameToRegister, bean);
@@ -287,6 +282,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 		return beans;
+	}
+
+	private boolean matchesBeanType(Class<?> targetType, String beanName) {
+		Class<?> beanType = this.beanFactory.getType(beanName);
+		return (beanType != null && targetType.isAssignableFrom(beanType));
 	}
 
 	/**
@@ -359,7 +359,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			Collections.sort(this.members, Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
-			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<String>());
+			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
 			for (LifecycleGroupMember member : this.members) {
 				if (this.lifecycleBeans.containsKey(member.name)) {
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * <p>Nested-path tag, to support and assist with nested beans or bean properties
@@ -60,7 +61,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	 * rather than "customer.address.street".
 	 * @see BindTag#setPath
 	 */
-	public void setPath(String path) {
+	public void setPath(@Nullable String path) {
 		if (path == null) {
 			path = "";
 		}

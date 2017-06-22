@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.springframework.core.SpringProperties;
-
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration object for the SpEL expression parser.
@@ -62,7 +62,7 @@ public class SpelParserConfiguration {
 	 * @param compilerMode the compiler mode for the parser
 	 * @param compilerClassLoader the ClassLoader to use as the basis for expression compilation
 	 */
-	public SpelParserConfiguration(SpelCompilerMode compilerMode, ClassLoader compilerClassLoader) {
+	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader) {
 		this(compilerMode, compilerClassLoader, false, false, Integer.MAX_VALUE);
 	}
 
@@ -94,7 +94,7 @@ public class SpelParserConfiguration {
 	 * @param autoGrowCollections if collections should automatically grow
 	 * @param maximumAutoGrowSize the maximum size that the collection can auto grow
 	 */
-	public SpelParserConfiguration(SpelCompilerMode compilerMode, ClassLoader compilerClassLoader,
+	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
 
 		this.compilerMode = (compilerMode != null ? compilerMode : defaultCompilerMode);

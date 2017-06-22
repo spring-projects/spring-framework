@@ -196,7 +196,8 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	@Nullable
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) throws PersistenceException {
+			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction)
+			throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
@@ -449,7 +450,7 @@ public abstract class EntityManagerFactoryUtils {
 		private final boolean newEntityManager;
 
 		public TransactionalEntityManagerSynchronization(
-				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
+				EntityManagerHolder emHolder, EntityManagerFactory emf, @Nullable Object txData, boolean newEm) {
 
 			super(emHolder, emf);
 			this.transactionData = txData;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
@@ -57,8 +57,8 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
-		String protocol = null;  // https://github.com/sockjs/sockjs-client/issues/130
-		sockJsSession.setAcceptedProtocol(protocol);
+		// https://github.com/sockjs/sockjs-client/issues/130
+		// sockJsSession.setAcceptedProtocol(protocol);
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
@@ -121,14 +121,8 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		if (StringUtils.isEmpty(value)) {
 			return null;
 		}
-		try {
-			String result = UriUtils.decode(value, "UTF-8");
-			return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, ex);
-		}
+		String result = UriUtils.decode(value, StandardCharsets.UTF_8);
+		return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
 	}
 
 }

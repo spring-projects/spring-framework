@@ -103,6 +103,14 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		}
 	}
 
+	/**
+	 * Invoked when an error happens while flushing. Defaults to no-op.
+	 * Servlet 3.1 based implementations will receive
+	 * {@link AsyncListener#onError(Throwable)} event.
+	 */
+	protected void flushingFailed(Throwable t) {
+	}
+
 
 	/**
 	 * Create a new processor for subscribing to the next flush boundary.
@@ -167,8 +175,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					processor.flush();
 				}
 				catch (IOException ex) {
-					processor.cancel();
-					processor.onError(ex);
+					processor.flushingFailed(ex);
+					return;
 				}
 				if (processor.subscriberCompleted) {
 					if (processor.changeState(this, COMPLETED)) {

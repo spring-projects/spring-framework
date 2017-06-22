@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see #setIsolationLevel
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
+		if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
 			throw new IllegalArgumentException("Only isolation constants allowed");
 		}
 		setIsolationLevel(constants.asNumber(constantName).intValue());
@@ -160,6 +160,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @return whether there is a read-only hint for the current scope
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
+	@Nullable
 	protected Boolean getCurrentReadOnlyFlag() {
 		boolean txReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 		return (txReadOnly ? Boolean.TRUE : null);

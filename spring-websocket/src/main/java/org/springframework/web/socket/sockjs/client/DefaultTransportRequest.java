@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -72,7 +73,7 @@ class DefaultTransportRequest implements TransportRequest {
 
 
 	public DefaultTransportRequest(SockJsUrlInfo sockJsUrlInfo,
-			HttpHeaders handshakeHeaders, HttpHeaders httpRequestHeaders,
+			@Nullable HttpHeaders handshakeHeaders, @Nullable HttpHeaders httpRequestHeaders,
 			Transport transport, TransportType serverTransportType, SockJsMessageCodec codec) {
 
 		Assert.notNull(sockJsUrlInfo, "SockJsUrlInfo is required");
@@ -209,7 +210,7 @@ class DefaultTransportRequest implements TransportRequest {
 			handleFailure(null, true);
 		}
 
-		private void handleFailure(Throwable ex, boolean isTimeoutFailure) {
+		private void handleFailure(@Nullable Throwable ex, boolean isTimeoutFailure) {
 			if (this.handled.compareAndSet(false, true)) {
 				if (isTimeoutFailure) {
 					String message = "Connect timed out for " + DefaultTransportRequest.this;
@@ -221,8 +222,12 @@ class DefaultTransportRequest implements TransportRequest {
 					fallbackRequest.connect(this.handler, this.future);
 				}
 				else {
-					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
-					this.future.setException(ex);
+					if (logger.isErrorEnabled()) {
+						logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
+					}
+					if (ex != null) {
+						this.future.setException(ex);
+					}
 				}
 				if (isTimeoutFailure) {
 					try {

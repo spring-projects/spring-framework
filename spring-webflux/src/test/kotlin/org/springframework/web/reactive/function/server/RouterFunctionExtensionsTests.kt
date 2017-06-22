@@ -27,6 +27,11 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.net.URI
 
+/**
+ * Tests for [RouterFunction] Kotlin DSL
+ *
+ * @author Sebastien Deleuze
+ */
 class RouterFunctionExtensionsTests {
 
 	@Test

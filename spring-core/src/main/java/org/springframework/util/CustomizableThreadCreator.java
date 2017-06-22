@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Create a new CustomizableThreadCreator with the given thread name prefix.
 	 * @param threadNamePrefix the prefix to use for the names of newly created threads
 	 */
-	public CustomizableThreadCreator(String threadNamePrefix) {
+	public CustomizableThreadCreator(@Nullable String threadNamePrefix) {
 		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : getDefaultThreadNamePrefix());
 	}
 
@@ -66,7 +66,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Specify the prefix to use for the names of newly created threads.
 	 * Default is "SimpleAsyncTaskExecutor-".
 	 */
-	public void setThreadNamePrefix(String threadNamePrefix) {
+	public void setThreadNamePrefix(@Nullable String threadNamePrefix) {
 		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : getDefaultThreadNamePrefix());
 	}
 

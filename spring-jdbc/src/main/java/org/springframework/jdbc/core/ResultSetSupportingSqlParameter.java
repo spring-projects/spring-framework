@@ -60,7 +60,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param typeName the type name of the parameter (optional)
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, String typeName) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, @Nullable String typeName) {
 		super(name, sqlType, typeName);
 	}
 

@@ -190,11 +190,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * (typically a {@link JsonMappingException})
 	 * @since 4.3
 	 */
-	protected void logWarningIfNecessary(Type type, Throwable cause) {
-		if (cause != null && !(cause instanceof JsonMappingException && cause.getMessage().startsWith("Can not find"))) {
+	protected void logWarningIfNecessary(Type type, @Nullable Throwable cause) {
+		if (cause == null) {
+			return;
+		}
+
+		boolean debugLevel = (cause instanceof JsonMappingException &&
+				cause.getMessage().startsWith("Can not find"));
+
+		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
 					"serialization for type [" + type + "]";
-			if (logger.isDebugEnabled()) {
+			if (debugLevel) {
+				logger.debug(msg, cause);
+			}
+			else if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
 			else {
@@ -258,7 +268,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}
-			if (type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
+			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
 			ObjectWriter objectWriter;
@@ -326,7 +336,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @param contentType the media type as requested by the caller
 	 * @return the JSON encoding to use (never {@code null})
 	 */
-	protected JsonEncoding getJsonEncoding(MediaType contentType) {
+	protected JsonEncoding getJsonEncoding(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
 			for (JsonEncoding encoding : JsonEncoding.values()) {

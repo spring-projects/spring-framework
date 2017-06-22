@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,23 +107,12 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 	@Override
 	protected Collection<CacheOperation> findCacheOperations(final Class<?> clazz) {
-		return determineCacheOperations(new CacheOperationProvider() {
-			@Override
-			public Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser) {
-				return parser.parseCacheAnnotations(clazz);
-			}
-		});
-
+		return determineCacheOperations(parser -> parser.parseCacheAnnotations(clazz));
 	}
 
 	@Override
 	protected Collection<CacheOperation> findCacheOperations(final Method method) {
-		return determineCacheOperations(new CacheOperationProvider() {
-			@Override
-			public Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser) {
-				return parser.parseCacheAnnotations(method);
-			}
-		});
+		return determineCacheOperations(parser -> parser.parseCacheAnnotations(method));
 	}
 
 	/**

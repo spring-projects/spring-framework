@@ -74,7 +74,7 @@ public class BindingContext {
 	 * @param name the name of the target object
 	 * @return the created data binder
 	 */
-	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, Object target, String name) {
+	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
 		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);

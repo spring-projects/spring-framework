@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -192,6 +193,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		return doReceive(channel, this.receiveTimeout);
 	}
 
+	@Nullable
 	protected final Message<?> doReceive(MessageChannel channel, long timeout) {
 		Assert.notNull(channel, "MessageChannel is required");
 		Assert.state(channel instanceof PollableChannel, "A PollableChannel is required to receive messages");
@@ -230,7 +232,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 
 		Message<?> replyMessage = this.doReceive(tempReplyChannel, receiveTimeout);
-		if (replyMessage != null && (originalReplyChannelHeader!= null || originalErrorChannelHeader != null)) {
+		if (replyMessage != null) {
 			replyMessage = MessageBuilder.fromMessage(replyMessage)
 					.setHeader(MessageHeaders.REPLY_CHANNEL, originalReplyChannelHeader)
 					.setHeader(MessageHeaders.ERROR_CHANNEL, originalErrorChannelHeader)
@@ -242,19 +244,20 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	private long sendTimeout(Message<?> requestMessage) {
 		Long sendTimeout = headerToLong(requestMessage.getHeaders().get(this.sendTimeoutHeader));
-		return sendTimeout == null ? this.sendTimeout : sendTimeout;
+		return (sendTimeout != null ? sendTimeout : this.sendTimeout);
 	}
 
 	private long receiveTimeout(Message<?> requestMessage) {
 		Long receiveTimeout = headerToLong(requestMessage.getHeaders().get(this.receiveTimeoutHeader));
-		return receiveTimeout == null ? this.receiveTimeout : receiveTimeout;
+		return (receiveTimeout != null ? receiveTimeout : this.receiveTimeout);
 	}
 
-	private Long headerToLong(Object headerValue) {
+	@Nullable
+	private Long headerToLong(@Nullable Object headerValue) {
 		if (headerValue instanceof Number) {
 			return ((Number) headerValue).longValue();
 		}
-		else if(headerValue instanceof String) {
+		else if (headerValue instanceof String) {
 			return Long.parseLong((String) headerValue);
 		}
 		else {

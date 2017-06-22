@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -164,7 +165,7 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	public static void splitSqlScript(EncodedResource resource, String script, String separator, String commentPrefix,
+	public static void splitSqlScript(@Nullable EncodedResource resource, String script, String separator, String commentPrefix,
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
 			throws ScriptException {
 
@@ -273,8 +274,8 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	private static String readScript(EncodedResource resource, String commentPrefix, String separator)
-			throws IOException {
+	private static String readScript(EncodedResource resource, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
 
 		LineNumberReader lnr = new LineNumberReader(resource.getReader());
 		try {
@@ -300,8 +301,8 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix, String separator)
-			throws IOException {
+	public static String readScript(LineNumberReader lineNumberReader, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
 
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
@@ -318,7 +319,7 @@ public abstract class ScriptUtils {
 		return scriptBuilder.toString();
 	}
 
-	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, String separator) {
+	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, @Nullable String separator) {
 		if (separator == null) {
 			return;
 		}
@@ -433,8 +434,8 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
-			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			boolean ignoreFailedDrops, String commentPrefix, @Nullable String separator,
+			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
 			if (logger.isInfoEnabled()) {

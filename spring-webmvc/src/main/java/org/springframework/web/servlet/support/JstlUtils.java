@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -53,7 +52,7 @@ public abstract class JstlUtils {
 	 * @see org.springframework.context.ApplicationContext
 	 */
 	public static MessageSource getJstlAwareMessageSource(
-			ServletContext servletContext, MessageSource messageSource) {
+			@Nullable ServletContext servletContext, MessageSource messageSource) {
 
 		if (servletContext != null) {
 			String jstlInitParam = servletContext.getInitParameter(Config.FMT_LOCALIZATION_CONTEXT);

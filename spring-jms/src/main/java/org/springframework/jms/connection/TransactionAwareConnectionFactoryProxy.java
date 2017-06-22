@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 import javax.jms.TransactionInProgressException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -109,6 +110,7 @@ public class TransactionAwareConnectionFactoryProxy
 	/**
 	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
+	@Nullable
 	protected ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
@@ -263,14 +265,14 @@ public class TransactionAwareConnectionFactoryProxy
 			}
 			else if (Session.class == method.getReturnType()) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
-						getTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
+						obtainTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
 				}
 			}
 			else if (QueueSession.class == method.getReturnType()) {
 				QueueSession session = ConnectionFactoryUtils.getTransactionalQueueSession(
-						(QueueConnectionFactory) getTargetConnectionFactory(), (QueueConnection) this.target,
+						(QueueConnectionFactory) obtainTargetConnectionFactory(), (QueueConnection) this.target,
 						isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
@@ -278,7 +280,7 @@ public class TransactionAwareConnectionFactoryProxy
 			}
 			else if (TopicSession.class == method.getReturnType()) {
 				TopicSession session = ConnectionFactoryUtils.getTransactionalTopicSession(
-						(TopicConnectionFactory) getTargetConnectionFactory(), (TopicConnection) this.target,
+						(TopicConnectionFactory) obtainTargetConnectionFactory(), (TopicConnection) this.target,
 						isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
@@ -323,6 +325,7 @@ public class TransactionAwareConnectionFactoryProxy
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 

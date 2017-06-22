@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
-	public void setConversionService(ConversionService conversionService) {
+	public void setConversionService(@Nullable ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -377,7 +377,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the custom editor, or {@code null} if none specific for this property
 	 */
 	@Nullable
-	private PropertyEditor getCustomEditor(String propertyName, Class<?> requiredType) {
+	private PropertyEditor getCustomEditor(String propertyName, @Nullable Class<?> requiredType) {
 		CustomEditorHolder holder = this.customEditorsForPath.get(propertyName);
 		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
 	}
@@ -391,7 +391,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see java.beans.PropertyEditor#getAsText()
 	 */
 	@Nullable
-	private PropertyEditor getCustomEditor(Class<?> requiredType) {
+	private PropertyEditor getCustomEditor(@Nullable Class<?> requiredType) {
 		if (requiredType == null || this.customEditors == null) {
 			return null;
 		}
@@ -457,9 +457,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		String actualPropertyName =
 				(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
 		if (this.customEditors != null) {
-			for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
-				target.registerCustomEditor(entry.getKey(), entry.getValue());
-			}
+			this.customEditors.forEach(target::registerCustomEditor);
 		}
 		if (this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
@@ -521,7 +519,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		private final Class<?> registeredType;
 
-		private CustomEditorHolder(PropertyEditor propertyEditor, Class<?> registeredType) {
+		private CustomEditorHolder(PropertyEditor propertyEditor, @Nullable Class<?> registeredType) {
 			this.propertyEditor = propertyEditor;
 			this.registeredType = registeredType;
 		}
@@ -530,11 +528,12 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			return this.propertyEditor;
 		}
 
+		@Nullable
 		private Class<?> getRegisteredType() {
 			return this.registeredType;
 		}
 
-		private PropertyEditor getPropertyEditor(Class<?> requiredType) {
+		private PropertyEditor getPropertyEditor(@Nullable Class<?> requiredType) {
 			// Special case: If no required type specified, which usually only happens for
 			// Collection elements, or required type is not assignable to registered type,
 			// which usually only happens for generic properties of type Object -

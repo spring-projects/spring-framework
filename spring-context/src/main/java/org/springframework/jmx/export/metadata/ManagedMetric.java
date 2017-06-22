@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jmx.export.metadata;
 
 import org.springframework.jmx.support.MetricType;
+import org.springframework.util.Assert;
 
 /**
  * Metadata that indicates to expose a given bean property as a JMX attribute,
@@ -29,17 +30,17 @@ import org.springframework.jmx.support.MetricType;
  */
 public class ManagedMetric extends AbstractJmxAttribute {
 
-	private String category = "";
+	private String category;
 
-	private String displayName = "";
+	private String displayName;
 
 	private MetricType metricType = MetricType.GAUGE;
 
 	private int persistPeriod = -1;
 
-	private String persistPolicy = "";
+	private String persistPolicy;
 
-	private String unit = "";
+	private String unit;
 
 
 	/**
@@ -74,6 +75,7 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	 * A description of how this metric's values change over time.
 	 */
 	public void setMetricType(MetricType metricType) {
+		Assert.notNull(metricType, "MetricType must not be null");
 		this.metricType = metricType;
 	}
 

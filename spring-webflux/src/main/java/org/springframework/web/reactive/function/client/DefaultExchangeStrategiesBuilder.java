@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.util.Assert;
@@ -47,18 +46,9 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 	}
 
 	@Override
-	public ExchangeStrategies.Builder defaultCodecs(
-			Consumer<ClientCodecConfigurer.ClientDefaultCodecs> consumer) {
+	public ExchangeStrategies.Builder codecs(Consumer<ClientCodecConfigurer> consumer) {
 		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.defaultCodecs());
-		return this;
-	}
-
-	@Override
-	public ExchangeStrategies.Builder customCodecs(
-			Consumer<CodecConfigurer.CustomCodecs> consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.customCodecs());
+		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 

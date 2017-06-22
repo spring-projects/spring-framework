@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -322,17 +322,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 			if (streamAsLob) {
 				if (asciiStream != null) {
-					try {
-						Reader reader = new InputStreamReader(asciiStream, "US-ASCII");
-						if (contentLength >= 0) {
-							ps.setClob(paramIndex, reader, contentLength);
-						}
-						else {
-							ps.setClob(paramIndex, reader);
-						}
+					Reader reader = new InputStreamReader(asciiStream, StandardCharsets.US_ASCII);
+					if (contentLength >= 0) {
+						ps.setClob(paramIndex, reader, contentLength);
 					}
-					catch (UnsupportedEncodingException ex) {
-						throw new SQLException("US-ASCII encoding not supported: " + ex);
+					else {
+						ps.setClob(paramIndex, reader);
 					}
 				}
 				else {

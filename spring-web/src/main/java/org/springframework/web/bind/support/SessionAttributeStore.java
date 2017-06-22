@@ -36,7 +36,7 @@ public interface SessionAttributeStore {
 	 * @param attributeName the name of the attribute
 	 * @param attributeValue the attribute value to store
 	 */
-	void storeAttribute(WebRequest request, String attributeName, Object attributeValue);
+	void storeAttribute(WebRequest request, String attributeName, @Nullable Object attributeValue);
 
 	/**
 	 * Retrieve the specified attribute from the backend session.

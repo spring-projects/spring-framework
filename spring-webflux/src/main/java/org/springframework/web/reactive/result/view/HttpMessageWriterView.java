@@ -35,7 +35,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * {@code View} that writes model attribute(s) with an {@link HttpMessageWriter}.
  *
@@ -97,7 +96,7 @@ public class HttpMessageWriterView implements View {
 	 * otherwise raise an {@link IllegalStateException}.
 	 * </ul>
 	 */
-	public void setModelKeys(Set<String> modelKeys) {
+	public void setModelKeys(@Nullable Set<String> modelKeys) {
 		this.modelKeys.clear();
 		if (modelKeys != null) {
 			this.modelKeys.addAll(modelKeys);
@@ -122,7 +121,10 @@ public class HttpMessageWriterView implements View {
 	}
 
 	@Nullable
-	private Object getObjectToRender(Map<String, ?> model) {
+	private Object getObjectToRender(@Nullable Map<String, ?> model) {
+		if (model == null) {
+			return null;
+		}
 
 		Map<String, ?> result = model.entrySet().stream()
 				.filter(this::isMatch)
@@ -155,7 +157,7 @@ public class HttpMessageWriterView implements View {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Mono<Void> write(T value, MediaType contentType, ServerWebExchange exchange) {
+	private <T> Mono<Void> write(T value, @Nullable MediaType contentType, ServerWebExchange exchange) {
 		Publisher<T> input = Mono.justOrEmpty(value);
 		ResolvableType elementType = ResolvableType.forClass(value.getClass());
 		return ((HttpMessageWriter<T>) this.writer).write(

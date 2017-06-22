@@ -17,7 +17,6 @@
 package org.springframework.http.codec;
 
 import org.springframework.core.codec.Encoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
  * Helps to configure a list of server-side HTTP message readers and writers

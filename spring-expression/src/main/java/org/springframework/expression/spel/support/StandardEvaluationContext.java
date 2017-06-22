@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -84,7 +85,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 
-	public void setRootObject(Object rootObject) {
+	public void setRootObject(@Nullable Object rootObject) {
 		this.rootObject = (rootObject != null ? new TypedValue(rootObject) : TypedValue.NULL);
 	}
 
@@ -169,7 +170,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Override
 	public TypeLocator getTypeLocator() {
 		if (this.typeLocator == null) {
-			 this.typeLocator = new StandardTypeLocator();
+			this.typeLocator = new StandardTypeLocator();
 		}
 		return this.typeLocator;
 	}
@@ -208,7 +209,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	public void setVariable(String name, Object value) {
+	public void setVariable(String name, @Nullable Object value) {
 		this.variables.put(name, value);
 	}
 

@@ -83,7 +83,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param request current HTTP request
 	 * @param response current HTTP response (for optional exposure)
 	 */
-	public ServletRequestAttributes(HttpServletRequest request, HttpServletResponse response) {
+	public ServletRequestAttributes(HttpServletRequest request, @Nullable HttpServletResponse response) {
 		this(request);
 		this.response = response;
 	}
@@ -108,6 +108,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * Exposes the {@link HttpSession} that we're wrapping.
 	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
+	@Nullable
 	protected final HttpSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
 			HttpSession session = this.request.getSession(allowCreate);
@@ -129,6 +130,12 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			}
 			return session;
 		}
+	}
+
+	private HttpSession obtainSession() {
+		HttpSession session = getSession(true);
+		Assert.state(session != null, "No HttpSession");
+		return session;
 	}
 
 
@@ -169,7 +176,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
-			HttpSession session = getSession(true);
+			HttpSession session = obtainSession();
 			this.sessionAttributesToUpdate.remove(name);
 			session.setAttribute(name, value);
 		}
@@ -247,12 +254,12 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	@Override
 	public String getSessionId() {
-		return getSession(true).getId();
+		return obtainSession().getId();
 	}
 
 	@Override
 	public Object getSessionMutex() {
-		return WebUtils.getSessionMutex(getSession(true));
+		return WebUtils.getSessionMutex(obtainSession());
 	}
 
 
@@ -296,7 +303,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * purposes of session attribute management; {@code false} otherwise
 	 * @see #updateAccessedSessionAttributes()
 	 */
-	protected boolean isImmutableSessionAttribute(String name, Object value) {
+	protected boolean isImmutableSessionAttribute(String name, @Nullable Object value) {
 		return (value == null || immutableValueTypes.contains(value.getClass()));
 	}
 
@@ -308,7 +315,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param callback the callback to be executed for destruction
 	 */
 	protected void registerSessionDestructionCallback(String name, Runnable callback) {
-		HttpSession session = getSession(true);
+		HttpSession session = obtainSession();
 		session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
 				new DestructionCallbackBindingListener(callback));
 	}

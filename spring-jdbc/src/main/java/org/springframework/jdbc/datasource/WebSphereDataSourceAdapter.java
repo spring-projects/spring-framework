@@ -19,13 +19,13 @@ package org.springframework.jdbc.datasource;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -141,8 +141,10 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
-		return (Connection) ReflectionUtils.invokeJdbcMethod(
-				this.wsDataSourceGetConnectionMethod, getTargetDataSource(), connSpec);
+		Connection con = (Connection) ReflectionUtils.invokeJdbcMethod(
+				this.wsDataSourceGetConnectionMethod, obtainTargetDataSource(), connSpec);
+		Assert.state(con != null, "No Connection");
+		return con;
 	}
 
 	/**
@@ -158,10 +160,11 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @throws SQLException if thrown by JDBCConnectionSpec API methods
 	 * @see com.ibm.websphere.rsadapter.JDBCConnectionSpec
 	 */
-	protected Object createConnectionSpec(
-			@Nullable Integer isolationLevel, @Nullable Boolean readOnlyFlag, @Nullable String username, @Nullable String password) throws SQLException {
+	protected Object createConnectionSpec(@Nullable Integer isolationLevel, @Nullable Boolean readOnlyFlag,
+			@Nullable String username, @Nullable String password) throws SQLException {
 
 		Object connSpec = ReflectionUtils.invokeJdbcMethod(this.newJdbcConnSpecMethod, null);
+		Assert.state(connSpec != null, "No JDBCConnectionSpec");
 		if (isolationLevel != null) {
 			ReflectionUtils.invokeJdbcMethod(this.setTransactionIsolationMethod, connSpec, isolationLevel);
 		}

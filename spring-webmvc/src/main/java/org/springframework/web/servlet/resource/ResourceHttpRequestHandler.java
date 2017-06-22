@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -140,7 +139,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default {@link PathResourceResolver} is configured. If using this property,
 	 * it is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+	public void setResourceResolvers(@Nullable List<ResourceResolver> resourceResolvers) {
 		this.resourceResolvers.clear();
 		if (resourceResolvers != null) {
 			this.resourceResolvers.addAll(resourceResolvers);
@@ -158,7 +157,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Configure the list of {@link ResourceTransformer}s to use.
 	 * <p>By default no transformers are configured for use.
 	 */
-	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
+	public void setResourceTransformers(@Nullable List<ResourceTransformer> resourceTransformers) {
 		this.resourceTransformers.clear();
 		if (resourceTransformers != null) {
 			this.resourceTransformers.addAll(resourceTransformers);
@@ -221,6 +220,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the configured content negotiation manager.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
@@ -527,7 +527,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param mediaType the resource's media type (never {@code null})
 	 * @throws IOException in case of errors while setting the headers
 	 */
-	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
+	protected void setHeaders(HttpServletResponse response, Resource resource, @Nullable MediaType mediaType)
+			throws IOException {
+
 		long length = resource.contentLength();
 		if (length > Integer.MAX_VALUE) {
 			response.setContentLengthLong(length);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import org.hibernate.SessionFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.support.DaoSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.util.Assert;
 
 /**
  * Convenient super class for Hibernate-based data access objects.
@@ -84,6 +86,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	/**
 	 * Return the Hibernate SessionFactory used by this DAO.
 	 */
+	@Nullable
 	public final SessionFactory getSessionFactory() {
 		return (this.hibernateTemplate != null ? this.hibernateTemplate.getSessionFactory() : null);
 	}
@@ -126,7 +129,9 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @see SessionFactory#getCurrentSession()
 	 */
 	protected final Session currentSession() throws DataAccessResourceFailureException {
-		return getSessionFactory().getCurrentSession();
+		SessionFactory sessionFactory = getSessionFactory();
+		Assert.state(sessionFactory != null, "No SessionFactory set");
+		return sessionFactory.getCurrentSession();
 	}
 
 }

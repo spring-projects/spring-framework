@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,14 +63,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 	private static Collection<HeaderExpression> parseExpressions(String... headers) {
 		Set<HeaderExpression> expressions = new LinkedHashSet<>();
-		if (headers != null) {
-			for (String header : headers) {
-				HeaderExpression expr = new HeaderExpression(header);
-				if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
-					continue;
-				}
-				expressions.add(expr);
+		for (String header : headers) {
+			HeaderExpression expr = new HeaderExpression(header);
+			if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
+				continue;
 			}
+			expressions.add(expr);
 		}
 		return expressions;
 	}

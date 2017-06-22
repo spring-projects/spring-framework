@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public interface TypeConverter {
 	 * @param targetType a type descriptor that describes the requested result type
 	 * @return {@code true} if that conversion can be performed
 	 */
-	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
 	 * Convert (or coerce) a value from one type to another, for example from a
@@ -55,6 +55,6 @@ public interface TypeConverter {
 	 * @throws EvaluationException if conversion failed or is not possible to begin with
 	 */
 	@Nullable
-	Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType);
+	Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -213,7 +212,7 @@ class ConfigurationClassEnhancer {
 
 		private final ClassLoader classLoader;
 
-		public BeanFactoryAwareGeneratorStrategy(ClassLoader classLoader) {
+		public BeanFactoryAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {
 			this.classLoader = classLoader;
 		}
 
@@ -389,7 +388,7 @@ class ConfigurationClassEnhancer {
 				}
 				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
 						beanFactory.getBean(beanName));
-				if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
+				if (!ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 					String msg = String.format("@Bean method %s.%s called as a bean reference " +
 								"for type [%s] but overridden by non-compatible bean instance of type [%s].",
 								beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
@@ -509,14 +508,11 @@ class ConfigurationClassEnhancer {
 
 			return Proxy.newProxyInstance(
 					factoryBean.getClass().getClassLoader(), new Class<?>[] {interfaceType},
-					new InvocationHandler() {
-						@Override
-						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-							if (method.getName().equals("getObject") && args == null) {
-								return beanFactory.getBean(beanName);
-							}
-							return ReflectionUtils.invokeMethod(method, factoryBean, args);
+					(proxy, method, args) -> {
+						if (method.getName().equals("getObject") && args == null) {
+							return beanFactory.getBean(beanName);
 						}
+						return ReflectionUtils.invokeMethod(method, factoryBean, args);
 					});
 		}
 

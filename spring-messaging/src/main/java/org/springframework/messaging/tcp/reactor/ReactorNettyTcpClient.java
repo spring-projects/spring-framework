@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -176,8 +177,8 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	private <T> Function<Flux<T>, Publisher<?>> reconnectFunction(ReconnectStrategy reconnectStrategy) {
 		return flux -> flux
 				.scan(1, (count, element) -> count++)
-				.flatMap(attempt -> Mono.delay(
-						Duration.ofMillis(reconnectStrategy.getTimeToNextAttempt(attempt))));
+				.flatMap(attempt -> Optional.ofNullable(reconnectStrategy.getTimeToNextAttempt(attempt))
+						.map(time -> Mono.delay(Duration.ofMillis(time))).orElse(Mono.empty()));
 	}
 
 	@Override

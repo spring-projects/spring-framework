@@ -16,36 +16,28 @@
 
 package org.springframework.web.reactive.config;
 
-import org.springframework.util.PathMatcher;
-import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.lang.Nullable;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class PathMatchConfigurer {
 
-	private Boolean suffixPatternMatch;
-
 	private Boolean trailingSlashMatch;
 
-	private Boolean registeredSuffixPatternMatch;
-
-	private HttpRequestPathHelper pathHelper;
-
-	private PathMatcher pathMatcher;
-
+	private Boolean caseSensitiveMatch;
 
 	/**
-	 * Whether to use suffix pattern match (".*") when matching patterns to
-	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>By default this is set to {@code true}.
-	 * @see #registeredSuffixPatternMatch
+	 * Whether to match to URLs irrespective of their case.
+	 * If enabled a method mapped to "/users" won't match to "/Users/".
+	 * <p>The default value is {@code false}.
 	 */
-	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
-		this.suffixPatternMatch = suffixPatternMatch;
+	public PathMatchConfigurer setUseCaseSensitiveMatch(Boolean caseSensitiveMatch) {
+		this.caseSensitiveMatch = caseSensitiveMatch;
 		return this;
 	}
 
@@ -59,54 +51,14 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
-	/**
-	 * Whether suffix pattern matching should work only against path extensions
-	 * that are explicitly registered. This is generally recommended to reduce
-	 * ambiguity and to avoid issues such as when a "." (dot) appears in the path
-	 * for other reasons.
-	 * <p>By default this is set to "true".
-	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
-		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-		return this;
-	}
-
-	/**
-	 * Set a {@code HttpRequestPathHelper} for the resolution of lookup paths.
-	 * <p>Default is {@code HttpRequestPathHelper}.
-	 */
-	public PathMatchConfigurer setPathHelper(HttpRequestPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
-		return this;
-	}
-
-	/**
-	 * Set the PathMatcher for matching URL paths against registered URL patterns.
-	 * <p>The default is a {@link org.springframework.web.util.pattern.ParsingPathMatcher}.
-	 */
-	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
-		return this;
-	}
-
-	protected Boolean isUseSuffixPatternMatch() {
-		return this.suffixPatternMatch;
-	}
-
+	@Nullable
 	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
-	protected Boolean isUseRegisteredSuffixPatternMatch() {
-		return this.registeredSuffixPatternMatch;
-	}
-
-	protected HttpRequestPathHelper getPathHelper() {
-		return this.pathHelper;
-	}
-
-	protected PathMatcher getPathMatcher() {
-		return this.pathMatcher;
+	@Nullable
+	protected Boolean isUseCaseSensitiveMatch() {
+		return this.caseSensitiveMatch;
 	}
 
 }

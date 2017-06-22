@@ -214,7 +214,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					context.getPropertyAccessors().add(new SimpMessageHeaderPropertyAccessor());
 				}
 				try {
-					if (expression.getValue(context, boolean.class)) {
+					if (Boolean.TRUE.equals(expression.getValue(context, Boolean.class))) {
 						result.add(sessionId, subId);
 					}
 				}
@@ -368,6 +368,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		// sessionId -> SessionSubscriptionInfo
 		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions = new ConcurrentHashMap<>();
 
+		@Nullable
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
 			return this.sessions.get(sessionId);
 		}
@@ -377,7 +378,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public SessionSubscriptionInfo addSubscription(String sessionId, String subscriptionId,
-				String destination, Expression selectorExpression) {
+				String destination, @Nullable Expression selectorExpression) {
 
 			SessionSubscriptionInfo info = this.sessions.get(sessionId);
 			if (info == null) {
@@ -391,6 +392,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return info;
 		}
 
+		@Nullable
 		public SessionSubscriptionInfo removeSubscriptions(String sessionId) {
 			return this.sessions.remove(sessionId);
 		}
@@ -444,7 +446,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return null;
 		}
 
-		public void addSubscription(String destination, String subscriptionId, Expression selectorExpression) {
+		public void addSubscription(String destination, String subscriptionId, @Nullable Expression selectorExpression) {
 			Set<Subscription> subs = this.destinationLookup.get(destination);
 			if (subs == null) {
 				synchronized (this.destinationLookup) {
@@ -460,7 +462,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Nullable
 		public String removeSubscription(String subscriptionId) {
-			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry : this.destinationLookup.entrySet()) {
+			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry :
+					this.destinationLookup.entrySet()) {
 				Set<Subscription> subs = destinationEntry.getValue();
 				if (subs != null) {
 					for (Subscription sub : subs) {
@@ -491,7 +494,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		private final Expression selectorExpression;
 
-		public Subscription(String id, Expression selector) {
+		public Subscription(String id, @Nullable Expression selector) {
 			Assert.notNull(id, "Subscription id must not be null");
 			this.id = id;
 			this.selectorExpression = selector;
@@ -501,6 +504,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return this.id;
 		}
 
+		@Nullable
 		public Expression getSelectorExpression() {
 			return this.selectorExpression;
 		}
@@ -530,15 +534,17 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) {
+		public boolean canRead(EvaluationContext context, @Nullable Object target, String name) {
 			return true;
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
+			Assert.state(target instanceof MessageHeaders, "No MessageHeaders");
 			MessageHeaders headers = (MessageHeaders) target;
 			SimpMessageHeaderAccessor accessor =
 					MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
+			Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
 			Object value;
 			if ("destination".equalsIgnoreCase(name)) {
 				value = accessor.getDestination();
@@ -553,12 +559,12 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) {
+		public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) {
 			return false;
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object value) {
+		public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object value) {
 		}
 	}
 

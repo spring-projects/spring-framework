@@ -447,6 +447,12 @@ public class HttpHeadersTests {
 		assertEquals(Locale.FRANCE, headers.getAcceptLanguageAsLocales().get(0));
 	}
 
+	@Test // SPR-15603
+	public void acceptLanguageWithEmptyValue() throws Exception {
+		this.headers.set(HttpHeaders.ACCEPT_LANGUAGE, "");
+		assertEquals(Collections.emptyList(), this.headers.getAcceptLanguageAsLocales());
+	}
+
 	@Test
 	public void contentLanguage() {
 		headers.setContentLanguage(Locale.FRANCE);

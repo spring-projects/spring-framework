@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -122,7 +123,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
 	public AbstractSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+			@Nullable Map<String, Object> attributes) {
 
 		Assert.notNull(id, "SessionId must not be null");
 		Assert.notNull(config, "SockJsConfig must not be null");

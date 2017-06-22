@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -56,8 +57,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpMethod httpMethod;
 
-	private final String contextPath;
-
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	private final InetSocketAddress remoteAddress;
@@ -70,9 +69,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 			InetSocketAddress remoteAddress,
 			Publisher<? extends DataBuffer> body) {
 
-		super(uri, headers);
+		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
-		this.contextPath = (contextPath != null ? contextPath : "");
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
 		this.body = Flux.from(body);
@@ -87,11 +85,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public String getMethodValue() {
 		return this.httpMethod.name();
-	}
-
-	@Override
-	public String getContextPath() {
-		return this.contextPath;
 	}
 
 	@Override
@@ -269,6 +262,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
+
+		/**
 		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -425,6 +425,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder acceptCharset(Charset... acceptableCharsets) {
 			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+			return this;
+		}
+
+		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
 			return this;
 		}
 

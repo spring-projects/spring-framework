@@ -117,7 +117,8 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		this.beanType = ClassUtils.getUserClass(beanFactory.getType(beanName));
+		Class<?> beanType = beanFactory.getType(beanName);
+		this.beanType = (beanType != null ? ClassUtils.getUserClass(beanType) : null);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
@@ -249,7 +250,7 @@ public class HandlerMethod {
 	/**
 	 * Return the actual return value type.
 	 */
-	public MethodParameter getReturnValueType(Object returnValue) {
+	public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 		return new ReturnValueMethodParameter(returnValue);
 	}
 
@@ -288,6 +289,7 @@ public class HandlerMethod {
 	 * Return the HandlerMethod from which this HandlerMethod instance was
 	 * resolved via {@link #createWithResolvedBean()}.
 	 */
+	@Nullable
 	public HandlerMethod getResolvedFromHandlerMethod() {
 		return this.resolvedFromHandlerMethod;
 	}
@@ -380,7 +382,7 @@ public class HandlerMethod {
 
 		private final Object returnValue;
 
-		public ReturnValueMethodParameter(Object returnValue) {
+		public ReturnValueMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 		}

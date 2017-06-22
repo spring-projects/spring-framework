@@ -97,34 +97,37 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	}
 
 	private Flux<Object> decodeInternal(JsonObjectDecoder objectDecoder, Publisher<DataBuffer> inputStream,
-			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		Class<?> contextClass = getParameter(elementType).map(MethodParameter::getContainingClass).orElse(null);
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
-		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
+		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 
 		ObjectReader reader = (jsonView != null ?
 				this.objectMapper.readerWithView(jsonView).forType(javaType) :
 				this.objectMapper.readerFor(javaType));
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
-				.map(dataBuffer -> {
+				.flatMap(dataBuffer -> {
+					if (dataBuffer.readableByteCount() == 0) {
+						return Mono.empty();
+					}
 					try {
 						Object value = reader.readValue(dataBuffer.asInputStream());
 						DataBufferUtils.release(dataBuffer);
-						return value;
+						return Mono.just(value);
 					}
 					catch (InvalidDefinitionException ex) {
-						throw new CodecException("Type definition error: " + ex.getType(), ex);
+						return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
 					}
 					catch (JsonProcessingException ex) {
-						throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
+						return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
 					}
 					catch (IOException ex) {
-						throw new DecodingException("I/O error while parsing input stream", ex);
+						return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
 					}
 				});
 	}

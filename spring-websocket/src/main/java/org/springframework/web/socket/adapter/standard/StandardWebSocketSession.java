@@ -75,8 +75,8 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 */
-	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> attributes,
-			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
+	public StandardWebSocketSession(@Nullable HttpHeaders headers, @Nullable Map<String, Object> attributes,
+			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress) {
 
 		this(headers, attributes, localAddress, remoteAddress, null);
 	}
@@ -90,11 +90,12 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * @param user the user associated with the session; if {@code null} we'll
 	 * 	fallback on the user available in the underlying WebSocket session
 	 */
-	public StandardWebSocketSession(HttpHeaders headers, Map<String, Object> attributes,
-			InetSocketAddress localAddress, InetSocketAddress remoteAddress, @Nullable Principal user) {
+	public StandardWebSocketSession(@Nullable HttpHeaders headers, @Nullable Map<String, Object> attributes,
+			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
+			@Nullable Principal user) {
 
 		super(attributes);
-		headers = (headers != null) ? headers : new HttpHeaders();
+		headers = (headers != null ? headers : new HttpHeaders());
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.user = user;
 		this.localAddress = localAddress;
@@ -171,7 +172,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public boolean isOpen() {
-		return (getNativeSession() != null && getNativeSession().isOpen());
+		return getNativeSession().isOpen();
 	}
 
 	@Override

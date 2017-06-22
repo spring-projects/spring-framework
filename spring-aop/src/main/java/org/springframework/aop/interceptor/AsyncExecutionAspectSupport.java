@@ -24,7 +24,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,7 +86,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * executor has been requested via a qualifier on the async method, in which case the
 	 * executor will be looked up at invocation time against the enclosing bean factory
 	 */
-	public AsyncExecutionAspectSupport(Executor defaultExecutor) {
+	public AsyncExecutionAspectSupport(@Nullable Executor defaultExecutor) {
 		this(defaultExecutor, new SimpleAsyncUncaughtExceptionHandler());
 	}
 
@@ -99,7 +98,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * executor will be looked up at invocation time against the enclosing bean factory
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
-	public AsyncExecutionAspectSupport(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	public AsyncExecutionAspectSupport(@Nullable Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		this.defaultExecutor = defaultExecutor;
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -196,7 +195,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #getExecutorQualifier(Method)
 	 */
 	@Nullable
-	protected Executor findQualifiedExecutor(BeanFactory beanFactory, String qualifier) {
+	protected Executor findQualifiedExecutor(@Nullable BeanFactory beanFactory, String qualifier) {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
@@ -217,7 +216,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
 	@Nullable
-	protected Executor getDefaultExecutor(BeanFactory beanFactory) {
+	protected Executor getDefaultExecutor(@Nullable BeanFactory beanFactory) {
 		if (beanFactory != null) {
 			try {
 				// Search for TaskExecutor bean... not plain Executor since that would
@@ -264,15 +263,12 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Nullable
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
-			return CompletableFuture.supplyAsync(new Supplier<Object>() {
-				@Override
-				public Object get() {
-					try {
-						return task.call();
-					}
-					catch (Throwable ex) {
-						throw new CompletionException(ex);
-					}
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					return task.call();
+				}
+				catch (Throwable ex) {
+					throw new CompletionException(ex);
 				}
 			}, executor);
 		}
