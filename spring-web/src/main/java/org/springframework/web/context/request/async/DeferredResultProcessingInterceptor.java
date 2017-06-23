@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * <p>A {@code DeferredResultProcessingInterceptor} is invoked before the start
  * of async processing, after the {@code DeferredResult} is set as well as on
- * timeout, or after completing for any reason including a timeout or network
+ * timeout/error, or after completing for any reason including a timeout or network
  * error.
  *
  * <p>As a general rule exceptions raised by interceptor methods will cause
@@ -33,7 +33,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * the Exception instance as the concurrent result. Such exceptions will then
  * be processed through the {@code HandlerExceptionResolver} mechanism.
  *
- * <p>The {@link #handleTimeout(NativeWebRequest, DeferredResult) afterTimeout}
+ * <p>The {@link #handleTimeout(NativeWebRequest, DeferredResult) handleTimeout}
  * method can set the {@code DeferredResult} in order to resume processing.
  *
  * @author Rossen Stoyanchev
@@ -93,6 +93,22 @@ public interface DeferredResultProcessingInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	<T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+
+	/**
+	 * Invoked from a container thread when an error occurred while processing an async request
+	 * before the {@code DeferredResult} has been set. Implementations may invoke
+	 * {@link DeferredResult#setResult(Object) setResult} or
+	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume processing.
+	 * @param request the current request
+	 * @param deferredResult the DeferredResult for the current request; if the
+	 * {@code DeferredResult} is set, then concurrent processing is resumed and
+	 * subsequent interceptors are not invoked
+	 * @param t the error that occurred while request processing
+	 * @return {@code true} if processing should continue, or {@code false} if
+	 * other interceptors should not be invoked
+	 * @throws Exception in case of errors
+	 */
+	<T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) throws Exception;
 
 	/**
 	 * Invoked from a container thread when an async request completed for any

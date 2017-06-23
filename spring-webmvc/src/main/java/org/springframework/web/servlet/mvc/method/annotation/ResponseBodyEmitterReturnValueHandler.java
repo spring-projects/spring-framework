@@ -19,6 +19,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.function.Consumer;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -215,6 +217,11 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		@Override
 		public void onTimeout(Runnable callback) {
 			this.deferredResult.onTimeout(callback);
+		}
+
+		@Override
+		public void onError(Consumer<Throwable> callback) {
+			this.deferredResult.onError(callback);
 		}
 
 		@Override

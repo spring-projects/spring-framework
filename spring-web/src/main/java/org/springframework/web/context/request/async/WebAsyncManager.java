@@ -67,8 +67,14 @@ public final class WebAsyncManager {
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
 
+	private static final CallableProcessingInterceptor errorCallableInterceptor =
+			new ErrorCallableProcessingInterceptor();
+
 	private static final DeferredResultProcessingInterceptor timeoutDeferredResultInterceptor =
 			new TimeoutDeferredResultProcessingInterceptor();
+
+	private static final DeferredResultProcessingInterceptor errorDeferredResultInterceptor =
+			new ErrorDeferredResultProcessingInterceptor();
 
 
 	private AsyncWebRequest asyncWebRequest;
@@ -281,6 +287,7 @@ public final class WebAsyncManager {
 		interceptors.add(webAsyncTask.getInterceptor());
 		interceptors.addAll(this.callableInterceptors.values());
 		interceptors.add(timeoutCallableInterceptor);
+		interceptors.add(errorCallableInterceptor);
 
 		final Callable<?> callable = webAsyncTask.getCallable();
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
@@ -288,6 +295,14 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.addTimeoutHandler(() -> {
 			logger.debug("Processing timeout");
 			Object result = interceptorChain.triggerAfterTimeout(this.asyncWebRequest, callable);
+			if (result != CallableProcessingInterceptor.RESULT_NONE) {
+				setConcurrentResultAndDispatch(result);
+			}
+		});
+
+		this.asyncWebRequest.addErrorHandler(t -> {
+			logger.debug("Processing error");
+			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, t);
 			if (result != CallableProcessingInterceptor.RESULT_NONE) {
 				setConcurrentResultAndDispatch(result);
 			}
@@ -371,12 +386,22 @@ public final class WebAsyncManager {
 		interceptors.add(deferredResult.getInterceptor());
 		interceptors.addAll(this.deferredResultInterceptors.values());
 		interceptors.add(timeoutDeferredResultInterceptor);
+		interceptors.add(errorDeferredResultInterceptor);
 
 		final DeferredResultInterceptorChain interceptorChain = new DeferredResultInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
 			try {
 				interceptorChain.triggerAfterTimeout(this.asyncWebRequest, deferredResult);
+			}
+			catch (Throwable ex) {
+				setConcurrentResultAndDispatch(ex);
+			}
+		});
+
+		this.asyncWebRequest.addErrorHandler(t -> {
+			try {
+				interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, t);
 			}
 			catch (Throwable ex) {
 				setConcurrentResultAndDispatch(ex);

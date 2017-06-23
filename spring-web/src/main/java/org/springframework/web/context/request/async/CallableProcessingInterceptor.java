@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * <p>A {@code CallableProcessingInterceptor} is invoked before and after the
  * invocation of the {@code Callable} task in the asynchronous thread, as well
- * as on timeout from a container thread, or after completing for any reason
+ * as on timeout/error from a container thread, or after completing for any reason
  * including a timeout or network error.
  *
  * <p>As a general rule exceptions raised by interceptor methods will cause
@@ -36,7 +36,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * the Exception instance as the concurrent result. Such exceptions will then
  * be processed through the {@code HandlerExceptionResolver} mechanism.
  *
- * <p>The {@link #handleTimeout(NativeWebRequest, Callable) afterTimeout} method
+ * <p>The {@link #handleTimeout(NativeWebRequest, Callable) handleTimeout} method
  * can select a value to be used to resume processing.
  *
  * @author Rossen Stoyanchev
@@ -100,6 +100,21 @@ public interface CallableProcessingInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	<T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception;
+
+	/**
+	 * Invoked from a container thread when an error occurred while processing the async request
+	 * before the {@code Callable} task completes. Implementations may return a value,
+	 * including an {@link Exception}, to use instead of the value the
+	 * {@link Callable} did not return in time.
+	 * @param request the current request
+	 * @param task the task for the current async request
+	 * @paramt t the error that occurred while request processing
+	 * @return a concurrent result value; if the value is anything other than
+	 * {@link #RESULT_NONE} or {@link #RESPONSE_HANDLED}, concurrent processing
+	 * is resumed and subsequent interceptors are not invoked
+	 * @throws Exception in case of errors
+	 */
+	<T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception;
 
 	/**
 	 * Invoked from a container thread when async processing completes for any

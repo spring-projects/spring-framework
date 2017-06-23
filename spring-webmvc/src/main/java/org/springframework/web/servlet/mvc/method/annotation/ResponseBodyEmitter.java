@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
@@ -74,6 +75,8 @@ public class ResponseBodyEmitter {
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
+	private final ErrorCallback errorCallback = new ErrorCallback();
+
 	private final DefaultCallback completionCallback = new DefaultCallback();
 
 
@@ -123,6 +126,7 @@ public class ResponseBodyEmitter {
 		}
 		else {
 			this.handler.onTimeout(this.timeoutCallback);
+			this.handler.onError(this.errorCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
 	}
@@ -168,11 +172,9 @@ public class ResponseBodyEmitter {
 				this.handler.send(object, mediaType);
 			}
 			catch (IOException ex) {
-				completeWithError(ex);
 				throw ex;
 			}
 			catch (Throwable ex) {
-				completeWithError(ex);
 				throw new IllegalStateException("Failed to send " + object, ex);
 			}
 		}
@@ -215,6 +217,15 @@ public class ResponseBodyEmitter {
 	}
 
 	/**
+	 * Register code to invoke when an error occurred while processing the async request.
+	 * This method is called from a container thread when an error occurred while processing
+	 * an async request.
+	 */
+	public synchronized void onError(Consumer<Throwable> callback) {
+		this.errorCallback.setDelegate(callback);
+	}
+
+	/**
 	 * Register code to invoke when the async request completes. This method is
 	 * called from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
@@ -243,6 +254,8 @@ public class ResponseBodyEmitter {
 		void completeWithError(Throwable failure);
 
 		void onTimeout(Runnable callback);
+
+		void onError(Consumer<Throwable> callback);
 
 		void onCompletion(Runnable callback);
 	}
@@ -287,6 +300,24 @@ public class ResponseBodyEmitter {
 			ResponseBodyEmitter.this.complete = true;
 			if (this.delegate != null) {
 				this.delegate.run();
+			}
+		}
+	}
+
+
+	private class ErrorCallback implements Consumer<Throwable> {
+
+		private Consumer<Throwable> delegate;
+
+		public void setDelegate(Consumer<Throwable> callback) {
+			this.delegate = callback;
+		}
+
+		@Override
+		public void accept(Throwable t) {
+			ResponseBodyEmitter.this.complete = true;
+			if (this.delegate != null) {
+				this.delegate.accept(t);
 			}
 		}
 	}

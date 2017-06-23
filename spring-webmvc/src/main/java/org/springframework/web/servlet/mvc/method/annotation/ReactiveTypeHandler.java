@@ -219,6 +219,7 @@ class ReactiveTypeHandler {
 				terminate();
 				this.emitter.complete();
 			});
+			this.emitter.onError(t -> this.emitter.completeWithError(t));
 			subscription.request(1);
 		}
 
