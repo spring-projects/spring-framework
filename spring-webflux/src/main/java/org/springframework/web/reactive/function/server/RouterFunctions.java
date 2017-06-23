@@ -197,8 +197,8 @@ public abstract class RouterFunctions {
 
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);
 		return WebHttpHandlerBuilder.webHandler(webHandler)
-				.filters(strategies.webFilters())
-				.exceptionHandlers(strategies.exceptionHandlers())
+				.filters(filters -> filters.addAll(strategies.webFilters()))
+				.exceptionHandlers(handlers -> handlers.addAll(strategies.exceptionHandlers()))
 				.localeContextResolver(strategies.localeContextResolver())
 				.build();
 	}

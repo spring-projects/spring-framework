@@ -17,7 +17,9 @@ package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,8 +135,8 @@ public class WebHttpHandlerBuilder {
 
 		SortedBeanContainer container = new SortedBeanContainer();
 		context.getAutowireCapableBeanFactory().autowireBean(container);
-		builder.filters(container.getFilters());
-		builder.exceptionHandlers(container.getExceptionHandlers());
+		builder.filters(filters -> filters.addAll(container.getFilters()));
+		builder.exceptionHandlers(handlers -> handlers.addAll(container.getExceptionHandlers()));
 
 		try {
 			builder.sessionManager(
@@ -166,8 +168,8 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Add the given filter(s).
-	 * @param filters the filter(s) to add
-that's	 */
+	 * @param filters the filter(s) to add that's
+	 */
 	public WebHttpHandlerBuilder filter(WebFilter... filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(Arrays.asList(filters));
@@ -176,23 +178,11 @@ that's	 */
 	}
 
 	/**
-	 * Add the given filters.
-	 * @param filters the filters to add
+	 * Manipulate the "live" list of currently configured filters.
+	 * @param consumer the consumer to use
 	 */
-	public WebHttpHandlerBuilder filters(List<? extends WebFilter> filters) {
-		if (!ObjectUtils.isEmpty(filters)) {
-			this.filters.addAll(filters);
-		}
-		return this;
-	}
-
-	/**
-	 * Insert the given filter before other configured filters.
-	 * @param filter the filters to insert
-	 */
-	public WebHttpHandlerBuilder prependFilter(WebFilter filter) {
-		Assert.notNull(filter, "WebFilter is required");
-		this.filters.add(0, filter);
+	public WebHttpHandlerBuilder filters(Consumer<List<WebFilter>> consumer) {
+		consumer.accept(this.filters);
 		return this;
 	}
 
@@ -208,23 +198,11 @@ that's	 */
 	}
 
 	/**
-	 * Add the given exception handlers.
-	 * @param handlers the exception handlers
+	 * Manipulate the "live" list of currently configured exception handlers.
+	 * @param consumer the consumer to use
 	 */
-	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> handlers) {
-		if (!ObjectUtils.isEmpty(handlers)) {
-			this.exceptionHandlers.addAll(handlers);
-		}
-		return this;
-	}
-
-	/**
-	 * Insert the given exception handler before other configured handlers.
-	 * @param handler the exception handler to insert
-	 */
-	public WebHttpHandlerBuilder prependExceptionHandler(WebExceptionHandler handler) {
-		Assert.notNull(handler, "WebExceptionHandler is required");
-		this.exceptionHandlers.add(0, handler);
+	public WebHttpHandlerBuilder exceptionHandlers(Consumer<List<WebExceptionHandler>> consumer) {
+		consumer.accept(this.exceptionHandlers);
 		return this;
 	}
 
@@ -288,9 +266,9 @@ that's	 */
 
 	private static class SortedBeanContainer {
 
-		private List<WebFilter> filters;
+		private List<WebFilter> filters = Collections.emptyList();
 
-		private List<WebExceptionHandler> exceptionHandlers;
+		private List<WebExceptionHandler> exceptionHandlers = Collections.emptyList();
 
 
 		@Autowired(required = false)

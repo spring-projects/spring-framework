@@ -20,6 +20,8 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
+ * Simple extension of {@link AbstractMockServerSpec} that is given a target
+ * {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -51,23 +51,20 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 	@Override
 	public WebTestClient.Builder configureClient() {
 		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
-		filtersInReverse().forEach(builder::prependFilter);
+		builder.filters(currentFilters -> {
+			List<WebFilter> toPrepend = new ArrayList<>(this.filters);
+			Collections.reverse(toPrepend);
+			toPrepend.forEach(filter -> currentFilters.add(0, filter));
+		});
 		return new DefaultWebTestClientBuilder(builder.build());
 	}
 
 	/**
-	 * Sub-classes to create the {@code WebHttpHandlerBuilder} to use.
+	 * Sub-classes must create an {@code WebHttpHandlerBuilder} that will then
+	 * be used to create the HttpHandler for the mock server.
 	 */
 	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();
 
-	/**
-	 * Return the filters in reverse order for pre-pending.
-	 */
-	private List<WebFilter> filtersInReverse() {
-		List<WebFilter> result = new ArrayList<>(this.filters);
-		Collections.reverse(result);
-		return result;
-	}
 
 	@Override
 	public WebTestClient build() {

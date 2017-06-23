@@ -119,8 +119,8 @@ public class FilteringWebHandlerTests {
 		TestExceptionHandler exceptionHandler = new TestExceptionHandler();
 
 		WebHttpHandlerBuilder.webHandler(new StubWebHandler())
-				.filters(Collections.singletonList(new ExceptionFilter()))
-				.exceptionHandlers(Collections.singletonList(exceptionHandler)).build()
+				.filter(new ExceptionFilter())
+				.exceptionHandler(exceptionHandler).build()
 				.handle(request, response)
 				.block();
 

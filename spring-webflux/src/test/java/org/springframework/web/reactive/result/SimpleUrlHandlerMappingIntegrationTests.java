@@ -63,7 +63,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		wac.refresh();
 
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
-				.exceptionHandlers(Collections.singletonList(new ResponseStatusExceptionHandler()))
+				.exceptionHandler(new ResponseStatusExceptionHandler())
 				.build();
 	}
 
