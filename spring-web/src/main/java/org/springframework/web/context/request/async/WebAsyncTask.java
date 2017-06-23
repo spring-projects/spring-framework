@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	private BeanFactory beanFactory;
 
 	private Callable<V> timeoutCallback;
+
+	private Callable<V> errorCallback;
 
 	private Runnable completionCallback;
 
@@ -151,6 +153,18 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	}
 
 	/**
+	 * Register code to invoke when an error occurred while processing the async request.
+	 * <p>This method is called from a container thread when an error occurred while processing
+	 * an async request before the {@code Callable} has completed. The callback is executed in
+	 * the same thread and therefore should return without blocking. It may return
+	 * an alternative value to use, including an {@link Exception} or return
+	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 */
+	public void onError(Callable<V> callback) {
+		this.errorCallback = callback;
+	}
+
+	/**
 	 * Register code to invoke when the async request completes.
 	 * <p>This method is called from a container thread when an async request
 	 * completed for any reason, including timeout and network error.
@@ -164,6 +178,10 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 			@Override
 			public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 				return (timeoutCallback != null ? timeoutCallback.call() : CallableProcessingInterceptor.RESULT_NONE);
+			}
+			@Override
+			public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
+				return (errorCallback != null ? errorCallback.call() : CallableProcessingInterceptor.RESULT_NONE);
 			}
 			@Override
 			public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {

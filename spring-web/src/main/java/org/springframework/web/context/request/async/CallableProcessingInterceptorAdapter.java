@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,15 @@ public abstract class CallableProcessingInterceptorAdapter implements CallablePr
 	 */
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+		return RESULT_NONE;
+	}
+
+	/**
+	 * This implementation always returns
+	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 */
+	@Override
+	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
 		return RESULT_NONE;
 	}
 
