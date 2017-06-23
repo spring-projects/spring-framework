@@ -1,5 +1,5 @@
 buildscript {
-	ext.kotlinVersion = '1.1.2-5'
+	ext.kotlinVersion = '1.1.3'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
@@ -109,17 +109,15 @@ configure(allprojects) { project ->
 	apply from: "${gradleScriptDir}/ide.gradle"
 	apply from: "${gradleScriptDir}/sniffer.gradle"
 
-	if(!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-		compileKotlin {
-			kotlinOptions.jvmTarget = "1.8"
-			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+	apply plugin: "kotlin"
+	compileKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 
-		}
-		compileTestKotlin {
-			kotlinOptions.jvmTarget = "1.8"
-			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
-		}
+	}
+	compileTestKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 	}
 
 	configurations.all {
