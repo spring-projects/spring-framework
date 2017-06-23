@@ -50,6 +50,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -191,11 +192,19 @@ public interface WebTestClient {
 	interface MockServerSpec<B extends MockServerSpec<B>> {
 
 		/**
-		 * Register one or more {@link WebFilter} instances to apply to the
-		 * mock server.
+		 * Register {@link WebFilter} instances to add to the mock server.
 		 * @param filter one or more filters
 		 */
 		<T extends B> T webFilter(WebFilter... filter);
+
+		/**
+		 * Provide a session manager instance for the mock server.
+		 * <p>By default an instance of
+		 * {@link org.springframework.web.server.session.DefaultWebSessionManager
+		 * DefaultWebSessionManager} is used.
+		 * @param sessionManager the session manager to use
+		 */
+		<T extends B> T webSessionManager(WebSessionManager sessionManager);
 
 		/**
 		 * Shortcut for pre-packaged customizations to the mock server setup.
