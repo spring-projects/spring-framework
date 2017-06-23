@@ -204,6 +204,12 @@ public interface WebTestClient {
 		<T extends B> T webFilter(WebFilter... filter);
 
 		/**
+		 * Shortcut for pre-packaged customizations to the mock server setup.
+		 * @param configurer the configurer to apply
+		 */
+		<T extends B> T apply(MockServerConfigurer configurer);
+
+		/**
 		 * Proceed to configure and build the test client.
 		 */
 		Builder configureClient();

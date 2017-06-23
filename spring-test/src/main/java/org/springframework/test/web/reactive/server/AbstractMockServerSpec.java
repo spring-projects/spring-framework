@@ -35,10 +35,19 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 
 	private final List<WebFilter> filters = new ArrayList<>(4);
 
+	private final List<MockServerConfigurer> configurers = new ArrayList<>(4);
+
 
 	@Override
 	public <T extends B> T webFilter(WebFilter... filter) {
 		this.filters.addAll(Arrays.asList(filter));
+		return self();
+	}
+
+	@Override
+	public <T extends B> T apply(MockServerConfigurer configurer) {
+		configurer.afterConfigureAdded(this);
+		this.configurers.add(configurer);
 		return self();
 	}
 
@@ -47,15 +56,11 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		return (T) this;
 	}
 
-
 	@Override
 	public WebTestClient.Builder configureClient() {
 		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
-		builder.filters(currentFilters -> {
-			List<WebFilter> toPrepend = new ArrayList<>(this.filters);
-			Collections.reverse(toPrepend);
-			toPrepend.forEach(filter -> currentFilters.add(0, filter));
-		});
+		builder.filters(theFilters -> theFilters.addAll(0, this.filters));
+		this.configurers.forEach(configurer -> configurer.beforeServerCreated(builder));
 		return new DefaultWebTestClientBuilder(builder.build());
 	}
 
@@ -64,7 +69,6 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 	 * be used to create the HttpHandler for the mock server.
 	 */
 	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();
-
 
 	@Override
 	public WebTestClient build() {
