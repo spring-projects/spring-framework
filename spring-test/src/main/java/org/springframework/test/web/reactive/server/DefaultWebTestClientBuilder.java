@@ -146,7 +146,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				new HttpHandlerConnector(this.httpHandlerBuilder.build()));
 
 		DefaultWebTestClientBuilder webTestClientBuilder = new DefaultWebTestClientBuilder(
-				this.webClientBuilder.build().mutate(), this.httpHandlerBuilder,
+				this.webClientBuilder.cloneBuilder(), this.httpHandlerBuilder,
 				this.connector, this.responseTimeout);
 
 		return new DefaultWebTestClient(this.webClientBuilder,
