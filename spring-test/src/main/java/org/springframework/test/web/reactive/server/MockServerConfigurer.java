@@ -38,6 +38,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see WebTestClientConfigurer
  */
 public interface MockServerConfigurer {
 

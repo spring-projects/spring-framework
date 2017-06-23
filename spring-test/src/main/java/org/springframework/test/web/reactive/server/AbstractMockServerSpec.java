@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.web.server.WebFilter;
@@ -61,7 +60,7 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
 		builder.filters(theFilters -> theFilters.addAll(0, this.filters));
 		this.configurers.forEach(configurer -> configurer.beforeServerCreated(builder));
-		return new DefaultWebTestClientBuilder(builder.build());
+		return new DefaultWebTestClientBuilder(builder);
 	}
 
 	/**

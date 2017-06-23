@@ -71,15 +71,18 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final Duration timeout;
 
+	private final WebTestClient.Builder builder;
+
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
 	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector,
-			@Nullable Duration timeout) {
+			@Nullable Duration timeout, WebTestClient.Builder webTestClientBuilder) {
 		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
+		this.builder = webTestClientBuilder;
 	}
 
 
@@ -125,8 +128,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 	@Override
 	public Builder mutate() {
-		return new DefaultWebTestClientBuilder(this.wiretapConnector.getDelegate(),
-				this.webClient.mutate(), this.timeout);
+		return this.builder;
 	}
 
 	private <S extends RequestHeadersSpec<?>> UriSpec<S> toUriSpec(

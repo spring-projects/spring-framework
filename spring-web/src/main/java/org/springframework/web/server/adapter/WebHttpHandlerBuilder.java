@@ -96,6 +96,19 @@ public class WebHttpHandlerBuilder {
 		this.webHandler = webHandler;
 	}
 
+	/**
+	 * Copy constructor.
+	 */
+	private WebHttpHandlerBuilder(WebHttpHandlerBuilder other) {
+
+		this.webHandler = other.webHandler;
+		this.filters.addAll(other.filters);
+		this.exceptionHandlers.addAll(other.exceptionHandlers);
+		this.sessionManager = other.sessionManager;
+		this.codecConfigurer = other.codecConfigurer;
+		this.localeContextResolver = other.localeContextResolver;
+	}
+
 
 	/**
 	 * Static factory method to create a new builder instance.
@@ -261,6 +274,14 @@ public class WebHttpHandlerBuilder {
 		}
 
 		return adapted;
+	}
+
+	/**
+	 * Clone this {@link WebHttpHandlerBuilder}.
+	 * @return the cloned builder instance
+	 */
+	public WebHttpHandlerBuilder cloneBuilder() {
+		return new WebHttpHandlerBuilder(this);
 	}
 
 

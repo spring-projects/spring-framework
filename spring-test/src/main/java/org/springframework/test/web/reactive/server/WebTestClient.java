@@ -193,13 +193,7 @@ public interface WebTestClient {
 		/**
 		 * Register one or more {@link WebFilter} instances to apply to the
 		 * mock server.
-		 *
-		 * <p>This could be used for example to apply {@code ServerWebExchange}
-		 * transformations such as setting the Principal (for all requests or a
-		 * subset) via {@link ExchangeMutatorWebFilter}.
-		 *
 		 * @param filter one or more filters
-		 * @see ExchangeMutatorWebFilter
 		 */
 		<T extends B> T webFilter(WebFilter... filter);
 
@@ -380,6 +374,12 @@ public interface WebTestClient {
 		 */
 		Builder responseTimeout(Duration timeout);
 
+		/**
+		 *
+		 * @param configurer
+		 * @return
+		 */
+		Builder apply(WebTestClientConfigurer configurer);
 
 		/**
 		 * Build the {@link WebTestClient} instance.
