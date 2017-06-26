@@ -114,6 +114,12 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 		});
 	}
 
+	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
+			MonoProcessor<Void> completion) {
+
+		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
+	}
+
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
 		return ClientEndpointConfig.Builder.create()
 				.configurator(configurator)
@@ -121,14 +127,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 				.build();
 	}
 
-	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
-			MonoProcessor<Void> completion) {
-		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
-	}
-
 	protected DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
 	}
+
 
 	private static final class DefaultConfigurator extends Configurator {
 

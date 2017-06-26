@@ -34,15 +34,17 @@ import reactor.core.publisher.MonoProcessor;
  */
 public class TomcatWebSocketSession extends StandardWebSocketSession {
 
-	public TomcatWebSocketSession(Session session, HandshakeInfo info,
-			DataBufferFactory factory) {
+
+	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		super(session, info, factory);
 	}
 
-	public TomcatWebSocketSession(Session session, HandshakeInfo info,
-			DataBufferFactory factory, MonoProcessor<Void> completionMono) {
+	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			MonoProcessor<Void> completionMono) {
+
 		super(session, info, factory, completionMono);
 	}
+
 
 	@Override
 	protected boolean canSuspendReceiving() {

@@ -32,10 +32,12 @@ import reactor.core.publisher.MonoProcessor;
  */
 public class TomcatWebSocketClient extends StandardWebSocketClient {
 
+
 	@Override
 	protected StandardWebSocketSession createWebSocketSession(Session session,
 			HandshakeInfo info, MonoProcessor<Void> completion) {
-		return new TomcatWebSocketSession(session, info, bufferFactory(), completion);
+
+			return new TomcatWebSocketSession(session, info, bufferFactory(), completion);
 	}
 
 }
