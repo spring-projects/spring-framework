@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.util.concurrent;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -34,12 +35,8 @@ public class ListenableFutureTaskTests {
 	@Test
 	public void success() throws Exception {
 		final String s = "Hello World";
-		Callable<String> callable = new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return s;
-			}
-		};
+		Callable<String> callable = () -> s;
+
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
@@ -52,17 +49,19 @@ public class ListenableFutureTaskTests {
 			}
 		});
 		task.run();
+
+		assertSame(s, task.get());
+		assertSame(s, task.completable().get());
+		task.completable().thenAccept(v -> assertSame(s, v));
 	}
 
 	@Test
 	public void failure() throws Exception {
 		final String s = "Hello World";
-		Callable<String> callable = new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				throw new IOException(s);
-			}
+		Callable<String> callable = () -> {
+			throw new IOException(s);
 		};
+
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
@@ -75,12 +74,28 @@ public class ListenableFutureTaskTests {
 			}
 		});
 		task.run();
+
+		try {
+			task.get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertSame(s, ex.getCause().getMessage());
+		}
+		try {
+			task.completable().get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertSame(s, ex.getCause().getMessage());
+		}
 	}
 
 	@Test
 	public void successWithLambdas() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
+
 		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
 		FailureCallback failureCallback = mock(FailureCallback.class);
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
@@ -88,6 +103,10 @@ public class ListenableFutureTaskTests {
 		task.run();
 		verify(successCallback).onSuccess(s);
 		verifyZeroInteractions(failureCallback);
+
+		assertSame(s, task.get());
+		assertSame(s, task.completable().get());
+		task.completable().thenAccept(v -> assertSame(s, v));
 	}
 
 	@Test
@@ -97,6 +116,7 @@ public class ListenableFutureTaskTests {
 		Callable<String> callable = () -> {
 			throw ex;
 		};
+
 		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
 		FailureCallback failureCallback = mock(FailureCallback.class);
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
@@ -104,6 +124,21 @@ public class ListenableFutureTaskTests {
 		task.run();
 		verify(failureCallback).onFailure(ex);
 		verifyZeroInteractions(successCallback);
+
+		try {
+			task.get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex2) {
+			assertSame(s, ex2.getCause().getMessage());
+		}
+		try {
+			task.completable().get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex2) {
+			assertSame(s, ex2.getCause().getMessage());
+		}
 	}
 
 }

@@ -74,6 +74,12 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	}
 
 	@Override
+	public CompletableFuture<T> completable() {
+		return this.completableFuture;
+	}
+
+
+	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		return this.completableFuture.cancel(mayInterruptIfRunning);
 	}

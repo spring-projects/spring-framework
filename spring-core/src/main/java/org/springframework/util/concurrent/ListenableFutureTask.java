@@ -17,6 +17,7 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -63,6 +64,14 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
 		this.callbacks.addSuccessCallback(successCallback);
 		this.callbacks.addFailureCallback(failureCallback);
+	}
+
+	@Override
+	public CompletableFuture<T> completable() {
+		CompletableFuture<T> completable = new DelegatingCompletableFuture<>(this);
+		this.callbacks.addSuccessCallback(completable::complete);
+		this.callbacks.addFailureCallback(completable::completeExceptionally);
+		return completable;
 	}
 
 

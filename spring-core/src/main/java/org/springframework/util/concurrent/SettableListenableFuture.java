@@ -17,6 +17,7 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -68,6 +69,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 		return this.settableTask.setExceptionResult(exception);
 	}
 
+
 	@Override
 	public void addCallback(ListenableFutureCallback<? super T> callback) {
 		this.settableTask.addCallback(callback);
@@ -77,6 +79,12 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
 		this.settableTask.addCallback(successCallback, failureCallback);
 	}
+
+	@Override
+	public CompletableFuture<T> completable() {
+		return this.settableTask.completable();
+	}
+
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
