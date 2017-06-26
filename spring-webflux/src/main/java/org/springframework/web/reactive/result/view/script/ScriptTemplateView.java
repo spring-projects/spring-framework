@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -58,7 +59,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@link ScriptTemplateConfig} bean in the web application context and using
  * it to obtain the configured properties.
  *
- * <p>Nashorn Javascript engine requires Java 8+, and may require setting the
+ * <p>The Nashorn JavaScript engine requires Java 8+ and may require setting the
  * {@code sharedEngine} property to {@code false} in order to run properly. See
  * {@link ScriptTemplateConfigurer#setSharedEngine(Boolean)} for more details.
  *
@@ -76,8 +77,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private ScriptEngine engine;
 
 	private String engineName;
-
-	private Locale locale;
 
 	private Boolean sharedEngine;
 
@@ -121,13 +120,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setEngineName(String engineName) {
 		this.engineName = engineName;
-	}
-
-	/**
-	 * Set the {@link Locale} to pass to the render function.
-	 */
-	public void setLocale(Locale locale) {
-		this.locale = locale;
 	}
 
 	/**
@@ -312,8 +304,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					}
 				};
 
+				Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 				RenderingContext context = new RenderingContext(
-						obtainApplicationContext(), this.locale, templateLoader, url);
+						obtainApplicationContext(), locale, templateLoader, url);
 
 				Object html;
 				if (this.renderFunction == null) {

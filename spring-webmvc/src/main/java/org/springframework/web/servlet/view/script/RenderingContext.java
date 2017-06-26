@@ -40,6 +40,7 @@ public class RenderingContext {
 
 	public RenderingContext(ApplicationContext applicationContext, Locale locale,
 			Function<String, String> templateLoader, String url) {
+
 		this.applicationContext = applicationContext;
 		this.locale = locale;
 		this.templateLoader = templateLoader;
@@ -48,19 +49,19 @@ public class RenderingContext {
 
 
 	public ApplicationContext getApplicationContext() {
-		return applicationContext;
+		return this.applicationContext;
 	}
 
 	public Locale getLocale() {
-		return locale;
+		return this.locale;
 	}
 
 	public Function<String, String> getTemplateLoader() {
-		return templateLoader;
+		return this.templateLoader;
 	}
 
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 }

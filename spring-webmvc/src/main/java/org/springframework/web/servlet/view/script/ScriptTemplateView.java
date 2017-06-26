@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
@@ -59,7 +60,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * {@link ScriptTemplateConfig} bean in the web application context and using
  * it to obtain the configured properties.
  *
- * <p>Nashorn Javascript engine requires Java 8+, and may require setting the
+ * <p>The Nashorn JavaScript engine requires Java 8+ and may require setting the
  * {@code sharedEngine} property to {@code false} in order to run properly. See
  * {@link ScriptTemplateConfigurer#setSharedEngine(Boolean)} for more details.
  *
@@ -85,8 +86,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private ScriptEngine engine;
 
 	private String engineName;
-
-	private Locale locale;
 
 	private Boolean sharedEngine;
 
@@ -128,14 +127,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setEngine(ScriptEngine engine) {
 		this.engine = engine;
-	}
-
-	/**
-	 * Set the {@link Locale} to pass to the render function.
-	 * @since 5.0
-	 */
-	public void setLocale(Locale locale) {
-		this.locale = locale;
 	}
 
 	/**
@@ -362,6 +353,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			String url = getUrl();
 			Assert.state(url != null, "'url' not set");
 			String template = getTemplate(url);
+
 			Function<String, String> templateLoader = path -> {
 				try {
 					return getTemplate(path);
@@ -370,7 +362,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					throw new IllegalStateException(ex);
 				}
 			};
-			RenderingContext context = new RenderingContext(obtainApplicationContext(), this.locale, templateLoader, url);
+
+			Locale locale = RequestContextUtils.getLocale(request);
+			RenderingContext context = new RenderingContext(obtainApplicationContext(), locale, templateLoader, url);
 
 			Object html;
 			if (this.renderFunction == null) {

@@ -94,9 +94,9 @@ public class KotlinScriptTemplateTests {
 
 	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
-		view.setLocale(locale);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addPreferredLocale(locale);
 		view.renderMergedOutputModel(model, request, response);
 		return response;
 	}
