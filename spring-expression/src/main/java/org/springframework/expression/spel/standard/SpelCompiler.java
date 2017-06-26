@@ -90,14 +90,13 @@ public class SpelCompiler implements Opcodes {
 
 
 	/**
-	 * Attempt compilation of the supplied expression. A check is
-	 * made to see if it is compilable before compilation proceeds. The
-	 * check involves visiting all the nodes in the expression Ast and
-	 * ensuring enough state is known about them that bytecode can
-	 * be generated for them.
+	 * Attempt compilation of the supplied expression. A check is made to see
+	 * if it is compilable before compilation proceeds. The check involves
+	 * visiting all the nodes in the expression Ast and ensuring enough state
+	 * is known about them that bytecode can be generated for them.
 	 * @param expression the expression to compile
-	 * @return an instance of the class implementing the compiled expression, or null
-	 * if compilation is not possible
+	 * @return an instance of the class implementing the compiled expression,
+	 * or {@code null} if compilation is not possible
 	 */
 	@Nullable
 	public CompiledExpression compile(SpelNodeImpl expression) {
@@ -193,7 +192,6 @@ public class SpelCompiler implements Opcodes {
 	 * because they anchor compiled classes in memory and prevent GC.  If you have expressions
 	 * continually recompiling over time then by replacing the classloader periodically
 	 * at least some of the older variants can be garbage collected.
-	 * 
 	 * @param name name of the class
 	 * @param bytes bytecode for the class
 	 * @return the Class object for the compiled expression
