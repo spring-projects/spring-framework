@@ -93,7 +93,7 @@ configure(allprojects) { project ->
 	ext.snakeyamlVersion       = "1.18"
 	ext.testngVersion          = "6.11"
 	ext.tiles3Version          = "3.0.7"
-	ext.tomcatVersion          = "8.5.15"
+	ext.tomcatVersion          = "8.5.16"
 	ext.tyrusVersion           = "1.13.1"
 	ext.undertowVersion        = "1.4.16.Final"
 	ext.websocketVersion       = "1.1"
