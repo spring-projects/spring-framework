@@ -18,10 +18,10 @@ package org.springframework.http.codec.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -46,14 +46,16 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s. That is, given
- * the following XML:
+ * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s.
+ * That is, given the following XML:
+ *
  * <pre>{@code
  * <root>
  *     <child>foo</child>
  *     <child>bar</child>
  * </root>}
  * </pre>
+ *
  * this method with result in a flux with the following events:
  * <ol>
  * <li>{@link javax.xml.stream.events.StartDocument}</li>
@@ -75,12 +77,12 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
+	private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+
 	private static final boolean aaltoPresent = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
 
-	private static final XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-
-	boolean useAalto = true;
+	boolean useAalto = aaltoPresent;
 
 
 	public XmlEventDecoder() {
@@ -89,12 +91,12 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"rawtypes", "unchecked"})  // on JDK 9 where XMLEventReader is Iterator<Object>
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
-		if (useAalto && aaltoPresent) {
+		if (useAalto) {
 			return flux.flatMap(new AaltoDataBufferToXmlEvent());
 		}
 		else {
@@ -103,7 +105,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 					flatMapMany(dataBuffer -> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
-							XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
+							Iterator eventReader = inputFactory.createXMLEventReader(is);
 							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader);
 						}
 						catch (XMLStreamException ex) {
@@ -127,8 +129,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		private final AsyncXMLStreamReader<AsyncByteBufferFeeder> streamReader =
 				inputFactory.createAsyncForByteBuffer();
 
-		private final XMLEventAllocator eventAllocator =
-				EventAllocatorImpl.getDefaultInstance();
+		private final XMLEventAllocator eventAllocator = EventAllocatorImpl.getDefaultInstance();
 
 		@Override
 		public Publisher<? extends XMLEvent> apply(DataBuffer dataBuffer) {

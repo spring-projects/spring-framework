@@ -581,13 +581,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
-		private final boolean needsToBeMadeAccessible;
-
 		OptimalPropertyAccessor(InvokerPair target) {
 			this.member = target.member;
 			this.typeDescriptor = target.typeDescriptor;
-			this.needsToBeMadeAccessible = (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
@@ -625,9 +621,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (this.member instanceof Method) {
 				Method method = (Method) this.member;
 				try {
-					if (this.needsToBeMadeAccessible && !method.isAccessible()) {
-						method.setAccessible(true);
-					}
+					ReflectionUtils.makeAccessible(method);
 					Object value = method.invoke(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
@@ -638,9 +632,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			else {
 				Field field = (Field) this.member;
 				try {
-					if (this.needsToBeMadeAccessible && !field.isAccessible()) {
-						field.setAccessible(true);
-					}
+					ReflectionUtils.makeAccessible(field);
 					Object value = field.get(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
