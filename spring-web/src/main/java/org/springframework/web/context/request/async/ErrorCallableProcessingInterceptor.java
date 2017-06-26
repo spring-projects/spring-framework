@@ -27,7 +27,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Violeta Georgieva
  * @since 5.0
  */
-class ErrorCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+class ErrorCallableProcessingInterceptor implements CallableProcessingInterceptor {
 
 	@Override
 	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {

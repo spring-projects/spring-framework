@@ -25,11 +25,12 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class ErrorDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
+public class ErrorDeferredResultProcessingInterceptor implements DeferredResultProcessingInterceptor {
 
 	@Override
 	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> result, Throwable t)
 			throws Exception {
+
 		result.setErrorResult(t);
 		return false;
 	}

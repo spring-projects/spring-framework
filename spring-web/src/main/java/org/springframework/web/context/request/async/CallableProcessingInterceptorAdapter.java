@@ -27,7 +27,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @since 3.2
+ * @deprecated as of 5.0 where CallableProcessingInterceptor has default methods
  */
+@Deprecated
 public abstract class CallableProcessingInterceptorAdapter implements CallableProcessingInterceptor {
 
 	/**

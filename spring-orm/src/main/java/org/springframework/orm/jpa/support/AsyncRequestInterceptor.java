@@ -26,7 +26,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 
@@ -41,7 +41,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  * @author Rossen Stoyanchev
  * @since 3.2.5
  */
-class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter implements DeferredResultProcessingInterceptor {
+class AsyncRequestInterceptor implements CallableProcessingInterceptor, DeferredResultProcessingInterceptor {
 
 	private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
 
@@ -102,18 +102,6 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 
 
 	// Implementation of DeferredResultProcessingInterceptor methods
-
-	@Override
-	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) {
-	}
-
-	@Override
-	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) {
-	}
-
-	@Override
-	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object result) {
-	}
 
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {

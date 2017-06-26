@@ -35,7 +35,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class TimeoutDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
+public class TimeoutDeferredResultProcessingInterceptor implements DeferredResultProcessingInterceptor {
 
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {

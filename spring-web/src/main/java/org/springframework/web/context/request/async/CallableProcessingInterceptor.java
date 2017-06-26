@@ -45,9 +45,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public interface CallableProcessingInterceptor {
 
-	static final Object RESULT_NONE = new Object();
+	Object RESULT_NONE = new Object();
 
-	static final Object RESPONSE_HANDLED = new Object();
+	Object RESPONSE_HANDLED = new Object();
 
 	/**
 	 * Invoked <em>before</em> the start of concurrent handling in the original
@@ -62,7 +62,8 @@ public interface CallableProcessingInterceptor {
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
 	 */
-	<T> void  beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception;
+	default <T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception {
+	}
 
 	/**
 	 * Invoked <em>after</em> the start of concurrent handling in the async
@@ -72,7 +73,8 @@ public interface CallableProcessingInterceptor {
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
 	 */
-	<T> void preProcess(NativeWebRequest request, Callable<T> task) throws Exception;
+	default <T> void preProcess(NativeWebRequest request, Callable<T> task) throws Exception {
+	}
 
 	/**
 	 * Invoked <em>after</em> the {@code Callable} has produced a result in the
@@ -85,7 +87,9 @@ public interface CallableProcessingInterceptor {
 	 * be a {@link Throwable} if the {@code Callable} raised an exception
 	 * @throws Exception in case of errors
 	 */
-	<T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) throws Exception;
+	default <T> void postProcess(NativeWebRequest request, Callable<T> task,
+			Object concurrentResult) throws Exception {
+	}
 
 	/**
 	 * Invoked from a container thread when the async request times out before
@@ -99,7 +103,9 @@ public interface CallableProcessingInterceptor {
 	 * is resumed and subsequent interceptors are not invoked
 	 * @throws Exception in case of errors
 	 */
-	<T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception;
+	default <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+		return RESULT_NONE;
+	}
 
 	/**
 	 * Invoked from a container thread when an error occurred while processing
@@ -115,7 +121,9 @@ public interface CallableProcessingInterceptor {
 	 * @throws Exception in case of errors
 	 * @since 5.0
 	 */
-	<T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception;
+	default <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
+		return RESULT_NONE;
+	}
 
 	/**
 	 * Invoked from a container thread when async processing completes for any
@@ -124,6 +132,7 @@ public interface CallableProcessingInterceptor {
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
 	 */
-	<T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception;
+	default <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
+	}
 
 }
