@@ -29,11 +29,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of the {@link DataBuffer} interface that uses a {@link
- * ByteBuffer} internally, with separate read and write positions. Constructed
- * using the {@link DefaultDataBufferFactory}.
+ * Default implementation of the {@link DataBuffer} interface that uses a
+ * {@link ByteBuffer} internally, with separate read and write positions.
+ * Constructed using the {@link DefaultDataBufferFactory}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.0
  * @see DefaultDataBufferFactory
  */
@@ -304,15 +305,16 @@ public class DefaultDataBuffer implements DataBuffer {
 				(oldBuffer.isDirect() ? ByteBuffer.allocateDirect(capacity) :
 						ByteBuffer.allocate(capacity));
 
-		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
 		final int remaining = readableByteCount();
+		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
 		((Buffer) oldBuffer).position(this.readPosition).limit(this.writePosition);
 		newBuffer.put(oldBuffer);
 
 		this.byteBuffer = newBuffer;
 		this.readPosition = 0;
 		this.writePosition = remaining;
-		oldBuffer.clear();
+		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+		((Buffer) oldBuffer).clear();
 	}
 
 
