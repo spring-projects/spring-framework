@@ -154,11 +154,13 @@ public class DeferredResult<T> {
 	}
 
 	/**
-	 * Register code to invoke when an error occurred while processing the async request.
-	 * <p>This method is called from a container thread when  an error occurred while
-	 * processing an async request before the {@code DeferredResult} has been populated.
-	 * It may invoke {@link DeferredResult#setResult setResult} or
-	 * {@link DeferredResult#setErrorResult setErrorResult} to resume processing.
+	 * Register code to invoke when an error occurred during the async request.
+	 * <p>This method is called from a container thread when an error occurs
+	 * while processing an async request before the {@code DeferredResult} has
+	 * been populated. It may invoke {@link DeferredResult#setResult setResult}
+	 * or {@link DeferredResult#setErrorResult setErrorResult} to resume
+	 * processing.
+	 * @since 5.0
 	 */
 	public void onError(Consumer<Throwable> callback) {
 		this.errorCallback = callback;

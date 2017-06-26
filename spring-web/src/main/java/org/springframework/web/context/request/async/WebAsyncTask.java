@@ -153,12 +153,14 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	}
 
 	/**
-	 * Register code to invoke when an error occurred while processing the async request.
-	 * <p>This method is called from a container thread when an error occurred while processing
-	 * an async request before the {@code Callable} has completed. The callback is executed in
-	 * the same thread and therefore should return without blocking. It may return
-	 * an alternative value to use, including an {@link Exception} or return
+	 * Register code to invoke for an error during async request processing.
+	 * <p>This method is called from a container thread when an error occurred
+	 * while processing an async request before the {@code Callable} has
+	 * completed. The callback is executed in the same thread and therefore
+	 * should return without blocking. It may return an alternative value to
+	 * use, including an {@link Exception} or return
 	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 * @since 5.0
 	 */
 	public void onError(Callable<V> callback) {
 		this.errorCallback = callback;

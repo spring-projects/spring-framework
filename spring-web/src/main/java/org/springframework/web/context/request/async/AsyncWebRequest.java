@@ -46,6 +46,7 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	/**
 	 * Add a handler to invoke when an error occurred while concurrent
 	 * handling of a request.
+	 * @since 5.0
 	 */
 	void addErrorHandler(Consumer<Throwable> exceptionHandler);
 

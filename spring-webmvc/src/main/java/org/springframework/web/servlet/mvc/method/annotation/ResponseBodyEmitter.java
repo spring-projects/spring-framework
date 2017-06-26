@@ -217,9 +217,10 @@ public class ResponseBodyEmitter {
 	}
 
 	/**
-	 * Register code to invoke when an error occurred while processing the async request.
-	 * This method is called from a container thread when an error occurred while processing
-	 * an async request.
+	 * Register code to invoke for an error during async request processing.
+	 * This method is called from a container thread when an error occurred
+	 * while processing an async request.
+	 * @since 5.0
 	 */
 	public synchronized void onError(Consumer<Throwable> callback) {
 		this.errorCallback.setDelegate(callback);
