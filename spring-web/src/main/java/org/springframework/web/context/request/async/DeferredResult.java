@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.context.request.async;
 
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +61,8 @@ public class DeferredResult<T> {
 	private final Object timeoutResult;
 
 	private Runnable timeoutCallback;
+
+	private Consumer<Throwable> errorCallback;
 
 	private Runnable completionCallback;
 
@@ -148,6 +151,17 @@ public class DeferredResult<T> {
 	 */
 	public void onTimeout(Runnable callback) {
 		this.timeoutCallback = callback;
+	}
+
+	/**
+	 * Register code to invoke when an error occurred while processing the async request.
+	 * <p>This method is called from a container thread when  an error occurred while
+	 * processing an async request before the {@code DeferredResult} has been populated.
+	 * It may invoke {@link DeferredResult#setResult setResult} or
+	 * {@link DeferredResult#setErrorResult setErrorResult} to resume processing.
+	 */
+	public void onError(Consumer<Throwable> callback) {
+		this.errorCallback = callback;
 	}
 
 	/**
@@ -270,6 +284,25 @@ public class DeferredResult<T> {
 						catch (Throwable ex) {
 							logger.debug("Failed to handle timeout result", ex);
 						}
+					}
+				}
+				return continueProcessing;
+			}
+			@Override
+			public <S> boolean handleError(NativeWebRequest request, DeferredResult<S> deferredResult, Throwable t) {
+				boolean continueProcessing = true;
+				try {
+					if (errorCallback != null) {
+						errorCallback.accept(t);
+					}
+				}
+				finally {
+					continueProcessing = false;
+					try {
+						setResultInternal(t);
+					}
+					catch (Throwable ex) {
+						logger.debug("Failed to handle error result", ex);
 					}
 				}
 				return continueProcessing;

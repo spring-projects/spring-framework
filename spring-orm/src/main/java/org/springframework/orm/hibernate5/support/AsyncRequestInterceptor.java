@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  *
  * Ensures the following:
  * 1) The session is bound/unbound when "callable processing" is started
- * 2) The session is closed if an async request times out
+ * 2) The session is closed if an async request times out or an error occurred
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -50,6 +50,8 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	private final SessionHolder sessionHolder;
 
 	private volatile boolean timeoutInProgress;
+
+	private volatile boolean errorInProgress;
 
 
 	public AsyncRequestInterceptor(SessionFactory sessionFactory, SessionHolder sessionHolder) {
@@ -65,6 +67,7 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 
 	public void bindSession() {
 		this.timeoutInProgress = false;
+		this.errorInProgress = false;
 		TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 	}
 
@@ -80,13 +83,19 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	}
 
 	@Override
-	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
-		closeAfterTimeout();
+	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) {
+		this.errorInProgress = true;
+		return RESULT_NONE;  // give other interceptors a chance to handle the error
 	}
 
-	private void closeAfterTimeout() {
-		if (this.timeoutInProgress) {
-			logger.debug("Closing Hibernate Session after async request timeout");
+	@Override
+	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
+		closeSession();
+	}
+
+	private void closeSession() {
+		if (this.timeoutInProgress || this.errorInProgress) {
+			logger.debug("Closing Hibernate Session after async request timeout/error");
 			SessionFactoryUtils.closeSession(this.sessionHolder.getSession());
 		}
 	}
@@ -113,8 +122,14 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	}
 
 	@Override
+	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) {
+		this.errorInProgress = true;
+		return true;  // give other interceptors a chance to handle the error
+	}
+
+	@Override
 	public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) {
-		closeAfterTimeout();
+		closeSession();
 	}
 
 }

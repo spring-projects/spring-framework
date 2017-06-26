@@ -36,7 +36,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  *
  * Ensures the following:
  * 1) The session is bound/unbound when "callable processing" is started
- * 2) The session is closed if an async request times out
+ * 2) The session is closed if an async request times out or an error occurred
  *
  * @author Rossen Stoyanchev
  * @since 3.2.5
@@ -50,6 +50,8 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	private final EntityManagerHolder emHolder;
 
 	private volatile boolean timeoutInProgress;
+
+	private volatile boolean errorInProgress;
 
 
 	public AsyncRequestInterceptor(EntityManagerFactory emFactory, EntityManagerHolder emHolder) {
@@ -65,6 +67,7 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 
 	public void bindEntityManager() {
 		this.timeoutInProgress = false;
+		this.errorInProgress = false;
 		TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
 	}
 
@@ -80,13 +83,19 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	}
 
 	@Override
-	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
-		closeAfterTimeout();
+	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) {
+		this.errorInProgress = true;
+		return RESULT_NONE;  // give other interceptors a chance to handle the error
 	}
 
-	private void closeAfterTimeout() {
-		if (this.timeoutInProgress) {
-			logger.debug("Closing JPA EntityManager after async request timeout");
+	@Override
+	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
+		closeEntityManager();
+	}
+
+	private void closeEntityManager() {
+		if (this.timeoutInProgress || this.errorInProgress) {
+			logger.debug("Closing JPA EntityManager after async request timeout/error");
 			EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 		}
 	}
@@ -113,8 +122,14 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter imple
 	}
 
 	@Override
+	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) {
+		this.errorInProgress = true;
+		return true;  // give other interceptors a chance to handle the error
+	}
+
+	@Override
 	public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) {
-		closeAfterTimeout();
+		closeEntityManager();
 	}
 
 }

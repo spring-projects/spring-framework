@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -378,6 +379,10 @@ public class ReactiveTypeHandlerTests {
 
 		@Override
 		public void onTimeout(Runnable callback) {
+		}
+
+		@Override
+		public void onError(Consumer<Throwable> callback) {
 		}
 
 		@Override
