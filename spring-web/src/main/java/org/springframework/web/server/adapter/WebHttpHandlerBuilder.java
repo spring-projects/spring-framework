@@ -280,7 +280,8 @@ public class WebHttpHandlerBuilder {
 	 * Clone this {@link WebHttpHandlerBuilder}.
 	 * @return the cloned builder instance
 	 */
-	public WebHttpHandlerBuilder cloneBuilder() {
+	@Override
+	public WebHttpHandlerBuilder clone() {
 		return new WebHttpHandlerBuilder(this);
 	}
 

@@ -384,9 +384,8 @@ public interface WebTestClient {
 		Builder responseTimeout(Duration timeout);
 
 		/**
-		 *
-		 * @param configurer
-		 * @return
+		 * Shortcut for pre-packaged customizations to WebTestClient builder.
+		 * @param configurer the configurer to apply
 		 */
 		Builder apply(WebTestClientConfigurer configurer);
 

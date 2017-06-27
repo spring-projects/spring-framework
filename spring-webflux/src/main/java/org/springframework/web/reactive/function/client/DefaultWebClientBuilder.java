@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,11 +89,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	public WebClient.Builder baseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
 		return this;
-	}
-
-	@Override
-	public WebClient.Builder cloneBuilder() {
-		return new DefaultWebClientBuilder(this);
 	}
 
 	@Override
@@ -226,10 +220,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 		}
 	}
 
-	private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
-		return Collections.unmodifiableList(new ArrayList<>(list));
-	}
-
 	private UriBuilderFactory initUriBuilderFactory() {
 		if (this.uriBuilderFactory != null) {
 			return this.uriBuilderFactory;
@@ -252,6 +242,11 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 		else {
 			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
 		}
+	}
+
+	@Override
+	public WebClient.Builder clone() {
+		return new DefaultWebClientBuilder(this);
 	}
 
 }

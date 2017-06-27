@@ -66,7 +66,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				"Either WebHttpHandlerBuilder or ClientHttpConnector must be provided");
 
 		this.webClientBuilder = (webClientBuilder != null ? webClientBuilder : WebClient.builder());
-		this.httpHandlerBuilder = (httpHandlerBuilder != null ? httpHandlerBuilder.cloneBuilder() : null);
+		this.httpHandlerBuilder = (httpHandlerBuilder != null ? httpHandlerBuilder.clone() : null);
 		this.connector = connector;
 		this.responseTimeout = responseTimeout;
 	}
@@ -146,7 +146,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				new HttpHandlerConnector(this.httpHandlerBuilder.build()));
 
 		DefaultWebTestClientBuilder webTestClientBuilder = new DefaultWebTestClientBuilder(
-				this.webClientBuilder.cloneBuilder(), this.httpHandlerBuilder,
+				this.webClientBuilder.clone(), this.httpHandlerBuilder,
 				this.connector, this.responseTimeout);
 
 		return new DefaultWebTestClient(this.webClientBuilder,

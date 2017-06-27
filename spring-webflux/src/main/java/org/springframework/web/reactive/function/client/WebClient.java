@@ -193,11 +193,6 @@ public interface WebClient {
 		Builder baseUrl(String baseUrl);
 
 		/**
-		 * Clone this {@code WebClient.Builder}
-		 */
-		Builder cloneBuilder();
-
-		/**
 		 * Configure default URI variable values that will be used when expanding
 		 * URI templates using a {@link Map}.
 		 * @param defaultUriVariables the default values to use
@@ -309,6 +304,11 @@ public interface WebClient {
 		 * Builder the {@link WebClient} instance.
 		 */
 		WebClient build();
+
+		/**
+		 * Clone this {@code WebClient.Builder}
+		 */
+		Builder clone();
 
 	}
 
