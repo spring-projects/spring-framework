@@ -31,35 +31,31 @@ public class DefaultRequestPathTests {
 	@Test
 	public void requestPath() throws Exception {
 		// basic
-		testRequestPath("/app/a/b/c", "/app", "/a/b/c", false, true, false);
+		testRequestPath("/app/a/b/c", "/app", "/a/b/c");
 
 		// no context path
-		testRequestPath("/a/b/c", "", "/a/b/c", false, true, false);
+		testRequestPath("/a/b/c", "", "/a/b/c");
 
 		// context path only
-		testRequestPath("/a/b", "/a/b", "", false, true, false);
+		testRequestPath("/a/b", "/a/b", "");
 
 		// root path
-		testRequestPath("/", "", "/", false, true, false);
+		testRequestPath("/", "", "/");
 
 		// empty path
-		testRequestPath("", "", "", true, false, false);
-		testRequestPath("", "/", "", true, false, false);
+		testRequestPath("", "", "");
+		testRequestPath("", "/", "");
 
 		// trailing slash
-		testRequestPath("/app/a/", "/app", "/a/", false, true, true);
-		testRequestPath("/app/a//", "/app", "/a//", false, true, true);
+		testRequestPath("/app/a/", "/app", "/a/");
+		testRequestPath("/app/a//", "/app", "/a//");
 	}
 
-	private void testRequestPath(String fullPath, String contextPath, String pathWithinApplication,
-			boolean empty, boolean absolute, boolean trailingSlash) {
+	private void testRequestPath(String fullPath, String contextPath, String pathWithinApplication) {
 
 		URI uri = URI.create("http://localhost:8080" + fullPath);
 		RequestPath requestPath = new DefaultRequestPath(uri, contextPath, UTF_8);
 
-		assertEquals(empty, requestPath.isEmpty());
-		assertEquals(absolute, requestPath.isAbsolute());
-		assertEquals(trailingSlash, requestPath.hasTrailingSlash());
 		assertEquals(contextPath.equals("/") ? "" : contextPath, requestPath.contextPath().value());
 		assertEquals(pathWithinApplication, requestPath.pathWithinApplication().value());
 	}

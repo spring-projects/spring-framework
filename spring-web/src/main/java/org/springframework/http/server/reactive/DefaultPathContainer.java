@@ -30,41 +30,28 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementations of {@link PathSegmentContainer} and {@link PathSegment}.
+ * Default implementation of {@link PathContainer}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultPathSegmentContainer implements PathSegmentContainer {
+class DefaultPathContainer implements PathContainer {
 
 	private static final MultiValueMap<String, String> EMPTY_MAP = new LinkedMultiValueMap<>(0);
 
-	private static final PathSegment EMPTY_PATH_SEGMENT = new DefaultPathSegment("", "", "", EMPTY_MAP);
+	private static final PathContainer EMPTY_PATH = new DefaultPathContainer("", Collections.emptyList());
 
-	static final PathSegmentContainer EMPTY_PATH =
-			new DefaultPathSegmentContainer("", Collections.emptyList());
-
-	private static final PathSegmentContainer ROOT_PATH =
-			new DefaultPathSegmentContainer("/", Collections.emptyList());
+	private static final PathContainer.Separator SEPARATOR = () -> "/";
 
 
 	private final String path;
 
-	private final boolean empty;
-
-	private final boolean absolute;
-
-	private final List<PathSegment> pathSegments;
-
-	private final boolean trailingSlash;
+	private final List<Element> elements;
 
 
-	private DefaultPathSegmentContainer(String path, List<PathSegment> segments) {
+	private DefaultPathContainer(String path, List<Element> elements) {
 		this.path = path;
-		this.absolute = path.startsWith("/");
-		this.pathSegments = Collections.unmodifiableList(segments);
-		this.trailingSlash = path.endsWith("/") && path.length() > 1;
-		this.empty = !this.absolute && !this.trailingSlash && segments.stream().allMatch(PathSegment::isEmpty);
+		this.elements = Collections.unmodifiableList(elements);
 	}
 
 
@@ -74,23 +61,8 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return this.empty;
-	}
-
-	@Override
-	public boolean isAbsolute() {
-		return this.absolute;
-	}
-
-	@Override
-	public List<PathSegment> pathSegments() {
-		return this.pathSegments;
-	}
-
-	@Override
-	public boolean hasTrailingSlash() {
-		return this.trailingSlash;
+	public List<Element> elements() {
+		return this.elements;
 	}
 
 
@@ -102,7 +74,7 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		return this.path.equals(((DefaultPathSegmentContainer) other).path);
+		return this.path.equals(((DefaultPathContainer) other).path);
 	}
 
 	@Override
@@ -116,32 +88,35 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 	}
 
 
-	static PathSegmentContainer parsePath(String path, Charset charset) {
-		path = StringUtils.hasText(path) ? path : "";
-		if ("".equals(path)) {
+	static PathContainer parsePath(String path, Charset charset) {
+		if (path.equals("")) {
 			return EMPTY_PATH;
 		}
-		if ("/".equals(path)) {
-			return ROOT_PATH;
+		List<Element> elements = new ArrayList<>();
+		int begin;
+		if (path.length() > 0 && path.charAt(0) == '/') {
+			begin = 1;
+			elements.add(SEPARATOR);
 		}
-		List<PathSegment> result = new ArrayList<>();
-		int begin = (path.charAt(0) == '/' ? 1 : 0);
+		else {
+			begin = 0;
+		}
 		while (begin < path.length()) {
 			int end = path.indexOf('/', begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
-			result.add(parsePathSegment(segment, charset));
+			if (!segment.equals("")) {
+				elements.add(parsePathSegment(segment, charset));
+			}
 			if (end == -1) {
 				break;
 			}
+			elements.add(SEPARATOR);
 			begin = end + 1;
 		}
-		return new DefaultPathSegmentContainer(path, result);
+		return new DefaultPathContainer(path, elements);
 	}
 
-	static PathSegment parsePathSegment(String input, Charset charset) {
-		if ("".equals(input)) {
-			return EMPTY_PATH_SEGMENT;
-		}
+	private static PathContainer.Segment parsePathSegment(String input, Charset charset) {
 		int index = input.indexOf(';');
 		if (index == -1) {
 			String inputDecoded = StringUtils.uriDecode(input, charset);
@@ -191,9 +166,9 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 		}
 	}
 
-	static PathSegmentContainer subPath(PathSegmentContainer container, int fromIndex, int toIndex) {
-		List<PathSegment> segments = container.pathSegments();
-		if (fromIndex == 0 && toIndex == segments.size()) {
+	static PathContainer subPath(PathContainer container, int fromIndex, int toIndex) {
+		List<Element> elements = container.elements();
+		if (fromIndex == 0 && toIndex == elements.size()) {
 			return container;
 		}
 		if (fromIndex == toIndex) {
@@ -201,26 +176,22 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 		}
 
 		Assert.isTrue(fromIndex < toIndex, "fromIndex: " + fromIndex + " should be < toIndex " + toIndex);
-		Assert.isTrue(fromIndex >= 0 && fromIndex < segments.size(), "Invalid fromIndex: " + fromIndex);
-		Assert.isTrue(toIndex >= 0 && toIndex <= segments.size(), "Invalid toIndex: " + toIndex);
+		Assert.isTrue(fromIndex >= 0 && fromIndex < elements.size(), "Invalid fromIndex: " + fromIndex);
+		Assert.isTrue(toIndex >= 0 && toIndex <= elements.size(), "Invalid toIndex: " + toIndex);
 
-		List<PathSegment> subList = segments.subList(fromIndex, toIndex);
-		String prefix = fromIndex > 0 || container.isAbsolute() ? "/" : "";
-		String suffix = toIndex == segments.size() && container.hasTrailingSlash() ? "/" : "";
-		String path = subList.stream().map(PathSegment::value).collect(Collectors.joining(prefix, "/", suffix));
-		return new DefaultPathSegmentContainer(path, subList);
+		List<Element> subList = elements.subList(fromIndex, toIndex);
+		String path = subList.stream().map(Element::value).collect(Collectors.joining(""));
+		return new DefaultPathContainer(path, subList);
 	}
 
 
-	private static class DefaultPathSegment implements PathSegment {
+	private static class DefaultPathSegment implements PathContainer.Segment {
 
 		private final String value;
 
 		private final String valueDecoded;
 
-		private final char[] valueCharsDecoded;
-
-		private final boolean empty;
+		private final char[] valueDecodedChars;
 
 		private final String semicolonContent;
 
@@ -232,8 +203,7 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 			Assert.isTrue(!value.contains("/"), "Invalid path segment value: " + value);
 			this.value = value;
 			this.valueDecoded = valueDecoded;
-			this.valueCharsDecoded = valueDecoded.toCharArray();
-			this.empty = !StringUtils.hasText(this.valueDecoded);
+			this.valueDecodedChars = valueDecoded.toCharArray();
 			this.semicolonContent = semicolonContent;
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
@@ -249,13 +219,8 @@ class DefaultPathSegmentContainer implements PathSegmentContainer {
 		}
 
 		@Override
-		public char[] valueCharsDecoded() {
-			return this.valueCharsDecoded;
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return this.empty;
+		public char[] valueDecodedChars() {
+			return this.valueDecodedChars;
 		}
 
 		@Override

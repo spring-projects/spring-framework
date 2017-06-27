@@ -21,7 +21,7 @@ package org.springframework.http.server.reactive;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface RequestPath extends PathSegmentContainer {
+public interface RequestPath extends PathContainer {
 
 	/**
 	 * Returns the portion of the URL path that represents the application.
@@ -31,11 +31,11 @@ public interface RequestPath extends PathSegmentContainer {
 	 * when deploying as a WAR to a Servlet container or it may also be assigned
 	 * through the use of {@link ContextPathCompositeHandler} or both.
 	 */
-	PathSegmentContainer contextPath();
+	PathContainer contextPath();
 
 	/**
 	 * The portion of the request path after the context path.
 	 */
-	PathSegmentContainer pathWithinApplication();
+	PathContainer pathWithinApplication();
 
 }

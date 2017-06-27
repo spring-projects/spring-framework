@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -32,15 +33,15 @@ import org.springframework.util.StringUtils;
  */
 class DefaultRequestPath implements RequestPath {
 
-	private final PathSegmentContainer fullPath;
+	private final PathContainer fullPath;
 
-	private final PathSegmentContainer contextPath;
+	private final PathContainer contextPath;
 
-	private final PathSegmentContainer pathWithinApplication;
+	private final PathContainer pathWithinApplication;
 
 
 	DefaultRequestPath(URI uri, @Nullable String contextPath, Charset charset) {
-		this.fullPath = PathSegmentContainer.parse(uri.getRawPath(), charset);
+		this.fullPath = PathContainer.parse(uri.getRawPath(), charset);
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
@@ -51,9 +52,9 @@ class DefaultRequestPath implements RequestPath {
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	private static PathSegmentContainer initContextPath(PathSegmentContainer path, @Nullable String contextPath) {
+	private static PathContainer initContextPath(PathContainer path, @Nullable String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
-			return DefaultPathSegmentContainer.EMPTY_PATH;
+			return PathContainer.parse("", StandardCharsets.UTF_8);
 		}
 
 		Assert.isTrue(contextPath.startsWith("/") && !contextPath.endsWith("/") &&
@@ -62,13 +63,14 @@ class DefaultRequestPath implements RequestPath {
 		int length = contextPath.length();
 		int counter = 0;
 
-		for (int i=0; i < path.pathSegments().size(); i++) {
-			PathSegment pathSegment = path.pathSegments().get(i);
-			counter += 1; // for slash separators
-			counter += pathSegment.value().length();
-			counter += pathSegment.semicolonContent().length();
+		for (int i=0; i < path.elements().size(); i++) {
+			PathContainer.Element element = path.elements().get(i);
+			counter += element.value().length();
+			if (element instanceof PathContainer.Segment) {
+				counter += ((Segment) element).semicolonContent().length();
+			}
 			if (length == counter) {
-				return DefaultPathSegmentContainer.subPath(path, 0, i + 1);
+				return DefaultPathContainer.subPath(path, 0, i + 1);
 			}
 		}
 
@@ -77,20 +79,13 @@ class DefaultRequestPath implements RequestPath {
 				" given path='" + path.value() + "'");
 	}
 
-	private static PathSegmentContainer extractPathWithinApplication(PathSegmentContainer fullPath,
-			PathSegmentContainer contextPath) {
-
-		return PathSegmentContainer.subPath(fullPath, contextPath.pathSegments().size());
+	private static PathContainer extractPathWithinApplication(PathContainer fullPath, PathContainer contextPath) {
+		return PathContainer.subPath(fullPath, contextPath.elements().size());
 	}
 
 
-	// PathSegmentContainer methods..
+	// PathContainer methods..
 
-
-	@Override
-	public boolean isEmpty() {
-		return this.contextPath.isEmpty() && this.pathWithinApplication.isEmpty();
-	}
 
 	@Override
 	public String value() {
@@ -98,31 +93,20 @@ class DefaultRequestPath implements RequestPath {
 	}
 
 	@Override
-	public boolean isAbsolute() {
-		return !this.contextPath.isEmpty() && this.contextPath.isAbsolute() ||
-				this.pathWithinApplication.isAbsolute();
-	}
-
-	@Override
-	public List<PathSegment> pathSegments() {
-		return this.fullPath.pathSegments();
-	}
-
-	@Override
-	public boolean hasTrailingSlash() {
-		return this.pathWithinApplication.hasTrailingSlash();
+	public List<Element> elements() {
+		return this.fullPath.elements();
 	}
 
 
 	// RequestPath methods..
 
 	@Override
-	public PathSegmentContainer contextPath() {
+	public PathContainer contextPath() {
 		return this.contextPath;
 	}
 
 	@Override
-	public PathSegmentContainer pathWithinApplication() {
+	public PathContainer pathWithinApplication() {
 		return this.pathWithinApplication;
 	}
 
