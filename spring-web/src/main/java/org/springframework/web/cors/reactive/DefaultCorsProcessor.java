@@ -115,7 +115,23 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		List<String> requestHeaders = getHeadersToUse(request, preFlightRequest);
 		List<String> allowHeaders = checkHeaders(config, requestHeaders);
 
-		if (allowOrigin == null || allowMethods == null || (preFlightRequest && allowHeaders == null)) {
+		if (allowOrigin == null) {
+			logger.debug("rejecting request because CORS processor cannot determine " +
+					"request origin");
+			rejectRequest(response);
+			return false;
+		} 
+		
+		if (allowMethods == null) {
+			logger.debug("rejecting request because CORS processor cannot determine " +
+					"the allowed methods for the response of a pre-flight request");
+			rejectRequest(response);
+			return false;
+		} 
+		
+		if ((preFlightRequest && allowHeaders == null)) {
+			logger.debug("rejecting request because CORS processor cannot determine " +
+					"the allowed headers for the response of a pre-flight request");
 			rejectRequest(response);
 			return false;
 		}
