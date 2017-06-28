@@ -16,6 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.reactive.PathContainer.Element;
+import org.springframework.http.server.reactive.PathContainer.Segment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -56,68 +58,63 @@ class SingleCharWildcardedPathElement extends PathElement {
 
 
 	@Override
-	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
-		if (matchingContext.candidateLength < (candidateIndex + len)) {
-			return false;  // there isn't enough data to match
+	public boolean matches(int pathIndex, MatchingContext matchingContext) {
+		if (pathIndex >= matchingContext.pathLength) {
+			// no more path left to match this element
+			return false;
 		}
 
-		char[] candidate = matchingContext.candidate;
+		Element element = matchingContext.pathElements.get(pathIndex);
+		if (!(element instanceof Segment)) {
+			return false;
+		}
+		String value = ((Segment)element).valueDecoded();
+		if (value.length() != len) {
+			// Not enough data to match this path element
+			return false;
+		}
+		
+		char[] data = ((Segment)element).valueDecodedChars();
 		if (this.caseSensitive) {
-			for (int i = 0; i <this.len; i++) {
-				char t = this.text[i];
-				if (t == '?') {
-					if (candidate[candidateIndex] == '%') {
-						// encoded value, skip next two as well!
-						candidateIndex += 2;
-					}
+			for (int i = 0; i < len; i++) {
+				char ch = this.text[i];
+				if ((ch != '?') && (ch != data[i])) {
+					return false;
 				}
-				else if (candidate[candidateIndex] != t) {
-					// TODO unfortunate performance hit here on comparison when encoded data is the less likely case
-					if (i < 3 || matchingContext.candidate[candidateIndex-2] != '%' ||
-							Character.toUpperCase(matchingContext.candidate[candidateIndex]) != this.text[i]) {
-						return false;
-					}
-				}
-				candidateIndex++;
 			}
 		}
 		else {
-			for (int i = 0; i < this.len; i++) {
-				char t = this.text[i];
-				if (t == '?') {
-					if (candidate[candidateIndex] == '%') {
-						// encoded value, skip next two as well!
-						candidateIndex += 2;
-					}
-				}
-				else if (Character.toLowerCase(candidate[candidateIndex]) != t) {
+			for (int i = 0; i < len; i++) {
+				char ch = this.text[i];
+				// TODO revisit performance if doing a lot of case insensitive matching
+				if ((ch != '?') && (ch != Character.toLowerCase(data[i]))) {
 					return false;
 				}
-				candidateIndex++;
 			}
 		}
-
-		if (this.next == null) {
-			if (matchingContext.determineRemainingPath && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
-				matchingContext.remainingPathIndex = candidateIndex;
+		
+		pathIndex++;
+		if (isNoMorePattern()) {
+			if (matchingContext.determineRemainingPath) {
+				matchingContext.remainingPathIndex = pathIndex;
 				return true;
 			}
 			else {
-				if (candidateIndex == matchingContext.candidateLength) {
+				if (pathIndex == matchingContext.pathLength) {
 					return true;
 				}
 				else {
 					return (matchingContext.isAllowOptionalTrailingSlash() &&
-							(candidateIndex + 1) == matchingContext.candidateLength &&
-							matchingContext.candidate[candidateIndex] == separator);
+							(pathIndex + 1) == matchingContext.pathLength &&
+							matchingContext.isSeparator(pathIndex));
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
-				return true;  // no more data but matches up to this point
+			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
+				return true;  // no more data but everything matched so far
 			}
-			return this.next.matches(candidateIndex, matchingContext);
+			return this.next.matches(pathIndex, matchingContext);
 		}
 	}
 
@@ -134,6 +131,11 @@ class SingleCharWildcardedPathElement extends PathElement {
 
 	public String toString() {
 		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
+	}
+	
+	@Override
+	public char[] getChars() {
+		return this.text;
 	}
 
 }

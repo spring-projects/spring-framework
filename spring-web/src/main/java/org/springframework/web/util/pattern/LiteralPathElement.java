@@ -16,6 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.reactive.PathContainer.Element;
+import org.springframework.http.server.reactive.PathContainer.Segment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -49,52 +51,60 @@ class LiteralPathElement extends PathElement {
 	}
 
 	@Override
-	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
-		if ((candidateIndex + text.length) > matchingContext.candidateLength) {
-			return false;  // not enough data, cannot be a match
+	public boolean matches(int pathIndex, MatchingContext matchingContext) {
+		if (pathIndex >= matchingContext.pathLength) {
+			// no more path left to match this element
+			return false;
+		}
+		Element element = matchingContext.pathElements.get(pathIndex);
+		if (!(element instanceof Segment)) {
+			return false;
+		}
+		String value = ((Segment)element).valueDecoded();
+		if (value.length() != len) {
+			// Not enough data to match this path element
+			return false;
 		}
 
+		char[] data = ((Segment)element).valueDecodedChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
-				if (matchingContext.candidate[candidateIndex++] != this.text[i]) {
-					// TODO unfortunate performance hit here on comparison when encoded data is the less likely case
-					if (i < 3 || matchingContext.candidate[candidateIndex-3] != '%' ||
-							Character.toUpperCase(matchingContext.candidate[candidateIndex-1]) != this.text[i]) {
-						return false;
-					}
+				if (data[i] != this.text[i]) {
+					return false;
 				}
 			}
 		}
 		else {
 			for (int i = 0; i < len; i++) {
 				// TODO revisit performance if doing a lot of case insensitive matching
-				if (Character.toLowerCase(matchingContext.candidate[candidateIndex++]) != this.text[i]) {
+				if (Character.toLowerCase(data[i]) != this.text[i]) {
 					return false;
 				}
 			}
 		}
 
-		if (this.next == null) {
-			if (matchingContext.determineRemainingPath && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
-				matchingContext.remainingPathIndex = candidateIndex;
+		pathIndex++;
+		if (isNoMorePattern()) {
+			if (matchingContext.determineRemainingPath) {
+				matchingContext.remainingPathIndex = pathIndex;
 				return true;
 			}
 			else {
-				if (candidateIndex == matchingContext.candidateLength) {
+				if (pathIndex == matchingContext.pathLength) {
 					return true;
 				}
 				else {
 					return (matchingContext.isAllowOptionalTrailingSlash() &&
-							(candidateIndex + 1) == matchingContext.candidateLength &&
-							matchingContext.candidate[candidateIndex] == separator);
+							(pathIndex + 1) == matchingContext.pathLength &&
+							matchingContext.isSeparator(pathIndex));
 				}
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
+			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
 				return true;  // no more data but everything matched so far
 			}
-			return this.next.matches(candidateIndex, matchingContext);
+			return this.next.matches(pathIndex, matchingContext);
 		}
 	}
 
@@ -106,6 +116,10 @@ class LiteralPathElement extends PathElement {
 
 	public String toString() {
 		return "Literal(" + String.valueOf(this.text) + ")";
+	}
+	
+	public char[] getChars() {
+		return this.text;
 	}
 
 }

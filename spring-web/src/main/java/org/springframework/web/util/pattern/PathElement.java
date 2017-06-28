@@ -19,6 +19,8 @@ package org.springframework.web.util.pattern;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
@@ -35,6 +37,7 @@ abstract class PathElement {
 
 	protected static final int CAPTURE_VARIABLE_WEIGHT = 1;
 
+	protected final static MultiValueMap<String,String> NO_PARAMETERS = new LinkedMultiValueMap<>();
 
 	// Position in the pattern where this path element starts
 	protected final int pos;
@@ -75,6 +78,8 @@ abstract class PathElement {
 	 */
 	public abstract int getNormalizedLength();
 
+	public abstract char[] getChars();
+
 	/**
 	 * Return the number of variables captured by the path element.
 	 */
@@ -97,52 +102,10 @@ abstract class PathElement {
 	}
 
 	/**
-	 * Return {@code true} if there is no next character, or if there is then it is a separator.
+	 * @return true if the there are no more PathElements in the pattern
 	 */
-	protected boolean nextIfExistsIsSeparator(int nextIndex, MatchingContext matchingContext) {
-		return (nextIndex >= matchingContext.candidateLength ||
-				matchingContext.candidate[nextIndex] == this.separator);
-	}
-
-	/**
-	 * Decode an input CharSequence if necessary.
-	 * @param toDecode the input char sequence that should be decoded if necessary
-	 * @return the decoded result
-	 */
-	protected String decode(CharSequence toDecode) {
-		CharSequence decoded = toDecode;
-		if (includesPercent(toDecode)) {
-			decoded = UriUtils.decode(toDecode.toString(), StandardCharsets.UTF_8);
-		}
-		return decoded.toString();
-	}
-
-	/**
-	 * @param chars sequence of characters
-	 * @param from start position (included in check)
-	 * @param to end position (excluded from check)
-	 * @return true if the chars array includes a '%' character between the specified positions
-	 */
-	protected boolean includesPercent(char[] chars, int from, int to) {
-		for (int i = from; i < to; i++) {
-			if (chars[i] == '%') {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * @param chars string that may include a '%' character indicating it is encoded
-	 * @return true if the string contains a '%' character
-	 */
-	protected boolean includesPercent(CharSequence chars) {
-		for (int i = 0, max = chars.length(); i < max; i++) {
-			if (chars.charAt(i) == '%') {
-				return true;
-			}
-		}
-		return false;
+	protected final boolean isNoMorePattern() {
+		return this.next == null;
 	}
 
 }

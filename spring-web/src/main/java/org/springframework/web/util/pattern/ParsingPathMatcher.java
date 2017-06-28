@@ -16,13 +16,18 @@
 
 package org.springframework.web.util.pattern;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 
 /**
  * {@link PathMatcher} implementation for path patterns parsed
@@ -56,13 +61,13 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public boolean match(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matches(path);
+		return pathPattern.matches(PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchStart(path);
+		return pathPattern.matchStart(PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
 
 	@Override
@@ -74,7 +79,19 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchAndExtract(path);
+		Map<String, PathMatchResult> results = pathPattern.matchAndExtract(PathContainer.parse(path, StandardCharsets.UTF_8));
+		// Collapse PathMatchResults to simple value results (path parameters are lost in this translation)
+		Map<String, String> boundVariables = null;
+		if (results.size() == 0) {
+			boundVariables = Collections.emptyMap();
+		}
+		else {
+			boundVariables = new LinkedHashMap<>();
+			for (Map.Entry<String,PathMatchResult> entries: results.entrySet()) {
+				boundVariables.put(entries.getKey(), entries.getValue().value());
+			}
+		}
+		return boundVariables;
 	}
 
 	@Override
@@ -85,7 +102,7 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public String combine(String pattern1, String pattern2) {
 		PathPattern pathPattern = getPathPattern(pattern1);
-		return pathPattern.combine(pattern2);
+		return pathPattern.combine(getPathPattern(pattern2)).getPatternString();
 	}
 
 	private PathPattern getPathPattern(String pattern) {

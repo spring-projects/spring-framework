@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
+import org.springframework.http.server.reactive.PathContainer.Segment;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
@@ -63,20 +63,17 @@ class RegexPathElement extends PathElement {
 	public Pattern buildPattern(char[] regex, char[] completePattern) {
 		StringBuilder patternBuilder = new StringBuilder();
 		String text = new String(regex);
-		StringBuilder encodedRegexBuilder = new StringBuilder();
 		Matcher matcher = GLOB_PATTERN.matcher(text);
 		int end = 0;
 
 		while (matcher.find()) {
-			patternBuilder.append(quote(text, end, matcher.start(), encodedRegexBuilder));
+			patternBuilder.append(quote(text, end, matcher.start()));
 			String match = matcher.group();
 			if ("?".equals(match)) {
 				patternBuilder.append('.');
-				encodedRegexBuilder.append('?');
 			}
 			else if ("*".equals(match)) {
 				patternBuilder.append(".*");
-				encodedRegexBuilder.append('*');
 				int pos = matcher.start();
 				if (pos < 1 || text.charAt(pos-1) != '.') {
 					// To be compatible with the AntPathMatcher comparator, 
@@ -85,7 +82,6 @@ class RegexPathElement extends PathElement {
 				}
 			}
 			else if (match.startsWith("{") && match.endsWith("}")) {
-				encodedRegexBuilder.append(match);
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
@@ -112,8 +108,7 @@ class RegexPathElement extends PathElement {
 			end = matcher.end();
 		}
 
-		patternBuilder.append(quote(text, end, text.length(), encodedRegexBuilder));
-		this.regex = encodedRegexBuilder.toString().toCharArray();
+		patternBuilder.append(quote(text, end, text.length()));
 		if (this.caseSensitive) {
 			return Pattern.compile(patternBuilder.toString());
 		}
@@ -126,54 +121,43 @@ class RegexPathElement extends PathElement {
 		return this.variableNames;
 	}
 
-	private String quote(String s, int start, int end, StringBuilder encodedRegexBuilder) {
+	private String quote(String s, int start, int end) {
 		if (start == end) {
 			return "";
 		}
-		String substring = s.substring(start, end);
-		String encodedSubString = UriUtils.encodePath(substring, StandardCharsets.UTF_8);
-		encodedRegexBuilder.append(encodedSubString);
-		return Pattern.quote(substring);
+		return Pattern.quote(s.substring(start, end));
 	}
 
 	@Override
-	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
-		int pos = matchingContext.scanAhead(candidateIndex);
-		
-		CharSequence textToMatch = null;
-		if (includesPercent(matchingContext.candidate, candidateIndex, pos)) {
-			textToMatch = decode(new SubSequence(matchingContext.candidate, candidateIndex, pos));
-		}
-		else {
-			textToMatch = new SubSequence(matchingContext.candidate, candidateIndex, pos);
-		}
+	public boolean matches(int pathIndex, MatchingContext matchingContext) {
+		String textToMatch = matchingContext.pathElementValue(pathIndex);		
 		Matcher matcher = this.pattern.matcher(textToMatch);
 		boolean matches = matcher.matches();
 
 		if (matches) {
-			if (this.next == null) {
+			if (isNoMorePattern()) {
 				if (matchingContext.determineRemainingPath && 
-					((this.variableNames.size() == 0) ? true : pos > candidateIndex)) {
-					matchingContext.remainingPathIndex = pos;
+					((this.variableNames.size() == 0) ? true : textToMatch.length() > 0)) {
+					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}
 				else {
 					// No more pattern, is there more data?
 					// If pattern is capturing variables there must be some actual data to bind to them
-					matches = (pos == matchingContext.candidateLength &&
-							   ((this.variableNames.size() == 0) ? true : pos > candidateIndex));
+					matches = (pathIndex + 1) >= matchingContext.pathLength &&
+							  ((this.variableNames.size() == 0) ? true : textToMatch.length() > 0);
 					if (!matches && matchingContext.isAllowOptionalTrailingSlash()) {
-						matches = ((this.variableNames.size() == 0) ? true : pos > candidateIndex) &&
-							      (pos + 1) == matchingContext.candidateLength &&
-							      matchingContext.candidate[pos] == separator;
+						matches = ((this.variableNames.size() == 0) ? true : textToMatch.length() > 0) &&
+							      (pathIndex + 2) >= matchingContext.pathLength &&
+							      matchingContext.isSeparator(pathIndex + 1);
 					}
 				}
 			}
 			else {
-				if (matchingContext.isMatchStartMatching && pos == matchingContext.candidateLength) {
+				if (matchingContext.isMatchStartMatching && (pathIndex + 1 >= matchingContext.pathLength)) {
 					return true; // no more data but matches up to this point
 				}
-				matches = this.next.matches(pos, matchingContext);
+				matches = this.next.matches(pathIndex + 1, matchingContext);
 			}
 		}
 
@@ -188,12 +172,15 @@ class RegexPathElement extends PathElement {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String name = this.variableNames.get(i - 1);
 				String value = matcher.group(i);
-				matchingContext.set(name, value);
+				matchingContext.set(name, value,
+						(i == this.variableNames.size())?
+								((Segment)matchingContext.pathElements.get(pathIndex)).parameters():
+								NO_PARAMETERS);
 			}
 		}
 		return matches;
 	}
-
+	
 	@Override
 	public int getNormalizedLength() {
 		int varsLength = 0;
@@ -222,4 +209,8 @@ class RegexPathElement extends PathElement {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}
 
+	@Override
+	public char[] getChars() {
+		return this.regex;
+	}
 }
