@@ -70,10 +70,10 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		JavaType javaType = this.objectMapper.getTypeFactory().constructType(elementType.getType());
+		JavaType javaType = objectMapper().getTypeFactory().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
 		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
-				this.objectMapper.canDeserialize(javaType) && supportsMimeType(mimeType));
+				objectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
 
 
@@ -107,8 +107,8 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 
 		ObjectReader reader = (jsonView != null ?
-				this.objectMapper.readerWithView(jsonView).forType(javaType) :
-				this.objectMapper.readerFor(javaType));
+				objectMapper().readerWithView(jsonView).forType(javaType) :
+				objectMapper().readerFor(javaType));
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
 				.flatMap(dataBuffer -> {

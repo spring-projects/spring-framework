@@ -62,7 +62,7 @@ public abstract class Jackson2CodecSupport {
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 
 
-	protected final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
 	private final List<MimeType> mimeTypes;
 
@@ -76,6 +76,10 @@ public abstract class Jackson2CodecSupport {
 		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ? Arrays.asList(mimeTypes) : JSON_MIME_TYPES;
 	}
 
+
+	protected ObjectMapper objectMapper() {
+		return this.objectMapper;
+	}
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));

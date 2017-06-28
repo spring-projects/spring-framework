@@ -109,7 +109,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		Class<?> clazz = elementType.resolve(Object.class);
 		return (Object.class == clazz) ||
 				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
-				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType);
+				objectMapper().canSerialize(clazz) && supportsMimeType(mimeType);
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		JavaType javaType = getJavaType(elementType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
-				this.objectMapper.writerWithView(jsonView) : this.objectMapper.writer());
+				objectMapper().writerWithView(jsonView) : objectMapper().writer());
 
 		if (javaType.isContainerType()) {
 			writer = writer.forType(javaType);
