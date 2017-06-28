@@ -21,11 +21,15 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
+import org.eclipse.jetty.io.RuntimeIOException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +39,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -54,11 +57,6 @@ import org.springframework.util.MimeType;
  */
 public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
-	private final JsonObjectDecoder fluxDecoder = new JsonObjectDecoder(true);
-
-	private final JsonObjectDecoder monoDecoder = new JsonObjectDecoder(false);
-
-
 	public Jackson2JsonDecoder() {
 		super(Jackson2ObjectMapperBuilder.json().build());
 	}
@@ -67,7 +65,6 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		super(mapper, mimeTypes);
 	}
 
-
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = objectMapper().getTypeFactory().constructType(elementType.getType());
@@ -75,7 +72,6 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
 				objectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
-
 
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
@@ -86,20 +82,27 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return decodeInternal(this.fluxDecoder, input, elementType, mimeType, hints);
+		Flux<TokenBuffer> tokens = Flux.from(input)
+				.flatMap(new Jackson2Tokenizer(nonBlockingParser(), true));
+
+		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return decodeInternal(this.monoDecoder, input, elementType, mimeType, hints).singleOrEmpty();
+		Flux<TokenBuffer> tokens = Flux.from(input)
+				.flatMap(new Jackson2Tokenizer(nonBlockingParser(), false));
+
+		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
 
-	private Flux<Object> decodeInternal(JsonObjectDecoder objectDecoder, Publisher<DataBuffer> inputStream,
-			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens,
+			ResolvableType elementType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 
-		Assert.notNull(inputStream, "'inputStream' must not be null");
+		Assert.notNull(tokens, "'tokens' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		Class<?> contextClass = getParameter(elementType).map(MethodParameter::getContainingClass).orElse(null);
@@ -110,26 +113,21 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 				objectMapper().readerWithView(jsonView).forType(javaType) :
 				objectMapper().readerFor(javaType));
 
-		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
-				.flatMap(dataBuffer -> {
-					if (dataBuffer.readableByteCount() == 0) {
-						return Mono.empty();
-					}
-					try {
-						Object value = reader.readValue(dataBuffer.asInputStream());
-						DataBufferUtils.release(dataBuffer);
-						return Mono.just(value);
-					}
-					catch (InvalidDefinitionException ex) {
-						return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
-					}
-					catch (JsonProcessingException ex) {
-						return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
-					}
-					catch (IOException ex) {
-						return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
-					}
-				});
+		return tokens.flatMap(tokenBuffer -> {
+			try {
+				Object value = reader.readValue(tokenBuffer.asParser());
+				return Mono.just(value);
+			}
+			catch (InvalidDefinitionException ex) {
+				return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
+			}
+			catch (JsonProcessingException ex) {
+				return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
+			}
+			catch (IOException ex) {
+				return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
+			}
+		});
 	}
 
 
@@ -147,4 +145,13 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		return parameter.getParameterAnnotation(annotType);
 	}
 
+	private JsonParser nonBlockingParser() {
+		try {
+			JsonFactory factory = this.objectMapper().getFactory();
+			return factory.createNonBlockingByteArrayParser();
+		}
+		catch (IOException ex) {
+			throw new RuntimeIOException(ex);
+		}
+	}
 }

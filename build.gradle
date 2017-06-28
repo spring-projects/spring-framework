@@ -59,6 +59,7 @@ configure(allprojects) { project ->
 	ext.httpclientVersion      = "4.5.3"
 	ext.interceptorApiVersion  = "1.2"
 	ext.jackson2Version        = "2.9.0.pr4"
+    ext.jsonassertVersion      = "1.5.0"
 	ext.javamailVersion        = "1.6.0-rc2"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
@@ -772,6 +773,7 @@ project("spring-web") {
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.skyscreamer:jsonassert:${jsonassertVersion}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
@@ -1037,7 +1039,7 @@ project("spring-test") {
 		optional("org.seleniumhq.selenium:selenium-java:3.4.0") {
 			exclude group: "io.netty", module: "netty"
 		}
-		optional("org.skyscreamer:jsonassert:1.5.0")
+		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
 		optional("com.jayway.jsonpath:json-path:2.2.0")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
@@ -1285,6 +1287,22 @@ configure(project(':spring-core')) {
 		}
 	}
 }
+
+/*
+ * Copyright 2002-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /*
  * Support publication of artifacts versioned by topic branch.
