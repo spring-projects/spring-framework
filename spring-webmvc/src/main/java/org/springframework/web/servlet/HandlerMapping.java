@@ -96,11 +96,11 @@ public interface HandlerMapping {
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains a map with
-	 * URI matrix variables.
+	 * URI variable names and a corresponding MultiValueMap of URI matrix
+	 * variables for each.
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations and may also not be present depending on
 	 * whether the HandlerMapping is configured to keep matrix variable content
-	 * in the request URI.
 	 */
 	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
 

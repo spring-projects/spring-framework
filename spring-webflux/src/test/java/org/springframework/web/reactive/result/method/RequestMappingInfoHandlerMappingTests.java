@@ -39,6 +39,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -60,6 +61,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.method;
@@ -69,6 +71,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.method.MvcAnnotationPredicates.getMapping;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestMapping;
 import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
+import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
@@ -76,6 +80,9 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  * @author Rossen Stoyanchev
  */
 public class RequestMappingInfoHandlerMappingTests {
+
+	private static final HandlerMethod handlerMethod = new HandlerMethod(new TestController(),
+			ClassUtils.getMethod(TestController.class, "dummy"));
 
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
@@ -169,8 +176,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
-				ex -> assertEquals("Response status 415 with reason \"Invalid mime type \"bogus\": does not contain '/'\"",
-						ex.getMessage()));
+				ex -> assertEquals("Response status 415 with reason \"Invalid mime type \"bogus\": " +
+								"does not contain '/'\"", ex.getMessage()));
 	}
 
 	@Test  // SPR-8462
@@ -219,7 +226,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 
 		RequestMappingInfo key = paths("/{path1}/{path2}").build();
-		this.handlerMapping.handleMatch(key, lookupPath, exchange);
+		this.handlerMapping.handleMatch(key, handlerMethod, lookupPath, exchange);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) exchange.getAttributes().get(name);
@@ -236,7 +243,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = method(HttpMethod.GET, url).toExchange();
 
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
-		this.handlerMapping.handleMatch(key, lookupPath, exchange);
+		this.handlerMapping.handleMatch(key, handlerMethod, lookupPath, exchange);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		@SuppressWarnings("unchecked")
@@ -252,11 +259,13 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
-		this.handlerMapping.handleMatch(key, lookupPath, exchange);
+		this.handlerMapping.handleMatch(key, handlerMethod, lookupPath, exchange);
 
-		PathPattern bestMatch = (PathPattern) exchange.getAttributes()
-				.get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		PathPattern bestMatch = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
 		assertEquals("/{path1}/2", bestMatch.getPatternString());
+
+		HandlerMethod mapped = (HandlerMethod) exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
+		assertSame(handlerMethod, mapped);
 	}
 
 	@Test
@@ -264,10 +273,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo key = paths().build();
 		ServerWebExchange exchange = get("/1/2").toExchange();
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
-		this.handlerMapping.handleMatch(key, lookupPath, exchange);
+		this.handlerMapping.handleMatch(key, handlerMethod, lookupPath, exchange);
 
-		PathPattern bestMatch = (PathPattern) exchange.getAttributes()
-				.get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		PathPattern bestMatch = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
 		assertEquals("/1/2", bestMatch.getPatternString());
 	}
 
@@ -330,7 +338,6 @@ public class RequestMappingInfoHandlerMappingTests {
 				.consumeErrorWith(error -> {
 					assertEquals(exceptionClass, error.getClass());
 					consumer.accept((T) error);
-
 				})
 				.verify();
 	}
@@ -375,19 +382,19 @@ public class RequestMappingInfoHandlerMappingTests {
 	private void handleMatch(ServerWebExchange exchange, String pattern) {
 		RequestMappingInfo info = paths(pattern).build();
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
-		this.handlerMapping.handleMatch(info, lookupPath, exchange);
+		this.handlerMapping.handleMatch(info, handlerMethod, lookupPath, exchange);
 	}
 
 	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getMatrixVariables(ServerWebExchange exchange, String uriVarName) {
-		String attrName = HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE;
-		return ((Map<String, MultiValueMap<String, String>>) exchange.getAttributes().get(attrName)).get(uriVarName);
+		return ((Map<String, MultiValueMap<String, String>>) exchange.getAttributes()
+				.get(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE)).get(uriVarName);
 	}
 
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getUriTemplateVariables(ServerWebExchange exchange) {
-		String attrName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return (Map<String, String>) exchange.getAttributes().get(attrName);
+		return (Map<String, String>) exchange.getAttributes()
+				.get(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 	}
 
 
@@ -446,6 +453,8 @@ public class RequestMappingInfoHandlerMappingTests {
 			headers.add("Allow", "PUT,POST");
 			return headers;
 		}
+
+		public void dummy() { }
 	}
 
 

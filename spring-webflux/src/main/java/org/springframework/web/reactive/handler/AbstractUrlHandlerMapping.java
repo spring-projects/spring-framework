@@ -145,8 +145,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		validateHandler(handler, exchange);
 
-		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatch);
+		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 
 		return handler;
 	}

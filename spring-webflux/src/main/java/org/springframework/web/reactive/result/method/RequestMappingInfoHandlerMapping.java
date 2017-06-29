@@ -106,8 +106,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
-	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
-		super.handleMatch(info, lookupPath, exchange);
+	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod, String lookupPath,
+			ServerWebExchange exchange) {
+
+		super.handleMatch(info, handlerMethod, lookupPath, exchange);
 
 		PathPattern bestPattern;
 		Map<String, String> uriVariables;
@@ -133,6 +135,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			));
 		}
 
+		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 

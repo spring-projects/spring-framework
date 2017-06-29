@@ -322,7 +322,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							lookupPath + "': {" + m1 + ", " + m2 + "}");
 				}
 			}
-			handleMatch(bestMatch.mapping, lookupPath, exchange);
+			handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupPath, exchange);
 			return bestMatch.handlerMethod;
 		}
 		else {
@@ -342,10 +342,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Invoked when a matching mapping is found.
 	 * @param mapping the matching mapping
+	 * @param handlerMethod the matching method
 	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 */
-	protected void handleMatch(T mapping, String lookupPath, ServerWebExchange exchange) {
+	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupPath,
+			ServerWebExchange exchange) {
 	}
 
 	/**
