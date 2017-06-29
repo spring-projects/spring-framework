@@ -58,9 +58,8 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueAr
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		return exchange.getSession()
-				.map(session -> session.getAttribute(name))
-				.filter(Optional::isPresent)
-				.map(Optional::get);
+				.filter(session -> session.getAttribute(name) != null)
+				.map(session -> session.getAttribute(name));
 	}
 
 	@Override

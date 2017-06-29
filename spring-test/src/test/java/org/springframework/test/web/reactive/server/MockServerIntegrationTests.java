@@ -43,9 +43,9 @@ public class MockServerIntegrationTests {
 			}
 			else {
 				return exchange.getSession()
-						.map(session -> session.getAttribute("foo").orElse("none"))
+						.map(session -> session.getAttributeOrDefault("foo", "none"))
 						.flatMap(value -> {
-							byte[] bytes = value.toString().getBytes(UTF_8);
+							byte[] bytes = value.getBytes(UTF_8);
 							DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
 							return exchange.getResponse().writeWith(Mono.just(buffer));
 						});
