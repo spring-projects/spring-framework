@@ -106,13 +106,13 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
 							Iterator eventReader = inputFactory.createXMLEventReader(is);
-							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader);
+							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader)
+									.doFinally(t -> {
+										DataBufferUtils.release(dataBuffer);
+									});
 						}
 						catch (XMLStreamException ex) {
 							return Mono.error(ex);
-						}
-						finally {
-							DataBufferUtils.release(dataBuffer);
 						}
 					});
 		}
