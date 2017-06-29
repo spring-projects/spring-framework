@@ -187,11 +187,11 @@ public class ControllerMethodResolverTests {
 	@Test
 	public void exceptionHandlerArgumentResolvers() throws Exception {
 
-		Optional<InvocableHandlerMethod> optional =
+		InvocableHandlerMethod invocable =
 				this.methodResolver.getExceptionHandlerMethod(
 						new ResponseStatusException(HttpStatus.BAD_REQUEST, "reason"), this.handlerMethod);
 
-		InvocableHandlerMethod invocable = optional.orElseThrow(() -> new AssertionError("No match"));
+		assertNotNull("No match", invocable);
 		assertEquals(TestController.class, invocable.getBeanType());
 		List<HandlerMethodArgumentResolver> resolvers = invocable.getResolvers();
 
@@ -221,11 +221,10 @@ public class ControllerMethodResolverTests {
 	@Test
 	public void exceptionHandlerFromControllerAdvice() throws Exception {
 
-		Optional<InvocableHandlerMethod> optional =
+		InvocableHandlerMethod invocable =
 				this.methodResolver.getExceptionHandlerMethod(
 						new IllegalStateException("reason"), this.handlerMethod);
 
-		InvocableHandlerMethod invocable = optional.orElseThrow(() -> new AssertionError("No match"));
 		assertNotNull(invocable);
 		assertEquals(TestControllerAdvice.class, invocable.getBeanType());
 	}
@@ -286,7 +285,7 @@ public class ControllerMethodResolverTests {
 			implements SyncHandlerMethodArgumentResolver {
 
 		@Override
-		public Optional<Object> resolveArgumentValue(MethodParameter p, BindingContext c, ServerWebExchange e) {
+		public Object resolveArgumentValue(MethodParameter p, BindingContext c, ServerWebExchange e) {
 			return null;
 		}
 	}

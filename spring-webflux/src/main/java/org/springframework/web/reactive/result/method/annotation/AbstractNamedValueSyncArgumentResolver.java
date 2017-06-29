@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -64,13 +62,11 @@ public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNam
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(
-			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
+	public Object resolveArgumentValue(MethodParameter parameter, BindingContext context,
+			ServerWebExchange exchange) {
 
 		// This won't block since resolveName below doesn't
-		Object value = resolveArgument(parameter, context, exchange).block();
-
-		return Optional.ofNullable(value);
+		return resolveArgument(parameter, context, exchange).block();
 	}
 
 	@Override

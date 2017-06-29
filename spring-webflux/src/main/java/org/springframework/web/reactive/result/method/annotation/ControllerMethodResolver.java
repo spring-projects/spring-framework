@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -53,7 +52,7 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.springframework.core.MethodIntrospector.*;
+import static org.springframework.core.MethodIntrospector.selectMethods;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -284,8 +283,8 @@ class ControllerMethodResolver {
 	 * Find an {@code @ExceptionHandler} method in {@code @ControllerAdvice}
 	 * components or in the controller of the given {@code @RequestMapping} method.
 	 */
-	public Optional<InvocableHandlerMethod> getExceptionHandlerMethod(Throwable ex,
-			HandlerMethod handlerMethod) {
+	@Nullable
+	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = handlerMethod.getBeanType();
 
@@ -309,12 +308,12 @@ class ControllerMethodResolver {
 		}
 
 		if (targetMethod == null) {
-			return Optional.empty();
+			return null;
 		}
 
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(targetBean, targetMethod);
 		invocable.setArgumentResolvers(this.exceptionHandlerResolvers);
-		return Optional.of(invocable);
+		return invocable;
 	}
 
 

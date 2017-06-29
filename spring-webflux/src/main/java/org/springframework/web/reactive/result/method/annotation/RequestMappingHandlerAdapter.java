@@ -197,24 +197,23 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
-		return this.methodResolver.getExceptionHandlerMethod(ex, handlerMethod)
-				.map(invocable -> {
-					try {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
-						}
-						bindingContext.getModel().asMap().clear();
-						Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-						return invocable.invoke(exchange, bindingContext, cause, handlerMethod);
-					}
-					catch (Throwable invocationEx) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
-						}
-						return null;
-					}
-				})
-				.orElseGet(() -> Mono.error(ex));
+		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(ex, handlerMethod);
+		if (invocable != null) {
+			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
+				}
+				bindingContext.getModel().asMap().clear();
+				Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+				return invocable.invoke(exchange, bindingContext, cause, handlerMethod);
+			}
+			catch (Throwable invocationEx) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
+				}
+			}
+		}
+		return Mono.error(ex);
 	}
 
 }

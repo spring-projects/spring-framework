@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.ui.Model;
@@ -47,11 +45,11 @@ public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
-			BindingContext context, ServerWebExchange exchange) {
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
+			ServerWebExchange exchange) {
 
 		Assert.isAssignable(Model.class, methodParameter.getParameterType());
-		return Optional.of(context.getModel());
+		return context.getModel();
 	}
 
 }

@@ -109,7 +109,8 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		Assert.notNull(tokens, "'tokens' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
-		Class<?> contextClass = getParameter(elementType).map(MethodParameter::getContainingClass).orElse(null);
+		MethodParameter param = getParameter(elementType);
+		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 
