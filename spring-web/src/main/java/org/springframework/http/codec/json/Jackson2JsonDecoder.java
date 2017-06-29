@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import org.eclipse.jetty.io.RuntimeIOException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -151,7 +151,7 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 			return factory.createNonBlockingByteArrayParser();
 		}
 		catch (IOException ex) {
-			throw new RuntimeIOException(ex);
+			throw new UncheckedIOException(ex);
 		}
 	}
 }

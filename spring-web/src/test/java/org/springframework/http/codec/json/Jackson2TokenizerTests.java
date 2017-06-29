@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -24,7 +25,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.jetty.io.RuntimeIOException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -147,7 +147,7 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 						return this.objectMapper.writeValueAsString(root);
 					}
 					catch (IOException ex) {
-						throw new RuntimeIOException(ex);
+						throw new UncheckedIOException(ex);
 					}
 				});
 
