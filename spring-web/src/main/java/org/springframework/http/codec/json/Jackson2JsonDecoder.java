@@ -82,8 +82,10 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(nonBlockingParser(), true);
 		Flux<TokenBuffer> tokens = Flux.from(input)
-				.flatMap(new Jackson2Tokenizer(nonBlockingParser(), true));
+				.flatMap(tokenizer)
+				.doFinally(t -> tokenizer.endOfInput());
 
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
@@ -92,8 +94,10 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(nonBlockingParser(), false);
 		Flux<TokenBuffer> tokens = Flux.from(input)
-				.flatMap(new Jackson2Tokenizer(nonBlockingParser(), false));
+				.flatMap(tokenizer)
+				.doFinally(t -> tokenizer.endOfInput());
 
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}

@@ -106,6 +106,10 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 		}
 	}
 
+	public void endOfInput() {
+		this.inputFeeder.endOfInput();
+	}
+
 	private void calculateDepth(JsonToken token) {
 		switch (token) {
 			case START_OBJECT:
