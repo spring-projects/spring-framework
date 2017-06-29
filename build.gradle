@@ -37,7 +37,7 @@ configure(allprojects) { project ->
 
 	ext.activationApiVersion   = "1.1.1"
 	ext.annotationApiVersion   = "1.3"
-	ext.aspectjVersion         = "1.9.0.BETA-5"
+	ext.aspectjVersion         = "1.9.0.BETA-6"
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.cacheApiVersion        = "1.0.0"
 	ext.caffeineVersion        = "2.5.2"
