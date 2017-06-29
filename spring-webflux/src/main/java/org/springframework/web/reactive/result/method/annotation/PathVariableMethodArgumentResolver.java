@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -83,10 +83,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		String attributeName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttribute(attributeName)
-				.map(value -> ((Map<String, String>) value).get(name));
+		return exchange.getAttributeOrDefault(attributeName, Collections.emptyMap()).get(name);
 	}
 
 	@Override

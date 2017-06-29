@@ -63,7 +63,7 @@ public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgument
 			BindingContext context, ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());
+		Object value = exchange.getAttributeOrDefault(name, Collections.emptyMap());
 		return Optional.of(value);
 	}
 

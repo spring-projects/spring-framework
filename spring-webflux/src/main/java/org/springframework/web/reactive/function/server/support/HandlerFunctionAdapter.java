@@ -57,11 +57,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		HandlerFunction<?> handlerFunction = (HandlerFunction<?>) handler;
-		ServerRequest request =
-				exchange.<ServerRequest>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
-						.orElseThrow(() -> new IllegalStateException(
-								"Could not find ServerRequest in exchange attributes"));
-
+		ServerRequest request = exchange.getRequiredAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
 		return handlerFunction.handle(request)
 				.map(response -> new HandlerResult(handlerFunction, response, HANDLER_FUNCTION_RETURN_TYPE));
 	}

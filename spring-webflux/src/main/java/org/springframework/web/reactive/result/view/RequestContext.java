@@ -404,7 +404,7 @@ public class RequestContext {
 	protected <T> T getModelObject(String modelName) {
 		T modelObject = (T) this.model.get(modelName);
 		if (modelObject == null) {
-			modelObject = (T) this.exchange.getAttribute(modelName).orElse(null);
+			modelObject = this.exchange.getAttribute(modelName);
 		}
 		return modelObject;
 	}

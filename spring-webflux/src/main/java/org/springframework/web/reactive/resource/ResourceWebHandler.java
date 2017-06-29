@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -311,14 +310,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	protected Mono<Resource> getResource(ServerWebExchange exchange) {
 
-		String attributeName = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
-		Optional<String> optional = exchange.getAttribute(attributeName);
-		if (!optional.isPresent()) {
-			return Mono.error(new IllegalStateException(
-					"Required request attribute '" + attributeName + "' is not set"));
-		}
-
-		String path = processPath(optional.get());
+		String name = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
+		String pathWithinHandler = exchange.getRequiredAttribute(name);
+		String path = processPath(pathWithinHandler);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Ignoring invalid resource path [" + path + "]");

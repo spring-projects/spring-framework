@@ -99,7 +99,7 @@ public class MockServerSpecTests {
 		@Override
 		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 			String name = "test-attribute";
-			String value = (String) exchange.getAttribute(name).orElse("");
+			String value = exchange.getAttributeOrDefault(name, "");
 			exchange.getAttributes().put(name, value + ":" + this.name);
 			return chain.filter(exchange);
 		}

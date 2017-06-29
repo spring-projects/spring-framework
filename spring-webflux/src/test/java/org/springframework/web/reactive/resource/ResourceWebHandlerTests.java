@@ -388,7 +388,7 @@ public class ResourceWebHandlerTests {
 		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
 		this.handler.handle(exchange).block(TIMEOUT);

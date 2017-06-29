@@ -117,7 +117,8 @@ public class WebHttpHandlerBuilderTests {
 
 		private WebFilter createFilter(String name) {
 			return (exchange, chain) -> {
-				String value = exchange.getAttribute(ATTRIBUTE).map(v -> v + "::" + name).orElse(name);
+				String value = exchange.getAttribute(ATTRIBUTE);
+				value = (value != null ? value + "::" + name : name);
 				exchange.getAttributes().put(ATTRIBUTE, value);
 				return chain.filter(exchange);
 			};
@@ -126,7 +127,7 @@ public class WebHttpHandlerBuilderTests {
 		@Bean
 		public WebHandler webHandler() {
 			return exchange -> {
-				String value = exchange.getAttribute(ATTRIBUTE).map(v -> (String) v).orElse("none");
+				String value = exchange.getAttributeOrDefault(ATTRIBUTE, "none");
 				return writeToResponse(exchange, value);
 			};
 		}

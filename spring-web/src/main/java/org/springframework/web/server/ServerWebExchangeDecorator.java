@@ -18,7 +18,6 @@ package org.springframework.web.server;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -74,11 +73,6 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	@Override
 	public Map<String, Object> getAttributes() {
 		return getDelegate().getAttributes();
-	}
-
-	@Override
-	public <T> Optional<T> getAttribute(String name) {
-		return getDelegate().getAttribute(name);
 	}
 
 	@Override

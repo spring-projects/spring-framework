@@ -81,6 +81,7 @@ public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNam
 	/**
 	 * Actually resolve the value synchronously.
 	 */
-	protected abstract Optional<Object> resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange);
+	@Nullable
+	protected abstract Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange);
 
 }

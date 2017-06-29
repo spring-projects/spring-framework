@@ -227,7 +227,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return (Map<String, String>) exchange.getAttribute(name).orElse(Collections.emptyMap());
+		return exchange.getAttributeOrDefault(name, Collections.<String, String>emptyMap());
 	}
 
 	/**
