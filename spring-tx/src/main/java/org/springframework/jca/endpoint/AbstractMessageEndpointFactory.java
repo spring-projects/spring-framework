@@ -33,6 +33,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.SimpleTransactionFactory;
 import org.springframework.transaction.jta.TransactionFactory;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base implementation of the JCA 1.7
@@ -49,12 +50,15 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private TransactionFactory transactionFactory;
 
+	@Nullable
 	private String transactionName;
 
 	private int transactionTimeout = -1;
 
+	@Nullable
 	private String beanName;
 
 
@@ -201,10 +205,12 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 */
 	protected abstract class AbstractMessageEndpoint implements MessageEndpoint {
 
+		@Nullable
 		private TransactionDelegate transactionDelegate;
 
 		private boolean beforeDeliveryCalled = false;
 
+		@Nullable
 		private ClassLoader previousContextClassLoader;
 
 		/**
@@ -228,6 +234,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		@Override
 		public void beforeDelivery(@Nullable Method method) throws ResourceException {
 			this.beforeDeliveryCalled = true;
+			Assert.state(this.transactionDelegate != null, "Not initialized");
 			try {
 				this.transactionDelegate.beginTransaction();
 			}
@@ -263,6 +270,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * @param ex the exception thrown from the concrete endpoint
 		 */
 		protected final void onEndpointException(Throwable ex) {
+			Assert.state(this.transactionDelegate != null, "Not initialized");
 			this.transactionDelegate.setRollbackOnly();
 		}
 
@@ -275,6 +283,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 */
 		@Override
 		public void afterDelivery() throws ResourceException {
+			Assert.state(this.transactionDelegate != null, "Not initialized");
 			this.beforeDeliveryCalled = false;
 			Thread.currentThread().setContextClassLoader(this.previousContextClassLoader);
 			this.previousContextClassLoader = null;
@@ -288,12 +297,14 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 		@Override
 		public void release() {
-			try {
-				this.transactionDelegate.setRollbackOnly();
-				this.transactionDelegate.endTransaction();
-			}
-			catch (Throwable ex) {
-				logger.error("Could not complete unfinished transaction on endpoint release", ex);
+			if (this.transactionDelegate != null) {
+				try {
+					this.transactionDelegate.setRollbackOnly();
+					this.transactionDelegate.endTransaction();
+				}
+				catch (Throwable ex) {
+					logger.error("Could not complete unfinished transaction on endpoint release", ex);
+				}
 			}
 		}
 	}
@@ -305,8 +316,10 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 */
 	private class TransactionDelegate {
 
+		@Nullable
 		private final XAResource xaResource;
 
+		@Nullable
 		private Transaction transaction;
 
 		private boolean rollbackOnly;

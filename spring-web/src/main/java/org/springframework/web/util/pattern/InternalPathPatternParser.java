@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
@@ -45,7 +46,7 @@ class InternalPathPatternParser {
 	private boolean matchOptionalTrailingSlash = false;
 	
 	// The input data for parsing
-	private char[] pathPatternData;
+	private char[] pathPatternData = new char[0];
 
 	// The length of the input data
 	private int pathPatternLength;
@@ -76,12 +77,15 @@ class InternalPathPatternParser {
 	int variableCaptureStart;
 
 	// Variables captures in this path pattern
+	@Nullable
 	List<String> capturedVariableNames;
 
 	// The head of the path element chain currently being built
+	@Nullable
 	PathElement headPE;
 
 	// The most recently constructed path element in the chain
+	@Nullable
 	PathElement currentPE;
 
 
@@ -297,7 +301,7 @@ class InternalPathPatternParser {
 				this.headPE = newPathElement;
 				this.currentPE = newPathElement;
 			}
-			else {
+			else if (this.currentPE != null) {
 				this.currentPE.next = newPathElement;
 				newPathElement.prev = this.currentPE;
 				this.currentPE = newPathElement;

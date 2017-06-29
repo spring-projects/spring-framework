@@ -56,6 +56,7 @@ public class UrlPathHelper {
 
 	private static final Log logger = LogFactory.getLog(UrlPathHelper.class);
 
+	@Nullable
 	static volatile Boolean websphereComplianceFlag;
 
 
@@ -568,7 +569,8 @@ public class UrlPathHelper {
 			// Don't remove that slash.
 			return false;
 		}
-		if (websphereComplianceFlag == null) {
+		Boolean flagToUse = websphereComplianceFlag;
+		if (flagToUse == null) {
 			ClassLoader classLoader = UrlPathHelper.class.getClassLoader();
 			String className = "com.ibm.ws.webcontainer.WebContainer";
 			String methodName = "getWebContainerProperties";
@@ -584,11 +586,12 @@ public class UrlPathHelper {
 					logger.debug("Could not introspect WebSphere web container properties: " + ex);
 				}
 			}
+			flagToUse = flag;
 			websphereComplianceFlag = flag;
 		}
 		// Don't bother if WebSphere is configured to be fully Servlet compliant.
 		// However, if it is not compliant, do remove the improper trailing slash!
-		return !websphereComplianceFlag;
+		return !flagToUse;
 	}
 
 }

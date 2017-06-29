@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractUrlBasedView extends AbstractView implements InitializingBean {
 
+	@Nullable
 	private String url;
 
 

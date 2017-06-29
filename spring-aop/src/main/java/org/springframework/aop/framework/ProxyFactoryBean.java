@@ -46,6 +46,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -101,8 +102,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private String[] interceptorNames;
 
+	@Nullable
 	private String targetName;
 
 	private boolean autodetectInterfaces = true;
@@ -113,16 +116,19 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	private boolean freezeProxy = false;
 
+	@Nullable
 	private transient ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private transient boolean classLoaderConfigured = false;
 
+	@Nullable
 	private transient BeanFactory beanFactory;
 
 	/** Whether the advisor chain has already been initialized */
 	private boolean advisorChainInitialized = false;
 
 	/** If this is a singleton, the cached singleton proxy instance */
+	@Nullable
 	private Object singletonInstance;
 
 
@@ -404,6 +410,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @return {@code true} if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		Class<?> namedBeanClass = this.beanFactory.getType(beanName);
 		if (namedBeanClass != null) {
 			return (Advisor.class.isAssignableFrom(namedBeanClass) || Advice.class.isAssignableFrom(namedBeanClass));

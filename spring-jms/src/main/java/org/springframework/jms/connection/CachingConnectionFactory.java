@@ -491,6 +491,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Destination destination;
 
+		@Nullable
 		private String destinationString;
 
 		public DestinationCacheKey(Destination destination) {
@@ -544,10 +545,13 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 */
 	private static class ConsumerCacheKey extends DestinationCacheKey {
 
+		@Nullable
 		private final String selector;
 
+		@Nullable
 		private final Boolean noLocal;
 
+		@Nullable
 		private final String subscription;
 
 		private final boolean durable;

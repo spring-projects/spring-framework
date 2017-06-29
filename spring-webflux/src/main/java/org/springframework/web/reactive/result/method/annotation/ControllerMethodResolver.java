@@ -52,7 +52,7 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.springframework.core.MethodIntrospector.selectMethods;
+import static org.springframework.core.MethodIntrospector.*;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -218,7 +218,6 @@ class ControllerMethodResolver {
 	 * or in the controller of the given {@code @RequestMapping} method.
 	 */
 	public List<SyncInvocableHandlerMethod> getInitBinderMethods(HandlerMethod handlerMethod) {
-
 		List<SyncInvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
@@ -251,7 +250,6 @@ class ControllerMethodResolver {
 	 * components or in the controller of the given {@code @RequestMapping} method.
 	 */
 	public List<InvocableHandlerMethod> getModelAttributeMethods(HandlerMethod handlerMethod) {
-
 		List<InvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
@@ -331,18 +329,18 @@ class ControllerMethodResolver {
 
 		private final List<HandlerMethodArgumentResolver> customResolvers;
 
+		@Nullable
 		private final List<HttpMessageReader<?>> messageReaders;
 
 		private final boolean modelAttributeSupported;
 
 		private final List<HandlerMethodArgumentResolver> result = new ArrayList<>();
 
-
 		private ArgumentResolverRegistrar(ArgumentResolverConfigurer resolvers,
 				@Nullable ServerCodecConfigurer codecs, boolean modelAttribute) {
 
 			this.customResolvers = resolvers.getCustomResolvers();
-			this.messageReaders = codecs != null ? codecs.getReaders() : null;
+			this.messageReaders = (codecs != null ? codecs.getReaders() : null);
 			this.modelAttributeSupported = modelAttribute;
 		}
 
@@ -379,7 +377,6 @@ class ControllerMethodResolver {
 					.collect(Collectors.toList());
 		}
 
-
 		public static Builder configurer(ArgumentResolverConfigurer configurer) {
 			return new Builder(configurer);
 		}
@@ -389,11 +386,9 @@ class ControllerMethodResolver {
 
 			private final ArgumentResolverConfigurer resolvers;
 
-
 			public Builder(ArgumentResolverConfigurer configurer) {
 				this.resolvers = configurer;
 			}
-
 
 			public ArgumentResolverRegistrar fullSupport(ServerCodecConfigurer codecs) {
 				return new ArgumentResolverRegistrar(this.resolvers, codecs, true);
@@ -407,7 +402,6 @@ class ControllerMethodResolver {
 				return new ArgumentResolverRegistrar(this.resolvers, null, false);
 			}
 		}
-
 	}
 
 }

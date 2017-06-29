@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
-
+import org.springframework.lang.Nullable;
 
 /**
  * Builder for a composite {@link RequestedContentTypeResolver} that delegates
@@ -113,8 +114,8 @@ public class RequestedContentTypeResolverBuilder {
 
 		private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
+		@Nullable
 		private String parameterName;
-
 
 		/**
 		 * Configure a mapping between a lookup key (extracted from a query

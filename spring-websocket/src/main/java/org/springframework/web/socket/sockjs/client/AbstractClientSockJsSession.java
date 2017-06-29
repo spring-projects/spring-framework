@@ -59,8 +59,10 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	@Nullable
 	private volatile State state = State.NEW;
 
+	@Nullable
 	private volatile CloseStatus closeStatus;
 
 
@@ -315,15 +317,19 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	}
 
 	public void afterTransportClosed(@Nullable CloseStatus closeStatus) {
-		this.closeStatus = (this.closeStatus != null ? this.closeStatus : closeStatus);
-		Assert.state(this.closeStatus != null, "CloseStatus not available");
+		CloseStatus cs = this.closeStatus;
+		if (cs == null) {
+			cs = closeStatus;
+			this.closeStatus = closeStatus;
+		}
+		Assert.state(cs != null, "CloseStatus not available");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Transport closed with " + this.closeStatus + " in " + this);
+			logger.debug("Transport closed with " + cs + " in " + this);
 		}
 
 		this.state = State.CLOSED;
 		try {
-			this.webSocketHandler.afterConnectionClosed(this, this.closeStatus);
+			this.webSocketHandler.afterConnectionClosed(this, cs);
 		}
 		catch (Throwable ex) {
 			logger.error("WebSocketHandler.afterConnectionClosed threw an exception", ex);

@@ -96,8 +96,10 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final ContextLoader contextLoader;
 
+	@Nullable
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
+	@Nullable
 	private final MergedContextConfiguration parent;
 
 

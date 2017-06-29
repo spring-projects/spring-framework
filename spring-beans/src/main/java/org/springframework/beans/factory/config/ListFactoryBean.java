@@ -35,9 +35,11 @@ import org.springframework.lang.Nullable;
  */
 public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
+	@Nullable
 	private List<?> sourceList;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends List> targetListClass;
 
 

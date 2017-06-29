@@ -54,7 +54,7 @@ import org.springframework.util.ReflectionUtils;
 // TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
-	private static enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
+	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
 
 
 	// These fields are used when the indexer is being used as a property read accessor.
@@ -62,10 +62,13 @@ public class Indexer extends SpelNodeImpl {
 	// is used to read the property. If they do not match, the correct accessor is
 	// discovered and then cached for later use.
 
+	@Nullable
 	private String cachedReadName;
 
+	@Nullable
 	private Class<?> cachedReadTargetType;
 
+	@Nullable
 	private PropertyAccessor cachedReadAccessor;
 
 	// These fields are used when the indexer is being used as a property write accessor.
@@ -73,12 +76,16 @@ public class Indexer extends SpelNodeImpl {
 	// is used to write the property. If they do not match, the correct accessor is
 	// discovered and then cached for later use.
 
+	@Nullable
 	private String cachedWriteName;
 
+	@Nullable
 	private Class<?> cachedWriteTargetType;
 
+	@Nullable
 	private PropertyAccessor cachedWriteAccessor;
 
+	@Nullable
 	private IndexedType indexedType;
 
 
@@ -282,6 +289,7 @@ public class Indexer extends SpelNodeImpl {
 		else if (this.indexedType == IndexedType.OBJECT) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
 					(ReflectivePropertyAccessor.OptimalPropertyAccessor) this.cachedReadAccessor;
+			Assert.state(accessor != null, "No cached read accessor");
 			Member member = accessor.member;
 			boolean isStatic = Modifier.isStatic(member.getModifiers());
 			String classDesc = member.getDeclaringClass().getName().replace('.', '/');
@@ -493,6 +501,7 @@ public class Indexer extends SpelNodeImpl {
 
 		private final Map map;
 
+		@Nullable
 		private final Object key;
 
 		private final TypeDescriptor mapEntryDescriptor;
@@ -556,7 +565,9 @@ public class Indexer extends SpelNodeImpl {
 						Indexer.this.cachedReadTargetType != null &&
 						Indexer.this.cachedReadTargetType.equals(targetObjectRuntimeClass)) {
 					// It is OK to use the cached accessor
-					return Indexer.this.cachedReadAccessor.read(this.evaluationContext, this.targetObject, this.name);
+					PropertyAccessor accessor = Indexer.this.cachedReadAccessor;
+					Assert.state(accessor != null, "No cached read accessor");
+					return accessor.read(this.evaluationContext, this.targetObject, this.name);
 				}
 				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(
 						targetObjectRuntimeClass, this.evaluationContext.getPropertyAccessors());
@@ -596,7 +607,9 @@ public class Indexer extends SpelNodeImpl {
 						Indexer.this.cachedWriteTargetType != null &&
 						Indexer.this.cachedWriteTargetType.equals(contextObjectClass)) {
 					// It is OK to use the cached accessor
-					Indexer.this.cachedWriteAccessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
+					PropertyAccessor accessor = Indexer.this.cachedWriteAccessor;
+					Assert.state(accessor != null, "No cached write accessor");
+					accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 					return;
 				}
 				List<PropertyAccessor> accessorsToTry =

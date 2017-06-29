@@ -143,12 +143,11 @@ import org.springframework.util.StringValueResolver;
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
-	// Common Annotations 1.1 Resource.lookup() available? Not present on JDK 6...
-	private static final Method lookupAttribute = ClassUtils.getMethodIfAvailable(Resource.class, "lookup");
+	@Nullable
+	private static Class<? extends Annotation> webServiceRefClass;
 
-	private static Class<? extends Annotation> webServiceRefClass = null;
-
-	private static Class<? extends Annotation> ejbRefClass = null;
+	@Nullable
+	private static Class<? extends Annotation> ejbRefClass;
 
 	static {
 		try {
@@ -180,14 +179,16 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private transient BeanFactory jndiFactory = new SimpleJndiBeanFactory();
 
+	@Nullable
 	private transient BeanFactory resourceFactory;
 
+	@Nullable
 	private transient BeanFactory beanFactory;
 
+	@Nullable
 	private transient StringValueResolver embeddedValueResolver;
 
-	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<>(256);
+	private transient final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -532,12 +533,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	protected abstract class LookupElement extends InjectionMetadata.InjectedElement {
 
-		protected String name;
+		protected String name = "";
 
 		protected boolean isDefaultName = false;
 
-		protected Class<?> lookupType;
+		protected Class<?> lookupType = Object.class;
 
+		@Nullable
 		protected String mappedName;
 
 		public LookupElement(Member member, @Nullable PropertyDescriptor pd) {
@@ -602,10 +604,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				// No resource type specified... check field/method.
 				resourceType = getResourceType();
 			}
-			this.name = resourceName;
+			this.name = (resourceName != null ? resourceName : "");
 			this.lookupType = resourceType;
-			String lookupValue = (lookupAttribute != null ?
-					(String) ReflectionUtils.invokeMethod(lookupAttribute, resource) : null);
+			String lookupValue = resource.lookup();
 			this.mappedName = (StringUtils.hasLength(lookupValue) ? lookupValue : resource.mappedName());
 			Lazy lazy = ae.getAnnotation(Lazy.class);
 			this.lazyLookup = (lazy != null && lazy.value());

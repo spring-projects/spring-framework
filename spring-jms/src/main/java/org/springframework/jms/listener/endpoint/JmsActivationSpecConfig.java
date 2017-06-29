@@ -44,22 +44,28 @@ public class JmsActivationSpecConfig {
 	private static final Constants sessionConstants = new Constants(Session.class);
 
 
+	@Nullable
 	private String destinationName;
 
 	private boolean pubSubDomain = false;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
 
+	@Nullable
 	private QosSettings replyQosSettings;
 
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
 
+	@Nullable
 	private String subscriptionName;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private String messageSelector;
 
 	private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -68,6 +74,7 @@ public class JmsActivationSpecConfig {
 
 	private int prefetchSize = -1;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
 
@@ -75,6 +82,7 @@ public class JmsActivationSpecConfig {
 		this.destinationName = destinationName;
 	}
 
+	@Nullable
 	public String getDestinationName() {
 		return this.destinationName;
 	}
@@ -104,6 +112,7 @@ public class JmsActivationSpecConfig {
 		this.replyQosSettings = replyQosSettings;
 	}
 
+	@Nullable
 	public QosSettings getReplyQosSettings() {
 		return this.replyQosSettings;
 	}

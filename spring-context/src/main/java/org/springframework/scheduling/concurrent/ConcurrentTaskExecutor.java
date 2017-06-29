@@ -63,6 +63,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
+	@Nullable
 	private static Class<?> managedExecutorServiceClass;
 
 	static {

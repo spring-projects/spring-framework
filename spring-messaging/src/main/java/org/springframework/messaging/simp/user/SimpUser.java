@@ -44,7 +44,7 @@ public interface SimpUser {
 	 * @return the matching session, or {@code null} if none found
 	 */
 	@Nullable
-	SimpSession getSession(@Nullable String sessionId);
+	SimpSession getSession(String sessionId);
 
 	/**
 	 * Return the sessions for the user.

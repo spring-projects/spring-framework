@@ -58,6 +58,7 @@ public class HandlerMethod {
 
 	private final Object bean;
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final Class<?> beanType;
@@ -118,7 +119,10 @@ public class HandlerMethod {
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
 		Class<?> beanType = beanFactory.getType(beanName);
-		this.beanType = (beanType != null ? ClassUtils.getUserClass(beanType) : null);
+		if (beanType == null) {
+			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
+		}
+		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
@@ -301,6 +305,7 @@ public class HandlerMethod {
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
 		if (this.bean instanceof String) {
+			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
@@ -380,6 +385,7 @@ public class HandlerMethod {
 	 */
 	private class ReturnValueMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
 		public ReturnValueMethodParameter(@Nullable Object returnValue) {

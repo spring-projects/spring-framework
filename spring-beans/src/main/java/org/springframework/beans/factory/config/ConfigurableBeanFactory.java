@@ -91,6 +91,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Return this factory's class loader for loading bean classes.
 	 */
+	@Nullable
 	ClassLoader getBeanClassLoader();
 
 	/**

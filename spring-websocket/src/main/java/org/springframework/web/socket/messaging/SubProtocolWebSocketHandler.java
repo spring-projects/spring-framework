@@ -89,6 +89,7 @@ public class SubProtocolWebSocketHandler
 
 	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<>();
 
+	@Nullable
 	private SubProtocolHandler defaultProtocolHandler;
 
 	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();

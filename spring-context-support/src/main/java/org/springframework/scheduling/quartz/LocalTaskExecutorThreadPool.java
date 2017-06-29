@@ -24,6 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 /**
  * Quartz ThreadPool adapter that delegates to a Spring-managed
  * TaskExecutor instance, specified on SchedulerFactoryBean.
@@ -37,6 +40,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Executor taskExecutor;
 
 
@@ -72,6 +76,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 
 	@Override
 	public boolean runInThread(Runnable runnable) {
+		Assert.state(this.taskExecutor != null, "No TaskExecutor available");
 		try {
 			this.taskExecutor.execute(runnable);
 			return true;

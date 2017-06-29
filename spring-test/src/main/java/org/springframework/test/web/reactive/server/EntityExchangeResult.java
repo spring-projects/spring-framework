@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  */
 public class EntityExchangeResult<T> extends ExchangeResult {
 
+	@Nullable
 	private final T body;
 
 

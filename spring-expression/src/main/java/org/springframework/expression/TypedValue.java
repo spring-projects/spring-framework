@@ -34,8 +34,10 @@ public class TypedValue {
 	public static final TypedValue NULL = new TypedValue(null);
 
 
+	@Nullable
 	private final Object value;
 
+	@Nullable
 	private TypeDescriptor typeDescriptor;
 
 

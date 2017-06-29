@@ -26,8 +26,8 @@ import javax.annotation.meta.TypeQualifierNickname;
 import javax.annotation.meta.When;
 
 /**
- * A common Spring annotation to declare that the annotated parameter or
- * return value could be {@code null} under some circumstances.
+ * A common Spring annotation to declare that the annotated parameter,
+ * return value or field could be {@code null} under some circumstances.
  *
  * <p>Should be used at parameters and return values level in association
  * with {@link NonNullApi} package-level annotations.
@@ -36,11 +36,12 @@ import javax.annotation.meta.When;
  * common tools with JSR-305 support.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  * @see NonNullApi
  * @see javax.annotation.Nullable
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull(when = When.MAYBE)

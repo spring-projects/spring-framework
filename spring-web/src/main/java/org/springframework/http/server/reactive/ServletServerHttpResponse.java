@@ -39,6 +39,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,8 +54,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private final int bufferSize;
 
+	@Nullable
 	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
 
+	@Nullable
 	private volatile ResponseBodyProcessor bodyProcessor;
 
 	private volatile boolean flushOnNext;
@@ -249,8 +252,9 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			try {
 				ServletOutputStream outputStream = response.getOutputStream();
-				bodyProcessor = new ResponseBodyProcessor(outputStream);
-				return bodyProcessor;
+				ResponseBodyProcessor processor = new ResponseBodyProcessor(outputStream);
+				bodyProcessor = processor;
+				return processor;
 			}
 			catch (IOException ex) {
 				throw new UncheckedIOException(ex);

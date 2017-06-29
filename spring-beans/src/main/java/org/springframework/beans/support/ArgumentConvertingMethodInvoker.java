@@ -41,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 
+	@Nullable
 	private TypeConverter typeConverter;
 
 	private boolean useDefaultConverter = true;

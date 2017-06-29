@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,15 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	private final ProxyMethodInvocation methodInvocation;
 
+	@Nullable
 	private Object[] defensiveCopyOfArgs;
 
 	/** Lazily initialized signature object */
+	@Nullable
 	private Signature signature;
 
 	/** Lazily initialized source location object */
+	@Nullable
 	private SourceLocation sourceLocation;
 
 
@@ -178,6 +181,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 */
 	private class MethodSignatureImpl implements MethodSignature {
 
+		@Nullable
 		private volatile String[] parameterNames;
 
 		@Override
@@ -216,6 +220,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		}
 
 		@Override
+		@Nullable
 		public String[] getParameterNames() {
 			if (this.parameterNames == null) {
 				this.parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());

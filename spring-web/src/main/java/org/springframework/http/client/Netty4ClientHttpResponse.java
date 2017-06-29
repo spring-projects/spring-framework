@@ -25,6 +25,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,6 +44,7 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ByteBufInputStream body;
 
+	@Nullable
 	private volatile HttpHeaders headers;
 
 
@@ -70,14 +72,15 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			HttpHeaders headers = new HttpHeaders();
+		HttpHeaders headers = this.headers;
+		if (headers == null) {
+			headers = new HttpHeaders();
 			for (Map.Entry<String, String> entry : this.nettyResponse.headers()) {
 				headers.add(entry.getKey(), entry.getValue());
 			}
 			this.headers = headers;
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

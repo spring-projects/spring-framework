@@ -164,13 +164,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final Scanner scanner;
 
+		@Nullable
 		private LineInfo previous;
-
 
 		public LineGenerator(String content) {
 			this.scanner = new Scanner(content);
 		}
-
 
 		@Override
 		public void accept(SynchronousSink<LineInfo> sink) {
@@ -186,6 +185,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineInfo {
 
 		private final String line;
@@ -194,8 +194,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final boolean link;
 
-
-		public LineInfo(String line, LineInfo previousLine) {
+		public LineInfo(String line, @Nullable LineInfo previousLine) {
 			this.line = line;
 			this.cacheSection = initCacheSectionFlag(line, previousLine);
 			this.link = iniLinkFlag(line, this.cacheSection);
@@ -222,7 +221,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
 		}
 
-
 		public String getLine() {
 			return this.line;
 		}
@@ -236,12 +234,13 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineOutput {
 
 		private final String line;
 
+		@Nullable
 		private final Resource resource;
-
 
 		public LineOutput(String line, @Nullable Resource resource) {
 			this.line = line;
@@ -258,6 +257,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineAggregator {
 
 		private final StringWriter writer = new StringWriter();
@@ -265,7 +265,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		private final ByteArrayOutputStream baos;
 
 		private final Resource resource;
-
 
 		public LineAggregator(Resource resource, String content) {
 			this.resource = resource;

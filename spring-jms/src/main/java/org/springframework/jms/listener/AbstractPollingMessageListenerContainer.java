@@ -87,6 +87,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private boolean sessionTransactedCalled = false;
 
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
 	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -232,7 +233,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doReceiveAndExecute
 	 */
-	protected boolean receiveAndExecute(Object invoker, Session session, MessageConsumer consumer)
+	protected boolean receiveAndExecute(
+			Object invoker, @Nullable Session session, @Nullable MessageConsumer consumer)
 			throws JMSException {
 
 		if (this.transactionManager != null) {
@@ -242,17 +244,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
-			catch (JMSException ex) {
-				rollbackOnException(status, ex);
+			catch (JMSException | RuntimeException | Error ex) {
+				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
-			}
-			catch (RuntimeException ex) {
-				rollbackOnException(status, ex);
-				throw ex;
-			}
-			catch (Error err) {
-				rollbackOnException(status, err);
-				throw err;
 			}
 			this.transactionManager.commit(status);
 			return messageReceived;
@@ -398,10 +392,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @param status object representing the transaction
 	 * @param ex the thrown listener exception or error
 	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) {
+	private void rollbackOnException(PlatformTransactionManager manager, TransactionStatus status, Throwable ex) {
 		logger.debug("Initiating transaction rollback on listener exception", ex);
 		try {
-			this.transactionManager.rollback(status);
+			manager.rollback(status);
 		}
 		catch (RuntimeException ex2) {
 			logger.error("Listener exception overridden by rollback exception", ex);

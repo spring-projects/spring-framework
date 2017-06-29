@@ -49,8 +49,10 @@ import org.springframework.util.MimeType;
  */
 public class MarshallingMessageConverter extends AbstractMessageConverter {
 
+	@Nullable
 	private Marshaller marshaller;
 
+	@Nullable
 	private Unmarshaller unmarshaller;
 
 
@@ -97,6 +99,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Return the configured Marshaller.
 	 */
+	@Nullable
 	public Marshaller getMarshaller() {
 		return this.marshaller;
 	}
@@ -111,6 +114,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Return the configured unmarshaller.
 	 */
+	@Nullable
 	public Unmarshaller getUnmarshaller() {
 		return this.unmarshaller;
 	}
@@ -123,7 +127,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
+	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
 		return (supportsMimeType(headers) && this.marshaller != null &&
 				this.marshaller.supports(payload.getClass()));
 	}

@@ -137,8 +137,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final String INFER_METHOD = "(inferred)";
 
 
+	@Nullable
 	private volatile Object beanClass;
 
+	@Nullable
 	private String scope = SCOPE_DEFAULT;
 
 	private boolean abstractFlag = false;
@@ -149,6 +151,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
+	@Nullable
 	private String[] dependsOn;
 
 	private boolean autowireCandidate = true;
@@ -157,14 +160,17 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>(0);
 
+	@Nullable
 	private Supplier<?> instanceSupplier;
 
 	private boolean nonPublicAccessAllowed = true;
 
 	private boolean lenientConstructorResolution = true;
 
+	@Nullable
 	private String factoryBeanName;
 
+	@Nullable
 	private String factoryMethodName;
 
 	private ConstructorArgumentValues constructorArgumentValues;
@@ -173,8 +179,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
+	@Nullable
 	private String initMethodName;
 
+	@Nullable
 	private String destroyMethodName;
 
 	private boolean enforceInitMethod = true;
@@ -185,8 +193,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
 
+	@Nullable
 	private String description;
 
+	@Nullable
 	private Resource resource;
 
 
@@ -202,8 +212,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * constructor argument values and property values.
 	 */
 	protected AbstractBeanDefinition(@Nullable ConstructorArgumentValues cargs, @Nullable MutablePropertyValues pvs) {
-		setConstructorArgumentValues(cargs);
-		setPropertyValues(pvs);
+		this.constructorArgumentValues = (cargs != null ? cargs : new ConstructorArgumentValues());
+		this.propertyValues = (pvs != null ? pvs : new MutablePropertyValues());
 	}
 
 	/**
@@ -219,8 +229,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		setLazyInit(original.isLazyInit());
 		setFactoryBeanName(original.getFactoryBeanName());
 		setFactoryMethodName(original.getFactoryMethodName());
-		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
-		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
+		this.constructorArgumentValues = new ConstructorArgumentValues(original.getConstructorArgumentValues());
+		this.propertyValues = new MutablePropertyValues(original.getPropertyValues());
 		setRole(original.getRole());
 		setSource(original.getSource());
 		copyAttributesFrom(original);
@@ -399,7 +409,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
 	@Nullable
-	public Class<?> resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
+	public Class<?> resolveBeanClass(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
 		String className = getBeanClassName();
 		if (className == null) {
 			return null;
@@ -428,6 +438,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the name of the target scope for the bean.
 	 */
 	@Override
+	@Nullable
 	public String getScope() {
 		return this.scope;
 	}
@@ -574,6 +585,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the bean names that this bean depends on.
 	 */
 	@Override
+	@Nullable
 	public String[] getDependsOn() {
 		return this.dependsOn;
 	}
@@ -735,6 +747,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the factory bean name, if any.
 	 */
 	@Override
+	@Nullable
 	public String getFactoryBeanName() {
 		return this.factoryBeanName;
 	}
@@ -756,6 +769,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return a factory method, if any.
 	 */
 	@Override
+	@Nullable
 	public String getFactoryMethodName() {
 		return this.factoryMethodName;
 	}
@@ -923,6 +937,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return a human-readable description of this bean definition.
 	 */
 	@Override
+	@Nullable
 	public String getDescription() {
 		return this.description;
 	}
@@ -931,13 +946,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the resource that this bean definition came from
 	 * (for the purpose of showing context in case of errors).
 	 */
-	public void setResource(Resource resource) {
+	public void setResource(@Nullable Resource resource) {
 		this.resource = resource;
 	}
 
 	/**
 	 * Return the resource that this bean definition came from.
 	 */
+	@Nullable
 	public Resource getResource() {
 		return this.resource;
 	}

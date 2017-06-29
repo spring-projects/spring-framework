@@ -392,6 +392,7 @@ public interface ServerResponse {
 		Mono<ServerResponse> render(String name, Map<String, ?> model);
 	}
 
+
 	/**
 	 * Defines the context used during the {@link #writeTo(ServerWebExchange, Context)}.
 	 */
@@ -399,13 +400,13 @@ public interface ServerResponse {
 
 		/**
 		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
-		 * @return the stream of message writers
+		 * @return the list of message writers
 		 */
 		List<HttpMessageWriter<?>> messageWriters();
 
 		/**
 		 * Return the  {@link ViewResolver}s to be used for view name resolution.
-		 * @return the stream of view resolvers
+		 * @return the list of view resolvers
 		 */
 		List<ViewResolver> viewResolvers();
 	}

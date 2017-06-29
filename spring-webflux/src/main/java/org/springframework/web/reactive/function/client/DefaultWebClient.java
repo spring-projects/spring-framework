@@ -63,8 +63,10 @@ class DefaultWebClient implements WebClient {
 
 	private final UriBuilderFactory uriBuilderFactory;
 
+	@Nullable
 	private final HttpHeaders defaultHeaders;
 
+	@Nullable
 	private final MultiValueMap<String, String> defaultCookies;
 
 	private final DefaultWebClientBuilder builder;
@@ -170,10 +172,13 @@ class DefaultWebClient implements WebClient {
 
 		private final URI uri;
 
+		@Nullable
 		private HttpHeaders headers;
 
+		@Nullable
 		private MultiValueMap<String, String> cookies;
 
+		@Nullable
 		private BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		DefaultRequestBodySpec(HttpMethod httpMethod, URI uri) {
@@ -284,11 +289,9 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public Mono<ClientResponse> exchange() {
-
-			ClientRequest request = this.inserter != null ?
+			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
-					initRequestBuilder().build();
-
+					initRequestBuilder().build());
 			return exchangeFunction.exchange(request);
 		}
 

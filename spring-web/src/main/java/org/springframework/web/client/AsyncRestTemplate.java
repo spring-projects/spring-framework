@@ -593,6 +593,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 
 		private final URI url;
 
+		@Nullable
 		private final ResponseExtractor<T> responseExtractor;
 
 		public ResponseExtractorFuture(HttpMethod method, URI url,

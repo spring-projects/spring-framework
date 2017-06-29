@@ -29,6 +29,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -67,10 +68,13 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private int concurrentConsumers = 1;
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private Set<Session> sessions;
 
+	@Nullable
 	private Set<MessageConsumer> consumers;
 
 	private final Object consumersMonitor = new Object();
@@ -335,9 +339,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				for (MessageConsumer consumer : this.consumers) {
 					JmsUtils.closeMessageConsumer(consumer);
 				}
-				logger.debug("Closing JMS Sessions");
-				for (Session session : this.sessions) {
-					JmsUtils.closeSession(session);
+				if (this.sessions != null) {
+					logger.debug("Closing JMS Sessions");
+					for (Session session : this.sessions) {
+						JmsUtils.closeSession(session);
+					}
 				}
 			}
 		}

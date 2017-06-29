@@ -52,9 +52,10 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private volatile D defaultDestination;
+	@Nullable
+	private D defaultDestination;
 
-	private volatile MessageConverter converter = new SimpleMessageConverter();
+	private MessageConverter converter = new SimpleMessageConverter();
 
 
 	/**

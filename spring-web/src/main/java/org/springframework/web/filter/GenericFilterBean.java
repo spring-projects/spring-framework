@@ -84,12 +84,16 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Environment environment;
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private FilterConfig filterConfig;
 
 	private final Set<String> requiredProperties = new HashSet<>(4);

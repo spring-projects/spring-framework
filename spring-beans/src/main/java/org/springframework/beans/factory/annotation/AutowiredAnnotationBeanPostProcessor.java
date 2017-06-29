@@ -128,6 +128,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
+	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private final Set<String> lookupMethodsChecked = Collections.newSetFromMap(new ConcurrentHashMap<>(256));
@@ -242,6 +243,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				ReflectionUtils.doWithMethods(beanClass, method -> {
 					Lookup lookup = method.getAnnotation(Lookup.class);
 					if (lookup != null) {
+						Assert.state(beanFactory != null, "No BeanFactory available");
 						LookupOverride override = new LookupOverride(method, lookup.value());
 						try {
 							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
@@ -504,7 +506,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private void registerDependentBeans(@Nullable String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
-				if (this.beanFactory.containsBean(autowiredBeanName)) {
+				if (this.beanFactory != null && this.beanFactory.containsBean(autowiredBeanName)) {
 					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				}
 				if (logger.isDebugEnabled()) {
@@ -519,9 +521,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * Resolve the specified cached method argument or field value.
 	 */
 	@Nullable
-	private Object resolvedCachedArgument(@Nullable String beanName, Object cachedArgument) {
+	private Object resolvedCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor) {
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
+			Assert.state(beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		}
 		else {
@@ -539,6 +542,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private volatile boolean cached = false;
 
+		@Nullable
 		private volatile Object cachedFieldValue;
 
 		public AutowiredFieldElement(Field field, boolean required) {
@@ -557,6 +561,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
 				desc.setContainingClass(bean.getClass());
 				Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
+				Assert.state(beanFactory != null, "No BeanFactory available");
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				try {
 					value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
@@ -603,6 +608,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private volatile boolean cached = false;
 
+		@Nullable
 		private volatile Object[] cachedMethodArguments;
 
 		public AutowiredMethodElement(Method method, boolean required, @Nullable PropertyDescriptor pd) {
@@ -626,6 +632,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				arguments = new Object[paramTypes.length];
 				DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
 				Set<String> autowiredBeans = new LinkedHashSet<>(paramTypes.length);
+				Assert.state(beanFactory != null, "No BeanFactory available");
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				for (int i = 0; i < arguments.length; i++) {
 					MethodParameter methodParam = new MethodParameter(method, i);
@@ -647,9 +654,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				synchronized (this) {
 					if (!this.cached) {
 						if (arguments != null) {
-							this.cachedMethodArguments = new Object[paramTypes.length];
+							Object[] cachedMethodArguments = new Object[paramTypes.length];
 							for (int i = 0; i < arguments.length; i++) {
-								this.cachedMethodArguments[i] = descriptors[i];
+								cachedMethodArguments[i] = descriptors[i];
 							}
 							registerDependentBeans(beanName, autowiredBeans);
 							if (autowiredBeans.size() == paramTypes.length) {
@@ -658,12 +665,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 									String autowiredBeanName = it.next();
 									if (beanFactory.containsBean(autowiredBeanName)) {
 										if (beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
-											this.cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
+											cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
 													descriptors[i], autowiredBeanName, paramTypes[i]);
 										}
 									}
 								}
 							}
+							this.cachedMethodArguments = cachedMethodArguments;
 						}
 						else {
 							this.cachedMethodArguments = null;
@@ -685,12 +693,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Nullable
 		private Object[] resolveCachedArguments(@Nullable String beanName) {
-			if (this.cachedMethodArguments == null) {
+			Object[] cachedMethodArguments = this.cachedMethodArguments;
+			if (cachedMethodArguments == null) {
 				return null;
 			}
-			Object[] arguments = new Object[this.cachedMethodArguments.length];
+			Object[] arguments = new Object[cachedMethodArguments.length];
 			for (int i = 0; i < arguments.length; i++) {
-				arguments[i] = resolvedCachedArgument(beanName, this.cachedMethodArguments[i]);
+				arguments[i] = resolvedCachedArgument(beanName, cachedMethodArguments[i]);
 			}
 			return arguments;
 		}

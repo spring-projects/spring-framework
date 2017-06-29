@@ -43,6 +43,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
 
+	@Nullable
 	private Proxy proxy;
 
 	private boolean bufferRequestBody = true;
@@ -55,6 +56,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private boolean outputStreaming = true;
 
+	@Nullable
 	private AsyncListenableTaskExecutor taskExecutor;
 
 

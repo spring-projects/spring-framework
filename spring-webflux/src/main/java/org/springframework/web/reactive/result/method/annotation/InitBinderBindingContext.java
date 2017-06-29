@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -71,10 +72,10 @@ class InitBinderBindingContext extends BindingContext {
 	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
 			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
 
-		Object returnValue = binderMethod.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder)
-				.getReturnValue();
+		HandlerResult result = binderMethod.invokeForHandlerResult(
+				exchange, this.binderMethodContext, dataBinder);
 
-		if (returnValue != null) {
+		if (result != null && result.getReturnValue() != null) {
 			throw new IllegalStateException(
 					"@InitBinder methods should return void: " + binderMethod);
 		}

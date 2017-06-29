@@ -19,6 +19,7 @@ package org.springframework.transaction.support;
 import java.io.Serializable;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -59,6 +60,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	private boolean readOnly = false;
 
+	@Nullable
 	private String name;
 
 

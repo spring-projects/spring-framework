@@ -33,8 +33,10 @@ public class BeanDefinitionDefaults {
 
 	private int autowireMode = AbstractBeanDefinition.AUTOWIRE_NO;
 
+	@Nullable
 	private String initMethodName;
 
+	@Nullable
 	private String destroyMethodName;
 
 

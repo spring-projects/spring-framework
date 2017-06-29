@@ -64,6 +64,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();

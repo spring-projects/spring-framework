@@ -43,6 +43,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private boolean classLoaderConfigured = false;
@@ -77,6 +78,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	/**
 	 * Return the configured proxy ClassLoader for this processor.
 	 */
+	@Nullable
 	protected ClassLoader getProxyClassLoader() {
 		return this.proxyClassLoader;
 	}

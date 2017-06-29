@@ -69,12 +69,14 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
 
+	@Nullable
 	private SockJsMessageCodec messageCodec;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<>();
 
+	@Nullable
 	private ScheduledFuture<?> sessionCleanupTask;
 
 	private boolean running;

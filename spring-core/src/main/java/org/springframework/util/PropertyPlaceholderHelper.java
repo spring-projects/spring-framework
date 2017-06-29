@@ -56,6 +56,7 @@ public class PropertyPlaceholderHelper {
 
 	private final String simplePrefix;
 
+	@Nullable
 	private final String valueSeparator;
 
 	private final boolean ignoreUnresolvablePlaceholders;

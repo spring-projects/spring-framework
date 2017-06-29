@@ -96,20 +96,26 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
 
 
+	@Nullable
 	private String scheme;
 
+	@Nullable
 	private String ssp;
 
+	@Nullable
 	private String userInfo;
 
+	@Nullable
 	private String host;
 
+	@Nullable
 	private String port;
 
 	private CompositePathComponentBuilder pathBuilder;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
+	@Nullable
 	private String fragment;
 
 

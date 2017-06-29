@@ -79,18 +79,24 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private Properties javaMailProperties = new Properties();
 
+	@Nullable
 	private Session session;
 
+	@Nullable
 	private String protocol;
 
+	@Nullable
 	private String host;
 
 	private int port = DEFAULT_PORT;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String defaultEncoding;
 
 	private FileTypeMap defaultFileTypeMap;

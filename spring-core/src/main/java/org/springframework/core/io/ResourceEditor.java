@@ -51,6 +51,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
 
+	@Nullable
 	private PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;

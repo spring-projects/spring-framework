@@ -41,20 +41,28 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
  */
 public class SockJsServiceRegistration {
 
+	@Nullable
 	private TaskScheduler scheduler;
 
+	@Nullable
 	private String clientLibraryUrl;
 
+	@Nullable
 	private Integer streamBytesLimit;
 
+	@Nullable
 	private Boolean sessionCookieNeeded;
 
+	@Nullable
 	private Long heartbeatTime;
 
+	@Nullable
 	private Long disconnectDelay;
 
+	@Nullable
 	private Integer httpMessageCacheSize;
 
+	@Nullable
 	private Boolean webSocketEnabled;
 
 	private final List<TransportHandler> transportHandlers = new ArrayList<>();
@@ -65,8 +73,10 @@ public class SockJsServiceRegistration {
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	@Nullable
 	private Boolean suppressCors;
 
+	@Nullable
 	private SockJsMessageCodec messageCodec;
 
 
@@ -75,7 +85,6 @@ public class SockJsServiceRegistration {
 
 	/**
 	 * Deprecated constructor with a TaskScheduler.
-	 *
 	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
 	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
 	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
@@ -91,7 +100,7 @@ public class SockJsServiceRegistration {
 	 * A scheduler instance to use for scheduling SockJS heart-beats.
 	 */
 	public SockJsServiceRegistration setTaskScheduler(TaskScheduler scheduler) {
-		Assert.notNull(scheduler, "TaskScheduler is required.");
+		Assert.notNull(scheduler, "TaskScheduler is required");
 		this.scheduler = scheduler;
 		return this;
 	}
@@ -302,9 +311,9 @@ public class SockJsServiceRegistration {
 	}
 
 	private TransportHandlingSockJsService createSockJsService() {
+		Assert.state(this.scheduler != null, "No TaskScheduler available");
 		Assert.state(this.transportHandlers.isEmpty() || this.transportHandlerOverrides.isEmpty(),
 				"Specify either TransportHandlers or TransportHandler overrides, not both");
-
 		return (!this.transportHandlers.isEmpty() ?
 				new TransportHandlingSockJsService(this.scheduler, this.transportHandlers) :
 				new DefaultSockJsService(this.scheduler, this.transportHandlerOverrides));

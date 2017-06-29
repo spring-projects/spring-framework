@@ -55,6 +55,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -92,35 +93,47 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private PersistenceProvider persistenceProvider;
 
+	@Nullable
 	private String persistenceUnitName;
 
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
+	@Nullable
 	private Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
+	@Nullable
 	private Class<? extends EntityManager> entityManagerInterface;
 
+	@Nullable
 	private JpaDialect jpaDialect;
 
+	@Nullable
 	private JpaVendorAdapter jpaVendorAdapter;
 
+	@Nullable
 	private AsyncTaskExecutor bootstrapExecutor;
 
 	private ClassLoader beanClassLoader = getClass().getClassLoader();
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private String beanName;
 
 	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
+	@Nullable
 	private EntityManagerFactory nativeEntityManagerFactory;
 
 	/** Future for lazily initializing raw target EntityManagerFactory */
+	@Nullable
 	private Future<EntityManagerFactory> nativeEntityManagerFactoryFuture;
 
 	/** Exposed client-level EntityManagerFactory proxy */
+	@Nullable
 	private EntityManagerFactory entityManagerFactory;
 
 
@@ -489,6 +502,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			return this.nativeEntityManagerFactory;
 		}
 		else {
+			Assert.state(this.nativeEntityManagerFactoryFuture != null, "No native EntityManagerFactory available");
 			try {
 				return this.nativeEntityManagerFactoryFuture.get();
 			}
@@ -538,10 +552,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 */
 	@Override
 	public void destroy() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+		if (this.entityManagerFactory != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+			}
+			this.entityManagerFactory.close();
 		}
-		this.entityManagerFactory.close();
 	}
 
 

@@ -47,6 +47,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 
 	private final Class<? extends Number> numberClass;
 
+	@Nullable
 	private final NumberFormat numberFormat;
 
 	private final boolean allowEmpty;

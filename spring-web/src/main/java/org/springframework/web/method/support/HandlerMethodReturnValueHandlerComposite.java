@@ -38,8 +38,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
-			new ArrayList<>();
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
 
 	/**
@@ -119,7 +118,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public HandlerMethodReturnValueHandlerComposite addHandlers(@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
+	public HandlerMethodReturnValueHandlerComposite addHandlers(
+			@Nullable List<? extends HandlerMethodReturnValueHandler> handlers) {
+
 		if (handlers != null) {
 			for (HandlerMethodReturnValueHandler handler : handlers) {
 				this.returnValueHandlers.add(handler);

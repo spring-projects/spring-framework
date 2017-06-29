@@ -50,6 +50,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
+	@Nullable
 	private SpelNodeImpl parent;
 
 	/**
@@ -61,6 +62,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * It does not include the trailing semicolon (for non array reference types).
 	 * Some examples: Ljava/lang/String, I, [I
      */
+	@Nullable
 	protected volatile String exitTypeDescriptor;
 
 
@@ -182,6 +184,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
 	}
 
+	@Nullable
 	public String getExitDescriptor() {
 		return this.exitTypeDescriptor;
 	}
@@ -222,25 +225,25 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
 			}
 			
-			SpelNodeImpl lastchild = (childCount == 0 ? null : arguments[childCount - 1]);
-			String arraytype = paramDescriptors[paramDescriptors.length - 1];
+			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
+			String arrayType = paramDescriptors[paramDescriptors.length - 1];
 			// Determine if the final passed argument is already suitably packaged in array
 			// form to be passed to the method
-			if (lastchild != null && lastchild.getExitDescriptor().equals(arraytype)) {
-				generateCodeForArgument(mv, cf, lastchild, paramDescriptors[p]);
+			if (lastChild != null && arrayType.equals(lastChild.getExitDescriptor())) {
+				generateCodeForArgument(mv, cf, lastChild, paramDescriptors[p]);
 			}
 			else {
-				arraytype = arraytype.substring(1); // trim the leading '[', may leave other '['		
+				arrayType = arrayType.substring(1); // trim the leading '[', may leave other '['
 				// build array big enough to hold remaining arguments
-				CodeFlow.insertNewArrayCode(mv, childCount - p, arraytype);
+				CodeFlow.insertNewArrayCode(mv, childCount - p, arrayType);
 				// Package up the remaining arguments into the array
 				int arrayindex = 0;
 				while (p < childCount) {
 					SpelNodeImpl child = arguments[p];
 					mv.visitInsn(DUP);
 					CodeFlow.insertOptimalLoad(mv, arrayindex++);
-					generateCodeForArgument(mv, cf, child, arraytype);
-					CodeFlow.insertArrayStore(mv, arraytype);
+					generateCodeForArgument(mv, cf, child, arrayType);
+					CodeFlow.insertArrayStore(mv, arrayType);
 					p++;
 				}
 			}

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
@@ -50,6 +51,7 @@ import org.springframework.web.util.NestedServletException;
  */
 public class GroovyMarkupView extends AbstractTemplateView {
 
+	@Nullable
 	private MarkupTemplateEngine engine;
 
 
@@ -99,6 +101,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 
 	@Override
 	public boolean checkResource(Locale locale) throws Exception {
+		Assert.state(this.engine != null, "No MarkupTemplateEngine set");
 		try {
 			this.engine.resolveTemplate(getUrl());
 		}
@@ -124,6 +127,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 	 * for the given view URL.
 	 */
 	protected Template getTemplate(String viewUrl) throws Exception {
+		Assert.state(this.engine != null, "No MarkupTemplateEngine set");
 		try {
 			return this.engine.createTemplateByPath(viewUrl);
 		}

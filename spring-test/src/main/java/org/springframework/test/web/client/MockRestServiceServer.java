@@ -23,6 +23,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
@@ -210,8 +211,10 @@ public class MockRestServiceServer {
 
 	private static class DefaultBuilder implements MockRestServiceServerBuilder {
 
+		@Nullable
 		private final RestTemplate restTemplate;
 
+		@Nullable
 		private final org.springframework.web.client.AsyncRestTemplate asyncRestTemplate;
 
 		private boolean ignoreExpectOrder;

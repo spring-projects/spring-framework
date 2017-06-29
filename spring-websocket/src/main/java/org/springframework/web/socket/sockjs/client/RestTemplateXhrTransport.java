@@ -165,6 +165,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		private final HttpHeaders headers;
 
+		@Nullable
 		private final String body;
 
 		public XhrRequestCallback(HttpHeaders headers) {
@@ -178,9 +179,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		@Override
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			if (this.headers != null) {
-				request.getHeaders().putAll(this.headers);
-			}
+			request.getHeaders().putAll(this.headers);
 			if (this.body != null) {
 				StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
 			}

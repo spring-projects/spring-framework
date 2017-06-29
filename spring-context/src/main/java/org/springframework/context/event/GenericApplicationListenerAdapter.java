@@ -37,6 +37,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
+	@Nullable
 	private final ResolvableType declaredEventType;
 
 

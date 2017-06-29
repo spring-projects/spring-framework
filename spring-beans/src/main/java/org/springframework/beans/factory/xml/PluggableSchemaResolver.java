@@ -66,11 +66,13 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	private static final Log logger = LogFactory.getLog(PluggableSchemaResolver.class);
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 	private final String schemaMappingsLocation;
 
 	/** Stores the mapping of schema URL -> local schema path */
+	@Nullable
 	private volatile Map<String, String> schemaMappings;
 
 
@@ -136,9 +138,11 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Load the specified schema mappings lazily.
 	 */
 	private Map<String, String> getSchemaMappings() {
-		if (this.schemaMappings == null) {
+		Map<String, String> schemaMappings = this.schemaMappings;
+		if (schemaMappings == null) {
 			synchronized (this) {
-				if (this.schemaMappings == null) {
+				schemaMappings = this.schemaMappings;
+				if (schemaMappings == null) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
 					}
@@ -148,8 +152,9 @@ public class PluggableSchemaResolver implements EntityResolver {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Loaded schema mappings: " + mappings);
 						}
-						Map<String, String> schemaMappings = new ConcurrentHashMap<>(mappings.size());
-						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
+						Map<String, String> mappingsToUse = new ConcurrentHashMap<>(mappings.size());
+						CollectionUtils.mergePropertiesIntoMap(mappings, mappingsToUse);
+						schemaMappings = mappingsToUse;
 						this.schemaMappings = schemaMappings;
 					}
 					catch (IOException ex) {
@@ -159,7 +164,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 				}
 			}
 		}
-		return this.schemaMappings;
+		return schemaMappings;
 	}
 
 

@@ -87,12 +87,16 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class FreeMarkerView extends AbstractTemplateView {
 
+	@Nullable
 	private String encoding;
 
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private TaglibFactory taglibFactory;
 
+	@Nullable
 	private ServletContextHashModel servletContextHashModel;
 
 

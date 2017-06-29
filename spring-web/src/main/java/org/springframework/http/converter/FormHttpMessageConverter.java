@@ -100,6 +100,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private Charset charset = DEFAULT_CHARSET;
 
+	@Nullable
 	private Charset multipartCharset;
 
 
@@ -365,7 +366,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * we encode directly using the configured {@link #setCharset(Charset)}.
 	 */
 	private boolean isFilenameCharsetSet() {
-		return this.multipartCharset != null;
+		return (this.multipartCharset != null);
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {

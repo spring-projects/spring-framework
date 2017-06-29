@@ -35,6 +35,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
 	private final String name;
 
+	@Nullable
 	private final Object source;
 
 	private final List<ComponentDefinition> nestedComponents = new LinkedList<>();
@@ -58,6 +59,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

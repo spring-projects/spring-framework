@@ -145,6 +145,7 @@ public final class CloseStatus {
 
 	private final int code;
 
+	@Nullable
 	private final String reason;
 
 

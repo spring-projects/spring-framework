@@ -66,6 +66,7 @@ import org.springframework.util.Assert;
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 
@@ -273,6 +274,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	 */
 	private static class CciLocalTransactionObject {
 
+		@Nullable
 		private ConnectionHolder connectionHolder;
 
 		public void setConnectionHolder(@Nullable ConnectionHolder connectionHolder) {

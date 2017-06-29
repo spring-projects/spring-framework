@@ -72,10 +72,13 @@ public class CciTemplate implements CciOperations {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
+	@Nullable
 	private ConnectionSpec connectionSpec;
 
+	@Nullable
 	private RecordCreator outputRecordCreator;
 
 
@@ -106,7 +109,9 @@ public class CciTemplate implements CciOperations {
 	 */
 	public CciTemplate(ConnectionFactory connectionFactory, @Nullable ConnectionSpec connectionSpec) {
 		setConnectionFactory(connectionFactory);
-		setConnectionSpec(connectionSpec);
+		if (connectionSpec != null) {
+			setConnectionSpec(connectionSpec);
+		}
 		afterPropertiesSet();
 	}
 
@@ -114,7 +119,7 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Set the CCI ConnectionFactory to obtain Connections from.
 	 */
-	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
+	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -136,7 +141,7 @@ public class CciTemplate implements CciOperations {
 	 * Set the CCI ConnectionSpec that this template instance is
 	 * supposed to obtain Connections for.
 	 */
-	public void setConnectionSpec(@Nullable ConnectionSpec connectionSpec) {
+	public void setConnectionSpec(ConnectionSpec connectionSpec) {
 		this.connectionSpec = connectionSpec;
 	}
 
@@ -160,7 +165,7 @@ public class CciTemplate implements CciOperations {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record)
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 */
-	public void setOutputRecordCreator(@Nullable RecordCreator creator) {
+	public void setOutputRecordCreator(RecordCreator creator) {
 		this.outputRecordCreator = creator;
 	}
 
@@ -189,10 +194,11 @@ public class CciTemplate implements CciOperations {
 	 * @see #setConnectionSpec
 	 */
 	public CciTemplate getDerivedTemplate(ConnectionSpec connectionSpec) {
-		CciTemplate derived = new CciTemplate();
-		derived.setConnectionFactory(getConnectionFactory());
-		derived.setConnectionSpec(connectionSpec);
-		derived.setOutputRecordCreator(getOutputRecordCreator());
+		CciTemplate derived = new CciTemplate(obtainConnectionFactory(), connectionSpec);
+		RecordCreator recordCreator = getOutputRecordCreator();
+		if (recordCreator != null) {
+			derived.setOutputRecordCreator(recordCreator);
+		}
 		return derived;
 	}
 

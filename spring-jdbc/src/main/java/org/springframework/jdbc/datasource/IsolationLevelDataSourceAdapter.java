@@ -58,6 +58,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	/** Constants instance for TransactionDefinition */
 	private static final Constants constants = new Constants(TransactionDefinition.class);
 
+	@Nullable
 	private Integer isolationLevel;
 
 

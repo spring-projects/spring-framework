@@ -35,6 +35,7 @@ public class MockJspWriter extends JspWriter {
 
 	private final HttpServletResponse response;
 
+	@Nullable
 	private PrintWriter targetWriter;
 
 

@@ -261,12 +261,16 @@ class ExtendedBeanInfo implements BeanInfo {
 
 	static class SimplePropertyDescriptor extends PropertyDescriptor {
 
+		@Nullable
 		private Method readMethod;
 
+		@Nullable
 		private Method writeMethod;
 
+		@Nullable
 		private Class<?> propertyType;
 
+		@Nullable
 		private Class<?> propertyEditorClass;
 
 		public SimplePropertyDescriptor(PropertyDescriptor original) throws IntrospectionException {
@@ -282,6 +286,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getReadMethod() {
 			return this.readMethod;
 		}
@@ -292,6 +297,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getWriteMethod() {
 			return this.writeMethod;
 		}
@@ -315,6 +321,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getPropertyEditorClass() {
 			return this.propertyEditorClass;
 		}
@@ -345,18 +352,25 @@ class ExtendedBeanInfo implements BeanInfo {
 
 	static class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 
+		@Nullable
 		private Method readMethod;
 
+		@Nullable
 		private Method writeMethod;
 
+		@Nullable
 		private Class<?> propertyType;
 
+		@Nullable
 		private Method indexedReadMethod;
 
+		@Nullable
 		private Method indexedWriteMethod;
 
+		@Nullable
 		private Class<?> indexedPropertyType;
 
+		@Nullable
 		private Class<?> propertyEditorClass;
 
 		public SimpleIndexedPropertyDescriptor(IndexedPropertyDescriptor original) throws IntrospectionException {
@@ -379,6 +393,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getReadMethod() {
 			return this.readMethod;
 		}
@@ -389,6 +404,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getWriteMethod() {
 			return this.writeMethod;
 		}
@@ -412,6 +428,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getIndexedReadMethod() {
 			return this.indexedReadMethod;
 		}
@@ -422,6 +439,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Method getIndexedWriteMethod() {
 			return this.indexedWriteMethod;
 		}
@@ -446,6 +464,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getPropertyEditorClass() {
 			return this.propertyEditorClass;
 		}

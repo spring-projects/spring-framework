@@ -59,9 +59,11 @@ public class SpelExpression implements Expression {
 	private final SpelParserConfiguration configuration;
 
 	// The default context is used if no override is supplied by the user
+	@Nullable
 	private EvaluationContext evaluationContext;
 
 	// Holds the compiled form of the expression (if it has been compiled)
+	@Nullable
 	private CompiledExpression compiledAst;
 
 	// Count of many times as the expression been interpreted - can trigger compilation

@@ -54,6 +54,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	private final HttpContext httpContext;
 
+	@Nullable
 	private Body body;
 
 
@@ -89,9 +90,9 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest && body != null) {
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest && this.body != null) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
-			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
+			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), this.body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 

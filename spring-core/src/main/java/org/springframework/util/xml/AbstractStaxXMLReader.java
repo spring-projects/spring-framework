@@ -56,6 +56,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private boolean namespacePrefixesFeature = false;
 
+	@Nullable
 	private Boolean isStandalone;
 
 	private final Map<String, String> namespaces = new LinkedHashMap<>();

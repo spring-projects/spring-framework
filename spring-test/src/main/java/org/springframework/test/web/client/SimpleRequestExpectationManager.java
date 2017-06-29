@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
  */
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
+	@Nullable
 	private Iterator<RequestExpectation> expectationIterator;
 
 	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();
@@ -52,7 +54,7 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
 		RequestExpectation expectation = this.repeatExpectations.findExpectation(request);
 		if (expectation == null) {
-			if (!this.expectationIterator.hasNext()) {
+			if (this.expectationIterator == null || !this.expectationIterator.hasNext()) {
 				throw createUnexpectedRequestError(request);
 			}
 			expectation = this.expectationIterator.next();

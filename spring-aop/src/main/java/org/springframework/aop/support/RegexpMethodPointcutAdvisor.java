@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -44,8 +45,10 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
+	@Nullable
 	private String[] patterns;
 
+	@Nullable
 	private AbstractRegexpMethodPointcut pointcut;
 
 	private final Object pointcutMonitor = new SerializableMonitor();
@@ -121,7 +124,9 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 		synchronized (this.pointcutMonitor) {
 			if (this.pointcut == null) {
 				this.pointcut = createPointcut();
-				this.pointcut.setPatterns(this.patterns);
+				if (this.patterns != null) {
+					this.pointcut.setPatterns(this.patterns);
+				}
 			}
 			return pointcut;
 		}

@@ -37,6 +37,7 @@ public class UserDestinationResult {
 
 	private final String subscribeDestination;
 
+	@Nullable
 	private final String user;
 
 

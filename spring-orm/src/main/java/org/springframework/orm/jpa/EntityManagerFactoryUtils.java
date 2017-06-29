@@ -317,7 +317,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param emf the EntityManagerFactory that the EntityManager has been created with
 	 * @see JpaDialect#cleanupTransaction
 	 */
-	private static void cleanupTransaction(Object transactionData, EntityManagerFactory emf) {
+	private static void cleanupTransaction(@Nullable Object transactionData, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
@@ -443,8 +443,10 @@ public abstract class EntityManagerFactoryUtils {
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
+		@Nullable
 		private final Object transactionData;
 
+		@Nullable
 		private final JpaDialect jpaDialect;
 
 		private final boolean newEntityManager;

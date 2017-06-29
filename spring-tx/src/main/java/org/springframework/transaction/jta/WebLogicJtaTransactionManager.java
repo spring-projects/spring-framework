@@ -88,16 +88,21 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	private boolean weblogicUserTransactionAvailable;
 
+	@Nullable
 	private Method beginWithNameMethod;
 
+	@Nullable
 	private Method beginWithNameAndTimeoutMethod;
 
 	private boolean weblogicTransactionManagerAvailable;
 
+	@Nullable
 	private Method forceResumeMethod;
 
+	@Nullable
 	private Method setPropertyMethod;
 
+	@Nullable
 	private Object transactionHelper;
 
 
@@ -109,10 +114,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	@Override
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
-		loadWebLogicTransactionHelper();
+		Object helper = loadWebLogicTransactionHelper();
 		try {
 			logger.debug("Retrieving JTA UserTransaction from WebLogic TransactionHelper");
-			Method getUserTransactionMethod = this.transactionHelper.getClass().getMethod("getUserTransaction");
+			Method getUserTransactionMethod = helper.getClass().getMethod("getUserTransaction");
 			return (UserTransaction) getUserTransactionMethod.invoke(this.transactionHelper);
 		}
 		catch (InvocationTargetException ex) {
@@ -127,10 +132,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	@Override
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
-		loadWebLogicTransactionHelper();
+		Object helper = loadWebLogicTransactionHelper();
 		try {
 			logger.debug("Retrieving JTA TransactionManager from WebLogic TransactionHelper");
-			Method getTransactionManagerMethod = this.transactionHelper.getClass().getMethod("getTransactionManager");
+			Method getTransactionManagerMethod = helper.getClass().getMethod("getTransactionManager");
 			return (TransactionManager) getTransactionManagerMethod.invoke(this.transactionHelper);
 		}
 		catch (InvocationTargetException ex) {
@@ -143,12 +148,14 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
-	private void loadWebLogicTransactionHelper() throws TransactionSystemException {
-		if (this.transactionHelper == null) {
+	private Object loadWebLogicTransactionHelper() throws TransactionSystemException {
+		Object helper = this.transactionHelper;
+		if (helper == null) {
 			try {
 				Class<?> transactionHelperClass = getClass().getClassLoader().loadClass(TRANSACTION_HELPER_CLASS_NAME);
 				Method getTransactionHelperMethod = transactionHelperClass.getMethod("getTransactionHelper");
-				this.transactionHelper = getTransactionHelperMethod.invoke(null);
+				helper = getTransactionHelperMethod.invoke(null);
+				this.transactionHelper = helper;
 				logger.debug("WebLogic TransactionHelper found");
 			}
 			catch (InvocationTargetException ex) {
@@ -161,6 +168,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 						ex);
 			}
 		}
+		return helper;
 	}
 
 	private void loadWebLogicTransactionClasses() throws TransactionSystemException {
@@ -220,6 +228,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
 					wut.begin(definition.getName(), timeout);
 					*/
+					Assert.state(this.beginWithNameAndTimeoutMethod != null, "WebLogic JTA API not initialized");
 					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(), definition.getName(), timeout);
 				}
 				else {
@@ -227,6 +236,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
 					wut.begin(definition.getName());
 					*/
+					Assert.state(this.beginWithNameMethod != null, "WebLogic JTA API not initialized");
 					this.beginWithNameMethod.invoke(txObject.getUserTransaction(), definition.getName());
 				}
 			}
@@ -256,6 +266,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.Transaction wtx = (weblogic.transaction.Transaction) tx;
 					wtx.setProperty(ISOLATION_LEVEL_KEY, isolationLevel);
 					*/
+					Assert.state(this.setPropertyMethod != null, "WebLogic JTA API not initialized");
 					this.setPropertyMethod.invoke(tx, ISOLATION_LEVEL_KEY, isolationLevel);
 				}
 				catch (InvocationTargetException ex) {
@@ -274,7 +285,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 	@Override
-	protected void doJtaResume(JtaTransactionObject txObject, Object suspendedTransaction)
+	protected void doJtaResume(@Nullable JtaTransactionObject txObject, Object suspendedTransaction)
 			throws InvalidTransactionException, SystemException {
 
 		try {
@@ -295,6 +306,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			wtm.forceResume(suspendedTransaction);
 			*/
 			try {
+				Assert.state(this.forceResumeMethod != null, "WebLogic JTA API not initialized");
 				this.forceResumeMethod.invoke(getTransactionManager(), suspendedTransaction);
 			}
 			catch (InvocationTargetException ex2) {
@@ -313,9 +325,11 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		if (this.weblogicUserTransactionAvailable && name != null) {
 			try {
 				if (timeout >= 0) {
+					Assert.state(this.beginWithNameAndTimeoutMethod != null, "WebLogic JTA API not initialized");
 					this.beginWithNameAndTimeoutMethod.invoke(getUserTransaction(), name, timeout);
 				}
 				else {
+					Assert.state(this.beginWithNameMethod != null, "WebLogic JTA API not initialized");
 					this.beginWithNameMethod.invoke(getUserTransaction(), name);
 				}
 			}

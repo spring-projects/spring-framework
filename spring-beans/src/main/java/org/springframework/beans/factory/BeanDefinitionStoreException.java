@@ -30,8 +30,10 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class BeanDefinitionStoreException extends FatalBeanException {
 
+	@Nullable
 	private String resourceDescription;
 
+	@Nullable
 	private String beanName;
 
 

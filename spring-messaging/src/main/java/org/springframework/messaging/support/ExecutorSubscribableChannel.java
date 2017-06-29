@@ -36,6 +36,7 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
+	@Nullable
 	private final Executor executor;
 
 	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<>(4);
@@ -60,6 +61,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	}
 
 
+	@Nullable
 	public Executor getExecutor() {
 		return this.executor;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,19 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	private boolean directFieldAccess = false;
 
+	@Nullable
 	private MessageCodesResolver messageCodesResolver;
 
+	@Nullable
 	private BindingErrorProcessor bindingErrorProcessor;
 
+	@Nullable
 	private Validator validator;
 
+	@Nullable
 	private ConversionService conversionService;
 
+	@Nullable
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
 

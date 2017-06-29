@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 
+	@Nullable
 	private final MediaType contentType;
 
 
@@ -67,6 +68,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	/**
 	 * Return the HTTP request content type method that caused the failure.
 	 */
+	@Nullable
 	public MediaType getContentType() {
 		return this.contentType;
 	}

@@ -35,6 +35,7 @@ import org.springframework.validation.DataBinder;
 @SuppressWarnings("serial")
 public class RedirectAttributesModelMap extends ModelMap implements RedirectAttributes {
 
+	@Nullable
 	private final DataBinder dataBinder;
 
 	private final ModelMap flashAttributes = new ModelMap();

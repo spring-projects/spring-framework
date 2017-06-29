@@ -34,8 +34,10 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMetadataElement {
 
+	@Nullable
 	private Object source;
 
+	@Nullable
 	private String elementTypeName;
 
 	private boolean mergeEnabled;
@@ -58,6 +60,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}
@@ -72,6 +75,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 	/**
 	 * Return the default element type name (class name) to be used for this set.
 	 */
+	@Nullable
 	public String getElementTypeName() {
 		return this.elementTypeName;
 	}

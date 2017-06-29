@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
+	@Nullable
 	private String targetRequestPath;
 
 	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(4);
@@ -90,8 +91,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide a request parameter identifying the request for this FlashMap.
-	 * @param name the expected parameter name (skipped if empty or {@code null})
-	 * @param value the expected value (skipped if empty or {@code null})
+	 * @param name the expected parameter name (skipped if empty)
+	 * @param value the expected value (skipped if empty)
 	 */
 	public FlashMap addTargetRequestParam(String name, String value) {
 		if (StringUtils.hasText(name) && StringUtils.hasText(value)) {

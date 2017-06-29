@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  */
 class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {
 
-	private String className;
+	private String className = "";
 
 	private boolean isInterface;
 
@@ -54,13 +54,15 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private boolean isFinal;
 
+	@Nullable
 	private String enclosingClassName;
 
 	private boolean independentInnerClass;
 
+	@Nullable
 	private String superClassName;
 
-	private String[] interfaces;
+	private String[] interfaces = new String[0];
 
 	private Set<String> memberClassNames = new LinkedHashSet<>();
 
@@ -183,6 +185,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public String getEnclosingClassName() {
 		return this.enclosingClassName;
 	}
@@ -193,6 +196,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public String getSuperClassName() {
 		return this.superClassName;
 	}

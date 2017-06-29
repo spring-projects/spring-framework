@@ -24,6 +24,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,6 +46,7 @@ import org.springframework.util.Assert;
  */
 public abstract class JdbcDaoSupport extends DaoSupport {
 
+	@Nullable
 	private JdbcTemplate jdbcTemplate;
 
 
@@ -91,6 +93,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 * Return the JdbcTemplate for this DAO,
 	 * pre-initialized with the DataSource or set explicitly.
 	 */
+	@Nullable
 	public final JdbcTemplate getJdbcTemplate() {
 	  return this.jdbcTemplate;
 	}
@@ -120,7 +123,9 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#getExceptionTranslator()
 	 */
 	protected final SQLExceptionTranslator getExceptionTranslator() {
-		return getJdbcTemplate().getExceptionTranslator();
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Assert.state(jdbcTemplate != null, "No JdbcTemplate set");
+		return jdbcTemplate.getExceptionTranslator();
 	}
 
 	/**

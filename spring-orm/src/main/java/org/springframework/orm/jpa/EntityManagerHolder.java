@@ -41,6 +41,7 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	private boolean transactionActive;
 
+	@Nullable
 	private SavepointManager savepointManager;
 
 

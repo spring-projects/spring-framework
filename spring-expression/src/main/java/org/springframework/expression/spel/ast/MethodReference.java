@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
+	@Nullable
 	private volatile CachedMethodExecutor cachedExecutor;
 
 
@@ -338,8 +339,10 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final EvaluationContext evaluationContext;
 
+		@Nullable
 		private final Object value;
 
+		@Nullable
 		private final TypeDescriptor targetType;
 
 		private final Object[] arguments;
@@ -360,7 +363,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		@Override
-		public void setValue(Object newValue) {
+		public void setValue(@Nullable Object newValue) {
 			throw new IllegalAccessError();
 		}
 
@@ -375,8 +378,10 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final MethodExecutor methodExecutor;
 
+		@Nullable
 		private final Class<?> staticClass;
 
+		@Nullable
 		private final TypeDescriptor target;
 
 		private final List<TypeDescriptor> argumentTypes;

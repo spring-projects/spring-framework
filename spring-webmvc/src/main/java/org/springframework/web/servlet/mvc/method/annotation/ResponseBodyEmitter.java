@@ -63,14 +63,17 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseBodyEmitter {
 
+	@Nullable
 	private final Long timeout;
 
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
 
+	@Nullable
 	private Handler handler;
 
 	private boolean complete;
 
+	@Nullable
 	private Throwable failure;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
@@ -270,6 +273,7 @@ public class ResponseBodyEmitter {
 
 		private final Object data;
 
+		@Nullable
 		private final MediaType mediaType;
 
 		public DataWithMediaType(Object data, @Nullable MediaType mediaType) {
@@ -290,6 +294,7 @@ public class ResponseBodyEmitter {
 
 	private class DefaultCallback implements Runnable {
 
+		@Nullable
 		private Runnable delegate;
 
 		public void setDelegate(Runnable delegate) {
@@ -308,6 +313,7 @@ public class ResponseBodyEmitter {
 
 	private class ErrorCallback implements Consumer<Throwable> {
 
+		@Nullable
 		private Consumer<Throwable> delegate;
 
 		public void setDelegate(Consumer<Throwable> callback) {

@@ -39,6 +39,7 @@ public class MockPart implements Part {
 
 	private final String name;
 
+	@Nullable
 	private final String filename;
 
 	private final byte[] content;
@@ -79,6 +80,7 @@ public class MockPart implements Part {
 	}
 
 	@Override
+	@Nullable
 	public String getSubmittedFileName() {
 		return this.filename;
 	}

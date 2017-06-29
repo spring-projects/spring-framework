@@ -92,6 +92,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	private static final String XML_SUFFIX = ".xml";
 
 
+	@Nullable
 	private Properties fileEncodings;
 
 	private boolean concurrentRefresh = true;
@@ -549,6 +550,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 */
 	protected class PropertiesHolder {
 
+		@Nullable
 		private final Properties properties;
 
 		private final long fileTimestamp;

@@ -42,8 +42,10 @@ public class HandlerExecutionChain {
 
 	private final Object handler;
 
+	@Nullable
 	private HandlerInterceptor[] interceptors;
 
+	@Nullable
 	private List<HandlerInterceptor> interceptorList;
 
 	private int interceptorIndex = -1;
@@ -53,7 +55,7 @@ public class HandlerExecutionChain {
 	 * Create a new HandlerExecutionChain.
 	 * @param handler the handler object to execute
 	 */
-	public HandlerExecutionChain(@Nullable Object handler) {
+	public HandlerExecutionChain(Object handler) {
 		this(handler, (HandlerInterceptor[]) null);
 	}
 
@@ -63,7 +65,7 @@ public class HandlerExecutionChain {
 	 * @param interceptors the array of interceptors to apply
 	 * (in the given order) before the handler itself executes
 	 */
-	public HandlerExecutionChain(@Nullable Object handler, @Nullable HandlerInterceptor... interceptors) {
+	public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
@@ -80,9 +82,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (may be {@code null})
 	 */
-	@Nullable
 	public Object getHandler() {
 		return this.handler;
 	}
@@ -207,9 +207,6 @@ public class HandlerExecutionChain {
 	@Override
 	public String toString() {
 		Object handler = getHandler();
-		if (handler == null) {
-			return "HandlerExecutionChain with no handler";
-		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("HandlerExecutionChain with handler [").append(handler).append("]");
 		HandlerInterceptor[] interceptors = getInterceptors();

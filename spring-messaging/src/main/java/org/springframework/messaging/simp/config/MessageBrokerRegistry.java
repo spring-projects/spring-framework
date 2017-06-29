@@ -40,18 +40,24 @@ public class MessageBrokerRegistry {
 
 	private final MessageChannel clientOutboundChannel;
 
+	@Nullable
 	private SimpleBrokerRegistration simpleBrokerRegistration;
 
+	@Nullable
 	private StompBrokerRelayRegistration brokerRelayRegistration;
 
 	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
+	@Nullable
 	private String[] applicationDestinationPrefixes;
 
+	@Nullable
 	private String userDestinationPrefix;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
+	@Nullable
 	private Integer cacheLimit;
 
 

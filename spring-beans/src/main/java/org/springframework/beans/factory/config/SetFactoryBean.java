@@ -35,9 +35,11 @@ import org.springframework.lang.Nullable;
  */
 public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 
+	@Nullable
 	private Set<?> sourceSet;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends Set> targetSetClass;
 
 

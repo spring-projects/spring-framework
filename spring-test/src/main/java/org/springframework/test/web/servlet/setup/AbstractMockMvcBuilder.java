@@ -21,6 +21,7 @@ import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +54,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 
 	private List<Filter> filters = new ArrayList<>();
 
+	@Nullable
 	private RequestBuilder defaultRequestBuilder;
 
 	private final List<ResultMatcher> globalResultMatchers = new ArrayList<>();

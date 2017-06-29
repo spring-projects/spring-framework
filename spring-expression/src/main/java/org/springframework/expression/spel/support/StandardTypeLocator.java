@@ -38,6 +38,7 @@ import org.springframework.util.ClassUtils;
  */
 public class StandardTypeLocator implements TypeLocator {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 	private final List<String> knownPackagePrefixes = new LinkedList<>();

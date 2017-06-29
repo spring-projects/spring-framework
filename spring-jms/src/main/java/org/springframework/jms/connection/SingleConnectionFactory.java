@@ -82,21 +82,27 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
+	@Nullable
 	private String clientId;
 
+	@Nullable
 	private ExceptionListener exceptionListener;
 
 	private boolean reconnectOnException = false;
 
 	/** The target Connection */
+	@Nullable
 	private Connection connection;
 
 	/** A hint whether to create a queue or topic connection */
+	@Nullable
 	private Boolean pubSubMode;
 
 	/** An internal aggregator allowing for per-connection ExceptionListeners */
+	@Nullable
 	private AggregatedExceptionListener aggregatedExceptionListener;
 
 	/** Whether the shared Connection has been started */
@@ -525,6 +531,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	private class SharedConnectionInvocationHandler implements InvocationHandler {
 
+		@Nullable
 		private ExceptionListener localExceptionListener;
 
 		private boolean locallyStarted = false;

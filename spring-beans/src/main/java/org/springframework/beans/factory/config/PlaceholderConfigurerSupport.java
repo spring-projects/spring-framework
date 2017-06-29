@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,16 +106,20 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR} */
+	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
 	protected boolean trimValues = false;
 
+	@Nullable
 	protected String nullValue;
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 

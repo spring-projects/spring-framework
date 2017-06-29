@@ -46,14 +46,19 @@ import org.springframework.util.StringUtils;
  */
 public class DateTimeFormatterFactory {
 
+	@Nullable
 	private String pattern;
 
+	@Nullable
 	private ISO iso;
 
+	@Nullable
 	private FormatStyle dateStyle;
 
+	@Nullable
 	private FormatStyle timeStyle;
 
+	@Nullable
 	private TimeZone timeZone;
 
 

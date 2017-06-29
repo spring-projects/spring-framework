@@ -59,8 +59,10 @@ import org.springframework.util.Assert;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
+	@Nullable
 	private HttpClient httpClient;
 
+	@Nullable
 	private RequestConfig requestConfig;
 
 	private boolean bufferRequestBody = true;
@@ -97,6 +99,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
+	@Nullable
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
@@ -152,6 +155,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		HttpClient client = getHttpClient();
+		Assert.state(client != null, "No HttpClient set");
+
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		HttpContext context = createHttpContext(httpMethod, uri);
@@ -167,7 +173,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				config = createRequestConfig(getHttpClient());
+				config = createRequestConfig(client);
 			}
 			if (config != null) {
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
@@ -175,10 +181,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 
 		if (this.bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, context);
+			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 		}
 		else {
-			return new HttpComponentsStreamingClientHttpRequest(getHttpClient(), httpRequest, context);
+			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
 		}
 	}
 

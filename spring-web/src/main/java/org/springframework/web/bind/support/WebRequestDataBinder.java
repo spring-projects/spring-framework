@@ -86,7 +86,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public WebRequestDataBinder(@Nullable Object target, @Nullable String objectName) {
+	public WebRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

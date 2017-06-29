@@ -79,6 +79,7 @@ public interface WebSocketSession extends Closeable {
 	/**
 	 * Return the address of the remote client.
 	 */
+	@Nullable
 	InetSocketAddress getRemoteAddress();
 
 	/**

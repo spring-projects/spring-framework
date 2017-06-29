@@ -37,7 +37,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -74,22 +73,28 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 
 
+	@Nullable
 	private ScriptEngine engine;
 
+	@Nullable
 	private String engineName;
 
+	@Nullable
 	private Boolean sharedEngine;
 
+	@Nullable
 	private String[] scripts;
 
+	@Nullable
 	private String renderObject;
 
+	@Nullable
 	private String renderFunction;
 
+	@Nullable
 	private String[] resourceLoaderPaths;
 
-	private ResourceLoader resourceLoader;
-
+	@Nullable
 	private volatile ScriptEngineManager scriptEngineManager;
 
 
@@ -193,9 +198,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			String resourceLoaderPath = viewConfig.getResourceLoaderPath();
 			setResourceLoaderPath(resourceLoaderPath == null ? DEFAULT_RESOURCE_LOADER_PATH : resourceLoaderPath);
 		}
-		if (this.resourceLoader == null) {
-			this.resourceLoader = getApplicationContext();
-		}
 		if (this.sharedEngine == null && viewConfig.isSharedEngine() != null) {
 			this.sharedEngine = viewConfig.isSharedEngine();
 		}
@@ -214,24 +216,34 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			loadScripts(this.engine);
 		}
 		else {
-			setEngine(createEngineFromName());
+			setEngine(createEngineFromName(this.engineName));
 		}
 
 		if (this.renderFunction != null && this.engine != null) {
-			Assert.isInstanceOf(Invocable.class, this.engine, "ScriptEngine must implement Invocable when 'renderFunction' is specified.");
+			Assert.isInstanceOf(Invocable.class, this.engine,
+					"ScriptEngine must implement Invocable when 'renderFunction' is specified");
 		}
 	}
 
 	protected ScriptEngine getEngine() {
-		return Boolean.FALSE.equals(this.sharedEngine) ? createEngineFromName() : this.engine;
+		if (Boolean.FALSE.equals(this.sharedEngine)) {
+			Assert.state(this.engineName != null, "No engine name specified");
+			return createEngineFromName(this.engineName);
+		}
+		else {
+			Assert.state(this.engine != null, "No shared engine available");
+			return this.engine;
+		}
 	}
 
-	protected ScriptEngine createEngineFromName() {
-		if (this.scriptEngineManager == null) {
-			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+	protected ScriptEngine createEngineFromName(String engineName) {
+		ScriptEngineManager scriptEngineManager = this.scriptEngineManager;
+		if (scriptEngineManager == null) {
+			scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+			this.scriptEngineManager = scriptEngineManager;
 		}
 
-		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, this.engineName);
+		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(scriptEngineManager, engineName);
 		loadScripts(engine);
 		return engine;
 	}
@@ -255,10 +267,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Nullable
 	protected Resource getResource(String location) {
-		for (String path : this.resourceLoaderPaths) {
-			Resource resource = this.resourceLoader.getResource(path + location);
-			if (resource.exists()) {
-				return resource;
+		if (this.resourceLoaderPaths != null) {
+			for (String path : this.resourceLoaderPaths) {
+				Resource resource = obtainApplicationContext().getResource(path + location);
+				if (resource.exists()) {
+					return resource;
+				}
 			}
 		}
 		return null;
@@ -317,10 +331,10 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				}
 				else if (this.renderObject != null) {
 					Object thiz = engine.eval(this.renderObject);
-					html = ((Invocable)engine).invokeMethod(thiz, this.renderFunction, template, model, context);
+					html = ((Invocable) engine).invokeMethod(thiz, this.renderFunction, template, model, context);
 				}
 				else {
-					html = ((Invocable)engine).invokeFunction(this.renderFunction, template, model, context);
+					html = ((Invocable) engine).invokeFunction(this.renderFunction, template, model, context);
 				}
 
 				byte[] bytes = String.valueOf(html).getBytes(StandardCharsets.UTF_8);

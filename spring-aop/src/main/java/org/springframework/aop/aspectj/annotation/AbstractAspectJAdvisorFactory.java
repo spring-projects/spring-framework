@@ -212,9 +212,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			throw new IllegalStateException("Unknown annotation type: " + annotation.toString());
 		}
 
-		@Nullable
 		private String resolveExpression(A annotation) throws Exception {
-			String expression = null;
 			for (String methodName : EXPRESSION_PROPERTIES) {
 				Method method;
 				try {
@@ -226,11 +224,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 				if (method != null) {
 					String candidate = (String) method.invoke(annotation);
 					if (StringUtils.hasText(candidate)) {
-						expression = candidate;
+						return candidate;
 					}
 				}
 			}
-			return expression;
+			throw new IllegalStateException("Failed to resolve expression: " + annotation);
 		}
 
 		public AspectJAnnotationType getAnnotationType() {

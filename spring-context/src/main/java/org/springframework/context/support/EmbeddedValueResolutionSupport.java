@@ -29,6 +29,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class EmbeddedValueResolutionSupport implements EmbeddedValueResolverAware {
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 

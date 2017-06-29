@@ -127,30 +127,41 @@ public class DefaultPersistenceUnitManager
 
 	private String[] persistenceXmlLocations = new String[] {DEFAULT_PERSISTENCE_XML_LOCATION};
 
+	@Nullable
 	private String defaultPersistenceUnitRootLocation = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION;
 
+	@Nullable
 	private String defaultPersistenceUnitName = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME;
 
+	@Nullable
 	private String[] packagesToScan;
 
+	@Nullable
 	private String[] mappingResources;
 
+	@Nullable
 	private SharedCacheMode sharedCacheMode;
 
+	@Nullable
 	private ValidationMode validationMode;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
+	@Nullable
 	private DataSource defaultDataSource;
 
+	@Nullable
 	private DataSource defaultJtaDataSource;
 
+	@Nullable
 	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
 
+	@Nullable
 	private LoadTimeWeaver loadTimeWeaver;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
+	@Nullable
 	private CandidateComponentsIndex componentsIndex;
 
 	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
@@ -447,10 +458,10 @@ public class DefaultPersistenceUnitManager
 			if (pui.getPersistenceUnitRootUrl() == null) {
 				pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
 			}
-			if (pui.getJtaDataSource() == null) {
+			if (pui.getJtaDataSource() == null && this.defaultJtaDataSource != null) {
 				pui.setJtaDataSource(this.defaultJtaDataSource);
 			}
-			if (pui.getNonJtaDataSource() == null) {
+			if (pui.getNonJtaDataSource() == null && this.defaultDataSource != null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
 			}
 			if (this.sharedCacheMode != null) {
@@ -517,17 +528,14 @@ public class DefaultPersistenceUnitManager
 	 */
 	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
 		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
-		scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+		if (this.defaultPersistenceUnitName != null) {
+			scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+		}
 		scannedUnit.setExcludeUnlistedClasses(true);
 
 		if (this.packagesToScan != null) {
 			for (String pkg : this.packagesToScan) {
-				if (this.componentsIndex != null) {
-					addPackageFromIndex(scannedUnit, pkg);
-				}
-				else {
-					scanPackage(scannedUnit, pkg);
-				}
+				scanPackage(scannedUnit, pkg);
 			}
 		}
 
@@ -555,18 +563,18 @@ public class DefaultPersistenceUnitManager
 		return scannedUnit;
 	}
 
-	private void addPackageFromIndex(SpringPersistenceUnitInfo scannedUnit, String pkg) {
-		Set<String> candidates = new HashSet<>();
-		for (AnnotationTypeFilter filter : entityTypeFilters) {
-			candidates.addAll(this.componentsIndex
-					.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
-		}
-		candidates.forEach(scannedUnit::addManagedClassName);
-		Set<String> managedPackages = this.componentsIndex.getCandidateTypes(pkg, "package-info");
-		managedPackages.forEach(scannedUnit::addManagedPackage);
-	}
-
 	private void scanPackage(SpringPersistenceUnitInfo scannedUnit, String pkg) {
+		if (this.componentsIndex != null) {
+			Set<String> candidates = new HashSet<>();
+			for (AnnotationTypeFilter filter : entityTypeFilters) {
+				candidates.addAll(this.componentsIndex.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
+			}
+			candidates.forEach(scannedUnit::addManagedClassName);
+			Set<String> managedPackages = this.componentsIndex.getCandidateTypes(pkg, "package-info");
+			managedPackages.forEach(scannedUnit::addManagedPackage);
+			return;
+		}
+
 		try {
 			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
@@ -709,7 +717,7 @@ public class DefaultPersistenceUnitManager
 			throw new IllegalStateException("All persistence units from " +
 					ObjectUtils.nullSafeToString(this.persistenceXmlLocations) + " already obtained");
 		}
-		if (this.persistenceUnitInfos.size() > 1) {
+		if (this.persistenceUnitInfos.size() > 1 && this.defaultPersistenceUnitName != null) {
 			return obtainPersistenceUnitInfo(this.defaultPersistenceUnitName);
 		}
 		PersistenceUnitInfo pui = this.persistenceUnitInfos.values().iterator().next();

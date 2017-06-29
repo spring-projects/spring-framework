@@ -47,6 +47,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 
 	private final Executor concurrentExecutor;
 
+	@Nullable
 	private TaskDecorator taskDecorator;
 
 

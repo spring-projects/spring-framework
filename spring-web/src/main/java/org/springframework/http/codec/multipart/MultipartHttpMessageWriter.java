@@ -230,6 +230,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		private final AtomicBoolean committed = new AtomicBoolean();
 
+		@Nullable
 		private Flux<DataBuffer> body;
 
 		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory, Charset charset) {

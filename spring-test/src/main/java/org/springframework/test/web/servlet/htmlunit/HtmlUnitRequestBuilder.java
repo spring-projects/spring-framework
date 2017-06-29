@@ -75,12 +75,16 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private final WebRequest webRequest;
 
+	@Nullable
 	private String contextPath;
 
+	@Nullable
 	private RequestBuilder parentBuilder;
 
+	@Nullable
 	private SmartRequestBuilder parentPostProcessor;
 
+	@Nullable
 	private RequestPostProcessor forwardPostProcessor;
 
 

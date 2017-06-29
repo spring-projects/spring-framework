@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,14 +103,16 @@ class CglibAopProxy implements AopProxy, Serializable {
 	/** The configuration used to configure this proxy */
 	protected final AdvisedSupport advised;
 
+	@Nullable
 	protected Object[] constructorArgs;
 
+	@Nullable
 	protected Class<?>[] constructorArgTypes;
 
 	/** Dispatcher used for methods on Advised */
 	private final transient AdvisedDispatcher advisedDispatcher;
 
-	private transient Map<String, Integer> fixedInterceptorMap;
+	private transient Map<String, Integer> fixedInterceptorMap = Collections.emptyMap();
 
 	private transient int fixedInterceptorOffset;
 
@@ -216,7 +219,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
 		enhancer.setInterceptDuringConstruction(false);
 		enhancer.setCallbacks(callbacks);
-		return (this.constructorArgs != null ?
+		return (this.constructorArgs != null && this.constructorArgTypes != null ?
 				enhancer.create(this.constructorArgTypes, this.constructorArgs) :
 				enhancer.create());
 	}
@@ -409,6 +412,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class StaticUnadvisedInterceptor implements MethodInterceptor, Serializable {
 
+		@Nullable
 		private final Object target;
 
 		public StaticUnadvisedInterceptor(@Nullable Object target) {
@@ -430,6 +434,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class StaticUnadvisedExposedInterceptor implements MethodInterceptor, Serializable {
 
+		@Nullable
 		private final Object target;
 
 		public StaticUnadvisedExposedInterceptor(@Nullable Object target) {
@@ -520,6 +525,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class StaticDispatcher implements Dispatcher, Serializable {
 
+		@Nullable
 		private Object target;
 
 		public StaticDispatcher(@Nullable Object target) {
@@ -527,6 +533,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Object loadObject() {
 			return this.target;
 		}
@@ -610,8 +617,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final List<Object> adviceChain;
 
+		@Nullable
 		private final Object target;
 
+		@Nullable
 		private final Class<?> targetClass;
 
 		public FixedChainStaticTargetInterceptor(
@@ -960,6 +969,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class ClassLoaderAwareUndeclaredThrowableStrategy extends UndeclaredThrowableStrategy {
 
+		@Nullable
 		private final ClassLoader classLoader;
 
 		public ClassLoaderAwareUndeclaredThrowableStrategy(@Nullable ClassLoader classLoader) {

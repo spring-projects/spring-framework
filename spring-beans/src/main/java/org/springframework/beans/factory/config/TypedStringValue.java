@@ -37,12 +37,16 @@ import org.springframework.util.ObjectUtils;
  */
 public class TypedStringValue implements BeanMetadataElement {
 
+	@Nullable
 	private String value;
 
+	@Nullable
 	private volatile Object targetType;
 
+	@Nullable
 	private Object source;
 
+	@Nullable
 	private String specifiedTypeName;
 
 	private volatile boolean dynamic;
@@ -157,7 +161,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @throws ClassNotFoundException if the type cannot be resolved
 	 */
 	@Nullable
-	public Class<?> resolveTargetType(ClassLoader classLoader) throws ClassNotFoundException {
+	public Class<?> resolveTargetType(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
 		String typeName = getTargetTypeName();
 		if (typeName == null) {
 			return null;
@@ -177,6 +181,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

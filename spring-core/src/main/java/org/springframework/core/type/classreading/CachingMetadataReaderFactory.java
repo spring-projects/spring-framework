@@ -41,6 +41,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
 	/** MetadataReader cache: either local or shared at the ResourceLoader level */
+	@Nullable
 	private Map<Resource, MetadataReader> metadataReaderCache;
 
 

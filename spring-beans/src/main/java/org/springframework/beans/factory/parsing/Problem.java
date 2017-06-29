@@ -36,8 +36,10 @@ public class Problem {
 
 	private final Location location;
 
+	@Nullable
 	private final ParseState parseState;
 
+	@Nullable
 	private final Throwable rootCause;
 
 

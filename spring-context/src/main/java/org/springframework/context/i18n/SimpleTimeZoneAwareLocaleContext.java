@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleTimeZoneAwareLocaleContext extends SimpleLocaleContext implements TimeZoneAwareLocaleContext {
 
+	@Nullable
 	private final TimeZone timeZone;
 
 
@@ -53,6 +54,7 @@ public class SimpleTimeZoneAwareLocaleContext extends SimpleLocaleContext implem
 
 
 	@Override
+	@Nullable
 	public TimeZone getTimeZone() {
 		return this.timeZone;
 	}

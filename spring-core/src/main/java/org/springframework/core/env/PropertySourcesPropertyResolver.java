@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  */
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
+	@Nullable
 	private final PropertySources propertySources;
 
 

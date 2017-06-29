@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
+	@Nullable
 	private transient ConversionService conversionService;
 
 

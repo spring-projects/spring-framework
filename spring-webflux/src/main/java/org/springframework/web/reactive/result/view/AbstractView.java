@@ -62,8 +62,10 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
+	@Nullable
 	private String requestContextAttribute;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 

@@ -220,8 +220,11 @@ public abstract class AopProxyUtils {
 	 * @return a cloned argument array, or the original if no adaptation is needed
 	 * @since 4.2.3
 	 */
-	static Object[] adaptArgumentsIfNecessary(Method method, Object... arguments) {
-		if (method.isVarArgs() && !ObjectUtils.isEmpty(arguments)) {
+	static Object[] adaptArgumentsIfNecessary(Method method, @Nullable Object[] arguments) {
+		if (ObjectUtils.isEmpty(arguments)) {
+			return new Object[0];
+		}
+		if (method.isVarArgs()) {
 			Class<?>[] paramTypes = method.getParameterTypes();
 			if (paramTypes.length == arguments.length) {
 				int varargIndex = paramTypes.length - 1;

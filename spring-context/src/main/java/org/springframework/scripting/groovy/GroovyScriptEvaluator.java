@@ -41,6 +41,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
  */
 public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware {
 
+	@Nullable
 	private ClassLoader classLoader;
 
 	private CompilerConfiguration compilerConfiguration = new CompilerConfiguration();

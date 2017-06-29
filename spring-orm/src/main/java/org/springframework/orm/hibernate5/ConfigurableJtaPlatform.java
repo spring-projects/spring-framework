@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ class ConfigurableJtaPlatform implements JtaPlatform {
 
 	private final UserTransaction userTransaction;
 
+	@Nullable
 	private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
@@ -55,7 +56,9 @@ class ConfigurableJtaPlatform implements JtaPlatform {
 	 * @param ut the JTA UserTransaction reference (optional)
 	 * @param tsr the JTA 1.1 TransactionSynchronizationRegistry (optional)
 	 */
-	public ConfigurableJtaPlatform(TransactionManager tm, @Nullable UserTransaction ut, @Nullable TransactionSynchronizationRegistry tsr) {
+	public ConfigurableJtaPlatform(TransactionManager tm, @Nullable UserTransaction ut,
+			@Nullable TransactionSynchronizationRegistry tsr) {
+
 		Assert.notNull(tm, "TransactionManager reference must not be null");
 		this.transactionManager = tm;
 		this.userTransaction = (ut != null ? ut : new UserTransactionAdapter(tm));

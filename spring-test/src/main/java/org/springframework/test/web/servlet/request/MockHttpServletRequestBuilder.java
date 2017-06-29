@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -87,18 +88,25 @@ public class MockHttpServletRequestBuilder
 
 	private String servletPath = "";
 
+	@Nullable
 	private String pathInfo = "";
 
+	@Nullable
 	private Boolean secure;
 
+	@Nullable
 	private Principal principal;
 
+	@Nullable
 	private MockHttpSession session;
 
+	@Nullable
 	private String characterEncoding;
 
+	@Nullable
 	private byte[] content;
 
+	@Nullable
 	private String contentType;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
@@ -205,7 +213,7 @@ public class MockHttpServletRequestBuilder
 	 * <p>If specified, the pathInfo will be used as-is.
 	 * @see javax.servlet.http.HttpServletRequest#getPathInfo()
 	 */
-	public MockHttpServletRequestBuilder pathInfo(String pathInfo) {
+	public MockHttpServletRequestBuilder pathInfo(@Nullable String pathInfo) {
 		if (StringUtils.hasText(pathInfo)) {
 			Assert.isTrue(pathInfo.startsWith("/"), "Path info must start with a '/'");
 		}
@@ -704,7 +712,7 @@ public class MockHttpServletRequestBuilder
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() throws IOException {
-				return new ByteArrayInputStream(content);
+				return (content != null ? new ByteArrayInputStream(content) : StreamUtils.emptyInput());
 			}
 			@Override
 			public HttpHeaders getHeaders() {

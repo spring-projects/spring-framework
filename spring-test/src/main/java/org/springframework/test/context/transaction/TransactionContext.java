@@ -50,6 +50,7 @@ class TransactionContext {
 
 	private boolean flaggedForRollback;
 
+	@Nullable
 	private TransactionStatus transactionStatus;
 
 	private volatile int transactionsStarted = 0;

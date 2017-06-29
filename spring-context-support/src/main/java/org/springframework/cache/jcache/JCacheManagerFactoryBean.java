@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,16 @@ import org.springframework.lang.Nullable;
 public class JCacheManagerFactoryBean
 		implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private URI cacheManagerUri;
 
+	@Nullable
 	private Properties cacheManagerProperties;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
+	@Nullable
 	private CacheManager cacheManager;
 
 
@@ -98,7 +102,9 @@ public class JCacheManagerFactoryBean
 
 	@Override
 	public void destroy() {
-		this.cacheManager.close();
+		if (this.cacheManager != null) {
+			this.cacheManager.close();
+		}
 	}
 
 }

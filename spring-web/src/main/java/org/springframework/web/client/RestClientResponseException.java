@@ -42,8 +42,10 @@ public class RestClientResponseException extends RestClientException {
 
 	private final byte[] responseBody;
 
+	@Nullable
 	private final HttpHeaders responseHeaders;
 
+	@Nullable
 	private final String responseCharset;
 
 
@@ -84,6 +86,7 @@ public class RestClientResponseException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
+	@Nullable
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}

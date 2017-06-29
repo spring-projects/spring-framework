@@ -59,6 +59,7 @@ public class MockServerRequest implements ServerRequest {
 
 	private final MockHeaders headers;
 
+	@Nullable
 	private final Object body;
 
 	private final Map<String, Object> attributes;
@@ -67,14 +68,16 @@ public class MockServerRequest implements ServerRequest {
 
 	private final Map<String, String> pathVariables;
 
+	@Nullable
 	private final WebSession session;
 
+	@Nullable
 	private Principal principal;
 
 
 	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables, WebSession session, Principal principal) {
+			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
 
 		this.method = method;
 		this.uri = uri;
@@ -209,6 +212,7 @@ public class MockServerRequest implements ServerRequest {
 
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
+		@Nullable
 		private Object body;
 
 		private Map<String, Object> attributes = new ConcurrentHashMap<>();
@@ -217,8 +221,10 @@ public class MockServerRequest implements ServerRequest {
 
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
 
+		@Nullable
 		private WebSession session;
 
+		@Nullable
 		private Principal principal;
 
 		@Override

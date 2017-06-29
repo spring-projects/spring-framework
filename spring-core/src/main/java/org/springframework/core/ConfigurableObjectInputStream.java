@@ -35,6 +35,7 @@ import org.springframework.util.ClassUtils;
  */
 public class ConfigurableObjectInputStream extends ObjectInputStream {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 	private final boolean acceptProxyClasses;

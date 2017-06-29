@@ -69,11 +69,12 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, false);
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
-		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
+		Assert.notNull(messagingTemplate, "'messagingTemplate' must not be null");
 		this.messagingTemplate = messagingTemplate;
 		this.annotationRequired = annotationRequired;
 	}
@@ -276,6 +277,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private static class DestinationVariablePlaceholderResolver implements PlaceholderResolver {
 
+		@Nullable
 		private final Map<String, String> vars;
 
 		public DestinationVariablePlaceholderResolver(@Nullable Map<String, String> vars) {

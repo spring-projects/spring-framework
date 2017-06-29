@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +34,11 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class HandlerExceptionResolverComposite implements HandlerExceptionResolver, Ordered {
 
+	@Nullable
 	private List<HandlerExceptionResolver> resolvers;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the list of exception resolvers to delegate to.
@@ -58,8 +51,18 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	 * Return the list of exception resolvers to delegate to.
 	 */
 	public List<HandlerExceptionResolver> getExceptionResolvers() {
-		return Collections.unmodifiableList(resolvers);
+		return (this.resolvers != null ? Collections.unmodifiableList(this.resolvers) : Collections.emptyList());
 	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
 
 	/**
 	 * Resolve the exception by iterating over the list of configured exception resolvers.
@@ -67,12 +70,11 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	 */
 	@Override
 	@Nullable
-	public ModelAndView resolveException(HttpServletRequest request,
-										 HttpServletResponse response,
-										 @Nullable Object handler,
-										 Exception ex) {
-		if (resolvers != null) {
-			for (HandlerExceptionResolver handlerExceptionResolver : resolvers) {
+	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
+			@Nullable Object handler,Exception ex) {
+
+		if (this.resolvers != null) {
+			for (HandlerExceptionResolver handlerExceptionResolver : this.resolvers) {
 				ModelAndView mav = handlerExceptionResolver.resolveException(request, response, handler, ex);
 				if (mav != null) {
 					return mav;

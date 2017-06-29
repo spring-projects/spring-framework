@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ class TypeConverterDelegate {
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
+	@Nullable
 	private final Object targetObject;
 
 
@@ -314,7 +315,7 @@ class TypeConverterDelegate {
 	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
 		Object convertedValue = currentConvertedValue;
 
-		if (Enum.class == requiredType) {
+		if (Enum.class == requiredType && this.targetObject != null) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
 			int index = trimmedValue.lastIndexOf(".");
 			if (index > - 1) {

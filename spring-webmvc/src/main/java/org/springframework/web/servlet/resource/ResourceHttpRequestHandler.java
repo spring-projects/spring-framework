@@ -100,14 +100,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	@Nullable
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
+	@Nullable
 	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private PathExtensionContentNegotiationStrategy contentNegotiationStrategy;
 
+	@Nullable
 	private CorsConfiguration corsConfiguration;
 
 
@@ -176,14 +181,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter resourceHttpMessageConverter) {
-		this.resourceHttpMessageConverter = resourceHttpMessageConverter;
+	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter messageConverter) {
+		this.resourceHttpMessageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the configured resource converter.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
 		return this.resourceHttpMessageConverter;
 	}
@@ -193,14 +199,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceRegionHttpMessageConverter(ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter) {
-		this.resourceRegionHttpMessageConverter = resourceRegionHttpMessageConverter;
+	public void setResourceRegionHttpMessageConverter(ResourceRegionHttpMessageConverter messageConverter) {
+		this.resourceRegionHttpMessageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the configured resource region converter.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
 		return this.resourceRegionHttpMessageConverter;
 	}
@@ -368,10 +375,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
+			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
 			setHeaders(response, resource, mediaType);
 			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
 		}
 		else {
+			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");
 			response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
@@ -516,7 +525,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	@Nullable
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		return this.contentNegotiationStrategy.getMediaTypeForResource(resource);
+		return (this.contentNegotiationStrategy != null ?
+				this.contentNegotiationStrategy.getMediaTypeForResource(resource) : null);
 	}
 
 	/**

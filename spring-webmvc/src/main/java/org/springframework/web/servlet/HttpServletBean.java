@@ -84,6 +84,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConfigurableEnvironment environment;
 
 	private final Set<String> requiredProperties = new HashSet<>(4);

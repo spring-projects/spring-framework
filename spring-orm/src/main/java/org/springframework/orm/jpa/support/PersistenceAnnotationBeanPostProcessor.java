@@ -61,6 +61,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -169,27 +170,30 @@ public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
 
+	@Nullable
 	private Object jndiEnvironment;
 
 	private boolean resourceRef = true;
 
+	@Nullable
 	private transient Map<String, String> persistenceUnits;
 
+	@Nullable
 	private transient Map<String, String> persistenceContexts;
 
+	@Nullable
 	private transient Map<String, String> extendedPersistenceContexts;
 
 	private transient String defaultPersistenceUnitName = "";
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 4;
 
+	@Nullable
 	private transient ListableBeanFactory beanFactory;
 
-	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<>(256);
+	private transient final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
-	private final Map<Object, EntityManager> extendedEntityManagersToClose =
-			new ConcurrentHashMap<>(16);
+	private final Map<Object, EntityManager> extendedEntityManagersToClose = new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -516,9 +520,6 @@ public class PersistenceAnnotationBeanPostProcessor
 	protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory bean lookup");
-		}
 		String unitNameForLookup = (unitName != null ? unitName : "");
 		if ("".equals(unitNameForLookup)) {
 			unitNameForLookup = this.defaultPersistenceUnitName;
@@ -542,6 +543,8 @@ public class PersistenceAnnotationBeanPostProcessor
 	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
+		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
+
 		EntityManagerFactory emf = EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
 		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
 			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
@@ -556,6 +559,8 @@ public class PersistenceAnnotationBeanPostProcessor
 	 */
 	protected EntityManagerFactory findDefaultEntityManagerFactory(@Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
+
+		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
 
 		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
 			// Fancy variant with dependency registration
@@ -617,10 +622,12 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		private final String unitName;
 
+		@Nullable
 		private PersistenceContextType type;
 
 		private boolean synchronizedWithTransaction = false;
 
+		@Nullable
 		private Properties properties;
 
 		public PersistenceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {

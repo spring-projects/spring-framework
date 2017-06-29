@@ -76,14 +76,17 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private String encoding = DEFAULT_ENCODING;
 
+	@Nullable
 	private String encodingPropertyName;
 
+	@Nullable
 	private String typeIdPropertyName;
 
 	private Map<String, Class<?>> idClassMappings = new HashMap<>();
 
 	private Map<Class<?>, String> classIdMappings = new HashMap<>();
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 

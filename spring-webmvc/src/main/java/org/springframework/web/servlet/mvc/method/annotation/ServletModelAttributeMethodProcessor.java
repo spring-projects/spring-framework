@@ -128,7 +128,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @throws Exception
 	 */
 	@Nullable
-	protected Object createAttributeFromRequestValue(String sourceValue, @Nullable String attributeName,
+	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
 			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 

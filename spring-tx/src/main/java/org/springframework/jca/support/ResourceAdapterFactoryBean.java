@@ -26,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that bootstraps
@@ -49,12 +50,16 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>, InitializingBean, DisposableBean {
 
+	@Nullable
 	private ResourceAdapter resourceAdapter;
 
+	@Nullable
 	private BootstrapContext bootstrapContext;
 
+	@Nullable
 	private WorkManager workManager;
 
+	@Nullable
 	private XATerminator xaTerminator;
 
 
@@ -145,7 +150,9 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 */
 	@Override
 	public void destroy() {
-		this.resourceAdapter.stop();
+		if (this.resourceAdapter != null) {
+			this.resourceAdapter.stop();
+		}
 	}
 
 }

@@ -28,6 +28,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -75,6 +76,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The {@code MBeanServer} instance being used to register beans.
 	 */
+	@Nullable
 	protected MBeanServer server;
 
 	/**
@@ -101,6 +103,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * Return the {@code MBeanServer} that the beans will be registered with.
 	 */
+	@Nullable
 	public final MBeanServer getServer() {
 		return this.server;
 	}
@@ -125,6 +128,7 @@ public class MBeanRegistrationSupport {
 	 * @throws JMException if the registration failed
 	 */
 	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
+		Assert.state(this.server != null, "No MBeanServer set");
 		ObjectName actualObjectName;
 
 		synchronized (this.registeredBeans) {
@@ -188,6 +192,7 @@ public class MBeanRegistrationSupport {
 	 * @param objectName the suggested ObjectName for the MBean
 	 */
 	protected void doUnregister(ObjectName objectName) {
+		Assert.state(this.server != null, "No MBeanServer set");
 		boolean actuallyUnregistered = false;
 
 		synchronized (this.registeredBeans) {

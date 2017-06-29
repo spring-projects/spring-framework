@@ -1271,14 +1271,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected static class SuspendedResourcesHolder {
 
+		@Nullable
 		private final Object suspendedResources;
 
+		@Nullable
 		private List<TransactionSynchronization> suspendedSynchronizations;
 
+		@Nullable
 		private String name;
 
 		private boolean readOnly;
 
+		@Nullable
 		private Integer isolationLevel;
 
 		private boolean wasActive;

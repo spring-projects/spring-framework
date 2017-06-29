@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -98,8 +99,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
+	@Nullable
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
+	@Nullable
 	private Map<Class<?>, Class<? extends PropertyEditor>> customEditors;
 
 

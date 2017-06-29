@@ -169,6 +169,7 @@ public interface Cache {
 	@SuppressWarnings("serial")
 	class ValueRetrievalException extends RuntimeException {
 
+		@Nullable
 		private final Object key;
 
 		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, Throwable ex) {

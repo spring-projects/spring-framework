@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
 @Deprecated
 public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 
+	@Nullable
 	private String baseUrl;
 
 	private final Map<String, Object> defaultUriVariables = new HashMap<>();

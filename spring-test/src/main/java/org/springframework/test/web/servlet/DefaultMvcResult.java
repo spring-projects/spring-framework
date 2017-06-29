@@ -42,12 +42,16 @@ class DefaultMvcResult implements MvcResult {
 
 	private final MockHttpServletResponse mockResponse;
 
+	@Nullable
 	private Object handler;
 
+	@Nullable
 	private HandlerInterceptor[] interceptors;
 
+	@Nullable
 	private ModelAndView modelAndView;
 
+	@Nullable
 	private Exception resolvedException;
 
 	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
@@ -72,11 +76,12 @@ class DefaultMvcResult implements MvcResult {
 		return this.mockResponse;
 	}
 
-	public void setHandler(@Nullable Object handler) {
+	public void setHandler(Object handler) {
 		this.handler = handler;
 	}
 
 	@Override
+	@Nullable
 	public Object getHandler() {
 		return this.handler;
 	}
@@ -86,6 +91,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		return this.interceptors;
 	}
@@ -95,6 +101,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@Nullable
 	public Exception getResolvedException() {
 		return this.resolvedException;
 	}
@@ -104,6 +111,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@Nullable
 	public ModelAndView getModelAndView() {
 		return this.modelAndView;
 	}

@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer}.
@@ -32,11 +33,9 @@ import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
  */
 class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements ClientCodecConfigurer {
 
-
 	public DefaultClientCodecConfigurer() {
 		super(new ClientDefaultCodecsImpl());
 	}
-
 
 	@Override
 	public ClientDefaultCodecs defaultCodecs() {
@@ -44,13 +43,13 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 	}
 
 
-	private static class ClientDefaultCodecsImpl extends AbstractDefaultCodecs
-			implements ClientDefaultCodecs {
+	private static class ClientDefaultCodecsImpl extends AbstractDefaultCodecs implements ClientDefaultCodecs {
 
+		@Nullable
 		private DefaultMultipartCodecs multipartCodecs;
 
+		@Nullable
 		private Decoder<?> sseDecoder;
-
 
 		@Override
 		public MultipartCodecs multipartCodecs() {
@@ -64,7 +63,6 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 		public void serverSentEventDecoder(Decoder<?> decoder) {
 			this.sseDecoder = decoder;
 		}
-
 
 		@Override
 		protected boolean splitTextOnNewLine() {
@@ -105,21 +103,26 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 				partWriters = this.multipartCodecs.getWriters();
 			}
 			else {
+				DefaultCustomCodecs customCodecs = getCustomCodecs();
 				partWriters = new ArrayList<>();
 				partWriters.addAll(super.getTypedWriters());
-				partWriters.addAll(getCustomCodecs().getTypedWriters());
+				if (customCodecs != null) {
+					partWriters.addAll(customCodecs.getTypedWriters());
+				}
 				partWriters.addAll(super.getObjectWriters());
-				partWriters.addAll(getCustomCodecs().getObjectWriters());
+				if (customCodecs != null) {
+					partWriters.addAll(customCodecs.getObjectWriters());
+				}
 				partWriters.addAll(super.getCatchAllWriters());
 			}
 			return new MultipartHttpMessageWriter(partWriters);
 		}
 	}
 
+
 	private static class DefaultMultipartCodecs implements MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
-
 
 		@Override
 		public MultipartCodecs encoder(Encoder<?> encoder) {

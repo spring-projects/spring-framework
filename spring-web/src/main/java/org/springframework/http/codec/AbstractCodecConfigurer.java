@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
 import java.util.ArrayList;
@@ -35,9 +36,9 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
 
 /**
  * Default implementation of {@link CodecConfigurer}.
@@ -63,7 +64,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
 
 	protected AbstractCodecConfigurer(AbstractDefaultCodecs defaultCodecs) {
-		Assert.notNull(defaultCodecs, "'defaultCodecs' is required.");
+		Assert.notNull(defaultCodecs, "'defaultCodecs' is required");
 		this.defaultCodecs = defaultCodecs;
 		this.defaultCodecs.setCustomCodecs(this.customCodecs);
 	}
@@ -117,12 +118,14 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 
 		private boolean registerDefaults = true;
 
+		@Nullable
 		private Jackson2JsonDecoder jackson2Decoder;
 
+		@Nullable
 		private Jackson2JsonEncoder jackson2Encoder;
 
+		@Nullable
 		private DefaultCustomCodecs customCodecs;
-
 
 		public void setRegisterDefaults(boolean registerDefaults) {
 			this.registerDefaults = registerDefaults;
@@ -139,6 +142,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			this.customCodecs = customCodecs;
 		}
 
+		@Nullable
 		public DefaultCustomCodecs getCustomCodecs() {
 			return this.customCodecs;
 		}
@@ -149,7 +153,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 		}
 
 		protected Jackson2JsonDecoder jackson2Decoder() {
-			return this.jackson2Decoder != null ? this.jackson2Decoder : new Jackson2JsonDecoder();
+			return (this.jackson2Decoder != null ? this.jackson2Decoder : new Jackson2JsonDecoder());
 		}
 
 		@Override
@@ -158,7 +162,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 		}
 
 		protected Jackson2JsonEncoder jackson2Encoder() {
-			return this.jackson2Encoder != null ? this.jackson2Encoder : new Jackson2JsonEncoder();
+			return (this.jackson2Encoder != null ? this.jackson2Encoder : new Jackson2JsonEncoder());
 		}
 
 		// Readers...
@@ -244,11 +248,12 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 	protected static class DefaultCustomCodecs implements CustomCodecs {
 
 		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
+
 		private final List<HttpMessageWriter<?>> typedWriters = new ArrayList<>();
 
 		private final List<HttpMessageReader<?>> objectReaders = new ArrayList<>();
-		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
 
+		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
 
 		@Override
 		public void decoder(Decoder<?> decoder) {
@@ -271,7 +276,6 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 			boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
 			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
 		}
-
 
 		public List<HttpMessageReader<?>> getTypedReaders() {
 			return this.typedReaders;

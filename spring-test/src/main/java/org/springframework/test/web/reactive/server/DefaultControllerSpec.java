@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
@@ -138,22 +139,29 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 	private class TestWebFluxConfigurer implements WebFluxConfigurer {
 
+		@Nullable
 		private Consumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer;
 
+		@Nullable
 		private Consumer<CorsRegistry> corsRegistryConsumer;
 
+		@Nullable
 		private Consumer<ArgumentResolverConfigurer> argumentResolverConsumer;
 
+		@Nullable
 		private Consumer<PathMatchConfigurer> pathMatchConsumer;
 
+		@Nullable
 		private Consumer<ServerCodecConfigurer> messageCodecsConsumer;
 
+		@Nullable
 		private Consumer<FormatterRegistry> formattersConsumer;
 
+		@Nullable
 		private Validator validator;
 
+		@Nullable
 		private Consumer<ViewResolverRegistry> viewResolversConsumer;
-
 
 		@Override
 		public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
@@ -198,6 +206,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		}
 
 		@Override
+		@Nullable
 		public Validator getValidator() {
 			return this.validator;
 		}

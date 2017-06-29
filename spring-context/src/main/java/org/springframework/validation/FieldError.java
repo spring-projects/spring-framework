@@ -37,6 +37,7 @@ public class FieldError extends ObjectError {
 
 	private final String field;
 
+	@Nullable
 	private final Object rejectedValue;
 
 	private final boolean bindingFailure;
@@ -84,6 +85,7 @@ public class FieldError extends ObjectError {
 	/**
 	 * Return the rejected field value.
 	 */
+	@Nullable
 	public Object getRejectedValue() {
 		return this.rejectedValue;
 	}

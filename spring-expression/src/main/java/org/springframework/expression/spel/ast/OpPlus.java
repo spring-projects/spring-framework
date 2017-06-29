@@ -219,14 +219,17 @@ public class OpPlus extends Operator {
 		else {
 			this.children[0].generateCode(mv, cf);
 			String leftDesc = this.children[0].exitTypeDescriptor;
-			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, this.exitTypeDescriptor.charAt(0));
+			String exitDesc = this.exitTypeDescriptor;
+			Assert.state(exitDesc != null, "No exit type descriptor");
+			char targetDesc = exitDesc.charAt(0);
+			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, targetDesc);
 			if (this.children.length > 1) {
 				cf.enterCompilationScope();
 				this.children[1].generateCode(mv, cf);
 				String rightDesc = this.children[1].exitTypeDescriptor;
 				cf.exitCompilationScope();
-				CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, this.exitTypeDescriptor.charAt(0));
-				switch (this.exitTypeDescriptor.charAt(0)) {
+				CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
+				switch (targetDesc) {
 					case 'I':
 						mv.visitInsn(IADD);
 						break;

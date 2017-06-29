@@ -35,9 +35,11 @@ import org.springframework.lang.Nullable;
  */
 public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 
+	@Nullable
 	private Map<?, ?> sourceMap;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends Map> targetMapClass;
 
 

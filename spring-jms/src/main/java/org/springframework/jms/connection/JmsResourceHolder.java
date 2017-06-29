@@ -53,6 +53,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 	private boolean frozen = false;

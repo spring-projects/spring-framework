@@ -70,10 +70,13 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 	private final boolean lazy;
 
+	@Nullable
 	private Advice instantiatedAdvice;
 
+	@Nullable
 	private Boolean isBeforeAdvice;
 
+	@Nullable
 	private Boolean isAfterAdvice;
 
 
@@ -267,10 +270,12 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 		private final Pointcut preInstantiationPointcut;
 
+		@Nullable
 		private LazySingletonAspectInstanceFactoryDecorator aspectInstanceFactory;
 
 		private PerTargetInstantiationModelPointcut(AspectJExpressionPointcut declaredPointcut,
 				Pointcut preInstantiationPointcut, MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
+
 			this.declaredPointcut = declaredPointcut;
 			this.preInstantiationPointcut = preInstantiationPointcut;
 			if (aspectInstanceFactory instanceof LazySingletonAspectInstanceFactoryDecorator) {

@@ -164,18 +164,22 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/** ServletContext attribute to find the WebApplicationContext in */
+	@Nullable
 	private String contextAttribute;
 
 	/** WebApplicationContext implementation class to create */
 	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** WebApplicationContext id to assign */
+	@Nullable
 	private String contextId;
 
 	/** Namespace for this servlet */
+	@Nullable
 	private String namespace;
 
 	/** Explicit context config location */
+	@Nullable
 	private String contextConfigLocation;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
@@ -183,6 +187,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			new ArrayList<>();
 
 	/** Comma-delimited ApplicationContextInitializer class names set through init param */
+	@Nullable
 	private String contextInitializerClasses;
 
 	/** Should we publish the context as a ServletContext attribute? */
@@ -201,6 +206,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private boolean dispatchTraceRequest = false;
 
 	/** WebApplicationContext for this servlet */
+	@Nullable
 	private WebApplicationContext webApplicationContext;
 
 	/** If the WebApplicationContext was injected via {@link #setApplicationContext} */
@@ -769,6 +775,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Return this servlet's WebApplicationContext.
 	 */
+	@Nullable
 	public final WebApplicationContext getWebApplicationContext() {
 		return this.webApplicationContext;
 	}
@@ -1065,7 +1072,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response,
 			long startTime, @Nullable Throwable failureCause) {
 
-		if (this.publishEvents) {
+		if (this.publishEvents && this.webApplicationContext != null) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
 			this.webApplicationContext.publishEvent(

@@ -41,7 +41,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
@@ -83,24 +82,31 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			new NamedThreadLocal<>("ScriptTemplateView engines");
 
 
+	@Nullable
 	private ScriptEngine engine;
 
+	@Nullable
 	private String engineName;
 
+	@Nullable
 	private Boolean sharedEngine;
 
+	@Nullable
 	private String[] scripts;
 
+	@Nullable
 	private String renderObject;
 
+	@Nullable
 	private String renderFunction;
 
+	@Nullable
 	private Charset charset;
 
+	@Nullable
 	private String[] resourceLoaderPaths;
 
-	private ResourceLoader resourceLoader;
-
+	@Nullable
 	private volatile ScriptEngineManager scriptEngineManager;
 
 
@@ -165,15 +171,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * See {@link ScriptTemplateConfigurer#setContentType(String)}} documentation.
-	 * @since 4.2.1
-	 */
-	@Override
-	public void setContentType(@Nullable String contentType) {
-		super.setContentType(contentType);
-	}
-
-	/**
 	 * See {@link ScriptTemplateConfigurer#setCharset(Charset)} documentation.
 	 */
 	public void setCharset(Charset charset) {
@@ -227,9 +224,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			String resourceLoaderPath = viewConfig.getResourceLoaderPath();
 			setResourceLoaderPath(resourceLoaderPath == null ? DEFAULT_RESOURCE_LOADER_PATH : resourceLoaderPath);
 		}
-		if (this.resourceLoader == null) {
-			this.resourceLoader = getApplicationContext();
-		}
 		if (this.sharedEngine == null && viewConfig.isSharedEngine() != null) {
 			this.sharedEngine = viewConfig.isSharedEngine();
 		}
@@ -248,11 +242,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			loadScripts(this.engine);
 		}
 		else {
-			setEngine(createEngineFromName());
+			setEngine(createEngineFromName(this.engineName));
 		}
 
 		if (this.renderFunction != null && this.engine != null) {
-			Assert.isInstanceOf(Invocable.class, this.engine, "ScriptEngine must implement Invocable when 'renderFunction' is specified.");
+			Assert.isInstanceOf(Invocable.class, this.engine,
+					"ScriptEngine must implement Invocable when 'renderFunction' is specified");
 		}
 	}
 
@@ -263,27 +258,31 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				engines = new HashMap<>(4);
 				enginesHolder.set(engines);
 			}
+			Assert.state(this.engineName != null, "No engine name specified");
 			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?
 					new EngineKey(this.engineName, this.scripts) : this.engineName);
 			ScriptEngine engine = engines.get(engineKey);
 			if (engine == null) {
-				engine = createEngineFromName();
+				engine = createEngineFromName(engineName);
 				engines.put(engineKey, engine);
 			}
 			return engine;
 		}
 		else {
 			// Simply return the configured ScriptEngine...
+			Assert.state(this.engine != null, "No shared engine available");
 			return this.engine;
 		}
 	}
 
-	protected ScriptEngine createEngineFromName() {
-		if (this.scriptEngineManager == null) {
-			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+	protected ScriptEngine createEngineFromName(String engineName) {
+		ScriptEngineManager scriptEngineManager = this.scriptEngineManager;
+		if (scriptEngineManager == null) {
+			scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+			this.scriptEngineManager = scriptEngineManager;
 		}
 
-		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, this.engineName);
+		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(scriptEngineManager, engineName);
 		loadScripts(engine);
 		return engine;
 	}
@@ -307,10 +306,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Nullable
 	protected Resource getResource(String location) {
-		for (String path : this.resourceLoaderPaths) {
-			Resource resource = this.resourceLoader.getResource(path + location);
-			if (resource.exists()) {
-				return resource;
+		if (this.resourceLoaderPaths != null) {
+			for (String path : this.resourceLoaderPaths) {
+				Resource resource = obtainApplicationContext().getResource(path + location);
+				if (resource.exists()) {
+					return resource;
+				}
 			}
 		}
 		return null;
@@ -341,7 +342,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		super.prepareResponse(request, response);
 
 		setResponseContentType(request, response);
-		response.setCharacterEncoding(this.charset.name());
+		if (this.charset != null) {
+			response.setCharacterEncoding(this.charset.name());
+		}
 	}
 
 	@Override
@@ -375,10 +378,10 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			}
 			else if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
-				html = ((Invocable)engine).invokeMethod(thiz, this.renderFunction, template, model, context);
+				html = ((Invocable) engine).invokeMethod(thiz, this.renderFunction, template, model, context);
 			}
 			else {
-				html = ((Invocable)engine).invokeFunction(this.renderFunction, template, model, context);
+				html = ((Invocable) engine).invokeFunction(this.renderFunction, template, model, context);
 			}
 
 			response.getWriter().write(String.valueOf(html));
@@ -393,7 +396,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (resource == null) {
 			throw new IllegalStateException("Template resource [" + path + "] not found");
 		}
-		InputStreamReader reader = new InputStreamReader(resource.getInputStream(), this.charset);
+		InputStreamReader reader = (this.charset != null ?
+				new InputStreamReader(resource.getInputStream(), this.charset) :
+				new InputStreamReader(resource.getInputStream()));
 		return FileCopyUtils.copyToString(reader);
 	}
 

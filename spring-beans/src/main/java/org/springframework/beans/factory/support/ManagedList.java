@@ -35,8 +35,10 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetadataElement {
 
+	@Nullable
 	private Object source;
 
+	@Nullable
 	private String elementTypeName;
 
 	private boolean mergeEnabled;
@@ -59,6 +61,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}
@@ -73,6 +76,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 	/**
 	 * Return the default element type name (class name) to be used for this list.
 	 */
+	@Nullable
 	public String getElementTypeName() {
 		return this.elementTypeName;
 	}

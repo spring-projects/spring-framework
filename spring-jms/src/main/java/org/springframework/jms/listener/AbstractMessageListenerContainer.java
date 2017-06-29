@@ -143,28 +143,37 @@ import org.springframework.util.ErrorHandler;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
+	@Nullable
 	private volatile Object destination;
 
+	@Nullable
 	private volatile String messageSelector;
 
+	@Nullable
 	private volatile Object messageListener;
 
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
 
+	@Nullable
 	private String subscriptionName;
 
+	@Nullable
 	private Boolean replyPubSubDomain;
 
+	@Nullable
 	private QosSettings replyQosSettings;
 
 	private boolean pubSubNoLocal = false;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
+	@Nullable
 	private ExceptionListener exceptionListener;
 
+	@Nullable
 	private ErrorHandler errorHandler;
 
 	private boolean exposeListenerSession = true;
@@ -238,7 +247,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * (never {@code null}).
 	 */
 	protected String getDestinationDescription() {
-		return this.destination.toString();
+		Object destination = this.destination;
+		return (destination != null ? destination.toString() : "");
 	}
 
 	/**

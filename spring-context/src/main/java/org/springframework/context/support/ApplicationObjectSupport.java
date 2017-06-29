@@ -52,9 +52,11 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** ApplicationContext this object runs in */
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	/** MessageSourceAccessor for easy message access */
+	@Nullable
 	private MessageSourceAccessor messageSourceAccessor;
 
 

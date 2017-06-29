@@ -41,6 +41,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	private final Class<? extends Annotation> annotationType;
 
+	@Nullable
 	private final Object annotatedElement;
 
 	private final S source;
@@ -73,6 +74,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	}
 
 	@Override
+	@Nullable
 	public final Object getAnnotatedElement() {
 		return this.annotatedElement;
 	}

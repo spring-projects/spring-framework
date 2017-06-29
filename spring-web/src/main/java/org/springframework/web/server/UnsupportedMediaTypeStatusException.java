@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class UnsupportedMediaTypeStatusException extends ResponseStatusException {
 
+	@Nullable
 	private final MediaType contentType;
 
 	private final List<MediaType> supportedMediaTypes;

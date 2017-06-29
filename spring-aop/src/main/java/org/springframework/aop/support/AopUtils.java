@@ -65,7 +65,7 @@ public abstract class AopUtils {
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
 	 */
-	public static boolean isAopProxy(Object object) {
+	public static boolean isAopProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy &&
 				(Proxy.isProxyClass(object.getClass()) || ClassUtils.isCglibProxyClass(object.getClass())));
 	}
@@ -78,7 +78,7 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
-	public static boolean isJdkDynamicProxy(Object object) {
+	public static boolean isJdkDynamicProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
 	}
 
@@ -90,7 +90,7 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 * @see ClassUtils#isCglibProxy(Object)
 	 */
-	public static boolean isCglibProxy(Object object) {
+	public static boolean isCglibProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy && ClassUtils.isCglibProxy(object));
 	}
 

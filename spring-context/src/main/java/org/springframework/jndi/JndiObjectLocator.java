@@ -20,6 +20,7 @@ import javax.naming.NamingException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,8 +49,10 @@ import org.springframework.util.StringUtils;
  */
 public abstract class JndiObjectLocator extends JndiLocatorSupport implements InitializingBean {
 
+	@Nullable
 	private String jndiName;
 
+	@Nullable
 	private Class<?> expectedType;
 
 
@@ -66,6 +69,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	/**
 	 * Return the JNDI name to look up.
 	 */
+	@Nullable
 	public String getJndiName() {
 		return this.jndiName;
 	}
@@ -105,7 +109,9 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * @see #lookup(String, Class)
 	 */
 	protected Object lookup() throws NamingException {
-		return lookup(getJndiName(), getExpectedType());
+		String jndiName = getJndiName();
+		Assert.state(jndiName != null, "No JNDI name specified");
+		return lookup(jndiName, getExpectedType());
 	}
 
 }

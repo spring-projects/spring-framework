@@ -122,40 +122,56 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
+	@Nullable
 	private ReflectionProvider reflectionProvider;
 
+	@Nullable
 	private HierarchicalStreamDriver streamDriver;
 
+	@Nullable
 	private HierarchicalStreamDriver defaultDriver;
 
+	@Nullable
 	private Mapper mapper;
 
+	@Nullable
 	private Class<? extends MapperWrapper>[] mapperWrappers;
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
 	private ConverterRegistry converterRegistry = (ConverterRegistry) this.converterLookup;
 
+	@Nullable
 	private ConverterMatcher[] converters;
 
+	@Nullable
 	private MarshallingStrategy marshallingStrategy;
 
+	@Nullable
 	private Integer mode;
 
+	@Nullable
 	private Map<String, ?> aliases;
 
+	@Nullable
 	private Map<String, ?> aliasesByType;
 
+	@Nullable
 	private Map<String, String> fieldAliases;
 
+	@Nullable
 	private Class<?>[] useAttributeForTypes;
 
+	@Nullable
 	private Map<?, ?> useAttributeFor;
 
+	@Nullable
 	private Map<Class<?>, String> implicitCollections;
 
+	@Nullable
 	private Map<Class<?>, String> omittedFields;
 
+	@Nullable
 	private Class<?>[] annotatedClasses;
 
 	private boolean autodetectAnnotations;
@@ -164,10 +180,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	private NameCoder nameCoder = new XmlFriendlyNameCoder();
 
+	@Nullable
 	private Class<?>[] supportedClasses;
 
 	private ClassLoader beanClassLoader = new CompositeClassLoader();
 
+	@Nullable
 	private XStream xstream;
 
 

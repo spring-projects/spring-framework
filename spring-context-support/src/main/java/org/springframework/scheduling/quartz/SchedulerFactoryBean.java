@@ -44,6 +44,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingException;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -165,26 +166,36 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
 
+	@Nullable
 	private String schedulerName;
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private Properties quartzProperties;
 
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private DataSource dataSource;
 
+	@Nullable
 	private DataSource nonTransactionalDataSource;
 
 
+	@Nullable
     private Map<String, ?> schedulerContextMap;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private String applicationContextSchedulerContextKey;
 
+	@Nullable
 	private JobFactory jobFactory;
 
 	private boolean jobFactorySet = false;
@@ -201,6 +212,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private boolean waitForJobsToCompleteOnShutdown = false;
 
 
+	@Nullable
 	private Scheduler scheduler;
 
 
@@ -625,7 +637,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private void populateSchedulerContext() throws SchedulerException {
 		// Put specified objects into Scheduler context.
 		if (this.schedulerContextMap != null) {
-			this.scheduler.getContext().putAll(this.schedulerContextMap);
+			getScheduler().getContext().putAll(this.schedulerContextMap);
 		}
 
 		// Register ApplicationContext in Scheduler context.
@@ -635,7 +647,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 					"SchedulerFactoryBean needs to be set up in an ApplicationContext " +
 					"to be able to handle an 'applicationContextSchedulerContextKey'");
 			}
-			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
+			getScheduler().getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 	}
 
@@ -691,6 +703,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	@Override
 	public Scheduler getScheduler() {
+		Assert.state(this.scheduler != null, "No Scheduler set");
 		return this.scheduler;
 	}
 
@@ -768,8 +781,10 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 */
 	@Override
 	public void destroy() throws SchedulerException {
-		logger.info("Shutting down Quartz Scheduler");
-		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
+		if (this.scheduler != null) {
+			logger.info("Shutting down Quartz Scheduler");
+			this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
+		}
 	}
 
 }

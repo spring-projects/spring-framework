@@ -24,6 +24,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -54,24 +55,33 @@ public class BindStatus {
 
 	private final boolean htmlEscape;
 
+	@Nullable
 	private final String expression;
 
+	@Nullable
 	private final Errors errors;
 
+	@Nullable
 	private BindingResult bindingResult;
 
+	@Nullable
 	private Object value;
 
+	@Nullable
 	private Class<?> valueType;
 
+	@Nullable
 	private Object actualValue;
 
+	@Nullable
 	private PropertyEditor editor;
 
+	@Nullable
 	private List<? extends ObjectError> objectErrors;
 
-	private String[] errorCodes;
+	private String[] errorCodes = new String[0];
 
+	@Nullable
 	private String[] errorMessages;
 
 
@@ -133,7 +143,7 @@ public class BindStatus {
 			else {
 				this.objectErrors = this.errors.getGlobalErrors();
 			}
-			initErrorCodes();
+			initErrorCodes(this.objectErrors);
 		}
 
 		else {
@@ -163,24 +173,11 @@ public class BindStatus {
 	/**
 	 * Extract the error codes from the ObjectError list.
 	 */
-	private void initErrorCodes() {
-		this.errorCodes = new String[this.objectErrors.size()];
-		for (int i = 0; i < this.objectErrors.size(); i++) {
-			ObjectError error = this.objectErrors.get(i);
+	private void initErrorCodes(List<? extends ObjectError> objectErrors) {
+		this.errorCodes = new String[objectErrors.size()];
+		for (int i = 0; i < objectErrors.size(); i++) {
+			ObjectError error = objectErrors.get(i);
 			this.errorCodes[i] = error.getCode();
-		}
-	}
-
-	/**
-	 * Extract the error messages from the ObjectError list.
-	 */
-	private void initErrorMessages() throws NoSuchMessageException {
-		if (this.errorMessages == null) {
-			this.errorMessages = new String[this.objectErrors.size()];
-			for (int i = 0; i < this.objectErrors.size(); i++) {
-				ObjectError error = this.objectErrors.get(i);
-				this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
-			}
 		}
 	}
 
@@ -256,14 +253,13 @@ public class BindStatus {
 	 * Return if this status represents a field or object error.
 	 */
 	public boolean isError() {
-		return (this.errorCodes != null && this.errorCodes.length > 0);
+		return (this.errorCodes.length > 0);
 	}
 
 	/**
 	 * Return the error codes for the field or object, if any.
 	 * Returns an empty array instead of null if none.
 	 */
-	@Nullable
 	public String[] getErrorCodes() {
 		return this.errorCodes;
 	}
@@ -280,16 +276,15 @@ public class BindStatus {
 	 * if any. Returns an empty array instead of null if none.
 	 */
 	public String[] getErrorMessages() {
-		initErrorMessages();
-		return this.errorMessages;
+		return initErrorMessages();
 	}
 
 	/**
 	 * Return the first error message for the field or object, if any.
 	 */
 	public String getErrorMessage() {
-		initErrorMessages();
-		return (this.errorMessages.length > 0 ? this.errorMessages[0] : "");
+		String[] errorMessages = initErrorMessages();
+		return (errorMessages.length > 0 ? errorMessages[0] : "");
 	}
 
 	/**
@@ -299,8 +294,26 @@ public class BindStatus {
 	 * @return the error message string
 	 */
 	public String getErrorMessagesAsString(String delimiter) {
-		initErrorMessages();
-		return StringUtils.arrayToDelimitedString(this.errorMessages, delimiter);
+		return StringUtils.arrayToDelimitedString(initErrorMessages(), delimiter);
+	}
+
+	/**
+	 * Extract the error messages from the ObjectError list.
+	 */
+	private String[] initErrorMessages() throws NoSuchMessageException {
+		if (this.errorMessages == null) {
+			if (this.objectErrors != null) {
+				this.errorMessages = new String[this.objectErrors.size()];
+				for (int i = 0; i < this.objectErrors.size(); i++) {
+					ObjectError error = this.objectErrors.get(i);
+					this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
+				}
+			}
+			else {
+				this.errorMessages = new String[0];
+			}
+		}
+		return this.errorMessages;
 	}
 
 	/**
@@ -341,7 +354,7 @@ public class BindStatus {
 		StringBuilder sb = new StringBuilder("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
 		sb.append("value=[").append(this.value).append("]");
-		if (isError()) {
+		if (!ObjectUtils.isEmpty(this.errorCodes)) {
 			sb.append("; errorCodes=").append(Arrays.asList(this.errorCodes));
 		}
 		return sb.toString();

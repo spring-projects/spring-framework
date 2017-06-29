@@ -21,6 +21,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -48,10 +49,13 @@ import org.springframework.util.ClassUtils;
 public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Class<?> proxyInterface;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private Object mbeanProxy;
 
 

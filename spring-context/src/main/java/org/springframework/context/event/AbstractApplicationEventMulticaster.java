@@ -65,8 +65,10 @@ public abstract class AbstractApplicationEventMulticaster
 
 	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache = new ConcurrentHashMap<>(64);
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private Object retrievalMutex = this.defaultRetriever;
@@ -300,6 +302,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 		private final ResolvableType eventType;
 
+		@Nullable
 		private final Class<?> sourceType;
 
 		public ListenerCacheKey(ResolvableType eventType, @Nullable Class<?> sourceType) {

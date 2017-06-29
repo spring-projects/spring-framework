@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,11 +51,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
+	@Nullable
 	private PathPatternRegistry<Object> patternRegistry;
 
-	public PathPatternRegistry<Object> getPatternRegistry() {
-		return patternRegistry;
-	}
 
 	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
@@ -76,7 +75,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * as value.
 	 */
 	public final Map<PathPattern, Object> getHandlerMap() {
-		return this.patternRegistry.getPatternsMap();
+		return (this.patternRegistry != null ? this.patternRegistry.getPatternsMap() : Collections.emptyMap());
 	}
 
 
@@ -103,11 +102,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Look up a handler instance for the given URL lookup path.
-	 *
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various path pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the PathPattern class.
-	 *
 	 * @param lookupPath URL the handler is mapped to
 	 * @param exchange the current exchange
 	 * @return the associated handler instance, or {@code null} if not found
@@ -115,19 +112,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	@Nullable
 	protected Object lookupHandler(String lookupPath, ServerWebExchange exchange) throws Exception {
-		Optional<PathMatchResult<Object>> matches = this.patternRegistry.findFirstMatch(lookupPath);
-		if (matches.isPresent()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Matching patterns for request [" + lookupPath + "] are " + matches);
+		if (this.patternRegistry != null) {
+			Optional<PathMatchResult<Object>> matches = this.patternRegistry.findFirstMatch(lookupPath);
+			if (matches.isPresent()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Matching patterns for request [" + lookupPath + "] are " + matches);
+				}
+				PathMatchResult<Object> bestMatch = matches.get();
+				String pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
+				Object handler = bestMatch.getHandler();
+				return handleMatch(handler, bestMatch.getPattern(), pathWithinMapping, exchange);
 			}
-			PathMatchResult<Object> bestMatch = matches.get();
-			String pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
-			Object handler = bestMatch.getHandler();
-			if (handler == null) {
-				throw new IllegalStateException(
-						"Could not find handler for best pattern match [" + bestMatch + "]");
-			}
-			return handleMatch(handler, bestMatch.getPattern(), pathWithinMapping, exchange);
 		}
 
 		// No handler found...

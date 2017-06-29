@@ -26,6 +26,7 @@ import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -47,6 +48,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	private Function<Session, StandardWebSocketSession> sessionFactory;
 
+	@Nullable
 	private StandardWebSocketSession delegateSession;
 
 
@@ -62,8 +64,8 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	@Override
 	public void onOpen(Session session, EndpointConfig config) {
-
 		this.delegateSession = this.sessionFactory.apply(session);
+		Assert.state(this.delegateSession != null, "No delegate session");
 
 		session.addMessageHandler(String.class, message -> {
 			WebSocketMessage webSocketMessage = toMessage(message);

@@ -96,6 +96,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Late binding entry set.
 	 */
+	@Nullable
 	private Set<Map.Entry<K, V>> entrySet;
 
 
@@ -441,9 +442,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		private final int initialSize;
 
 		/**
-		 * Array of references indexed using the low order bits from the hash. This
-		 * property should only be set via {@link #setReferences} to ensure that the
-		 * {@code resizeThreshold} is maintained.
+		 * Array of references indexed using the low order bits from the hash.
+		 * This property should only be set along with {@code resizeThreshold}.
 		 */
 		private volatile Reference<K, V>[] references;
 
@@ -462,7 +462,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		public Segment(int initialCapacity) {
 			this.referenceManager = createReferenceManager();
 			this.initialSize = 1 << calculateShift(initialCapacity, MAXIMUM_SEGMENT_SIZE);
-			setReferences(createReferenceArray(this.initialSize));
+			this.references = createReferenceArray(this.initialSize);
+			this.resizeThreshold = (int) (this.references.length * getLoadFactor());
 		}
 
 		@Nullable
@@ -532,7 +533,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			}
 			lock();
 			try {
-				setReferences(createReferenceArray(this.initialSize));
+				this.references = createReferenceArray(this.initialSize);
+				this.resizeThreshold = (int) (this.references.length * getLoadFactor());
 				this.count = 0;
 			}
 			finally {
@@ -598,7 +600,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 					// Replace volatile members
 					if (resizing) {
-						setReferences(restructured);
+						this.references = restructured;
+						this.resizeThreshold = (int) (this.references.length * getLoadFactor());
 					}
 					this.count = Math.max(countAfterRestructure, 0);
 				}
@@ -636,23 +639,14 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		/**
-		 * Replace the references with a new value, recalculating the resizeThreshold.
-		 * @param references the new references
-		 */
-		private void setReferences(Reference<K, V>[] references) {
-			this.references = references;
-			this.resizeThreshold = (int) (references.length * getLoadFactor());
-		}
-
-		/**
-		 * @return the size of the current references array
+		 * Return the size of the current references array.
 		 */
 		public final int getSize() {
 			return this.references.length;
 		}
 
 		/**
-		 * @return the total number of references in this segment
+		 * Return the total number of references in this segment.
 		 */
 		public final int getCount() {
 			return this.count;
@@ -865,12 +859,16 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		private int referenceIndex;
 
+		@Nullable
 		private Reference<K, V>[] references;
 
+		@Nullable
 		private Reference<K, V> reference;
 
+		@Nullable
 		private Entry<K, V> next;
 
+		@Nullable
 		private Entry<K, V> last;
 
 		public EntryIterator() {
@@ -990,9 +988,10 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		private final int hash;
 
+		@Nullable
 		private final Reference<K, V> nextReference;
 
-		public SoftEntryReference(Entry<K, V> entry, int hash, @Nullable  Reference<K, V> next,
+		public SoftEntryReference(Entry<K, V> entry, int hash, @Nullable Reference<K, V> next,
 				ReferenceQueue<Entry<K, V>> queue) {
 
 			super(entry, queue);
@@ -1025,6 +1024,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		private final int hash;
 
+		@Nullable
 		private final Reference<K, V> nextReference;
 
 		public WeakEntryReference(Entry<K, V> entry, int hash, @Nullable Reference<K, V> next,

@@ -38,7 +38,8 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 
 	private final Future<S> adaptee;
 
-	private Object result = null;
+	@Nullable
+	private Object result;
 
 	private State state = State.NEW;
 

@@ -58,8 +58,10 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	private int awaitTerminationSeconds = 0;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private ExecutorService executor;
 
 
@@ -82,7 +84,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	@Override
-	public void setThreadNamePrefix(String threadNamePrefix) {
+	public void setThreadNamePrefix(@Nullable String threadNamePrefix) {
 		super.setThreadNamePrefix(threadNamePrefix);
 		this.threadNamePrefixSet = true;
 	}
@@ -197,29 +199,30 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Perform a shutdown on the underlying ExecutorService.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
-	 * @see #awaitTerminationIfNecessary()
 	 */
 	public void shutdown() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
-		if (this.waitForTasksToCompleteOnShutdown) {
-			this.executor.shutdown();
+		if (this.executor != null) {
+			if (this.waitForTasksToCompleteOnShutdown) {
+				this.executor.shutdown();
+			}
+			else {
+				this.executor.shutdownNow();
+			}
+			awaitTerminationIfNecessary(this.executor);
 		}
-		else {
-			this.executor.shutdownNow();
-		}
-		awaitTerminationIfNecessary();
 	}
 
 	/**
 	 * Wait for the executor to terminate, according to the value of the
 	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
 	 */
-	private void awaitTerminationIfNecessary() {
+	private void awaitTerminationIfNecessary(ExecutorService executor) {
 		if (this.awaitTerminationSeconds > 0) {
 			try {
-				if (!this.executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+				if (!executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Timed out while waiting for executor" +
 								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");

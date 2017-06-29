@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -63,8 +64,10 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
+	@Nullable
 	private Resource location;
 
+	@Nullable
 	private ConfigurableApplicationContext cachedFactory;
 
 

@@ -71,14 +71,17 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private final List<ResolvableType> declaredEventTypes;
 
+	@Nullable
 	private final String condition;
 
 	private final int order;
 
 	private final AnnotatedElementKey methodKey;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private EventExpressionEvaluator evaluator;
 
 
@@ -291,6 +294,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * annotation or any matching attribute on a composed annotation that
 	 * is meta-annotated with {@code @EventListener}.
 	 */
+	@Nullable
 	protected String getCondition() {
 		return this.condition;
 	}

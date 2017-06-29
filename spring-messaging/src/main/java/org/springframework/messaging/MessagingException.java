@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class MessagingException extends NestedRuntimeException {
 
+	@Nullable
 	private final Message<?> failedMessage;
 
 
@@ -63,6 +64,7 @@ public class MessagingException extends NestedRuntimeException {
 	}
 
 
+	@Nullable
 	public Message<?> getFailedMessage() {
 		return this.failedMessage;
 	}

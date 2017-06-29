@@ -287,6 +287,7 @@ public abstract class MetaAnnotationUtils {
 
 		private final Class<?> declaringClass;
 
+		@Nullable
 		private final Annotation composedAnnotation;
 
 		private final T annotation;
@@ -306,8 +307,10 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+			AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
 					rootDeclaringClass, annotation.annotationType().getName(), false, false);
+			Assert.state(attributes != null, "No annotation attributes");
+			this.annotationAttributes = attributes;
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -345,6 +348,7 @@ public abstract class MetaAnnotationUtils {
 			return this.annotationAttributes;
 		}
 
+		@Nullable
 		public Annotation getComposedAnnotation() {
 			return this.composedAnnotation;
 		}

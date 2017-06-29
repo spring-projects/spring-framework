@@ -54,6 +54,7 @@ public class ControllerAdviceBean implements Ordered {
 
 	private final Object bean;
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final int order;
@@ -137,7 +138,7 @@ public class ControllerAdviceBean implements Ordered {
 	@Nullable
 	public Class<?> getBeanType() {
 		Class<?> beanType = (this.bean instanceof String ?
-				this.beanFactory.getType((String) this.bean) : this.bean.getClass());
+				obtainBeanFactory().getType((String) this.bean) : this.bean.getClass());
 		return (beanType != null ? ClassUtils.getUserClass(beanType) : null);
 	}
 
@@ -145,7 +146,12 @@ public class ControllerAdviceBean implements Ordered {
 	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
 	 */
 	public Object resolveBean() {
-		return (this.bean instanceof String ? this.beanFactory.getBean((String) this.bean) : this.bean);
+		return (this.bean instanceof String ? obtainBeanFactory().getBean((String) this.bean) : this.bean);
+	}
+
+	private BeanFactory obtainBeanFactory() {
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
+		return this.beanFactory;
 	}
 
 	/**

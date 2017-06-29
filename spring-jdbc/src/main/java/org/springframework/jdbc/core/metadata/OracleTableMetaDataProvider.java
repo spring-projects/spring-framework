@@ -43,6 +43,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	private final boolean includeSynonyms;
 
+	@Nullable
 	private String defaultSchema;
 
 
@@ -104,7 +105,8 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	@Override
 	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
-			@Nullable String catalogName, @Nullable String schemaName, String tableName) throws SQLException {
+			@Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName)
+			throws SQLException {
 
 		if (!this.includeSynonyms) {
 			logger.debug("Defaulting to no synonyms in table metadata lookup");

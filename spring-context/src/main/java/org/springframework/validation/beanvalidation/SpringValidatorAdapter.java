@@ -65,6 +65,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		internalAnnotationAttributes.add("payload");
 	}
 
+	@Nullable
 	private javax.validation.Validator targetValidator;
 
 
@@ -316,6 +317,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public ExecutableValidator forExecutables() {
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.forExecutables();
 	}
 

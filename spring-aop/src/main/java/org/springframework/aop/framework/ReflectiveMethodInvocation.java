@@ -63,17 +63,20 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	protected final Object proxy;
 
+	@Nullable
 	protected final Object target;
 
 	protected final Method method;
 
-	protected Object[] arguments;
+	protected Object[] arguments = new Object[0];
 
+	@Nullable
 	private final Class<?> targetClass;
 
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
 	 */
+	@Nullable
 	private Map<String, Object> userAttributes;
 
 	/**
@@ -103,7 +106,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
 	protected ReflectiveMethodInvocation(
-			Object proxy, @Nullable Object target, Method method, Object[] arguments,
+			Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
 			@Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
@@ -143,7 +146,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	@Override
 	public final Object[] getArguments() {
-		return (this.arguments != null ? this.arguments : new Object[0]);
+		return this.arguments;
 	}
 
 	@Override
@@ -205,8 +208,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	@Override
 	public MethodInvocation invocableClone() {
-		Object[] cloneArguments = null;
-		if (this.arguments != null) {
+		Object[] cloneArguments = this.arguments;
+		if (this.arguments.length > 0) {
 			// Build an independent copy of the arguments array.
 			cloneArguments = new Object[this.arguments.length];
 			System.arraycopy(this.arguments, 0, cloneArguments, 0, this.arguments.length);
@@ -223,7 +226,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	public MethodInvocation invocableClone(@Nullable Object... arguments) {
+	public MethodInvocation invocableClone(Object... arguments) {
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.
 		if (this.userAttributes == null) {

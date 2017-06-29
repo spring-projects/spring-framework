@@ -78,20 +78,27 @@ public class FreeMarkerConfigurationFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private Properties freemarkerSettings;
 
+	@Nullable
 	private Map<String, Object> freemarkerVariables;
 
+	@Nullable
 	private String defaultEncoding;
 
 	private final List<TemplateLoader> templateLoaders = new ArrayList<>();
 
+	@Nullable
 	private List<TemplateLoader> preTemplateLoaders;
 
+	@Nullable
 	private List<TemplateLoader> postTemplateLoaders;
 
+	@Nullable
 	private String[] templateLoaderPaths;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();

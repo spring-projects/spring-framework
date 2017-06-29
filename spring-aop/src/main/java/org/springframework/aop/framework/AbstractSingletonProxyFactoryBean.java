@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -41,19 +42,25 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Object target;
 
+	@Nullable
 	private Class<?>[] proxyInterfaces;
 
+	@Nullable
 	private Object[] preInterceptors;
 
+	@Nullable
 	private Object[] postInterceptors;
 
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
+	@Nullable
 	private transient ClassLoader proxyClassLoader;
 
+	@Nullable
 	private Object proxy;
 
 

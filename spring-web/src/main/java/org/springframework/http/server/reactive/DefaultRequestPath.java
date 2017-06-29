@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
@@ -38,19 +39,19 @@ class DefaultRequestPath implements RequestPath {
 	private final PathSegmentContainer pathWithinApplication;
 
 
-	DefaultRequestPath(URI uri, String contextPath, Charset charset) {
+	DefaultRequestPath(URI uri, @Nullable String contextPath, Charset charset) {
 		this.fullPath = PathSegmentContainer.parse(uri.getRawPath(), charset);
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	DefaultRequestPath(RequestPath requestPath, String contextPath) {
+	DefaultRequestPath(RequestPath requestPath, @Nullable String contextPath) {
 		this.fullPath = requestPath;
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	private static PathSegmentContainer initContextPath(PathSegmentContainer path, String contextPath) {
+	private static PathSegmentContainer initContextPath(PathSegmentContainer path, @Nullable String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
 			return DefaultPathSegmentContainer.EMPTY_PATH;
 		}

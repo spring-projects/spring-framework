@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  */
 public class WeavingTransformer {
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<>();

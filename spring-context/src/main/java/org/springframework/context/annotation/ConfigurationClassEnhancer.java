@@ -95,7 +95,7 @@ class ConfigurationClassEnhancer {
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
 	 * @return the enhanced subclass
 	 */
-	public Class<?> enhance(Class<?> configClass, ClassLoader classLoader) {
+	public Class<?> enhance(Class<?> configClass, @Nullable ClassLoader classLoader) {
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -118,7 +118,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
-	private Enhancer newEnhancer(Class<?> superclass, ClassLoader classLoader) {
+	private Enhancer newEnhancer(Class<?> superclass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
@@ -210,6 +210,7 @@ class ConfigurationClassEnhancer {
 	 */
 	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
 
+		@Nullable
 		private final ClassLoader classLoader;
 
 		public BeanFactoryAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {

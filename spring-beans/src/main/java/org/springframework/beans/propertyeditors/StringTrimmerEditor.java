@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
  */
 public class StringTrimmerEditor extends PropertyEditorSupport {
 
+	@Nullable
 	private final String charsToDelete;
 
 	private final boolean emptyAsNull;

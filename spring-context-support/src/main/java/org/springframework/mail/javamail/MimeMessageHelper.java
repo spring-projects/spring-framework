@@ -163,10 +163,13 @@ public class MimeMessageHelper {
 
 	private final MimeMessage mimeMessage;
 
+	@Nullable
 	private MimeMultipart rootMimeMultipart;
 
+	@Nullable
 	private MimeMultipart mimeMultipart;
 
+	@Nullable
 	private final String encoding;
 
 	private FileTypeMap fileTypeMap;
@@ -377,17 +380,6 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Throw an IllegalStateException if this helper is not in multipart mode.
-	 */
-	private void checkMultipart() throws IllegalStateException {
-		if (!isMultipart()) {
-			throw new IllegalStateException("Not in multipart mode - " +
-				"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
-				"if you need to set alternative texts or add inline elements or attachments.");
-		}
-	}
-
-	/**
 	 * Return the root MIME "multipart/mixed" object, if any.
 	 * Can be used to manually add attachments.
 	 * <p>This will be the direct content of the MimeMessage,
@@ -398,7 +390,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getRootMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.rootMimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.rootMimeMultipart;
 	}
 
@@ -413,7 +409,11 @@ public class MimeMessageHelper {
 	 * @see javax.mail.internet.MimeMultipart#addBodyPart
 	 */
 	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
-		checkMultipart();
+		if (this.mimeMultipart == null) {
+			throw new IllegalStateException("Not in multipart mode - " +
+					"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+					"if you need to set alternative texts or add inline elements or attachments.");
+		}
 		return this.mimeMultipart;
 	}
 

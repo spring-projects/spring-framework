@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  */
 public class SQLErrorCodes {
 
+	@Nullable
 	private String[] databaseProductNames;
 
 	private boolean useSqlStateForTranslation = false;
@@ -59,8 +60,10 @@ public class SQLErrorCodes {
 
 	private String[] cannotSerializeTransactionCodes = new String[0];
 
+	@Nullable
 	private CustomSQLErrorCodesTranslation[] customTranslations;
 
+	@Nullable
 	private SQLExceptionTranslator customSqlExceptionTranslator;
 
 
@@ -86,6 +89,7 @@ public class SQLErrorCodes {
 		this.databaseProductNames = databaseProductNames;
 	}
 
+	@Nullable
 	public String[] getDatabaseProductNames() {
 		return this.databaseProductNames;
 	}

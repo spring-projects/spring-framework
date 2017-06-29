@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  */
 public class DataSourceInitializer implements InitializingBean, DisposableBean {
 
+	@Nullable
 	private DataSource dataSource;
 
 	private DatabasePopulator databasePopulator;

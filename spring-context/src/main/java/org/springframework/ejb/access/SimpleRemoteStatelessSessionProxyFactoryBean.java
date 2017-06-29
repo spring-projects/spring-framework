@@ -21,6 +21,7 @@ import javax.naming.NamingException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -62,11 +63,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	/** The business interface of the EJB we're proxying */
+	@Nullable
 	private Class<?> businessInterface;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** EJBObject */
+	@Nullable
 	private Object proxy;
 
 
@@ -87,6 +91,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	/**
 	 * Return the business interface of the EJB we're proxying.
 	 */
+	@Nullable
 	public Class<?> getBusinessInterface() {
 		return this.businessInterface;
 	}

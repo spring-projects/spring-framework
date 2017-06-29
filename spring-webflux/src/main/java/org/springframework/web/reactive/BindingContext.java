@@ -37,6 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class BindingContext {
 
+	@Nullable
 	private final WebBindingInitializer initializer;
 
 	private final Model model = new BindingAwareConcurrentModel();

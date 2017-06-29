@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  */
 public abstract class CciDaoSupport extends DaoSupport {
 
+	@Nullable
 	private CciTemplate cciTemplate;
 
 
@@ -77,7 +78,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 */
 	@Nullable
 	public final ConnectionFactory getConnectionFactory() {
-		return this.cciTemplate.getConnectionFactory();
+		return (this.cciTemplate != null ? this.cciTemplate.getConnectionFactory() : null);
 	}
 
 	/**
@@ -92,6 +93,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * Return the CciTemplate for this DAO,
 	 * pre-initialized with the ConnectionFactory or set explicitly.
 	 */
+	@Nullable
 	public final CciTemplate getCciTemplate() {
 	  return this.cciTemplate;
 	}
@@ -114,7 +116,9 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * @see org.springframework.jca.cci.core.CciTemplate#getDerivedTemplate(javax.resource.cci.ConnectionSpec)
 	 */
 	protected final CciTemplate getCciTemplate(ConnectionSpec connectionSpec) {
-		return getCciTemplate().getDerivedTemplate(connectionSpec);
+		CciTemplate cciTemplate = getCciTemplate();
+		Assert.state(cciTemplate != null, "No CciTemplate set");
+		return cciTemplate.getDerivedTemplate(connectionSpec);
 	}
 
 	/**

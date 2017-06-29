@@ -29,10 +29,13 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class CannotLoadBeanClassException extends FatalBeanException {
 
+	@Nullable
 	private String resourceDescription;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private String beanClassName;
 
 
@@ -78,6 +81,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * Return the description of the resource that the bean
 	 * definition came from.
 	 */
+	@Nullable
 	public String getResourceDescription() {
 		return this.resourceDescription;
 	}
@@ -85,6 +89,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	/**
 	 * Return the name of the bean requested.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -92,6 +97,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	/**
 	 * Return the name of the class we were trying to load.
 	 */
+	@Nullable
 	public String getBeanClassName() {
 		return this.beanClassName;
 	}

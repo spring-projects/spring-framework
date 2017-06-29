@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -64,8 +65,10 @@ import org.springframework.web.context.ServletContextAware;
 public class GenericWebApplicationContext extends GenericApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ThemeSource themeSource;
 
 
@@ -122,6 +125,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -145,9 +149,10 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
-
+		if (this.servletContext != null) {
+			beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+			beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		}
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
@@ -158,6 +163,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected Resource getResourceByPath(String path) {
+		Assert.state(this.servletContext != null, "No ServletContext available");
 		return new ServletContextResource(this.servletContext, path);
 	}
 
@@ -192,6 +198,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	@Override
 	public Theme getTheme(String themeName) {
+		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
 	}
 

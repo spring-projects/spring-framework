@@ -63,31 +63,38 @@ public class MethodParameter {
 			ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
 
 
-	private final Method method;
-
-	private final Constructor<?> constructor;
+	private final Executable executable;
 
 	private final int parameterIndex;
 
+	@Nullable
 	private volatile Parameter parameter;
 
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
+	@Nullable
 	Map<Integer, Integer> typeIndexesPerLevel;
 
+	@Nullable
 	private volatile Class<?> containingClass;
 
+	@Nullable
 	private volatile Class<?> parameterType;
 
+	@Nullable
 	private volatile Type genericParameterType;
 
+	@Nullable
 	private volatile Annotation[] parameterAnnotations;
 
+	@Nullable
 	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
 
+	@Nullable
 	private volatile String parameterName;
 
+	@Nullable
 	private volatile MethodParameter nestedMethodParameter;
 
 
@@ -114,10 +121,9 @@ public class MethodParameter {
 	 */
 	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
 		Assert.notNull(method, "Method must not be null");
-		this.method = method;
+		this.executable = method;
 		this.parameterIndex = validateIndex(method, parameterIndex);
 		this.nestingLevel = nestingLevel;
-		this.constructor = null;
 	}
 
 	/**
@@ -139,10 +145,9 @@ public class MethodParameter {
 	 */
 	public MethodParameter(Constructor<?> constructor, int parameterIndex, int nestingLevel) {
 		Assert.notNull(constructor, "Constructor must not be null");
-		this.constructor = constructor;
+		this.executable = constructor;
 		this.parameterIndex = validateIndex(constructor, parameterIndex);
 		this.nestingLevel = nestingLevel;
-		this.method = null;
 	}
 
 	/**
@@ -152,8 +157,7 @@ public class MethodParameter {
 	 */
 	public MethodParameter(MethodParameter original) {
 		Assert.notNull(original, "Original must not be null");
-		this.method = original.method;
-		this.constructor = original.constructor;
+		this.executable = original.executable;
 		this.parameterIndex = original.parameterIndex;
 		this.parameter = original.parameter;
 		this.nestingLevel = original.nestingLevel;
@@ -174,7 +178,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Method getMethod() {
-		return this.method;
+		return (this.executable instanceof Method ? (Method) this.executable : null);
 	}
 
 	/**
@@ -184,14 +188,14 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Constructor<?> getConstructor() {
-		return this.constructor;
+		return (this.executable instanceof Constructor ? (Constructor) this.executable : null);
 	}
 
 	/**
 	 * Return the class that declares the underlying Method or Constructor.
 	 */
 	public Class<?> getDeclaringClass() {
-		return getMember().getDeclaringClass();
+		return this.executable.getDeclaringClass();
 	}
 
 	/**
@@ -199,7 +203,7 @@ public class MethodParameter {
 	 * @return the Method or Constructor as Member
 	 */
 	public Member getMember() {
-		return getExecutable();
+		return this.executable;
 	}
 
 	/**
@@ -209,7 +213,7 @@ public class MethodParameter {
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
-		return getExecutable();
+		return this.executable;
 	}
 
 	/**
@@ -218,7 +222,7 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public Executable getExecutable() {
-		return (this.method != null ? this.method : this.constructor);
+		return this.executable;
 	}
 
 	/**
@@ -226,10 +230,12 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public Parameter getParameter() {
-		if (this.parameter == null) {
-			this.parameter = getExecutable().getParameters()[this.parameterIndex];
+		Parameter parameter = this.parameter;
+		if (parameter == null) {
+			parameter = getExecutable().getParameters()[this.parameterIndex];
+			this.parameter = parameter;
 		}
-		return this.parameter;
+		return parameter;
 	}
 
 	/**
@@ -316,10 +322,11 @@ public class MethodParameter {
 	 * @since 4.3
 	 */
 	public MethodParameter nested() {
-		if (this.nestedMethodParameter != null) {
-			return this.nestedMethodParameter;
+		MethodParameter nestedParam = this.nestedMethodParameter;
+		if (nestedParam != null) {
+			return nestedParam;
 		}
-		MethodParameter nestedParam = clone();
+		nestedParam = clone();
 		nestedParam.nestingLevel = this.nestingLevel + 1;
 		this.nestedMethodParameter = nestedParam;
 		return nestedParam;
@@ -372,7 +379,8 @@ public class MethodParameter {
 	}
 
 	public Class<?> getContainingClass() {
-		return (this.containingClass != null ? this.containingClass : getDeclaringClass());
+		Class<?> containingClass = this.containingClass;
+		return (containingClass != null ? containingClass : getDeclaringClass());
 	}
 
 	/**
@@ -387,17 +395,18 @@ public class MethodParameter {
 	 * @return the parameter type (never {@code null})
 	 */
 	public Class<?> getParameterType() {
-		if (this.parameterType == null) {
+		Class<?> paramType = this.parameterType;
+		if (paramType == null) {
 			if (this.parameterIndex < 0) {
-				this.parameterType = (this.method != null ? this.method.getReturnType() : null);
+				Method method = getMethod();
+				paramType = (method != null ? method.getReturnType() : void.class);
 			}
 			else {
-				this.parameterType = (this.method != null ?
-					this.method.getParameterTypes()[this.parameterIndex] :
-					this.constructor.getParameterTypes()[this.parameterIndex]);
+				paramType = this.executable.getParameterTypes()[this.parameterIndex];
 			}
+			this.parameterType = paramType;
 		}
-		return this.parameterType;
+		return paramType;
 	}
 
 	/**
@@ -406,17 +415,18 @@ public class MethodParameter {
 	 * @since 3.0
 	 */
 	public Type getGenericParameterType() {
-		if (this.genericParameterType == null) {
+		Type paramType = this.genericParameterType;
+		if (paramType == null) {
 			if (this.parameterIndex < 0) {
-				this.genericParameterType = (this.method != null ? this.method.getGenericReturnType() : void.class);
+				Method method = getMethod();
+				paramType = (method != null ? method.getGenericReturnType() : void.class);
 			}
 			else {
-				this.genericParameterType = (this.method != null ?
-					this.method.getGenericParameterTypes()[this.parameterIndex] :
-					this.constructor.getGenericParameterTypes()[this.parameterIndex]);
+				paramType = this.executable.getGenericParameterTypes()[this.parameterIndex];
 			}
+			this.genericParameterType = paramType;
 		}
-		return this.genericParameterType;
+		return paramType;
 	}
 
 	/**
@@ -507,17 +517,18 @@ public class MethodParameter {
 	 * Return the annotations associated with the specific method/constructor parameter.
 	 */
 	public Annotation[] getParameterAnnotations() {
-		if (this.parameterAnnotations == null) {
-			Annotation[][] annotationArray = (this.method != null ?
-					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
+		Annotation[] paramAnns = this.parameterAnnotations;
+		if (paramAnns == null) {
+			Annotation[][] annotationArray = this.executable.getParameterAnnotations();
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				this.parameterAnnotations = adaptAnnotationArray(annotationArray[this.parameterIndex]);
+				paramAnns = adaptAnnotationArray(annotationArray[this.parameterIndex]);
 			}
 			else {
-				this.parameterAnnotations = new Annotation[0];
+				paramAnns = new Annotation[0];
 			}
+			this.parameterAnnotations = paramAnns;
 		}
-		return this.parameterAnnotations;
+		return paramAnns;
 	}
 
 	/**
@@ -576,8 +587,13 @@ public class MethodParameter {
 	public String getParameterName() {
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
-			String[] parameterNames = (this.method != null ?
-					discoverer.getParameterNames(this.method) : discoverer.getParameterNames(this.constructor));
+			String[] parameterNames = null;
+			if (this.executable instanceof Method) {
+				parameterNames = discoverer.getParameterNames((Method) this.executable);
+			}
+			else if (this.executable instanceof Constructor) {
+				parameterNames = discoverer.getParameterNames((Constructor) this.executable);
+			}
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
 			}
@@ -626,12 +642,13 @@ public class MethodParameter {
 
 	@Override
 	public int hashCode() {
-		return (getMember().hashCode() * 31 + this.parameterIndex);
+		return (getExecutable().hashCode() * 31 + this.parameterIndex);
 	}
 
 	@Override
 	public String toString() {
-		return (this.method != null ? "method '" + this.method.getName() + "'" : "constructor") +
+		Method method = getMethod();
+		return (method != null ? "method '" + method.getName() + "'" : "constructor") +
 				" parameter " + this.parameterIndex;
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.JavaScriptUtils;
@@ -82,16 +85,20 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	private static final String URL_TYPE_ABSOLUTE = "://";
 
 
-	private List<Param> params;
+	private List<Param> params = Collections.emptyList();
 
-	private Set<String> templateParams;
+	private Set<String> templateParams = Collections.emptySet();
 
+	@Nullable
 	private UrlType type;
 
+	@Nullable
 	private String value;
 
+	@Nullable
 	private String context;
 
+	@Nullable
 	private String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
@@ -198,9 +205,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @return the URL value as a String
 	 * @throws JspException
 	 */
-	private String createUrl() throws JspException {
+	String createUrl() throws JspException {
+		Assert.state(this.value != null, "No value set");
 		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
 		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
+
 		StringBuilder url = new StringBuilder();
 		if (this.type == UrlType.CONTEXT_RELATIVE) {
 			// add application context to url
@@ -231,7 +240,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 		// HTML and/or JavaScript escape, if demanded.
 		urlStr = htmlEscape(urlStr);
-		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
+		urlStr = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr);
 
 		return urlStr;
 	}

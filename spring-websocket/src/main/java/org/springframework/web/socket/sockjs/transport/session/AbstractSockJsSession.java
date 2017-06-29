@@ -107,8 +107,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private volatile long timeLastActive = this.timeCreated;
 
+	@Nullable
 	private ScheduledFuture<?> heartbeatFuture;
 
+	@Nullable
 	private HeartbeatTask heartbeatTask;
 
 	private volatile boolean heartbeatDisabled;

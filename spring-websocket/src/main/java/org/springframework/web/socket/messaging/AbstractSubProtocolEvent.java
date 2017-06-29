@@ -35,6 +35,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 
 	private final Message<byte[]> message;
 
+	@Nullable
 	private final Principal user;
 
 

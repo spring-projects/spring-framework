@@ -36,12 +36,14 @@ public class HandlerResult {
 
 	private final Object handler;
 
+	@Nullable
 	private final Object returnValue;
 
 	private final ResolvableType returnType;
 
 	private final BindingContext bindingContext;
 
+	@Nullable
 	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
 
@@ -144,7 +146,7 @@ public class HandlerResult {
 	 * @return the new result or the same error if there is no exception handler
 	 */
 	public Mono<HandlerResult> applyExceptionHandler(Throwable failure) {
-		return (hasExceptionHandler() ? this.exceptionHandler.apply(failure) : Mono.error(failure));
+		return (this.exceptionHandler != null ? this.exceptionHandler.apply(failure) : Mono.error(failure));
 	}
 
 }

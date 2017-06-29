@@ -88,27 +88,21 @@ import org.springframework.web.servlet.ViewResolver;
 public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		implements ViewResolver, Ordered, InitializingBean {
 
-	private int order = Ordered.HIGHEST_PRECEDENCE;
-
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
+	@Nullable
 	private List<View> defaultViews;
 
+	@Nullable
 	private List<ViewResolver> viewResolvers;
 
+	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
@@ -124,6 +118,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * @since 4.1.9
 	 */
+	@Nullable
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
@@ -157,7 +152,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	}
 
 	public List<View> getDefaultViews() {
-		return Collections.unmodifiableList(this.defaultViews);
+		return (this.defaultViews != null ? Collections.unmodifiableList(this.defaultViews) :
+				Collections.emptyList());
 	}
 
 	/**
@@ -169,7 +165,17 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	}
 
 	public List<ViewResolver> getViewResolvers() {
-		return Collections.unmodifiableList(this.viewResolvers);
+		return (this.viewResolvers != null ? Collections.unmodifiableList(this.viewResolvers) :
+				Collections.emptyList());
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 
@@ -243,6 +249,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 */
 	@Nullable
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
+		Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
 
@@ -297,18 +304,21 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			throws Exception {
 
 		List<View> candidateViews = new ArrayList<>();
-		for (ViewResolver viewResolver : this.viewResolvers) {
-			View view = viewResolver.resolveViewName(viewName, locale);
-			if (view != null) {
-				candidateViews.add(view);
-			}
-			for (MediaType requestedMediaType : requestedMediaTypes) {
-				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
-				for (String extension : extensions) {
-					String viewNameWithExtension = viewName + '.' + extension;
-					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
-					if (view != null) {
-						candidateViews.add(view);
+		if (this.viewResolvers != null) {
+			Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
+			for (ViewResolver viewResolver : this.viewResolvers) {
+				View view = viewResolver.resolveViewName(viewName, locale);
+				if (view != null) {
+					candidateViews.add(view);
+				}
+				for (MediaType requestedMediaType : requestedMediaTypes) {
+					List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
+					for (String extension : extensions) {
+						String viewNameWithExtension = viewName + '.' + extension;
+						view = viewResolver.resolveViewName(viewNameWithExtension, locale);
+						if (view != null) {
+							candidateViews.add(view);
+						}
 					}
 				}
 			}

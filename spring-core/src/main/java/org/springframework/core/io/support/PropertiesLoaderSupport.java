@@ -43,14 +43,17 @@ public abstract class PropertiesLoaderSupport {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	protected Properties[] localProperties;
 
 	protected boolean localOverride = false;
 
+	@Nullable
 	private Resource[] locations;
 
 	private boolean ignoreResourceNotFound = false;
 
+	@Nullable
 	private String fileEncoding;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();

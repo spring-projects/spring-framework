@@ -84,6 +84,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
 	private long receiptTimeLimit = 15 * 1000;
@@ -91,8 +92,10 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private volatile boolean autoReceiptEnabled;
 
 
+	@Nullable
 	private volatile TcpConnection<byte[]> connection;
 
+	@Nullable
 	private volatile String version;
 
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
@@ -167,6 +170,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	/**
 	 * Return the configured TaskScheduler to use for receipt tracking.
 	 */
+	@Nullable
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
@@ -464,13 +468,15 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		if (connect == null || connected == null) {
 			return;
 		}
+		TcpConnection<byte[]> con = this.connection;
+		Assert.state(con != null, "No TcpConnection available");
 		if (connect[0] > 0 && connected[1] > 0) {
 			long interval = Math.max(connect[0],  connected[1]);
-			this.connection.onWriteInactivity(new WriteInactivityTask(), interval);
+			con.onWriteInactivity(new WriteInactivityTask(), interval);
 		}
 		if (connect[1] > 0 && connected[0] > 0) {
-			final long interval = Math.max(connect[1], connected[0]) * HEARTBEAT_MULTIPLIER;
-			this.connection.onReadInactivity(new ReadInactivityTask(), interval);
+			long interval = Math.max(connect[1], connected[0]) * HEARTBEAT_MULTIPLIER;
+			con.onReadInactivity(new ReadInactivityTask(), interval);
 		}
 	}
 
@@ -514,14 +520,17 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private class ReceiptHandler implements Receiptable {
 
+		@Nullable
 		private final String receiptId;
 
 		private final List<Runnable> receiptCallbacks = new ArrayList<>(2);
 
 		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
+		@Nullable
 		private ScheduledFuture<?> future;
 
+		@Nullable
 		private Boolean result;
 
 		public ReceiptHandler(@Nullable String receiptId) {
@@ -666,7 +675,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			if (conn != null) {
 				conn.send(HEARTBEAT).addCallback(
 						new ListenableFutureCallback<Void>() {
-							public void onSuccess(Void result) {
+							public void onSuccess(@Nullable Void result) {
 							}
 							public void onFailure(Throwable ex) {
 								handleFailure(ex);

@@ -60,6 +60,7 @@ import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.oxm.support.SaxResourceUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.StaxUtils;
@@ -94,12 +95,15 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
+	@Nullable
 	private Resource[] mappingLocations;
 
 	private String encoding = DEFAULT_ENCODING;
 
+	@Nullable
 	private Class<?>[] targetClasses;
 
+	@Nullable
 	private String[] targetPackages;
 
 	private boolean validating = false;
@@ -112,10 +116,13 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private boolean marshalExtendedType = true;
 
+	@Nullable
 	private String rootElement;
 
+	@Nullable
 	private String noNamespaceSchemaLocation;
 
+	@Nullable
 	private String schemaLocation;
 
 	private boolean useXSITypeAtRoot = false;
@@ -126,32 +133,44 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private boolean ignoreExtraElements = false;
 
+	@Nullable
 	private Object rootObject;
 
 	private boolean reuseObjects = false;
 
 	private boolean clearCollections = false;
 
+	@Nullable
 	private Map<String, String> castorProperties;
 
+	@Nullable
 	private Map<String, String> doctypes;
 
+	@Nullable
 	private Map<String, String> processingInstructions;
 
+	@Nullable
 	private Map<String, String> namespaceMappings;
 
+	@Nullable
 	private Map<String, String> namespaceToPackageMapping;
 
+	@Nullable
 	private EntityResolver entityResolver;
 
+	@Nullable
 	private XMLClassDescriptorResolver classDescriptorResolver;
 
+	@Nullable
 	private IDResolver idResolver;
 
+	@Nullable
 	private ObjectFactory objectFactory;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
+	@Nullable
 	private XMLContext xmlContext;
 
 
@@ -456,8 +475,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * @see XMLContext#addMapping(org.exolab.castor.mapping.Mapping)
 	 * @see XMLContext#addClass(Class)
 	 */
-	protected XMLContext createXMLContext(Resource[] mappingLocations, Class<?>[] targetClasses,
-			String[] targetPackages) throws MappingException, ResolverException, IOException {
+	protected XMLContext createXMLContext(@Nullable Resource[] mappingLocations,
+			@Nullable Class<?>[] targetClasses, @Nullable String[] targetPackages)
+			throws MappingException, ResolverException, IOException {
 
 		XMLContext context = new XMLContext();
 		if (!ObjectUtils.isEmpty(mappingLocations)) {
@@ -520,7 +540,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)
 			throws XmlMappingException {
 
-		Marshaller marshaller = xmlContext.createMarshaller();
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
+		Marshaller marshaller = this.xmlContext.createMarshaller();
 		marshaller.setContentHandler(contentHandler);
 		doMarshal(graph, marshaller);
 	}
@@ -532,7 +553,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	@Override
 	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
-		Marshaller marshaller = xmlContext.createMarshaller();
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
+		Marshaller marshaller = this.xmlContext.createMarshaller();
 		marshaller.setWriter(writer);
 		doMarshal(graph, marshaller);
 	}
@@ -641,6 +663,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	private Unmarshaller createUnmarshaller() {
+		Assert.state(this.xmlContext != null, "CastorMarshaller not initialized");
 		Unmarshaller unmarshaller = this.xmlContext.createUnmarshaller();
 		customizeUnmarshaller(unmarshaller);
 		return unmarshaller;

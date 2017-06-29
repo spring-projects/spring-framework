@@ -92,31 +92,43 @@ public class RequestContext {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
 
-	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
-			RequestContext.class.getClassLoader());
+	protected static final boolean jstlPresent = ClassUtils.isPresent(
+			"javax.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
+	@Nullable
 	private HttpServletRequest request;
 
+	@Nullable
 	private HttpServletResponse response;
 
+	@Nullable
 	private Map<String, Object> model;
 
+	@Nullable
 	private WebApplicationContext webApplicationContext;
 
+	@Nullable
 	private Locale locale;
 
+	@Nullable
 	private TimeZone timeZone;
 
+	@Nullable
 	private Theme theme;
 
+	@Nullable
 	private Boolean defaultHtmlEscape;
 
+	@Nullable
 	private Boolean responseEncodedHtmlEscape;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	@Nullable
 	private RequestDataValueProcessor requestDataValueProcessor;
 
+	@Nullable
 	private Map<String, Errors> errorsMap;
 
 
@@ -214,15 +226,15 @@ public class RequestContext {
 	 * @param request current HTTP request
 	 * @param servletContext the servlet context of the web application (can be {@code null}; necessary for
 	 * fallback to root WebApplicationContext)
-	 * @param model the model attributes for the current view (can be {@code null}, using the request attributes
-	 * for Errors retrieval)
+	 * @param model the model attributes for the current view (can be {@code null}, using the request
+	 * attributes for Errors retrieval)
 	 * @see #getFallbackLocale
 	 * @see #getFallbackTheme
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
 	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
 	 */
-	protected void initContext(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable ServletContext servletContext,
-			@Nullable Map<String, Object> model) {
+	protected void initContext(HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable ServletContext servletContext, @Nullable Map<String, Object> model) {
 
 		this.request = request;
 		this.response = response;
@@ -267,7 +279,8 @@ public class RequestContext {
 
 		// Determine response-encoded HTML escape setting from the "responseEncodedHtmlEscape"
 		// context-param in web.xml, if any.
-		this.responseEncodedHtmlEscape = WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
+		this.responseEncodedHtmlEscape =
+				WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
 
@@ -776,8 +789,8 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, @Nullable List<?> args, String defaultMessage) {
-		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), defaultMessage,
-				this.locale);
+		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null),
+				defaultMessage, this.locale);
 	}
 
 	/**

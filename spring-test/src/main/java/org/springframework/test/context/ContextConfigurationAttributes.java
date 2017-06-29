@@ -51,9 +51,9 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
-	private Class<?>[] classes;
+	private Class<?>[] classes = new Class<?>[0];
 
-	private String[] locations;
+	private String[] locations = new String[0];
 
 	private final boolean inheritLocations;
 
@@ -61,6 +61,7 @@ public class ContextConfigurationAttributes {
 
 	private final boolean inheritInitializers;
 
+	@Nullable
 	private final String name;
 
 	private final Class<? extends ContextLoader> contextLoaderClass;
@@ -204,7 +205,7 @@ public class ContextConfigurationAttributes {
 	 * @see #setClasses(Class[])
 	 */
 	public Class<?>[] getClasses() {
-		return (this.classes != null ? this.classes : new Class<?>[0]);
+		return this.classes;
 	}
 
 	/**
@@ -215,7 +216,7 @@ public class ContextConfigurationAttributes {
 	 * @see #hasLocations()
 	 */
 	public boolean hasClasses() {
-		return !ObjectUtils.isEmpty(getClasses());
+		return (getClasses().length > 0);
 	}
 
 	/**
@@ -239,7 +240,7 @@ public class ContextConfigurationAttributes {
 	 * @see #setLocations
 	 */
 	public String[] getLocations() {
-		return (this.locations != null ? this.locations : new String[0]);
+		return this.locations;
 	}
 
 	/**
@@ -250,7 +251,7 @@ public class ContextConfigurationAttributes {
 	 * @see #hasClasses()
 	 */
 	public boolean hasLocations() {
-		return !ObjectUtils.isEmpty(getLocations());
+		return (getLocations().length > 0);
 	}
 
 	/**

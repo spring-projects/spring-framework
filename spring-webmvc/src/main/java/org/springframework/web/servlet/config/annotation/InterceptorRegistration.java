@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -44,6 +44,7 @@ public class InterceptorRegistration {
 
 	private int order = 0;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 

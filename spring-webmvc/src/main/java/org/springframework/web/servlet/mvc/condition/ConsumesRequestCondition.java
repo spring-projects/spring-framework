@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.InvalidMediaTypeException;
@@ -90,7 +89,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
-				if ("Content-Type".equalsIgnoreCase(expr.name)) {
+				if ("Content-Type".equalsIgnoreCase(expr.name) && expr.value != null) {
 					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ConsumeMediaTypeExpression(mediaType, expr.isNegated));
 					}

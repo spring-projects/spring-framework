@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -32,15 +33,14 @@ import org.springframework.util.ClassUtils;
  */
 class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
 
-	static final boolean synchronossMultipartPresent =
-			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
-					AbstractCodecConfigurer.class.getClassLoader());
+	static final boolean synchronossMultipartPresent = ClassUtils.isPresent(
+			"org.synchronoss.cloud.nio.multipart.NioMultipartParser",
+			DefaultServerCodecConfigurer.class.getClassLoader());
 
 
 	public DefaultServerCodecConfigurer() {
 		super(new ServerDefaultCodecsImpl());
 	}
-
 
 	@Override
 	public ServerDefaultCodecs defaultCodecs() {
@@ -51,17 +51,15 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 	/**
 	 * Default implementation of {@link ServerDefaultCodecs}.
 	 */
-	private static class ServerDefaultCodecsImpl extends AbstractDefaultCodecs
-			implements ServerDefaultCodecs {
+	private static class ServerDefaultCodecsImpl extends AbstractDefaultCodecs implements ServerDefaultCodecs {
 
+		@Nullable
 		private Encoder<?> sseEncoder;
-
 
 		@Override
 		public void serverSentEventEncoder(Encoder<?> encoder) {
 			this.sseEncoder = encoder;
 		}
-
 
 		@Override
 		protected boolean splitTextOnNewLine() {

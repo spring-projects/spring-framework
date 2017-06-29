@@ -78,12 +78,15 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
 
 
+	@Nullable
 	private String jsonPrefix;
 
+	@Nullable
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
 
+	@Nullable
 	private Set<String> jsonpParameterNames = new LinkedHashSet<>(Arrays.asList("jsonp", "callback"));
 
 
@@ -146,6 +149,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	/**
 	 * Return the attributes in the model that should be rendered by this view.
 	 */
+	@Nullable
 	public final Set<String> getModelKeys() {
 		return this.modelKeys;
 	}

@@ -35,7 +35,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-
 /**
  * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
  *
@@ -54,6 +53,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final List<MediaType> mediaTypes;
 
+	@Nullable
 	private final MediaType defaultMediaType;
 
 

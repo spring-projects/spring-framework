@@ -27,12 +27,14 @@ import org.springframework.lang.Nullable;
  */
 public class CallParameterMetaData {
 
+	@Nullable
 	private String parameterName;
 
 	private int parameterType;
 
 	private int sqlType;
 
+	@Nullable
 	private String typeName;
 
 	private boolean nullable;

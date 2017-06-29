@@ -50,10 +50,13 @@ public class DefaultTestContext implements TestContext {
 
 	private final Class<?> testClass;
 
+	@Nullable
 	private volatile Object testInstance;
 
+	@Nullable
 	private volatile Method testMethod;
 
+	@Nullable
 	private volatile Throwable testException;
 
 
@@ -133,15 +136,18 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	public final Object getTestInstance() {
-		Assert.state(this.testInstance != null, "No test instance");
-		return this.testInstance;
+		Object testInstance = this.testInstance;
+		Assert.state(testInstance != null, "No test instance");
+		return testInstance;
 	}
 
 	public final Method getTestMethod() {
-		Assert.state(this.testMethod != null, "No test method");
-		return this.testMethod;
+		Method testMethod = this.testMethod;
+		Assert.state(testMethod != null, "No test method");
+		return testMethod;
 	}
 
+	@Nullable
 	public final Throwable getTestException() {
 		return this.testException;
 	}

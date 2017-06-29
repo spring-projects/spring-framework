@@ -72,8 +72,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	private boolean returnGeneratedKeys = false;
 
-	private String[] generatedKeysColumnNames = null;
+	@Nullable
+	private String[] generatedKeysColumnNames;
 
+	@Nullable
 	private String sql;
 
 	private final List<SqlParameter> declaredParameters = new LinkedList<>();

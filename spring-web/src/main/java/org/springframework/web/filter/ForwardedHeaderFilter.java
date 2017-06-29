@@ -187,10 +187,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderExtractingRequest extends ForwardedHeaderRemovingRequest {
 
+		@Nullable
 		private final String scheme;
 
 		private final boolean secure;
 
+		@Nullable
 		private final String host;
 
 		private final int port;
@@ -238,11 +240,13 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
+		@Nullable
 		public String getScheme() {
 			return this.scheme;
 		}
 
 		@Override
+		@Nullable
 		public String getServerName() {
 			return this.host;
 		}

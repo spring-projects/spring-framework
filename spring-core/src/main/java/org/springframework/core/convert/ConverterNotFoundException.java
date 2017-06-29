@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ConverterNotFoundException extends ConversionException {
 
+	@Nullable
 	private final TypeDescriptor sourceType;
 
 	private final TypeDescriptor targetType;

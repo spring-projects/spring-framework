@@ -39,6 +39,7 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
+	@Nullable
 	private final Message<T> originalMessage;
 
 	private MessageHeaderAccessor headerAccessor;

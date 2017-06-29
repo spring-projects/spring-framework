@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,13 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * The EJB's home object, potentially cached.
 	 * The type must be Object as it could be either EJBHome or EJBLocalHome.
 	 */
+	@Nullable
 	private Object cachedHome;
 
 	/**
 	 * The no-arg create() method required on EJB homes, potentially cached.
 	 */
+	@Nullable
 	private Method createMethod;
 
 	private final Object homeMonitor = new Object();

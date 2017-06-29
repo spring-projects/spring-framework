@@ -44,6 +44,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	protected static final Log logger = LogFactory.getLog(ResourceLoaderClassLoadHelper.class);
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
 
@@ -59,7 +60,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	 * Create a new ResourceLoaderClassLoadHelper for the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to delegate to
 	 */
-	public ResourceLoaderClassLoadHelper(ResourceLoader resourceLoader) {
+	public ResourceLoaderClassLoadHelper(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
@@ -76,6 +77,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		return ClassUtils.forName(name, this.resourceLoader.getClassLoader());
 	}
 
@@ -87,6 +89,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	@Override
 	@Nullable
 	public URL getResource(String name) {
+		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {
 			try {
@@ -107,6 +110,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	@Override
 	@Nullable
 	public InputStream getResourceAsStream(String name) {
+		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {
 			try {
@@ -126,6 +130,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	@Override
 	public ClassLoader getClassLoader() {
+		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
 		Assert.state(classLoader != null, "No ClassLoader");
 		return classLoader;

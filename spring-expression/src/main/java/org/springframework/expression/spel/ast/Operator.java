@@ -47,8 +47,10 @@ public abstract class Operator extends SpelNodeImpl {
 	// whose accessors seem to only be returning 'Object' - the actual descriptors may
 	// indicate 'int')
 
+	@Nullable
 	protected String leftActualDescriptor;
 
+	@Nullable
 	protected String rightActualDescriptor;
 
 
@@ -266,8 +268,9 @@ public abstract class Operator extends SpelNodeImpl {
 		 * @param rightActualDescriptor the dynamic/runtime right object descriptor
 		 * @return a DescriptorComparison object indicating the type of compatibility, if any
 		 */
-		public static DescriptorComparison checkNumericCompatibility(String leftDeclaredDescriptor,
-				String rightDeclaredDescriptor, String leftActualDescriptor, String rightActualDescriptor) {
+		public static DescriptorComparison checkNumericCompatibility(
+				@Nullable String leftDeclaredDescriptor, @Nullable String rightDeclaredDescriptor,
+				@Nullable String leftActualDescriptor, @Nullable String rightActualDescriptor) {
 
 			String ld = leftDeclaredDescriptor;
 			String rd = rightDeclaredDescriptor;
@@ -276,11 +279,11 @@ public abstract class Operator extends SpelNodeImpl {
 			boolean rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
 			
 			// If the declared descriptors aren't providing the information, try the actual descriptors
-			if (!leftNumeric && !ld.equals(leftActualDescriptor)) {
+			if (!leftNumeric && !ObjectUtils.nullSafeEquals(ld, leftActualDescriptor)) {
 				ld = leftActualDescriptor;
 				leftNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(ld);
 			}
-			if (!rightNumeric && !rd.equals(rightActualDescriptor)) {
+			if (!rightNumeric && !ObjectUtils.nullSafeEquals(rd, rightActualDescriptor)) {
 				rd = rightActualDescriptor;
 				rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
 			}

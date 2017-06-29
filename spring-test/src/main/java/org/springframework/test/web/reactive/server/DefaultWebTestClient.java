@@ -51,11 +51,9 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static java.nio.charset.StandardCharsets.*;
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -78,6 +76,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector,
 			@Nullable Duration timeout, WebTestClient.Builder webTestClientBuilder) {
+
 		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
@@ -173,6 +172,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final WebClient.RequestBodySpec bodySpec;
 
+		@Nullable
 		private final String uriTemplate;
 
 		private final String requestId;
@@ -270,6 +270,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private DefaultResponseSpec toResponseSpec(Mono<ClientResponse> mono) {
 			ClientResponse clientResponse = mono.block(getTimeout());
+			Assert.state(clientResponse != null, "No ClientResponse");
 			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
 			return new DefaultResponseSpec(exchangeResult, clientResponse, this.uriTemplate, getTimeout());
 		}
@@ -283,7 +284,7 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 		UndecodedExchangeResult(ExchangeResult result, ClientResponse response,
-				String uriTemplate, Duration timeout) {
+				@Nullable String uriTemplate, Duration timeout) {
 
 			super(result, uriTemplate);
 			this.response = response;
@@ -318,7 +319,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final UndecodedExchangeResult result;
 
-		DefaultResponseSpec(ExchangeResult result, ClientResponse response, String uriTemplate, Duration timeout) {
+		DefaultResponseSpec(
+				ExchangeResult result, ClientResponse response, @Nullable String uriTemplate, Duration timeout) {
+
 			this.result = new UndecodedExchangeResult(result, response, uriTemplate, timeout);
 		}
 

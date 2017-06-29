@@ -101,10 +101,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	private boolean slashPathSeparator = true;
 
+	@Nullable
 	private Validator validator;
 
+	@Nullable
 	private StringValueResolver valueResolver;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 	private final Object lifecycleMonitor = new Object();
@@ -221,6 +224,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Return the configured Validator instance.
 	 */
+	@Nullable
 	public Validator getValidator() {
 		return this.validator;
 	}
@@ -252,6 +256,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Return the configured header initializer.
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -331,7 +336,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerInitializer != null) {
+			sendToHandler.setHeaderInitializer(this.headerInitializer);
+		}
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =

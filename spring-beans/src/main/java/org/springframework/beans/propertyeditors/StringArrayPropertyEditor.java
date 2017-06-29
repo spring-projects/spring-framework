@@ -44,6 +44,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final String separator;
 
+	@Nullable
 	private final String charsToDelete;
 
 	private final boolean emptyArrayAsNull;

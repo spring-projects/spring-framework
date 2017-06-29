@@ -45,6 +45,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Original URI, if available; used for URI and File access.
 	 */
+	@Nullable
 	private final URI uri;
 
 	/**

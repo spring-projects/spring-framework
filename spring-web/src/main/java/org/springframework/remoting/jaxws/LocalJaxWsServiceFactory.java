@@ -44,16 +44,22 @@ import org.springframework.util.Assert;
  */
 public class LocalJaxWsServiceFactory {
 
+	@Nullable
 	private URL wsdlDocumentUrl;
 
+	@Nullable
 	private String namespaceUri;
 
+	@Nullable
 	private String serviceName;
 
+	@Nullable
 	private WebServiceFeature[] serviceFeatures;
 
+	@Nullable
 	private Executor executor;
 
+	@Nullable
 	private HandlerResolver handlerResolver;
 
 

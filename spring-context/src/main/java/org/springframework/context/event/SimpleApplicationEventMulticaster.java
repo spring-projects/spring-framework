@@ -48,8 +48,10 @@ import org.springframework.util.ErrorHandler;
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private ErrorHandler errorHandler;
 
 

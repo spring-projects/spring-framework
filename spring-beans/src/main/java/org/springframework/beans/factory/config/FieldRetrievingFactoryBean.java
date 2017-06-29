@@ -24,6 +24,8 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -55,19 +57,26 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Class<?> targetClass;
 
+	@Nullable
 	private Object targetObject;
 
+	@Nullable
 	private String targetField;
 
+	@Nullable
 	private String staticField;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	// the field we will retrieve
+	@Nullable
 	private Field fieldObject;
 
 
@@ -85,6 +94,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the target class on which the field is defined.
 	 */
+	@Nullable
 	public Class<?> getTargetClass() {
 		return targetClass;
 	}
@@ -103,6 +113,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the target object on which the field is defined.
 	 */
+	@Nullable
 	public Object getTargetObject() {
 		return this.targetObject;
 	}
@@ -121,6 +132,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the name of the field to be retrieved.
 	 */
+	@Nullable
 	public String getTargetField() {
 		return this.targetField;
 	}
@@ -168,6 +180,7 @@ public class FieldRetrievingFactoryBean
 			// If no other property specified, consider bean name as static field expression.
 			if (this.staticField == null) {
 				this.staticField = this.beanName;
+				Assert.state(this.staticField != null, "No target field specified");
 			}
 
 			// Try to parse static field into class and field.

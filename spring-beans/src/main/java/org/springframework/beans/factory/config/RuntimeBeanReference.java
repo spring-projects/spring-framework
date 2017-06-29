@@ -34,6 +34,7 @@ public class RuntimeBeanReference implements BeanReference {
 
 	private final boolean toParent;
 
+	@Nullable
 	private Object source;
 
 
@@ -84,6 +85,7 @@ public class RuntimeBeanReference implements BeanReference {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

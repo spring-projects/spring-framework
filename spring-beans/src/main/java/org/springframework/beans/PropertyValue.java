@@ -44,18 +44,22 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	private final String name;
 
+	@Nullable
 	private final Object value;
 
 	private boolean optional = false;
 
 	private boolean converted = false;
 
+	@Nullable
 	private Object convertedValue;
 
 	/** Package-visible field that indicates whether conversion is necessary */
+	@Nullable
 	volatile Boolean conversionNecessary;
 
 	/** Package-visible field for caching the resolved property path tokens */
+	@Nullable
 	transient volatile Object resolvedTokens;
 
 
@@ -177,6 +181,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * Return the converted value of the constructor argument,
 	 * after processed type conversion.
 	 */
+	@Nullable
 	public synchronized Object getConvertedValue() {
 		return this.convertedValue;
 	}

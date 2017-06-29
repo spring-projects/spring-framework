@@ -72,6 +72,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean writerAccessAllowed = true;
 
+	@Nullable
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private boolean charset = false;
@@ -80,10 +81,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
+	@Nullable
 	private PrintWriter writer;
 
 	private long contentLength = 0;
 
+	@Nullable
 	private String contentType;
 
 	private int bufferSize = 4096;
@@ -103,8 +106,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private int status = HttpServletResponse.SC_OK;
 
+	@Nullable
 	private String errorMessage;
 
+	@Nullable
 	private String forwardedUrl;
 
 	private final List<String> includedUrls = new ArrayList<>();
@@ -295,7 +300,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.characterEncoding = null;
 		this.contentLength = 0;
 		this.contentType = null;
-		this.locale = null;
+		this.locale = Locale.getDefault();
 		this.cookies.clear();
 		this.headers.clear();
 		this.status = HttpServletResponse.SC_OK;
@@ -303,11 +308,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setLocale(@Nullable Locale locale) {
+	public void setLocale(Locale locale) {
 		this.locale = locale;
-		if (locale != null) {
-			doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
-		}
+		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, locale.toLanguageTag(), true);
 	}
 
 	@Override
@@ -585,7 +588,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
 			List<Locale> locales = headers.getAcceptLanguageAsLocales();
-			setLocale(locales.isEmpty() ? null : locales.get(0));
+			this.locale = (!locales.isEmpty() ? locales.get(0) : Locale.getDefault());
 			return true;
 		}
 		else {
@@ -629,6 +632,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.status;
 	}
 
+	@Nullable
 	public String getErrorMessage() {
 		return this.errorMessage;
 	}

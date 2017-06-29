@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -51,6 +52,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private int order = 1;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
 	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
@@ -127,6 +129,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	@Nullable
 	protected UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}

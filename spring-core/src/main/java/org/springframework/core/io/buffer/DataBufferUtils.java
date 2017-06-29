@@ -221,7 +221,7 @@ public abstract class DataBufferUtils {
 	 * @param dataBuffer the data buffer to release
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
-	public static boolean release(DataBuffer dataBuffer) {
+	public static boolean release(@Nullable DataBuffer dataBuffer) {
 		if (dataBuffer instanceof PooledDataBuffer) {
 			return ((PooledDataBuffer) dataBuffer).release();
 		}

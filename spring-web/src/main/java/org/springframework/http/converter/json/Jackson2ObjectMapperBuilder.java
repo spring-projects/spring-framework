@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StreamUtils;
@@ -107,26 +108,37 @@ public class Jackson2ObjectMapperBuilder {
 
 	private boolean createXmlMapper = false;
 
+	@Nullable
 	private JsonFactory factory;
 
+	@Nullable
 	private DateFormat dateFormat;
 
+	@Nullable
 	private Locale locale;
 
+	@Nullable
 	private TimeZone timeZone;
 
+	@Nullable
 	private AnnotationIntrospector annotationIntrospector;
 
+	@Nullable
 	private PropertyNamingStrategy propertyNamingStrategy;
 
+	@Nullable
 	private TypeResolverBuilder<?> defaultTyping;
 
+	@Nullable
 	private JsonInclude.Include serializationInclusion;
 
+	@Nullable
 	private FilterProvider filters;
 
+	@Nullable
 	private List<Module> modules;
 
+	@Nullable
 	private Class<? extends Module>[] moduleClasses;
 
 	private boolean findModulesViaServiceLoader = false;
@@ -135,10 +147,13 @@ public class Jackson2ObjectMapperBuilder {
 
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
+	@Nullable
 	private HandlerInstantiator handlerInstantiator;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private Boolean defaultUseWrapper;
 
 

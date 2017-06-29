@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public abstract class PropertyAccessException extends BeansException {
 
+	@Nullable
 	private transient PropertyChangeEvent propertyChangeEvent;
 
 

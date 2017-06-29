@@ -45,12 +45,15 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public final class MappedInterceptor implements HandlerInterceptor {
 
+	@Nullable
 	private final String[] includePatterns;
 
+	@Nullable
 	private final String[] excludePatterns;
 
 	private final HandlerInterceptor interceptor;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 
@@ -56,9 +57,11 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	private final String path;
 
-	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
-
+	@Nullable
 	private final Endpoint endpoint;
+
+	@Nullable
+	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
     private List<Class<? extends Encoder>> encoders = new ArrayList<>();
 
@@ -73,20 +76,6 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.websocket.Endpoint} class.
-	 * @param path the endpoint path
-	 * @param endpointClass the endpoint class
-	 */
-	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
-		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpointClass, "endpointClass must not be null");
-		this.path = path;
-		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
-		this.endpoint = null;
-	}
-
-	/**
-	 * Create a new {@link ServerEndpointRegistration} instance from an
 	 * {@code javax.websocket.Endpoint} instance.
 	 * @param path the endpoint path
 	 * @param endpoint the endpoint instance
@@ -95,8 +84,22 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpoint, "endpoint must not be null");
 		this.path = path;
-		this.endpointProvider = null;
 		this.endpoint = endpoint;
+		this.endpointProvider = null;
+	}
+
+	/**
+	 * Create a new {@link ServerEndpointRegistration} instance from an
+	 * {@code javax.websocket.Endpoint} class.
+	 * @param path the endpoint path
+	 * @param endpointClass the endpoint class
+	 */
+	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
+		Assert.hasText(path, "path must not be empty");
+		Assert.notNull(endpointClass, "endpointClass must not be null");
+		this.path = path;
+		this.endpoint = null;
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 	}
 
 
@@ -107,11 +110,23 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
-		return (this.endpoint != null ? this.endpoint.getClass() : this.endpointProvider.getHandlerType());
+		if (this.endpoint != null) {
+			return this.endpoint.getClass();
+		}
+		else {
+			Assert.state(this.endpointProvider != null, "No endpoint set");
+			return this.endpointProvider.getHandlerType();
+		}
 	}
 
 	public Endpoint getEndpoint() {
-		return (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
+		if (this.endpoint != null) {
+			return this.endpoint;
+		}
+		else {
+			Assert.state(this.endpointProvider != null, "No endpoint set");
+			return this.endpointProvider.getHandler();
+		}
 	}
 
 	public void setSubprotocols(List<String> protocols) {

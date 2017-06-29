@@ -47,6 +47,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	}
 
 
+	@Nullable
 	private final ClassLoader overrideDelegate;
 
 

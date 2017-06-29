@@ -56,6 +56,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -161,6 +162,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
 
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -168,8 +170,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private boolean defaultProxyTargetClass = false;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -178,6 +182,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	/** Map from bean name String to ScriptSource object */
 	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
+
 
 	/**
 	 * Set the delay between refresh checks, in milliseconds.
@@ -228,7 +233,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
@@ -237,6 +242,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		return Integer.MIN_VALUE;
 	}
 
+
 	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
@@ -244,6 +250,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			return null;
 		}
 
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 
 		try {
@@ -293,6 +300,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			return null;
 		}
 
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 		String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;

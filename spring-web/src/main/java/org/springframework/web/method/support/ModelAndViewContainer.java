@@ -50,10 +50,12 @@ public class ModelAndViewContainer {
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
+	@Nullable
 	private Object view;
 
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
+	@Nullable
 	private ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
@@ -61,6 +63,7 @@ public class ModelAndViewContainer {
 	/* Names of attributes with binding disabled */
 	private final Set<String> bindingDisabledAttributes = new HashSet<>(4);
 
+	@Nullable
 	private HttpStatus status;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();

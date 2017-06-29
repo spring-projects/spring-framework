@@ -133,6 +133,7 @@ class ConfigurationClassParser {
 
 	private final ImportStack importStack = new ImportStack();
 
+	@Nullable
 	private List<DeferredImportSelectorHolder> deferredImportSelectors;
 
 
@@ -539,8 +540,11 @@ class ConfigurationClassParser {
 	private void processDeferredImportSelectors() {
 		List<DeferredImportSelectorHolder> deferredImports = this.deferredImportSelectors;
 		this.deferredImportSelectors = null;
-		Collections.sort(deferredImports, DEFERRED_IMPORT_COMPARATOR);
+		if (deferredImports == null) {
+			return;
+		}
 
+		Collections.sort(deferredImports, DEFERRED_IMPORT_COMPARATOR);
 		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			ConfigurationClass configClass = deferredImport.getConfigurationClass();
 			try {

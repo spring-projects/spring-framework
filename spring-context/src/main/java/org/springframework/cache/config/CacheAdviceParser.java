@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,7 +197,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private String method;
 
-		private String[] caches = null;
+		@Nullable
+		private String[] caches;
 
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
@@ -220,12 +221,12 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			if (StringUtils.hasText(cache)) {
 				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
 			}
-			else {
-				if (this.caches == null) {
-					readerCtx.error("No cache specified for " + element.getNodeName(), element);
-				}
+			if (localCaches != null) {
+				builder.setCacheNames(localCaches);
 			}
-			builder.setCacheNames(localCaches);
+			else {
+				readerCtx.error("No cache specified for " + element.getNodeName(), element);
+			}
 
 			builder.setKey(getAttributeValue(element, "key", this.key));
 			builder.setKeyGenerator(getAttributeValue(element, "key-generator", this.keyGenerator));
@@ -233,8 +234,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			builder.setCondition(getAttributeValue(element, "condition", this.condition));
 
 			if (StringUtils.hasText(builder.getKey()) && StringUtils.hasText(builder.getKeyGenerator())) {
-				throw new IllegalStateException("Invalid cache advice configuration on '"
-						+ element.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
+				throw new IllegalStateException("Invalid cache advice configuration on '" +
+						element.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
 						"These attributes are mutually exclusive: either set the SpEL expression used to" +
 						"compute the key at runtime or set the name of the KeyGenerator bean to use.");
 			}

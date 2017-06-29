@@ -167,9 +167,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private String displayName = ObjectUtils.identityToString(this);
 
 	/** Parent context */
+	@Nullable
 	private ApplicationContext parent;
 
 	/** Environment used by this context */
+	@Nullable
 	private ConfigurableEnvironment environment;
 
 	/** BeanFactoryPostProcessors to apply on refresh */
@@ -188,24 +190,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private final Object startupShutdownMonitor = new Object();
 
 	/** Reference to the JVM shutdown hook, if registered */
+	@Nullable
 	private Thread shutdownHook;
 
 	/** ResourcePatternResolver used by this context */
 	private ResourcePatternResolver resourcePatternResolver;
 
 	/** LifecycleProcessor for managing the lifecycle of beans within this context */
+	@Nullable
 	private LifecycleProcessor lifecycleProcessor;
 
 	/** MessageSource we delegate our implementation of this interface to */
+	@Nullable
 	private MessageSource messageSource;
 
 	/** Helper class used in event publishing */
+	@Nullable
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Statically specified listeners */
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
 	/** ApplicationEvents published early */
+	@Nullable
 	private Set<ApplicationEvent> earlyApplicationEvents;
 
 
@@ -275,6 +282,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	@Override
+	@Nullable
 	public ApplicationContext getParent() {
 		return this.parent;
 	}

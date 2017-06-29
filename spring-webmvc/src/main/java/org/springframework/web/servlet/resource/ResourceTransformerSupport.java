@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
+	@Nullable
 	private ResourceUrlProvider resourceUrlProvider;
 
 
@@ -43,15 +44,15 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * URL of links in a transformed resource (e.g. import links in a CSS file).
 	 * This is required only for links expressed as full paths and not for
 	 * relative links.
-	 * @param resourceUrlProvider the URL provider to use
 	 */
 	public void setResourceUrlProvider(ResourceUrlProvider resourceUrlProvider) {
 		this.resourceUrlProvider = resourceUrlProvider;
 	}
 
 	/**
-	 * @return the configured {@code ResourceUrlProvider}.
+	 * Return the configured {@code ResourceUrlProvider}.
 	 */
+	@Nullable
 	public ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,22 +64,31 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private boolean overwriteExistingJobs = false;
 
+	@Nullable
 	private String[] jobSchedulingDataLocations;
 
+	@Nullable
 	private List<JobDetail> jobDetails;
 
+	@Nullable
 	private Map<String, Calendar> calendars;
 
+	@Nullable
 	private List<Trigger> triggers;
 
+	@Nullable
 	private SchedulerListener[] schedulerListeners;
 
+	@Nullable
 	private JobListener[] globalJobListeners;
 
+	@Nullable
 	private TriggerListener[] globalTriggerListeners;
 
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
+	@Nullable
 	protected ResourceLoader resourceLoader;
 
 
@@ -187,7 +196,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	}
 
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
@@ -297,14 +306,15 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		// Check if the Trigger is aware of an associated JobDetail.
 		JobDetail jobDetail = (JobDetail) trigger.getJobDataMap().remove("jobDetail");
 		if (triggerExists) {
-			if (jobDetail != null && !this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+			if (jobDetail != null && this.jobDetails != null &&
+					!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 				this.jobDetails.add(jobDetail);
 			}
 			getScheduler().rescheduleJob(trigger.getKey(), trigger);
 		}
 		else {
 			try {
-				if (jobDetail != null && !this.jobDetails.contains(jobDetail) &&
+				if (jobDetail != null && this.jobDetails != null && !this.jobDetails.contains(jobDetail) &&
 						(this.overwriteExistingJobs || getScheduler().getJobDetail(jobDetail.getKey()) == null)) {
 					getScheduler().scheduleJob(jobDetail, trigger);
 					this.jobDetails.add(jobDetail);

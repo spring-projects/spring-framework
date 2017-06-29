@@ -52,14 +52,17 @@ public final class Property {
 
 	private final Class<?> objectType;
 
+	@Nullable
 	private final Method readMethod;
 
+	@Nullable
 	private final Method writeMethod;
 
 	private final String name;
 
 	private final MethodParameter methodParameter;
 
+	@Nullable
 	private Annotation[] annotations;
 
 
@@ -147,13 +150,16 @@ public final class Property {
 			}
 			return StringUtils.uncapitalize(this.readMethod.getName().substring(index));
 		}
-		else {
+		else if (this.writeMethod != null) {
 			int index = this.writeMethod.getName().indexOf("set");
 			if (index == -1) {
 				throw new IllegalArgumentException("Not a setter method");
 			}
 			index += 3;
 			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
+		}
+		else {
+			throw new IllegalStateException("Property is neither readable nor writeable");
 		}
 	}
 

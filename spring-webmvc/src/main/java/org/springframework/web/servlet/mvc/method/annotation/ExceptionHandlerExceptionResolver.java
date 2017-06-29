@@ -75,12 +75,16 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
 		implements ApplicationContextAware, InitializingBean {
 
+	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
+	@Nullable
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
+	@Nullable
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
+	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	private List<HttpMessageConverter<?>> messageConverters;
@@ -89,6 +93,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private final List<Object> responseBodyAdvice = new ArrayList<>();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
@@ -374,8 +379,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			return null;
 		}
 
-		exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		if (this.argumentResolvers != null) {
+			exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		}
+		if (this.returnValueHandlers != null) {
+			exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		}
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();

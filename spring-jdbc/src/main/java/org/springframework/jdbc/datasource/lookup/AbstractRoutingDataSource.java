@@ -40,16 +40,20 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {
 
+	@Nullable
 	private Map<Object, Object> targetDataSources;
 
+	@Nullable
 	private Object defaultTargetDataSource;
 
 	private boolean lenientFallback = true;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
+	@Nullable
 	private Map<Object, DataSource> resolvedDataSources;
 
+	@Nullable
 	private DataSource resolvedDefaultDataSource;
 
 

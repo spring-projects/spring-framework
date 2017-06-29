@@ -41,12 +41,16 @@ import org.springframework.util.ObjectUtils;
  */
 public class NotificationListenerHolder {
 
+	@Nullable
 	private NotificationListener notificationListener;
 
+	@Nullable
 	private NotificationFilter notificationFilter;
 
+	@Nullable
 	private Object handback;
 
+	@Nullable
 	protected Set<Object> mappedObjectNames;
 
 

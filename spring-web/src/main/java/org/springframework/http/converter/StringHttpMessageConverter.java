@@ -45,6 +45,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
 
+	@Nullable
 	private volatile List<Charset> availableCharsets;
 
 	private boolean writeAcceptCharset = true;
@@ -110,11 +111,12 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 * @return the list of accepted charsets
 	 */
 	protected List<Charset> getAcceptedCharsets() {
-		if (this.availableCharsets == null) {
-			this.availableCharsets = new ArrayList<>(
-					Charset.availableCharsets().values());
+		List<Charset> charsets = this.availableCharsets;
+		if (charsets == null) {
+			charsets = new ArrayList<>(Charset.availableCharsets().values());
+			this.availableCharsets = charsets;
 		}
-		return this.availableCharsets;
+		return charsets;
 	}
 
 	private Charset getContentTypeCharset(@Nullable MediaType contentType) {

@@ -102,8 +102,10 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 
+		@Nullable
 		private final Object[] params;
 
+		@Nullable
 		private final Map<?, ?> context;
 
 		/**

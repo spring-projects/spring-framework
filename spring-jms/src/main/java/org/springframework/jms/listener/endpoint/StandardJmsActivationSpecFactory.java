@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,13 @@ import org.springframework.lang.Nullable;
  */
 public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactory {
 
+	@Nullable
 	private Class<?> activationSpecClass;
 
+	@Nullable
 	private Map<String, String> defaultProperties;
 
+	@Nullable
 	private DestinationResolver destinationResolver;
 
 
@@ -87,7 +90,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * or {@link org.springframework.jms.support.destination.BeanFactoryDestinationResolver}
 	 * but not {@link org.springframework.jms.support.destination.DynamicDestinationResolver}.
 	 */
-	public void setDestinationResolver(@Nullable DestinationResolver destinationResolver) {
+	public void setDestinationResolver(DestinationResolver destinationResolver) {
 		this.destinationResolver = destinationResolver;
 	}
 
@@ -142,26 +145,28 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 */
 	protected void populateActivationSpecProperties(BeanWrapper bw, JmsActivationSpecConfig config) {
 		String destinationName = config.getDestinationName();
-		boolean pubSubDomain = config.isPubSubDomain();
-		Object destination = destinationName;
-		if (this.destinationResolver != null) {
-			try {
-				destination = this.destinationResolver.resolveDestinationName(null, destinationName, pubSubDomain);
+		if (destinationName != null) {
+			boolean pubSubDomain = config.isPubSubDomain();
+			Object destination = destinationName;
+			if (this.destinationResolver != null) {
+				try {
+					destination = this.destinationResolver.resolveDestinationName(null, destinationName, pubSubDomain);
+				}
+				catch (JMSException ex) {
+					throw new DestinationResolutionException(
+							"Cannot resolve destination name [" + destinationName + "]", ex);
+				}
 			}
-			catch (JMSException ex) {
-				throw new DestinationResolutionException("Cannot resolve destination name [" + destinationName + "]", ex);
-			}
+			bw.setPropertyValue("destination", destination);
+			bw.setPropertyValue("destinationType", pubSubDomain ? Topic.class.getName() : Queue.class.getName());
 		}
-		bw.setPropertyValue("destination", destination);
-		bw.setPropertyValue("destinationType", pubSubDomain ? Topic.class.getName() : Queue.class.getName());
 
 		if (bw.isWritableProperty("subscriptionDurability")) {
 			bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
 		}
 		else if (config.isSubscriptionDurable()) {
 			// Standard JCA 1.5 "subscriptionDurability" apparently not supported...
-			throw new IllegalArgumentException(
-					"Durable subscriptions not supported by underlying provider: " + this.activationSpecClass.getName());
+			throw new IllegalArgumentException("Durable subscriptions not supported by underlying provider");
 		}
 		if (config.isSubscriptionShared()) {
 			throw new IllegalArgumentException("Shared subscriptions not supported for JCA-driven endpoints");
@@ -208,8 +213,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 		}
 		else if (ackMode == Session.DUPS_OK_ACKNOWLEDGE) {
 			// Standard JCA 1.5 "acknowledgeMode" apparently not supported (e.g. WebSphere MQ 6.0.2.1)
-			throw new IllegalArgumentException(
-					"Dups-ok-acknowledge not supported by underlying provider: " + this.activationSpecClass.getName());
+			throw new IllegalArgumentException("Dups-ok-acknowledge not supported by underlying provider");
 		}
 	}
 

@@ -50,6 +50,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
+	@Nullable
 	private String originalPath;
 
 

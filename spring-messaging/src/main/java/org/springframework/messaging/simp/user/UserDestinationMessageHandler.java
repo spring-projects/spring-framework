@@ -61,8 +61,10 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 	private final MessageSendingOperations<String> messagingTemplate;
 
+	@Nullable
 	private BroadcastHandler broadcastHandler;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 	private final Object lifecycleMonitor = new Object();

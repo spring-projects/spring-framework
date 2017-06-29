@@ -48,6 +48,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private static final String UNKNOWN = "unknown";
 
+	@Nullable
 	private final Class<? extends Annotation> annotationType;
 
 	final String displayName;

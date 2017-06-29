@@ -33,6 +33,7 @@ import org.springframework.jmx.support.RegistrationPolicy;
 import org.springframework.jmx.support.WebSphereMBeanServerFactoryBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -52,10 +53,13 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private static final String MBEAN_EXPORTER_BEAN_NAME = "mbeanExporter";
 
+	@Nullable
 	private AnnotationAttributes enableMBeanExport;
 
+	@Nullable
 	private Environment environment;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -84,14 +88,15 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationMBeanExporter mbeanExporter() {
 		AnnotationMBeanExporter exporter = new AnnotationMBeanExporter();
-		setupDomain(exporter);
-		setupServer(exporter);
-		setupRegistrationPolicy(exporter);
+		Assert.state(this.enableMBeanExport != null, "No EnableMBeanExport annotation found");
+		setupDomain(exporter, this.enableMBeanExport);
+		setupServer(exporter, this.enableMBeanExport);
+		setupRegistrationPolicy(exporter, this.enableMBeanExport);
 		return exporter;
 	}
 
-	private void setupDomain(AnnotationMBeanExporter exporter) {
-		String defaultDomain = this.enableMBeanExport.getString("defaultDomain");
+	private void setupDomain(AnnotationMBeanExporter exporter, AnnotationAttributes enableMBeanExport) {
+		String defaultDomain = enableMBeanExport.getString("defaultDomain");
 		if (StringUtils.hasLength(defaultDomain) && this.environment != null) {
 			defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
 		}
@@ -100,12 +105,13 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 		}
 	}
 
-	private void setupServer(AnnotationMBeanExporter exporter) {
-		String server = this.enableMBeanExport.getString("server");
+	private void setupServer(AnnotationMBeanExporter exporter, AnnotationAttributes enableMBeanExport) {
+		String server = enableMBeanExport.getString("server");
 		if (StringUtils.hasLength(server) && this.environment != null) {
 			server = this.environment.resolvePlaceholders(server);
 		}
 		if (StringUtils.hasText(server)) {
+			Assert.state(this.beanFactory != null, "No BeanFactory set");
 			exporter.setServer(this.beanFactory.getBean(server, MBeanServer.class));
 		}
 		else {
@@ -119,8 +125,8 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 		}
 	}
 
-	private void setupRegistrationPolicy(AnnotationMBeanExporter exporter) {
-		RegistrationPolicy registrationPolicy = this.enableMBeanExport.getEnum("registration");
+	private void setupRegistrationPolicy(AnnotationMBeanExporter exporter, AnnotationAttributes enableMBeanExport) {
+		RegistrationPolicy registrationPolicy = enableMBeanExport.getEnum("registration");
 		exporter.setRegistrationPolicy(registrationPolicy);
 	}
 

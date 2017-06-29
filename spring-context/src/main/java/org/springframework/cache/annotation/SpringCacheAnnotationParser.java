@@ -263,12 +263,16 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	 */
 	static class DefaultCacheConfig {
 
+		@Nullable
 		private final String[] cacheNames;
 
+		@Nullable
 		private final String keyGenerator;
 
+		@Nullable
 		private final String cacheManager;
 
+		@Nullable
 		private final String cacheResolver;
 
 		public DefaultCacheConfig() {

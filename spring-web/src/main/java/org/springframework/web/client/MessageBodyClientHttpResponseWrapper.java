@@ -23,6 +23,7 @@ import java.io.PushbackInputStream;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link ClientHttpResponse} that can not only check if
@@ -31,12 +32,13 @@ import org.springframework.http.client.ClientHttpResponse;
  *
  * @author Brian Clozel
  * @since 4.1.5
- * @see <a href="http://tools.ietf.org/html/rfc7230#section-3.3.3">rfc7230 Section 3.3.3</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
  */
 class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 
 	private final ClientHttpResponse response;
 
+	@Nullable
 	private PushbackInputStream pushbackInputStream;
 
 

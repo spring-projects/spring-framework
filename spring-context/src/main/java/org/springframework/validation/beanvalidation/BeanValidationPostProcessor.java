@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Simple {@link BeanPostProcessor} that checks JSR-303 constraint annotations
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  */
 public class BeanValidationPostProcessor implements BeanPostProcessor, InitializingBean {
 
+	@Nullable
 	private Validator validator;
 
 	private boolean afterInitialization = false;
@@ -103,6 +106,7 @@ public class BeanValidationPostProcessor implements BeanPostProcessor, Initializ
 	 * @see javax.validation.Validator#validate
 	 */
 	protected void doValidate(Object bean) {
+		Assert.state(this.validator != null, "No Validator set");
 		Set<ConstraintViolation<Object>> result = this.validator.validate(bean);
 		if (!result.isEmpty()) {
 			StringBuilder sb = new StringBuilder("Bean state is invalid: ");

@@ -733,6 +733,7 @@ public class TypeDescriptor implements Serializable {
 	 */
 	private class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
 
+		@Nullable
 		private final Annotation[] annotations;
 
 		public AnnotatedElementAdapter(@Nullable Annotation[] annotations) {

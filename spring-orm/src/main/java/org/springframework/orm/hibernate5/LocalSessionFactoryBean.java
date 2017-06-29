@@ -63,52 +63,75 @@ import org.springframework.util.Assert;
 public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		implements FactoryBean<SessionFactory>, ResourceLoaderAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private DataSource dataSource;
 
+	@Nullable
 	private Resource[] configLocations;
 
+	@Nullable
 	private String[] mappingResources;
 
+	@Nullable
 	private Resource[] mappingLocations;
 
+	@Nullable
 	private Resource[] cacheableMappingLocations;
 
+	@Nullable
 	private Resource[] mappingJarLocations;
 
+	@Nullable
 	private Resource[] mappingDirectoryLocations;
 
+	@Nullable
 	private Interceptor entityInterceptor;
 
+	@Nullable
 	private ImplicitNamingStrategy implicitNamingStrategy;
 
+	@Nullable
 	private PhysicalNamingStrategy physicalNamingStrategy;
 
+	@Nullable
 	private Object jtaTransactionManager;
 
+	@Nullable
 	private MultiTenantConnectionProvider multiTenantConnectionProvider;
 
+	@Nullable
 	private CurrentTenantIdentifierResolver currentTenantIdentifierResolver;
 
+	@Nullable
 	private TypeFilter[] entityTypeFilters;
 
+	@Nullable
 	private Properties hibernateProperties;
 
+	@Nullable
 	private Class<?>[] annotatedClasses;
 
+	@Nullable
 	private String[] annotatedPackages;
 
+	@Nullable
 	private String[] packagesToScan;
 
+	@Nullable
 	private AsyncTaskExecutor bootstrapExecutor;
 
 	private boolean metadataSourcesAccessed = false;
 
+	@Nullable
 	private MetadataSources metadataSources;
 
+	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private SessionFactory sessionFactory;
 
 
@@ -372,7 +395,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @param resourceLoader the ResourceLoader to use (never {@code null})
 	 */
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
@@ -409,7 +432,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		if (this.mappingResources != null) {
 			// Register given Hibernate mapping definitions, contained in resource files.
 			for (String mapping : this.mappingResources) {
-				Resource mr = new ClassPathResource(mapping.trim(), this.resourcePatternResolver.getClassLoader());
+				Resource mr = new ClassPathResource(mapping.trim(), getResourceLoader().getClassLoader());
 				sfb.addInputStream(mr.getInputStream());
 			}
 		}
@@ -543,7 +566,9 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	@Override
 	public void destroy() {
-		this.sessionFactory.close();
+		if (this.sessionFactory != null) {
+			this.sessionFactory.close();
+		}
 	}
 
 }

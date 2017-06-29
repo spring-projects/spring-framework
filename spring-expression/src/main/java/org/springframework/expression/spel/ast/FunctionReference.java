@@ -30,6 +30,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -53,6 +55,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
+	@Nullable
 	private Method method;
 	
 	private boolean argumentConversionOccurred;
@@ -177,6 +180,7 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow cf) {
+		Assert.state(this.method != null, "No method handle");
 		String classDesc = this.method.getDeclaringClass().getName().replace('.', '/');
 		generateCodeForArguments(mv, cf, this.method, this.children);
 		mv.visitMethodInsn(INVOKESTATIC, classDesc, this.method.getName(),

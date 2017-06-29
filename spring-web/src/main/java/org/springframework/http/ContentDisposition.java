@@ -40,28 +40,38 @@ import static java.time.format.DateTimeFormatter.*;
  */
 public class ContentDisposition {
 
+	@Nullable
 	private final String type;
 
+	@Nullable
 	private final String name;
 
+	@Nullable
 	private final String filename;
 
+	@Nullable
 	private final Charset charset;
 
+	@Nullable
 	private final Long size;
 
+	@Nullable
 	private final ZonedDateTime creationDate;
 
+	@Nullable
 	private final ZonedDateTime modificationDate;
 
+	@Nullable
 	private final ZonedDateTime readDate;
 
 
 	/**
 	 * Private constructor. See static factory methods in this class.
 	 */
-	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename, @Nullable Charset charset, @Nullable Long size,
-			@Nullable ZonedDateTime creationDate, @Nullable ZonedDateTime modificationDate, @Nullable ZonedDateTime readDate) {
+	private ContentDisposition(@Nullable String type, @Nullable String name, @Nullable String filename,
+			@Nullable Charset charset, @Nullable Long size, @Nullable ZonedDateTime creationDate,
+			@Nullable ZonedDateTime modificationDate, @Nullable ZonedDateTime readDate) {
+
 		this.type = type;
 		this.name = name;
 		this.filename = filename;
@@ -435,27 +445,33 @@ public class ContentDisposition {
 		 * Build the content disposition
 		 */
 		ContentDisposition build();
-
 	}
+
 
 	private static class BuilderImpl implements Builder {
 
 		private String type;
 
+		@Nullable
 		private String name;
 
+		@Nullable
 		private String filename;
 
+		@Nullable
 		private Charset charset;
 
+		@Nullable
 		private Long size;
 
+		@Nullable
 		private ZonedDateTime creationDate;
 
+		@Nullable
 		private ZonedDateTime modificationDate;
 
+		@Nullable
 		private ZonedDateTime readDate;
-
 
 		public BuilderImpl(String type) {
 			Assert.hasText(type, "'type' must not be not empty");

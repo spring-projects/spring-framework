@@ -74,7 +74,7 @@ public class MappingJacksonValue {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
 	 * @see com.fasterxml.jackson.annotation.JsonView
 	 */
-	public void setSerializationView(@Nullable Class<?> serializationView) {
+	public void setSerializationView(Class<?> serializationView) {
 		this.serializationView = serializationView;
 	}
 

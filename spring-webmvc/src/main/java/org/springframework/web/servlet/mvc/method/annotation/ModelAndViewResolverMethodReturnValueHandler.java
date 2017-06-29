@@ -55,6 +55,7 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  */
 public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private final List<ModelAndViewResolver> mavResolvers;
 
 	private final ModelAttributeMethodProcessor modelAttributeProcessor = new ModelAttributeMethodProcessor(true);

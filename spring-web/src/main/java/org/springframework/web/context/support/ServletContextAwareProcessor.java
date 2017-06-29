@@ -41,8 +41,10 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class ServletContextAwareProcessor implements BeanPostProcessor {
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ServletConfig servletConfig;
 
 

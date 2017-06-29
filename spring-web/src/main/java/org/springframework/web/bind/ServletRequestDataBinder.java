@@ -75,7 +75,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public ServletRequestDataBinder(@Nullable Object target, @Nullable String objectName) {
+	public ServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

@@ -46,10 +46,12 @@ import org.springframework.util.ClassUtils;
  */
 public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
+	@Nullable
 	private Map<String, Object> scopes;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 

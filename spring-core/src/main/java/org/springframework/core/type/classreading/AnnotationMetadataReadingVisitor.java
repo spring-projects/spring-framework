@@ -49,6 +49,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
+	@Nullable
 	protected final ClassLoader classLoader;
 
 	protected final Set<String> annotationSet = new LinkedHashSet<>(4);

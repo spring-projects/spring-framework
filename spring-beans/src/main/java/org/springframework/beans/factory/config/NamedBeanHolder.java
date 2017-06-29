@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.factory.NamedBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +38,7 @@ public class NamedBeanHolder<T> implements NamedBean {
 	 * @param beanName the name of the bean
 	 * @param beanInstance the corresponding bean instance
 	 */
-	public NamedBeanHolder(String beanName, @Nullable T beanInstance) {
+	public NamedBeanHolder(String beanName, T beanInstance) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanName = beanName;
 		this.beanInstance = beanInstance;

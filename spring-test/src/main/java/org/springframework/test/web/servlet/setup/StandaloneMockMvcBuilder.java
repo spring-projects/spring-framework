@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
@@ -90,6 +91,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final List<Object> controllers;
 
+	@Nullable
 	private List<Object> controllerAdvice;
 
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
@@ -100,26 +102,34 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 
-	private Validator validator = null;
+	@Nullable
+	private Validator validator;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private FormattingConversionService conversionService = null;
+	@Nullable
+	private FormattingConversionService conversionService;
 
+	@Nullable
 	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
+	@Nullable
 	private Long asyncRequestTimeout;
 
+	@Nullable
 	private List<ViewResolver> viewResolvers;
 
 	private LocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
 
-	private FlashMapManager flashMapManager = null;
+	@Nullable
+	private FlashMapManager flashMapManager;
 
 	private boolean useSuffixPatternMatch = true;
 
 	private boolean useTrailingSlashPatternMatch = true;
 
+	@Nullable
 	private Boolean removeSemicolonContent;
 
 	private Map<String, String> placeholderValues = new HashMap<>();
@@ -447,7 +457,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		public FormattingConversionService mvcConversionService() {
-			return (conversionService != null) ? conversionService : super.mvcConversionService();
+			return (conversionService != null ? conversionService : super.mvcConversionService());
 		}
 
 		@Override
@@ -478,7 +488,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			}
 			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
 				if (resolver instanceof ApplicationContextAware) {
-					((ApplicationContextAware) resolver).setApplicationContext(getApplicationContext());
+					ApplicationContext applicationContext  = getApplicationContext();
+					if (applicationContext != null) {
+						((ApplicationContextAware) resolver).setApplicationContext(applicationContext);
+					}
 				}
 				if (resolver instanceof InitializingBean) {
 					try {

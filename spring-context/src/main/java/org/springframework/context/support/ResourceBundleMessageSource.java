@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -66,8 +67,10 @@ import org.springframework.util.ClassUtils;
  */
 public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
 
+	@Nullable
 	private ClassLoader bundleClassLoader;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
@@ -77,8 +80,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
-			new HashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new HashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -88,8 +90,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
-			new HashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new HashMap<>();
 
 
 	/**
@@ -109,6 +110,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * <p>Default is the containing BeanFactory's bean ClassLoader.
 	 * @see #setBundleClassLoader
 	 */
+	@Nullable
 	protected ClassLoader getBundleClassLoader() {
 		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
 	}
@@ -214,7 +216,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+		ClassLoader classLoader = getBundleClassLoader();
+		Assert.state(classLoader != null, "No bundle ClassLoader set");
+		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
 	}
 
 	/**

@@ -54,6 +54,7 @@ import org.springframework.context.annotation.ConfigurationClassEnhancer.Enhance
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -96,10 +97,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
+	@Nullable
 	private Environment environment;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
@@ -110,6 +113,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private final Set<Integer> factoriesPostProcessed = new HashSet<>();
 
+	@Nullable
 	private ConfigurationClassBeanDefinitionReader reader;
 
 	private boolean localBeanNameGeneratorSet = false;
@@ -193,7 +197,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
@@ -295,6 +299,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					this.importBeanNameGenerator = generator;
 				}
 			}
+		}
+
+		if (this.environment == null) {
+			this.environment = new StandardEnvironment();
 		}
 
 		// Parse each @Configuration class

@@ -44,12 +44,14 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class BeanPropertyBindingResult extends AbstractPropertyBindingResult implements Serializable {
 
+	@Nullable
 	private final Object target;
 
 	private final boolean autoGrowNestedPaths;
 
 	private final int autoGrowCollectionLimit;
 
+	@Nullable
 	private transient BeanWrapper beanWrapper;
 
 
@@ -80,6 +82,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 
 
 	@Override
+	@Nullable
 	public final Object getTarget() {
 		return this.target;
 	}

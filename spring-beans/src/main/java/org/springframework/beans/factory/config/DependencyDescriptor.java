@@ -58,12 +58,15 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	private final Class<?> declaringClass;
 
+	@Nullable
 	private String methodName;
 
+	@Nullable
 	private Class<?>[] parameterTypes;
 
 	private int parameterIndex;
 
+	@Nullable
 	private String fieldName;
 
 	private final boolean required;
@@ -72,8 +75,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	private int nestingLevel = 1;
 
+	@Nullable
 	private Class<?> containingClass;
 
+	@Nullable
 	private volatile ResolvableType resolvableType;
 
 
@@ -98,8 +103,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		super(methodParameter);
 
 		this.declaringClass = methodParameter.getDeclaringClass();
-		if (this.methodParameter.getMethod() != null) {
-			this.methodName = this.methodParameter.getMethod().getName();
+		if (methodParameter.getMethod() != null) {
+			this.methodName = methodParameter.getMethod().getName();
 		}
 		this.parameterTypes = methodParameter.getExecutable().getParameterTypes();
 		this.parameterIndex = methodParameter.getParameterIndex();
@@ -170,7 +175,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 					(kotlinPresent && KotlinDelegate.isNullable(this.field)));
 		}
 		else {
-			return !this.methodParameter.isOptional();
+			return !obtainMethodParameter().isOptional();
 		}
 	}
 
@@ -282,12 +287,14 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
-		if (this.resolvableType == null) {
-			this.resolvableType = (this.field != null ?
+		ResolvableType resolvableType = this.resolvableType;
+		if (resolvableType == null) {
+			resolvableType = (this.field != null ?
 					ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
-					ResolvableType.forMethodParameter(this.methodParameter));
+					ResolvableType.forMethodParameter(obtainMethodParameter()));
+			this.resolvableType = resolvableType;
 		}
-		return this.resolvableType;
+		return resolvableType;
 	}
 
 	/**
@@ -333,7 +340,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	@Nullable
 	public String getDependencyName() {
-		return (this.field != null ? this.field.getName() : this.methodParameter.getParameterName());
+		return (this.field != null ? this.field.getName() : obtainMethodParameter().getParameterName());
 	}
 
 	/**
@@ -367,7 +374,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 			}
 		}
 		else {
-			return this.methodParameter.getNestedParameterType();
+			return obtainMethodParameter().getNestedParameterType();
 		}
 	}
 

@@ -217,6 +217,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final String line;
 
+		@Nullable
 		private final Resource resource;
 
 		public LineOutput(String line, @Nullable Resource resource) {

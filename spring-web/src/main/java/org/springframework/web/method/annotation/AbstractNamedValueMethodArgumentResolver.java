@@ -63,8 +63,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Nullable
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
+	@Nullable
 	private final BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
@@ -268,6 +270,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		private final boolean required;
 
+		@Nullable
 		private final String defaultValue;
 
 		public NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {

@@ -56,16 +56,22 @@ import org.springframework.util.CollectionUtils;
  */
 public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean {
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
+	@Nullable
 	private ScheduledExecutorService localExecutor;
 
+	@Nullable
 	private List<TriggerTask> triggerTasks;
 
+	@Nullable
 	private List<CronTask> cronTasks;
 
+	@Nullable
 	private List<IntervalTask> fixedRateTasks;
 
+	@Nullable
 	private List<IntervalTask> fixedDelayTasks;
 
 	private final Map<Task, ScheduledTask> unresolvedTasks = new HashMap<>(16);

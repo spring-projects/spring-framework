@@ -64,6 +64,7 @@ import org.springframework.util.StringUtils;
 public class PathPattern implements Comparable<PathPattern> {
 
 	/** First path element in the parsed chain of path elements for this pattern */
+	@Nullable
 	private PathElement head;
 
 	/** The text of the parsed pattern */
@@ -142,6 +143,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.patternString;
 	}
 
+	@Nullable
 	PathElement getHeadSection() {
 		return this.head;
 	}
@@ -550,6 +552,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		boolean isMatchStartMatching = false;
 
+		@Nullable
 		private Map<String, String> extractedVariables;
 
 		boolean extractingVariables;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private Set<?> mappedHandlers;
 
+	@Nullable
 	private Class<?>[] mappedHandlerClasses;
 
+	@Nullable
 	private Log warnLogger;
 
 	private boolean preventResponseCaching = false;
@@ -101,7 +104,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
 	 * category. Alternatively, override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
-	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {

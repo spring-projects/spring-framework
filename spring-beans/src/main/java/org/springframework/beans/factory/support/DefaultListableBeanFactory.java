@@ -117,7 +117,8 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-	private static Class<?> javaxInjectProviderClass = null;
+	@Nullable
+	private static Class<?> javaxInjectProviderClass;
 
 	static {
 		try {
@@ -126,6 +127,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - Provider interface simply not supported then.
+			javaxInjectProviderClass = null;
 		}
 	}
 
@@ -135,6 +137,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			new ConcurrentHashMap<>(8);
 
 	/** Optional id for this factory, for serialization purposes */
+	@Nullable
 	private String serializationId;
 
 	/** Whether to allow re-registration of a different definition with the same name */
@@ -144,6 +147,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private boolean allowEagerClassLoading = true;
 
 	/** Optional OrderComparator for dependency Lists and arrays */
+	@Nullable
 	private Comparator<Object> dependencyComparator;
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
@@ -168,6 +172,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
 	/** Cached array of bean definition names in case of frozen configuration */
+	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
 
 	/** Whether bean definition metadata may be cached for all beans */
@@ -209,6 +214,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * to be deserialized from this id back into the BeanFactory object, if needed.
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public String getSerializationId() {
 		return this.serializationId;
 	}
@@ -360,8 +366,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanDefinitionNames() {
-		if (this.frozenBeanDefinitionNames != null) {
-			return this.frozenBeanDefinitionNames.clone();
+		String[] frozenNames = this.frozenBeanDefinitionNames;
+		if (frozenNames != null) {
+			return frozenNames.clone();
 		}
 		else {
 			return StringUtils.toStringArray(this.beanDefinitionNames);
@@ -511,9 +518,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				Throwable rootCause = ex.getMostSpecificCause();
 				if (rootCause instanceof BeanCurrentlyInCreationException) {
 					BeanCreationException bce = (BeanCreationException) rootCause;
-					if (isCurrentlyInCreation(bce.getBeanName())) {
+					String exBeanName = bce.getBeanName();
+					if (exBeanName != null && isCurrentlyInCreation(exBeanName)) {
 						if (this.logger.isDebugEnabled()) {
-							this.logger.debug("Ignoring match to currently created bean '" + beanName + "': " +
+							this.logger.debug("Ignoring match to currently created bean '" + exBeanName + "': " +
 									ex.getMessage());
 						}
 						onSuppressedException(ex);
@@ -1595,6 +1603,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		private final boolean optional;
 
+		@Nullable
 		private final String beanName;
 
 		public DependencyObjectProvider(DependencyDescriptor descriptor, @Nullable String beanName) {

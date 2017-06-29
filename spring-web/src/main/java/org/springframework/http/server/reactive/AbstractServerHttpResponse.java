@@ -62,12 +62,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final DataBufferFactory dataBufferFactory;
 
+	@Nullable
 	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
+	@Nullable
 	private Function<String, String> urlEncoder = url -> url;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
@@ -105,6 +107,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}

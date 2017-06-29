@@ -66,6 +66,7 @@ import org.springframework.lang.Nullable;
  */
 public class SqlLobValue implements DisposableSqlTypeValue {
 
+	@Nullable
 	private final Object content;
 
 	private final int length;

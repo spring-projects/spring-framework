@@ -18,6 +18,7 @@ package org.springframework.beans.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -56,12 +57,15 @@ public class PagedListHolder<E> implements Serializable {
 	public static final int DEFAULT_MAX_LINKED_PAGES = 10;
 
 
-	private List<E> source;
+	private List<E> source = Collections.emptyList();
 
+	@Nullable
 	private Date refreshDate;
 
+	@Nullable
 	private SortDefinition sort;
 
+	@Nullable
 	private SortDefinition sortUsed;
 
 	private int pageSize = DEFAULT_PAGE_SIZE;

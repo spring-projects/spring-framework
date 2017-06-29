@@ -76,6 +76,7 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final Method addTransformerMethod;
 
+	@Nullable
 	private final Method getThrowawayClassLoaderMethod;
 
 
@@ -97,22 +98,26 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	public ReflectiveLoadTimeWeaver(@Nullable ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
-		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(
+
+		Method addTransformerMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME, ClassFileTransformer.class);
-		if (this.addTransformerMethod == null) {
+		if (addTransformerMethod == null) {
 			throw new IllegalStateException(
 					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
 					"'addTransformer(ClassFileTransformer)' method.");
 		}
-		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
+		this.addTransformerMethod = addTransformerMethod;
+
+		Method getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME);
 		// getThrowawayClassLoader method is optional
-		if (this.getThrowawayClassLoaderMethod == null) {
+		if (getThrowawayClassLoaderMethod == null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("The ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide a " +
 						"'getThrowawayClassLoader()' method; SimpleThrowawayClassLoader will be used instead.");
 			}
 		}
+		this.getThrowawayClassLoaderMethod = getThrowawayClassLoaderMethod;
 	}
 
 

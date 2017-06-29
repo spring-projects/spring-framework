@@ -31,8 +31,10 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 
 	private final String name;
 
+	@Nullable
 	private final Object value;
 
+	@Nullable
 	private Object source;
 
 
@@ -58,6 +60,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	/**
 	 * Return the value of the attribute.
 	 */
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -71,6 +74,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

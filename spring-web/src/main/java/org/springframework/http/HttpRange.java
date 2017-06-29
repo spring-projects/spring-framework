@@ -212,6 +212,7 @@ public abstract class HttpRange {
 
 		private final long firstPos;
 
+		@Nullable
 		private final Long lastPos;
 
 		public ByteRange(long firstPos, @Nullable Long lastPos) {

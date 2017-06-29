@@ -18,6 +18,7 @@ package org.springframework.web.util.pattern;
 
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
@@ -42,9 +43,11 @@ abstract class PathElement {
 	protected final char separator;
 
 	// The next path element in the chain
+	@Nullable
 	protected PathElement next;
 
 	// The previous path element in the chain
+	@Nullable
 	protected PathElement prev;
 
 

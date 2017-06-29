@@ -23,6 +23,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.Mergeable;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -68,6 +69,7 @@ public final class MockMvc {
 
 	private final ServletContext servletContext;
 
+	@Nullable
 	private RequestBuilder defaultRequestBuilder;
 
 	private List<ResultMatcher> defaultResultMatchers = new ArrayList<>();

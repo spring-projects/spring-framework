@@ -259,6 +259,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private class AsyncResultMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
 		private final ResolvableType returnType;

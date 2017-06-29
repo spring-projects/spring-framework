@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class Literal extends SpelNodeImpl {
 
+	@Nullable
 	private final String originalValue;
 
 
@@ -41,6 +42,7 @@ public abstract class Literal extends SpelNodeImpl {
 	}
 
 
+	@Nullable
 	public final String getOriginalValue() {
 		return this.originalValue;
 	}

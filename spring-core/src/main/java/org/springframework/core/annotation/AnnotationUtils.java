@@ -136,6 +136,7 @@ public abstract class AnnotationUtils {
 	private static final Map<Method, AliasDescriptor> aliasDescriptorCache =
 			new ConcurrentReferenceHashMap<>(256);
 
+	@Nullable
 	private static transient Log logger;
 
 
@@ -1920,6 +1921,7 @@ public abstract class AnnotationUtils {
 
 		private final Class<A> annotationType;
 
+		@Nullable
 		private final Class<? extends Annotation> containerAnnotationType;
 
 		private final boolean declaredMode;

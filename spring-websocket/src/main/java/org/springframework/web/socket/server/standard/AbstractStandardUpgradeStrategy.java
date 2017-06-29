@@ -59,6 +59,7 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private volatile List<WebSocketExtension> extensions;
 
 
@@ -84,11 +85,13 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
-		if (this.extensions == null) {
+		List<WebSocketExtension> extensions = this.extensions;
+		if (extensions == null) {
 			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-			this.extensions = getInstalledExtensions(getContainer(servletRequest));
+			extensions = getInstalledExtensions(getContainer(servletRequest));
+			this.extensions = extensions;
 		}
-		return this.extensions;
+		return extensions;
 	}
 
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {

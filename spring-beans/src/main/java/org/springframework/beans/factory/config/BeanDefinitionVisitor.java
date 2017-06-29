@@ -47,6 +47,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class BeanDefinitionVisitor {
 
+	@Nullable
 	private StringValueResolver valueResolver;
 
 

@@ -46,8 +46,10 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	private static final String CONTENT_TYPE = "Content-Type";
 
+	@Nullable
 	private Map<String, String[]> multipartParameters;
 
+	@Nullable
 	private Map<String, String> multipartParameterContentTypes;
 
 

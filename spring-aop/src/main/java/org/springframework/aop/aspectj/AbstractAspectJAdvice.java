@@ -104,11 +104,11 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	private final AspectInstanceFactory aspectInstanceFactory;
 
 	/**
-	 * The name of the aspect (ref bean) in which this advice was defined (used
-	 * when determining advice precedence so that we can determine
+	 * The name of the aspect (ref bean) in which this advice was defined
+	 * (used when determining advice precedence so that we can determine
 	 * whether two pieces of advice come from the same aspect).
 	 */
-	private String aspectName;
+	private String aspectName = "";
 
 	/**
 	 * The order of declaration of this advice within the aspect.
@@ -119,13 +119,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * This will be non-null if the creator of this advice object knows the argument names
 	 * and sets them explicitly
 	 */
-	private String[] argumentNames = null;
+	@Nullable
+	private String[] argumentNames;
 
 	/** Non-null if after throwing advice binds the thrown value */
-	private String throwingName = null;
+	@Nullable
+	private String throwingName;
 
 	/** Non-null if after returning advice binds the return value */
-	private String returningName = null;
+	@Nullable
+	private String returningName;
 
 	private Class<?> discoveredReturningType = Object.class;
 
@@ -143,10 +146,12 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
+	@Nullable
 	private Map<String, Integer> argumentBindings;
 
 	private boolean argumentsIntrospected = false;
 
+	@Nullable
 	private Type discoveredReturningGenericType;
 	// Note: Unlike return type, no such generic information is needed for the throwing type,
 	// since Java doesn't allow exception types to be parameterized.
@@ -464,6 +469,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
+		Assert.state(this.argumentNames != null, "No argument names available");
 		this.argumentBindings = new HashMap<>();
 
 		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterCount();
@@ -504,7 +510,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 
 		// configure the pointcut expression accordingly.
-		configurePointcutParameters(argumentIndexOffset);
+		configurePointcutParameters(this.argumentNames, argumentIndexOffset);
 	}
 
 	/**
@@ -512,7 +518,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * pointcut parameters - but returning and throwing vars are handled differently
 	 * and must be removed from the list if present.
 	 */
-	private void configurePointcutParameters(int argumentIndexOffset) {
+	private void configurePointcutParameters(String[] argumentNames, int argumentIndexOffset) {
 		int numParametersToRemove = argumentIndexOffset;
 		if (this.returningName != null) {
 			numParametersToRemove++;
@@ -520,20 +526,20 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (this.throwingName != null) {
 			numParametersToRemove++;
 		}
-		String[] pointcutParameterNames = new String[this.argumentNames.length - numParametersToRemove];
+		String[] pointcutParameterNames = new String[argumentNames.length - numParametersToRemove];
 		Class<?>[] pointcutParameterTypes = new Class<?>[pointcutParameterNames.length];
 		Class<?>[] methodParameterTypes = this.aspectJAdviceMethod.getParameterTypes();
 
 		int index = 0;
-		for (int i = 0; i < this.argumentNames.length; i++) {
+		for (int i = 0; i < argumentNames.length; i++) {
 			if (i < argumentIndexOffset) {
 				continue;
 			}
-			if (this.argumentNames[i].equals(this.returningName) ||
-				this.argumentNames[i].equals(this.throwingName)) {
+			if (argumentNames[i].equals(this.returningName) ||
+				argumentNames[i].equals(this.throwingName)) {
 				continue;
 			}
-			pointcutParameterNames[index] = this.argumentNames[i];
+			pointcutParameterNames[index] = argumentNames[i];
 			pointcutParameterTypes[index] = methodParameterTypes[i];
 			index++;
 		}

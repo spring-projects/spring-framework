@@ -73,6 +73,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 	private HttpClient httpClient;
 
+	@Nullable
 	private RequestConfig requestConfig;
 
 

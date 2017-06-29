@@ -43,6 +43,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private final WebSocketHandler webSocketHandler;
 
+	@Nullable
 	private WebSocketSession webSocketSession;
 
 	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
@@ -140,7 +141,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 		future.addCallback(new ListenableFutureCallback<WebSocketSession>() {
 			@Override
-			public void onSuccess(WebSocketSession result) {
+			public void onSuccess(@Nullable WebSocketSession result) {
 				webSocketSession = result;
 				logger.info("Successfully connected");
 			}
@@ -153,7 +154,9 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected void closeConnection() throws Exception {
-		this.webSocketSession.close();
+		if (this.webSocketSession != null) {
+			this.webSocketSession.close();
+		}
 	}
 
 	@Override

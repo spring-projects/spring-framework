@@ -64,6 +64,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	private ObjectMapper objectMapper;
 
+	@Nullable
 	private Boolean prettyPrint;
 
 
@@ -73,7 +74,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	public MappingJackson2MessageConverter() {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8));
-		initObjectMapper();
+		this.objectMapper = initObjectMapper();
 	}
 
 	/**
@@ -84,14 +85,15 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	public MappingJackson2MessageConverter(MimeType... supportedMimeTypes) {
 		super(Arrays.asList(supportedMimeTypes));
-		initObjectMapper();
+		this.objectMapper = initObjectMapper();
 	}
 
 
-	private void initObjectMapper() {
-		this.objectMapper = new ObjectMapper();
-		this.objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	private ObjectMapper initObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return objectMapper;
 	}
 
 	/**

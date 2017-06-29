@@ -41,6 +41,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	private final List<PropertyValue> propertyValueList;
 
+	@Nullable
 	private Set<String> processedProperties;
 
 	private volatile boolean converted = false;

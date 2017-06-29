@@ -37,10 +37,12 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
+	@Nullable
 	private final Object target;
 
 	private final boolean autoGrowNestedPaths;
 
+	@Nullable
 	private transient ConfigurablePropertyAccessor directFieldAccessor;
 
 
@@ -67,6 +69,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 
 	@Override
+	@Nullable
 	public final Object getTarget() {
 		return this.target;
 	}

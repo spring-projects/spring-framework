@@ -125,6 +125,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
 	/** Resolver strategy for method parameter names */
+	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	/** Whether to automatically try to resolve circular references between beans */
@@ -755,13 +756,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						}
 						Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
 								factoryMethod, args, getBeanClassLoader());
-						if (returnType != null) {
-							uniqueCandidate = (commonType == null ? factoryMethod : null);
-							commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
-							if (commonType == null) {
-								// Ambiguous return types found: return null to indicate "not determinable".
-								return null;
-							}
+						uniqueCandidate = (commonType == null ? factoryMethod : null);
+						commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
+						if (commonType == null) {
+							// Ambiguous return types found: return null to indicate "not determinable".
+							return null;
 						}
 					}
 					catch (Throwable ex) {
@@ -869,7 +868,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Nullable
 	private Class<?> getTypeForFactoryBeanFromMethod(Class<?> beanClass, final String factoryMethodName) {
-		class Holder { Class<?> value = null; }
+		class Holder { @Nullable Class<?> value = null; }
 		final Holder objectType = new Holder();
 
 		// CGLIB subclass methods hide generic parameters; look at the original user class.
@@ -1731,7 +1730,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				((BeanNameAware) bean).setBeanName(beanName);
 			}
 			if (bean instanceof BeanClassLoaderAware) {
-				((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
+				ClassLoader bcl = getBeanClassLoader();
+				if (bcl != null) {
+					((BeanClassLoaderAware) bean).setBeanClassLoader(bcl);
+				}
 			}
 			if (bean instanceof BeanFactoryAware) {
 				((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);

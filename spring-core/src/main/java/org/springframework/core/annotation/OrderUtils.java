@@ -34,7 +34,8 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("unchecked")
 public abstract class OrderUtils {
 
-	private static Class<? extends Annotation> priorityAnnotationType = null;
+	@Nullable
+	private static Class<? extends Annotation> priorityAnnotationType;
 
 	static {
 		try {
@@ -43,6 +44,7 @@ public abstract class OrderUtils {
 		}
 		catch (Throwable ex) {
 			// javax.annotation.Priority not available, or present but not loadable (on JDK 6)
+			priorityAnnotationType = null;
 		}
 	}
 

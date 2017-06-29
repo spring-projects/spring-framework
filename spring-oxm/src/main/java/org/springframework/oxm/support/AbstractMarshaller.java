@@ -77,6 +77,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 	private boolean processExternalEntities = false;
 
+	@Nullable
 	private DocumentBuilderFactory documentBuilderFactory;
 
 	private final Object documentBuilderFactoryMonitor = new Object();

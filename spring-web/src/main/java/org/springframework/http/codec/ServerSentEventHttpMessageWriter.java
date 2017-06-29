@@ -48,10 +48,9 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
-	private static final List<MediaType> WRITABLE_MEDIA_TYPES =
-			Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
+	private static final List<MediaType> WRITABLE_MEDIA_TYPES = Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
 
-
+	@Nullable
 	private final Encoder<?> encoder;
 
 

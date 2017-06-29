@@ -84,6 +84,7 @@ import org.springframework.util.ReflectionUtils;
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 
 	/** An instance of this class bound to JNDI */
+	@Nullable
 	private static volatile SimpleNamingContextBuilder activated;
 
 	private static boolean initialized = false;
@@ -111,17 +112,18 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * to control JNDI bindings
 	 */
 	public static SimpleNamingContextBuilder emptyActivatedContextBuilder() throws NamingException {
-		if (activated != null) {
+		SimpleNamingContextBuilder builder = activated;
+		if (builder != null) {
 			// Clear already activated context builder.
-			activated.clear();
+			builder.clear();
 		}
 		else {
 			// Create and activate new context builder.
-			SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+			builder = new SimpleNamingContextBuilder();
 			// The activate() call will cause an assignment to the activated variable.
 			builder.activate();
 		}
-		return activated;
+		return builder;
 	}
 
 

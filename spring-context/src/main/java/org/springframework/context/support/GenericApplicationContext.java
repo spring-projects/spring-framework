@@ -93,6 +93,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 	private final DefaultListableBeanFactory beanFactory;
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
 	private boolean customClassLoader = false;

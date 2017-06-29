@@ -72,10 +72,12 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<>(16);
 
+	@Nullable
 	private volatile Executor defaultExecutor;
 
 	private AsyncUncaughtExceptionHandler exceptionHandler;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 

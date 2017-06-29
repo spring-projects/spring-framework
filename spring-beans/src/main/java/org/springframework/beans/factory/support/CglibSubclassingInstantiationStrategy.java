@@ -194,6 +194,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class ClassLoaderAwareGeneratorStrategy extends DefaultGeneratorStrategy {
 
+		@Nullable
 		private final ClassLoader classLoader;
 
 		public ClassLoaderAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {

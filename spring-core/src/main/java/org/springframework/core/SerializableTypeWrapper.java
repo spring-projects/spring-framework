@@ -296,6 +296,7 @@ abstract class SerializableTypeWrapper {
 	@SuppressWarnings("serial")
 	static class MethodParameterTypeProvider implements TypeProvider {
 
+		@Nullable
 		private final String methodName;
 
 		private final Class<?>[] parameterTypes;
@@ -359,6 +360,7 @@ abstract class SerializableTypeWrapper {
 
 		private transient Method method;
 
+		@Nullable
 		private transient volatile Object result;
 
 		public MethodInvokeTypeProvider(TypeProvider provider, Method method, int index) {
@@ -388,14 +390,15 @@ abstract class SerializableTypeWrapper {
 
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
-			this.method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
-			if (this.method == null) {
+			Method method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
+			if (method == null) {
 				throw new IllegalStateException("Cannot find method on deserialization: " + this.methodName);
 			}
-			if (this.method.getReturnType() != Type.class && this.method.getReturnType() != Type[].class) {
+			if (method.getReturnType() != Type.class && method.getReturnType() != Type[].class) {
 				throw new IllegalStateException(
-						"Invalid return type on deserialized method - needs to be Type or Type[]: " + this.method);
+						"Invalid return type on deserialized method - needs to be Type or Type[]: " + method);
 			}
+			this.method = method;
 		}
 	}
 

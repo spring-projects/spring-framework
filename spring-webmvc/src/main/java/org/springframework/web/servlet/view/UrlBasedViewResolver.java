@@ -102,31 +102,39 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	public static final String FORWARD_URL_PREFIX = "forward:";
 
 
+	@Nullable
 	private Class<?> viewClass;
 
 	private String prefix = "";
 
 	private String suffix = "";
 
+	@Nullable
 	private String contentType;
 
 	private boolean redirectContextRelative = true;
 
 	private boolean redirectHttp10Compatible = true;
 
+	@Nullable
 	private String[] redirectHosts;
 
+	@Nullable
 	private String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String) */
 	private final Map<String, Object> staticAttributes = new HashMap<>();
 
+	@Nullable
 	private Boolean exposePathVariables;
 
+	@Nullable
 	private Boolean exposeContextBeansAsAttributes;
 
+	@Nullable
 	private String[] exposedContextBeanNames;
 
+	@Nullable
 	private String[] viewNames;
 
 	private int order = Integer.MAX_VALUE;
@@ -276,6 +284,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the configured application hosts for redirect purposes.
 	 * @since 4.3
 	 */
+	@Nullable
 	public String[] getRedirectHosts() {
 		return this.redirectHosts;
 	}
@@ -467,7 +476,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
 			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
-			view.setHosts(getRedirectHosts());
+			String[] hosts = getRedirectHosts();
+			if (hosts != null) {
+				view.setHosts(hosts);
+			}
 			return applyLifecycleMethods(viewName, view);
 		}
 		// Check for special "forward:" prefix.

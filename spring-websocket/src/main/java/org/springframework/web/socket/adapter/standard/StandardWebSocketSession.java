@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
@@ -32,6 +31,7 @@ import javax.websocket.Session;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -50,20 +50,27 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class StandardWebSocketSession extends AbstractWebSocketSession<Session> {
 
+	@Nullable
 	private String id;
 
+	@Nullable
 	private URI uri;
 
 	private final HttpHeaders handshakeHeaders;
 
+	@Nullable
 	private String acceptedProtocol;
 
+	@Nullable
 	private List<WebSocketExtension> extensions;
 
+	@Nullable
 	private Principal user;
 
+	@Nullable
 	private final InetSocketAddress localAddress;
 
+	@Nullable
 	private final InetSocketAddress remoteAddress;
 
 
@@ -88,7 +95,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 * @param user the user associated with the session; if {@code null} we'll
-	 * 	fallback on the user available in the underlying WebSocket session
+	 * fallback on the user available in the underlying WebSocket session
 	 */
 	public StandardWebSocketSession(@Nullable HttpHeaders headers, @Nullable Map<String, Object> attributes,
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
@@ -105,13 +112,13 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public String getId() {
-		checkNativeSessionInitialized();
+		Assert.state(this.id != null, "WebSocket session is not yet initialized");
 		return this.id;
 	}
 
 	@Override
 	public URI getUri() {
-		checkNativeSessionInitialized();
+		Assert.state(this.uri != null, "WebSocket session is not yet initialized");
 		return this.uri;
 	}
 
@@ -128,7 +135,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		checkNativeSessionInitialized();
+		Assert.state(this.extensions != null, "WebSocket session is not yet initialized");
 		return this.extensions;
 	}
 

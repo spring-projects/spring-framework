@@ -45,6 +45,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	@Nullable
 	private T nativeSession;
 
 
@@ -67,6 +68,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public T getNativeSession() {
+		Assert.state(this.nativeSession != null, "WebSocket session not yet initialized");
 		return this.nativeSession;
 	}
 

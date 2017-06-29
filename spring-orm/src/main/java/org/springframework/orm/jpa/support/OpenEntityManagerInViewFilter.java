@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,10 +74,13 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
 
 
+	@Nullable
 	private String entityManagerFactoryBeanName;
 
+	@Nullable
 	private String persistenceUnitName;
 
+	@Nullable
 	private volatile EntityManagerFactory entityManagerFactory;
 
 
@@ -97,6 +100,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * Return the bean name of the EntityManagerFactory to fetch from Spring's
 	 * root application context.
 	 */
+	@Nullable
 	protected String getEntityManagerFactoryBeanName() {
 		return this.entityManagerFactoryBeanName;
 	}
@@ -202,10 +206,12 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * @see #lookupEntityManagerFactory()
 	 */
 	protected EntityManagerFactory lookupEntityManagerFactory(HttpServletRequest request) {
-		if (this.entityManagerFactory == null) {
-			this.entityManagerFactory = lookupEntityManagerFactory();
+		EntityManagerFactory emf = this.entityManagerFactory;
+		if (emf == null) {
+			emf = lookupEntityManagerFactory();
+			this.entityManagerFactory = emf;
 		}
-		return this.entityManagerFactory;
+		return emf;
 	}
 
 	/**

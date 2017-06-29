@@ -93,6 +93,7 @@ import org.springframework.util.Assert;
 public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 
@@ -327,6 +328,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	private static class JmsTransactionObject implements SmartTransactionObject {
 
+		@Nullable
 		private JmsResourceHolder resourceHolder;
 
 		public void setResourceHolder(@Nullable JmsResourceHolder resourceHolder) {
@@ -344,7 +346,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public boolean isRollbackOnly() {
-			return this.resourceHolder.isRollbackOnly();
+			return (this.resourceHolder != null && this.resourceHolder.isRollbackOnly());
 		}
 
 		@Override

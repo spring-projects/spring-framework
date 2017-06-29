@@ -33,6 +33,7 @@ import org.apache.http.protocol.HttpContext;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,6 +51,7 @@ import org.springframework.util.Assert;
 public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
+	@Nullable
 	private HttpAsyncClient asyncClient;
 
 
@@ -126,6 +128,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 * @since 4.3.10
 	 * @see #getHttpClient()
 	 */
+	@Nullable
 	public HttpAsyncClient getAsyncClient() {
 		return this.asyncClient;
 	}
@@ -158,19 +161,21 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 		startAsyncClient();
 	}
 
-	private void startAsyncClient() {
-        HttpAsyncClient asyncClient = getAsyncClient();
-		if (asyncClient instanceof CloseableHttpAsyncClient) {
-			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) asyncClient;
+	private HttpAsyncClient startAsyncClient() {
+        HttpAsyncClient client = getAsyncClient();
+		Assert.state(client != null, "No HttpAsyncClient set");
+		if (client instanceof CloseableHttpAsyncClient) {
+			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) client;
 			if (!closeableAsyncClient.isRunning()) {
 				closeableAsyncClient.start();
 			}
 		}
+		return client;
 	}
 
 	@Override
 	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		startAsyncClient();
+		HttpAsyncClient client = startAsyncClient();
 
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
@@ -187,14 +192,14 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 				config = ((Configurable) httpRequest).getConfig();
 			}
 			if (config == null) {
-				config = createRequestConfig(getAsyncClient());
+				config = createRequestConfig(client);
 			}
 			if (config != null) {
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
 
-		return new HttpComponentsAsyncClientHttpRequest(getAsyncClient(), httpRequest, context);
+		return new HttpComponentsAsyncClientHttpRequest(client, httpRequest, context);
 	}
 
 	@Override

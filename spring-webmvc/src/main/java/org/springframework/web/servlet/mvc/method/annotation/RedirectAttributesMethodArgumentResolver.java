@@ -59,8 +59,8 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 
 		ModelMap redirectAttributes;
 		if (binderFactory != null) {
-			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-			redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, DataBinder.DEFAULT_OBJECT_NAME);
+			redirectAttributes = new RedirectAttributesModelMap(dataBinder);
 		}
 		else {
 			redirectAttributes  = new RedirectAttributesModelMap();

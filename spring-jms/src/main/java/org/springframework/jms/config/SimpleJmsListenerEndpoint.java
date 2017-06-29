@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  */
 public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
+	@Nullable
 	private MessageListener messageListener;
 
 

@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
@@ -41,27 +42,30 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  */
 public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
 
+	@Nullable
 	private final Object endpoint;
 
+	@Nullable
 	private final BeanCreatingHandlerProvider<Object> endpointProvider;
 
 	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("AnnotatedEndpointConnectionManager-");
 
+	@Nullable
 	private volatile Session session;
 
 
 	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.endpointProvider = null;
 		this.endpoint = endpoint;
+		this.endpointProvider = null;
 	}
 
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 	}
 
 
@@ -104,7 +108,11 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 				if (logger.isInfoEnabled()) {
 					logger.info("Connecting to WebSocket at " + getUri());
 				}
-				Object endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
+				Object endpointToUse = endpoint;
+				if (endpointToUse == null) {
+					Assert.state(endpointProvider != null, "No endpoint set");
+					endpointToUse = endpointProvider.getHandler();
+				}
 				session = webSocketContainer.connectToServer(endpointToUse, getUri());
 				logger.info("Successfully connected to WebSocket");
 			}
@@ -117,8 +125,9 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 	@Override
 	protected void closeConnection() throws Exception {
 		try {
-			if (isConnected()) {
-				this.session.close();
+			Session session = this.session;
+			if (session != null && session.isOpen()) {
+				session.close();
 			}
 		}
 		finally {
@@ -128,7 +137,8 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 
 	@Override
 	protected boolean isConnected() {
-		return (this.session != null && this.session.isOpen());
+		Session session = this.session;
+		return (session != null && session.isOpen());
 	}
 
 }

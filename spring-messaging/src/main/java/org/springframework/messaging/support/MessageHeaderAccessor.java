@@ -130,6 +130,7 @@ public class MessageHeaderAccessor {
 
 	private boolean enableTimestamp = false;
 
+	@Nullable
 	private IdGenerator idGenerator;
 
 

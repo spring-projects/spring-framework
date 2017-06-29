@@ -94,6 +94,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
 	private TypeFilter[] entityTypeFilters = DEFAULT_ENTITY_TYPE_FILTERS;
 
 

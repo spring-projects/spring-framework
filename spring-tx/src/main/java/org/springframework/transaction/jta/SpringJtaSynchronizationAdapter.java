@@ -49,6 +49,7 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 
 	private final TransactionSynchronization springSynchronization;
 
+	@Nullable
 	private UserTransaction jtaTransaction;
 
 	private boolean beforeCompletionCalled = false;

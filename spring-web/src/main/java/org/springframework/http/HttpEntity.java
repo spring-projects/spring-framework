@@ -64,6 +64,7 @@ public class HttpEntity<T> {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final T body;
 
 
@@ -151,13 +152,9 @@ public class HttpEntity<T> {
 		StringBuilder builder = new StringBuilder("<");
 		if (this.body != null) {
 			builder.append(this.body);
-			if (this.headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (this.headers != null) {
-			builder.append(this.headers);
-		}
+		builder.append(this.headers);
 		builder.append('>');
 		return builder.toString();
 	}

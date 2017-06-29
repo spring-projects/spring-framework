@@ -29,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -39,12 +40,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.*;
 
 /**
  * Reader that supports a stream of {@link ServerSentEvent}s and also plain
- * {@link Object}s which is the same as an {@link ServerSentEvent} with data
- * only.
+ * {@link Object}s which is the same as an {@link ServerSentEvent} with data only.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -59,6 +59,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly(false);
 
 
+	@Nullable
 	private final Decoder<?> decoder;
 
 
@@ -178,9 +179,14 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		return sseBuilder.build();
 	}
 
+	@Nullable
 	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);
+		}
+
+		if (this.decoder == null) {
+			return Flux.error(new CodecException("No SSE decoder configured and the data is not String."));
 		}
 
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);

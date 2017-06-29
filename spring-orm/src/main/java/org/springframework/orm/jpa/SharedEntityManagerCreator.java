@@ -179,10 +179,12 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
+		@Nullable
 		private final Map<?, ?> properties;
 
 		private final boolean synchronizedWithTransaction;
 
+		@Nullable
 		private transient volatile ClassLoader proxyClassLoader;
 
 		public SharedEntityManagerInvocationHandler(
@@ -341,6 +343,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Query target;
 
+		@Nullable
 		private EntityManager em;
 
 		public DeferredQueryInvocationHandler(Query target, EntityManager em) {

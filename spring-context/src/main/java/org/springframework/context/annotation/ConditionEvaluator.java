@@ -133,14 +133,17 @@ class ConditionEvaluator {
 	 */
 	private static class ConditionContextImpl implements ConditionContext {
 
+		@Nullable
 		private final BeanDefinitionRegistry registry;
 
+		@Nullable
 		private final ConfigurableListableBeanFactory beanFactory;
 
 		private final Environment environment;
 
 		private final ResourceLoader resourceLoader;
 
+		@Nullable
 		private final ClassLoader classLoader;
 
 		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry,

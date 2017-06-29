@@ -34,16 +34,22 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 
+	@Nullable
 	private String url;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String catalog;
 
+	@Nullable
 	private String schema;
 
+	@Nullable
 	private Properties connectionProperties;
 
 

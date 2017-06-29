@@ -42,10 +42,13 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private volatile ConfigurableConversionService conversionService;
 
+	@Nullable
 	private PropertyPlaceholderHelper nonStrictHelper;
 
+	@Nullable
 	private PropertyPlaceholderHelper strictHelper;
 
 	private boolean ignoreUnresolvableNestedPlaceholders = false;
@@ -54,6 +57,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String placeholderSuffix = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
+	@Nullable
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
 	private final Set<String> requiredProperties = new LinkedHashSet<>();
@@ -63,14 +67,17 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public ConfigurableConversionService getConversionService() {
 		// Need to provide an independent DefaultConversionService, not the
 		// shared DefaultConversionService used by PropertySourcesPropertyResolver.
-		if (this.conversionService == null) {
+		ConfigurableConversionService cs = this.conversionService;
+		if (cs == null) {
 			synchronized (this) {
-				if (this.conversionService == null) {
-					this.conversionService = new DefaultConversionService();
+				cs = this.conversionService;
+				if (cs == null) {
+					cs = new DefaultConversionService();
+					this.conversionService = cs;
 				}
 			}
 		}
-		return conversionService;
+		return cs;
 	}
 
 	@Override

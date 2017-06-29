@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriUtils;
 
 /**
@@ -34,6 +35,7 @@ class CaptureVariablePathElement extends PathElement {
 
 	private final String variableName;
 
+	@Nullable
 	private Pattern constraintPattern;
 
 

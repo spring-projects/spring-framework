@@ -20,6 +20,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A general-purpose number formatter using NumberFormat's number style.
  *
@@ -36,6 +38,7 @@ import java.util.Locale;
  */
 public class NumberStyleFormatter extends AbstractNumberFormatter {
 
+	@Nullable
 	private String pattern;
 
 

@@ -30,8 +30,10 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 @SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
+	@Nullable
 	private String qualifier;
 
+	@Nullable
 	private String descriptor;
 
 

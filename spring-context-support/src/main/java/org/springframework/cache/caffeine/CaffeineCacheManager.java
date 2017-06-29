@@ -61,6 +61,7 @@ public class CaffeineCacheManager implements CacheManager {
 
 	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
 
+	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
 
 	private boolean allowNullValues = true;

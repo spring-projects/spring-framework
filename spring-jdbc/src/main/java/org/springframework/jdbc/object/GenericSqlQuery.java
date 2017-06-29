@@ -35,9 +35,11 @@ import org.springframework.util.Assert;
  */
 public class GenericSqlQuery<T> extends SqlQuery<T> {
 
+	@Nullable
 	private RowMapper<T> rowMapper;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends RowMapper> rowMapperClass;
 
 
@@ -69,7 +71,13 @@ public class GenericSqlQuery<T> extends SqlQuery<T> {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected RowMapper<T> newRowMapper(@Nullable Object[] parameters, @Nullable Map<?, ?> context) {
-		return (this.rowMapper != null ? this.rowMapper : BeanUtils.instantiateClass(this.rowMapperClass));
+		if (this.rowMapper != null) {
+			return this.rowMapper;
+		}
+		else {
+			Assert.state(this.rowMapperClass != null, "No RowMapper set");
+			return BeanUtils.instantiateClass(this.rowMapperClass);
+		}
 	}
 
 }

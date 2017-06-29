@@ -45,6 +45,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
+	@Nullable
 	private volatile SuspendToken suspendToken;
 
 

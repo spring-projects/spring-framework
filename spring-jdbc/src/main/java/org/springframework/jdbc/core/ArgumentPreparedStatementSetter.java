@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  */
 public class ArgumentPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
+	@Nullable
 	private final Object[] args;
 
 

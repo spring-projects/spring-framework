@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
  */
 class BootstrapContextAwareProcessor implements BeanPostProcessor {
 
+	@Nullable
 	private final BootstrapContext bootstrapContext;
 
 

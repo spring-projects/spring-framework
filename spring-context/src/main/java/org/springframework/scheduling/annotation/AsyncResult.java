@@ -47,8 +47,10 @@ import org.springframework.util.concurrent.SuccessCallback;
  */
 public class AsyncResult<V> implements ListenableFuture<V> {
 
+	@Nullable
 	private final V value;
 
+	@Nullable
 	private final Throwable executionException;
 
 
@@ -86,6 +88,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	}
 
 	@Override
+	@Nullable
 	public V get() throws ExecutionException {
 		if (this.executionException != null) {
 			throw (this.executionException instanceof ExecutionException ?
@@ -96,6 +99,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	}
 
 	@Override
+	@Nullable
 	public V get(long timeout, TimeUnit unit) throws ExecutionException {
 		return get();
 	}

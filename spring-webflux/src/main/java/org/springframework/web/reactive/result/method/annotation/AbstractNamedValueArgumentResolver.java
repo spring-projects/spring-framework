@@ -60,8 +60,10 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
+	@Nullable
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
+	@Nullable
 	private final BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
@@ -154,7 +156,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 */
 	@Nullable
 	private Object resolveStringValue(String value) {
-		if (this.configurableBeanFactory == null) {
+		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
 		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
@@ -291,6 +293,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		private final boolean required;
 
+		@Nullable
 		private final String defaultValue;
 
 		public NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {

@@ -56,7 +56,8 @@ public class PreparedStatementCreatorFactory {
 
 	private boolean returnGeneratedKeys = false;
 
-	private String[] generatedKeysColumnNames = null;
+	@Nullable
+	private String[] generatedKeysColumnNames;
 
 
 	/**

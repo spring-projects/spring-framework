@@ -160,6 +160,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 		private final DataSource targetDataSource;
 
+		@Nullable
 		private Connection target;
 
 		private boolean closed = false;

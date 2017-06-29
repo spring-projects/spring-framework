@@ -42,6 +42,7 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport implements ServletContextAware {
 
+	@Nullable
 	private ServletContext servletContext;
 
 

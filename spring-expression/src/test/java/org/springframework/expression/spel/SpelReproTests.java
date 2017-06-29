@@ -1768,6 +1768,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 				};
 			}
 		});
+
 		result = spel.getValue(context);
 		assertNotNull(result);
 		assertTrue(result.getClass().isArray());

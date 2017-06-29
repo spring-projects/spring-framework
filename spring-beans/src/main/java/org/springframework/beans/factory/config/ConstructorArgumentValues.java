@@ -435,16 +435,21 @@ public class ConstructorArgumentValues {
 	 */
 	public static class ValueHolder implements BeanMetadataElement {
 
+		@Nullable
 		private Object value;
 
+		@Nullable
 		private String type;
 
+		@Nullable
 		private String name;
 
+		@Nullable
 		private Object source;
 
 		private boolean converted = false;
 
+		@Nullable
 		private Object convertedValue;
 
 		/**
@@ -558,6 +563,7 @@ public class ConstructorArgumentValues {
 		 * Return the converted value of the constructor argument,
 		 * after processed type conversion.
 		 */
+		@Nullable
 		public synchronized Object getConvertedValue() {
 			return this.convertedValue;
 		}

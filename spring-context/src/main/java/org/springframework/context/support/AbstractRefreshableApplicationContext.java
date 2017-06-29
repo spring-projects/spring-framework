@@ -64,11 +64,14 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
+	@Nullable
 	private Boolean allowBeanDefinitionOverriding;
 
+	@Nullable
 	private Boolean allowCircularReferences;
 
 	/** Bean factory for this context */
+	@Nullable
 	private DefaultListableBeanFactory beanFactory;
 
 	/** Synchronization monitor for the internal BeanFactory */
@@ -149,8 +152,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	@Override
 	protected final void closeBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
-			this.beanFactory.setSerializationId(null);
-			this.beanFactory = null;
+			if (this.beanFactory != null) {
+				this.beanFactory.setSerializationId(null);
+				this.beanFactory = null;
+			}
 		}
 	}
 

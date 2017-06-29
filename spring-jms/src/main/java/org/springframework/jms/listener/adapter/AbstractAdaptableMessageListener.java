@@ -60,6 +60,7 @@ public abstract class AbstractAdaptableMessageListener
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Object defaultResponseDestination;
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
@@ -68,6 +69,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
 
+	@Nullable
 	private QosSettings responseQosSettings;
 
 
@@ -504,8 +506,10 @@ public abstract class AbstractAdaptableMessageListener
 
 			private final javax.jms.Message message;
 
+			@Nullable
 			private Object payload;
 
+			@Nullable
 			private MessageHeaders headers;
 
 			public LazyResolutionMessage(javax.jms.Message message) {

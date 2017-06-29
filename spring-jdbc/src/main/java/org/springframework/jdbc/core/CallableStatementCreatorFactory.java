@@ -121,8 +121,10 @@ public class CallableStatementCreatorFactory {
 	 */
 	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
+		@Nullable
 		private ParameterMapper inParameterMapper;
 
+		@Nullable
 		private Map<String, ?> inParameters;
 
 		/**

@@ -132,8 +132,10 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 
 	private static class MapEntry {
 
+		@Nullable
 		private final Object key;
 
+		@Nullable
 		private final Object value;
 
 		public MapEntry(@Nullable Object key, @Nullable Object value) {

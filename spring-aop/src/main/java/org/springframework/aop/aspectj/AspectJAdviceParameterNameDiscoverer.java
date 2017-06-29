@@ -114,6 +114,7 @@ import org.springframework.util.StringUtils;
  * returning {@code null} in the case that the parameter names cannot be discovered.
  *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -155,26 +156,23 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	private boolean raiseExceptions;
-
-	/**
-	 * If the advice is afterReturning, and binds the return value, this is the parameter name used.
-	 */
-	private String returningName;
-
-	/**
-	 * If the advice is afterThrowing, and binds the thrown value, this is the parameter name used.
-	 */
-	private String throwingName;
-
-	/**
-	 * The pointcut expression associated with the advice, as a simple String.
-	 */
+	/** The pointcut expression associated with the advice, as a simple String */
+	@Nullable
 	private String pointcutExpression;
 
-	private Class<?>[] argumentTypes;
+	private boolean raiseExceptions;
 
-	private String[] parameterNameBindings;
+	/** If the advice is afterReturning, and binds the return value, this is the parameter name used */
+	@Nullable
+	private String returningName;
+
+	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used */
+	@Nullable
+	private String throwingName;
+
+	private Class<?>[] argumentTypes = new Class<?>[0];
+
+	private String[] parameterNameBindings = new String[0];
 
 	private int numberOfRemainingUnboundArguments;
 
@@ -202,7 +200,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * returning variable name must be specified.
 	 * @param returningName the name of the returning variable
 	 */
-	public void setReturningName(String returningName) {
+	public void setReturningName(@Nullable String returningName) {
 		this.returningName = returningName;
 	}
 
@@ -211,7 +209,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * throwing variable name must be specified.
 	 * @param throwingName the name of the throwing variable
 	 */
-	public void setThrowingName(String throwingName) {
+	public void setThrowingName(@Nullable String throwingName) {
 		this.throwingName = throwingName;
 	}
 
@@ -781,6 +779,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 		private int numTokensConsumed;
 
+		@Nullable
 		private String text;
 
 		public PointcutBody(int tokens, @Nullable String text) {

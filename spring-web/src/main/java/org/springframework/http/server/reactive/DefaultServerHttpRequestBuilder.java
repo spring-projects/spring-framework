@@ -36,12 +36,16 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private final ServerHttpRequest delegate;
 
+	@Nullable
 	private HttpMethod httpMethod;
 
+	@Nullable
 	private String path;
 
+	@Nullable
 	private String contextPath;
 
+	@Nullable
 	private HttpHeaders httpHeaders;
 
 
@@ -103,10 +107,10 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Nullable
 	private RequestPath getRequestPathToUse(@Nullable URI uriToUse) {
-		if (uriToUse == null && this.contextPath == null) {
-			return null;
-		}
-		else if (uriToUse == null) {
+		if (uriToUse == null) {
+			if (this.contextPath == null) {
+				return null;
+			}
 			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath);
 		}
 		else {
@@ -134,18 +138,21 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	 */
 	private static class MutativeDecorator extends ServerHttpRequestDecorator {
 
+		@Nullable
 		private final HttpMethod httpMethod;
 
+		@Nullable
 		private final URI uri;
 
+		@Nullable
 		private final RequestPath requestPath;
 
+		@Nullable
 		private final HttpHeaders httpHeaders;
 
 
-		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod method,
-				@Nullable URI uri, @Nullable RequestPath requestPath,
-				@Nullable HttpHeaders httpHeaders) {
+		public MutativeDecorator(ServerHttpRequest delegate, @Nullable HttpMethod method,
+				@Nullable URI uri, @Nullable RequestPath requestPath, @Nullable HttpHeaders httpHeaders) {
 
 			super(delegate);
 			this.httpMethod = method;

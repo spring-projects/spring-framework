@@ -47,10 +47,12 @@ import org.springframework.util.Assert;
 public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		implements JmsMessageOperations, InitializingBean {
 
+	@Nullable
 	private JmsTemplate jmsTemplate;
 
 	private MessageConverter jmsMessageConverter = new MessagingMessageConverter();
 
+	@Nullable
 	private String defaultDestinationName;
 
 
@@ -111,6 +113,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	/**
 	 * Return the configured {@link JmsTemplate}.
 	 */
+	@Nullable
 	public JmsTemplate getJmsTemplate() {
 		return this.jmsTemplate;
 	}
@@ -158,7 +161,12 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(getJmsTemplate(), "Property 'connectionFactory' or 'jmsTemplate' is required");
+		Assert.notNull(this.jmsTemplate, "Property 'connectionFactory' or 'jmsTemplate' is required");
+	}
+
+	private JmsTemplate obtainJmsTemplate() {
+		Assert.state(this.jmsTemplate != null, "No JmsTemplate set");
+		return this.jmsTemplate;
 	}
 
 
@@ -325,7 +333,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	protected void doSend(Destination destination, Message<?> message) {
 		try {
-			this.jmsTemplate.send(destination, createMessageCreator(message));
+			obtainJmsTemplate().send(destination, createMessageCreator(message));
 		}
 		catch (JmsException ex) {
 			throw convertJmsException(ex);
@@ -334,7 +342,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	protected void doSend(String destinationName, Message<?> message) {
 		try {
-			this.jmsTemplate.send(destinationName, createMessageCreator(message));
+			obtainJmsTemplate().send(destinationName, createMessageCreator(message));
 		}
 		catch (JmsException ex) {
 			throw convertJmsException(ex);
@@ -344,7 +352,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	protected Message<?> doReceive(Destination destination) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate.receive(destination);
+			javax.jms.Message jmsMessage = obtainJmsTemplate().receive(destination);
 			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
@@ -355,7 +363,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Nullable
 	protected Message<?> doReceive(String destinationName) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate.receive(destinationName);
+			javax.jms.Message jmsMessage = obtainJmsTemplate().receive(destinationName);
 			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {
@@ -366,7 +374,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	protected Message<?> doSendAndReceive(Destination destination, Message<?> requestMessage) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
+			javax.jms.Message jmsMessage = obtainJmsTemplate().sendAndReceive(
 					destination, createMessageCreator(requestMessage));
 			return convertJmsMessage(jmsMessage);
 		}
@@ -378,7 +386,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Nullable
 	protected Message<?> doSendAndReceive(String destinationName, Message<?> requestMessage) {
 		try {
-			javax.jms.Message jmsMessage = this.jmsTemplate.sendAndReceive(
+			javax.jms.Message jmsMessage = obtainJmsTemplate().sendAndReceive(
 					destinationName, createMessageCreator(requestMessage));
 			return convertJmsMessage(jmsMessage);
 		}

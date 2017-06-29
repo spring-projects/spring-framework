@@ -30,6 +30,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -42,6 +43,7 @@ import org.springframework.util.ErrorHandler;
  */
 public class TimerManagerTaskScheduler extends TimerManagerAccessor implements TaskScheduler {
 
+	@Nullable
 	private volatile ErrorHandler errorHandler;
 
 
@@ -108,6 +110,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	 */
 	private static class TimerScheduledFuture extends FutureTask<Object> implements TimerListener, ScheduledFuture<Object> {
 
+		@Nullable
 		protected transient Timer timer;
 
 		protected transient boolean cancelled = false;
@@ -128,13 +131,16 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			boolean result = super.cancel(mayInterruptIfRunning);
-			this.timer.cancel();
+			if (this.timer != null) {
+				this.timer.cancel();
+			}
 			this.cancelled = true;
 			return result;
 		}
 
 		@Override
 		public long getDelay(TimeUnit unit) {
+			Assert.state(this.timer != null, "No Timer available");
 			return unit.convert(this.timer.getScheduledExecutionTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 		}
 
@@ -158,7 +164,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 
 		private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
 
-		private volatile Date scheduledExecutionTime;
+		private volatile Date scheduledExecutionTime = new Date();
 
 		public ReschedulingTimerListener(Runnable runnable, Trigger trigger) {
 			super(runnable);
@@ -167,10 +173,11 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 
 		@Nullable
 		public ScheduledFuture<?> schedule() {
-			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
-			if (this.scheduledExecutionTime == null) {
+			Date nextExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
+			if (nextExecutionTime == null) {
 				return null;
 			}
+			this.scheduledExecutionTime = nextExecutionTime;
 			setTimer(obtainTimerManager().schedule(this, this.scheduledExecutionTime));
 			return this;
 		}

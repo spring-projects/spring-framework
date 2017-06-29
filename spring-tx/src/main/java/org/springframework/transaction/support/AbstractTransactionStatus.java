@@ -50,6 +50,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	private boolean completed = false;
 
+	@Nullable
 	private Object savepoint;
 
 

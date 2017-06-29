@@ -60,6 +60,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	private JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 
+	@Nullable
 	private JmsActivationSpecConfig activationSpecConfig;
 
 

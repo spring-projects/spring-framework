@@ -38,6 +38,7 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 
 	private final Object source;
 
+	@Nullable
 	private GenericApplicationListener delegate;
 
 

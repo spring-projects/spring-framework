@@ -57,9 +57,11 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Wrapped Connection */
+	@Nullable
 	private Connection target;
 
 	/** Proxy Connection */
+	@Nullable
 	private Connection connection;
 
 	/** Synchronization monitor for the shared Connection */

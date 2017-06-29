@@ -49,6 +49,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	private final List<MimeType> supportedMimeTypes;
 
+	@Nullable
 	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
 	private boolean strictContentTypeMatch = false;
@@ -91,13 +92,14 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * ignore all messages.
 	 * <p>By default, a {@code DefaultContentTypeResolver} instance is used.
 	 */
-	public void setContentTypeResolver(ContentTypeResolver resolver) {
+	public void setContentTypeResolver(@Nullable ContentTypeResolver resolver) {
 		this.contentTypeResolver = resolver;
 	}
 
 	/**
 	 * Return the configured {@link ContentTypeResolver}.
 	 */
+	@Nullable
 	public ContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;
 	}

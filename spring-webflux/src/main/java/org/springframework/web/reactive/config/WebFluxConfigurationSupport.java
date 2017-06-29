@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -58,11 +60,11 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * The main class for Spring WebFlux configuration.
@@ -74,12 +76,16 @@ import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
+	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
+	@Nullable
 	private PathMatchConfigurer pathMatchConfigurer;
 
+	@Nullable
 	private ViewResolverRegistry viewResolverRegistry;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -88,7 +94,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		this.applicationContext = applicationContext;
 	}
 
-	protected ApplicationContext getApplicationContext() {
+	@Nullable
+	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -205,7 +212,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext);
+		ResourceLoader resourceLoader = this.applicationContext;
+		if (resourceLoader == null) {
+			resourceLoader = new DefaultResourceLoader();
+		}
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(resourceLoader);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -427,7 +438,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected final ViewResolverRegistry getViewResolverRegistry() {
 		if (this.viewResolverRegistry == null) {
-			this.viewResolverRegistry = new ViewResolverRegistry(getApplicationContext());
+			this.viewResolverRegistry = new ViewResolverRegistry(this.applicationContext);
 			configureViewResolvers(this.viewResolverRegistry);
 		}
 		return this.viewResolverRegistry;

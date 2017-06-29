@@ -39,6 +39,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 
 	private String method;
 
+	@Nullable
 	private String[] supportedMethods;
 
 

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * A subclass of {@link EmbeddedDatabaseFactory} that implements {@link FactoryBean}
@@ -43,6 +44,7 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 		implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 
+	@Nullable
 	private DatabasePopulator databaseCleaner;
 
 

@@ -78,15 +78,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
+	@Nullable
 	Object wrappedObject;
 
 	private String nestedPath = "";
 
+	@Nullable
 	Object rootObject;
 
-	/**
-	 * Map with cached nested Accessors: nested path -> Accessor instance.
-	 */
+	/** Map with cached nested Accessors: nested path -> Accessor instance */
+	@Nullable
 	private Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
 
@@ -199,7 +200,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	public final Object getWrappedInstance() {
-		Assert.state(this.wrappedObject != null, "No wrapped instance");
+		Assert.state(this.wrappedObject != null, "No wrapped object");
 		return this.wrappedObject;
 	}
 
@@ -218,8 +219,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * Return the root object at the top of the path of this accessor.
 	 * @see #getNestedPath
 	 */
-	@Nullable
 	public final Object getRootInstance() {
+		Assert.state(this.rootObject != null, "No root object");
 		return this.rootObject;
 	}
 
@@ -228,8 +229,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @see #getNestedPath
 	 */
 	public final Class<?> getRootClass() {
-		Assert.state(this.wrappedObject != null, "No root object");
-		return this.rootObject.getClass();
+		return getRootInstance().getClass();
 	}
 
 	@Override
@@ -287,6 +287,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			throw new InvalidPropertyException(
 					getRootClass(), this.nestedPath + tokens.actualName, "No property handler found");
 		}
+		Assert.state(tokens.keys != null, "No token keys");
 		String lastKey = tokens.keys[tokens.keys.length - 1];
 
 		if (propValue.getClass().isArray()) {
@@ -379,9 +380,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	private Object getPropertyHoldingValue(PropertyTokenHolder tokens) {
 		// Apply indexes and map keys: fetch value for all keys but the last one.
-		PropertyTokenHolder getterTokens = new PropertyTokenHolder();
+		Assert.state(tokens.keys != null, "No token keys");
+		PropertyTokenHolder getterTokens = new PropertyTokenHolder(tokens.actualName);
 		getterTokens.canonicalName = tokens.canonicalName;
-		getterTokens.actualName = tokens.actualName;
 		getterTokens.keys = new String[tokens.keys.length - 1];
 		System.arraycopy(tokens.keys, 0, getterTokens.keys, 0, tokens.keys.length - 1);
 
@@ -461,7 +462,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 		catch (InvocationTargetException ex) {
 			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(
-					this.rootObject, this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
+					getRootInstance(), this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
 			if (ex.getTargetException() instanceof ClassCastException) {
 				throw new TypeMismatchException(propertyChangeEvent, ph.getPropertyType(), ex.getTargetException());
 			}
@@ -476,7 +477,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 		catch (Exception ex) {
 			PropertyChangeEvent pce = new PropertyChangeEvent(
-					this.rootObject, this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
+					getRootInstance(), this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
 			throw new MethodInvocationException(pce, ex);
 		}
 	}
@@ -582,12 +583,12 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 		catch (ConverterNotFoundException | IllegalStateException ex) {
 			PropertyChangeEvent pce =
-					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+					new PropertyChangeEvent(getRootInstance(), this.nestedPath + propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, requiredType, ex);
 		}
 		catch (ConversionException | IllegalArgumentException ex) {
 			PropertyChangeEvent pce =
-					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+					new PropertyChangeEvent(getRootInstance(), this.nestedPath + propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, requiredType, ex);
 		}
 	}
@@ -621,7 +622,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			if (tokens.keys != null) {
 				if (value == null) {
 					if (isAutoGrowNestedPaths()) {
-						value = setDefaultValue(tokens.actualName);
+						value = setDefaultValue(new PropertyTokenHolder(tokens.actualName));
 					}
 					else {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
@@ -865,13 +866,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return nestedPa;
 	}
 
-	private Object setDefaultValue(String propertyName) {
-		PropertyTokenHolder tokens = new PropertyTokenHolder();
-		tokens.actualName = propertyName;
-		tokens.canonicalName = propertyName;
-		return setDefaultValue(tokens);
-	}
-
 	private Object setDefaultValue(PropertyTokenHolder tokens) {
 		PropertyValue pv = createDefaultPropertyValue(tokens);
 		setPropertyValue(tokens, pv);
@@ -932,7 +926,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @return representation of the parsed property tokens
 	 */
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
-		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		String actualName = null;
 		List<String> keys = new ArrayList<>(2);
 		int searchIndex = 0;
@@ -955,8 +948,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				}
 			}
 		}
-		tokens.actualName = (actualName != null ? actualName : propertyName);
-		tokens.canonicalName = tokens.actualName;
+		PropertyTokenHolder tokens = new PropertyTokenHolder(actualName != null ? actualName : propertyName);
 		if (!keys.isEmpty()) {
 			tokens.canonicalName += PROPERTY_KEY_PREFIX +
 					StringUtils.collectionToDelimitedString(keys, PROPERTY_KEY_SUFFIX + PROPERTY_KEY_PREFIX) +
@@ -1036,10 +1028,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	protected static class PropertyTokenHolder {
 
-		public String canonicalName;
+		public PropertyTokenHolder(String name) {
+			this.actualName = name;
+			this.canonicalName = name;
+		}
 
 		public String actualName;
 
+		public String canonicalName;
+
+		@Nullable
 		public String[] keys;
 	}
 

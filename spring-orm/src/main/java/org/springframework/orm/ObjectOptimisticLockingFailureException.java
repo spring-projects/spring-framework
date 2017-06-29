@@ -29,8 +29,10 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ObjectOptimisticLockingFailureException extends OptimisticLockingFailureException {
 
+	@Nullable
 	private Object persistentClass;
 
+	@Nullable
 	private Object identifier;
 
 
@@ -151,6 +153,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	/**
 	 * Return the identifier of the object for which the locking failed.
 	 */
+	@Nullable
 	public Object getIdentifier() {
 		return this.identifier;
 	}

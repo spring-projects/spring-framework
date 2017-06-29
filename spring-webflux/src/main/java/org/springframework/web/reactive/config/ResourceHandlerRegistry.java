@@ -23,9 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
@@ -53,7 +52,7 @@ import org.springframework.web.server.WebHandler;
  */
 public class ResourceHandlerRegistry {
 
-	private final ApplicationContext applicationContext;
+	private final ResourceLoader resourceLoader;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
@@ -61,13 +60,12 @@ public class ResourceHandlerRegistry {
 
 
 	/**
-	 * Create a new resource handler registry for the given application context.
-	 * @param applicationContext the Spring application context
+	 * Create a new resource handler registry for the given resource loader
+	 * (typically an application context).
+	 * @param resourceLoader the resource loader to use
 	 */
-	public ResourceHandlerRegistry(ApplicationContext applicationContext) {
-
-		Assert.notNull(applicationContext, "ApplicationContext is required");
-		this.applicationContext = applicationContext;
+	public ResourceHandlerRegistry(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 
@@ -82,8 +80,7 @@ public class ResourceHandlerRegistry {
 	 * configure the registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... patterns) {
-		ResourceHandlerRegistration registration =
-				new ResourceHandlerRegistration(this.applicationContext, patterns);
+		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(this.resourceLoader, patterns);
 		this.registrations.add(registration);
 		return registration;
 	}
@@ -126,7 +123,7 @@ public class ResourceHandlerRegistry {
 				try {
 					handler.afterPropertiesSet();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
 				}
 				urlMap.put(pathPattern, handler);

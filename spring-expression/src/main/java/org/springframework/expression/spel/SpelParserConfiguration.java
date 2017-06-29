@@ -41,6 +41,7 @@ public class SpelParserConfiguration {
 
 	private final SpelCompilerMode compilerMode;
 
+	@Nullable
 	private final ClassLoader compilerClassLoader;
 
 	private final boolean autoGrowNullReferences;
@@ -106,35 +107,36 @@ public class SpelParserConfiguration {
 
 
 	/**
-	 * @return the configuration mode for parsers using this configuration object
+	 * Return the configuration mode for parsers using this configuration object.
 	 */
 	public SpelCompilerMode getCompilerMode() {
 		return this.compilerMode;
 	}
 
 	/**
-	 * @return the ClassLoader to use as the basis for expression compilation
+	 * Return the ClassLoader to use as the basis for expression compilation.
 	 */
+	@Nullable
 	public ClassLoader getCompilerClassLoader() {
 		return this.compilerClassLoader;
 	}
 
 	/**
-	 * @return {@code true} if {@code null} references should be automatically grown
+	 * Return {@code true} if {@code null} references should be automatically grown.
 	 */
 	public boolean isAutoGrowNullReferences() {
 		return this.autoGrowNullReferences;
 	}
 
 	/**
-	 * @return {@code true} if collections should be automatically grown
+	 * Return {@code true} if collections should be automatically grown.
 	 */
 	public boolean isAutoGrowCollections() {
 		return this.autoGrowCollections;
 	}
 
 	/**
-	 * @return the maximum size that a collection can auto grow
+	 * Return the maximum size that a collection can auto grow.
 	 */
 	public int getMaximumAutoGrowSize() {
 		return this.maximumAutoGrowSize;

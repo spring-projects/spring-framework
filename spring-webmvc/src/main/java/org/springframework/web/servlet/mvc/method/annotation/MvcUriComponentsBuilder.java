@@ -717,20 +717,13 @@ public class MvcUriComponentsBuilder {
 	private static class ControllerMethodInvocationInterceptor
 			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor {
 
-		private static final Method getControllerMethod =
-				ReflectionUtils.findMethod(MethodInvocationInfo.class, "getControllerMethod");
+		private final Class<?> controllerType;
 
-		private static final Method getArgumentValues =
-				ReflectionUtils.findMethod(MethodInvocationInfo.class, "getArgumentValues");
-
-		private static final Method getControllerType =
-				ReflectionUtils.findMethod(MethodInvocationInfo.class, "getControllerType");
-
+		@Nullable
 		private Method controllerMethod;
 
+		@Nullable
 		private Object[] argumentValues;
-
-		private Class<?> controllerType;
 
 		ControllerMethodInvocationInterceptor(Class<?> controllerType) {
 			this.controllerType = controllerType;
@@ -739,13 +732,13 @@ public class MvcUriComponentsBuilder {
 		@Override
 		@Nullable
 		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
-			if (method.equals(getControllerMethod)) {
+			if (method.getName().equals("getControllerMethod")) {
 				return this.controllerMethod;
 			}
-			else if (method.equals(getArgumentValues)) {
+			else if (method.getName().equals("getArgumentValues")) {
 				return this.argumentValues;
 			}
-			else if (method.equals(getControllerType)) {
+			else if (method.getName().equals("getControllerType")) {
 				return this.controllerType;
 			}
 			else if (ReflectionUtils.isObjectMethod(method)) {

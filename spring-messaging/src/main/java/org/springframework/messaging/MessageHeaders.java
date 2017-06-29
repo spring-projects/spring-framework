@@ -96,7 +96,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
-	private static volatile IdGenerator idGenerator = null;
+	@Nullable
+	private static volatile IdGenerator idGenerator;
 
 
 	private final Map<String, Object> headers;
@@ -162,7 +163,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	protected static IdGenerator getIdGenerator() {
-		return (idGenerator != null ? idGenerator : defaultIdGenerator);
+		IdGenerator generator = idGenerator;
+		return (generator != null ? generator : defaultIdGenerator);
 	}
 
 	@Nullable

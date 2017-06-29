@@ -65,10 +65,13 @@ public class RequestContext {
 
 	private TimeZone timeZone;
 
+	@Nullable
 	private Boolean defaultHtmlEscape;
 
+	@Nullable
 	private Map<String, Errors> errorsMap;
 
+	@Nullable
 	private RequestDataValueProcessor dataValueProcessor;
 
 
@@ -79,19 +82,21 @@ public class RequestContext {
 	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource,
 			@Nullable RequestDataValueProcessor dataValueProcessor) {
 
-		Assert.notNull(exchange, "'exchange' is required");
-		Assert.notNull(model, "'model' is required");
-		Assert.notNull(messageSource, "'messageSource' is required");
+		Assert.notNull(exchange, "ServerWebExchange is required");
+		Assert.notNull(model, "Model is required");
+		Assert.notNull(messageSource, "MessageSource is required");
 		this.exchange = exchange;
 		this.model = model;
 		this.messageSource = messageSource;
 
 		LocaleContext localeContext = exchange.getLocaleContext();
-		this.locale = localeContext.getLocale();
-		this.timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
-				((TimeZoneAwareLocaleContext)localeContext).getTimeZone() : TimeZone.getDefault());
+		Locale locale = localeContext.getLocale();
+		this.locale = (locale != null ? locale : Locale.getDefault());
+		TimeZone timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
+				((TimeZoneAwareLocaleContext) localeContext).getTimeZone() : null);
+		this.timeZone = (timeZone != null ? timeZone : TimeZone.getDefault());
 
-		this.defaultHtmlEscape = null; // TODO
+		this.defaultHtmlEscape = null;  // TODO
 		this.dataValueProcessor = dataValueProcessor;
 	}
 
@@ -125,7 +130,6 @@ public class RequestContext {
 
 	/**
 	 * Return the current TimeZone.
-	 * TODO: currently this is the Timezone.getDefault()
 	 */
 	public TimeZone getTimeZone() {
 		return this.timeZone;
@@ -168,6 +172,7 @@ public class RequestContext {
 	 * specified and an explicit value.
 	 * @return whether default HTML escaping is enabled (null = no explicit default)
 	 */
+	@Nullable
 	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}

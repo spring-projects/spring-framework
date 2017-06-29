@@ -31,8 +31,10 @@ import org.springframework.lang.Nullable;
  */
 public class Param {
 
+	@Nullable
 	private String name;
 
+	@Nullable
 	private String value;
 
 
@@ -46,6 +48,7 @@ public class Param {
 	/**
 	 * Return the raw parameter name.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -53,7 +56,7 @@ public class Param {
 	/**
 	 * Set the raw value of the parameter
 	 */
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 

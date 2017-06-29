@@ -91,6 +91,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
 
+	@Nullable
 	private final ProtobufFormatSupport protobufFormatSupport;
 
 

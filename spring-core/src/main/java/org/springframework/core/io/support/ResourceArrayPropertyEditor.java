@@ -60,6 +60,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
+	@Nullable
 	private PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;

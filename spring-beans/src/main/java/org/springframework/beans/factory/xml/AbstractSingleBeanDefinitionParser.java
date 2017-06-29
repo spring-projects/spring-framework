@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.lang.Nullable;
@@ -75,9 +76,10 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 			}
 		}
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
-		if (parserContext.isNested()) {
+		BeanDefinition containingBd = parserContext.getContainingBeanDefinition();
+		if (containingBd != null) {
 			// Inner bean definition must receive same scope as containing bean.
-			String scopeName = parserContext.getContainingBeanDefinition().getScope();
+			String scopeName = containingBd.getScope();
 			if (scopeName != null) {
 				builder.setScope(scopeName);
 			}

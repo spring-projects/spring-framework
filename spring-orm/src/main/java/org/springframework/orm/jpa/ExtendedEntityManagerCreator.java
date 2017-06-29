@@ -248,6 +248,7 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private final EntityManager target;
 
+		@Nullable
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
 		private final boolean jta;
@@ -423,12 +424,14 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private final EntityManager entityManager;
 
+		@Nullable
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
 		public volatile boolean closeOnCompletion = false;
 
 		public ExtendedEntityManagerSynchronization(
-				EntityManager em, PersistenceExceptionTranslator exceptionTranslator) {
+				EntityManager em, @Nullable PersistenceExceptionTranslator exceptionTranslator) {
+
 			super(new EntityManagerHolder(em), em);
 			this.entityManager = em;
 			this.exceptionTranslator = exceptionTranslator;

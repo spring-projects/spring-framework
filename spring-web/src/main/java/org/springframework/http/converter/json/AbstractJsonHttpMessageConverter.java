@@ -52,6 +52,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	@Nullable
 	private String jsonPrefix;
 
 

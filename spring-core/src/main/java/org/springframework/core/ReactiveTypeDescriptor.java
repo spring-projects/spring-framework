@@ -32,11 +32,10 @@ public class ReactiveTypeDescriptor {
 
 	private final Class<?> reactiveType;
 
+	@Nullable
 	private final Supplier<?> emptyValueSupplier;
 
 	private final boolean multiValue;
-
-	private final boolean supportsEmpty;
 
 	private final boolean noValue;
 
@@ -45,14 +44,12 @@ public class ReactiveTypeDescriptor {
 	 * Private constructor. See static factory methods.
 	 */
 	private ReactiveTypeDescriptor(Class<?> reactiveType, @Nullable Supplier<?> emptySupplier,
-			boolean multiValue, boolean canBeEmpty, boolean noValue) {
+			boolean multiValue, boolean noValue) {
 
 		Assert.notNull(reactiveType, "'reactiveType' must not be null");
-		Assert.isTrue(!canBeEmpty || emptySupplier != null, "Empty value supplier is required.");
 		this.reactiveType = reactiveType;
 		this.emptyValueSupplier = emptySupplier;
 		this.multiValue = multiValue;
-		this.supportsEmpty = canBeEmpty;
 		this.noValue = noValue;
 	}
 
@@ -69,7 +66,7 @@ public class ReactiveTypeDescriptor {
 	 * Use of this type implies {@link #supportsEmpty()} is true.
 	 */
 	public Object getEmptyValue() {
-		Assert.isTrue(supportsEmpty(), "Empty values not supported.");
+		Assert.state(this.emptyValueSupplier != null, "Empty values not supported");
 		return this.emptyValueSupplier.get();
 	}
 
@@ -87,7 +84,7 @@ public class ReactiveTypeDescriptor {
 	 * Return {@code true} if the reactive type can complete with no values.
 	 */
 	public boolean supportsEmpty() {
-		return this.supportsEmpty;
+		return (this.emptyValueSupplier != null);
 	}
 
 	/**
@@ -122,7 +119,7 @@ public class ReactiveTypeDescriptor {
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
 	 */
 	public static ReactiveTypeDescriptor multiValue(Class<?> type, Supplier<?> emptySupplier) {
-		return new ReactiveTypeDescriptor(type, emptySupplier, true, true, false);
+		return new ReactiveTypeDescriptor(type, emptySupplier, true, false);
 	}
 
 	/**
@@ -131,7 +128,7 @@ public class ReactiveTypeDescriptor {
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
 	 */
 	public static ReactiveTypeDescriptor singleOptionalValue(Class<?> type, Supplier<?> emptySupplier) {
-		return new ReactiveTypeDescriptor(type, emptySupplier, false, true, false);
+		return new ReactiveTypeDescriptor(type, emptySupplier, false, false);
 	}
 
 	/**
@@ -139,7 +136,7 @@ public class ReactiveTypeDescriptor {
 	 * @param type the reactive type
 	 */
 	public static ReactiveTypeDescriptor singleRequiredValue(Class<?> type) {
-		return new ReactiveTypeDescriptor(type, null, false, false, false);
+		return new ReactiveTypeDescriptor(type, null, false, false);
 	}
 
 	/**
@@ -148,7 +145,7 @@ public class ReactiveTypeDescriptor {
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
 	 */
 	public static ReactiveTypeDescriptor noValue(Class<?> type, Supplier<?> emptySupplier) {
-		return new ReactiveTypeDescriptor(type, emptySupplier, false, true, true);
+		return new ReactiveTypeDescriptor(type, emptySupplier, false, true);
 	}
 
 }

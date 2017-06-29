@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
+	@Nullable
 	private Object source;
 
 	private boolean mergeEnabled;
@@ -47,6 +48,7 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

@@ -51,6 +51,7 @@ import org.springframework.util.StringValueResolver;
 public class FormattingConversionService extends GenericConversionService
 		implements FormatterRegistry, EmbeddedValueResolverAware {
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters = new ConcurrentHashMap<>(64);

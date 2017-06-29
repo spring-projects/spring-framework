@@ -23,7 +23,6 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Simple Pointcut that looks for a specific Java 5 annotation
@@ -127,21 +126,14 @@ public class AnnotationMatchingPointcut implements Pointcut {
 		if (!(other instanceof AnnotationMatchingPointcut)) {
 			return false;
 		}
-		AnnotationMatchingPointcut that = (AnnotationMatchingPointcut) other;
-		return ObjectUtils.nullSafeEquals(that.classFilter, this.classFilter) &&
-				ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
+		AnnotationMatchingPointcut otherPointcut = (AnnotationMatchingPointcut) other;
+		return (this.classFilter.equals(otherPointcut.classFilter) &&
+				this.methodMatcher.equals(otherPointcut.methodMatcher));
 	}
 
 	@Override
 	public int hashCode() {
-		int code = 17;
-		if (this.classFilter != null) {
-			code = 37 * code + this.classFilter.hashCode();
-		}
-		if (this.methodMatcher != null) {
-			code = 37 * code + this.methodMatcher.hashCode();
-		}
-		return code;
+		return this.classFilter.hashCode() * 37 + this.methodMatcher.hashCode();
 	}
 
 	@Override

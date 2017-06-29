@@ -65,6 +65,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Nullable
 	private static final Method newPushBuilderMethod =
 			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "newPushBuilder");
 

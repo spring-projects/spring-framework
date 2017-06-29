@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Operation object representing a SQL-based operation such as a query or update,
@@ -39,9 +40,11 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * Object enabling us to create PreparedStatementCreators efficiently,
 	 * based on this class's declared parameters.
 	 */
+	@Nullable
 	private PreparedStatementCreatorFactory preparedStatementFactory;
 
 	/** Parsed representation of the SQL statement */
+	@Nullable
 	private ParsedSql cachedSql;
 
 	/** Monitor for locking the cached representation of the parsed SQL statement */
@@ -93,6 +96,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
 
@@ -102,6 +106,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 
@@ -113,6 +118,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
+		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}
 

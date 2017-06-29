@@ -158,12 +158,14 @@ public class ContextLoader {
 	 * The 'current' WebApplicationContext, if the ContextLoader class is
 	 * deployed in the web app ClassLoader itself.
 	 */
+	@Nullable
 	private static volatile WebApplicationContext currentContext;
 
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
 	 */
+	@Nullable
 	private WebApplicationContext context;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */

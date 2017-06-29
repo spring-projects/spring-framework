@@ -40,6 +40,7 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -77,14 +78,16 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	protected transient Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Class<? extends Annotation> initAnnotationType;
 
+	@Nullable
 	private Class<? extends Annotation> destroyAnnotationType;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
-			new ConcurrentHashMap<>(256);
+	@Nullable
+	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -255,8 +258,10 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		private final Collection<LifecycleElement> destroyMethods;
 
+		@Nullable
 		private volatile Set<LifecycleElement> checkedInitMethods;
 
+		@Nullable
 		private volatile Set<LifecycleElement> checkedDestroyMethods;
 
 		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleElement> initMethods,
@@ -295,8 +300,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeInitMethods(Object target, String beanName) throws Throwable {
+			Collection<LifecycleElement> checkedInitMethods = this.checkedInitMethods;
 			Collection<LifecycleElement> initMethodsToIterate =
-					(this.checkedInitMethods != null ? this.checkedInitMethods : this.initMethods);
+					(checkedInitMethods != null ? checkedInitMethods : this.initMethods);
 			if (!initMethodsToIterate.isEmpty()) {
 				boolean debug = logger.isDebugEnabled();
 				for (LifecycleElement element : initMethodsToIterate) {
@@ -309,8 +315,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeDestroyMethods(Object target, String beanName) throws Throwable {
+			Collection<LifecycleElement> checkedDestroyMethods = this.checkedDestroyMethods;
 			Collection<LifecycleElement> destroyMethodsToUse =
-					(this.checkedDestroyMethods != null ? this.checkedDestroyMethods : this.destroyMethods);
+					(checkedDestroyMethods != null ? checkedDestroyMethods : this.destroyMethods);
 			if (!destroyMethodsToUse.isEmpty()) {
 				boolean debug = logger.isDebugEnabled();
 				for (LifecycleElement element : destroyMethodsToUse) {
@@ -323,8 +330,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public boolean hasDestroyMethods() {
+			Collection<LifecycleElement> checkedDestroyMethods = this.checkedDestroyMethods;
 			Collection<LifecycleElement> destroyMethodsToUse =
-					(this.checkedDestroyMethods != null ? this.checkedDestroyMethods : this.destroyMethods);
+					(checkedDestroyMethods != null ? checkedDestroyMethods : this.destroyMethods);
 			return !destroyMethodsToUse.isEmpty();
 		}
 	}

@@ -101,14 +101,18 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreUnknownPathExtensions = true;
 
+	@Nullable
 	private Boolean useRegisteredExtensionsOnly;
 
 	private String parameterName = "format";
 
+	@Nullable
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private ServletContext servletContext;
 
 
@@ -268,13 +272,12 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 
-	public ContentNegotiationManager build() {
-		afterPropertiesSet();
-		return this.contentNegotiationManager;
-	}
-
 	@Override
 	public void afterPropertiesSet() {
+		build();
+	}
+
+	public ContentNegotiationManager build() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
 		if (this.favorPathExtension) {
@@ -309,7 +312,9 @@ public class ContentNegotiationManagerFactoryBean
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
+		return this.contentNegotiationManager;
 	}
+
 
 	@Override
 	public ContentNegotiationManager getObject() {

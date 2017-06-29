@@ -52,8 +52,10 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
 
+	@Nullable
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
 
@@ -130,29 +132,35 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 			return;
 		}
 
-		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
+		BeanWiringInfoResolver bwiResolver = this.beanWiringInfoResolver;
+		Assert.state(bwiResolver != null, "No BeanWiringInfoResolver available");
+		BeanWiringInfo bwi = bwiResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
 			return;
 		}
 
+
+		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
+		Assert.state(beanFactory != null, "No BeanFactory available");
 		try {
 			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && bwi.getBeanName() != null &&
-					!this.beanFactory.containsBean(bwi.getBeanName()))) {
+					!beanFactory.containsBean(bwi.getBeanName()))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
-				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-				this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
+				beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
+				beanFactory.initializeBean(beanInstance, bwi.getBeanName());
 			}
 			else {
 				// Perform explicit wiring based on the specified bean definition.
-				this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
+				beanFactory.configureBean(beanInstance, bwi.getBeanName());
 			}
 		}
 		catch (BeanCreationException ex) {
 			Throwable rootCause = ex.getMostSpecificCause();
 			if (rootCause instanceof BeanCurrentlyInCreationException) {
 				BeanCreationException bce = (BeanCreationException) rootCause;
-				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+				String bceBeanName = bce.getBeanName();
+				if (bceBeanName != null && beanFactory.isCurrentlyInCreation(bceBeanName)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Failed to create target bean '" + bce.getBeanName() +
 								"' while configuring object of type [" + beanInstance.getClass().getName() +

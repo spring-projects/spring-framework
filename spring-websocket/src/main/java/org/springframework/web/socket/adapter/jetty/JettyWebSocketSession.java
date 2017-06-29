@@ -32,6 +32,7 @@ import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -54,16 +55,22 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
+	@Nullable
 	private String id;
 
+	@Nullable
 	private URI uri;
 
+	@Nullable
 	private HttpHeaders headers;
 
+	@Nullable
 	private String acceptedProtocol;
 
+	@Nullable
 	private List<WebSocketExtension> extensions;
 
+	@Nullable
 	private Principal user;
 
 
@@ -90,19 +97,19 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public String getId() {
-		checkNativeSessionInitialized();
+		Assert.state(this.id != null, "WebSocket session is not yet initialized");
 		return this.id;
 	}
 
 	@Override
 	public URI getUri() {
-		checkNativeSessionInitialized();
+		Assert.state(this.uri != null, "WebSocket session is not yet initialized");
 		return this.uri;
 	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
-		checkNativeSessionInitialized();
+		Assert.state(this.headers != null, "WebSocket session is not yet initialized");
 		return this.headers;
 	}
 
@@ -114,7 +121,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		checkNativeSessionInitialized();
+		Assert.state(this.extensions != null, "WebSocket session is not yet initialized");
 		return this.extensions;
 	}
 

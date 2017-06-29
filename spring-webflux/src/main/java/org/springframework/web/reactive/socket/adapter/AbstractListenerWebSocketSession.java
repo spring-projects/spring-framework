@@ -30,6 +30,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -58,10 +59,12 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	private static final int RECEIVE_BUFFER_SIZE = 8192;
 
 
+	@Nullable
 	private final MonoProcessor<Void> completionMono;
 
 	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
 
+	@Nullable
 	private volatile WebSocketSendProcessor sendProcessor;
 
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
@@ -93,7 +96,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 
 	protected WebSocketSendProcessor getSendProcessor() {
-		return this.sendProcessor;
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		Assert.state(sendProcessor != null, "No WebSocketSendProcessor available");
+		return sendProcessor;
 	}
 
 	@Override
@@ -106,10 +111,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		if (this.sendCalled.compareAndSet(false, true)) {
-			this.sendProcessor = new WebSocketSendProcessor();
+			WebSocketSendProcessor sendProcessor = new WebSocketSendProcessor();
+			this.sendProcessor = sendProcessor;
 			return Mono.from(subscriber -> {
-					messages.subscribe(this.sendProcessor);
-					this.sendProcessor.subscribe(subscriber);
+					messages.subscribe(sendProcessor);
+					sendProcessor.subscribe(subscriber);
 			});
 		}
 		else {
@@ -157,18 +163,20 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	/** Handle an error callback from the WebSocketHandler adapter */
 	void handleError(Throwable ex) {
 		this.receivePublisher.onError(ex);
-		if (this.sendProcessor != null) {
-			this.sendProcessor.cancel();
-			this.sendProcessor.onError(ex);
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		if (sendProcessor != null) {
+			sendProcessor.cancel();
+			sendProcessor.onError(ex);
 		}
 	}
 
 	/** Handle a close callback from the WebSocketHandler adapter */
 	void handleClose(CloseStatus reason) {
 		this.receivePublisher.onAllDataRead();
-		if (this.sendProcessor != null) {
-			this.sendProcessor.cancel();
-			this.sendProcessor.onComplete();
+		WebSocketSendProcessor sendProcessor = this.sendProcessor;
+		if (sendProcessor != null) {
+			sendProcessor.cancel();
+			sendProcessor.onComplete();
 		}
 	}
 
@@ -205,6 +213,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
+		@Nullable
 		private volatile WebSocketMessage webSocketMessage;
 
 		@Override

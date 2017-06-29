@@ -63,8 +63,10 @@ import org.springframework.util.Assert;
  */
 public class SimpleTaskWorkManager implements WorkManager {
 
+	@Nullable
 	private TaskExecutor syncTaskExecutor = new SyncTaskExecutor();
 
+	@Nullable
 	private AsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor();
 
 
@@ -238,15 +240,10 @@ public class SimpleTaskWorkManager implements WorkManager {
 			try {
 				this.work.run();
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				this.workListener.workCompleted(
 						new WorkEvent(this, WorkEvent.WORK_COMPLETED, this.work, new WorkCompletedException(ex)));
 				throw ex;
-			}
-			catch (Error err) {
-				this.workListener.workCompleted(
-						new WorkEvent(this, WorkEvent.WORK_COMPLETED, this.work, new WorkCompletedException(err)));
-				throw err;
 			}
 			this.workListener.workCompleted(new WorkEvent(this, WorkEvent.WORK_COMPLETED, this.work, null));
 		}

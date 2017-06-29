@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 	private int phase = Integer.MAX_VALUE;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private boolean contextRefreshed;
@@ -133,9 +134,9 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.notNull(factory, "Factory must not be null");
-
 		String id = endpoint.getId();
-		Assert.notNull(id, "Endpoint id must not be null");
+		Assert.hasText(id, "Endpoint id must be set");
+
 		synchronized (this.listenerContainers) {
 			if (this.listenerContainers.containsKey(id)) {
 				throw new IllegalStateException("Another endpoint is already registered with id '" + id + "'");

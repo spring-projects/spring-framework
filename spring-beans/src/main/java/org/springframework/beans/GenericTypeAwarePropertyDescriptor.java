@@ -28,6 +28,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -44,14 +45,19 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
 
+	@Nullable
 	private final Method readMethod;
 
+	@Nullable
 	private final Method writeMethod;
 
+	@Nullable
 	private volatile Set<Method> ambiguousWriteMethods;
 
+	@Nullable
 	private MethodParameter writeMethodParameter;
 
+	@Nullable
 	private Class<?> propertyType;
 
 	private final Class<?> propertyEditorClass;
@@ -116,16 +122,19 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
+	@Nullable
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
 
 	@Override
+	@Nullable
 	public Method getWriteMethod() {
 		return this.writeMethod;
 	}
 
 	public Method getWriteMethodForActualAccess() {
+		Assert.state(this.writeMethod != null, "No write method available");
 		Set<Method> ambiguousCandidates = this.ambiguousWriteMethods;
 		if (ambiguousCandidates != null) {
 			this.ambiguousWriteMethods = null;
@@ -137,10 +146,12 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	public MethodParameter getWriteMethodParameter() {
+		Assert.state(this.writeMethodParameter != null, "No write method available");
 		return this.writeMethodParameter;
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getPropertyType() {
 		return this.propertyType;
 	}

@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
  */
 public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 
+	@Nullable
 	private SqlReturnType sqlReturnType;
 
 

@@ -66,9 +66,10 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		private final HttpServletRequest request;
 
 		/* Cache the index and prefix of the path within the DispatcherServlet mapping */
+		@Nullable
 		private Integer indexLookupPath;
 
-		private String prefixLookupPath;
+		private String prefixLookupPath = "";
 
 		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -83,11 +84,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return super.encodeURL(url);
 			}
 
-			initLookupPath(resourceUrlProvider);
+			int index = initLookupPath(resourceUrlProvider);
 			if (url.startsWith(this.prefixLookupPath)) {
 				int suffixIndex = getQueryParamsIndex(url);
 				String suffix = url.substring(suffixIndex);
-				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
+				String lookupPath = url.substring(index, suffixIndex);
 				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
 				if (lookupPath != null) {
 					return super.encodeURL(this.prefixLookupPath + lookupPath + suffix);
@@ -103,14 +104,13 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 		}
 
-		private void initLookupPath(ResourceUrlProvider urlProvider) {
+		private int initLookupPath(ResourceUrlProvider urlProvider) {
 			if (this.indexLookupPath == null) {
 				UrlPathHelper pathHelper = urlProvider.getUrlPathHelper();
 				String requestUri = pathHelper.getRequestUri(this.request);
 				String lookupPath = pathHelper.getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
-
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = pathHelper.getContextPath(this.request);
 					if (requestUri.equals(contextPath)) {
@@ -119,6 +119,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					}
 				}
 			}
+			return this.indexLookupPath;
 		}
 
 		private int getQueryParamsIndex(String url) {

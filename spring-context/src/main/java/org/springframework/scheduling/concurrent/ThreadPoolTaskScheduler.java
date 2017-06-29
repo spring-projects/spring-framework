@@ -61,9 +61,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private volatile boolean removeOnCancelPolicy = false;
 
-	private volatile ScheduledExecutorService scheduledExecutor;
-
+	@Nullable
 	private volatile ErrorHandler errorHandler;
+
+	@Nullable
+	private ScheduledExecutorService scheduledExecutor;
 
 
 	/**
@@ -236,8 +238,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ExecutorService executor = getScheduledExecutor();
 		try {
 			Callable<T> taskToUse = task;
-			if (this.errorHandler != null) {
-				taskToUse = new DelegatingErrorHandlingCallable<>(task, this.errorHandler);
+			ErrorHandler errorHandler = this.errorHandler;
+			if (errorHandler != null) {
+				taskToUse = new DelegatingErrorHandlingCallable<>(task, errorHandler);
 			}
 			return executor.submit(taskToUse);
 		}
@@ -284,8 +287,10 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			ErrorHandler errorHandler =
-					(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
+			ErrorHandler errorHandler = this.errorHandler;
+			if (errorHandler == null) {
+				errorHandler = TaskUtils.getDefaultErrorHandler(true);
+			}
 			return new ReschedulingRunnable(task, trigger, executor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {

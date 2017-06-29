@@ -33,6 +33,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 
 	private final Method method;
 
+	@Nullable
 	private final Class<?> targetClass;
 
 

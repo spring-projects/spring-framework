@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,10 @@ import org.springframework.util.ObjectUtils;
  */
 public class LookupOverride extends MethodOverride {
 
+	@Nullable
 	private final String beanName;
 
+	@Nullable
 	private Method method;
 
 
@@ -65,6 +67,7 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Return the name of the bean that should be returned by this method.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}

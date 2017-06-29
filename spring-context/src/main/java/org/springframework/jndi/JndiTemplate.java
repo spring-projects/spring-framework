@@ -43,6 +43,7 @@ public class JndiTemplate {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Properties environment;
 
 

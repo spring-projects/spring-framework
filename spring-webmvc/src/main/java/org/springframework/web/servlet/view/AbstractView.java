@@ -69,10 +69,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
-	private String beanName;
-
+	@Nullable
 	private String contentType = DEFAULT_CONTENT_TYPE;
 
+	@Nullable
 	private String requestContextAttribute;
 
 	private final Map<String, Object> staticAttributes = new LinkedHashMap<>();
@@ -81,26 +81,12 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	private boolean exposeContextBeansAsAttributes = false;
 
-	private Set<String> exposedContextBeanNames;
-
-
-	/**
-	 * Set the view's name. Helpful for traceability.
-	 * <p>Framework code must call this when constructing views.
-	 */
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	/**
-	 * Return the view's name. Should never be {@code null},
-	 * if the view was correctly configured.
-	 */
 	@Nullable
-	public String getBeanName() {
-		return this.beanName;
-	}
+	private Set<String> exposedContextBeanNames;
+	@Nullable
+	private String beanName;
+
+
 
 	/**
 	 * Set the content type for this view.
@@ -285,6 +271,24 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
 		this.exposedContextBeanNames = new HashSet<>(Arrays.asList(exposedContextBeanNames));
+	}
+
+	/**
+	 * Set the view's name. Helpful for traceability.
+	 * <p>Framework code must call this when constructing views.
+	 */
+	@Override
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	/**
+	 * Return the view's name. Should never be {@code null},
+	 * if the view was correctly configured.
+	 */
+	@Nullable
+	public String getBeanName() {
+		return this.beanName;
 	}
 
 

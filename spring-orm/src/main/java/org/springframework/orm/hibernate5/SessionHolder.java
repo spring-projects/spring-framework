@@ -40,8 +40,10 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	private final Session session;
 
+	@Nullable
 	private Transaction transaction;
 
+	@Nullable
 	private FlushMode previousFlushMode;
 
 

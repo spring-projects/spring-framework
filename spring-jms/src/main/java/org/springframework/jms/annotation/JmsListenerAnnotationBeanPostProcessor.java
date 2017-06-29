@@ -93,15 +93,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private JmsListenerEndpointRegistry endpointRegistry;
 
+	@Nullable
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
 	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
 			new MessageHandlerMethodFactoryAdapter();
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
@@ -296,10 +300,10 @@ public class JmsListenerAnnotationBeanPostProcessor
 		return new MethodJmsListenerEndpoint();
 	}
 
-	@Nullable
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
-			return resolve(jmsListener.id());
+			String id = resolve(jmsListener.id());
+			return (id != null ? id : "");
 		}
 		else {
 			return "org.springframework.jms.JmsListenerEndpointContainer#" + this.counter.getAndIncrement();
@@ -320,6 +324,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	 */
 	private class MessageHandlerMethodFactoryAdapter implements MessageHandlerMethodFactory {
 
+		@Nullable
 		private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 		public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {

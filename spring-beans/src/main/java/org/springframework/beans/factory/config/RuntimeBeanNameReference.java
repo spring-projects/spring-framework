@@ -33,6 +33,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 
 	private final String beanName;
 
+	@Nullable
 	private Object source;
 
 
@@ -59,6 +60,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

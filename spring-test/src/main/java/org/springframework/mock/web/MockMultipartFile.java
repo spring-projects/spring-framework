@@ -44,6 +44,7 @@ public class MockMultipartFile implements MultipartFile {
 
 	private String originalFilename;
 
+	@Nullable
 	private String contentType;
 
 	private final byte[] content;
@@ -111,6 +112,7 @@ public class MockMultipartFile implements MultipartFile {
 	}
 
 	@Override
+	@Nullable
 	public String getContentType() {
 		return this.contentType;
 	}

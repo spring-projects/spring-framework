@@ -53,6 +53,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
@@ -107,14 +108,19 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Object scheduler;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
@@ -216,12 +222,12 @@ public class ScheduledAnnotationBeanPostProcessor
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
 			try {
 				// Search for TaskScheduler bean...
-				this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, false));
+				this.registrar.setTaskScheduler(resolveSchedulerBean(beanFactory, TaskScheduler.class, false));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				logger.debug("Could not find unique TaskScheduler bean", ex);
 				try {
-					this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, true));
+					this.registrar.setTaskScheduler(resolveSchedulerBean(beanFactory, TaskScheduler.class, true));
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
 					if (logger.isInfoEnabled()) {
@@ -237,12 +243,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				logger.debug("Could not find default TaskScheduler bean", ex);
 				// Search for ScheduledExecutorService bean next...
 				try {
-					this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, false));
+					this.registrar.setScheduler(resolveSchedulerBean(beanFactory, ScheduledExecutorService.class, false));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
 					logger.debug("Could not find unique ScheduledExecutorService bean", ex2);
 					try {
-						this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, true));
+						this.registrar.setScheduler(resolveSchedulerBean(beanFactory, ScheduledExecutorService.class, true));
 					}
 					catch (NoSuchBeanDefinitionException ex3) {
 						if (logger.isInfoEnabled()) {
@@ -265,25 +271,24 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.registrar.afterPropertiesSet();
 	}
 
-	private <T> T resolveSchedulerBean(Class<T> schedulerType, boolean byName) {
+	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
 		if (byName) {
-			T scheduler = this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
-			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			T scheduler = beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
+			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
 				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
 						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
 			}
 			return scheduler;
 		}
-		else if (this.beanFactory instanceof AutowireCapableBeanFactory) {
-			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) this.beanFactory).resolveNamedBean(schedulerType);
-			if (this.beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
-						holder.getBeanName(), this.beanName);
+		else if (beanFactory instanceof AutowireCapableBeanFactory) {
+			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) beanFactory).resolveNamedBean(schedulerType);
+			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) beanFactory).registerDependentBean(holder.getBeanName(), this.beanName);
 			}
 			return holder.getBeanInstance();
 		}
 		else {
-			return this.beanFactory.getBean(schedulerType);
+			return beanFactory.getBean(schedulerType);
 		}
 	}
 

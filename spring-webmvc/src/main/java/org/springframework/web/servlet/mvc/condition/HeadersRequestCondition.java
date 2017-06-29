@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
 
@@ -156,12 +157,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return request.getHeader(name) != null;
+			return (request.getHeader(this.name) != null);
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getHeader(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getHeader(this.name));
 		}
 	}
 

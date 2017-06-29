@@ -65,18 +65,25 @@ public class CorsConfiguration {
 	}
 
 
+	@Nullable
 	private List<String> allowedOrigins;
 
+	@Nullable
 	private List<String> allowedMethods;
 
+	@Nullable
 	private List<HttpMethod> resolvedMethods = DEFAULT_METHODS;
 
+	@Nullable
 	private List<String> allowedHeaders;
 
+	@Nullable
 	private List<String> exposedHeaders;
 
+	@Nullable
 	private Boolean allowCredentials;
 
+	@Nullable
 	private Long maxAge;
 
 

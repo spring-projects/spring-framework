@@ -69,6 +69,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
+	@Nullable
 	private Object defaultHandler;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
@@ -481,6 +482,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private class PreFlightHandler implements HttpRequestHandler, CorsConfigurationSource {
 
+		@Nullable
 		private final CorsConfiguration config;
 
 		public PreFlightHandler(@Nullable CorsConfiguration config) {
@@ -501,6 +503,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private class CorsInterceptor extends HandlerInterceptorAdapter implements CorsConfigurationSource {
 
+		@Nullable
 		private final CorsConfiguration config;
 
 		public CorsInterceptor(@Nullable CorsConfiguration config) {

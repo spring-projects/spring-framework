@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.handler;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -37,8 +36,9 @@ public class PathMatchResult<T> {
 	private final T handler;
 
 
-	public PathMatchResult(PathPattern pattern, @Nullable T handler) {
+	public PathMatchResult(PathPattern pattern, T handler) {
 		Assert.notNull(pattern, "PathPattern must not be null");
+		Assert.notNull(handler, "Handler must not be null");
 		this.pattern = pattern;
 		this.handler = handler;
 	}
@@ -54,7 +54,6 @@ public class PathMatchResult<T> {
 	/**
 	 * Return the request handler associated with the {@link PathPattern}.
 	 */
-	@Nullable
 	public T getHandler() {
 		return this.handler;
 	}

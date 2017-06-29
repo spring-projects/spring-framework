@@ -34,10 +34,13 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class BeanCreationException extends FatalBeanException {
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private String resourceDescription;
 
+	@Nullable
 	private List<Throwable> relatedCauses;
 
 
@@ -119,6 +122,7 @@ public class BeanCreationException extends FatalBeanException {
 	/**
 	 * Return the name of the bean requested, if any.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}

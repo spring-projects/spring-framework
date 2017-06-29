@@ -113,10 +113,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
+	@Nullable
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
+	@Nullable
 	private EntityResolver entityResolver;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);

@@ -129,6 +129,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	private class PutIfAbsentFunction implements Function<Object, Object> {
 
+		@Nullable
 		private final Object value;
 
 		private boolean called;

@@ -39,11 +39,11 @@ public class ViewControllerRegistry {
 
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
-	private final List<RedirectViewControllerRegistration> redirectRegistrations =
-			new ArrayList<>(10);
+	private final List<RedirectViewControllerRegistration> redirectRegistrations = new ArrayList<>(10);
 
 	private int order = 1;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -97,7 +97,7 @@ public class ViewControllerRegistry {
 		this.order = order;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
+	protected void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 

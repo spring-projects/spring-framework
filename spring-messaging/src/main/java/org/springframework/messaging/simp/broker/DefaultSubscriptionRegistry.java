@@ -492,6 +492,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		private final String id;
 
+		@Nullable
 		private final Expression selectorExpression;
 
 		public Subscription(String id, @Nullable Expression selector) {

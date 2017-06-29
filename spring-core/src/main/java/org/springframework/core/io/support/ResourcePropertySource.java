@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 public class ResourcePropertySource extends PropertiesPropertySource {
 
 	/** The original resource name, if different from the given name */
+	@Nullable
 	private final String resourceName;
 
 

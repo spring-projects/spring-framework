@@ -42,10 +42,13 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private final WebClient.Builder webClientBuilder;
 
+	@Nullable
 	private final WebHttpHandlerBuilder httpHandlerBuilder;
 
+	@Nullable
 	private final ClientHttpConnector connector;
 
+	@Nullable
 	private Duration responseTimeout;
 
 
@@ -58,11 +61,10 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	DefaultWebTestClientBuilder(@Nullable WebClient.Builder webClientBuilder,
-			@Nullable WebHttpHandlerBuilder httpHandlerBuilder,
-			@Nullable ClientHttpConnector connector,
+			@Nullable WebHttpHandlerBuilder httpHandlerBuilder, @Nullable ClientHttpConnector connector,
 			@Nullable Duration responseTimeout) {
 
-		Assert.isTrue(httpHandlerBuilder != null || connector !=null,
+		Assert.isTrue(httpHandlerBuilder != null || connector != null,
 				"Either WebHttpHandlerBuilder or ClientHttpConnector must be provided");
 
 		this.webClientBuilder = (webClientBuilder != null ? webClientBuilder : WebClient.builder());
@@ -139,11 +141,14 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		return this;
 	}
 
+
 	@Override
 	public WebTestClient build() {
-
-		ClientHttpConnector connectorToUse = (this.connector != null ? this.connector :
-				new HttpHandlerConnector(this.httpHandlerBuilder.build()));
+		ClientHttpConnector connectorToUse = this.connector;
+		if (connectorToUse == null) {
+			Assert.state(this.httpHandlerBuilder != null, "No WebHttpHandlerBuilder available");
+			connectorToUse = new HttpHandlerConnector(this.httpHandlerBuilder.build());
+		}
 
 		DefaultWebTestClientBuilder webTestClientBuilder = new DefaultWebTestClientBuilder(
 				this.webClientBuilder.clone(), this.httpHandlerBuilder,

@@ -44,6 +44,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	private byte[] content = new byte[0];
 
+	@Nullable
 	private Resource contentResource;
 
 	private final HttpHeaders headers = new HttpHeaders();

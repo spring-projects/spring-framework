@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 
-	public AsyncTaskMethodReturnValueHandler(BeanFactory beanFactory) {
+	public AsyncTaskMethodReturnValueHandler(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
@@ -56,7 +57,9 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 		}
 
 		WebAsyncTask<?> webAsyncTask = (WebAsyncTask<?>) returnValue;
-		webAsyncTask.setBeanFactory(this.beanFactory);
+		if (this.beanFactory != null) {
+			webAsyncTask.setBeanFactory(this.beanFactory);
+		}
 		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(webAsyncTask, mavContainer);
 	}
 

@@ -21,6 +21,7 @@ import javax.naming.NamingException;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -52,11 +53,14 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	/** The business interface of the EJB we're proxying */
+	@Nullable
 	private Class<?> businessInterface;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** EJBLocalObject */
+	@Nullable
 	private Object proxy;
 
 
@@ -73,6 +77,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 	/**
 	 * Return the business interface of the EJB we're proxying.
 	 */
+	@Nullable
 	public Class<?> getBusinessInterface() {
 		return this.businessInterface;
 	}

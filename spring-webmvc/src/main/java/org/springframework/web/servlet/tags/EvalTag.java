@@ -59,8 +59,10 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private final ExpressionParser expressionParser = new SpelExpressionParser();
 
+	@Nullable
 	private Expression expression;
 
+	@Nullable
 	private String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
@@ -114,12 +116,13 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			this.pageContext.setAttribute(EVALUATION_CONTEXT_PAGE_ATTRIBUTE, evaluationContext);
 		}
 		if (this.var != null) {
-			Object result = this.expression.getValue(evaluationContext);
+			Object result = (this.expression != null ? this.expression.getValue(evaluationContext) : null);
 			this.pageContext.setAttribute(this.var, result, this.scope);
 		}
 		else {
 			try {
-				String result = this.expression.getValue(evaluationContext, String.class);
+				String result = (this.expression != null ?
+						this.expression.getValue(evaluationContext, String.class) : null);
 				result = ObjectUtils.getDisplayString(result);
 				result = htmlEscape(result);
 				result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
@@ -156,6 +159,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 		private final PageContext pageContext;
 
+		@Nullable
 		private final javax.servlet.jsp.el.VariableResolver variableResolver;
 
 		public JspPropertyAccessor(PageContext pageContext) {

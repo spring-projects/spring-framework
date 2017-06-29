@@ -191,10 +191,11 @@ abstract class AutowireUtils {
 	 * @return the resolved target return type or the standard method return type
 	 * @since 3.2.5
 	 */
-	public static Class<?> resolveReturnTypeForFactoryMethod(Method method, Object[] args, ClassLoader classLoader) {
+	public static Class<?> resolveReturnTypeForFactoryMethod(
+			Method method, Object[] args, @Nullable ClassLoader classLoader) {
+
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(args, "Argument array must not be null");
-		Assert.notNull(classLoader, "ClassLoader must not be null");
 
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
 		Type genericReturnType = method.getGenericReturnType();

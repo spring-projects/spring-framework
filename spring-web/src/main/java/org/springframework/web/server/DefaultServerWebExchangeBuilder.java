@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,10 +36,13 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 	private final ServerWebExchange delegate;
 
+	@Nullable
 	private ServerHttpRequest request;
 
+	@Nullable
 	private ServerHttpResponse response;
 
+	@Nullable
 	private Mono<Principal> principalMono;
 
 
@@ -85,14 +89,17 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 	 */
 	private static class MutativeDecorator extends ServerWebExchangeDecorator {
 
+		@Nullable
 		private final ServerHttpRequest request;
 
+		@Nullable
 		private final ServerHttpResponse response;
 
+		@Nullable
 		private final Mono<Principal> principalMono;
 
-		public MutativeDecorator(ServerWebExchange delegate, ServerHttpRequest request,
-				ServerHttpResponse response, Mono<Principal> principalMono) {
+		public MutativeDecorator(ServerWebExchange delegate, @Nullable ServerHttpRequest request,
+				@Nullable ServerHttpResponse response, @Nullable Mono<Principal> principalMono) {
 
 			super(delegate);
 			this.request = request;
@@ -113,8 +120,7 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T extends Principal> Mono<T> getPrincipal() {
-			return (this.principalMono != null ?
-					(Mono<T>) this.principalMono : getDelegate().getPrincipal());
+			return (this.principalMono != null ? (Mono<T>) this.principalMono : getDelegate().getPrincipal());
 		}
 	}
 

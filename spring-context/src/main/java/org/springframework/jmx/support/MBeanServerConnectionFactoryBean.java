@@ -34,6 +34,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -53,18 +54,23 @@ import org.springframework.util.CollectionUtils;
 public class MBeanServerConnectionFactoryBean
 		implements FactoryBean<MBeanServerConnection>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private JMXServiceURL serviceUrl;
 
 	private Map<String, Object> environment = new HashMap<>();
 
 	private boolean connectOnStartup = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private JMXConnector connector;
 
+	@Nullable
 	private MBeanServerConnection connection;
 
+	@Nullable
 	private JMXConnectorLazyInitTargetSource connectorTargetSource;
 
 
@@ -131,6 +137,7 @@ public class MBeanServerConnectionFactoryBean
 	 * environment properties.
 	 */
 	private void connect() throws IOException {
+		Assert.state(this.serviceUrl != null, "No JMXServiceURL set");
 		this.connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
 		this.connection = this.connector.getMBeanServerConnection();
 	}
@@ -170,7 +177,8 @@ public class MBeanServerConnectionFactoryBean
 	 */
 	@Override
 	public void destroy() throws IOException {
-		if (this.connectorTargetSource == null || this.connectorTargetSource.isInitialized()) {
+		if (this.connector != null &&
+				(this.connectorTargetSource == null || this.connectorTargetSource.isInitialized())) {
 			this.connector.close();
 		}
 	}
@@ -186,6 +194,7 @@ public class MBeanServerConnectionFactoryBean
 
 		@Override
 		protected Object createObject() throws Exception {
+			Assert.state(serviceUrl != null, "No JMXServiceURL set");
 			return JMXConnectorFactory.connect(serviceUrl, environment);
 		}
 
@@ -203,6 +212,7 @@ public class MBeanServerConnectionFactoryBean
 
 		@Override
 		protected Object createObject() throws Exception {
+			Assert.state(connector != null, "JMXConnector not initialized");
 			return connector.getMBeanServerConnection();
 		}
 

@@ -56,16 +56,22 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private SubscriptionRegistry subscriptionRegistry;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
+	@Nullable
 	private Integer cacheLimit;
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
+	@Nullable
 	private long[] heartbeatValue;
 
+	@Nullable
 	private ScheduledFuture<?> heartbeatFuture;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -112,7 +118,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @see DefaultSubscriptionRegistry#setPathMatcher
 	 * @see org.springframework.util.AntPathMatcher
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		initPathMatcherToUse();
 	}
@@ -133,7 +139,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @see DefaultSubscriptionRegistry#setCacheLimit
 	 * @see DefaultSubscriptionRegistry#DEFAULT_CACHE_LIMIT
 	 */
-	public void setCacheLimit(Integer cacheLimit) {
+	public void setCacheLimit(@Nullable Integer cacheLimit) {
 		this.cacheLimit = cacheLimit;
 		initCacheLimitToUse();
 	}
@@ -216,7 +222,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	public void startInternal() {
 		publishBrokerAvailableEvent();
-		if (getTaskScheduler() != null) {
+		if (this.taskScheduler != null) {
 			long interval = initHeartbeatTaskDelay();
 			if (interval > 0) {
 				this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
@@ -384,6 +390,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private final String sessiondId;
 
+		@Nullable
 		private final Principal user;
 
 		private final long readInterval;
@@ -416,6 +423,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return this.sessiondId;
 		}
 
+		@Nullable
 		public Principal getUser() {
 			return this.user;
 		}
@@ -458,7 +466,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
 					accessor.setSessionId(info.getSessiondId());
-					accessor.setUser(info.getUser());
+					Principal user = info.getUser();
+					if (user != null) {
+						accessor.setUser(user);
+					}
 					initHeaders(accessor);
 					MessageHeaders headers = accessor.getMessageHeaders();
 					getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));

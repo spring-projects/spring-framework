@@ -97,6 +97,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * Convenience constant for subclasses: Return value for "do not proxy".
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
+	@Nullable
 	protected static final Object[] DO_NOT_PROXY = null;
 
 	/**
@@ -124,8 +125,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private boolean applyCommonInterceptorsFirst = true;
 
+	@Nullable
 	private TargetSourceCreator[] customTargetSourceCreators;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));

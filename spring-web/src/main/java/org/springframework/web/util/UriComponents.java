@@ -50,8 +50,10 @@ public abstract class UriComponents implements Serializable {
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
+	@Nullable
 	private final String scheme;
 
+	@Nullable
 	private final String fragment;
 
 

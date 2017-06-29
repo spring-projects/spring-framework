@@ -35,10 +35,13 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
+	@Nullable
 	private final String[] codes;
 
+	@Nullable
 	private final Object[] arguments;
 
+	@Nullable
 	private final String defaultMessage;
 
 
@@ -109,16 +112,19 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 	@Override
+	@Nullable
 	public String[] getCodes() {
 		return this.codes;
 	}
 
 	@Override
+	@Nullable
 	public Object[] getArguments() {
 		return this.arguments;
 	}
 
 	@Override
+	@Nullable
 	public String getDefaultMessage() {
 		return this.defaultMessage;
 	}

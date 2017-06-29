@@ -78,7 +78,9 @@ public class AspectJWeavingEnabler
 	 * @param weaverToUse the LoadTimeWeaver to apply to (or {@code null} for a default weaver)
 	 * @param beanClassLoader the class loader to create a default weaver for (if necessary)
 	 */
-	public static void enableAspectJWeaving(@Nullable LoadTimeWeaver weaverToUse, ClassLoader beanClassLoader) {
+	public static void enableAspectJWeaving(
+			@Nullable LoadTimeWeaver weaverToUse, @Nullable ClassLoader beanClassLoader) {
+
 		if (weaverToUse == null) {
 			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
 				weaverToUse = new InstrumentationLoadTimeWeaver(beanClassLoader);

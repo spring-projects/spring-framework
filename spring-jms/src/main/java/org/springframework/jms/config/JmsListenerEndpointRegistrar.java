@@ -38,14 +38,19 @@ import org.springframework.util.Assert;
  */
 public class JmsListenerEndpointRegistrar implements BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private JmsListenerEndpointRegistry endpointRegistry;
 
+	@Nullable
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
+	@Nullable
 	private JmsListenerContainerFactory<?> containerFactory;
 
+	@Nullable
 	private String containerFactoryBeanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private final List<JmsListenerEndpointDescriptor> endpointDescriptors = new ArrayList<>();
@@ -131,6 +136,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	}
 
 	protected void registerAllEndpoints() {
+		Assert.state(this.endpointRegistry != null, "No JmsListenerEndpointRegistry set");
 		synchronized (this.mutex) {
 			for (JmsListenerEndpointDescriptor descriptor : this.endpointDescriptors) {
 				this.endpointRegistry.registerListenerContainer(
@@ -168,7 +174,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	 * used for that endpoint.
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint, @Nullable JmsListenerContainerFactory<?> factory) {
-		Assert.notNull(endpoint, "Endpoint must be set");
+		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.hasText(endpoint.getId(), "Endpoint id must be set");
 
 		// Factory may be null, we defer the resolution right before actually creating the container
@@ -176,6 +182,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 		synchronized (this.mutex) {
 			if (this.startImmediately) {  // register and start immediately
+				Assert.state(this.endpointRegistry != null, "No JmsListenerEndpointRegistry set");
 				this.endpointRegistry.registerListenerContainer(descriptor.endpoint,
 						resolveContainerFactory(descriptor), true);
 			}
@@ -200,10 +207,12 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 
 		public final JmsListenerEndpoint endpoint;
 
+		@Nullable
 		public final JmsListenerContainerFactory<?> containerFactory;
 
 		public JmsListenerEndpointDescriptor(JmsListenerEndpoint endpoint,
 				@Nullable JmsListenerContainerFactory<?> containerFactory) {
+
 			this.endpoint = endpoint;
 			this.containerFactory = containerFactory;
 		}

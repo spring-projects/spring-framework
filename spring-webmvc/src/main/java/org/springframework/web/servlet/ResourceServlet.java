@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
@@ -103,14 +104,18 @@ public class ResourceServlet extends HttpServletBean {
 	public static final String RESOURCE_PARAM_NAME = "resource";
 
 
+	@Nullable
 	private String defaultUrl;
 
+	@Nullable
 	private String allowedResources;
 
+	@Nullable
 	private String contentType;
 
 	private boolean applyLastModified = false;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 	private long startupTime;
@@ -267,9 +272,12 @@ public class ResourceServlet extends HttpServletBean {
 			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 		for (String url : resourceUrls) {
 			// check whether URL matches allowed resources
-			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, url)) {
-				throw new ServletException("Resource [" + url +
-						"] does not match allowed pattern [" + this.allowedResources + "]");
+			if (this.allowedResources != null) {
+				Assert.state(this.pathMatcher != null, "No PathMatcher available");
+				if (!this.pathMatcher.match(this.allowedResources, url)) {
+					throw new ServletException("Resource [" + url +
+							"] does not match allowed pattern [" + this.allowedResources + "]");
+				}
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Including resource [" + url + "]");

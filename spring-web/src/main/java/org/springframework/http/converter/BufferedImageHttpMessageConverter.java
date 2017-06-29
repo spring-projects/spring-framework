@@ -70,8 +70,10 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	private final List<MediaType> readableMediaTypes = new ArrayList<>();
 
+	@Nullable
 	private MediaType defaultContentType;
 
+	@Nullable
 	private File cacheDir;
 
 
@@ -112,6 +114,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	 * Returns the default {@code Content-Type} to be used for writing.
 	 * Called when {@link #write} is invoked without a specified content type parameter.
 	 */
+	@Nullable
 	public MediaType getDefaultContentType() {
 		return this.defaultContentType;
 	}

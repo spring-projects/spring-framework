@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a dot separated sequence of strings that indicate a package qualified type
@@ -31,7 +32,7 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class QualifiedIdentifier extends SpelNodeImpl {
 
-	// TODO safe to cache? dont think so
+	@Nullable
 	private TypedValue value;
 
 

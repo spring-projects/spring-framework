@@ -50,6 +50,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFactoryAware {
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 

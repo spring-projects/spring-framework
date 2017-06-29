@@ -189,6 +189,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
+		@Nullable
 		private StringBuilder sb;
 
 		@Override

@@ -38,8 +38,10 @@ import org.springframework.util.Assert;
 public abstract class TimerManagerAccessor extends JndiLocatorSupport
 		implements InitializingBean, DisposableBean, Lifecycle {
 
+	@Nullable
 	private TimerManager timerManager;
 
+	@Nullable
 	private String timerManagerName;
 
 	private boolean shared = false;
@@ -139,7 +141,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void start() {
 		if (!this.shared) {
-			this.timerManager.resume();
+			obtainTimerManager().resume();
 		}
 	}
 
@@ -150,7 +152,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void stop() {
 		if (!this.shared) {
-			this.timerManager.suspend();
+			obtainTimerManager().suspend();
 		}
 	}
 
@@ -162,7 +164,8 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 */
 	@Override
 	public boolean isRunning() {
-		return (!this.timerManager.isSuspending() && !this.timerManager.isStopping());
+		TimerManager tm = obtainTimerManager();
+		return (!tm.isSuspending() && !tm.isStopping());
 	}
 
 
@@ -177,7 +180,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	@Override
 	public void destroy() {
 		// Stop the entire TimerManager, if necessary.
-		if (!this.shared) {
+		if (this.timerManager != null && !this.shared) {
 			// May return early, but at least we already cancelled all known Timers.
 			this.timerManager.stop();
 		}

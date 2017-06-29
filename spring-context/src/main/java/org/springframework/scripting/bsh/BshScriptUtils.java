@@ -116,10 +116,12 @@ public abstract class BshScriptUtils {
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
 	@Nullable
-	static Class<?> determineBshObjectType(String scriptSource, ClassLoader classLoader) throws EvalError {
+	static Class<?> determineBshObjectType(String scriptSource, @Nullable ClassLoader classLoader) throws EvalError {
 		Assert.hasText(scriptSource, "Script source must not be empty");
 		Interpreter interpreter = new Interpreter();
-		interpreter.setClassLoader(classLoader);
+		if (classLoader != null) {
+			interpreter.setClassLoader(classLoader);
+		}
 		Object result = interpreter.eval(scriptSource);
 		if (result instanceof Class) {
 			return (Class<?>) result;

@@ -141,8 +141,8 @@ public abstract class StatementCreatorUtils {
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
-			throws SQLException {
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param,
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
 	}
@@ -157,8 +157,8 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
-			throws SQLException {
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType,
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
 	}
@@ -176,7 +176,7 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-			Object inValue) throws SQLException {
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
 	}

@@ -145,6 +145,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	private static class SettableTask<T> extends ListenableFutureTask<T> {
 
+		@Nullable
 		private volatile Thread completingThread;
 
 		@SuppressWarnings("unchecked")

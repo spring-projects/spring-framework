@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleLocaleContext implements LocaleContext {
 
+	@Nullable
 	private final Locale locale;
 
 
@@ -45,6 +46,7 @@ public class SimpleLocaleContext implements LocaleContext {
 	}
 
 	@Override
+	@Nullable
 	public Locale getLocale() {
 		return this.locale;
 	}

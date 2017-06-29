@@ -188,6 +188,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		DataSource ds = this.jdbcTemplate.getDataSource();
 		Assert.state(ds != null, "No DataSource set");
+		Assert.state(this.applicationContext != null, "No ApplicationContext available");
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(ds);
 	}

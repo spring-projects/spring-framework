@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class SockJsException extends NestedRuntimeException {
 
+	@Nullable
 	private final String sessionId;
 
 
@@ -55,6 +56,7 @@ public class SockJsException extends NestedRuntimeException {
 	/**
 	 * Return the SockJS session id.
 	 */
+	@Nullable
 	public String getSockJsSessionId() {
 		return this.sessionId;
 	}

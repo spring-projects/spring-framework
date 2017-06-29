@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -105,12 +104,12 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof NameMatchMethodPointcut &&
-				ObjectUtils.nullSafeEquals(this.mappedNames, ((NameMatchMethodPointcut) other).mappedNames)));
+				this.mappedNames.equals(((NameMatchMethodPointcut) other).mappedNames)));
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.mappedNames != null ? this.mappedNames.hashCode() : 0);
+		return this.mappedNames.hashCode();
 	}
 
 }

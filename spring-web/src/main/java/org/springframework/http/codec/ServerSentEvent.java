@@ -36,18 +36,25 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEvent<T> {
 
+	@Nullable
     private final String id;
 
+	@Nullable
     private final String event;
 
+	@Nullable
     private final Duration retry;
 
+	@Nullable
     private final String comment;
 
+	@Nullable
 	private final T data;
 
 
-    private ServerSentEvent(String id, String event, Duration retry, String comment, T data) {
+    private ServerSentEvent(@Nullable String id, @Nullable String event, @Nullable Duration retry,
+			@Nullable String comment, @Nullable T data) {
+
         this.id = id;
         this.event = event;
         this.retry = retry;
@@ -167,7 +174,7 @@ public class ServerSentEvent<T> {
 		 * @param data the value of the data field
 		 * @return {@code this} builder
 		 */
-		Builder<T> data(T data);
+		Builder<T> data(@Nullable T data);
 
         /**
          * Builds the event.
@@ -179,14 +186,19 @@ public class ServerSentEvent<T> {
 
     private static class BuilderImpl<T> implements Builder<T> {
 
+		@Nullable
         private String id;
 
+		@Nullable
         private String event;
 
+		@Nullable
         private Duration retry;
 
+		@Nullable
         private String comment;
 
+		@Nullable
 		private T data;
 
 		public BuilderImpl() {
@@ -221,7 +233,7 @@ public class ServerSentEvent<T> {
         }
 
 		@Override
-		public Builder<T> data(T data) {
+		public Builder<T> data(@Nullable T data) {
 			this.data = data;
 			return this;
 		}

@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -37,6 +38,7 @@ public class EmbeddedValueResolver implements StringValueResolver {
 
 	private final BeanExpressionContext exprContext;
 
+	@Nullable
 	private final BeanExpressionResolver exprResolver;
 
 

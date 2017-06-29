@@ -48,6 +48,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
+	@Nullable
 	private final String name;
 
 	private final PatternsRequestCondition patternsCondition;
@@ -392,18 +393,25 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private String[] paths;
 
+		@Nullable
 		private RequestMethod[] methods;
 
+		@Nullable
 		private String[] params;
 
+		@Nullable
 		private String[] headers;
 
+		@Nullable
 		private String[] consumes;
 
+		@Nullable
 		private String[] produces;
 
+		@Nullable
 		private String mappingName;
 
+		@Nullable
 		private RequestCondition<?> customCondition;
 
 		private BuilderConfiguration options = new BuilderConfiguration();
@@ -492,17 +500,19 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
+		@Nullable
 		private PathPatternParser patternParser;
 
+		@Nullable
 		private RequestedContentTypeResolver contentTypeResolver;
+
+		public void setPatternParser(PathPatternParser patternParser) {
+			this.patternParser = patternParser;
+		}
 
 		@Nullable
 		public PathPatternParser getPatternParser() {
 			return this.patternParser;
-		}
-
-		public void setPatternParser(PathPatternParser patternParser) {
-			this.patternParser = patternParser;
 		}
 
 		/**

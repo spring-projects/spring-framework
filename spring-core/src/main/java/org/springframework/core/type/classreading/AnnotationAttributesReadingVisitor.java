@@ -47,6 +47,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 
 	private final MultiValueMap<String, AnnotationAttributes> attributesMap;
 
+	@Nullable
 	private final Map<String, Set<String>> metaAnnotationMap;
 
 

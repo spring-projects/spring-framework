@@ -28,7 +28,9 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Clob;
 import java.sql.SQLException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Simple JDBC {@link Clob} adapter that exposes a given String or character stream.
@@ -39,10 +41,13 @@ import org.springframework.util.FileCopyUtils;
  */
 class PassThroughClob implements Clob {
 
+	@Nullable
 	private String content;
 
+	@Nullable
 	private Reader characterStream;
 
+	@Nullable
 	private InputStream asciiStream;
 
 	private long contentLength;
@@ -78,7 +83,9 @@ class PassThroughClob implements Clob {
 			return this.characterStream;
 		}
 		else {
-			return new InputStreamReader(this.asciiStream, StandardCharsets.US_ASCII);
+			return new InputStreamReader(
+					(this.asciiStream != null ? this.asciiStream : StreamUtils.emptyInput()),
+					StandardCharsets.US_ASCII);
 		}
 	}
 
@@ -93,7 +100,7 @@ class PassThroughClob implements Clob {
 				return new ByteArrayInputStream(tempContent.getBytes(StandardCharsets.US_ASCII));
 			}
 			else {
-				return this.asciiStream;
+				return (this.asciiStream != null ? this.asciiStream : StreamUtils.emptyInput());
 			}
 		}
 		catch (IOException ex) {

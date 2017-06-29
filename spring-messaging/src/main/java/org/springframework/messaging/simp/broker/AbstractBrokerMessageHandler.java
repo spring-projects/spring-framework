@@ -59,6 +59,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private final Collection<String> destinationPrefixes;
 
+	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
 	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
@@ -132,6 +133,7 @@ public abstract class AbstractBrokerMessageHandler
 		this.eventPublisher = publisher;
 	}
 
+	@Nullable
 	public ApplicationEventPublisher getApplicationEventPublisher() {
 		return this.eventPublisher;
 	}

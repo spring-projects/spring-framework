@@ -49,7 +49,7 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	 */
 	@Override
 	protected ServletRequestDataBinder createBinderInstance(
-			@Nullable Object target, @Nullable String objectName, NativeWebRequest request) throws Exception  {
+			@Nullable Object target, String objectName, NativeWebRequest request) throws Exception  {
 
 		return new ExtendedServletRequestDataBinder(target, objectName);
 	}

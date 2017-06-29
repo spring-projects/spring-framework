@@ -102,29 +102,37 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Optional provider for the type.
 	 */
+	@Nullable
 	private final TypeProvider typeProvider;
 
 	/**
 	 * The {@code VariableResolver} to use or {@code null} if no resolver is available.
 	 */
+	@Nullable
 	private final VariableResolver variableResolver;
 
 	/**
 	 * The component type for an array or {@code null} if the type should be deduced.
 	 */
+	@Nullable
 	private final ResolvableType componentType;
 
 	/**
 	 * Copy of the resolved value.
 	 */
+	@Nullable
 	private final Class<?> resolved;
 
+	@Nullable
 	private final Integer hash;
 
+	@Nullable
 	private ResolvableType superType;
 
+	@Nullable
 	private ResolvableType[] interfaces;
 
+	@Nullable
 	private ResolvableType[] generics;
 
 
@@ -147,7 +155,7 @@ public class ResolvableType implements Serializable {
 	 * @since 4.2
 	 */
 	private ResolvableType(Type type, @Nullable TypeProvider typeProvider,
-			@Nullable VariableResolver variableResolver, Integer hash) {
+			@Nullable VariableResolver variableResolver, @Nullable Integer hash) {
 
 		this.type = type;
 		this.typeProvider = typeProvider;
@@ -1131,7 +1139,7 @@ public class ResolvableType implements Serializable {
 	 * @return a {@link ResolvableType} for the specified field
 	 * @see #forField(Field)
 	 */
-	public static ResolvableType forField(Field field, int nestingLevel, Class<?> implementationClass) {
+	public static ResolvableType forField(Field field, int nestingLevel, @Nullable Class<?> implementationClass) {
 		Assert.notNull(field, "Field must not be null");
 		ResolvableType owner = forType(implementationClass).as(field.getDeclaringClass());
 		return forType(null, new FieldTypeProvider(field), owner.asVariableResolver()).getNested(nestingLevel);

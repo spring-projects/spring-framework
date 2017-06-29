@@ -56,6 +56,7 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
+	@Nullable
 	private final ContentNegotiationManager contentNegotiationManager;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
@@ -142,9 +143,11 @@ public class ResourceHandlerRegistry {
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
+				if (this.contentNegotiationManager != null) {
+					handler.setContentNegotiationManager(this.contentNegotiationManager);
+				}
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.applicationContext);
-				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}

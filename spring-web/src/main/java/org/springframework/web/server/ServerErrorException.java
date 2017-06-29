@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ServerErrorException extends ResponseStatusException {
 
+	@Nullable
 	private final MethodParameter parameter;
 
 

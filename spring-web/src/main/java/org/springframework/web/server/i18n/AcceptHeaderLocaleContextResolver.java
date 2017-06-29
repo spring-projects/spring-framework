@@ -42,6 +42,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 
 	private final List<Locale> supportedLocales = new ArrayList<>(4);
 
+	@Nullable
 	private Locale defaultLocale;
 
 

@@ -149,8 +149,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
+	@Nullable
 	private transient UserTransaction userTransaction;
 
+	@Nullable
 	private String userTransactionName;
 
 	private boolean autodetectUserTransaction = true;
@@ -159,14 +161,18 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private boolean userTransactionObtainedFromJndi = false;
 
+	@Nullable
 	private transient TransactionManager transactionManager;
 
+	@Nullable
 	private String transactionManagerName;
 
 	private boolean autodetectTransactionManager = true;
 
+	@Nullable
 	private transient TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
+	@Nullable
 	private String transactionSynchronizationRegistryName;
 
 	private boolean autodetectTransactionSynchronizationRegistry = true;
@@ -743,8 +749,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException in case of errors
 	 */
 	@Nullable
-	protected TransactionSynchronizationRegistry findTransactionSynchronizationRegistry(UserTransaction ut, TransactionManager tm)
-			throws TransactionSystemException {
+	protected TransactionSynchronizationRegistry findTransactionSynchronizationRegistry(
+			@Nullable UserTransaction ut, @Nullable TransactionManager tm) throws TransactionSystemException {
 
 		if (this.userTransactionObtainedFromJndi) {
 			// UserTransaction has already been obtained from JNDI, so the

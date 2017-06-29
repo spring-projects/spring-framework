@@ -32,8 +32,10 @@ public class ImportDefinition implements BeanMetadataElement {
 
 	private final String importedResource;
 
+	@Nullable
 	private final Resource[] actualResources;
 
+	@Nullable
 	private final Object source;
 
 
@@ -74,11 +76,13 @@ public class ImportDefinition implements BeanMetadataElement {
 		return this.importedResource;
 	}
 
+	@Nullable
 	public final Resource[] getActualResources() {
 		return this.actualResources;
 	}
 
 	@Override
+	@Nullable
 	public final Object getSource() {
 		return this.source;
 	}

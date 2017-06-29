@@ -54,18 +54,25 @@ public class WebSocketMessageBrokerStats {
 	private static final Log logger = LogFactory.getLog(WebSocketMessageBrokerStats.class);
 
 
+	@Nullable
 	private SubProtocolWebSocketHandler webSocketHandler;
 
+	@Nullable
 	private StompSubProtocolHandler stompSubProtocolHandler;
 
+	@Nullable
 	private StompBrokerRelayMessageHandler stompBrokerRelay;
 
+	@Nullable
 	private ThreadPoolExecutor inboundChannelExecutor;
 
+	@Nullable
 	private ThreadPoolExecutor outboundChannelExecutor;
 
+	@Nullable
 	private ScheduledThreadPoolExecutor sockJsTaskScheduler;
 
+	@Nullable
 	private ScheduledFuture<?> loggingTask;
 
 	private long loggingPeriod = 30 * 60 * 1000;
@@ -78,6 +85,9 @@ public class WebSocketMessageBrokerStats {
 
 	@Nullable
 	private StompSubProtocolHandler initStompSubProtocolHandler() {
+		if (this.webSocketHandler == null) {
+			return null;
+		}
 		for (SubProtocolHandler handler : this.webSocketHandler.getProtocolHandlers()) {
 			if (handler instanceof StompSubProtocolHandler) {
 				return (StompSubProtocolHandler) handler;
@@ -104,12 +114,12 @@ public class WebSocketMessageBrokerStats {
 
 	public void setSockJsTaskScheduler(ThreadPoolTaskScheduler sockJsTaskScheduler) {
 		this.sockJsTaskScheduler = sockJsTaskScheduler.getScheduledThreadPoolExecutor();
-		this.loggingTask = initLoggingTask(1 * 60 * 1000);
+		this.loggingTask = initLoggingTask(60 * 1000);
 	}
 
 	@Nullable
 	private ScheduledFuture<?> initLoggingTask(long initialDelay) {
-		if (logger.isInfoEnabled() && this.loggingPeriod > 0) {
+		if (this.sockJsTaskScheduler != null && this.loggingPeriod > 0 && logger.isInfoEnabled()) {
 			return this.sockJsTaskScheduler.scheduleAtFixedRate(() ->
 							logger.info(WebSocketMessageBrokerStats.this.toString()),
 					initialDelay, this.loggingPeriod, TimeUnit.MILLISECONDS);

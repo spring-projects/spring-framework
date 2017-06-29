@@ -141,6 +141,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String CONSTRUCTOR_ARG_PREFIX = "$";
 
 
+	@Nullable
 	private String defaultParentBean;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
@@ -168,13 +169,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * not apply to a bean definition that carries a class is there for
 	 * backwards compatibility reasons. It still matches the typical use case.
 	 */
-	public void setDefaultParentBean(String defaultParentBean) {
+	public void setDefaultParentBean(@Nullable String defaultParentBean) {
 		this.defaultParentBean = defaultParentBean;
 	}
 
 	/**
 	 * Return the default parent bean for this bean factory.
 	 */
+	@Nullable
 	public String getDefaultParentBean() {
 		return this.defaultParentBean;
 	}

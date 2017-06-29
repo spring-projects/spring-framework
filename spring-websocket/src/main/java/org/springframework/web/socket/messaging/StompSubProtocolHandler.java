@@ -90,6 +90,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
+	@Nullable
 	private StompSubProtocolErrorHandler errorHandler;
 
 	private int messageSizeLimit = 64 * 1024;
@@ -100,12 +101,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<>();
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<>();
 
+	@Nullable
 	private Boolean immutableMessageInterceptorPresent;
 
+	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
 	private final Stats stats = new Stats();
@@ -289,13 +293,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 						}
 						if (this.eventPublisher != null) {
 							if (isConnect) {
-								publishEvent(new SessionConnectEvent(this, message, user));
+								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
 							}
 							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-								publishEvent(new SessionSubscribeEvent(this, message, user));
+								publishEvent(this.eventPublisher, new SessionSubscribeEvent(this, message, user));
 							}
 							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-								publishEvent(new SessionUnsubscribeEvent(this, message, user));
+								publishEvent(this.eventPublisher, new SessionUnsubscribeEvent(this, message, user));
 							}
 						}
 					}
@@ -372,9 +376,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return false;
 	}
 
-	private void publishEvent(ApplicationEvent event) {
+	private void publishEvent(ApplicationEventPublisher publisher, ApplicationEvent event) {
 		try {
-			this.eventPublisher.publishEvent(event);
+			publisher.publishEvent(event);
 		}
 		catch (Throwable ex) {
 			if (logger.isErrorEnabled()) {
@@ -418,7 +422,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);
 					Principal user = getUser(session);
-					publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message, user));
+					publishEvent(this.eventPublisher, new SessionConnectedEvent(this, (Message<byte[]>) message, user));
 				}
 				finally {
 					SimpAttributesContextHolder.resetAttributes();
@@ -604,7 +608,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
 			if (this.eventPublisher != null) {
 				Principal user = getUser(session);
-				publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
+				publishEvent(this.eventPublisher, new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}

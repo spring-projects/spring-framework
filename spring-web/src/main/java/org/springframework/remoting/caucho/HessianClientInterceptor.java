@@ -68,6 +68,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 	private HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
+	@Nullable
 	private Object hessianProxy;
 
 

@@ -62,6 +62,7 @@ public class MockPageContext extends PageContext {
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
+	@Nullable
 	private JspWriter out;
 
 

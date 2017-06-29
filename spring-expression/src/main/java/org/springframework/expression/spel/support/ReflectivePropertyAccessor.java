@@ -76,6 +76,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<>(64);
 
+	@Nullable
 	private InvokerPair lastReadInvokerPair;
 
 
@@ -122,8 +123,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return false;
 	}
 
+	@Nullable
 	public Member getLastReadInvokerPair() {
-		return this.lastReadInvokerPair.member;
+		InvokerPair lastReadInvoker = this.lastReadInvokerPair;
+		return (lastReadInvoker != null ? lastReadInvoker.member : null);
 	}
 
 	@Override

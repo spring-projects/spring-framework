@@ -71,8 +71,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected ObjectMapper objectMapper;
 
+	@Nullable
 	private Boolean prettyPrint;
 
+	@Nullable
 	private PrettyPrinter ssePrettyPrinter;
 
 
@@ -119,6 +121,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
+	@Nullable
 	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}

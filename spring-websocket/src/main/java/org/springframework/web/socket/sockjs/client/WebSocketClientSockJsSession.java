@@ -39,6 +39,7 @@ import org.springframework.web.socket.adapter.NativeWebSocketSession;
  */
 public class WebSocketClientSockJsSession extends AbstractClientSockJsSession implements NativeWebSocketSession {
 
+	@Nullable
 	private WebSocketSession webSocketSession;
 
 
@@ -51,6 +52,7 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 
 	@Override
 	public Object getNativeSession() {
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession;
 	}
 
@@ -62,54 +64,50 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getLocalAddress();
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getRemoteAddress();
 	}
 
 	@Override
 	public String getAcceptedProtocol() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getAcceptedProtocol();
 	}
 
 	@Override
 	public void setTextMessageSizeLimit(int messageSizeLimit) {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		this.webSocketSession.setTextMessageSizeLimit(messageSizeLimit);
 	}
 
 	@Override
 	public int getTextMessageSizeLimit() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getTextMessageSizeLimit();
 	}
 
 	@Override
 	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		this.webSocketSession.setBinaryMessageSizeLimit(messageSizeLimit);
 	}
 
 	@Override
 	public int getBinaryMessageSizeLimit() {
-		checkDelegateSessionInitialized();
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getBinaryMessageSizeLimit();
 	}
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		checkDelegateSessionInitialized();
-		return this.webSocketSession.getExtensions();
-	}
-
-	private void checkDelegateSessionInitialized() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
+		return this.webSocketSession.getExtensions();
 	}
 
 	public void initializeDelegateSession(WebSocketSession session) {
@@ -118,6 +116,7 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 
 	@Override
 	protected void sendInternal(TextMessage textMessage) throws IOException {
+		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		this.webSocketSession.sendMessage(textMessage);
 	}
 

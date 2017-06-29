@@ -53,35 +53,43 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
+	@Nullable
 	private BeanDefinitionHolder decoratedDefinition;
 
+	@Nullable
 	private AnnotatedElement qualifiedElement;
 
 	boolean allowCaching = true;
 
 	boolean isFactoryMethodUnique = false;
 
+	@Nullable
 	volatile ResolvableType targetType;
 
 	/** Package-visible field for caching the determined Class of a given bean definition */
+	@Nullable
 	volatile Class<?> resolvedTargetType;
 
 	/** Package-visible field for caching the return type of a generically typed factory method */
+	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
 
 	/** Common lock for the four constructor fields below */
 	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
+	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
 
 	/** Package-visible field that marks the constructor arguments as resolved */
 	boolean constructorArgumentsResolved = false;
 
 	/** Package-visible field for caching fully resolved constructor arguments */
+	@Nullable
 	Object[] resolvedConstructorArguments;
 
 	/** Package-visible field for caching partly prepared constructor arguments */
+	@Nullable
 	Object[] preparedConstructorArguments;
 
 	/** Common lock for the two post-processing fields below */
@@ -91,12 +99,16 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	boolean postProcessed = false;
 
 	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	@Nullable
 	volatile Boolean beforeInstantiationResolved;
 
+	@Nullable
 	private Set<Member> externallyManagedConfigMembers;
 
+	@Nullable
 	private Set<String> externallyManagedInitMethods;
 
+	@Nullable
 	private Set<String> externallyManagedDestroyMethods;
 
 
@@ -304,7 +316,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (this.resolvedTargetType != null) {
 			return this.resolvedTargetType;
 		}
-		return (this.targetType != null ? this.targetType.resolve() : null);
+		ResolvableType targetType = this.targetType;
+		return (targetType != null ? targetType.resolve() : null);
 	}
 
 	/**

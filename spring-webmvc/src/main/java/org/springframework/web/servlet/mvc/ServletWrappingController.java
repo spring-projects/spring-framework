@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -84,14 +85,18 @@ import org.springframework.web.servlet.ModelAndView;
 public class ServletWrappingController extends AbstractController
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private Class<? extends Servlet> servletClass;
 
+	@Nullable
 	private String servletName;
 
 	private Properties initParameters = new Properties();
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Servlet servletInstance;
 
 
@@ -156,6 +161,7 @@ public class ServletWrappingController extends AbstractController
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		Assert.state(this.servletInstance != null, "No Servlet instance");
 		this.servletInstance.service(request, response);
 		return null;
 	}
@@ -167,7 +173,9 @@ public class ServletWrappingController extends AbstractController
 	 */
 	@Override
 	public void destroy() {
-		this.servletInstance.destroy();
+		if (this.servletInstance != null) {
+			this.servletInstance.destroy();
+		}
 	}
 
 
@@ -179,6 +187,7 @@ public class ServletWrappingController extends AbstractController
 	private class DelegatingServletConfig implements ServletConfig {
 
 		@Override
+		@Nullable
 		public String getServletName() {
 			return servletName;
 		}

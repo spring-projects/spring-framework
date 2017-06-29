@@ -60,7 +60,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 
 
 	@Override
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 

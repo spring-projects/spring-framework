@@ -47,6 +47,7 @@ public class DefaultServletHandlerConfigurer {
 
 	private final ServletContext servletContext;
 
+	@Nullable
 	private DefaultServletHttpRequestHandler handler;
 
 

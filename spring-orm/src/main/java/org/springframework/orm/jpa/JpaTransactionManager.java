@@ -113,12 +113,15 @@ import org.springframework.util.CollectionUtils;
 public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private EntityManagerFactory entityManagerFactory;
 
+	@Nullable
 	private String persistenceUnitName;
 
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
+	@Nullable
 	private DataSource dataSource;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
@@ -630,19 +633,23 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	private class JpaTransactionObject extends JdbcTransactionObjectSupport {
 
+		@Nullable
 		private EntityManagerHolder entityManagerHolder;
 
 		private boolean newEntityManagerHolder;
 
+		@Nullable
 		private Object transactionData;
 
 		public void setEntityManagerHolder(
 				@Nullable EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
+
 			this.entityManagerHolder = entityManagerHolder;
 			this.newEntityManagerHolder = newEntityManagerHolder;
 		}
 
 		public EntityManagerHolder getEntityManagerHolder() {
+			Assert.state(this.entityManagerHolder != null, "No EntityManagerHolder available");
 			return this.entityManagerHolder;
 		}
 
@@ -660,18 +667,19 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		public void setTransactionData(@Nullable Object transactionData) {
 			this.transactionData = transactionData;
-			this.entityManagerHolder.setTransactionActive(true);
+			getEntityManagerHolder().setTransactionActive(true);
 			if (transactionData instanceof SavepointManager) {
-				this.entityManagerHolder.setSavepointManager((SavepointManager) transactionData);
+				getEntityManagerHolder().setSavepointManager((SavepointManager) transactionData);
 			}
 		}
 
+		@Nullable
 		public Object getTransactionData() {
 			return this.transactionData;
 		}
 
 		public void setRollbackOnly() {
-			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			EntityTransaction tx = getEntityManagerHolder().getEntityManager().getTransaction();
 			if (tx.isActive()) {
 				tx.setRollbackOnly();
 			}
@@ -682,14 +690,14 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public boolean isRollbackOnly() {
-			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			EntityTransaction tx = getEntityManagerHolder().getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
 		}
 
 		@Override
 		public void flush() {
 			try {
-				this.entityManagerHolder.getEntityManager().flush();
+				getEntityManagerHolder().getEntityManager().flush();
 			}
 			catch (RuntimeException ex) {
 				throw DataAccessUtils.translateIfNecessary(ex, getJpaDialect());
@@ -698,7 +706,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public Object createSavepoint() throws TransactionException {
-			if (this.entityManagerHolder.isRollbackOnly()) {
+			if (getEntityManagerHolder().isRollbackOnly()) {
 				throw new CannotCreateTransactionException(
 						"Cannot create savepoint for transaction which is already marked as rollback-only");
 			}
@@ -708,7 +716,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().rollbackToSavepoint(savepoint);
-			this.entityManagerHolder.resetRollbackOnly();
+			getEntityManagerHolder().resetRollbackOnly();
 		}
 
 		@Override
@@ -739,6 +747,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		private final EntityManagerHolder entityManagerHolder;
 
+		@Nullable
 		private final ConnectionHolder connectionHolder;
 
 		private SuspendedResourcesHolder(EntityManagerHolder emHolder, @Nullable ConnectionHolder conHolder) {

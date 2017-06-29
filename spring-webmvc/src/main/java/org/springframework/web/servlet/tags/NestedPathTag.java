@@ -49,9 +49,11 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	public static final String NESTED_PATH_VARIABLE_NAME = "nestedPath";
 
 
+	@Nullable
 	private String path;
 
 	/** Caching a previous nested path, so that it may be reset */
+	@Nullable
 	private String previousNestedPath;
 
 
@@ -74,6 +76,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	/**
 	 * Return the path that this tag applies to.
 	 */
+	@Nullable
 	public String getPath() {
 		return this.path;
 	}

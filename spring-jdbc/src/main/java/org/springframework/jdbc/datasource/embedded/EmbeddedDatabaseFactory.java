@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Logger;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -77,10 +76,13 @@ public class EmbeddedDatabaseFactory {
 
 	private DataSourceFactory dataSourceFactory = new SimpleDriverDataSourceFactory();
 
+	@Nullable
 	private EmbeddedDatabaseConfigurer databaseConfigurer;
 
+	@Nullable
 	private DatabasePopulator databasePopulator;
 
+	@Nullable
 	private DataSource dataSource;
 
 
@@ -222,7 +224,9 @@ public class EmbeddedDatabaseFactory {
 					logger.info(String.format("Shutting down embedded database '%s'", this.databaseName));
 				}
 			}
-			this.databaseConfigurer.shutdown(this.dataSource, this.databaseName);
+			if (this.databaseConfigurer != null) {
+				this.databaseConfigurer.shutdown(this.dataSource, this.databaseName);
+			}
 			this.dataSource = null;
 		}
 	}

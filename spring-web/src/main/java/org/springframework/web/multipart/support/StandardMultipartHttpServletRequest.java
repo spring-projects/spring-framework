@@ -61,6 +61,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	private static final String FILENAME_WITH_CHARSET_KEY = "filename*=";
 
 
+	@Nullable
 	private Set<String> multipartParameterNames;
 
 

@@ -40,6 +40,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	private Class<?> clazz;
 
+	@Nullable
 	private String methodName;
 
 	private volatile int evaluations;

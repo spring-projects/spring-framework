@@ -61,16 +61,22 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	private final String scriptSourceLocator;
 
+	@Nullable
 	private GroovyObjectCustomizer groovyObjectCustomizer;
 
+	@Nullable
 	private CompilerConfiguration compilerConfiguration;
 
+	@Nullable
 	private GroovyClassLoader groovyClassLoader;
 
+	@Nullable
 	private Class<?> scriptClass;
 
+	@Nullable
 	private Class<?> scriptResultClass;
 
+	@Nullable
 	private CachedResultHolder cachedResult;
 
 	private final Object scriptClassMonitor = new Object();
@@ -348,6 +354,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 */
 	private static class CachedResultHolder {
 
+		@Nullable
 		public final Object object;
 
 		public CachedResultHolder(@Nullable Object object) {

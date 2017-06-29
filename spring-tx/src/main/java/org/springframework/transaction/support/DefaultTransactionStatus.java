@@ -50,6 +50,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
+	@Nullable
 	private final Object transaction;
 
 	private final boolean newTransaction;
@@ -60,6 +61,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	private final boolean debug;
 
+	@Nullable
 	private final Object suspendedResources;
 
 

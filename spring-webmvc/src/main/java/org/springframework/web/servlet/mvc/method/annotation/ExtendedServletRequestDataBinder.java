@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -51,7 +50,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * @param objectName the name of the target object
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
-	public ExtendedServletRequestDataBinder(@Nullable Object target, @Nullable String objectName) {
+	public ExtendedServletRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}
 

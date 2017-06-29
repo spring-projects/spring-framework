@@ -54,8 +54,10 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 			InstrumentationLoadTimeWeaver.class.getClassLoader());
 
 
+	@Nullable
 	private final ClassLoader classLoader;
 
+	@Nullable
 	private final Instrumentation instrumentation;
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<>(4);
@@ -115,7 +117,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public void removeTransformers() {
 		synchronized (this.transformers) {
-			if (!this.transformers.isEmpty()) {
+			if (this.instrumentation != null && !this.transformers.isEmpty()) {
 				for (int i = this.transformers.size() - 1; i >= 0; i--) {
 					this.instrumentation.removeTransformer(this.transformers.get(i));
 				}
@@ -167,9 +169,12 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 		private final ClassFileTransformer targetTransformer;
 
+		@Nullable
 		private final ClassLoader targetClassLoader;
 
-		public FilteringClassFileTransformer(ClassFileTransformer targetTransformer, ClassLoader targetClassLoader) {
+		public FilteringClassFileTransformer(
+				ClassFileTransformer targetTransformer, @Nullable ClassLoader targetClassLoader) {
+
 			this.targetTransformer = targetTransformer;
 			this.targetClassLoader = targetClassLoader;
 		}
@@ -179,7 +184,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
-			if (!this.targetClassLoader.equals(loader)) {
+			if (this.targetClassLoader != loader) {
 				return null;
 			}
 			return this.targetTransformer.transform(

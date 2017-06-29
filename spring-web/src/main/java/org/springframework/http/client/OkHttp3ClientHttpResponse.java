@@ -23,6 +23,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
@@ -38,7 +39,8 @@ class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final Response response;
 
-	private HttpHeaders headers;
+	@Nullable
+	private volatile HttpHeaders headers;
 
 
 	public OkHttp3ClientHttpResponse(Response response) {
@@ -65,8 +67,9 @@ class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			HttpHeaders headers = new HttpHeaders();
+		HttpHeaders headers = this.headers;
+		if (headers == null) {
+			headers = new HttpHeaders();
 			for (String headerName : this.response.headers().names()) {
 				for (String headerValue : this.response.headers(headerName)) {
 					headers.add(headerName, headerValue);
@@ -74,7 +77,7 @@ class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
 			}
 			this.headers = headers;
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.jsp.JspException;
@@ -65,18 +66,23 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
 
 
+	@Nullable
 	private MessageSourceResolvable message;
 
+	@Nullable
 	private String code;
 
+	@Nullable
 	private Object arguments;
 
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
-	private List<Object> nestedArguments;
+	private List<Object> nestedArguments = Collections.emptyList();
 
+	@Nullable
 	private String text;
 
+	@Nullable
 	private String var;
 
 	private String scope = TagUtils.SCOPE_PAGE;

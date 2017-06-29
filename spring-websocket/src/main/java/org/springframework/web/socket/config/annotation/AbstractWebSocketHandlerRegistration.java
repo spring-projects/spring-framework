@@ -46,14 +46,17 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	private final MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<>();
 
+	@Nullable
 	private HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	@Nullable
 	private SockJsServiceRegistration sockJsServiceRegistration;
 
+	@Nullable
 	private TaskScheduler scheduler;
 
 
@@ -86,6 +89,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		return this;
 	}
 
+	@Nullable
 	protected HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
 	}

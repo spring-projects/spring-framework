@@ -25,6 +25,7 @@ import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
 import org.springframework.jmx.export.metadata.ManagedNotification;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,10 +38,10 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
 
+	@Nullable
 	private ModelMBeanNotificationInfo[] notificationInfos;
 
-	private final Map<String, ModelMBeanNotificationInfo[]> notificationInfoMappings =
-			new HashMap<>();
+	private final Map<String, ModelMBeanNotificationInfo[]> notificationInfoMappings = new HashMap<>();
 
 
 	public void setNotificationInfos(ManagedNotification[] notificationInfos) {

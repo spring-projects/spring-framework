@@ -51,9 +51,11 @@ public abstract class LocaleContextHolder {
 			new NamedInheritableThreadLocal<>("LocaleContext");
 
 	// Shared default locale at the framework level
+	@Nullable
 	private static Locale defaultLocale;
 
 	// Shared default time zone at the framework level
+	@Nullable
 	private static TimeZone defaultTimeZone;
 
 

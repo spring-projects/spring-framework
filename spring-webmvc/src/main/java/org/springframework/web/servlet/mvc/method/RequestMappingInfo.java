@@ -53,6 +53,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
+	@Nullable
 	private final String name;
 
 	private final PatternsRequestCondition patternsCondition;
@@ -418,8 +419,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private String[] produces = new String[0];
 
+		@Nullable
 		private String mappingName;
 
+		@Nullable
 		private RequestCondition<?> customCondition;
 
 		private BuilderConfiguration options = new BuilderConfiguration();
@@ -511,8 +514,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
+		@Nullable
 		private UrlPathHelper urlPathHelper;
 
+		@Nullable
 		private PathMatcher pathMatcher;
 
 		private boolean trailingSlashMatch = true;
@@ -521,6 +526,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private boolean registeredSuffixPatternMatch = false;
 
+		@Nullable
 		private ContentNegotiationManager contentNegotiationManager;
 
 		/**
@@ -614,7 +620,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 */
 		@Nullable
 		public List<String> getFileExtensions() {
-			if (useRegisteredSuffixPatternMatch() && getContentNegotiationManager() != null) {
+			if (useRegisteredSuffixPatternMatch() && this.contentNegotiationManager != null) {
 				return this.contentNegotiationManager.getAllFileExtensions();
 			}
 			return null;

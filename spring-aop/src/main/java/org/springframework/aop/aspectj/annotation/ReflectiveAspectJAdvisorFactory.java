@@ -86,6 +86,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 
@@ -209,7 +210,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
-		ajexp.setBeanFactory(this.beanFactory);
+		if (this.beanFactory != null) {
+			ajexp.setBeanFactory(this.beanFactory);
+		}
 		return ajexp;
 	}
 

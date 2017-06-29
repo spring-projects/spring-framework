@@ -56,9 +56,9 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 
 	public static final String MBEAN_APPLICATION_KEY = "application";
 
-	private static final Set<ConfigurableApplicationContext> applicationContexts =
-			new LinkedHashSet<>();
+	private static final Set<ConfigurableApplicationContext> applicationContexts = new LinkedHashSet<>();
 
+	@Nullable
 	private static String applicationName;
 
 
@@ -103,6 +103,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	}
 
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
 

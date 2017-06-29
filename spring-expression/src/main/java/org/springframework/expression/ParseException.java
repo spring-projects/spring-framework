@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.expression;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represent an exception that occurs during expression parsing.
  *
@@ -31,7 +33,7 @@ public class ParseException extends ExpressionException {
 	 * @param position the position in the expression string where the problem occurred
 	 * @param message description of the problem that occurred
 	 */
-	public ParseException(String expressionString, int position, String message) {
+	public ParseException(@Nullable String expressionString, int position, String message) {
 		super(expressionString, position, message);
 	}
 

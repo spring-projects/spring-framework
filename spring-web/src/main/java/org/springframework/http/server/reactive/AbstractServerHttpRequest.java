@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -45,8 +46,10 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private MultiValueMap<String, String> queryParams;
 
+	@Nullable
 	private MultiValueMap<String, HttpCookie> cookies;
 
 

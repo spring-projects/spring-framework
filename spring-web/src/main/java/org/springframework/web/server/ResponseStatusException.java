@@ -34,6 +34,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 
 	private final HttpStatus status;
 
+	@Nullable
 	private final String reason;
 
 

@@ -52,8 +52,10 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	private final BeanDefinitionRegistry registry;
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 	private Environment environment;
@@ -120,11 +122,12 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
-	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
 	@Override
+	@Nullable
 	public ResourceLoader getResourceLoader() {
 		return this.resourceLoader;
 	}
@@ -141,6 +144,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}

@@ -51,8 +51,10 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	public static final String VALUE_0 = "0";
 
 
+	@Nullable
 	private final String trueString;
 
+	@Nullable
 	private final String falseString;
 
 	private final boolean allowEmpty;

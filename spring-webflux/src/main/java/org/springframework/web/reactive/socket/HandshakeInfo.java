@@ -41,6 +41,7 @@ public class HandshakeInfo {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final String protocol;
 
 

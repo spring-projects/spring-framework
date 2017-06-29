@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -89,6 +88,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 
+		@Nullable
 		private final Map<?, ?> context;
 
 		public RowMapperImpl(@Nullable Map<?, ?> context) {

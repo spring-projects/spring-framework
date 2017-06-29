@@ -91,20 +91,26 @@ import org.springframework.util.ClassUtils;
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
+	@Nullable
 	private ConversionService conversionService;
 
 	private boolean defaultEditorsActive = false;
 
 	private boolean configValueEditorsActive = false;
 
+	@Nullable
 	private Map<Class<?>, PropertyEditor> defaultEditors;
 
+	@Nullable
 	private Map<Class<?>, PropertyEditor> overriddenDefaultEditors;
 
+	@Nullable
 	private Map<Class<?>, PropertyEditor> customEditors;
 
+	@Nullable
 	private Map<String, CustomEditorHolder> customEditorsForPath;
 
+	@Nullable
 	private Map<Class<?>, PropertyEditor> customEditorCache;
 
 
@@ -378,7 +384,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 */
 	@Nullable
 	private PropertyEditor getCustomEditor(String propertyName, @Nullable Class<?> requiredType) {
-		CustomEditorHolder holder = this.customEditorsForPath.get(propertyName);
+		CustomEditorHolder holder =
+				(this.customEditorsForPath != null ? this.customEditorsForPath.get(propertyName) : null);
 		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
 	}
 
@@ -517,6 +524,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		private final PropertyEditor propertyEditor;
 
+		@Nullable
 		private final Class<?> registeredType;
 
 		private CustomEditorHolder(PropertyEditor propertyEditor, @Nullable Class<?> registeredType) {

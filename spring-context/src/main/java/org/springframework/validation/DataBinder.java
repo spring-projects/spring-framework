@@ -120,12 +120,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
+	@Nullable
 	private final Object target;
 
 	private final String objectName;
 
+	@Nullable
 	private AbstractPropertyBindingResult bindingResult;
 
+	@Nullable
 	private SimpleTypeConverter typeConverter;
 
 	private boolean ignoreUnknownFields = true;
@@ -136,14 +139,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private int autoGrowCollectionLimit = DEFAULT_AUTO_GROW_COLLECTION_LIMIT;
 
+	@Nullable
 	private String[] allowedFields;
 
+	@Nullable
 	private String[] disallowedFields;
 
+	@Nullable
 	private String[] requiredFields;
 
+	@Nullable
 	private ConversionService conversionService;
 
+	@Nullable
 	private MessageCodesResolver messageCodesResolver;
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
@@ -167,7 +175,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
-	public DataBinder(@Nullable Object target, @Nullable String objectName) {
+	public DataBinder(@Nullable Object target, String objectName) {
 		this.target = ObjectUtils.unwrapOptional(target);
 		this.objectName = objectName;
 	}
@@ -424,6 +432,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the fields that should be allowed for binding.
 	 * @return array of field names
 	 */
+	@Nullable
 	public String[] getAllowedFields() {
 		return this.allowedFields;
 	}
@@ -447,6 +456,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the fields that should <i>not</i> be allowed for binding.
 	 * @return array of field names
 	 */
+	@Nullable
 	public String[] getDisallowedFields() {
 		return this.disallowedFields;
 	}
@@ -473,6 +483,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the fields that are required for each binding process.
 	 * @return array of field names
 	 */
+	@Nullable
 	public String[] getRequiredFields() {
 		return this.requiredFields;
 	}

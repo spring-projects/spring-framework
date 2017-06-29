@@ -61,14 +61,17 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private SockJsMessageCodec codec;
 
+	@Nullable
 	private Principal user;
 
 	private long timeoutValue;
 
+	@Nullable
 	private TaskScheduler timeoutScheduler;
 
 	private final List<Runnable> timeoutTasks = new ArrayList<>();
 
+	@Nullable
 	private DefaultTransportRequest fallbackRequest;
 
 
@@ -191,7 +194,7 @@ class DefaultTransportRequest implements TransportRequest {
 		}
 
 		@Override
-		public void onSuccess(WebSocketSession session) {
+		public void onSuccess(@Nullable WebSocketSession session) {
 			if (this.handled.compareAndSet(false, true)) {
 				this.future.set(session);
 			}

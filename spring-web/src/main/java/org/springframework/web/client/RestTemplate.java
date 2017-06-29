@@ -783,6 +783,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	private class AcceptHeaderRequestCallback implements RequestCallback {
 
+		@Nullable
 		private final Type responseType;
 
 		private AcceptHeaderRequestCallback(@Nullable Type responseType) {
@@ -937,6 +938,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
 
+		@Nullable
 		private final HttpMessageConverterExtractor<T> delegate;
 
 		public ResponseEntityResponseExtractor(@Nullable Type responseType) {

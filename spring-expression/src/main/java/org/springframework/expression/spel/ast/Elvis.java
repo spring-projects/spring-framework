@@ -23,6 +23,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -109,7 +110,7 @@ public class Elvis extends SpelNodeImpl {
 				this.children[1].exitTypeDescriptor != null) {
 			String conditionDescriptor = this.children[0].exitTypeDescriptor;
 			String ifNullValueDescriptor = this.children[1].exitTypeDescriptor;
-			if (conditionDescriptor.equals(ifNullValueDescriptor)) {
+			if (ObjectUtils.nullSafeEquals(conditionDescriptor, ifNullValueDescriptor)) {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {

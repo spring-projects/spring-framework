@@ -104,10 +104,11 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringJUnit4ClassRunner.class.getClassLoader()),
 				"SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
 
-		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
+		Method method = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
 				FrameworkMethod.class, Object.class, Statement.class);
-		Assert.state(withRulesMethod != null, "SpringJUnit4ClassRunner requires JUnit 4.12 or higher");
-		ReflectionUtils.makeAccessible(withRulesMethod);
+		Assert.state(method != null, "SpringJUnit4ClassRunner requires JUnit 4.12 or higher");
+		ReflectionUtils.makeAccessible(method);
+		withRulesMethod = method;
 	}
 
 

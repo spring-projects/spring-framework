@@ -27,6 +27,7 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represent a list in an expression, e.g. '{1,2,3}'
@@ -37,7 +38,8 @@ import org.springframework.lang.Nullable;
 public class InlineList extends SpelNodeImpl {
 
 	// If the list is purely literals, it is a constant value and can be computed and cached
-	private TypedValue constant = null;  // TODO must be immutable list
+	@Nullable
+	private TypedValue constant;  // TODO must be immutable list
 
 
 	public InlineList(int pos, SpelNodeImpl... args) {
@@ -123,6 +125,7 @@ public class InlineList extends SpelNodeImpl {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public List<Object> getConstantValue() {
+		Assert.state(this.constant != null, "No constant");
 		return (List<Object>) this.constant.getValue();
 	}
 	

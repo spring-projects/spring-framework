@@ -41,6 +41,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 
 	private boolean overloaded = true;
 
+	@Nullable
 	private Object source;
 
 
@@ -88,6 +89,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}

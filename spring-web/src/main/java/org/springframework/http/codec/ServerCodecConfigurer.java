@@ -34,7 +34,6 @@ import org.springframework.core.codec.Encoder;
  */
 public interface ServerCodecConfigurer extends CodecConfigurer {
 
-
 	@Override
 	ServerDefaultCodecs defaultCodecs();
 

@@ -29,8 +29,10 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ObjectRetrievalFailureException extends DataRetrievalFailureException {
 
+	@Nullable
 	private Object persistentClass;
 
+	@Nullable
 	private Object identifier;
 
 
@@ -125,6 +127,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	/**
 	 * Return the identifier of the object that was not found.
 	 */
+	@Nullable
 	public Object getIdentifier() {
 		return this.identifier;
 	}

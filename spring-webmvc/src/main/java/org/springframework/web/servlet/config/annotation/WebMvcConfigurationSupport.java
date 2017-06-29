@@ -25,8 +25,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -58,6 +56,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
@@ -198,22 +197,31 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			ClassUtils.isPresent("javax.json.bind.Jsonb", WebMvcConfigurationSupport.class.getClassLoader());
 
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private List<Object> interceptors;
 
+	@Nullable
 	private PathMatchConfigurer pathMatchConfigurer;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private List<HandlerMethodArgumentResolver> argumentResolvers;
 
+	@Nullable
 	private List<HandlerMethodReturnValueHandler> returnValueHandlers;
 
+	@Nullable
 	private List<HttpMessageConverter<?>> messageConverters;
 
+	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
 
@@ -229,7 +237,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Return the associated Spring {@link ApplicationContext}.
 	 * @since 4.2
 	 */
-	public ApplicationContext getApplicationContext() {
+	@Nullable
+	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -246,7 +255,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Return the associated {@link javax.servlet.ServletContext}.
 	 * @since 4.2
 	 */
-	public ServletContext getServletContext() {
+	@Nullable
+	public final ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
@@ -383,7 +393,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			try {
 				this.contentNegotiationManager = configurer.getContentNegotiationManager();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanInitializationException("Could not create ContentNegotiationManager", ex);
 			}
 		}
@@ -465,6 +475,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
+		Assert.state(this.applicationContext != null, "No ApplicationContext set");
+		Assert.state(this.servletContext != null, "No ServletContext set");
+
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
 				this.servletContext, mvcContentNegotiationManager());
 		addResourceHandlers(registry);
@@ -514,7 +527,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping defaultServletHandlerMapping() {
-		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(servletContext);
+		Assert.state(this.servletContext != null, "No ServletContext set");
+		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(this.servletContext);
 		configureDefaultServletHandling(configurer);
 		AbstractHandlerMapping handlerMapping = configurer.getHandlerMapping();
 		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
@@ -785,16 +799,22 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		if (jackson2XmlPresent) {
-			ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.xml().applicationContext(this.applicationContext).build();
-			messageConverters.add(new MappingJackson2XmlHttpMessageConverter(objectMapper));
+			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.xml();
+			if (this.applicationContext != null) {
+				builder.applicationContext(this.applicationContext);
+			}
+			messageConverters.add(new MappingJackson2XmlHttpMessageConverter(builder.build()));
 		}
 		else if (jaxb2Present) {
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 
 		if (jackson2Present) {
-			ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().applicationContext(this.applicationContext).build();
-			messageConverters.add(new MappingJackson2HttpMessageConverter(objectMapper));
+			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
+			if (this.applicationContext != null) {
+				builder.applicationContext(this.applicationContext);
+			}
+			messageConverters.add(new MappingJackson2HttpMessageConverter(builder.build()));
 		}
 		else if (gsonPresent) {
 			messageConverters.add(new GsonHttpMessageConverter());
@@ -804,12 +824,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		if (jackson2SmilePresent) {
-			ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.smile().applicationContext(this.applicationContext).build();
-			messageConverters.add(new MappingJackson2SmileHttpMessageConverter(objectMapper));
+			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.smile();
+			if (this.applicationContext != null) {
+				builder.applicationContext(this.applicationContext);
+			}
+			messageConverters.add(new MappingJackson2SmileHttpMessageConverter(builder.build()));
 		}
 		if (jackson2CborPresent) {
-			ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.cbor().applicationContext(this.applicationContext).build();
-			messageConverters.add(new MappingJackson2CborHttpMessageConverter(objectMapper));
+			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.cbor();
+			if (this.applicationContext != null) {
+				builder.applicationContext(this.applicationContext);
+			}
+			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
 		}
 	}
 
@@ -911,7 +937,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			exceptionHandlerResolver.setResponseBodyAdvice(
 					Collections.singletonList(new JsonViewResponseBodyAdvice()));
 		}
-		exceptionHandlerResolver.setApplicationContext(this.applicationContext);
+		if (this.applicationContext != null) {
+			exceptionHandlerResolver.setApplicationContext(this.applicationContext);
+		}
 		exceptionHandlerResolver.afterPropertiesSet();
 		exceptionResolvers.add(exceptionHandlerResolver);
 
@@ -947,7 +975,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public ViewResolver mvcViewResolver() {
 		ViewResolverRegistry registry = new ViewResolverRegistry();
 		registry.setContentNegotiationManager(mvcContentNegotiationManager());
-		registry.setApplicationContext(this.applicationContext);
+		if (this.applicationContext != null) {
+			registry.setApplicationContext(this.applicationContext);
+		}
 		configureViewResolvers(registry);
 
 		if (registry.getViewResolvers().isEmpty()) {
@@ -962,7 +992,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		composite.setOrder(registry.getOrder());
 		composite.setViewResolvers(registry.getViewResolvers());
 		composite.setApplicationContext(this.applicationContext);
-		composite.setServletContext(this.servletContext);
+		if (this.servletContext != null) {
+			composite.setServletContext(this.servletContext);
+		}
 		return composite;
 	}
 

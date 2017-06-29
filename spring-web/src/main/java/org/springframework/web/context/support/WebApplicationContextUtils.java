@@ -205,7 +205,7 @@ public abstract class WebApplicationContextUtils {
 	 * @param bf the BeanFactory to configure
 	 * @param sc the ServletContext that we're running within
 	 */
-	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, ServletContext sc) {
+	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, @Nullable ServletContext sc) {
 		registerEnvironmentBeans(bf, sc, null);
 	}
 

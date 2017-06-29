@@ -62,10 +62,13 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
+	@Nullable
 	private HessianRemoteResolver remoteResolver;
 
+	@Nullable
 	private Log debugLogger;
 
+	@Nullable
 	private HessianSkeleton skeleton;
 
 
@@ -212,10 +215,8 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 				throw new IOException("Expected 'H'/'C' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
 			}
 
-			if (this.serializerFactory != null) {
-				in.setSerializerFactory(this.serializerFactory);
-				out.setSerializerFactory(this.serializerFactory);
-			}
+			in.setSerializerFactory(this.serializerFactory);
+			out.setSerializerFactory(this.serializerFactory);
 			if (this.remoteResolver != null) {
 				in.setRemoteResolver(this.remoteResolver);
 			}

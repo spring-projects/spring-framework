@@ -322,10 +322,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final Session session;
 
+		@Nullable
 		private final FlushMode previousFlushMode;
 
+		@Nullable
 		private final Connection preparedCon;
 
+		@Nullable
 		private final Integer previousIsolationLevel;
 
 		public SessionTransactionData(Session session, @Nullable FlushMode previousFlushMode,
@@ -358,6 +361,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static class HibernateConnectionHandle implements ConnectionHandle {
 
+		@Nullable
 		private static volatile Method connectionMethodToUse;
 
 		private final Session session;
@@ -377,11 +381,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		public static Connection doGetConnection(Session session) {
 			try {
-				if (connectionMethodToUse == null) {
+				Method methodToUse = connectionMethodToUse;
+				if (methodToUse == null) {
 					// Reflective lookup to find SessionImpl's connection() method on Hibernate 4.x/5.x
-					connectionMethodToUse = session.getClass().getMethod("connection");
+					methodToUse = session.getClass().getMethod("connection");
+					connectionMethodToUse = methodToUse;
 				}
-				Connection con = (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, session);
+				Connection con = (Connection) ReflectionUtils.invokeMethod(methodToUse, session);
 				Assert.state(con != null, "No Connection from Session");
 				return con;
 			}

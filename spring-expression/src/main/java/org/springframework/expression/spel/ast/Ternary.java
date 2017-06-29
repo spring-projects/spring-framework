@@ -25,6 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -69,7 +70,7 @@ public class Ternary extends SpelNodeImpl {
 				this.children[2].exitTypeDescriptor != null) {
 			String leftDescriptor = this.children[1].exitTypeDescriptor;
 			String rightDescriptor = this.children[2].exitTypeDescriptor;
-			if (leftDescriptor.equals(rightDescriptor)) {
+			if (ObjectUtils.nullSafeEquals(leftDescriptor, rightDescriptor)) {
 				this.exitTypeDescriptor = leftDescriptor;
 			}
 			else {

@@ -36,15 +36,18 @@ import org.springframework.util.Assert;
 public class SqlParameter {
 
 	/** The name of the parameter, if any */
+	@Nullable
 	private String name;
 
 	/** SQL type constant from {@code java.sql.Types} */
 	private final int sqlType;
 
 	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
+	@Nullable
 	private String typeName;
 
 	/** The scale to apply in case of a NUMERIC or DECIMAL type, if any */
+	@Nullable
 	private Integer scale;
 
 

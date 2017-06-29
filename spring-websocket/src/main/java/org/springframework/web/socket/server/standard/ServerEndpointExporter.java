@@ -55,8 +55,10 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 public class ServerEndpointExporter extends WebApplicationObjectSupport
 		implements InitializingBean, SmartInitializingSingleton {
 
+	@Nullable
 	private List<Class<?>> annotatedEndpointClasses;
 
+	@Nullable
 	private ServerContainer serverContainer;
 
 

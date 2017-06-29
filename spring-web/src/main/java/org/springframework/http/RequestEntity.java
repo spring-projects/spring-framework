@@ -62,10 +62,12 @@ import org.springframework.util.ObjectUtils;
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 
+	@Nullable
 	private final HttpMethod method;
 
 	private final URI url;
 
+	@Nullable
 	private final Type type;
 
 

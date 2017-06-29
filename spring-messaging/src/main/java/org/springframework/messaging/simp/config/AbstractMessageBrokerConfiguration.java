@@ -91,12 +91,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ChannelRegistration clientInboundChannelRegistration;
 
+	@Nullable
 	private ChannelRegistration clientOutboundChannelRegistration;
 
+	@Nullable
 	private MessageBrokerRegistry brokerRegistry;
 
 
@@ -112,6 +116,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		this.applicationContext = applicationContext;
 	}
 
+	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
@@ -418,7 +423,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected Validator simpValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+			if (this.applicationContext != null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
 			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {

@@ -39,12 +39,13 @@ class DefaultRendering implements Rendering {
 
 	private final Map<String, Object> model;
 
+	@Nullable
 	private final HttpStatus status;
 
 	private final HttpHeaders headers;
 
 
-	DefaultRendering(Object view, @Nullable Model model, HttpStatus status, @Nullable HttpHeaders headers) {
+	DefaultRendering(Object view, @Nullable Model model, @Nullable HttpStatus status, @Nullable HttpHeaders headers) {
 		this.view = view;
 		this.model = (model != null ? model.asMap() : Collections.emptyMap());
 		this.status = status;
@@ -63,6 +64,7 @@ class DefaultRendering implements Rendering {
 	}
 
 	@Override
+	@Nullable
 	public HttpStatus status() {
 		return this.status;
 	}

@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -43,9 +45,12 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RouterFunctionMapping extends AbstractHandlerMapping implements InitializingBean {
 
+	@Nullable
 	private RouterFunction<?> routerFunction;
 
+	@Nullable
 	private ServerCodecConfigurer messageCodecConfigurer;
+
 
 	/**
 	 * Create an empty {@code RouterFunctionMapping}.
@@ -63,6 +68,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	public RouterFunctionMapping(RouterFunction<?> routerFunction) {
 		this.routerFunction = routerFunction;
 	}
+
 
 	/**
 	 * Configure HTTP message readers to de-serialize the request body with.
@@ -114,6 +120,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
 		if (this.routerFunction != null) {
+			Assert.state(this.messageCodecConfigurer != null, "No ServerCodecConfigurer set");
 			ServerRequest request = ServerRequest.create(exchange, this.messageCodecConfigurer.getReaders());
 			exchange.getAttributes().put(RouterFunctions.REQUEST_ATTRIBUTE, request);
 			return this.routerFunction.route(request);
@@ -123,8 +130,10 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		}
 	}
 
+
 	private static class SortedRouterFunctionsContainer {
 
+		@Nullable
 		private List<RouterFunction<?>> routerFunctions;
 
 		@Autowired(required = false)

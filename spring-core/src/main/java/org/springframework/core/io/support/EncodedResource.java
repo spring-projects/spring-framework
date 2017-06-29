@@ -46,8 +46,10 @@ public class EncodedResource implements InputStreamSource {
 
 	private final Resource resource;
 
+	@Nullable
 	private final String encoding;
 
+	@Nullable
 	private final Charset charset;
 
 

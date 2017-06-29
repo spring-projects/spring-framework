@@ -48,14 +48,18 @@ import org.springframework.util.StringUtils;
  */
 public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
+	@Nullable
 	private final String scriptEngineName;
 
 	private final String scriptSourceLocator;
 
+	@Nullable
 	private final Class<?>[] scriptInterfaces;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private volatile ScriptEngine scriptEngine;
 
 
@@ -120,6 +124,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 	}
 
 	@Override
+	@Nullable
 	public Class<?>[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
@@ -180,13 +185,15 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 
 	protected Object evaluateScript(ScriptSource scriptSource) {
 		try {
-			if (this.scriptEngine == null) {
-				this.scriptEngine = retrieveScriptEngine(scriptSource);
-				if (this.scriptEngine == null) {
+			ScriptEngine scriptEngine = this.scriptEngine;
+			if (scriptEngine == null) {
+				scriptEngine = retrieveScriptEngine(scriptSource);
+				if (scriptEngine == null) {
 					throw new IllegalStateException("Could not determine script engine for " + scriptSource);
 				}
+				this.scriptEngine = scriptEngine;
 			}
-			return this.scriptEngine.eval(scriptSource.getScriptAsString());
+			return scriptEngine.eval(scriptSource.getScriptAsString());
 		}
 		catch (Exception ex) {
 			throw new ScriptCompilationException(scriptSource, ex);
@@ -218,7 +225,9 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 	}
 
 	@Nullable
-	protected Object adaptToInterfaces(@Nullable Object script, ScriptSource scriptSource, Class<?>... actualInterfaces) {
+	protected Object adaptToInterfaces(
+			@Nullable Object script, ScriptSource scriptSource, Class<?>... actualInterfaces) {
+
 		Class<?> adaptedIfc;
 		if (actualInterfaces.length == 1) {
 			adaptedIfc = actualInterfaces[0];
@@ -228,12 +237,12 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 		}
 
 		if (adaptedIfc != null) {
-			if (!(this.scriptEngine instanceof Invocable)) {
+			ScriptEngine scriptEngine = this.scriptEngine;
+			if (!(scriptEngine instanceof Invocable)) {
 				throw new ScriptCompilationException(scriptSource,
-						"ScriptEngine must implement Invocable in order to adapt it to an interface: " +
-								this.scriptEngine);
+						"ScriptEngine must implement Invocable in order to adapt it to an interface: " + scriptEngine);
 			}
-			Invocable invocable = (Invocable) this.scriptEngine;
+			Invocable invocable = (Invocable) scriptEngine;
 			if (script != null) {
 				script = invocable.getInterface(script, adaptedIfc);
 			}

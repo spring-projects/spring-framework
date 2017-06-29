@@ -205,9 +205,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + result.getPattern() + "\"");
 					}
 					ResourceWebHandler handler = result.getHandler();
-					if (handler == null) {
-						throw new IllegalStateException("No handler for URL pattern \"" + result.getPattern() + "\"");
-					}
 					ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
 					return chain.resolveUrlPath(pathWithinMapping, handler.getLocations())
 							.map(resolvedPath -> {

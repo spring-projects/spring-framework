@@ -21,6 +21,7 @@ import javax.resource.cci.InteractionSpec;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jca.cci.core.CciTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,6 +40,7 @@ public abstract class EisOperation implements InitializingBean {
 
 	private CciTemplate cciTemplate = new CciTemplate();
 
+	@Nullable
 	private InteractionSpec interactionSpec;
 
 
@@ -76,6 +78,7 @@ public abstract class EisOperation implements InitializingBean {
 	/**
 	 * Return the CCI InteractionSpec for this operation.
 	 */
+	@Nullable
 	public InteractionSpec getInteractionSpec() {
 		return this.interactionSpec;
 	}
@@ -86,7 +89,7 @@ public abstract class EisOperation implements InitializingBean {
 		this.cciTemplate.afterPropertiesSet();
 
 		if (this.interactionSpec == null) {
-			throw new IllegalArgumentException("interactionSpec is required");
+			throw new IllegalArgumentException("InteractionSpec is required");
 		}
 	}
 

@@ -87,24 +87,33 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class providerClass;
 
+	@Nullable
 	private ValidationProviderResolver validationProviderResolver;
 
+	@Nullable
 	private MessageInterpolator messageInterpolator;
 
+	@Nullable
 	private TraversableResolver traversableResolver;
 
+	@Nullable
 	private ConstraintValidatorFactory constraintValidatorFactory;
 
+	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+	@Nullable
 	private Resource[] mappingLocations;
 
 	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ValidatorFactory validatorFactory;
 
 
@@ -273,7 +282,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 
 		if (this.parameterNameDiscoverer != null) {
-			configureParameterNameProviderIfPossible(configuration);
+			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
 
 		if (this.mappingLocations != null) {
@@ -296,8 +305,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		setTargetValidator(this.validatorFactory.getValidator());
 	}
 
-	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
-		final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
 		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
 		configuration.parameterNameProvider(new ParameterNameProvider() {
 			@Override
@@ -386,16 +394,19 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				// ignore - we'll try ValidatorFactory unwrapping next
 			}
 		}
-		try {
-			return this.validatorFactory.unwrap(type);
-		}
-		catch (ValidationException ex) {
-			// ignore if just being asked for ValidatorFactory
-			if (ValidatorFactory.class == type) {
-				return (T) this.validatorFactory;
+		if (this.validatorFactory != null) {
+			try {
+				return this.validatorFactory.unwrap(type);
 			}
-			throw ex;
+			catch (ValidationException ex) {
+				// ignore if just being asked for ValidatorFactory
+				if (ValidatorFactory.class == type) {
+					return (T) this.validatorFactory;
+				}
+				throw ex;
+			}
 		}
+		throw new ValidationException("Cannot unwrap to " + type);
 	}
 
 	public void close() {

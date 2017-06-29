@@ -25,6 +25,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represent a map in an expression, e.g. '{name:'foo',age:12}'
@@ -35,7 +36,8 @@ import org.springframework.lang.Nullable;
 public class InlineMap extends SpelNodeImpl {
 
 	// If the map is purely literals, it is a constant value and can be computed and cached
-	private TypedValue constant = null;
+	@Nullable
+	private TypedValue constant;
 
 
 	public InlineMap(int pos, SpelNodeImpl... args) {
@@ -149,7 +151,7 @@ public class InlineMap extends SpelNodeImpl {
 	}
 
 	/**
-	 * @return whether this list is a constant value
+	 * Return whether this list is a constant value.
 	 */
 	public boolean isConstant() {
 		return this.constant != null;
@@ -158,6 +160,7 @@ public class InlineMap extends SpelNodeImpl {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public Map<Object,Object> getConstantValue() {
+		Assert.state(this.constant != null, "No constant");
 		return (Map<Object,Object>) this.constant.getValue();
 	}
 

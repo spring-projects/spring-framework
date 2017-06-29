@@ -40,7 +40,8 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 		DestinationResolvingMessageReceivingOperations<D>,
 		DestinationResolvingMessageRequestReplyOperations<D> {
 
-	private volatile DestinationResolver<D> destinationResolver;
+	@Nullable
+	private DestinationResolver<D> destinationResolver;
 
 
 	/**
@@ -58,6 +59,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	/**
 	 * Return the configured destination resolver.
 	 */
+	@Nullable
 	public DestinationResolver<D> getDestinationResolver() {
 		return this.destinationResolver;
 	}
@@ -70,6 +72,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	}
 
 	protected final D resolveDestination(String destinationName) {
+
 		Assert.state(this.destinationResolver != null, "DestinationResolver is required to resolve destination names");
 		return this.destinationResolver.resolveDestination(destinationName);
 	}

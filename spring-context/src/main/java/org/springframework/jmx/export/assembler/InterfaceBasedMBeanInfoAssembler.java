@@ -61,14 +61,18 @@ import org.springframework.util.StringUtils;
 public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler
 		implements BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Class<?>[] managedInterfaces;
 
 	/** Mappings of bean keys to an array of classes */
+	@Nullable
 	private Properties interfaceMappings;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** Mappings of bean keys to an array of classes */
+	@Nullable
 	private Map<String, Class<?>[]> resolvedInterfaceMappings;
 
 

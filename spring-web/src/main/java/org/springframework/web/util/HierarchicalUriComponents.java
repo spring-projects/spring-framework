@@ -54,10 +54,13 @@ final class HierarchicalUriComponents extends UriComponents {
 	private static final String PATH_DELIMITER_STRING = "/";
 
 
+	@Nullable
 	private final String userInfo;
 
+	@Nullable
 	private final String host;
 
+	@Nullable
 	private final String port;
 
 	private final PathComponent path;
@@ -107,11 +110,13 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getUserInfo() {
 		return this.userInfo;
 	}
 
 	@Override
+	@Nullable
 	public String getHost() {
 		return this.host;
 	}
@@ -198,8 +203,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		String fragment = getFragment();
 		String schemeTo = (scheme != null ? encodeUriComponent(scheme, charset, Type.SCHEME) : null);
 		String fragmentTo = (fragment != null ? encodeUriComponent(fragment, charset, Type.FRAGMENT) : null);
-		String userInfoTo = encodeUriComponent(this.userInfo, charset, Type.USER_INFO);
-		String hostTo = encodeUriComponent(this.host, charset, getHostType());
+		String userInfoTo = (this.userInfo != null ? encodeUriComponent(this.userInfo, charset, Type.USER_INFO) : null);
+		String hostTo = (this.host != null ? encodeUriComponent(this.host, charset, getHostType()) : null);
 		PathComponent pathTo = this.path.encode(charset);
 		MultiValueMap<String, String> paramsTo = encodeQueryParams(charset);
 		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo, hostTo, this.port,
@@ -229,7 +234,6 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given value is not a valid URI component
 	 */
-	@Nullable
 	static String encodeUriComponent(String source, String encoding, Type type) {
 		return encodeUriComponent(source, Charset.forName(encoding), type);
 	}

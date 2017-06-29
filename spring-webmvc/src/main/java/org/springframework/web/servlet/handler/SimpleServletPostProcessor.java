@@ -69,8 +69,10 @@ public class SimpleServletPostProcessor implements
 
 	private boolean useSharedServletConfig = true;
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ServletConfig servletConfig;
 
 
@@ -140,9 +142,10 @@ public class SimpleServletPostProcessor implements
 
 		private final String servletName;
 
+		@Nullable
 		private final ServletContext servletContext;
 
-		public DelegatingServletConfig(String servletName, ServletContext servletContext) {
+		public DelegatingServletConfig(String servletName, @Nullable ServletContext servletContext) {
 			this.servletName = servletName;
 			this.servletContext = servletContext;
 		}
@@ -153,6 +156,7 @@ public class SimpleServletPostProcessor implements
 		}
 
 		@Override
+		@Nullable
 		public ServletContext getServletContext() {
 			return this.servletContext;
 		}

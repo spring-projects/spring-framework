@@ -35,18 +35,22 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint {
 
-	private String id;
+	private String id = "";
 
+	@Nullable
 	private String destination;
 
+	@Nullable
 	private String subscription;
 
+	@Nullable
 	private String selector;
 
+	@Nullable
 	private String concurrency;
 
 
-	public void setId(@Nullable String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

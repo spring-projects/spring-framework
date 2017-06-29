@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean<Object>
 		implements BeanClassLoaderAware {
 
+	@Nullable
 	private Class<?> serviceType;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
@@ -50,6 +52,7 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	/**
 	 * Return the desired service type.
 	 */
+	@Nullable
 	public Class<?> getServiceType() {
 		return this.serviceType;
 	}

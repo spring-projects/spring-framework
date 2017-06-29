@@ -110,8 +110,10 @@ import org.springframework.util.Assert;
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private SessionFactory sessionFactory;
 
+	@Nullable
 	private DataSource dataSource;
 
 	private boolean autodetectDataSource = true;
@@ -122,12 +124,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private boolean hibernateManagedSession = false;
 
+	@Nullable
 	private Object entityInterceptor;
 
 	/**
 	 * Just needed for entityInterceptorBeanName.
 	 * @see #setEntityInterceptorBeanName
 	 */
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -788,12 +792,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	private class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
+		@Nullable
 		private SessionHolder sessionHolder;
 
 		private boolean newSessionHolder;
 
 		private boolean newSession;
 
+		@Nullable
 		private Integer previousHoldability;
 
 		public void setSession(Session session) {
@@ -850,7 +856,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		public void setRollbackOnly() {
-			this.sessionHolder.setRollbackOnly();
+			getSessionHolder().setRollbackOnly();
 			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
 			}
@@ -858,14 +864,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		@Override
 		public boolean isRollbackOnly() {
-			return this.sessionHolder.isRollbackOnly() ||
+			return getSessionHolder().isRollbackOnly() ||
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
 		}
 
 		@Override
 		public void flush() {
 			try {
-				this.sessionHolder.getSession().flush();
+				getSessionHolder().getSession().flush();
 			}
 			catch (HibernateException ex) {
 				throw convertHibernateAccessException(ex);
@@ -888,6 +894,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private final SessionHolder sessionHolder;
 
+		@Nullable
 		private final ConnectionHolder connectionHolder;
 
 		private SuspendedResourcesHolder(SessionHolder sessionHolder, @Nullable ConnectionHolder conHolder) {

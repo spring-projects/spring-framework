@@ -79,12 +79,15 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private final List<Transport> transports;
 
+	@Nullable
 	private String[] httpHeaderNames;
 
 	private InfoReceiver infoReceiver;
 
+	@Nullable
 	private SockJsMessageCodec messageCodec;
 
+	@Nullable
 	private TaskScheduler connectTimeoutScheduler;
 
 	private volatile boolean running = false;
@@ -171,7 +174,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * Jackson2SockJsMessageCodec} is used if Jackson is on the classpath.
 	 */
 	public void setMessageCodec(SockJsMessageCodec messageCodec) {
-		Assert.notNull(messageCodec, "'messageCodec' is required");
+		Assert.notNull(messageCodec, "SockJsMessageCodec is required");
 		this.messageCodec = messageCodec;
 	}
 
@@ -179,6 +182,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * Return the SockJsMessageCodec to use.
 	 */
 	public SockJsMessageCodec getMessageCodec() {
+		Assert.state(this.messageCodec != null, "No SockJsMessageCodec set");
 		return this.messageCodec;
 	}
 

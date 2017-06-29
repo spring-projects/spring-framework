@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
@@ -27,15 +28,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
@@ -81,10 +83,13 @@ public class WebHttpHandlerBuilder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
+	@Nullable
 	private WebSessionManager sessionManager;
 
+	@Nullable
 	private ServerCodecConfigurer codecConfigurer;
 
+	@Nullable
 	private LocaleContextResolver localeContextResolver;
 
 

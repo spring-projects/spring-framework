@@ -135,7 +135,7 @@ public abstract class CachedExpressionEvaluator {
 		@Override
 		public int compareTo(ExpressionKey other) {
 			int result = this.element.toString().compareTo(other.element.toString());
-			if (result == 0 && this.expression != null) {
+			if (result == 0) {
 				result = this.expression.compareTo(other.expression);
 			}
 			return result;

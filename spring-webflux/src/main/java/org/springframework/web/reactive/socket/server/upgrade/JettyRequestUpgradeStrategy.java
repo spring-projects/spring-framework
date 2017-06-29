@@ -54,8 +54,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			new NamedThreadLocal<>("JettyWebSocketHandlerAdapter");
 
 
+	@Nullable
 	private WebSocketServerFactory factory;
 
+	@Nullable
 	private volatile ServletContext servletContext;
 
 	private volatile boolean running = false;
@@ -66,10 +68,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-			if (!isRunning() && this.servletContext != null) {
+			ServletContext servletContext = this.servletContext;
+			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = new WebSocketServerFactory(this.servletContext);
+					this.factory = new WebSocketServerFactory(servletContext);
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();
@@ -92,11 +95,13 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
 				this.running = false;
-				try {
-					this.factory.stop();
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
+				if (this.factory != null) {
+					try {
+						this.factory.stop();
+					}
+					catch (Throwable ex) {
+						throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
+					}
 				}
 			}
 		}
@@ -125,6 +130,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		startLazily(servletRequest);
 
+		Assert.state(this.factory != null, "No WebSocketServerFactory available");
 		boolean isUpgrade = this.factory.isUpgradeRequest(servletRequest, servletResponse);
 		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
@@ -175,6 +181,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final JettyWebSocketHandlerAdapter adapter;
 
+		@Nullable
 		private final String protocol;
 
 		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {

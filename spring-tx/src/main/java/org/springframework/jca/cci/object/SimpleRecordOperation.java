@@ -22,6 +22,7 @@ import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * EIS operation object that accepts a passed-in CCI input Record
@@ -48,6 +49,7 @@ public class SimpleRecordOperation extends EisOperation {
 		setInteractionSpec(interactionSpec);
 	}
 
+
 	/**
 	 * Execute the CCI interaction encapsulated by this operation object.
 	 * <p>This method will call CCI's {@code Interaction.execute} variant
@@ -59,7 +61,9 @@ public class SimpleRecordOperation extends EisOperation {
 	 */
 	@Nullable
 	public Record execute(Record inputRecord) throws DataAccessException {
-		return getCciTemplate().execute(getInteractionSpec(), inputRecord);
+		InteractionSpec interactionSpec = getInteractionSpec();
+		Assert.state(interactionSpec != null, "No InteractionSpec set");
+		return getCciTemplate().execute(interactionSpec, inputRecord);
 	}
 
 	/**
@@ -72,7 +76,9 @@ public class SimpleRecordOperation extends EisOperation {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 */
 	public void execute(Record inputRecord, Record outputRecord) throws DataAccessException {
-		getCciTemplate().execute(getInteractionSpec(), inputRecord, outputRecord);
+		InteractionSpec interactionSpec = getInteractionSpec();
+		Assert.state(interactionSpec != null, "No InteractionSpec set");
+		getCciTemplate().execute(interactionSpec, inputRecord, outputRecord);
 	}
 
 }
