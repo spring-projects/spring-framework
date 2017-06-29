@@ -93,7 +93,7 @@ public abstract class BodyExtractors {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> {
+				(HttpMessageReader<T> reader) -> {
 					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
 					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
 						return reader.readMono(elementType, elementType, (ServerHttpRequest) inputMessage,
@@ -142,7 +142,7 @@ public abstract class BodyExtractors {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> {
+				(HttpMessageReader<T> reader) -> {
 					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
 					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
 						return reader.read(elementType, elementType, (ServerHttpRequest) inputMessage,

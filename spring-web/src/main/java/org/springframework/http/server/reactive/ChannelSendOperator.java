@@ -21,9 +21,13 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.MonoSource;
+import reactor.core.Scannable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
+import reactor.util.context.Context;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,20 +42,30 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ChannelSendOperator<T> extends MonoSource<T, Void> {
+public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
+	private final Flux<T>                                 source;
 
 
 	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>, Publisher<Void>> writeFunction) {
-		super(source);
+		this.source = Flux.from(source);
 		this.writeFunction = writeFunction;
+	}
+
+	@Override
+	@Nullable
+	@SuppressWarnings("rawtypes")
+	public Object scanUnsafe(Attr key) {
+		if (key == IntAttr.PREFETCH) return Integer.MAX_VALUE;
+		if (key == ScannableAttr.PARENT) return source;
+		return null;
 	}
 
 
 	@Override
-	public void subscribe(Subscriber<? super Void> s) {
-		this.source.subscribe(new WriteWithBarrier(s));
+	public void subscribe(Subscriber<? super Void> s, Context ctx) {
+		this.source.subscribe(new WriteWithBarrier(s), ctx);
 	}
 
 
