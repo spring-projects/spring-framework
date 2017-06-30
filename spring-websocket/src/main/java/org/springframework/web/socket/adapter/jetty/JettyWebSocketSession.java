@@ -103,7 +103,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public URI getUri() {
-		Assert.state(this.uri != null, "WebSocket session is not yet initialized");
+		checkNativeSessionInitialized();
 		return this.uri;
 	}
 

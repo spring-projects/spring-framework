@@ -43,7 +43,9 @@ public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Return the URI used to open the WebSocket connection.
+	 * ({@code null} on the client side).
 	 */
+	@Nullable
 	URI getUri();
 
 	/**
