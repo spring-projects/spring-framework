@@ -29,6 +29,7 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -37,6 +38,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -74,6 +76,11 @@ public interface ServerRequest {
 	 * Return the headers of this request.
 	 */
 	Headers headers();
+
+	/**
+	 * Return the cookies of this request.
+	 */
+	MultiValueMap<String, HttpCookie> cookies();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.

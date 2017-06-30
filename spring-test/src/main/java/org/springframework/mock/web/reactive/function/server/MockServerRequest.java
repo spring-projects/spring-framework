@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -59,6 +61,8 @@ public class MockServerRequest implements ServerRequest {
 
 	private final MockHeaders headers;
 
+	private final MultiValueMap<String, HttpCookie> cookies;
+
 	@Nullable
 	private final Object body;
 
@@ -75,13 +79,15 @@ public class MockServerRequest implements ServerRequest {
 	private Principal principal;
 
 
-	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers, @Nullable Object body,
+	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers,
+			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
 
 		this.method = method;
 		this.uri = uri;
 		this.headers = headers;
+		this.cookies = cookies;
 		this.body = body;
 		this.attributes = attributes;
 		this.queryParams = queryParams;
@@ -104,6 +110,11 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public Headers headers() {
 		return this.headers;
+	}
+
+	@Override
+	public MultiValueMap<String, HttpCookie> cookies() {
+		return this.cookies;
 	}
 
 	@Override
@@ -182,6 +193,10 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder headers(HttpHeaders headers);
 
+		Builder cookie(HttpCookie... cookies);
+
+		Builder cookies(MultiValueMap<String, HttpCookie> cookies);
+
 		Builder attribute(String name, Object value);
 
 		Builder attributes(Map<String, Object> attributes);
@@ -212,6 +227,8 @@ public class MockServerRequest implements ServerRequest {
 
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
+		private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+
 		@Nullable
 		private Object body;
 
@@ -238,6 +255,19 @@ public class MockServerRequest implements ServerRequest {
 		public Builder uri(URI uri) {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
+			return this;
+		}
+
+		@Override
+		public Builder cookie(HttpCookie... cookies) {
+			Arrays.stream(cookies).forEach(cookie -> this.cookies.add(cookie.getName(), cookie));
+			return this;
+		}
+
+		@Override
+		public Builder cookies(MultiValueMap<String, HttpCookie> cookies) {
+			Assert.notNull(cookies, "'cookies' must not be null");
+			this.cookies = cookies;
 			return this;
 		}
 
@@ -318,14 +348,14 @@ public class MockServerRequest implements ServerRequest {
 		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
-			return new MockServerRequest(this.method, this.uri, this.headers, this.body,
-					this.attributes, this.queryParams, this.pathVariables, this.session,
+			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies,
+					this.body, this.attributes, this.queryParams, this.pathVariables, this.session,
 					this.principal);
 		}
 
 		@Override
 		public MockServerRequest build() {
-			return new MockServerRequest(this.method, this.uri, this.headers, null,
+			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies, null,
 					this.attributes, this.queryParams, this.pathVariables, this.session,
 					this.principal);
 		}

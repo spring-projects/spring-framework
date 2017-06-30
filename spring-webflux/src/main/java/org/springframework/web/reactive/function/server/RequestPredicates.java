@@ -34,11 +34,13 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
@@ -488,6 +490,11 @@ public abstract class RequestPredicates {
 		@Override
 		public Headers headers() {
 			return this.request.headers();
+		}
+
+		@Override
+		public MultiValueMap<String, HttpCookie> cookies() {
+			return this.request.cookies();
 		}
 
 		@Override
