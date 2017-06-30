@@ -292,7 +292,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * @see #handleMatch(Object, String, ServerWebExchange)
+	 * @see #handleMatch(Object, HandlerMethod, String, ServerWebExchange)
 	 * @see #handleNoMatch(Set, String, ServerWebExchange)
 	 */
 	@Nullable
@@ -399,11 +399,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Nullable
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
-
-	/**
-	 * Extract and return the URL paths contained in a mapping.
-	 */
-	protected abstract Set<String> getMappingPathPatterns(T mapping);
 
 	/**
 	 * Check if a mapping matches the current request and return a (potentially

@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -93,15 +92,6 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.registerHandler(new TestController());
 	}
 
-
-	@Test
-	public void getMappingPathPatterns() throws Exception {
-		String[] patterns = {"/foo/*", "/foo", "/bar/*", "/bar"};
-		RequestMappingInfo info = paths(patterns).build();
-		Set<String> actual = this.handlerMapping.getMappingPathPatterns(info);
-
-		assertEquals(new HashSet<>(Arrays.asList(patterns)), actual);
-	}
 
 	@Test
 	public void getHandlerDirectMatch() throws Exception {

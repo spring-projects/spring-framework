@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -133,9 +134,9 @@ public class RequestMappingHandlerMappingTests {
 
 		assertNotNull(info);
 
-		Set<String> paths = info.getPatternsCondition().getPatternStrings();
+		Set<PathPattern> paths = info.getPatternsCondition().getPatterns();
 		assertEquals(1, paths.size());
-		assertEquals(path, paths.iterator().next());
+		assertEquals(path, paths.iterator().next().getPatternString());
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
 		assertEquals(1, methods.size());

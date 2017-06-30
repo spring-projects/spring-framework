@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternComparator;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -101,10 +100,10 @@ public class PathPatternRegistry<T> {
 	 * @param lookupPath the URL lookup path to be matched against
 	 */
 	public Optional<PathMatchResult<T>> findFirstMatch(String lookupPath) {
-		PathPatternComparator comparator = new PathPatternComparator(lookupPath);
 		return this.patternsMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
-				.reduce((e1, e2) -> comparator.compare(e1.getKey(), e2.getKey()) < 0 ? e1 : e2)
+				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.findFirst()
 				.map(entry -> new PathMatchResult<>(entry.getKey(), entry.getValue()));
 	}
 
