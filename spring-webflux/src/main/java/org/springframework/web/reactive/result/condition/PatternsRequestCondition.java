@@ -119,7 +119,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * the "other" instance as follows:
 	 * <ul>
 	 * <li>If there are patterns in both instances, combine the patterns in "this" with
-	 * the patterns in "other" using {@link PathPattern#combine(String)}.
+	 * the patterns in "other" using {@link PathPattern#combine(PathPattern)}.
 	 * <li>If only one instance has patterns, use them.
 	 * <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
@@ -130,8 +130,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (PathPattern pattern1 : this.patterns) {
 				for (PathPattern pattern2 : other.patterns) {
-					String combinedPattern = pattern1.combine(pattern2.getPatternString());
-					combined.add(this.parser.parse(combinedPattern));
+					combined.add(pattern1.combine(pattern2));
 				}
 			}
 		}
@@ -166,7 +165,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		SortedSet<PathPattern> matches = getMatchingPatterns(lookupPath);
-		return matches.isEmpty() ? null : new PatternsRequestCondition(new ArrayList<>(matches), this.parser);
+		return matches.isEmpty() ? null : new PatternsRequestCondition(
+				new ArrayList<PathPattern>(matches), this.parser);
 	}
 
 	/**

@@ -343,7 +343,7 @@ public abstract class RequestPredicates {
 			boolean match = this.pattern.matches(path);
 			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
 			if (match) {
-				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()));
+				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()).getUriVariables());
 				return true;
 			}
 			else {
@@ -355,7 +355,7 @@ public abstract class RequestPredicates {
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.getPathRemaining(request.path()))
 					.map(info -> {
-						mergeTemplateVariables(request, info.getMatchingVariables());
+						mergeTemplateVariables(request, info.getUriVariables());
 						String path = info.getPathRemaining();
 						if (!path.startsWith("/")) {
 							path = "/" + path;

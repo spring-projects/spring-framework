@@ -27,6 +27,7 @@ import org.springframework.http.server.reactive.PathContainer.Element;
 import org.springframework.http.server.reactive.PathContainer.Segment;
 import org.springframework.http.server.reactive.PathContainer.Separator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -155,6 +156,26 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.patternString;
 	}
 
+
+	// TODO: remove String-variants
+
+	public boolean matches(String path) {
+		return matches(PathContainer.parse(path, StandardCharsets.UTF_8));
+	}
+
+	public PathMatchResult matchAndExtract(String path) {
+		return matchAndExtract(PathContainer.parse(path, StandardCharsets.UTF_8));
+	}
+
+	@Nullable
+	public PathRemainingMatchInfo getPathRemaining(@Nullable String path) {
+		return getPathRemaining(path != null ?
+				PathContainer.parse(path, StandardCharsets.UTF_8) : null);
+	}
+
+
+
+
 	/**
 	 * @param pathContainer the candidate path container to attempt to match against this pattern
 	 * @return true if the path matches this pattern
@@ -199,11 +220,11 @@ public class PathPattern implements Comparable<PathPattern> {
 		else {
 			PathRemainingMatchInfo info;
 			if (matchingContext.remainingPathIndex == pathContainer.elements().size()) {
-				info = new PathRemainingMatchInfo(EMPTY_PATH, matchingContext.getExtractedVariables());
+				info = new PathRemainingMatchInfo(EMPTY_PATH, matchingContext.getPathMatchResult());
 			}
 			else {
 				info = new PathRemainingMatchInfo(PathContainer.subPath(pathContainer, matchingContext.remainingPathIndex),
-						 matchingContext.getExtractedVariables());
+						 matchingContext.getPathMatchResult());
 			}
 			return info;
 		}
@@ -230,13 +251,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return a map of extracted variables - an empty map if no variables extracted. 
 	 * @throws IllegalStateException if the path does not match the pattern
 	 */
-	public Map<String, PathMatchResult> matchAndExtract(PathContainer pathContainer) {
+	public PathMatchResult matchAndExtract(PathContainer pathContainer) {
 		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
 		if (this.head != null && this.head.matches(0, matchingContext)) {
-			return matchingContext.getExtractedVariables();
+			return matchingContext.getPathMatchResult();
 		}
 		else if (!hasLength(pathContainer)) {
-			return Collections.emptyMap();
+			return PathMatchResult.EMPTY;
 		}
 		else {
 			throw new IllegalStateException("Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
@@ -447,45 +468,46 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.patternString;
 	}
 
+
 	/**
-	 * Represents the result of a successful variable match. This holds the key that matched, the
-	 * value that was found for that key and, if any, the parameters attached to that path element.
-	 * For example: "/{var}" against "/foo;a=b" will return a PathMathResult with 'key=var', 
-	 * 'value=foo' and parameters 'a=b'.
+	 * Represents the result of a successful path match. This holds the keys that matched, the
+	 * values that were found for each key and, if any, the path parameters (matrix variables)
+	 * attached to that path element.
+	 * For example: "/{var}" against "/foo;a=b" will return a PathMathResult with 'foo=bar'
+	 * for URI variables and 'a=b' as path parameters for 'foo'.
 	 */
 	public static class PathMatchResult {
-		
-		private final String key;
-		
-		private final String value;
-		
-		private final MultiValueMap<String,String> parameters;
 
-		public PathMatchResult(String key, String value, MultiValueMap<String, String> parameters) {
-			this.key = key;
-			this.value = value;
-			this.parameters = parameters;
+		private static final PathMatchResult EMPTY =
+				new PathMatchResult(Collections.emptyMap(), Collections.emptyMap());
+
+
+		private final Map<String, String> uriVariables;
+
+		private final Map<String, MultiValueMap<String, String>> matrixVariables;
+
+
+		public PathMatchResult(Map<String, String> uriVars,
+				@Nullable Map<String, MultiValueMap<String, String>> matrixVars) {
+
+			this.uriVariables = Collections.unmodifiableMap(uriVars);
+			this.matrixVariables = matrixVars != null ?
+					Collections.unmodifiableMap(matrixVars) : Collections.emptyMap();
 		}
 
-		/**
-		 * @return match result key
-		 */
-		public String key() {
-			return key;
+
+		public Map<String, String> getUriVariables() {
+			return this.uriVariables;
 		}
-		
-		/**
-		 * @return match result value
-		 */
-		public String value() {
-			return this.value;
+
+		public Map<String, MultiValueMap<String, String>> getMatrixVariables() {
+			return this.matrixVariables;
 		}
-		
-		/**
-		 * @return match result parameters (empty map if no parameters)
-		 */
-		public MultiValueMap<String,String> parameters() {
-			return this.parameters;
+
+		@Override
+		public String toString() {
+			return "PathMatchResult[uriVariables=" + this.uriVariables + ", " +
+					"matrixVariables=" + this.matrixVariables + "]";
 		}
 	}
 
@@ -498,15 +520,15 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final PathContainer pathRemaining;
 
-		private final Map<String, PathMatchResult> matchingVariables;
+		private final PathMatchResult pathMatchResult;
 
 		PathRemainingMatchInfo(@Nullable PathContainer pathRemaining) {
-			this(pathRemaining, Collections.emptyMap());
+			this(pathRemaining, PathMatchResult.EMPTY);
 		}
 
-		PathRemainingMatchInfo(@Nullable PathContainer pathRemaining, Map<String, PathMatchResult> matchingVariables) {
+		PathRemainingMatchInfo(@Nullable PathContainer pathRemaining, PathMatchResult pathMatchResult) {
 			this.pathRemaining = pathRemaining;
-			this.matchingVariables = matchingVariables;
+			this.pathMatchResult = pathMatchResult;
 		}
 
 		/**
@@ -520,8 +542,15 @@ public class PathPattern implements Comparable<PathPattern> {
 		 * Return variables that were bound in the part of the path that was successfully matched.
 		 * Will be an empty map if no variables were bound
 		 */
-		public Map<String, PathMatchResult> getMatchingVariables() {
-			return this.matchingVariables;
+		public Map<String, String> getUriVariables() {
+			return this.pathMatchResult.getUriVariables();
+		}
+
+		/**
+		 * Return the path parameters for each bound variable.
+		 */
+		public Map<String, MultiValueMap<String, String>> getMatrixVariables() {
+			return this.pathMatchResult.getMatrixVariables();
 		}
 	}
 
@@ -595,7 +624,10 @@ public class PathPattern implements Comparable<PathPattern> {
 		boolean isMatchStartMatching = false;
 
 		@Nullable
-		private Map<String, PathMatchResult> extractedVariables;
+		private Map<String, String> extractedUriVariables;
+
+		@Nullable
+		private Map<String, MultiValueMap<String, String>> extractedMatrixVariables;
 
 		boolean extractingVariables;
 
@@ -626,18 +658,25 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 
 		public void set(String key, String value, MultiValueMap<String,String> parameters) {
-			if (this.extractedVariables == null) {
-				extractedVariables = new HashMap<>();
+			if (this.extractedUriVariables == null) {
+				this.extractedUriVariables = new HashMap<>();
 			}
-			extractedVariables.put(key, new PathMatchResult(key, value, parameters));
+			this.extractedUriVariables.put(key, value);
+
+			if (!parameters.isEmpty()) {
+				if (this.extractedMatrixVariables == null) {
+					this.extractedMatrixVariables = new HashMap<>();
+				}
+				this.extractedMatrixVariables.put(key, CollectionUtils.unmodifiableMultiValueMap(parameters));
+			}
 		}
 
-		public Map<String, PathMatchResult> getExtractedVariables() {
-			if (this.extractedVariables == null) {
-				return Collections.emptyMap();
+		public PathMatchResult getPathMatchResult() {
+			if (this.extractedUriVariables == null) {
+				return PathMatchResult.EMPTY;
 			}
 			else {
-				return this.extractedVariables;
+				return new PathMatchResult(this.extractedUriVariables, this.extractedMatrixVariables);
 			}
 		}
 

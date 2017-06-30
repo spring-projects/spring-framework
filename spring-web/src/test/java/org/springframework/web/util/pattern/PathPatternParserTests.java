@@ -19,14 +19,18 @@ package org.springframework.web.util.pattern;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Exercise the {@link PathPatternParser}.
@@ -137,23 +141,23 @@ public class PathPatternParserTests {
 
 		pathPattern = checkStructure("/{var:[^\\/]*}");
 		assertEquals(CaptureVariablePathElement.class.getName(), pathPattern.getHeadSection().next.getClass().getName());
-		Map<String, PathMatchResult> result = matchAndExtract(pathPattern,"/foo");
-		assertEquals("foo", result.get("var").value());
+		PathMatchResult result = matchAndExtract(pathPattern,"/foo");
+		assertEquals("foo", result.getUriVariables().get("var"));
 
 		pathPattern = checkStructure("/{var:\\[*}");
 		assertEquals(CaptureVariablePathElement.class.getName(), pathPattern.getHeadSection().next.getClass().getName());
 		result = matchAndExtract(pathPattern,"/[[[");
-		assertEquals("[[[", result.get("var").value());
+		assertEquals("[[[", result.getUriVariables().get("var"));
 
 		pathPattern = checkStructure("/{var:[\\{]*}");
 		assertEquals(CaptureVariablePathElement.class.getName(), pathPattern.getHeadSection().next.getClass().getName());
 		result = matchAndExtract(pathPattern,"/{{{");
-		assertEquals("{{{", result.get("var").value());
+		assertEquals("{{{", result.getUriVariables().get("var"));
 
 		pathPattern = checkStructure("/{var:[\\}]*}");
 		assertEquals(CaptureVariablePathElement.class.getName(), pathPattern.getHeadSection().next.getClass().getName());
 		result = matchAndExtract(pathPattern,"/}}}");
-		assertEquals("}}}", result.get("var").value());
+		assertEquals("}}}", result.getUriVariables().get("var"));
 
 		pathPattern = checkStructure("*");
 		assertEquals(WildcardPathElement.class.getName(), pathPattern.getHeadSection().getClass().getName());
@@ -467,7 +471,7 @@ public class PathPatternParserTests {
 		assertFalse(pp.matches(PathPatternMatcherTests.toPathContainer(path)));
 	}
 	
-	private Map<String, PathMatchResult> matchAndExtract(PathPattern pp, String path) {
+	private PathMatchResult matchAndExtract(PathPattern pp, String path) {
 		 return pp.matchAndExtract(PathPatternMatcherTests.toPathContainer(path));
 	}
 

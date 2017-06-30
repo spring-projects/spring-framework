@@ -294,41 +294,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
-
-		exchange = get("/cars;colors=red,blue,green;year=2012").toExchange();
-		handleMatch(exchange, "/{cars:[^;]+}{params}");
-
-		matrixVariables = getMatrixVariables(exchange, "params");
-		uriVariables = getUriTemplateVariables(exchange);
-
-		assertNotNull(matrixVariables);
-		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
-		assertEquals("2012", matrixVariables.getFirst("year"));
-		assertEquals("cars", uriVariables.get("cars"));
-		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
-
-		exchange = get("/cars").toExchange();
-		handleMatch(exchange, "/{cars:[^;]+}{params}");
-
-		matrixVariables = getMatrixVariables(exchange, "params");
-		uriVariables = getUriTemplateVariables(exchange);
-
-		assertNull(matrixVariables);
-		assertEquals("cars", uriVariables.get("cars"));
-		assertEquals("", uriVariables.get("params"));
 	}
 
 	@Test
 	public void handleMatchMatrixVariablesDecoding() throws Exception {
 		ServerWebExchange exchange = method(HttpMethod.GET, URI.create("/path;mvar=a%2fb")).toExchange();
-		handleMatch(exchange, "/path{filter}");
+		handleMatch(exchange, "/{filter}");
 
 		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "filter");
 		Map<String, String> uriVariables = getUriTemplateVariables(exchange);
 
 		assertNotNull(matrixVariables);
 		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals(";mvar=a/b", uriVariables.get("filter"));
+		assertEquals("path", uriVariables.get("filter"));
 	}
 
 

@@ -19,10 +19,10 @@ package org.springframework.web.util.pattern;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
@@ -79,19 +79,17 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		Map<String, PathMatchResult> results = pathPattern.matchAndExtract(PathContainer.parse(path, StandardCharsets.UTF_8));
-		// Collapse PathMatchResults to simple value results (path parameters are lost in this translation)
-		Map<String, String> boundVariables = null;
-		if (results.size() == 0) {
-			boundVariables = Collections.emptyMap();
+		PathContainer pathContainer = PathContainer.parse(path, StandardCharsets.UTF_8);
+		PathMatchResult results = pathPattern.matchAndExtract(pathContainer);
+		// Collapse PathMatchResults to simple value results
+		// TODO: (path parameters are lost in this translation)
+		if (results.getUriVariables().size() == 0) {
+			return Collections.emptyMap();
 		}
 		else {
-			boundVariables = new LinkedHashMap<>();
-			for (Map.Entry<String,PathMatchResult> entries: results.entrySet()) {
-				boundVariables.put(entries.getKey(), entries.getValue().value());
-			}
+			return results.getUriVariables().entrySet().stream()
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		}
-		return boundVariables;
 	}
 
 	@Override
