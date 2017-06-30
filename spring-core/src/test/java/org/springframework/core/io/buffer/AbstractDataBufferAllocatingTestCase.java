@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,22 @@ package org.springframework.core.io.buffer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocatorMetric;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import org.junit.Rule;
+import org.junit.rules.Verifier;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -43,13 +49,17 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		return new Object[][] {
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(false))},
+				// disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 8192, 11, 0, 0, 0, true))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 8192, 11, 0, 0, 0, true))},
 				{new DefaultDataBufferFactory(true)},
 				{new DefaultDataBufferFactory(false)}
 
 		};
 	}
+
+	@Rule
+	public final Verifier leakDetector = new LeakDetector();
 
 	protected DataBuffer createDataBuffer(int capacity) {
 		return this.bufferFactory.allocateBuffer(capacity);
@@ -73,6 +83,32 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 			assertEquals(expected, value);
 			DataBufferUtils.release(dataBuffer);
 		};
+	}
+
+
+	private class LeakDetector extends Verifier {
+
+		@Override
+		protected void verify() throws Throwable {
+			if (bufferFactory instanceof NettyDataBufferFactory) {
+				ByteBufAllocator byteBufAllocator =
+						((NettyDataBufferFactory) bufferFactory).getByteBufAllocator();
+				if (byteBufAllocator instanceof PooledByteBufAllocator) {
+					PooledByteBufAllocator pooledByteBufAllocator =
+							(PooledByteBufAllocator) byteBufAllocator;
+					PooledByteBufAllocatorMetric metric = pooledByteBufAllocator.metric();
+					long allocations = calculateAllocations(metric.directArenas()) +
+							calculateAllocations(metric.heapArenas());
+					assertTrue("ByteBuf leak detected: " + allocations +
+							" allocations were not released", allocations == 0);
+				}
+			}
+		}
+
+		private long calculateAllocations(List<PoolArenaMetric> metrics) {
+			return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
+		}
+
 	}
 
 }
