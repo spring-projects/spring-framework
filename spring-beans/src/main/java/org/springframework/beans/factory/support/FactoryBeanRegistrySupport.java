@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,16 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	}
 
 	/**
-	 * Returns the security context for this bean factory. If a security manager
+	 * Overridden to clear the FactoryBean object cache as well.
+	 */
+	@Override
+	public void destroySingletons() {
+		super.destroySingletons();
+		this.factoryBeanObjectCache.clear();
+	}
+
+	/**
+	 * Return the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged
 	 * of the security context returned by this method.
 	 * @see AccessController#getContext()
