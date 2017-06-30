@@ -39,6 +39,7 @@ import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -339,24 +340,25 @@ public class PathPatternMatcherTests {
 		assertEquals("",parse("/resource/{*foo}").getPathRemaining(toPathContainer("/resource")).getPathRemaining());
 
 		PathPattern.PathRemainingMatchInfo pri = parse("/aaa/{bbb}/c?d/e*f/*/g").getPathRemaining(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
+		assertNotNull(pri);
 		assertEquals("/i",pri.getPathRemaining());
 		assertEquals("b",pri.getUriVariables().get("bbb"));
 
 		pri = parse("/aaa/{bbb}/c?d/e*f/*/g/").getPathRemaining(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
+		assertNotNull(pri);
 		assertEquals("i",pri.getPathRemaining());
 		assertEquals("b",pri.getUriVariables().get("bbb"));
 		
 		pri = parse("/{aaa}_{bbb}/e*f/{x}/g").getPathRemaining(toPathContainer("/aa_bb/ef/x/g/i"));
+		assertNotNull(pri);
 		assertEquals("/i",pri.getPathRemaining());
 		assertEquals("aa",pri.getUriVariables().get("aaa"));
 		assertEquals("bb",pri.getUriVariables().get("bbb"));
 		assertEquals("x",pri.getUriVariables().get("x"));
 
 		assertNull(parse("/a/b").getPathRemaining(toPathContainer("")));
-		assertNull(parse("/a/b").getPathRemaining((String) null));
 		assertEquals("/a/b",parse("").getPathRemaining(toPathContainer("/a/b")).getPathRemaining());
 		assertEquals("",parse("").getPathRemaining(toPathContainer("")).getPathRemaining());
-		assertNull(parse("").getPathRemaining((String) null).getPathRemaining());
 	}
 
 	@Test

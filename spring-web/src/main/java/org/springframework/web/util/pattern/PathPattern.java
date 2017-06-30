@@ -90,7 +90,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean caseSensitive;
 
 	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully */
-	boolean allowOptionalTrailingSlash;
+	private boolean allowOptionalTrailingSlash;
 
 	/** How many variables are captured in this pattern */
 	private int capturedVariableCount;
@@ -122,8 +122,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
-	PathPattern(String patternText, PathPatternParser parser, PathElement head, char separator, boolean caseSensitive,
-			boolean allowOptionalTrailingSlash) {
+	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head,
+			char separator, boolean caseSensitive, boolean allowOptionalTrailingSlash) {
+
 		this.patternString = patternText;
 		this.parser = parser;
 		this.head = head;
@@ -168,12 +169,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	@Nullable
-	public PathRemainingMatchInfo getPathRemaining(@Nullable String path) {
-		return getPathRemaining(path != null ?
-				PathContainer.parse(path, StandardCharsets.UTF_8) : null);
+	public PathRemainingMatchInfo getPathRemaining(String path) {
+		return getPathRemaining(PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
-
-
 
 
 	/**
@@ -203,7 +201,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * or {@code null} if the path does not match this pattern
 	 */
 	@Nullable
-	public PathRemainingMatchInfo getPathRemaining(@Nullable PathContainer pathContainer) {
+	public PathRemainingMatchInfo getPathRemaining(PathContainer pathContainer) {
 		if (this.head == null) {
 			return new PathRemainingMatchInfo(pathContainer);
 		}
@@ -487,7 +485,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		private final Map<String, MultiValueMap<String, String>> matrixVariables;
 
 
-		public PathMatchResult(Map<String, String> uriVars,
+		PathMatchResult(Map<String, String> uriVars,
 				@Nullable Map<String, MultiValueMap<String, String>> matrixVars) {
 
 			this.uriVariables = Collections.unmodifiableMap(uriVars);
@@ -522,11 +520,11 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final PathMatchResult pathMatchResult;
 
-		PathRemainingMatchInfo(@Nullable PathContainer pathRemaining) {
+		PathRemainingMatchInfo(PathContainer pathRemaining) {
 			this(pathRemaining, PathMatchResult.EMPTY);
 		}
 
-		PathRemainingMatchInfo(@Nullable PathContainer pathRemaining, PathMatchResult pathMatchResult) {
+		PathRemainingMatchInfo(PathContainer pathRemaining, PathMatchResult pathMatchResult) {
 			this.pathRemaining = pathRemaining;
 			this.pathMatchResult = pathMatchResult;
 		}
@@ -535,7 +533,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		 * Return the part of a path that was not matched by a pattern.
 		 */
 		public String getPathRemaining() {
-			return this.pathRemaining == null ? null: this.pathRemaining.value();
+			return this.pathRemaining.value();
 		}
 
 		/**
@@ -727,7 +725,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param container a path container
 	 * @return true if the container is not null and has more than zero elements
 	 */
-	private boolean hasLength(PathContainer container) {
+	private boolean hasLength(@Nullable PathContainer container) {
 		return container != null && container.elements().size() > 0;
 	}
 
