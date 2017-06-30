@@ -292,14 +292,12 @@ public class DeferredResult<T> {
 			}
 			@Override
 			public <S> boolean handleError(NativeWebRequest request, DeferredResult<S> deferredResult, Throwable t) {
-				boolean continueProcessing = true;
 				try {
 					if (errorCallback != null) {
 						errorCallback.accept(t);
 					}
 				}
 				finally {
-					continueProcessing = false;
 					try {
 						setResultInternal(t);
 					}
@@ -307,7 +305,7 @@ public class DeferredResult<T> {
 						logger.debug("Failed to handle error result", ex);
 					}
 				}
-				return continueProcessing;
+				return false;
 			}
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
