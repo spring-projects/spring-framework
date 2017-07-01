@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -81,38 +80,6 @@ public class PathPatternRegistry<T> {
 		return Collections.unmodifiableMap(this.patternsMap);
 	}
 
-	/**
-	 * Return a {@code SortedSet} of {@code PathPattern}s matching the given {@code lookupPath}.
-	 * <p>The returned set sorted with the most specific
-	 * patterns first, according to the given {@code lookupPath}.
-	 * @param lookupPath the URL lookup path to be matched against
-	 */
-	public SortedSet<PathMatchResult<T>> findMatches(String lookupPath) {
-		return this.patternsMap.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.map(entry -> new PathMatchResult<>(entry.getKey(), entry.getValue()))
-				.collect(Collectors.toCollection(() ->
-						new TreeSet<>(new PathMatchResultComparator<T>(lookupPath))));
-	}
-
-	/**
-	 * Return, if any, the most specific {@code PathPattern} matching the given {@code lookupPath}.
-	 * @param lookupPath the URL lookup path to be matched against
-	 */
-	public Optional<PathMatchResult<T>> findFirstMatch(String lookupPath) {
-		return this.patternsMap.entrySet().stream()
-				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted(Comparator.comparing(Map.Entry::getKey))
-				.findFirst()
-				.map(entry -> new PathMatchResult<>(entry.getKey(), entry.getValue()));
-	}
-
-	/**
-	 * Remove all {@link PathPattern}s from this registry
-	 */
-	public void clear() {
-		this.patternsMap.clear();
-	}
 
 	/**
 	 * Parse the given {@code rawPattern} and adds it to this registry.
@@ -125,7 +92,7 @@ public class PathPatternRegistry<T> {
 		this.patternsMap.put(newPattern, handler);
 	}
 
-	private String prependLeadingSlash(String pattern) {
+	private static String prependLeadingSlash(String pattern) {
 		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 			return "/" + pattern;
 		}
@@ -135,40 +102,39 @@ public class PathPatternRegistry<T> {
 	}
 
 
-	private class PathMatchResultComparator<T> implements Comparator<PathMatchResult<T>> {
+	/**
+	 * Return patterns matching the given {@code lookupPath}.
+	 * <p>The returned set sorted with the most specific
+	 * patterns first, according to the given {@code lookupPath}.
+	 * @param lookupPath the URL lookup path to be matched against
+	 */
+	public SortedSet<PathMatchResult<T>> findMatches(String lookupPath) {
+		return this.patternsMap.entrySet().stream()
+				.filter(entry -> entry.getKey().matches(lookupPath))
+				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.map(entry -> new PathMatchResult<>(entry.getKey(), entry.getValue()))
+				.collect(Collectors.toCollection(TreeSet::new));
+	}
 
-		private final String path;
+	/**
+	 * Return, if any, the most specific {@code PathPattern} matching the given {@code lookupPath}.
+	 * @param lookupPath the URL lookup path to be matched against
+	 */
+	@Nullable
+	public PathMatchResult<T> findFirstMatch(String lookupPath) {
+		return this.patternsMap.entrySet().stream()
+				.filter(entry -> entry.getKey().matches(lookupPath))
+				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.findFirst()
+				.map(entry -> new PathMatchResult<>(entry.getKey(), entry.getValue()))
+				.orElse(null);
+	}
 
-		public PathMatchResultComparator(String path) {
-			this.path = path;
-		}
-
-		@Override
-		public int compare(@Nullable PathMatchResult<T> o1, @Nullable PathMatchResult<T> o2) {
-			// Nulls get sorted to the end
-			if (o1 == null) {
-				return (o2 == null ? 0 : +1);
-			}
-			else if (o2 == null) {
-				return -1;
-			}
-			PathPattern p1 = o1.getPattern();
-			PathPattern p2 = o2.getPattern();
-			// exact matches get sorted first
-			if (p1.getPatternString().equals(path)) {
-				return (p2.getPatternString().equals(path)) ? 0 : -1;
-			}
-			else if (p2.getPatternString().equals(path)) {
-				return +1;
-			}
-			// compare pattern specificity
-			int result = p1.compareTo(p2);
-			// if equal specificity, sort using pattern string
-			if (result == 0) {
-				return p1.getPatternString().compareTo(p2.getPatternString());
-			}
-			return result;
-		}
+	/**
+	 * Remove all {@link PathPattern}s from this registry
+	 */
+	public void clear() {
+		this.patternsMap.clear();
 	}
 
 }

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -113,12 +112,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	@Nullable
 	protected Object lookupHandler(String lookupPath, ServerWebExchange exchange) throws Exception {
 		if (this.patternRegistry != null) {
-			Optional<PathMatchResult<Object>> matches = this.patternRegistry.findFirstMatch(lookupPath);
-			if (matches.isPresent()) {
+			PathMatchResult<Object> bestMatch = this.patternRegistry.findFirstMatch(lookupPath);
+			if (bestMatch != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Matching patterns for request [" + lookupPath + "] are " + matches);
+					logger.debug("Matching patterns for request [" + lookupPath + "] are " + bestMatch);
 				}
-				PathMatchResult<Object> bestMatch = matches.get();
 				String pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
 				Object handler = bestMatch.getHandler();
 				return handleMatch(handler, bestMatch.getPattern(), pathWithinMapping, exchange);

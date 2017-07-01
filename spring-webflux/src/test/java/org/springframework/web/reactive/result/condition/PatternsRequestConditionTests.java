@@ -16,10 +16,14 @@
 
 package org.springframework.web.reactive.result.condition;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 import org.junit.Test;
 
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
@@ -141,6 +145,15 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition c2 = new PatternsRequestCondition("/foo*");
 
 		assertEquals(0, c1.compareTo(c2, get("/foo").toExchange()));
+	}
+
+	@Test
+	public void equallyMatchingPatternsAreBothPresent() throws Exception {
+		PatternsRequestCondition c = new PatternsRequestCondition("/a", "/b");
+		assertEquals(2, c.getPatterns().size());
+		Iterator<PathPattern> itr = c.getPatterns().iterator();
+		assertEquals("/a", itr.next().getPatternString());
+		assertEquals("/b", itr.next().getPatternString());
 	}
 
 	@Test

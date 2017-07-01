@@ -16,20 +16,20 @@
 
 package org.springframework.web.reactive.handler;
 
+import org.jetbrains.annotations.NotNull;
+
 import org.springframework.util.Assert;
 import org.springframework.web.util.pattern.PathPattern;
 
 /**
- * Result of matching an request lookup path against {@link PathPattern} instances.
- *
- * <p>Each result optionally associates the matching {@link PathPattern}
- * with a request handler of type {@code T}.
+ * Result of path match performed through a {@link PathPatternRegistry}.
+ * Each result contains the matched pattern and handler of type {@code T}.
  *
  * @author Brian Clozel
  * @since 5.0
  * @see PathPatternRegistry
  */
-public class PathMatchResult<T> {
+public class PathMatchResult<T> implements Comparable<PathMatchResult<T>> {
 
 	private final PathPattern pattern;
 
@@ -56,6 +56,22 @@ public class PathMatchResult<T> {
 	 */
 	public T getHandler() {
 		return this.handler;
+	}
+
+
+	@Override
+	public int compareTo(@NotNull PathMatchResult<T> other) {
+		int index = this.pattern.compareTo(other.pattern);
+		return (index != 0 ? index : this.getPatternString().compareTo(other.getPatternString()));
+	}
+
+	private String getPatternString() {
+		return this.pattern.getPatternString();
+	}
+
+	@Override
+	public String toString() {
+		return "PathMatchResult{pattern=" + this.pattern + ", handler=" + this.handler + "]";
 	}
 
 }

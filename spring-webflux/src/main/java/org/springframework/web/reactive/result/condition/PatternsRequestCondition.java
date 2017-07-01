@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -85,8 +86,15 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	private static Set<PathPattern> toSortedSet(Stream<PathPattern> stream) {
-		Set<PathPattern> result = stream.sorted().collect(Collectors.toCollection(TreeSet::new));
-		return Collections.unmodifiableSet(result);
+		return Collections.unmodifiableSet(stream.sorted()
+				.collect(Collectors.toCollection(() -> new TreeSet<>(getPatternComparator()))));
+	}
+
+	private static Comparator<PathPattern> getPatternComparator() {
+		return (p1, p2) -> {
+			int index = p1.compareTo(p2);
+			return (index != 0 ? index : p1.getPatternString().compareTo(p2.getPatternString()));
+		};
 	}
 
 	/**

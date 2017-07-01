@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -45,17 +44,13 @@ import static org.junit.Assert.assertThat;
  */
 public class PathPatternRegistryTests {
 
-	private PathPatternRegistry<Object> registry;
+	private final PathPatternRegistry<Object> registry = new PathPatternRegistry();
 
 	private final PathPatternParser parser = new PathPatternParser();
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	@Before
-	public void setUp() throws Exception {
-		this.registry = new PathPatternRegistry();
-	}
 
 	@Test
 	public void shouldPrependPatternsWithSlash() {
@@ -79,7 +74,7 @@ public class PathPatternRegistryTests {
 		this.registry.register("/fo?", new Object());
 		this.registry.register("/f?o", new Object());
 		Set<PathMatchResult<Object>> matches = this.registry.findMatches("/foo");
-		assertThat(getPatternList(matches), contains(pattern("/f?o"), pattern("/fo?")));
+		assertThat(toPatterns(matches), contains(pattern("/f?o"), pattern("/fo?")));
 	}
 
 	@Test
@@ -94,15 +89,13 @@ public class PathPatternRegistryTests {
 		this.registry.register("/foo/bar/baz", new Object());
 		this.registry.register("/foo/bar/{baz}", new Object());
 		Set<PathMatchResult<Object>> matches = this.registry.findMatches("/foo/bar/baz");
-		assertThat(getPatternList(matches), contains(pattern("/foo/bar/baz"), pattern("/foo/bar/{baz}"),
+		assertThat(toPatterns(matches), contains(pattern("/foo/bar/baz"), pattern("/foo/bar/{baz}"),
 				pattern("/foo/{*baz}")));
 	}
 
 
-	private List<PathPattern> getPatternList(Collection<PathMatchResult<Object>> results) {
-		return results.stream()
-				.map(result -> result.getPattern()).collect(Collectors.toList());
-
+	private List<PathPattern> toPatterns(Collection<PathMatchResult<Object>> results) {
+		return results.stream().map(PathMatchResult::getPattern).collect(Collectors.toList());
 	}
 
 	private static PathPatternMatcher pattern(String pattern) {
