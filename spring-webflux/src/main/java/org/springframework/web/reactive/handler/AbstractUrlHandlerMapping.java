@@ -22,6 +22,7 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -80,7 +81,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	@Override
 	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
-		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
+		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
@@ -110,14 +111,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	@Nullable
-	protected Object lookupHandler(String lookupPath, ServerWebExchange exchange) throws Exception {
+	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
 		if (this.patternRegistry != null) {
 			PathMatchResult<Object> bestMatch = this.patternRegistry.findFirstMatch(lookupPath);
 			if (bestMatch != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Matching patterns for request [" + lookupPath + "] are " + bestMatch);
 				}
-				String pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
+				PathContainer pathWithinMapping = bestMatch.getPattern().extractPathWithinPattern(lookupPath);
 				Object handler = bestMatch.getHandler();
 				return handleMatch(handler, bestMatch.getPattern(), pathWithinMapping, exchange);
 			}
@@ -127,7 +128,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		return null;
 	}
 
-	private Object handleMatch(Object handler, PathPattern bestMatch, String pathWithinMapping,
+	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
 			ServerWebExchange exchange) throws Exception {
 
 		// Bean name or resolved handler?

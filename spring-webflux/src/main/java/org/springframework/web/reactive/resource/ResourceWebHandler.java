@@ -41,6 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -311,8 +312,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	protected Mono<Resource> getResource(ServerWebExchange exchange) {
 
 		String name = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
-		String pathWithinHandler = exchange.getRequiredAttribute(name);
-		String path = processPath(pathWithinHandler);
+		PathContainer pathWithinHandler = exchange.getRequiredAttribute(name);
+		String path = processPath(pathWithinHandler.value());
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Ignoring invalid resource path [" + path + "]");

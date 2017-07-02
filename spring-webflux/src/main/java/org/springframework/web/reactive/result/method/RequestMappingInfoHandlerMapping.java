@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.method.HandlerMethod;
@@ -92,10 +93,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
-	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod, String lookupPath,
+	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod,
 			ServerWebExchange exchange) {
 
-		super.handleMatch(info, handlerMethod, lookupPath, exchange);
+		super.handleMatch(info, handlerMethod, exchange);
+
+		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 
 		PathPattern bestPattern;
 		Map<String, String> uriVariables;
@@ -103,7 +106,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Set<PathPattern> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
-			bestPattern = getPathPatternParser().parse(lookupPath);
+			bestPattern = getPathPatternParser().parse(lookupPath.value());
 			uriVariables = Collections.emptyMap();
 			matrixVariables = Collections.emptyMap();
 		}
@@ -137,7 +140,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * method but not by query parameter conditions
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath,
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos,
 			ServerWebExchange exchange) throws Exception {
 
 		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);

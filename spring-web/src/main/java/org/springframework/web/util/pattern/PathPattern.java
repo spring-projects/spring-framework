@@ -262,6 +262,13 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 	}
 
+	// TODO: implement extractPathWithinPattern natively for PathContainer
+
+	public PathContainer extractPathWithinPattern(PathContainer path) {
+		String result = extractPathWithinPattern(path.value());
+		return PathContainer.parse(result, StandardCharsets.UTF_8);
+	}
+
 	/**
 	 * Given a full path, determine the pattern-mapped part. <p>For example: <ul>
 	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>

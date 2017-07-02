@@ -44,6 +44,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
@@ -273,14 +274,6 @@ public class ResourceWebHandlerTests {
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
-		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
-	}
-
-	@Test
-	public void ignoreInvalidEscapeSequence() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
-		setPathWithinHandlerMapping(exchange, "/%foo%/bar.txt");
-		this.handler.handle(exchange).block(TIMEOUT);
 		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
 	}
 
@@ -559,7 +552,8 @@ public class ResourceWebHandlerTests {
 
 
 	private void setPathWithinHandlerMapping(ServerWebExchange exchange, String path) {
-		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, path);
+		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
+				PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {

@@ -24,6 +24,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -121,7 +122,7 @@ public class PathPatternRegistry<T> {
 	 * @param lookupPath the URL lookup path to be matched against
 	 */
 	@Nullable
-	public PathMatchResult<T> findFirstMatch(String lookupPath) {
+	public PathMatchResult<T> findFirstMatch(PathContainer lookupPath) {
 		return this.patternsMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
 				.sorted(Comparator.comparing(Map.Entry::getKey))
