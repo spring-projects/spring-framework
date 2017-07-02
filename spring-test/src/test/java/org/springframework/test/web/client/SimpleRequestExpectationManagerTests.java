@@ -169,7 +169,6 @@ public class SimpleRequestExpectationManagerTests {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
 			return new MockClientHttpRequest(method, new URI(url));

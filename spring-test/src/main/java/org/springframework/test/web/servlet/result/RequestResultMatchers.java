@@ -141,7 +141,6 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a session attribute value.
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> ResultMatcher sessionAttribute(final String name, final Object value) {
 		return result -> {
 			HttpSession session = result.getRequest().getSession();
