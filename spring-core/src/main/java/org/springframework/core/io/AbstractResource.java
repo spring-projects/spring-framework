@@ -27,7 +27,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -144,7 +143,6 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public long contentLength() throws IOException {
 		InputStream is = getInputStream();
-		Assert.state(is != null, "Resource InputStream must not be null");
 		try {
 			long size = 0;
 			byte[] buf = new byte[255];

@@ -79,7 +79,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 			String content = readBodyContent();
 			// HTML and/or JavaScript escape, if demanded
 			content = htmlEscape(content);
-			content = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content;
+			content = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content);
 			writeBodyContent(content);
 		}
 		catch (IOException ex) {

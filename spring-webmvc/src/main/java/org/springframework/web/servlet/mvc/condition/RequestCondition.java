@@ -18,6 +18,8 @@ package org.springframework.web.servlet.mvc.condition;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Contract for request mapping conditions.
  *
@@ -55,6 +57,7 @@ public interface RequestCondition<T> {
 	 * empty content thus not causing a failure to match.
 	 * @return a condition instance in case of a match or {@code null} otherwise.
 	 */
+	@Nullable
 	T getMatchingCondition(HttpServletRequest request);
 
 	/**

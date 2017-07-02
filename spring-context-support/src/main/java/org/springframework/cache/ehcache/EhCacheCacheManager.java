@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * CacheManager backed by an EhCache {@link net.sf.ehcache.CacheManager}.
@@ -64,6 +66,7 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	/**
 	 * Return the backing EhCache {@link net.sf.ehcache.CacheManager}.
 	 */
+	@Nullable
 	public net.sf.ehcache.CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
@@ -79,7 +82,10 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		Status status = getCacheManager().getStatus();
+		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
+		Status status = cacheManager.getStatus();
 		if (!Status.STATUS_ALIVE.equals(status)) {
 			throw new IllegalStateException(
 					"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
@@ -95,8 +101,11 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 
 	@Override
 	protected Cache getMissingCache(String name) {
+		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
 		// Check the EhCache cache again (in case the cache was added at runtime)
-		Ehcache ehcache = getCacheManager().getEhcache(name);
+		Ehcache ehcache = cacheManager.getEhcache(name);
 		if (ehcache != null) {
 			return new EhCacheCache(ehcache);
 		}

@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -44,6 +45,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	@Nullable
 	private T nativeSession;
 
 
@@ -52,7 +54,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
-	public AbstractWebSocketSession(Map<String, Object> attributes) {
+	public AbstractWebSocketSession(@Nullable Map<String, Object> attributes) {
 		if (attributes != null) {
 			this.attributes.putAll(attributes);
 		}
@@ -66,18 +68,14 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public T getNativeSession() {
+		Assert.state(this.nativeSession != null, "WebSocket session not yet initialized");
 		return this.nativeSession;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R> R getNativeSession(Class<R> requiredType) {
-		if (requiredType != null) {
-			if (requiredType.isInstance(this.nativeSession)) {
-				return (R) this.nativeSession;
-			}
-		}
-		return null;
+	public <R> R getNativeSession(@Nullable Class<R> requiredType) {
+		return (requiredType == null || requiredType.isInstance(this.nativeSession) ? (R) this.nativeSession : null);
 	}
 
 	public void initializeNativeSession(T session) {

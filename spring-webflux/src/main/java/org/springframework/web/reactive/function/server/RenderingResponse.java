@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -92,7 +93,7 @@ public interface RenderingResponse extends ServerResponse {
 		 * @param name the name of the model attribute (never {@code null})
 		 * @param value the model attribute value (can be {@code null})
 		 */
-		Builder modelAttribute(String name, Object value);
+		Builder modelAttribute(String name, @Nullable Object value);
 
 		/**
 		 * Copy all attributes in the supplied array into the model,

@@ -37,6 +37,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -157,12 +158,14 @@ public class ContextLoader {
 	 * The 'current' WebApplicationContext, if the ContextLoader class is
 	 * deployed in the web app ClassLoader itself.
 	 */
+	@Nullable
 	private static volatile WebApplicationContext currentContext;
 
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
 	 */
+	@Nullable
 	private WebApplicationContext context;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
@@ -234,7 +237,7 @@ public class ContextLoader {
 	 * @see #customizeContext
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+	public void setContextInitializers(@Nullable ApplicationContextInitializer<?>... initializers) {
 		if (initializers != null) {
 			for (ApplicationContextInitializer<?> initializer : initializers) {
 				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
@@ -504,6 +507,7 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 * @return the parent application context, or {@code null} if none
 	 */
+	@Nullable
 	protected ApplicationContext loadParentContext(ServletContext servletContext) {
 		return null;
 	}
@@ -542,6 +546,7 @@ public class ContextLoader {
 	 * if none found
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
+	@Nullable
 	public static WebApplicationContext getCurrentWebApplicationContext() {
 		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 		if (ccl != null) {

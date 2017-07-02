@@ -50,6 +50,7 @@ import org.springframework.jms.support.JmsMessageHeaderAccessor;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -504,7 +505,7 @@ public class MethodJmsListenerEndpointTests {
 				return String.class.isAssignableFrom(clazz);
 			}
 			@Override
-			public void validate(Object target, Errors errors) {
+			public void validate(@Nullable Object target, Errors errors) {
 				String value = (String) target;
 				if (invalidValue.equals(value)) {
 					errors.reject("not a valid value");

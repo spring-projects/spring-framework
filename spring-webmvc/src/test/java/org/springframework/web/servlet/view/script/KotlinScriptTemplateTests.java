@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletContext;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import static org.mockito.Mockito.mock;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,11 +34,15 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 /**
- * Unit tests for Kotlin script templates running on Kotlin JSR 223 support
+ * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
+@Ignore  // for JDK 9 compatibility
 public class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
@@ -53,6 +56,7 @@ public class KotlinScriptTemplateTests {
 		this.servletContext = new MockServletContext();
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
+
 
 	@Test
 	public void renderTemplateWithFrenchLocale() throws Exception {
@@ -74,11 +78,25 @@ public class KotlinScriptTemplateTests {
 				response.getContentAsString());
 	}
 
+	@Test
+	public void renderTemplateWithoutRenderFunction() throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		model.put("header", "<html><body>");
+		model.put("hello", "Hello");
+		model.put("foo", "Foo");
+		model.put("footer", "</body></html>");
+		MockHttpServletResponse response = renderViewWithModel("org/springframework/web/servlet/view/script/kotlin/eval.kts",
+				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
+				response.getContentAsString());
+	}
+
+
 	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
-		view.setLocale(locale);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addPreferredLocale(locale);
 		view.renderMergedOutputModel(model, request, response);
 		return response;
 	}
@@ -113,6 +131,15 @@ public class KotlinScriptTemplateTests {
 			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 			messageSource.setBasename("org/springframework/web/servlet/view/script/messages");
 			return messageSource;
+		}
+	}
+
+	@Configuration
+	static class ScriptTemplatingConfigurationWithoutRenderFunction {
+
+		@Bean
+		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
+			return new ScriptTemplateConfigurer("kotlin");
 		}
 	}
 

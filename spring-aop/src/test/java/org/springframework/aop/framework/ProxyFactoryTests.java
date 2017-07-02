@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -367,6 +367,16 @@ public class ProxyFactoryTests {
 		AnnotationAwareOrderComparator.sort(list);
 		assertSame(proxy2, list.get(0));
 		assertSame(proxy1, list.get(1));
+	}
+
+	@Test
+	public void testInterceptorWithoutJoinpoint() {
+		final TestBean target = new TestBean("tb");
+		ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, (MethodInterceptor) invocation -> {
+			assertNull(invocation.getThis());
+			return invocation.getMethod().invoke(target, invocation.getArguments());
+		});
+		assertEquals("tb", proxy.getName());
 	}
 
 

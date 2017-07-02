@@ -48,6 +48,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -86,24 +87,33 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class providerClass;
 
+	@Nullable
 	private ValidationProviderResolver validationProviderResolver;
 
+	@Nullable
 	private MessageInterpolator messageInterpolator;
 
+	@Nullable
 	private TraversableResolver traversableResolver;
 
+	@Nullable
 	private ConstraintValidatorFactory constraintValidatorFactory;
 
+	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+	@Nullable
 	private Resource[] mappingLocations;
 
 	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ValidatorFactory validatorFactory;
 
 
@@ -201,7 +211,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.validation.Configuration#addProperty(String, String)
 	 */
-	public void setValidationPropertyMap(Map<String, String> validationProperties) {
+	public void setValidationPropertyMap(@Nullable Map<String, String> validationProperties) {
 		if (validationProperties != null) {
 			this.validationPropertyMap.putAll(validationProperties);
 		}
@@ -272,7 +282,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 
 		if (this.parameterNameDiscoverer != null) {
-			configureParameterNameProviderIfPossible(configuration);
+			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
 
 		if (this.mappingLocations != null) {
@@ -286,9 +296,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			}
 		}
 
-		for (Map.Entry<String, String> entry : this.validationPropertyMap.entrySet()) {
-			configuration.addProperty(entry.getKey(), entry.getValue());
-		}
+		this.validationPropertyMap.forEach(configuration::addProperty);
 
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
 		postProcessConfiguration(configuration);
@@ -297,8 +305,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		setTargetValidator(this.validatorFactory.getValidator());
 	}
 
-	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
-		final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
 		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
 		configuration.parameterNameProvider(new ParameterNameProvider() {
 			@Override
@@ -377,7 +384,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	*/
 
 	@Override
-	public <T> T unwrap(Class<T> type) {
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(@Nullable Class<T> type) {
 		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
 			try {
 				return super.unwrap(type);
@@ -386,7 +394,19 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				// ignore - we'll try ValidatorFactory unwrapping next
 			}
 		}
-		return this.validatorFactory.unwrap(type);
+		if (this.validatorFactory != null) {
+			try {
+				return this.validatorFactory.unwrap(type);
+			}
+			catch (ValidationException ex) {
+				// ignore if just being asked for ValidatorFactory
+				if (ValidatorFactory.class == type) {
+					return (T) this.validatorFactory;
+				}
+				throw ex;
+			}
+		}
+		throw new ValidationException("Cannot unwrap to " + type);
 	}
 
 	public void close() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.validation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -36,6 +37,7 @@ public class FieldError extends ObjectError {
 
 	private final String field;
 
+	@Nullable
 	private final Object rejectedValue;
 
 	private final boolean bindingFailure;
@@ -62,9 +64,8 @@ public class FieldError extends ObjectError {
 	 * @param arguments the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
-	public FieldError(
-			String objectName, String field, Object rejectedValue, boolean bindingFailure,
-			String[] codes, Object[] arguments, String defaultMessage) {
+	public FieldError(String objectName, String field, @Nullable Object rejectedValue, boolean bindingFailure,
+			@Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage) {
 
 		super(objectName, codes, arguments, defaultMessage);
 		Assert.notNull(field, "Field must not be null");
@@ -84,6 +85,7 @@ public class FieldError extends ObjectError {
 	/**
 	 * Return the rejected field value.
 	 */
+	@Nullable
 	public Object getRejectedValue() {
 		return this.rejectedValue;
 	}
@@ -104,7 +106,7 @@ public class FieldError extends ObjectError {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

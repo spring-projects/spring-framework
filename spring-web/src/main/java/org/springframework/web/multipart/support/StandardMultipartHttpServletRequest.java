@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -60,6 +61,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	private static final String FILENAME_WITH_CHARSET_KEY = "filename*=";
 
 
+	@Nullable
 	private Set<String> multipartParameterNames;
 
 
@@ -121,10 +123,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		throw new MultipartException("Failed to parse multipart servlet request", ex);
 	}
 
+	@Nullable
 	private String extractFilename(String contentDisposition, String key) {
-		if (contentDisposition == null) {
-			return null;
-		}
 		int startIndex = contentDisposition.indexOf(key);
 		if (startIndex == -1) {
 			return null;
@@ -145,10 +145,12 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		return filename;
 	}
 
+	@Nullable
 	private String extractFilename(String contentDisposition) {
 		return extractFilename(contentDisposition, FILENAME_KEY);
 	}
 
+	@Nullable
 	private String extractFilenameWithCharset(String contentDisposition) {
 		String filename = extractFilename(contentDisposition, FILENAME_WITH_CHARSET_KEY);
 		if (filename == null) {

@@ -25,6 +25,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
@@ -34,6 +35,7 @@ import org.springframework.web.server.WebFilter;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see RouterFunctions#toHttpHandler(RouterFunction, HandlerStrategies)
  */
@@ -70,6 +72,12 @@ public interface HandlerStrategies {
 	 * @return the exception handlers
 	 */
 	List<WebExceptionHandler> exceptionHandlers();
+
+	/**
+	 * Return the {@link LocaleContextResolver} to be used for resolving locale context.
+	 * @return the locale context resolver
+	 */
+	LocaleContextResolver localeContextResolver();
 
 
 	// Static methods
@@ -109,20 +117,11 @@ public interface HandlerStrategies {
 	interface Builder {
 
 		/**
-		 * Customize the list of default server-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the default codecs
+		 * Customize the list of server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the codecs
 		 * @return this builder
-		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecsConfigurer> consumer);
-
-		/**
-		 * Customize the list of custom server-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the custom codecs
-		 * @return this builder
-		 * @see #defaultCodecs(Consumer)
-		 */
-		Builder customCodecs(Consumer<ServerCodecConfigurer.CustomCodecsConfigurer> consumer);
+		Builder codecs(Consumer<ServerCodecConfigurer> consumer);
 
 		/**
 		 * Add the given view resolver to this builder.
@@ -144,6 +143,13 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 */
 		Builder exceptionHandler(WebExceptionHandler exceptionHandler);
+
+		/**
+		 * Add the given locale context resolver to this builder.
+		 * @param localeContextResolver the locale context resolver to add
+		 * @return this builder
+		 */
+		Builder localeContextResolver(LocaleContextResolver localeContextResolver);
 
 		/**
 		 * Builds the {@link HandlerStrategies}.

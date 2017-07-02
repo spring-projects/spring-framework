@@ -27,6 +27,7 @@ import java.util.Set;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
  * to expectations following the order of declaration or not.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.3
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
@@ -45,8 +47,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	private final List<RequestExpectation> expectations = new LinkedList<>();
 
 	private final List<ClientHttpRequest> requests = new LinkedList<>();
-
-	private final Object lock = new Object();
 
 
 	protected List<RequestExpectation> getExpectations() {
@@ -68,12 +68,13 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		synchronized (this.lock) {
-			if (getRequests().isEmpty()) {
+		List<ClientHttpRequest> requests = getRequests();
+		synchronized (requests) {
+			if (requests.isEmpty()) {
 				afterExpectationsDeclared();
 			}
 			ClientHttpResponse response = validateRequestInternal(request);
-			getRequests().add(request);
+			requests.add(request);
 			return response;
 		}
 	}
@@ -172,6 +173,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			}
 		}
 
+		@Nullable
 		public RequestExpectation findExpectation(ClientHttpRequest request) throws IOException {
 			for (RequestExpectation expectation : getExpectations()) {
 				try {
@@ -186,7 +188,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		}
 
 		public void reset() {
-			this.expectations.clear();
+			getExpectations().clear();
 		}
 	}
 

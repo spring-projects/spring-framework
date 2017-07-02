@@ -38,6 +38,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
@@ -99,6 +100,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private Charset charset = DEFAULT_CHARSET;
 
+	@Nullable
 	private Charset multipartCharset;
 
 
@@ -149,19 +151,16 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	/**
 	 * Set the default character set to use for reading and writing form data when
 	 * the request or response Content-Type header does not explicitly specify it.
-	 *
 	 * <p>As of 4.3, this is also used as the default charset for the conversion
 	 * of text bodies in a multipart request.
-	 *
 	 * <p>As of 5.0 this is also used for part headers including
 	 * "Content-Disposition" (and its filename parameter) unless (the mutually
 	 * exclusive) {@link #setMultipartCharset} is also set, in which case part
 	 * headers are encoded as ASCII and <i>filename</i> is encoded with the
 	 * "encoded-word" syntax from RFC 2047.
-	 *
 	 * <p>By default this is set to "UTF-8".
 	 */
-	public void setCharset(Charset charset) {
+	public void setCharset(@Nullable Charset charset) {
 		if (charset != this.charset) {
 			this.charset = (charset != null ? charset : DEFAULT_CHARSET);
 			applyDefaultCharset();
@@ -201,7 +200,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
@@ -218,7 +217,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
@@ -234,11 +233,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	@Override
-	public MultiValueMap<String, String> read(Class<? extends MultiValueMap<String, ?>> clazz,
+	public MultiValueMap<String, String> read(@Nullable Class<? extends MultiValueMap<String, ?>> clazz,
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
+		Charset charset = (contentType != null && contentType.getCharset() != null ?
+				contentType.getCharset() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
@@ -259,7 +259,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void write(MultiValueMap<String, ?> map, MediaType contentType, HttpOutputMessage outputMessage)
+	public void write(MultiValueMap<String, ?> map, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		if (!isMultipart(map, contentType)) {
@@ -271,7 +271,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 
-	private boolean isMultipart(MultiValueMap<String, ?> map, MediaType contentType) {
+	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
 		}
@@ -285,7 +285,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, MediaType contentType,
+	private void writeForm(MultiValueMap<String, String> form, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
 		Charset charset;
@@ -366,7 +366,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * we encode directly using the configured {@link #setCharset(Charset)}.
 	 */
 	private boolean isFilenameCharsetSet() {
-		return this.multipartCharset != null;
+		return (this.multipartCharset != null);
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
@@ -385,6 +385,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	@SuppressWarnings("unchecked")
 	private void writePart(String name, HttpEntity<?> partEntity, OutputStream os) throws IOException {
 		Object partBody = partEntity.getBody();
+		if (partBody == null) {
+			throw new IllegalStateException("Empty body for part '" + name + "': " + partEntity);
+		}
 		Class<?> partType = partBody.getClass();
 		HttpHeaders partHeaders = partEntity.getHeaders();
 		MediaType partContentType = partHeaders.getContentType();
@@ -431,6 +434,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * @param part the part to determine the file name for
 	 * @return the filename, or {@code null} if not known
 	 */
+	@Nullable
 	protected String getFilename(Object part) {
 		if (part instanceof Resource) {
 			Resource resource = (Resource) part;

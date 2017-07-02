@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ public class JsonExpectationsHelper {
 	 * are "similar" - i.e. they contain the same attribute-value pairs
 	 * regardless of formatting with a lenient checking (extensible, and non-strict
 	 * array ordering).
-	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
 	 * @since 4.1
@@ -48,13 +47,11 @@ public class JsonExpectationsHelper {
 	 * Parse the expected and actual strings as JSON and assert the two
 	 * are "similar" - i.e. they contain the same attribute-value pairs
 	 * regardless of formatting.
-	 *
 	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
 	 * <ul>
-	 *     <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
-	 *     <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
-	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
 	 * @param strict enables strict checking
@@ -69,7 +66,6 @@ public class JsonExpectationsHelper {
 	 * are "not similar" - i.e. they contain different attribute-value pairs
 	 * regardless of formatting with a lenient checking (extensible, and non-strict
 	 * array ordering).
-	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
 	 * @since 4.1
@@ -83,13 +79,11 @@ public class JsonExpectationsHelper {
 	 * Parse the expected and actual strings as JSON and assert the two
 	 * are "not similar" - i.e. they contain different attribute-value pairs
 	 * regardless of formatting.
-	 *
 	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
 	 * <ul>
-	 *     <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
-	 *     <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
-	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
 	 * @param strict enables strict checking

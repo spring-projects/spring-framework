@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.WebUtils;
@@ -179,6 +180,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * The contract is the same as for {@code handleRequest}.
 	 * @see #handleRequest
 	 */
+	@Nullable
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 

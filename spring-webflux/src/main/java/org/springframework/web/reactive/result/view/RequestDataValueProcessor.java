@@ -17,6 +17,7 @@ package org.springframework.web.reactive.result.view;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -61,6 +62,7 @@ public interface RequestDataValueProcessor {
 	 * @param exchange the current exchange
 	 * @return additional hidden form fields to be added, or {@code null}
 	 */
+	@Nullable
 	Map<String, String> getExtraHiddenFields(ServerWebExchange exchange);
 
 	/**

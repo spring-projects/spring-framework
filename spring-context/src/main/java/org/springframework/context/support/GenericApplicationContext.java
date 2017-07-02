@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -92,6 +93,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 	private final DefaultListableBeanFactory beanFactory;
 
+	@Nullable
 	private ResourceLoader resourceLoader;
 
 	private boolean customClassLoader = false;
@@ -125,7 +127,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
-	public GenericApplicationContext(ApplicationContext parent) {
+	public GenericApplicationContext(@Nullable ApplicationContext parent) {
 		this();
 		setParent(parent);
 	}
@@ -149,7 +151,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
 	 */
 	@Override
-	public void setParent(ApplicationContext parent) {
+	public void setParent(@Nullable ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
@@ -237,7 +239,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
-	public void setClassLoader(ClassLoader classLoader) {
+	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		super.setClassLoader(classLoader);
 		this.customClassLoader = true;
 	}
@@ -384,7 +386,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
-	public final <T> void registerBean(String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+	public final <T> void registerBean(@Nullable String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
 		registerBean(beanName, beanClass, null, customizers);
 	}
 
@@ -418,13 +420,15 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	public <T> void registerBean(String beanName, Class<T> beanClass, Supplier<T> supplier,
+	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass, @Nullable Supplier<T> supplier,
 			BeanDefinitionCustomizer... customizers) {
 
-		Assert.isTrue(beanName != null || beanClass != null, "Either bean name or bean class must be specified");
+		BeanDefinitionBuilder builder = (supplier != null ?
+				BeanDefinitionBuilder.genericBeanDefinition(beanClass, supplier) :
+				BeanDefinitionBuilder.genericBeanDefinition(beanClass));
+		BeanDefinition beanDefinition = builder.applyCustomizers(customizers).getRawBeanDefinition();
+
 		String nameToUse = (beanName != null ? beanName : beanClass.getName());
-		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(beanClass, supplier).
-				applyCustomizers(customizers).getRawBeanDefinition();
 		registerBeanDefinition(nameToUse, beanDefinition);
 	}
 

@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -293,7 +294,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (this == obj) {
 				return true;
 			}

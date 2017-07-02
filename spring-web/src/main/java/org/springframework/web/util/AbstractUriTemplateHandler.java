@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
 @Deprecated
 public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 
+	@Nullable
 	private String baseUrl;
 
 	private final Map<String, Object> defaultUriVariables = new HashMap<>();
@@ -50,7 +52,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	 * {@link UriComponentsBuilder}.
 	 * @param baseUrl the base URL.
 	 */
-	public void setBaseUrl(String baseUrl) {
+	public void setBaseUrl(@Nullable String baseUrl) {
 		if (baseUrl != null) {
 			UriComponents uriComponents = UriComponentsBuilder.fromUriString(baseUrl).build();
 			Assert.hasText(uriComponents.getScheme(), "'baseUrl' must have a scheme");
@@ -64,6 +66,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	/**
 	 * Return the configured base URL.
 	 */
+	@Nullable
 	public String getBaseUrl() {
 		return this.baseUrl;
 	}
@@ -76,7 +79,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	 * @param defaultUriVariables the default URI variable values
 	 * @since 4.3
 	 */
-	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+	public void setDefaultUriVariables(@Nullable Map<String, ?> defaultUriVariables) {
 		this.defaultUriVariables.clear();
 		if (defaultUriVariables != null) {
 			this.defaultUriVariables.putAll(defaultUriVariables);

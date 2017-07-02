@@ -40,6 +40,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -55,6 +56,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	private final HttpServerExchange exchange;
 
+	@Nullable
 	private StreamSinkChannel responseChannel;
 
 
@@ -150,6 +152,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 		private final StreamSinkChannel channel;
 
+		@Nullable
 		private volatile ByteBuffer byteBuffer;
 
 		public ResponseBodyProcessor(StreamSinkChannel channel) {
@@ -171,14 +174,15 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 		@Override
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
-			if (this.byteBuffer == null) {
+			ByteBuffer buffer = this.byteBuffer;
+			if (buffer == null) {
 				return false;
 			}
 			if (logger.isTraceEnabled()) {
 				logger.trace("write: " + dataBuffer);
 			}
-			int total = this.byteBuffer.remaining();
-			int written = writeByteBuffer(this.byteBuffer);
+			int total = buffer.remaining();
+			int written = writeByteBuffer(buffer);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("written: " + written + " total: " + total);
@@ -229,6 +233,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			this.channel.getWriteSetter().set(null);
 			this.channel.resumeWrites();
 		}
+
+		@Override
+		protected void writingFailed(Throwable ex) {
+			cancel();
+			onError(ex);
+		}
 	}
 
 
@@ -247,6 +257,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 				}
 				UndertowServerHttpResponse.this.responseChannel.flush();
 			}
+		}
+
+		@Override
+		protected void flushingFailed(Throwable t) {
+			cancel();
+			onError(t);
 		}
 	}
 

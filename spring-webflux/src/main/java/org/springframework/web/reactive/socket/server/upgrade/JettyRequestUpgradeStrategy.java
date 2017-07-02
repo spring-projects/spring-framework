@@ -32,6 +32,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
 import org.springframework.http.server.reactive.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -53,8 +54,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			new NamedThreadLocal<>("JettyWebSocketHandlerAdapter");
 
 
+	@Nullable
 	private WebSocketServerFactory factory;
 
+	@Nullable
 	private volatile ServletContext servletContext;
 
 	private volatile boolean running = false;
@@ -65,10 +68,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-			if (!isRunning() && this.servletContext != null) {
+			ServletContext servletContext = this.servletContext;
+			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = new WebSocketServerFactory(this.servletContext);
+					this.factory = new WebSocketServerFactory(servletContext);
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();
@@ -91,11 +95,13 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
 				this.running = false;
-				try {
-					this.factory.stop();
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
+				if (this.factory != null) {
+					try {
+						this.factory.stop();
+					}
+					catch (Throwable ex) {
+						throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
+					}
 				}
 			}
 		}
@@ -108,7 +114,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -124,6 +130,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		startLazily(servletRequest);
 
+		Assert.state(this.factory != null, "No WebSocketServerFactory available");
 		boolean isUpgrade = this.factory.isUpgradeRequest(servletRequest, servletResponse);
 		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
@@ -151,7 +158,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
@@ -174,9 +181,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final JettyWebSocketHandlerAdapter adapter;
 
+		@Nullable
 		private final String protocol;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, String protocol) {
+		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, @Nullable String protocol) {
 			this.adapter = adapter;
 			this.protocol = protocol;
 		}
@@ -185,6 +193,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			return this.adapter;
 		}
 
+		@Nullable
 		public String getProtocol() {
 			return this.protocol;
 		}

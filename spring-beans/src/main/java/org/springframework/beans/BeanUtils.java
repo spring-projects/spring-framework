@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -172,6 +173,7 @@ public abstract class BeanUtils {
 	 * @see Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
+	@Nullable
 	public static Method findMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
@@ -192,6 +194,7 @@ public abstract class BeanUtils {
 	 * @return the Method object, or {@code null} if not found
 	 * @see Class#getDeclaredMethod
 	 */
+	@Nullable
 	public static Method findDeclaredMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		try {
 			return clazz.getDeclaredMethod(methodName, paramTypes);
@@ -219,6 +222,7 @@ public abstract class BeanUtils {
 	 * @see Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
+	@Nullable
 	public static Method findMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
@@ -241,6 +245,7 @@ public abstract class BeanUtils {
 	 * could not be resolved to a unique method with minimal parameters
 	 * @see Class#getDeclaredMethods
 	 */
+	@Nullable
 	public static Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
@@ -260,6 +265,7 @@ public abstract class BeanUtils {
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
 	 */
+	@Nullable
 	public static Method findMethodWithMinimalParameters(Method[] methods, String methodName)
 			throws IllegalArgumentException {
 
@@ -311,6 +317,7 @@ public abstract class BeanUtils {
 	 * @see #findMethod
 	 * @see #findMethodWithMinimalParameters
 	 */
+	@Nullable
 	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
@@ -365,6 +372,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
+	@Nullable
 	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
 			throws BeansException {
 
@@ -381,6 +389,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
+	@Nullable
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
 		return findPropertyForMethod(method, method.getDeclaringClass());
 	}
@@ -395,6 +404,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 * @since 3.2.13
 	 */
+	@Nullable
 	public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> clazz) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(clazz);
@@ -415,7 +425,8 @@ public abstract class BeanUtils {
 	 * @param targetType the type to find an editor for
 	 * @return the corresponding editor, or {@code null} if none found
 	 */
-	public static PropertyEditor findEditorByConvention(Class<?> targetType) {
+	@Nullable
+	public static PropertyEditor findEditorByConvention(@Nullable Class<?> targetType) {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.contains(targetType)) {
 			return null;
 		}
@@ -465,7 +476,7 @@ public abstract class BeanUtils {
 	 * @param beanClasses the classes to check against
 	 * @return the property type, or {@code Object.class} as fallback
 	 */
-	public static Class<?> findPropertyType(String propertyName, Class<?>... beanClasses) {
+	public static Class<?> findPropertyType(String propertyName, @Nullable Class<?>... beanClasses) {
 		if (beanClasses != null) {
 			for (Class<?> beanClass : beanClasses) {
 				PropertyDescriptor pd = getPropertyDescriptor(beanClass, propertyName);
@@ -488,7 +499,9 @@ public abstract class BeanUtils {
 			return new MethodParameter(((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
 		}
 		else {
-			return new MethodParameter(pd.getWriteMethod(), 0);
+			Method writeMethod = pd.getWriteMethod();
+			Assert.state(writeMethod != null, "No write method available");
+			return new MethodParameter(writeMethod, 0);
 		}
 	}
 
@@ -588,8 +601,8 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	private static void copyProperties(Object source, Object target, Class<?> editable, String... ignoreProperties)
-			throws BeansException {
+	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable,
+			@Nullable String... ignoreProperties) throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");

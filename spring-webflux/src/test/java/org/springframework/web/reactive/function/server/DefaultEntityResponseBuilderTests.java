@@ -30,7 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -48,7 +48,8 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Arjen Poutsma
@@ -70,10 +71,10 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void fromPublisherResolvableType() throws Exception {
+	public void fromPublisher() throws Exception {
 		Flux<String> body = Flux.just("foo", "bar");
-		ResolvableType type = ResolvableType.forClass(String.class);
-		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, type).build().block();
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, typeReference).build().block();
 		assertSame(body, response.entity());
 	}
 
@@ -203,10 +204,6 @@ public class DefaultEntityResponseBuilderTests {
 				return Collections.<ViewResolver>emptyList();
 			}
 		};
-		HandlerStrategies strategies = HandlerStrategies.empty()
-				.customCodecs(configurer -> configurer.writer(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes())))
-				.build();
-
 		StepVerifier.create(result)
 				.consumeNextWith(response -> {
 					StepVerifier.create(response.entity())

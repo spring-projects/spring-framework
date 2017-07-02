@@ -32,6 +32,8 @@ import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
@@ -57,6 +59,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private LoadTimeWeaver loadTimeWeaver;
 
 
@@ -66,6 +69,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	public DefaultContextLoadTimeWeaver(ClassLoader beanClassLoader) {
 		setBeanClassLoader(beanClassLoader);
 	}
+
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -105,6 +109,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	 * of a specific method (addInstanceClassPreProcessor) for any earlier
 	 * versions even though the ClassLoader name is the same.
 	 */
+	@Nullable
 	protected LoadTimeWeaver createServerSpecificLoadTimeWeaver(ClassLoader classLoader) {
 		String name = classLoader.getClass().getName();
 		try {
@@ -146,16 +151,19 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 
 	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
+		Assert.state(this.loadTimeWeaver != null, "Not initialized");
 		this.loadTimeWeaver.addTransformer(transformer);
 	}
 
 	@Override
 	public ClassLoader getInstrumentableClassLoader() {
+		Assert.state(this.loadTimeWeaver != null, "Not initialized");
 		return this.loadTimeWeaver.getInstrumentableClassLoader();
 	}
 
 	@Override
 	public ClassLoader getThrowawayClassLoader() {
+		Assert.state(this.loadTimeWeaver != null, "Not initialized");
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
 

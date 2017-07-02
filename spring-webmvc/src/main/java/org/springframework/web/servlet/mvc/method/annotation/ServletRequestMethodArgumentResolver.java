@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -64,6 +65,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Nullable
 	private static final Method newPushBuilderMethod =
 			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "newPushBuilder");
 
@@ -86,8 +88,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
@@ -118,6 +120,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		return nativeRequest;
 	}
 
+	@Nullable
 	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
 		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();

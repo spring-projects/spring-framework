@@ -32,6 +32,7 @@ import java.util.function.Function;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -40,6 +41,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -96,6 +98,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public MultiValueMap<String, HttpCookie> cookies() {
+		return request().getCookies();
+	}
+
+	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return body(extractor, Collections.emptyMap());
 	}
@@ -134,7 +141,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> Optional<T> attribute(String name) {
-		return this.exchange.getAttribute(name);
+		return Optional.ofNullable(this.exchange.getAttribute(name));
 	}
 
 	@Override
@@ -150,8 +157,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.exchange.<Map<String, String>>getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
-				orElseGet(Collections::emptyMap);
+		return this.exchange.getAttributeOrDefault(
+				RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
 	}
 
 	@Override

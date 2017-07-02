@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
@@ -49,18 +50,25 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
+	@Nullable
 	private ServerCodecConfigurer messageCodecConfigurer;
 
+	@Nullable
 	private WebBindingInitializer webBindingInitializer;
 
+	@Nullable
 	private ArgumentResolverConfigurer argumentResolverConfigurer;
 
+	@Nullable
 	private ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	@Nullable
 	private ConfigurableApplicationContext applicationContext;
 
+	@Nullable
 	private ControllerMethodResolver methodResolver;
 
+	@Nullable
 	private ModelInitializer modelInitializer;
 
 
@@ -75,6 +83,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Return the configurer for HTTP message readers.
 	 */
+	@Nullable
 	public ServerCodecConfigurer getMessageCodecConfigurer() {
 		return this.messageCodecConfigurer;
 	}
@@ -90,6 +99,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Return the configured WebBindingInitializer, or {@code null} if none.
 	 */
+	@Nullable
 	public WebBindingInitializer getWebBindingInitializer() {
 		return this.webBindingInitializer;
 	}
@@ -105,6 +115,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Return the configured resolvers for controller method arguments.
 	 */
+	@Nullable
 	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
 		return this.argumentResolverConfigurer;
 	}
@@ -121,6 +132,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Return the configured registry for adapting reactive types.
 	 */
+	@Nullable
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveAdapterRegistry;
 	}
@@ -137,22 +149,17 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 	}
 
-	public ConfigurableApplicationContext getApplicationContext() {
-		return this.applicationContext;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(this.applicationContext, "ApplicationContext is required");
 
 		if (this.messageCodecConfigurer == null) {
 			this.messageCodecConfigurer = ServerCodecConfigurer.create();
 		}
-
 		if (this.argumentResolverConfigurer == null) {
 			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
 		}
-
 		if (this.reactiveAdapterRegistry == null) {
 			this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
 		}
@@ -171,9 +178,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
-
-		Assert.notNull(handler, "Expected handler");
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
+		Assert.state(this.methodResolver != null && this.modelInitializer != null, "Not initialized");
 
 		BindingContext bindingContext = new InitBinderBindingContext(
 				getWebBindingInitializer(), this.methodResolver.getInitBinderMethods(handlerMethod));
@@ -195,24 +201,25 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
-		return this.methodResolver.getExceptionHandlerMethod(ex, handlerMethod)
-				.map(invocable -> {
-					try {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
-						}
-						bindingContext.getModel().asMap().clear();
-						Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-						return invocable.invoke(exchange, bindingContext, cause, handlerMethod);
-					}
-					catch (Throwable invocationEx) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
-						}
-						return null;
-					}
-				})
-				.orElseGet(() -> Mono.error(ex));
+		Assert.state(this.methodResolver != null, "Not initialized");
+
+		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(ex, handlerMethod);
+		if (invocable != null) {
+			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
+				}
+				bindingContext.getModel().asMap().clear();
+				Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+				return invocable.invoke(exchange, bindingContext, cause, handlerMethod);
+			}
+			catch (Throwable invocationEx) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
+				}
+			}
+		}
+		return Mono.error(ex);
 	}
 
 }

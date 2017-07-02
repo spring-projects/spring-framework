@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -49,7 +50,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	/**
 	 * Create an instance with the given map of file extensions and media types.
 	 */
-	public AbstractMappingContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
+	public AbstractMappingContentNegotiationStrategy(@Nullable Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
 
@@ -66,7 +67,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * an already extracted key.
 	 * @since 3.2.16
 	 */
-	public List<MediaType> resolveMediaTypeKey(NativeWebRequest webRequest, String key)
+	public List<MediaType> resolveMediaTypeKey(NativeWebRequest webRequest, @Nullable String key)
 			throws HttpMediaTypeNotAcceptableException {
 
 		if (StringUtils.hasText(key)) {
@@ -87,8 +88,9 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 
 	/**
 	 * Extract a key from the request to use to look up media types.
-	 * @return the lookup key or {@code null}.
+	 * @return the lookup key, or {@code null} if none
 	 */
+	@Nullable
 	protected abstract String getMediaTypeKey(NativeWebRequest request);
 
 	/**
@@ -104,6 +106,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * determine the media type(s). If a MediaType is returned from
 	 * this method it will be added to the cache in the base class.
 	 */
+	@Nullable
 	protected MediaType handleNoMatch(NativeWebRequest request, String key)
 			throws HttpMediaTypeNotAcceptableException {
 

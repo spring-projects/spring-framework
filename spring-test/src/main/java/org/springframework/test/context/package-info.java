@@ -11,4 +11,7 @@
  * and caching, dependency injection of test fixtures, and transactional test
  * management with default rollback semantics.
  */
+@NonNullApi
 package org.springframework.test.context;
+
+import org.springframework.lang.NonNullApi;

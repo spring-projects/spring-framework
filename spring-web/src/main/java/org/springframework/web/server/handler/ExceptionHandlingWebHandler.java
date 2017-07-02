@@ -16,6 +16,7 @@
 
 package org.springframework.web.server.handler;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 	public ExceptionHandlingWebHandler(WebHandler delegate, List<WebExceptionHandler> handlers) {
 		super(delegate);
-		this.exceptionHandlers = Collections.unmodifiableList(handlers);
+		this.exceptionHandlers = Collections.unmodifiableList(new ArrayList<>(handlers));
 	}
 
 

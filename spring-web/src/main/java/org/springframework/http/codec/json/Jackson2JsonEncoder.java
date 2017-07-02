@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,6 +48,7 @@ import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -105,16 +105,16 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.resolve(Object.class);
 		return (Object.class == clazz) ||
 				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
-				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType);
+				objectMapper().canSerialize(clazz) && supportsMimeType(mimeType);
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
@@ -138,20 +138,15 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		}
 	}
 
-	private DataBuffer encodeValue(Object value, MimeType mimeType, DataBufferFactory bufferFactory,
-			ResolvableType elementType, Map<String, Object> hints) {
+	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
-		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		JavaType javaType = typeFactory.constructType(elementType.getType());
-		if (elementType.isInstance(value)) {
-			javaType = getJavaType(elementType.getType(), null);
-		}
-
-		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
+		JavaType javaType = getJavaType(elementType.getType(), null);
+		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
-				this.objectMapper.writerWithView(jsonView) : this.objectMapper.writer());
+				objectMapper().writerWithView(jsonView) : objectMapper().writer());
 
-		if (javaType != null && javaType.isContainerType()) {
+		if (javaType.isContainerType()) {
 			writer = writer.forType(javaType);
 		}
 
@@ -188,10 +183,10 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 	}
 
 	@Override
-	public Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+	public Map<String, Object> getEncodeHints(@Nullable ResolvableType actualType, ResolvableType elementType,
+			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		return getHints(actualType);
+		return (actualType != null ? getHints(actualType) : Collections.emptyMap());
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.lang.Nullable;
 
 import static org.junit.Assert.*;
 
@@ -134,7 +135,8 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator() {
 			@Override
-			protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
+			@Nullable
+			protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlex) {
 				assertEquals(TASK, task);
 				assertEquals(SQL, sql);
 				return (sqlex == badSqlEx) ? customDex : null;

@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface that specifies a converter that can convert from and to HTTP requests and responses.
@@ -39,7 +40,7 @@ public interface HttpMessageConverter<T> {
 	 * typically the value of a {@code Content-Type} header.
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(Class<?> clazz, MediaType mediaType);
+	boolean canRead(Class<?> clazz, @Nullable MediaType mediaType);
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
@@ -48,7 +49,7 @@ public interface HttpMessageConverter<T> {
 	 * typically the value of an {@code Accept} header.
 	 * @return {@code true} if writable; {@code false} otherwise
 	 */
-	boolean canWrite(Class<?> clazz, MediaType mediaType);
+	boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType);
 
 	/**
 	 * Return the list of {@link MediaType} objects supported by this converter.
@@ -80,7 +81,7 @@ public interface HttpMessageConverter<T> {
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
-	void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
+	void write(T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException;
 
 }

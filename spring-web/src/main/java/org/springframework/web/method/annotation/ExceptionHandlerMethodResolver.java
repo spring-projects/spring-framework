@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -46,24 +46,13 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
-	public static final MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
-		@Override
-		public boolean matches(Method method) {
-			return (AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
-		}
-	};
-
-	/**
-	 * Arbitrary {@link Method} reference, indicating no method found in the cache.
-	 */
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
+	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
+			(AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null);
 
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods =
-			new ConcurrentHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentReferenceHashMap<>(16);
 
-	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
-			new ConcurrentHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
 
 	/**
@@ -100,6 +89,7 @@ public class ExceptionHandlerMethodResolver {
 
 	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
 		ExceptionHandler ann = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		Assert.state(ann != null, "No ExceptionHandler annotation");
 		result.addAll(Arrays.asList(ann.value()));
 	}
 
@@ -124,6 +114,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
+	@Nullable
 	public Method resolveMethod(Exception exception) {
 		return resolveMethodByThrowable(exception);
 	}
@@ -135,6 +126,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 5.0
 	 */
+	@Nullable
 	public Method resolveMethodByThrowable(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
 		if (method == null) {
@@ -152,18 +144,20 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
+	@Nullable
 	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, (method != null ? method : NO_METHOD_FOUND));
+			this.exceptionLookupCache.put(exceptionType, method);
 		}
-		return (method != NO_METHOD_FOUND ? method : null);
+		return method;
 	}
 
 	/**
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
+	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {

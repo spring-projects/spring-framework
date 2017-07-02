@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
@@ -75,6 +76,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	private int poolSize = 1;
 
+	@Nullable
 	private ScheduledExecutorTask[] scheduledExecutorTasks;
 
 	private boolean removeOnCancelPolicy = false;
@@ -83,6 +85,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	private boolean exposeUnconfigurableExecutor = false;
 
+	@Nullable
 	private ScheduledExecutorService exposedExecutor;
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,16 +34,22 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 
+	@Nullable
 	private String url;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String catalog;
 
+	@Nullable
 	private String schema;
 
+	@Nullable
 	private Properties connectionProperties;
 
 
@@ -58,6 +65,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC URL to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getUrl() {
 		return this.url;
 	}
@@ -73,6 +81,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC username to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -88,6 +97,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the JDBC password to use for connecting through the Driver.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}
@@ -105,6 +115,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Return the database catalog to be applied to each Connection, if any.
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public String getCatalog() {
 		return this.catalog;
 	}
@@ -122,6 +133,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Return the database schema to be applied to each Connection, if any.
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public String getSchema() {
 		return this.schema;
 	}
@@ -141,6 +153,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	/**
 	 * Return the connection properties to be passed to the Driver, if any.
 	 */
+	@Nullable
 	public Properties getConnectionProperties() {
 		return this.connectionProperties;
 	}
@@ -178,7 +191,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @throws SQLException in case of failure
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	protected Connection getConnectionFromDriver(String username, String password) throws SQLException {
+	protected Connection getConnectionFromDriver(@Nullable String username, @Nullable String password) throws SQLException {
 		Properties mergedProps = new Properties();
 		Properties connProps = getConnectionProperties();
 		if (connProps != null) {

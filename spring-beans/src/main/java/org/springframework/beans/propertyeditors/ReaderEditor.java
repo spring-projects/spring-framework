@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -80,6 +81,7 @@ public class ReaderEditor extends PropertyEditorSupport {
 	 * there is no appropriate text representation.
 	 */
 	@Override
+	@Nullable
 	public String getAsText() {
 		return null;
 	}

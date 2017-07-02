@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
-import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;

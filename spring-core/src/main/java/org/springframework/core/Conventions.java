@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -171,7 +172,7 @@ public abstract class Conventions {
 	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
-	public static String getVariableNameForReturnType(Method method, Object value) {
+	public static String getVariableNameForReturnType(Method method, @Nullable Object value) {
 		return getVariableNameForReturnType(method, method.getReturnType(), value);
 	}
 
@@ -180,18 +181,16 @@ public abstract class Conventions {
 	 * method, taking the generic collection type, if any, into account, falling
 	 * back on the given return value if the method declaration is not specific
 	 * enough, e.g. {@code Object} return type or untyped collection.
-	 *
 	 * <p>As of 5.0 this method supports reactive types:<br>
 	 * {@code Mono<com.myapp.Product>} becomes {@code "productMono"}<br>
 	 * {@code Flux<com.myapp.MyProduct>} becomes {@code "myProductFlux"}<br>
 	 * {@code Observable<com.myapp.MyProduct>} becomes {@code "myProductObservable"}<br>
-	 *
 	 * @param method the method to generate a variable name for
 	 * @param resolvedType the resolved return type of the method
 	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
-	public static String getVariableNameForReturnType(Method method, Class<?> resolvedType, Object value) {
+	public static String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value) {
 		Assert.notNull(method, "Method must not be null");
 
 		if (Object.class == resolvedType) {
@@ -229,12 +228,11 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = resolvedType;
-
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
 					reactiveSuffix = ClassUtils.getShortName(valueClass);
-					valueClass = ResolvableType.forMethodReturnType(method).getGeneric(0).resolve();
+					valueClass = ResolvableType.forMethodReturnType(method).getGeneric().resolve(Object.class);
 				}
 			}
 		}

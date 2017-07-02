@@ -89,8 +89,12 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 				if (type != null) {
 					if (ScopedObject.class.isAssignableFrom(type)) {
 						try {
-							type = AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(),
+							Class<?> targetClass = AutoProxyUtils.determineTargetClass(
+									this.applicationContext.getBeanFactory(),
 									ScopedProxyUtils.getTargetBeanName(beanName));
+							if (targetClass != null) {
+								type = targetClass;
+							}
 						}
 						catch (Throwable ex) {
 							// An invalid scoped proxy arrangement - let's ignore it.
@@ -123,16 +127,15 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 		return allFactories;
 	}
 
-	protected void processBean(final List<EventListenerFactory> factories, final String beanName, final Class<?> targetType) {
+	protected void processBean(
+			final List<EventListenerFactory> factories, final String beanName, final Class<?> targetType) {
+
 		if (!this.nonAnnotatedClasses.contains(targetType)) {
 			Map<Method, EventListener> annotatedMethods = null;
 			try {
 				annotatedMethods = MethodIntrospector.selectMethods(targetType,
-						new MethodIntrospector.MetadataLookup<EventListener>() {
-							@Override
-							public EventListener inspect(Method method) {
-								return AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
-							}
+						(MethodIntrospector.MetadataLookup<EventListener>) method -> {
+							return AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
 						});
 			}
 			catch (Throwable ex) {

@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.lang.Nullable;
 
 /**
  * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
@@ -67,6 +68,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
 	 */
+	@Nullable
 	default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
@@ -109,6 +111,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.MutablePropertyValues
 	 */
+	@Nullable
 	default PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 

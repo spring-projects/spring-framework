@@ -34,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -119,6 +120,7 @@ public abstract class ResponseEntityExceptionHandler {
 			NoHandlerFoundException.class,
 			AsyncRequestTimeoutException.class
 		})
+	@Nullable
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		if (ex instanceof HttpRequestMethodNotSupportedException) {
@@ -202,7 +204,7 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the response status
 	 * @param request the current request
 	 */
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
@@ -446,14 +448,15 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @return a {@code ResponseEntity} instance
 	 * @since 4.2.8
 	 */
+	@Nullable
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
 			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
 
 		if (webRequest instanceof ServletWebRequest) {
-			ServletWebRequest servletRequest = (ServletWebRequest) webRequest;
-			HttpServletRequest request = servletRequest.getNativeRequest(HttpServletRequest.class);
-			HttpServletResponse response = servletRequest.getNativeResponse(HttpServletResponse.class);
-			if (response.isCommitted()) {
+			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
+			HttpServletRequest request = servletWebRequest.getRequest();
+			HttpServletResponse response = servletWebRequest.getResponse();
+			if (response != null && response.isCommitted()) {
 				if (logger.isErrorEnabled()) {
 					logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
 				}

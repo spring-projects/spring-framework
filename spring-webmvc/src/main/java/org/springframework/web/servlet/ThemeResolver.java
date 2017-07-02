@@ -19,6 +19,8 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface for web-based theme resolution strategies that allows for
  * both theme resolution via the request and theme modification via
@@ -58,10 +60,10 @@ public interface ThemeResolver {
 	 * Set the current theme name to the given one.
 	 * @param request request to be used for theme name modification
 	 * @param response response to be used for theme name modification
-	 * @param themeName the new theme name
+	 * @param themeName the new theme name ({@code null} or empty to reset it)
 	 * @throws UnsupportedOperationException if the ThemeResolver implementation
 	 * does not support dynamic changing of the theme
 	 */
-	void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName);
+	void setThemeName(HttpServletRequest request, HttpServletResponse response, @Nullable String themeName);
 
 }

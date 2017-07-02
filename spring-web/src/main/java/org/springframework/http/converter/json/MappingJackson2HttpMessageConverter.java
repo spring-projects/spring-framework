@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and
@@ -46,6 +47,7 @@ import org.springframework.http.MediaType;
  */
 public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
+	@Nullable
 	private String jsonPrefix;
 
 

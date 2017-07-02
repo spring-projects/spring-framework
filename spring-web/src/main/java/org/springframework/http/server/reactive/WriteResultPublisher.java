@@ -25,6 +25,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,10 +41,12 @@ class WriteResultPublisher implements Publisher<Void> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
+	@Nullable
 	private Subscriber<? super Void> subscriber;
 
 	private volatile boolean publisherCompleted;
 
+	@Nullable
 	private volatile Throwable publisherError;
 
 
@@ -123,8 +126,11 @@ class WriteResultPublisher implements Publisher<Void> {
 					if (publisher.publisherCompleted) {
 						publisher.publishComplete();
 					}
-					else if (publisher.publisherError != null) {
-						publisher.publishError(publisher.publisherError);
+					else {
+						Throwable publisherError = publisher.publisherError;
+						if (publisherError != null) {
+							publisher.publishError(publisherError);
+						}
 					}
 				}
 				else {
@@ -149,12 +155,14 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
 				if (publisher.changeState(this, COMPLETED)) {
+					Assert.state(publisher.subscriber != null, "No subscriber");
 					publisher.subscriber.onComplete();
 				}
 			}
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable t) {
 				if (publisher.changeState(this, COMPLETED)) {
+					Assert.state(publisher.subscriber != null, "No subscriber");
 					publisher.subscriber.onError(t);
 				}
 			}

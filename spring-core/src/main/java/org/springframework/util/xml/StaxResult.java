@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import javax.xml.transform.sax.SAXResult;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ext.LexicalHandler;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Implementation of the {@code Result} tagging interface for StAX writers. Can be constructed with
@@ -75,21 +77,25 @@ class StaxResult extends SAXResult {
 
 
 	/**
-	 * Return the {@code XMLEventWriter} used by this {@code StaxResult}. If this {@code StaxResult}
-	 * was created with an {@code XMLStreamWriter}, the result will be {@code null}.
+	 * Return the {@code XMLEventWriter} used by this {@code StaxResult}.
+	 * <p>If this {@code StaxResult} was created with an {@code XMLStreamWriter},
+	 * the result will be {@code null}.
 	 * @return the StAX event writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLEventWriter)
 	 */
+	@Nullable
 	public XMLEventWriter getXMLEventWriter() {
 		return this.eventWriter;
 	}
 
 	/**
-	 * Return the {@code XMLStreamWriter} used by this {@code StaxResult}. If this {@code StaxResult}
-	 * was created with an {@code XMLEventConsumer}, the result will be {@code null}.
+	 * Return the {@code XMLStreamWriter} used by this {@code StaxResult}.
+	 * <p>If this {@code StaxResult} was created with an {@code XMLEventConsumer},
+	 * the result will be {@code null}.
 	 * @return the StAX stream writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLStreamWriter)
 	 */
+	@Nullable
 	public XMLStreamWriter getXMLStreamWriter() {
 		return this.streamWriter;
 	}

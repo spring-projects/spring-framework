@@ -22,6 +22,7 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
@@ -34,9 +35,11 @@ import org.springframework.core.ResolvableType;
  */
 public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 
+	@Nullable
 	private Set<?> sourceSet;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends Set> targetSetClass;
 
 
@@ -54,7 +57,7 @@ public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 	 * @see java.util.LinkedHashSet
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setTargetSetClass(Class<? extends Set> targetSetClass) {
+	public void setTargetSetClass(@Nullable Class<? extends Set> targetSetClass) {
 		if (targetSetClass == null) {
 			throw new IllegalArgumentException("'targetSetClass' must not be null");
 		}

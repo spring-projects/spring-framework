@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -35,6 +36,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> receive() throws MessagingException;
 
 	/**
@@ -43,6 +45,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	Message<?> receive(D destination) throws MessagingException;
 
 	/**
@@ -52,6 +55,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T receiveAndConvert(Class<T> targetClass) throws MessagingException;
 
 	/**
@@ -62,6 +66,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
+	@Nullable
 	<T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
 
 }

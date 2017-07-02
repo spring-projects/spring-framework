@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -155,16 +156,16 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveResource(exchange, requestPath, locations)
 				.switchIfEmpty(Mono.defer(() ->
 						resolveVersionedResource(exchange, requestPath, locations, chain)));
 	}
 
-	private Mono<Resource> resolveVersionedResource(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	private Mono<Resource> resolveVersionedResource(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		VersionStrategy versionStrategy = getStrategyForPath(requestPath);
 		if (versionStrategy == null) {
@@ -235,6 +236,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Find a {@code VersionStrategy} for the request path of the requested resource.
 	 * @return an instance of a {@code VersionStrategy} or null if none matches that request path
 	 */
+	@Nullable
 	protected VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
 		List<String> matchingPatterns = new ArrayList<>();

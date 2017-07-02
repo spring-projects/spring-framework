@@ -58,13 +58,11 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 			XhrTransport transport, SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
-		Assert.notNull(transport, "'transport' is required");
+		Assert.notNull(transport, "XhrTransport is required");
 		this.transport = transport;
 		this.headers = request.getHttpRequestHeaders();
 		this.sendHeaders = new HttpHeaders();
-		if (this.headers != null) {
-			this.sendHeaders.putAll(this.headers);
-		}
+		this.sendHeaders.putAll(this.headers);
 		this.sendHeaders.setContentType(MediaType.APPLICATION_JSON);
 		this.sendUrl = request.getSockJsUrlInfo().getTransportUrl(TransportType.XHR_SEND);
 	}
@@ -81,7 +79,8 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return new InetSocketAddress(getUri().getHost(), getUri().getPort());
+		URI uri = getUri();
+		return (uri != null ? new InetSocketAddress(uri.getHost(), uri.getPort()) : null);
 	}
 
 	@Override

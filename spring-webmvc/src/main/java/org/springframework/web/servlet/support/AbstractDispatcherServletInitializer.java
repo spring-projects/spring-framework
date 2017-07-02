@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -27,6 +28,7 @@ import javax.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
@@ -150,6 +152,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see DispatcherServlet#setContextInitializers
 	 * @see #getRootApplicationContextInitializers()
 	 */
+	@Nullable
 	protected ApplicationContextInitializer<?>[] getServletApplicationContextInitializers() {
 		return null;
 	}
@@ -166,6 +169,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
+	@Nullable
 	protected Filter[] getServletFilters() {
 		return null;
 	}

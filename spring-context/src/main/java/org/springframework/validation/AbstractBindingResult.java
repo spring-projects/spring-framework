@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -91,12 +92,14 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 
 	@Override
-	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
+			@Nullable String defaultMessage) {
+
 		if ("".equals(getNestedPath()) && !StringUtils.hasLength(field)) {
 			// We're at the top of the nested object hierarchy,
 			// so the present level is not a field but rather the top object.
@@ -104,10 +107,10 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 			reject(errorCode, errorArgs, defaultMessage);
 			return;
 		}
+
 		String fixedField = fixedField(field);
 		Object newVal = getActualFieldValue(fixedField);
-		FieldError fe = new FieldError(
-				getObjectName(), fixedField, newVal, false,
+		FieldError fe = new FieldError(getObjectName(), fixedField, newVal, false,
 				resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
 		addError(fe);
 	}
@@ -131,7 +134,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
-	public String[] resolveMessageCodes(String errorCode, String field) {
+	public String[] resolveMessageCodes(String errorCode, @Nullable String field) {
 		Class<?> fieldType = getFieldType(field);
 		return getMessageCodesResolver().resolveMessageCodes(
 				errorCode, getObjectName(), fixedField(field), fieldType);
@@ -241,7 +244,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see #getActualFieldValue
 	 */
 	@Override
-	public Class<?> getFieldType(String field) {
+	public Class<?> getFieldType(@Nullable String field) {
 		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
 			return value.getClass();
@@ -265,8 +268,6 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * which needs access to the Errors instance.
 	 * @see #getObjectName
 	 * @see #MODEL_KEY_PREFIX
-	 * @see org.springframework.web.servlet.ModelAndView
-	 * @see org.springframework.web.servlet.tags.BindTag
 	 */
 	@Override
 	public Map<String, Object> getModel() {
@@ -289,7 +290,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * editor lookup facility, if available.
 	 */
 	@Override
-	public PropertyEditor findEditor(String field, Class<?> valueType) {
+	public PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
 		if (editorRegistry != null) {
 			Class<?> valueTypeToUse = valueType;
@@ -369,6 +370,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @param field the field to check
 	 * @return the current value of the field
 	 */
+	@Nullable
 	protected abstract Object getActualFieldValue(String field);
 
 	/**
@@ -379,7 +381,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * other than from a binding error, or an actual field value)
 	 * @return the formatted value
 	 */
-	protected Object formatFieldValue(String field, Object value) {
+	@Nullable
+	protected Object formatFieldValue(String field, @Nullable Object value) {
 		return value;
 	}
 

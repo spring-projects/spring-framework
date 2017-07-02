@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompiledExpression;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -74,8 +75,7 @@ public class SpelCompiler implements Opcodes {
 
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
-	private static final Map<ClassLoader, SpelCompiler> compilers =
-			new ConcurrentReferenceHashMap<>();
+	private static final Map<ClassLoader, SpelCompiler> compilers = new ConcurrentReferenceHashMap<>();
 
 	// The child ClassLoader used to load the compiled expression classes
 	private ChildClassLoader ccl;
@@ -83,20 +83,22 @@ public class SpelCompiler implements Opcodes {
 	// Counter suffix for generated classes within this SpelCompiler instance
 	private final AtomicInteger suffixId = new AtomicInteger(1);
 
-	private SpelCompiler(ClassLoader classloader) {
+
+	private SpelCompiler(@Nullable ClassLoader classloader) {
 		this.ccl = new ChildClassLoader(classloader);
 	}
 
+
 	/**
-	 * Attempt compilation of the supplied expression. A check is
-	 * made to see if it is compilable before compilation proceeds. The
-	 * check involves visiting all the nodes in the expression Ast and
-	 * ensuring enough state is known about them that bytecode can
-	 * be generated for them.
+	 * Attempt compilation of the supplied expression. A check is made to see
+	 * if it is compilable before compilation proceeds. The check involves
+	 * visiting all the nodes in the expression Ast and ensuring enough state
+	 * is known about them that bytecode can be generated for them.
 	 * @param expression the expression to compile
-	 * @return an instance of the class implementing the compiled expression, or null
-	 * if compilation is not possible
+	 * @return an instance of the class implementing the compiled expression,
+	 * or {@code null} if compilation is not possible
 	 */
+	@Nullable
 	public CompiledExpression compile(SpelNodeImpl expression) {
 		if (expression.isCompilable()) {
 			if (logger.isDebugEnabled()) {
@@ -130,6 +132,7 @@ public class SpelCompiler implements Opcodes {
 	 * @return the expression call, or {@code null} if the decision was to opt out of
 	 * compilation during code generation
 	 */
+	@Nullable
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String clazzName = "spel/Ex" + getNextSuffix();
@@ -189,7 +192,6 @@ public class SpelCompiler implements Opcodes {
 	 * because they anchor compiled classes in memory and prevent GC.  If you have expressions
 	 * continually recompiling over time then by replacing the classloader periodically
 	 * at least some of the older variants can be garbage collected.
-	 * 
 	 * @param name name of the class
 	 * @param bytes bytecode for the class
 	 * @return the Class object for the compiled expression
@@ -209,7 +211,7 @@ public class SpelCompiler implements Opcodes {
 	 * @param classLoader the ClassLoader to use as the basis for compilation
 	 * @return a corresponding SpelCompiler instance
 	 */
-	public static SpelCompiler getCompiler(ClassLoader classLoader) {
+	public static SpelCompiler getCompiler(@Nullable ClassLoader classLoader) {
 		ClassLoader clToUse = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		synchronized (compilers) {
 			SpelCompiler compiler = compilers.get(clToUse);
@@ -286,7 +288,7 @@ public class SpelCompiler implements Opcodes {
 
 		private int classesDefinedCount = 0;
 
-		public ChildClassLoader(ClassLoader classLoader) {
+		public ChildClassLoader(@Nullable ClassLoader classLoader) {
 			super(NO_URLS, classLoader);
 		}
 

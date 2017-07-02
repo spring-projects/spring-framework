@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -28,7 +27,8 @@ import java.security.PrivilegedExceptionAction;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Default {@link BeanWrapper} implementation that should be sufficient
@@ -66,11 +66,13 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * Cached introspections results for this object, to prevent encountering
 	 * the cost of JavaBeans introspection every time.
 	 */
+	@Nullable
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
 	/**
 	 * The security context used for invoking the property methods
 	 */
+	@Nullable
 	private AccessControlContext acc;
 
 
@@ -147,7 +149,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	@Override
-	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
+	public void setWrappedInstance(Object object, @Nullable String nestedPath, @Nullable Object rootObject) {
 		super.setWrappedInstance(object, nestedPath, rootObject);
 		setIntrospectionClass(getWrappedClass());
 	}
@@ -168,7 +170,6 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * for the wrapped object.
 	 */
 	private CachedIntrospectionResults getCachedIntrospectionResults() {
-		Assert.state(getWrappedInstance() != null, "BeanWrapper does not hold a bean instance");
 		if (this.cachedIntrospectionResults == null) {
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
 		}
@@ -179,7 +180,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * Set the security context used during the invocation of the wrapped instance methods.
 	 * Can be null.
 	 */
-	public void setSecurityContext(AccessControlContext acc) {
+	public void setSecurityContext(@Nullable AccessControlContext acc) {
 		this.acc = acc;
 	}
 
@@ -187,6 +188,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * Return the security context used during the invocation of the wrapped instance methods.
 	 * Can be null.
 	 */
+	@Nullable
 	public AccessControlContext getSecurityContext() {
 		return this.acc;
 	}
@@ -202,6 +204,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * @return the new value, possibly the result of type conversion
 	 * @throws TypeMismatchException if type conversion failed
 	 */
+	@Nullable
 	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
 		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
 		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
@@ -288,73 +291,45 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		public Object getValue() throws Exception {
 			final Method readMethod = this.pd.getReadMethod();
-			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
-				if (System.getSecurityManager() != null) {
-					AccessController.doPrivileged(new PrivilegedAction<Object>() {
-						@Override
-						public Object run() {
-							readMethod.setAccessible(true);
-							return null;
-						}
-					});
-				}
-				else {
-					readMethod.setAccessible(true);
-				}
-			}
 			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+					ReflectionUtils.makeAccessible(readMethod);
+					return null;
+				});
 				try {
-					return AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
-						public Object run() throws Exception {
-							return readMethod.invoke(getWrappedInstance(), (Object[]) null);
-						}
-					}, acc);
+					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+							readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
 				}
 			}
 			else {
+				ReflectionUtils.makeAccessible(readMethod);
 				return readMethod.invoke(getWrappedInstance(), (Object[]) null);
 			}
 		}
 
 		@Override
-		public void setValue(final Object object, Object valueToApply) throws Exception {
+		public void setValue(final @Nullable Object value) throws Exception {
 			final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
 					((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
 					this.pd.getWriteMethod());
-			if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
-				if (System.getSecurityManager() != null) {
-					AccessController.doPrivileged(new PrivilegedAction<Object>() {
-						@Override
-						public Object run() {
-							writeMethod.setAccessible(true);
-							return null;
-						}
-					});
-				}
-				else {
-					writeMethod.setAccessible(true);
-				}
-			}
-			final Object value = valueToApply;
 			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+					ReflectionUtils.makeAccessible(writeMethod);
+					return null;
+				});
 				try {
-					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
-						public Object run() throws Exception {
-							writeMethod.invoke(object, value);
-							return null;
-						}
-					}, acc);
+					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+							writeMethod.invoke(getWrappedInstance(), value), acc);
 				}
 				catch (PrivilegedActionException ex) {
 					throw ex.getException();
 				}
 			}
 			else {
+				ReflectionUtils.makeAccessible(writeMethod);
 				writeMethod.invoke(getWrappedInstance(), value);
 			}
 		}

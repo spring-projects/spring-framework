@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -54,6 +55,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	List<Resource> scripts = new ArrayList<>();
 
+	@Nullable
 	private String sqlScriptEncoding;
 
 	private String separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
@@ -102,7 +104,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops,
-			String sqlScriptEncoding, Resource... scripts) {
+			@Nullable String sqlScriptEncoding, Resource... scripts) {
 
 		this(scripts);
 		this.continueOnError = continueOnError;
@@ -152,8 +154,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * or empty to indicate platform encoding
 	 * @see #addScript(Resource)
 	 */
-	public void setSqlScriptEncoding(String sqlScriptEncoding) {
-		this.sqlScriptEncoding = StringUtils.hasText(sqlScriptEncoding) ? sqlScriptEncoding : null;
+	public void setSqlScriptEncoding(@Nullable String sqlScriptEncoding) {
+		this.sqlScriptEncoding = (StringUtils.hasText(sqlScriptEncoding) ? sqlScriptEncoding : null);
 	}
 
 	/**

@@ -39,6 +39,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,8 +54,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private final int bufferSize;
 
+	@Nullable
 	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
 
+	@Nullable
 	private volatile ResponseBodyProcessor bodyProcessor;
 
 	private volatile boolean flushOnNext;
@@ -192,25 +195,31 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 
 		void handleError(Throwable ex) {
-			if (bodyFlushProcessor != null) {
-				bodyFlushProcessor.cancel();
-				bodyFlushProcessor.onError(ex);
+			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+			if (flushProcessor != null) {
+				flushProcessor.cancel();
+				flushProcessor.onError(ex);
 			}
-			if (bodyProcessor != null) {
-				bodyProcessor.cancel();
-				bodyProcessor.onError(ex);
+
+			ResponseBodyProcessor processor = bodyProcessor;
+			if (processor != null) {
+				processor.cancel();
+				processor.onError(ex);
 			}
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			if (bodyFlushProcessor != null) {
-				bodyFlushProcessor.cancel();
-				bodyFlushProcessor.onComplete();
+			ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+			if (flushProcessor != null) {
+				flushProcessor.cancel();
+				flushProcessor.onComplete();
 			}
-			if (bodyProcessor != null) {
-				bodyProcessor.cancel();
-				bodyProcessor.onComplete();
+
+			ResponseBodyProcessor processor = bodyProcessor;
+			if (processor != null) {
+				processor.cancel();
+				processor.onComplete();
 			}
 		}
 	}
@@ -220,16 +229,18 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		@Override
 		public void onWritePossible() throws IOException {
-			if (bodyProcessor != null) {
-				bodyProcessor.onWritePossible();
+			ResponseBodyProcessor processor = bodyProcessor;
+			if (processor != null) {
+				processor.onWritePossible();
 			}
 		}
 
 		@Override
 		public void onError(Throwable ex) {
-			if (bodyProcessor != null) {
-				bodyProcessor.cancel();
-				bodyProcessor.onError(ex);
+			ResponseBodyProcessor processor = bodyProcessor;
+			if (processor != null) {
+				processor.cancel();
+				processor.onError(ex);
 			}
 		}
 	}
@@ -241,8 +252,9 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			try {
 				ServletOutputStream outputStream = response.getOutputStream();
-				bodyProcessor = new ResponseBodyProcessor(outputStream);
-				return bodyProcessor;
+				ResponseBodyProcessor processor = new ResponseBodyProcessor(outputStream);
+				bodyProcessor = processor;
+				return processor;
 			}
 			catch (IOException ex) {
 				throw new UncheckedIOException(ex);

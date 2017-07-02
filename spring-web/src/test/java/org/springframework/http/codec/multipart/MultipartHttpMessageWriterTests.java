@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -149,7 +151,13 @@ public class MultipartHttpMessageWriterTests {
 		part = requestParts.getFirst("json");
 		assertEquals("json", part.name());
 		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.headers().getContentType());
-		assertEquals("{\"bar\":\"bar\"}", ((FormFieldPart) part).value());
+
+		String value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
+				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
+				Collections.emptyMap()).block(Duration.ZERO);
+
+		assertEquals("{\"bar\":\"bar\"}", value);
+
 	}
 
 

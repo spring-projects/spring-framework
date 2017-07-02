@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -50,6 +51,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -248,8 +250,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
-		List<SimpleBean> result = (List<SimpleBean>)
-				processor.resolveArgument(methodParam, container, request, factory);
+		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
+				methodParam, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.get(0).getName());
@@ -305,9 +307,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Foo", servletResponse.getContentAsString());
 	}
 
-	// SPR-13423
-
-	@Test
+	@Test  // SPR-13423
 	public void handleReturnValueCharSequence() throws Exception {
 		List<HttpMessageConverter<?>>converters = new ArrayList<>();
 		converters.add(new ByteArrayHttpMessageConverter());
@@ -368,7 +368,6 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void addContentDispositionHeader() throws Exception {
-
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("pdf", new MediaType("application", "pdf"));
 		factory.afterPropertiesSet();
@@ -524,8 +523,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -550,8 +549,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(
-				methodParameter, this.container, this.request, this.factory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument( methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -577,8 +576,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -603,8 +602,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -699,8 +698,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		String value = (String)processor.readWithMessageConverters(this.request, methodParameter,
-				methodParameter.getGenericParameterType());
+		String value = (String) processor.readWithMessageConverters(
+				this.request, methodParameter, methodParameter.getGenericParameterType());
 		assertEquals("foo", value);
 	}
 
@@ -806,7 +805,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest request, Object target, String objectName) {
+		public WebDataBinder createBinder(NativeWebRequest request, @Nullable Object target, String objectName) {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
@@ -1013,13 +1012,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 
 		@Override
-		public Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-
-			return "default value for empty body";
-		}
-
-		@Override
 		public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
 				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
@@ -1031,6 +1023,13 @@ public class RequestResponseBodyMethodProcessorTests {
 				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 			return body;
+		}
+
+		@Override
+		public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return "default value for empty body";
 		}
 	}
 

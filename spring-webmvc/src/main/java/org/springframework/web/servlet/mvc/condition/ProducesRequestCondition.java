@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -66,7 +67,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
 	 */
 	public ProducesRequestCondition(String... produces) {
-		this(produces, (String[]) null);
+		this(produces, null, null);
 	}
 
 	/**
@@ -77,7 +78,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
 	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
 	 */
-	public ProducesRequestCondition(String[] produces, String[] headers) {
+	public ProducesRequestCondition(String[] produces, @Nullable String[] headers) {
 		this(produces, headers, null);
 	}
 
@@ -88,7 +89,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
 	 * @param manager used to determine requested media types
 	 */
-	public ProducesRequestCondition(String[] produces, String[] headers, ContentNegotiationManager manager) {
+	public ProducesRequestCondition(String[] produces, @Nullable String[] headers,
+			@Nullable ContentNegotiationManager manager) {
+
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
 		Collections.sort(this.expressions);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
@@ -97,29 +100,29 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	/**
 	 * Private constructor with already parsed media type expressions.
 	 */
-	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions, ContentNegotiationManager manager) {
+	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions,
+			@Nullable ContentNegotiationManager manager) {
+
 		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 	}
 
 
-	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
+	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, @Nullable String[] headers) {
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
-				if ("Accept".equalsIgnoreCase(expr.name)) {
+				if ("Accept".equalsIgnoreCase(expr.name) && expr.value != null) {
 					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
 					}
 				}
 			}
 		}
-		if (produces != null) {
-			for (String produce : produces) {
-				result.add(new ProduceMediaTypeExpression(produce));
-			}
+		for (String produce : produces) {
+			result.add(new ProduceMediaTypeExpression(produce));
 		}
 		return result;
 	}

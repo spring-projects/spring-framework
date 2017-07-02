@@ -21,6 +21,7 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ExceptionTypeFilter;
 import org.springframework.util.StringUtils;
 
@@ -78,6 +79,7 @@ class CacheResultOperation extends AbstractJCacheKeyOperation<CacheResult> {
 	 * caching exceptions should be disabled.
 	 * @see javax.cache.annotation.CacheResult#exceptionCacheName()
 	 */
+	@Nullable
 	public String getExceptionCacheName() {
 		return this.exceptionCacheName;
 	}

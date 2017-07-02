@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -39,6 +40,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	private Class<?> clazz;
 
+	@Nullable
 	private String methodName;
 
 	private volatile int evaluations;
@@ -59,7 +61,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * @param clazz the clazz
 	 * @param methodName the name of the method (may be {@code null})
 	 */
-	public ControlFlowPointcut(Class<?> clazz, String methodName) {
+	public ControlFlowPointcut(Class<?> clazz, @Nullable String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
 		this.methodName = methodName;
@@ -79,7 +81,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * some candidate classes.
 	 */
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return true;
 	}
 
@@ -89,7 +91,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass, Object... args) {
 		this.evaluations++;
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {

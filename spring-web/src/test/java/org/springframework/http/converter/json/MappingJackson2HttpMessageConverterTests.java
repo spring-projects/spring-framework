@@ -39,6 +39,7 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
@@ -169,7 +170,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void readGenerics() throws IOException {
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
 			@Override
-			protected JavaType getJavaType(Type type, Class<?> contextClass) {
+			protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
 					return new ObjectMapper().getTypeFactory().constructCollectionType(ArrayList.class, MyBean.class);
 				}

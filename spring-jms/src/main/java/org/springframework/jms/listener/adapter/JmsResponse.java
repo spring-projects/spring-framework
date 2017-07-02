@@ -21,6 +21,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -86,6 +87,7 @@ public class JmsResponse<T> {
 	 * @return the {@link Destination} to use
 	 * @throws JMSException if the DestinationResolver failed to resolve the destination
 	 */
+	@Nullable
 	public Destination resolveDestination(DestinationResolver destinationResolver, Session session)
 			throws JMSException {
 

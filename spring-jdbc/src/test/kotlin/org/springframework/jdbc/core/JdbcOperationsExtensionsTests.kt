@@ -18,172 +18,107 @@ package org.springframework.jdbc.core
 
 
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.ExpectedException
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.mock
+import org.junit.runner.RunWith
+import org.mockito.Answers
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.junit.MockitoJUnitRunner
 import java.sql.*
-import javax.sql.DataSource
 
 /**
- * Mock object based tests for JdbcOperationsExtension
+ * Mock object based tests for [JdbcOperations] Kotlin extensions
+ *
+ * @author Mario Arias
+ * @author Sebastien Deleuze
  */
+@RunWith(MockitoJUnitRunner::class)
 class JdbcOperationsExtensionsTests {
 
-	@Rule
-	@JvmField
-	val thrown = ExpectedException.none()!!
-
-	lateinit private var connection: Connection
-	lateinit private var dataSource: DataSource
-	lateinit private var preparedStatement: PreparedStatement
-	lateinit private var statement: Statement
-	lateinit private var resultSet: ResultSet
-	lateinit private var template: JdbcTemplate
-	lateinit private var callableStatement: CallableStatement
-	lateinit private var resultSetMetaData: ResultSetMetaData
-
-	@Before
-	fun setup() {
-		connection = mock(Connection::class.java)
-		dataSource = mock(DataSource::class.java)
-		preparedStatement = mock(PreparedStatement::class.java)
-		statement = mock(Statement::class.java)
-		resultSet = mock(ResultSet::class.java)
-		callableStatement = mock(CallableStatement::class.java)
-		resultSetMetaData = mock(ResultSetMetaData::class.java)
-		template = JdbcTemplate(dataSource)
-		given(dataSource.connection).willReturn(connection)
-		given(connection.prepareStatement(anyString())).willReturn(preparedStatement)
-		given(preparedStatement.executeQuery()).willReturn(resultSet)
-		given(preparedStatement.executeQuery(anyString())).willReturn(resultSet)
-		given(preparedStatement.connection).willReturn(connection)
-		given(statement.connection).willReturn(connection)
-		given(statement.executeQuery(anyString())).willReturn(resultSet)
-		given(connection.prepareCall(anyString())).willReturn(callableStatement)
-		given(connection.createStatement()).willReturn(statement)
-		given(callableStatement.resultSet).willReturn(resultSet)
-		given(resultSetMetaData.columnCount).willReturn(1)
-		given(resultSetMetaData.getColumnName(1)).willReturn("age")
-		given(resultSet.metaData).willReturn(resultSetMetaData)
-		given(resultSet.next()).willReturn(true, false)
-		given(resultSet.getInt(1)).willReturn(22)
-	}
-
+	@Mock(answer = Answers.RETURNS_MOCKS)
+	lateinit var template: JdbcTemplate
 
 	@Test
-	fun `queryForObject with KClass`() {
-		val i = template.queryForObject("select age from customer where id = 3", Int::class)
-		assertEquals(22, i)
-	}
-
-	@Test
-	fun `queryForObject with reified type`() {
-		val i: Int = template.queryForObject("select age from customer where id = 3")
-		assertEquals(22, i)
+	fun `queryForObject with reified type parameters`() {
+		val sql = "select age from customer where id = 3"
+		template.queryForObject<Int>(sql)
+		verify(template, times(1)).queryForObject(sql, Integer::class.java)
 	}
 
 	@Test
 	fun `queryForObject with RowMapper-like function`() {
-		val i = template.queryForObject("select age from customer where id = ?", 3) { rs, _ ->
-			rs.getInt(1)
-		}
-		assertEquals(22, i)
+		val sql = "select age from customer where id = ?"
+		template.queryForObject(sql, 3) { rs: ResultSet, _: Int -> rs.getInt(1) }
+		verify(template, times(1)).queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3))
 	}
 
 	@Test
-	fun `queryForObject with argTypes`() {
-		val i = template.queryForObject("select age from customer where id = ?", arrayOf(3),
-				intArrayOf(JDBCType.INTEGER.vendorTypeNumber), Int::class)
-		assertEquals(22, i)
+	fun `queryForObject with reified type parameters and argTypes`() {
+		val sql = "select age from customer where id = ?"
+		val args = arrayOf(3)
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
+		template.queryForObject<Int>(sql, args, argTypes)
+		verify(template, times(1)).queryForObject(sql, args, argTypes, Integer::class.java)
 	}
 
 	@Test
-	fun `queryForObject with reified type and argTypes`() {
-		val i: Int = template.queryForObject("select age from customer where id = ?", arrayOf(3),
-				intArrayOf(JDBCType.INTEGER.vendorTypeNumber))
-		assertEquals(22, i)
+	fun `queryForObject with reified type parameters and args`() {
+		val sql = "select age from customer where id = ?"
+		val args = arrayOf(3)
+		template.queryForObject<Int>(sql, args)
+		verify(template, times(1)).queryForObject(sql, args, Integer::class.java)
 	}
 
 	@Test
-	fun `queryForObject with args`() {
-		val i = template.queryForObject("select age from customer where id = ?", arrayOf(3), Int::class)
-		assertEquals(22, i)
+	fun `queryForList with reified type parameters`() {
+		val sql = "select age from customer where id = 3"
+		template.queryForList<Int>(sql)
+		verify(template, times(1)).queryForList(sql, Integer::class.java)
 	}
 
 	@Test
-	fun `queryForObject with reified type and args`() {
-		val i: Int = template.queryForObject("select age from customer where id = ?", arrayOf(3))
-		assertEquals(22, i)
+	fun `queryForList with reified type parameters and argTypes`() {
+		val sql = "select age from customer where id = ?"
+		val args = arrayOf(3)
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
+		template.queryForList<Int>(sql, args, argTypes)
+		verify(template, times(1)).queryForList(sql, args, argTypes, Integer::class.java)
 	}
 
 	@Test
-	fun `queryForObject with varargs`() {
-		val i = template.queryForObject("select age from customer where id = ?", Int::class, 3)
-		assertEquals(22, i)
-	}
-
-	@Test
-	fun `queryForList with KClass`() {
-		val i = template.queryForList(sql = "select age from customer where id = 3", elementType = Int::class)
-		assertEquals(22, i.first())
-	}
-
-	@Test
-	fun `queryForList with reified type`() {
-		val i = template.queryForList<Int>("select age from customer where id = 3")
-		assertEquals(22, i.first())
-	}
-
-	@Test
-	fun `queryForList with argTypes`() {
-		val i = template.queryForList(sql = "select age from customer where id = ?", args = arrayOf(3),
-				argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber), elementType = Int::class)
-		assertEquals(22, i.first())
-	}
-
-	@Test
-	fun `queryForList with reified type and argTypes`() {
-		val i = template.queryForList<Int>("select age from customer where id = ?", arrayOf(3), intArrayOf(JDBCType.INTEGER.vendorTypeNumber))
-		assertEquals(22, i.first())
-	}
-
-	@Test
-	fun `queryForList with args`() {
-		val i = template.queryForList(sql = "select age from customer where id = ?", args = arrayOf(3), elementType = Int::class)
-		assertEquals(22, i.first())
-	}
-
-	@Test
-	fun `queryForList with reified type and args`() {
-		val i = template.queryForList<Int>("select age from customer where id = ?", arrayOf(3))
-		assertEquals(22, i.first())
+	fun `queryForList with reified type parameters and args`() {
+		val sql = "select age from customer where id = ?"
+		val args = arrayOf(3)
+		template.queryForList<Int>(sql, args)
+		verify(template, times(1)).queryForList(sql, args, Integer::class.java)
 	}
 
 	@Test
 	fun `query with ResultSetExtractor-like function`() {
-		val i = template.query<Int>("select age from customer where id = ?", 3) { rs ->
+		val sql = "select age from customer where id = ?"
+		template.query<Int>(sql, 3) { rs ->
 			rs.next()
 			rs.getInt(1)
 		}
-		assertEquals(22, i)
+		verify(template, times(1)).query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3))
 	}
 
 	@Test
 	fun `query with RowCallbackHandler-like function`() {
-		template.query("select age from customer where id = ?", 3) { rs ->
+		val sql = "select age from customer where id = ?"
+		template.query(sql, 3) { rs ->
 			assertEquals(22, rs.getInt(1))
 		}
+		verify(template, times(1)).query(eq(sql), any<RowCallbackHandler>(), eq(3))
 	}
 
 	@Test
 	fun `query with RowMapper-like function`() {
-		val i = template.query("select age from customer where id = ?", 3) { rs, _ ->
+		val sql = "select age from customer where id = ?"
+		template.query(sql, 3) { rs, _ ->
 			rs.getInt(1)
 		}
-		assertEquals(22, i.first())
+		verify(template, times(1)).query(eq(sql), any<RowMapper<Int>>(), eq(3))
 	}
+
 }

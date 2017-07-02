@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -126,6 +127,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return the default charset to use for parsing properties files, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}

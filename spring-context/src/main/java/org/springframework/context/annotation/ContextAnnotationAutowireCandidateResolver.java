@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -41,7 +42,7 @@ import org.springframework.util.Assert;
 public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotationAutowireCandidateResolver {
 
 	@Override
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return (isLazy(descriptor) ? buildLazyResolutionProxy(descriptor, beanName) : null);
 	}
 
@@ -65,7 +66,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		return false;
 	}
 
-	protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor, final String beanName) {
+	protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor, final @Nullable String beanName) {
 		Assert.state(getBeanFactory() instanceof DefaultListableBeanFactory,
 				"BeanFactory needs to be a DefaultListableBeanFactory");
 		final DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) getBeanFactory();

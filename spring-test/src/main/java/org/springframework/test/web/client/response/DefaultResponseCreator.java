@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.Assert;
@@ -41,8 +42,9 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	private HttpStatus statusCode;
 
-	private byte[] content;
+	private byte[] content = new byte[0];
 
+	@Nullable
 	private Resource contentResource;
 
 	private final HttpHeaders headers = new HttpHeaders();
@@ -86,9 +88,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 * Set the {@code Content-Type} header.
 	 */
 	public DefaultResponseCreator contentType(MediaType mediaType) {
-		if (mediaType != null) {
-			this.headers.setContentType(mediaType);
-		}
+		this.headers.setContentType(mediaType);
 		return this;
 	}
 
@@ -104,17 +104,13 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 * Copy all given headers.
 	 */
 	public DefaultResponseCreator headers(HttpHeaders headers) {
-		for (String headerName : headers.keySet()) {
-			for (String headerValue : headers.get(headerName)) {
-				this.headers.add(headerName, headerValue);
-			}
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
 
 	@Override
-	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
+	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
 		MockClientHttpResponse response;
 		if (this.contentResource != null) {
 			InputStream stream = this.contentResource.getInputStream();

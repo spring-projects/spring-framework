@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -232,7 +232,6 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
@@ -364,7 +363,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestExecution(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestExecution(Object testInstance, Method testMethod, @Nullable Throwable exception) throws Exception {
 		String callbackName = "afterTestExecution";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
 
@@ -424,7 +423,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestMethod(Object testInstance, Method testMethod, @Nullable Throwable exception) throws Exception {
 		String callbackName = "afterTestMethod";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
 
@@ -500,7 +499,6 @@ public class TestContextManager {
 	}
 
 	private void prepareForBeforeCallback(String callbackName, Object testInstance, Method testMethod) {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("%s(): instance [%s], method [%s]", callbackName, testInstance, testMethod));
 		}
@@ -508,8 +506,8 @@ public class TestContextManager {
 	}
 
 	private void prepareForAfterCallback(String callbackName, Object testInstance, Method testMethod,
-			Throwable exception) {
-		Assert.notNull(testInstance, "Test instance must not be null");
+			@Nullable Throwable exception) {
+
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("%s(): instance [%s], method [%s], exception [%s]", callbackName, testInstance,
 					testMethod, exception));

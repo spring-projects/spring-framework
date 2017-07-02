@@ -47,7 +47,7 @@ public class RedirectViewTests {
 
 	@Before
 	public void setup() {
-		this.exchange = MockServerHttpRequest.get("/").contextPath("/context").toExchange();
+		this.exchange = MockServerHttpRequest.get("/context/path").contextPath("/context").toExchange();
 	}
 
 

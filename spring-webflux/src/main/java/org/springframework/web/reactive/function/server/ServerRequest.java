@@ -29,6 +29,7 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -36,6 +37,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -54,6 +57,7 @@ public interface ServerRequest {
 	/**
 	 * Return the HTTP method.
 	 */
+	@Nullable
 	HttpMethod method();
 
 	/**
@@ -65,13 +69,18 @@ public interface ServerRequest {
 	 * Return the request path.
 	 */
 	default String path() {
-		return uri().getPath();
+		return uri().getRawPath();
 	}
 
 	/**
 	 * Return the headers of this request.
 	 */
 	Headers headers();
+
+	/**
+	 * Return the cookies of this request.
+	 */
+	MultiValueMap<String, HttpCookie> cookies();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.
@@ -129,7 +138,16 @@ public interface ServerRequest {
 	 */
 	default Optional<String> queryParam(String name) {
 		List<String> queryParams = this.queryParams(name);
-		return (!queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty());
+		if (queryParams.isEmpty()) {
+			return Optional.empty();
+		}
+		else {
+			String value = queryParams.get(0);
+			if (value == null) {
+				value = "";
+			}
+			return Optional.of(value);
+		}
 	}
 
 	/**
@@ -232,6 +250,7 @@ public interface ServerRequest {
 		 * <p>If the header value does not contain a port, the returned
 		 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
 		 */
+		@Nullable
 		InetSocketAddress host();
 
 		/**

@@ -46,6 +46,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -109,14 +110,15 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+		Class<?> rawClass = elementType.getRawClass();
+		return (rawClass != null && MultiValueMap.class.isAssignableFrom(rawClass) &&
+				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType)));
 	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, ?>> inputStream,
-			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
 			Map<String, Object> hints) {
 
 		byte[] boundary = generateMultipartBoundary();
@@ -155,6 +157,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		if (value instanceof HttpEntity) {
 			outputMessage.getHeaders().putAll(((HttpEntity<T>) value).getHeaders());
 			body = ((HttpEntity<T>) value).getBody();
+			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
 		}
 		else {
 			body = value;
@@ -227,6 +230,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		private final AtomicBoolean committed = new AtomicBoolean();
 
+		@Nullable
 		private Flux<DataBuffer> body;
 
 		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory, Charset charset) {

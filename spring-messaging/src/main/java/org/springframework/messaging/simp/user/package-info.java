@@ -6,4 +6,7 @@
  * <p>Also included is {@link org.springframework.messaging.simp.user.SimpUserRegistry}
  * for keeping track of connected user sessions.
  */
+@NonNullApi
 package org.springframework.messaging.simp.user;
+
+import org.springframework.lang.NonNullApi;

@@ -27,6 +27,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -170,7 +171,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	@Override
 	public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler handler) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
@@ -180,7 +180,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 
 		if (HttpMethod.GET != method) {
-			return Mono.error(new MethodNotAllowedException(method, Collections.singleton(HttpMethod.GET)));
+			return Mono.error(new MethodNotAllowedException(
+					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
@@ -208,6 +209,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return Mono.error(new ServerWebInputException(reason));
 	}
 
+	@Nullable
 	private String selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
 		String protocolHeader = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
 		if (protocolHeader != null) {

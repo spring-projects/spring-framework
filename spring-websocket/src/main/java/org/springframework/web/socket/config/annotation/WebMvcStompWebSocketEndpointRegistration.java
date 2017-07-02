@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -35,7 +36,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-
 /**
  * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
@@ -50,12 +50,14 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	private final TaskScheduler sockJsTaskScheduler;
 
+	@Nullable
 	private HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	@Nullable
 	private SockJsServiceRegistration registration;
 
 

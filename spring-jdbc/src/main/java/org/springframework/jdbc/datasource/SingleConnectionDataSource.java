@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -57,12 +58,15 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	private boolean suppressClose;
 
 	/** Override auto-commit state? */
+	@Nullable
 	private Boolean autoCommit;
 
 	/** Wrapped Connection */
+	@Nullable
 	private Connection target;
 
 	/** Proxy Connection */
+	@Nullable
 	private Connection connection;
 
 	/** Synchronization monitor for the shared Connection */
@@ -146,6 +150,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
+	@Nullable
 	protected Boolean getAutoCommitValue() {
 		return this.autoCommit;
 	}
@@ -290,6 +295,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

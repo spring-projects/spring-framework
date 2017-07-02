@@ -20,6 +20,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -47,7 +48,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {

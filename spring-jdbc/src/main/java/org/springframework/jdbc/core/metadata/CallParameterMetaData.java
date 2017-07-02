@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Holder of metadata for a specific parameter that is used for call processing.
  *
@@ -25,12 +27,14 @@ package org.springframework.jdbc.core.metadata;
  */
 public class CallParameterMetaData {
 
+	@Nullable
 	private String parameterName;
 
 	private int parameterType;
 
 	private int sqlType;
 
+	@Nullable
 	private String typeName;
 
 	private boolean nullable;
@@ -39,7 +43,9 @@ public class CallParameterMetaData {
 	/**
 	 * Constructor taking all the properties.
 	 */
-	public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+	public CallParameterMetaData(
+			@Nullable String columnName, int columnType, int sqlType, @Nullable String typeName, boolean nullable) {
+
 		this.parameterName = columnName;
 		this.parameterType = columnType;
 		this.sqlType = sqlType;
@@ -51,6 +57,7 @@ public class CallParameterMetaData {
 	/**
 	 * Get the parameter name.
 	 */
+	@Nullable
 	public String getParameterName() {
 		return this.parameterName;
 	}
@@ -72,6 +79,7 @@ public class CallParameterMetaData {
 	/**
 	 * Get the parameter type name.
 	 */
+	@Nullable
 	public String getTypeName() {
 		return this.typeName;
 	}

@@ -19,12 +19,15 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
@@ -88,6 +91,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the specified database
 	 * @return the EclipseLink target database name, or {@code null} if none found
 	 */
+	@Nullable
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;

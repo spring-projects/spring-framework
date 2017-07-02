@@ -17,11 +17,9 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -35,7 +33,10 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.ParsingPathMatcher;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
@@ -102,11 +103,8 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(),
+				Matchers.contains(key1, key2));
 	}
 
 	@Test
@@ -118,11 +116,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.contains(key1, key2));
 	}
 
 	@Test
@@ -137,7 +131,7 @@ public class HandlerMethodMappingTests {
 		result = this.mapping.getHandler(MockServerHttpRequest.get(key).toExchange());
 
 		assertNull(result.block());
-		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.not(Matchers.contains(key)));
 	}
 
 
@@ -154,11 +148,6 @@ public class HandlerMethodMappingTests {
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
-		}
-
-		@Override
-		protected Set<String> getMappingPathPatterns(String key) {
-			return (this.pathMatcher.isPattern(key) ? Collections.emptySet() : Collections.singleton(key));
 		}
 
 		@Override

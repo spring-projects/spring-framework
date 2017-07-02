@@ -90,7 +90,7 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	public byte[] getResponseBodyContent() {
 		return this.body.ignoreElements()
 				.timeout(this.timeout, Mono.error(TIMEOUT_ERROR))
-				.then(Mono.defer(() -> Mono.just(super.getResponseBodyContent())))
+				.then(Mono.defer(() -> Mono.justOrEmpty(super.getResponseBodyContent())))
 				.block();
 	}
 

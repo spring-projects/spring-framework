@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.util.List;
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
 import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -43,10 +44,13 @@ public class ResourceHandlerRegistration {
 
 	private final List<Resource> locations = new ArrayList<>();
 
+	@Nullable
 	private Integer cachePeriod;
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
 
 

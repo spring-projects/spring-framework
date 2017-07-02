@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -42,6 +43,7 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param handler the target handler to handle the message
 	 * @return the input message, or a new instance, or {@code null}
 	 */
+	@Nullable
 	Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler);
 
 	/**
@@ -55,6 +57,6 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param handler the target handler that handled the message
 	 * @param ex any exception that may been raised by the handler
 	 */
-	void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex);
+	void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, @Nullable Exception ex);
 
 }

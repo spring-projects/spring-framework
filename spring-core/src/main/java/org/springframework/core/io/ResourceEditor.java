@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -50,6 +51,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
 
+	@Nullable
 	private PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;
@@ -69,7 +71,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @param resourceLoader the {@code ResourceLoader} to use
 	 * @param propertyResolver the {@code PropertyResolver} to use
 	 */
-	public ResourceEditor(ResourceLoader resourceLoader, PropertyResolver propertyResolver) {
+	public ResourceEditor(ResourceLoader resourceLoader, @Nullable PropertyResolver propertyResolver) {
 		this(resourceLoader, propertyResolver, true);
 	}
 
@@ -81,7 +83,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding property could be found in the given {@code propertyResolver}
 	 */
-	public ResourceEditor(ResourceLoader resourceLoader, PropertyResolver propertyResolver,
+	public ResourceEditor(ResourceLoader resourceLoader, @Nullable PropertyResolver propertyResolver,
 			boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
@@ -120,6 +122,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 
 	@Override
+	@Nullable
 	public String getAsText() {
 		Resource value = (Resource) getValue();
 		try {

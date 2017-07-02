@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -34,7 +35,7 @@ import org.springframework.util.ObjectUtils;
 abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		CacheOperationSource cas = getCacheOperationSource();
 		return (cas != null && !CollectionUtils.isEmpty(cas.getCacheOperations(method, targetClass)));
 	}
@@ -66,6 +67,7 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 	 * Obtain the underlying {@link CacheOperationSource} (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
+	@Nullable
 	protected abstract CacheOperationSource getCacheOperationSource();
 
 }

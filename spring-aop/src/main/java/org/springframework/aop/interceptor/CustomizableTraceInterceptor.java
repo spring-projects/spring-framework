@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
@@ -291,7 +292,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * at {@code TRACE} level. Sub-classes can override this method
 	 * to control which level the message is written at.
 	 */
-	protected void writeToLog(Log logger, String message, Throwable ex) {
+	protected void writeToLog(Log logger, String message, @Nullable Throwable ex) {
 		if (ex != null) {
 			logger.trace(message, ex);
 		}
@@ -317,7 +318,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
-			Object returnValue, Throwable throwable, long invocationTime) {
+			@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime) {
 
 		Matcher matcher = PATTERN.matcher(message);
 
@@ -371,7 +372,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param returnValue the value returned by the method invocation.
 	 */
 	private void appendReturnValue(
-			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, Object returnValue) {
+			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, @Nullable Object returnValue) {
 
 		if (methodInvocation.getMethod().getReturnType() == void.class) {
 			matcher.appendReplacement(output, "void");

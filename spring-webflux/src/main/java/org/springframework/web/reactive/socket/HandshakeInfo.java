@@ -22,6 +22,7 @@ import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,6 +41,7 @@ public class HandshakeInfo {
 
 	private final HttpHeaders headers;
 
+	@Nullable
 	private final String protocol;
 
 
@@ -50,7 +52,7 @@ public class HandshakeInfo {
 	 * @param principal the principal for the session
 	 * @param protocol the negotiated sub-protocol (may be {@code null})
 	 */
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, String protocol) {
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
 		Assert.notNull(principal, "Principal is required");
@@ -88,6 +90,7 @@ public class HandshakeInfo {
 	 * @see <a href="https://tools.ietf.org/html/rfc6455#section-1.9">
 	 * https://tools.ietf.org/html/rfc6455#section-1.9</a>
 	 */
+	@Nullable
 	public String getSubProtocol() {
 		return this.protocol;
 	}

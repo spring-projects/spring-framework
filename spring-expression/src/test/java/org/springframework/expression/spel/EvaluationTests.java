@@ -244,6 +244,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 			fail("Should have failed to parse");
 		}
 		catch (ParseException e) {
+			e.printStackTrace();
 			assertTrue(e instanceof SpelParseException);
 			SpelParseException spe = (SpelParseException) e;
 			assertEquals(SpelMessage.OOD, spe.getMessageCode());

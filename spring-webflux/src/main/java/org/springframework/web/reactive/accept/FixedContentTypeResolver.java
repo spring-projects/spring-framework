@@ -26,7 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code RequestedContentTypeResolver} with a fixed list of media types.
+ * Resolver that always resolves to a fixed list of media types. This can be
+ * used as the "last in line" strategy providing a fallback for when the client
+ * has not requested any media types.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -63,7 +65,6 @@ public class FixedContentTypeResolver implements RequestedContentTypeResolver {
 	public List<MediaType> getContentTypes() {
 		return this.mediaTypes;
 	}
-
 
 
 	@Override

@@ -33,7 +33,7 @@ public class PathPatternParser {
 	
 	// Whether the PathPatterns produced by the parser will allow patterns that don't
 	// have a trailing slash to match paths that may or may not have a trailing slash.
-	private boolean matchOptionalTrailingSlash = false;
+	private boolean matchOptionalTrailingSlash = true;
 
 	// If the parser produces case-sensitive PathPattern matchers.
 	private boolean caseSensitive = true;

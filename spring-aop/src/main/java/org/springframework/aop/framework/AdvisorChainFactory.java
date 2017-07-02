@@ -19,6 +19,8 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Factory interface for advisor chains.
  *
@@ -36,6 +38,6 @@ public interface AdvisorChainFactory {
 	 * target object, in which case the method's declaring class is the next best option)
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class<?> targetClass);
+	List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, @Nullable Class<?> targetClass);
 
 }

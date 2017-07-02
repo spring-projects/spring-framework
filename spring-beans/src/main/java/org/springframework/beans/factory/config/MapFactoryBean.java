@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -34,9 +35,11 @@ import org.springframework.core.ResolvableType;
  */
 public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 
+	@Nullable
 	private Map<?, ?> sourceMap;
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class<? extends Map> targetMapClass;
 
 
@@ -54,7 +57,7 @@ public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 	 * @see java.util.LinkedHashMap
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setTargetMapClass(Class<? extends Map> targetMapClass) {
+	public void setTargetMapClass(@Nullable Class<? extends Map> targetMapClass) {
 		if (targetMapClass == null) {
 			throw new IllegalArgumentException("'targetMapClass' must not be null");
 		}

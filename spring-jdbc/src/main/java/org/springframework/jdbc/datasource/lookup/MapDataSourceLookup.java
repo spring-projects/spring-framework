@@ -19,8 +19,10 @@ package org.springframework.jdbc.datasource.lookup;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -71,7 +73,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	 * call effectively has no effect.
 	 * @param dataSources said {@link Map} of {@link DataSource DataSources}
 	 */
-	public void setDataSources(Map<String, DataSource> dataSources) {
+	public void setDataSources(@Nullable Map<String, DataSource> dataSources) {
 		if (dataSources != null) {
 			this.dataSources.putAll(dataSources);
 		}

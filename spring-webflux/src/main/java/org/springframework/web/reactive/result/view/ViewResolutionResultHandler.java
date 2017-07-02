@@ -29,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
@@ -38,6 +39,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -50,7 +52,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
@@ -91,8 +92,6 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 
 	private final List<View> defaultViews = new ArrayList<>(4);
 
-	private final HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
-
 
 	/**
 	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
@@ -131,7 +130,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	 * Set the default views to consider always when resolving view names and
 	 * trying to satisfy the best matching content type.
 	 */
-	public void setDefaultViews(List<View> defaultViews) {
+	public void setDefaultViews(@Nullable List<View> defaultViews) {
 		this.defaultViews.clear();
 		if (defaultViews != null) {
 			this.defaultViews.addAll(defaultViews);
@@ -160,10 +159,11 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			type = result.getReturnType().getGeneric().resolve(Object.class);
 		}
 
-		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
-				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				void.class.equals(type) || View.class.isAssignableFrom(type) ||
-				!BeanUtils.isSimpleProperty(type));
+		return (type != null &&
+				(CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
+						Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
+						void.class.equals(type) || View.class.isAssignableFrom(type) ||
+						!BeanUtils.isSimpleProperty(type)));
 	}
 
 	private boolean hasModelAnnotation(MethodParameter parameter) {
@@ -201,9 +201,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
 					MethodParameter parameter = result.getReturnTypeSource();
-
-					List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-					Locale locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
+					Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 
 					Class<?> clazz = valueType.getRawClass();
 					if (clazz == null) {
@@ -259,7 +257,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	 * Use the request path the leading and trailing slash stripped.
 	 */
 	private String getDefaultViewName(ServerWebExchange exchange) {
-		String path = this.pathHelper.getLookupPathForRequest(exchange);
+		String path = exchange.getRequest().getPath().pathWithinApplication().value();
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
@@ -301,10 +299,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				});
 	}
 
-	private boolean isBindingCandidate(String name, Object value) {
-		return !name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
+	private boolean isBindingCandidate(String name, @Nullable Object value) {
+		return (!name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
 				!value.getClass().isArray() && !(value instanceof Collection) &&
-				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass());
+				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 	private Mono<? extends Void> render(List<View> views, Map<String, Object> model,

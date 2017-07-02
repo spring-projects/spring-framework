@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
 import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
@@ -32,6 +33,7 @@ import javax.validation.metadata.ConstraintDescriptor;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -63,6 +65,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		internalAnnotationAttributes.add("payload");
 	}
 
+	@Nullable
 	private javax.validation.Validator targetValidator;
 
 
@@ -93,14 +96,14 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	}
 
 	@Override
-	public void validate(Object target, Errors errors) {
+	public void validate(@Nullable Object target, Errors errors) {
 		if (this.targetValidator != null) {
 			processConstraintViolations(this.targetValidator.validate(target), errors);
 		}
 	}
 
 	@Override
-	public void validate(Object target, Errors errors, Object... validationHints) {
+	public void validate(@Nullable Object target, Errors errors, @Nullable Object... validationHints) {
 		if (this.targetValidator != null) {
 			Set<Class<?>> groups = new LinkedHashSet<>();
 			if (validationHints != null) {
@@ -213,16 +216,14 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<>();
-		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
-			String attributeName = entry.getKey();
-			Object attributeValue = entry.getValue();
+		descriptor.getAttributes().forEach((attributeName, attributeValue) -> {
 			if (!internalAnnotationAttributes.contains(attributeName)) {
 				if (attributeValue instanceof String) {
 					attributeValue = new ResolvableAttribute(attributeValue.toString());
 				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
-		}
+		});
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
 	}
@@ -255,6 +256,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @see javax.validation.ConstraintViolation#getInvalidValue()
 	 * @see org.springframework.validation.FieldError#getRejectedValue()
 	 */
+	@Nullable
 	protected Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
 		Object invalidValue = violation.getInvalidValue();
 		if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
@@ -299,13 +301,23 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T unwrap(Class<T> type) {
+	public <T> T unwrap(@Nullable Class<T> type) {
 		Assert.state(this.targetValidator != null, "No target Validator set");
-		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+		try {
+			return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+		}
+		catch (ValidationException ex) {
+			// ignore if just being asked for plain Validator
+			if (javax.validation.Validator.class == type) {
+				return (T) this.targetValidator;
+			}
+			throw ex;
+		}
 	}
 
 	@Override
 	public ExecutableValidator forExecutables() {
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.forExecutables();
 	}
 

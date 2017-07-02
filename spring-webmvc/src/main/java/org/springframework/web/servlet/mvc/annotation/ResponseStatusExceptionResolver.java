@@ -24,6 +24,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,6 +55,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  */
 public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver implements MessageSourceAware {
 
+	@Nullable
 	private MessageSource messageSource;
 
 
@@ -65,7 +67,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		try {
 			if (ex instanceof ResponseStatusException) {
@@ -101,7 +103,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @return an empty ModelAndView, i.e. exception resolved
 	 */
 	protected ModelAndView resolveResponseStatus(ResponseStatus responseStatus, HttpServletRequest request,
-			HttpServletResponse response, Object handler, Exception ex) throws Exception {
+			HttpServletResponse response, @Nullable Object handler, Exception ex) throws Exception {
 
 		int statusCode = responseStatus.code().value();
 		String reason = responseStatus.reason();
@@ -121,7 +123,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @since 5.0
 	 */
 	protected ModelAndView resolveResponseStatusException(ResponseStatusException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws Exception {
 
 		int statusCode = ex.getStatus().value();
 		String reason = ex.getReason();
@@ -139,7 +141,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param response current HTTP response
 	 * @since 5.0
 	 */
-	protected ModelAndView applyStatusAndReason(int statusCode, String reason, HttpServletResponse response)
+	protected ModelAndView applyStatusAndReason(int statusCode, @Nullable String reason, HttpServletResponse response)
 			throws IOException {
 
 		if (!StringUtils.hasLength(reason)) {

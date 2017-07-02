@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Juergen Hoeller
@@ -24,6 +25,7 @@ import org.springframework.core.type.AnnotationMetadata;
  */
 interface ImportRegistry {
 
+	@Nullable
 	AnnotationMetadata getImportingClassFor(String importedClass);
 
 	void removeImportingClass(String importingClass);

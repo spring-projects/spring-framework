@@ -35,6 +35,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -106,8 +107,9 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
-		ResolvableType valueType = (adapter != null ? type.getGeneric(0) : type);
+		Class<?> resolvedType = type.resolve();
+		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
+		ResolvableType valueType = (adapter != null ? type.getGeneric() : type);
 
 		Assert.state(adapter == null || !adapter.isMultiValue(),
 				() -> getClass().getSimpleName() + " doesn't support multi-value reactive type wrapper: " +
@@ -165,7 +167,9 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		if (attribute == null) {
-			return createAttribute(attributeName, attributeType.getRawClass(), context, exchange);
+			Class<?> attributeClass = attributeType.getRawClass();
+			Assert.state(attributeClass != null, "No attribute class");
+			return createAttribute(attributeName,attributeClass , context, exchange);
 		}
 
 		ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapter(null, attribute);
@@ -178,6 +182,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 	}
 
+	@Nullable
 	private Object findAndRemoveReactiveAttribute(Model model, String attributeName) {
 		return model.asMap().entrySet().stream()
 				.filter(entry -> {
@@ -236,7 +241,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 	private boolean hasErrorsArgument(MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
-		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+		Class<?>[] paramTypes = parameter.getExecutable().getParameterTypes();
 		return (paramTypes.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 	}
 

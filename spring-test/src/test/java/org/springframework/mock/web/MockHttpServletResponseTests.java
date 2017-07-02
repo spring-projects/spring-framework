@@ -169,7 +169,7 @@ public class MockHttpServletResponseTests {
 		response.addCookie(cookie);
 
 		assertEquals("foo=bar; Path=/path; Domain=example.com; " +
-				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; " +
 				"Secure; HttpOnly", response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 

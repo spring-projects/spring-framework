@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  * Abstract {@linkplain Transactional transactional} extension of
@@ -201,8 +202,10 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+		DataSource ds = this.jdbcTemplate.getDataSource();
+		Assert.state(ds != null, "No DataSource set");
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(jdbcTemplate.getDataSource());
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(ds);
 	}
 
 }

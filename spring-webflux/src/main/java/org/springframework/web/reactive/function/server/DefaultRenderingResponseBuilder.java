@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -28,11 +27,13 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -51,7 +52,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	private final Map<String, Object> model = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> model = new LinkedHashMap<>();
 
 
 	public DefaultRenderingResponseBuilder(String name) {
@@ -76,7 +77,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	}
 
 	@Override
-	public RenderingResponse.Builder modelAttribute(String name, Object value) {
+	public RenderingResponse.Builder modelAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "'name' must not be null");
 		this.model.put(name, value);
 		return this;
@@ -84,25 +85,19 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Object... attributes) {
-		if (attributes != null) {
-			modelAttributes(Arrays.asList(attributes));
-		}
+		modelAttributes(Arrays.asList(attributes));
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Collection<?> attributes) {
-		if (attributes != null) {
-			attributes.forEach(this::modelAttribute);
-		}
+		attributes.forEach(this::modelAttribute);
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Map<String, ?> attributes) {
-		if (attributes != null) {
-			this.model.putAll(attributes);
-		}
+		this.model.putAll(attributes);
 		return this;
 	}
 
@@ -116,9 +111,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
@@ -163,7 +156,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale locale = resolveLocale(exchange);
+			Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
 			return Flux.fromStream(viewResolverStream)
@@ -174,11 +167,6 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
-		private Locale resolveLocale(ServerWebExchange exchange) {
-			List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
-			return locales.isEmpty() ? Locale.getDefault() : locales.get(0);
-
-		}
 	}
 
 }

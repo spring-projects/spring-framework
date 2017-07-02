@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,7 @@ import org.springframework.http.codec.Pojo;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
@@ -117,6 +115,19 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
+	public void decodeEmptyArrayToFlux() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("[]"));
+
+		ResolvableType elementType = forClass(Pojo.class);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
+				emptyMap());
+
+		StepVerifier.create(flux)
+				.expectNextCount(0)
+				.verifyComplete();
+	}
+
+	@Test
 	public void fieldLevelJsonView() throws Exception {
 		Flux<DataBuffer> source = Flux.just(
 				stringBuffer("{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
@@ -155,6 +166,18 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void decodeEmptyBodyToMono() throws Exception {
 		Flux<DataBuffer> source = Flux.empty();
+		ResolvableType elementType = forClass(Pojo.class);
+		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
+				null, emptyMap());
+
+		StepVerifier.create(mono)
+				.expectNextCount(0)
+				.verifyComplete();
+	}
+
+	@Test
+	public void decodeEmptyArrayToMono() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("[]"));
 		ResolvableType elementType = forClass(Pojo.class);
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, emptyMap());

@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -65,13 +64,12 @@ public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgument
 
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
-			BindingContext context, ServerWebExchange exchange) {
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
+			ServerWebExchange exchange) {
 
 		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(methodParameter.getParameterType());
 		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-		Object value = isMultiValueMap ? queryParams : queryParams.toSingleValueMap();
-		return Optional.of(value);
+		return isMultiValueMap ? queryParams : queryParams.toSingleValueMap();
 	}
 
 }

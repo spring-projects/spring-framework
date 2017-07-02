@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
+	@Nullable
 	private ClassLoader classLoader;
 
 	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
@@ -67,7 +69,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @param classLoader the ClassLoader to load class path resources with, or {@code null}
 	 * for using the thread context class loader at the time of actual resource access
 	 */
-	public DefaultResourceLoader(ClassLoader classLoader) {
+	public DefaultResourceLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -78,7 +80,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default is that ClassLoader access will happen using the thread context
 	 * class loader at the time of this ResourceLoader's initialization.
 	 */
-	public void setClassLoader(ClassLoader classLoader) {
+	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -188,7 +190,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
 
-		public ClassPathContextResource(String path, ClassLoader classLoader) {
+		public ClassPathContextResource(String path, @Nullable ClassLoader classLoader) {
 			super(path, classLoader);
 		}
 

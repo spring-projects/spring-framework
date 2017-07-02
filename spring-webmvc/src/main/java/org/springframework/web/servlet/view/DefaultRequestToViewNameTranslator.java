@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
@@ -77,7 +78,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the prefix to prepend to generated view names.
 	 * @param prefix the prefix to prepend to generated view names
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
 	}
 
@@ -85,7 +86,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the suffix to append to generated view names.
 	 * @param suffix the suffix to append to generated view names
 	 */
-	public void setSuffix(String suffix) {
+	public void setSuffix(@Nullable String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
@@ -185,6 +186,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @return the transformed path, with slashes and extensions stripped
 	 * if desired
 	 */
+	@Nullable
 	protected String transformPath(String lookupPath) {
 		String path = lookupPath;
 		if (this.stripLeadingSlash && path.startsWith(SLASH)) {

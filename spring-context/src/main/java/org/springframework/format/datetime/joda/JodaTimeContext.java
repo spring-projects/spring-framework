@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * A context that holds user-specific Joda-Time settings such as the user's
@@ -38,8 +39,10 @@ import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
  */
 public class JodaTimeContext {
 
+	@Nullable
 	private Chronology chronology;
 
+	@Nullable
 	private DateTimeZone timeZone;
 
 
@@ -53,6 +56,7 @@ public class JodaTimeContext {
 	/**
 	 * Return the user's chronology (calendar system), if any.
 	 */
+	@Nullable
 	public Chronology getChronology() {
 		return this.chronology;
 	}
@@ -72,6 +76,7 @@ public class JodaTimeContext {
 	/**
 	 * Return the user's time zone, if any.
 	 */
+	@Nullable
 	public DateTimeZone getTimeZone() {
 		return this.timeZone;
 	}

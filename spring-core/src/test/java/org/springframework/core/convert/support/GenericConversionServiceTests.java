@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
@@ -368,9 +369,7 @@ public class GenericConversionServiceTests {
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
 			Map<String, Integer> target = new HashMap<>(source.size());
-			for (Map.Entry<String, String> entry : source.entrySet()) {
-				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
-			}
+			source.forEach((k, v) -> target.put(k, Integer.valueOf(v)));
 		}
 		watch.stop();
 		// System.out.println(watch.prettyPrint());
@@ -761,7 +760,8 @@ public class GenericConversionServiceTests {
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		@Nullable
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return null;
 		}
 	}
@@ -783,7 +783,8 @@ public class GenericConversionServiceTests {
 		}
 
 		@Override
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		@Nullable
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return null;
 		}
 

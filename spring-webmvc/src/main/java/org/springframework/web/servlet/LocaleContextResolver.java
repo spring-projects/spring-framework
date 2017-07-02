@@ -17,10 +17,12 @@
 package org.springframework.web.servlet;
 
 import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link LocaleResolver}, adding support for a rich locale context
@@ -68,6 +70,6 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 * @see org.springframework.context.i18n.SimpleLocaleContext
 	 * @see org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext
 	 */
-	void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext);
+	void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -52,7 +54,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	 * or {@code null} if default values are not expected to have expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 
@@ -68,20 +70,19 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader annotation = parameter.getParameterAnnotation(RequestHeader.class);
-		return new RequestHeaderNamedValueInfo(annotation);
+		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		Assert.state(ann != null, "No RequestHeader annotation");
+		return new RequestHeaderNamedValueInfo(ann);
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		List<String> headerValues = exchange.getRequest().getHeaders().get(name);
 		Object result = null;
 		if (headerValues != null) {
 			result = (headerValues.size() == 1 ? headerValues.get(0) : headerValues);
 		}
-		return Optional.ofNullable(result);
+		return result;
 	}
 
 	@Override

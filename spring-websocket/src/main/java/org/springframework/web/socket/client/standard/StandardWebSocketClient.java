@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -61,6 +62,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final Map<String,Object> userProperties = new HashMap<>();
 
+	@Nullable
 	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
@@ -91,14 +93,14 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * Use this property to configure one or more properties to be passed on
 	 * every handshake.
 	 */
-	public void setUserProperties(Map<String, Object> userProperties) {
+	public void setUserProperties(@Nullable Map<String, Object> userProperties) {
 		if (userProperties != null) {
 			this.userProperties.putAll(userProperties);
 		}
 	}
 
 	/**
-	 * The configured user properties, or {@code null}.
+	 * The configured user properties.
 	 */
 	public Map<String, Object> getUserProperties() {
 		return this.userProperties;
@@ -106,17 +108,18 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	/**
 	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 * If this property is set to {@code null}, calls to  any of the
+	 * If this property is set to {@code null}, calls to any of the
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default, an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
-	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
+	public void setTaskExecutor(@Nullable AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
 	 * Return the configured {@link TaskExecutor}.
 	 */
+	@Nullable
 	public AsyncListenableTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
@@ -143,12 +146,9 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 		final Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 
-		Callable<WebSocketSession> connectTask = new Callable<WebSocketSession>() {
-			@Override
-			public WebSocketSession call() throws Exception {
-				webSocketContainer.connectToServer(endpoint, endpointConfig, uri);
-				return session;
-			}
+		Callable<WebSocketSession> connectTask = () -> {
+			webSocketContainer.connectToServer(endpoint, endpointConfig, uri);
+			return session;
 		};
 
 		if (this.taskExecutor != null) {

@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 
 /**
@@ -38,8 +39,9 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 	public static final String ERRORS_VARIABLE_NAME = "errors";
 
 
-	private String name;
+	private String name = "";
 
+	@Nullable
 	private Errors errors;
 
 
@@ -80,6 +82,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 	 * Retrieve the Errors instance that this tag is currently bound to.
 	 * <p>Intended for cooperating nesting tags.
 	 */
+	@Nullable
 	public final Errors getErrors() {
 		return this.errors;
 	}

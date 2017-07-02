@@ -23,6 +23,7 @@ import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -81,7 +82,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see #beginTransaction
 	 */
 	@Override
-	public void cleanupTransaction(Object transactionData) {
+	public void cleanupTransaction(@Nullable Object transactionData) {
 	}
 
 	/**

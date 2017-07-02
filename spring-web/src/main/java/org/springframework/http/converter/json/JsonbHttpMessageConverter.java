@@ -23,6 +23,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -97,7 +98,7 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	}
 
 	@Override
-	protected void writeInternal(Object o, Type type, Writer writer) throws Exception {
+	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
 		if (type != null) {
 			getJsonb().toJson(o, type, writer);
 		}

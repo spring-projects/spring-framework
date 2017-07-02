@@ -56,6 +56,7 @@ import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -86,7 +87,7 @@ public class ResolvableTypeTests {
 		assertThat(none.getGenerics().length, equalTo(0));
 		assertThat(none.getInterfaces().length, equalTo(0));
 		assertThat(none.getSuperType(), equalTo(ResolvableType.NONE));
-		assertThat(none.getType(), nullValue());
+		assertThat(none.getType(), equalTo(ResolvableType.EmptyType.INSTANCE));
 		assertThat(none.hasGenerics(), equalTo(false));
 		assertThat(none.isArray(), equalTo(false));
 		assertThat(none.resolve(), nullValue());

@@ -24,6 +24,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic auto proxy creator that builds AOP proxies for specific beans
@@ -66,7 +67,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 
 	@Override
-	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource) {
+	@Nullable
+	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;

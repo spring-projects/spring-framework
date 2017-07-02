@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.core.annotation.AnnotationUtilsTests.*;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
 import org.springframework.util.Assert;
@@ -70,8 +69,8 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()));
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class).isEmpty());
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()).isEmpty());
 	}
 
 	@Test

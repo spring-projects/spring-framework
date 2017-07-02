@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
@@ -123,6 +124,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @see #getId()
 	 * @see #autogenerateId()
 	 */
+	@Nullable
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
@@ -137,8 +139,10 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>The default implementation simply delegates to {@link #getName()},
 	 * deleting invalid characters (such as "[" or "]").
 	 */
+	@Nullable
 	protected String autogenerateId() throws JspException {
-		return StringUtils.deleteAny(getName(), "[]");
+		String name = getName();
+		return (name != null ? StringUtils.deleteAny(name, "[]") : null);
 	}
 
 	/**
@@ -150,6 +154,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * the value of the '{@code name}' attribute without changing the bind path.
 	 * @return the value for the HTML '{@code name}' attribute
 	 */
+	@Nullable
 	protected String getName() throws JspException {
 		return getPropertyPath();
 	}
@@ -200,6 +205,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	/**
 	 * Get the {@link PropertyEditor}, if any, in use for value bound to this tag.
 	 */
+	@Nullable
 	protected PropertyEditor getPropertyEditor() throws JspException {
 		return getBindStatus().getEditor();
 	}

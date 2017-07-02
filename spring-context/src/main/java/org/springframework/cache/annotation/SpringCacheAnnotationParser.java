@@ -28,6 +28,7 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -58,6 +59,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return parseCacheAnnotations(defaultConfig, method);
 	}
 
+	@Nullable
 	protected Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
 		Collection<CacheOperation> ops = parseCacheAnnotations(cachingConfig, ae, false);
 		if (ops != null && ops.size() > 1 && ae.getAnnotations().length > 0) {
@@ -70,6 +72,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return ops;
 	}
 
+	@Nullable
 	private Collection<CacheOperation> parseCacheAnnotations(
 			DefaultCacheConfig cachingConfig, AnnotatedElement ae, boolean localOnly) {
 
@@ -78,7 +81,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		Collection<Cacheable> cacheables = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, Cacheable.class) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, Cacheable.class));
 		if (!cacheables.isEmpty()) {
-			ops = lazyInit(ops);
+			ops = lazyInit(null);
 			for (Cacheable cacheable : cacheables) {
 				ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable));
 			}
@@ -114,7 +117,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return ops;
 	}
 
-	private <T extends Annotation> Collection<CacheOperation> lazyInit(Collection<CacheOperation> ops) {
+	private <T extends Annotation> Collection<CacheOperation> lazyInit(@Nullable Collection<CacheOperation> ops) {
 		return (ops != null ? ops : new ArrayList<>(1));
 	}
 
@@ -177,12 +180,13 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return op;
 	}
 
+	@Nullable
 	Collection<CacheOperation> parseCachingAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, Caching caching) {
 		Collection<CacheOperation> ops = null;
 
 		Cacheable[] cacheables = caching.cacheable();
 		if (!ObjectUtils.isEmpty(cacheables)) {
-			ops = lazyInit(ops);
+			ops = lazyInit(null);
 			for (Cacheable cacheable : cacheables) {
 				ops.add(parseCacheableAnnotation(ae, defaultConfig, cacheable));
 			}
@@ -259,19 +263,25 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	 */
 	static class DefaultCacheConfig {
 
+		@Nullable
 		private final String[] cacheNames;
 
+		@Nullable
 		private final String keyGenerator;
 
+		@Nullable
 		private final String cacheManager;
 
+		@Nullable
 		private final String cacheResolver;
 
 		public DefaultCacheConfig() {
 			this(null, null, null, null);
 		}
 
-		private DefaultCacheConfig(String[] cacheNames, String keyGenerator, String cacheManager, String cacheResolver) {
+		private DefaultCacheConfig(@Nullable String[] cacheNames, @Nullable String keyGenerator,
+				@Nullable String cacheManager, @Nullable String cacheResolver) {
+
 			this.cacheNames = cacheNames;
 			this.keyGenerator = keyGenerator;
 			this.cacheManager = cacheManager;

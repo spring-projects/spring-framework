@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -55,16 +56,22 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private SubscriptionRegistry subscriptionRegistry;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
+	@Nullable
 	private Integer cacheLimit;
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
+	@Nullable
 	private long[] heartbeatValue;
 
+	@Nullable
 	private ScheduledFuture<?> heartbeatFuture;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 
@@ -111,7 +118,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @see DefaultSubscriptionRegistry#setPathMatcher
 	 * @see org.springframework.util.AntPathMatcher
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		initPathMatcherToUse();
 	}
@@ -132,7 +139,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @see DefaultSubscriptionRegistry#setCacheLimit
 	 * @see DefaultSubscriptionRegistry#DEFAULT_CACHE_LIMIT
 	 */
-	public void setCacheLimit(Integer cacheLimit) {
+	public void setCacheLimit(@Nullable Integer cacheLimit) {
 		this.cacheLimit = cacheLimit;
 		initCacheLimitToUse();
 	}
@@ -162,6 +169,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Return the configured TaskScheduler.
 	 * @since 4.2
 	 */
+	@Nullable
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
@@ -176,7 +184,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setHeartbeatValue(long[] heartbeat) {
-		if (heartbeat == null || heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+		if (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
 			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
 		}
 		this.heartbeatValue = heartbeat;
@@ -186,6 +194,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * The configured value for the heart-beat settings.
 	 * @since 4.2
 	 */
+	@Nullable
 	public long[] getHeartbeatValue() {
 		return this.heartbeatValue;
 	}
@@ -204,6 +213,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Return the configured header initializer.
 	 * @since 4.1
 	 */
+	@Nullable
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
@@ -212,7 +222,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	public void startInternal() {
 		publishBrokerAvailableEvent();
-		if (getTaskScheduler() != null) {
+		if (this.taskScheduler != null) {
 			long interval = initHeartbeatTaskDelay();
 			if (interval > 0) {
 				this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
@@ -265,21 +275,27 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			logMessage(message);
-			long[] clientHeartbeat = SimpMessageHeaderAccessor.getHeartbeat(headers);
-			long[] serverHeartbeat = getHeartbeatValue();
-			this.sessions.put(sessionId, new SessionInfo(sessionId, user, clientHeartbeat, serverHeartbeat));
-			SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-			initHeaders(connectAck);
-			connectAck.setSessionId(sessionId);
-			connectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
-			connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
-			connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, serverHeartbeat);
-			Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
-			getClientOutboundChannel().send(messageOut);
+			if (sessionId != null) {
+				long[] clientHeartbeat = SimpMessageHeaderAccessor.getHeartbeat(headers);
+				long[] serverHeartbeat = getHeartbeatValue();
+				this.sessions.put(sessionId, new SessionInfo(sessionId, user, clientHeartbeat, serverHeartbeat));
+				SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+				initHeaders(connectAck);
+				connectAck.setSessionId(sessionId);
+				if (user != null) {
+					connectAck.setUser(user);
+				}
+				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
+				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, serverHeartbeat);
+				Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
+				getClientOutboundChannel().send(messageOut);
+			}
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			logMessage(message);
-			handleDisconnect(sessionId, user, message);
+			if (sessionId != null) {
+				handleDisconnect(sessionId, user, message);
+			}
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			logMessage(message);
@@ -291,7 +307,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private void updateSessionReadTime(String sessionId) {
+	private void updateSessionReadTime(@Nullable String sessionId) {
 		if (sessionId != null) {
 			SessionInfo info = this.sessions.get(sessionId);
 			if (info != null) {
@@ -314,12 +330,14 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private void handleDisconnect(String sessionId, Principal user, Message<?> origMessage) {
+	private void handleDisconnect(String sessionId, @Nullable Principal user, @Nullable Message<?> origMessage) {
 		this.sessions.remove(sessionId);
 		this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 		accessor.setSessionId(sessionId);
-		accessor.setUser(user);
+		if (user != null) {
+			accessor.setUser(user);
+		}
 		if (origMessage != null) {
 			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
 		}
@@ -328,7 +346,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		getClientOutboundChannel().send(message);
 	}
 
-	protected void sendMessageToSubscribers(String destination, Message<?> message) {
+	protected void sendMessageToSubscribers(@Nullable String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
 		if (!subscriptions.isEmpty() && logger.isDebugEnabled()) {
 			logger.debug("Broadcasting to " + subscriptions.size() + " sessions.");
@@ -372,6 +390,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private final String sessiondId;
 
+		@Nullable
 		private final Principal user;
 
 		private final long readInterval;
@@ -382,7 +401,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private volatile long lastWriteTime;
 
-		public SessionInfo(String sessiondId, Principal user, long[] clientHeartbeat, long[] serverHeartbeat) {
+		public SessionInfo(String sessiondId, @Nullable Principal user,
+				@Nullable long[] clientHeartbeat, @Nullable long[] serverHeartbeat) {
+
 			this.sessiondId = sessiondId;
 			this.user = user;
 			if (clientHeartbeat != null && serverHeartbeat != null) {
@@ -402,6 +423,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return this.sessiondId;
 		}
 
+		@Nullable
 		public Principal getUser() {
 			return this.user;
 		}
@@ -444,7 +466,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
 					accessor.setSessionId(info.getSessiondId());
-					accessor.setUser(info.getUser());
+					Principal user = info.getUser();
+					if (user != null) {
+						accessor.setUser(user);
+					}
 					initHeaders(accessor);
 					MessageHeaders headers = accessor.getMessageHeaders();
 					getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));

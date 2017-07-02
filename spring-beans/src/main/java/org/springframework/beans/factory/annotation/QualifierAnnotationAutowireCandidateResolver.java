@@ -36,6 +36,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -144,7 +145,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		boolean match = super.isAutowireCandidate(bdHolder, descriptor);
-		if (match && descriptor != null) {
+		if (match) {
 			match = checkQualifiers(bdHolder, descriptor.getAnnotations());
 			if (match) {
 				MethodParameter methodParam = descriptor.getMethodParameter();
@@ -297,11 +298,13 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		return true;
 	}
 
+	@Nullable
 	protected Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		AnnotatedElement qualifiedElement = bd.getQualifiedElement();
 		return (qualifiedElement != null ? AnnotationUtils.getAnnotation(qualifiedElement, type) : null);
 	}
 
+	@Nullable
 	protected Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		Method resolvedFactoryMethod = bd.getResolvedFactoryMethod();
 		return (resolvedFactoryMethod != null ? AnnotationUtils.getAnnotation(resolvedFactoryMethod, type) : null);
@@ -341,6 +344,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	/**
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
+	@Nullable
 	protected Object findValue(Annotation[] annotationsToSearch) {
 		AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
 				AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);

@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -163,13 +164,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final Scanner scanner;
 
+		@Nullable
 		private LineInfo previous;
-
 
 		public LineGenerator(String content) {
 			this.scanner = new Scanner(content);
 		}
-
 
 		@Override
 		public void accept(SynchronousSink<LineInfo> sink) {
@@ -185,6 +185,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineInfo {
 
 		private final String line;
@@ -193,14 +194,13 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 		private final boolean link;
 
-
-		public LineInfo(String line, LineInfo previousLine) {
+		public LineInfo(String line, @Nullable LineInfo previousLine) {
 			this.line = line;
 			this.cacheSection = initCacheSectionFlag(line, previousLine);
 			this.link = iniLinkFlag(line, this.cacheSection);
 		}
 
-		private static boolean initCacheSectionFlag(String line, LineInfo previousLine) {
+		private static boolean initCacheSectionFlag(String line, @Nullable LineInfo previousLine) {
 			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
 				return line.trim().equals(CACHE_HEADER);
 			}
@@ -221,7 +221,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
 		}
 
-
 		public String getLine() {
 			return this.line;
 		}
@@ -235,14 +234,15 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		}
 	}
 
+
 	private static class LineOutput {
 
 		private final String line;
 
+		@Nullable
 		private final Resource resource;
 
-
-		public LineOutput(String line, Resource resource) {
+		public LineOutput(String line, @Nullable Resource resource) {
 			this.line = line;
 			this.resource = resource;
 		}
@@ -251,10 +251,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return this.line;
 		}
 
+		@Nullable
 		public Resource getResource() {
 			return this.resource;
 		}
 	}
+
 
 	private static class LineAggregator {
 
@@ -263,7 +265,6 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		private final ByteArrayOutputStream baos;
 
 		private final Resource resource;
-
 
 		public LineAggregator(Resource resource, String content) {
 			this.resource = resource;

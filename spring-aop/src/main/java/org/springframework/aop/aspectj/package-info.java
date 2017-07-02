@@ -8,4 +8,7 @@
  * or AspectJ load-time weaver. It is intended to enable the use of a valuable subset of AspectJ
  * functionality, with consistent semantics, with the proxy-based Spring AOP framework.
  */
+@NonNullApi
 package org.springframework.aop.aspectj;
+
+import org.springframework.lang.NonNullApi;

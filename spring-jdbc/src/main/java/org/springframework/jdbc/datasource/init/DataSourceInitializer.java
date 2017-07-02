@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
  */
 public class DataSourceInitializer implements InitializingBean, DisposableBean {
 
+	@Nullable
 	private DataSource dataSource;
 
 	private DatabasePopulator databasePopulator;
@@ -54,10 +56,8 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	/**
-	 * Set the {@link DatabasePopulator} to execute during the bean initialization
-	 * phase.
-	 * @param databasePopulator the {@code DatabasePopulator} to use during
-	 * initialization
+	 * Set the {@link DatabasePopulator} to execute during the bean initialization phase.
+	 * @param databasePopulator the {@code DatabasePopulator} to use during initialization
 	 * @see #setDatabaseCleaner
 	 */
 	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
@@ -84,6 +84,7 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 		this.enabled = enabled;
 	}
 
+
 	/**
 	 * Use the {@linkplain #setDatabasePopulator database populator} to set up
 	 * the database.
@@ -102,8 +103,8 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 		execute(this.databaseCleaner);
 	}
 
-	private void execute(DatabasePopulator populator) {
-		Assert.state(dataSource != null, "DataSource must be set");
+	private void execute(@Nullable DatabasePopulator populator) {
+		Assert.state(this.dataSource != null, "DataSource must be set");
 		if (this.enabled && populator != null) {
 			DatabasePopulatorUtils.execute(populator, this.dataSource);
 		}

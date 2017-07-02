@@ -32,11 +32,12 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
 import org.springframework.http.server.reactive.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
-import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
+import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -52,7 +53,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol){
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol){
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -63,7 +64,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 				session -> {
 					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 					DataBufferFactory factory = response.bufferFactory();
-					return new StandardWebSocketSession(session, info, factory);
+					return new TomcatWebSocketSession(session, info, factory);
 				});
 
 		String requestURI = servletRequest.getRequestURI();
@@ -91,7 +92,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, String protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);

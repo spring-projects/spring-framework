@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -66,7 +67,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
-	private final Object statusCode;
+	private final Object status;
 
 
 	/**
@@ -82,7 +83,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param body the entity body
 	 * @param status the status code
 	 */
-	public ResponseEntity(T body, HttpStatus status) {
+	public ResponseEntity(@Nullable T body, HttpStatus status) {
 		this(body, null, status);
 	}
 
@@ -101,10 +102,10 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
-	public ResponseEntity(T body, MultiValueMap<String, String> headers, HttpStatus status) {
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
 		super(body, headers);
 		Assert.notNull(status, "HttpStatus must not be null");
-		this.statusCode = status;
+		this.status = status;
 	}
 
 	/**
@@ -112,11 +113,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Just used behind the nested builder API.
 	 * @param body the entity body
 	 * @param headers the entity headers
-	 * @param statusCode the status code (as {@code HttpStatus} or as {@code Integer} value)
+	 * @param status the status code (as {@code HttpStatus} or as {@code Integer} value)
 	 */
-	private ResponseEntity(T body, MultiValueMap<String, String> headers, Object statusCode) {
+	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
 		super(body, headers);
-		this.statusCode = statusCode;
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.status = status;
 	}
 
 
@@ -125,11 +127,11 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the HTTP status as an HttpStatus enum entry
 	 */
 	public HttpStatus getStatusCode() {
-		if (this.statusCode instanceof HttpStatus) {
-			return (HttpStatus) this.statusCode;
+		if (this.status instanceof HttpStatus) {
+			return (HttpStatus) this.status;
 		}
 		else {
-			return HttpStatus.valueOf((Integer) this.statusCode);
+			return HttpStatus.valueOf((Integer) this.status);
 		}
 	}
 
@@ -139,17 +141,17 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 */
 	public int getStatusCodeValue() {
-		if (this.statusCode instanceof HttpStatus) {
-			return ((HttpStatus) this.statusCode).value();
+		if (this.status instanceof HttpStatus) {
+			return ((HttpStatus) this.status).value();
 		}
 		else {
-			return (Integer) this.statusCode;
+			return (Integer) this.status;
 		}
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -157,34 +159,30 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			return false;
 		}
 		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;
-		return ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode);
+		return ObjectUtils.nullSafeEquals(this.status, otherEntity.status);
 	}
 
 	@Override
 	public int hashCode() {
-		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode));
+		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.status));
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.statusCode.toString());
-		if (this.statusCode instanceof HttpStatus) {
+		builder.append(this.status.toString());
+		if (this.status instanceof HttpStatus) {
 			builder.append(' ');
-			builder.append(((HttpStatus) this.statusCode).getReasonPhrase());
+			builder.append(((HttpStatus) this.status).getReasonPhrase());
 		}
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();
 		if (body != null) {
 			builder.append(body);
-			if (headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (headers != null) {
-			builder.append(headers);
-		}
+		builder.append(headers);
 		builder.append('>');
 		return builder.toString();
 	}
@@ -315,7 +313,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @since 4.1.2
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B headers(HttpHeaders headers);
+		B headers(@Nullable HttpHeaders headers);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -328,11 +326,11 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 * @param eTag the new entity tag
+		 * @param etag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		B eTag(String eTag);
+		B eTag(String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -415,7 +413,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @param body the body of the response entity
 		 * @return the built response entity
 		 */
-		<T> ResponseEntity<T> body(T body);
+		<T> ResponseEntity<T> body(@Nullable T body);
 	}
 
 
@@ -438,7 +436,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder headers(HttpHeaders headers) {
+		public BodyBuilder headers(@Nullable HttpHeaders headers) {
 			if (headers != null) {
 				this.headers.putAll(headers);
 			}
@@ -464,16 +462,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(String eTag) {
-			if (eTag != null) {
-				if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
-					eTag = "\"" + eTag;
-				}
-				if (!eTag.endsWith("\"")) {
-					eTag = eTag + "\"";
-				}
+		public BodyBuilder eTag(String etag) {
+			if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+				etag = "\"" + etag;
 			}
-			this.headers.setETag(eTag);
+			if (!etag.endsWith("\"")) {
+				etag = etag + "\"";
+			}
+			this.headers.setETag(etag);
 			return this;
 		}
 
@@ -510,7 +506,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public <T> ResponseEntity<T> body(T body) {
+		public <T> ResponseEntity<T> body(@Nullable T body) {
 			return new ResponseEntity<>(body, this.headers, this.statusCode);
 		}
 	}

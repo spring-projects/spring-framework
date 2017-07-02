@@ -18,6 +18,8 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Superclass for exceptions related to a property access,
  * such as type mismatch or invocation target exception.
@@ -28,6 +30,7 @@ import java.beans.PropertyChangeEvent;
 @SuppressWarnings("serial")
 public abstract class PropertyAccessException extends BeansException {
 
+	@Nullable
 	private transient PropertyChangeEvent propertyChangeEvent;
 
 
@@ -37,7 +40,7 @@ public abstract class PropertyAccessException extends BeansException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, Throwable cause) {
+	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
@@ -47,7 +50,7 @@ public abstract class PropertyAccessException extends BeansException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public PropertyAccessException(String msg, Throwable cause) {
+	public PropertyAccessException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -57,6 +60,7 @@ public abstract class PropertyAccessException extends BeansException {
 	 * <p>May be {@code null}; only available if an actual bean property
 	 * was affected.
 	 */
+	@Nullable
 	public PropertyChangeEvent getPropertyChangeEvent() {
 		return this.propertyChangeEvent;
 	}
@@ -64,6 +68,7 @@ public abstract class PropertyAccessException extends BeansException {
 	/**
 	 * Return the name of the affected property, if available.
 	 */
+	@Nullable
 	public String getPropertyName() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getPropertyName() : null);
 	}
@@ -71,6 +76,7 @@ public abstract class PropertyAccessException extends BeansException {
 	/**
 	 * Return the affected value that was about to be set, if any.
 	 */
+	@Nullable
 	public Object getValue() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getNewValue() : null);
 	}

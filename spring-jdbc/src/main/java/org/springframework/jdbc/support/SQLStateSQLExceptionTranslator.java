@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link SQLExceptionTranslator} implementation that analyzes the SQL state in
@@ -130,6 +131,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 	 * is to be extracted
 	 * @return the SQL state code
 	 */
+	@Nullable
 	private String getSqlState(SQLException ex) {
 		String sqlState = ex.getSQLState();
 		if (sqlState == null) {

@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -97,22 +99,24 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 		this.bindingResult.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode) {
+	public void rejectValue(@Nullable String field, String errorCode) {
 		this.bindingResult.rejectValue(field, errorCode);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
 		this.bindingResult.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	@Override
-	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public void rejectValue(
+			@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+
 		this.bindingResult.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
@@ -224,7 +228,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public PropertyEditor findEditor(String field, Class valueType) {
+	public PropertyEditor findEditor(@Nullable String field, @Nullable Class valueType) {
 		return this.bindingResult.findEditor(field, valueType);
 	}
 
@@ -265,9 +269,10 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	@Override
 	public String getMessage() {
 		MethodParameter parameter = getMethodParameter();
+		Assert.state(parameter != null, "No MethodParameter");
 		StringBuilder sb = new StringBuilder("Validation failed for argument at index ")
 				.append(parameter.getParameterIndex()).append(" in method: ")
-				.append(parameter.getMethod().toGenericString())
+				.append(parameter.getExecutable().toGenericString())
 				.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
 		for (ObjectError error : this.bindingResult.getAllErrors()) {
 			sb.append("[").append(error).append("] ");

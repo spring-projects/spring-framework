@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -104,8 +105,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve());
-		ResolvableType elementType = (adapter != null ? bodyType.getGeneric(0) : bodyType);
+		Class<?> resolvedType = bodyType.resolve();
+		ReactiveAdapter adapter = (resolvedType != null ? getAdapterRegistry().getAdapter(resolvedType) : null);
+		ResolvableType elementType = (adapter != null ? bodyType.getGeneric() : bodyType);
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -160,7 +162,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter param) {
-		return new ServerWebInputException("Request body is missing: " + param.getMethod().toGenericString());
+		return new ServerWebInputException("Request body is missing: " + param.getExecutable().toGenericString());
 	}
 
 	/**
@@ -168,6 +170,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * a (possibly empty) Object[] with validation hints. A return value of
 	 * {@code null} indicates that validation is not required.
 	 */
+	@Nullable
 	private Object[] extractValidationHints(MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {

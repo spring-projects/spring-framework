@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -156,12 +157,12 @@ public class MessageConverterTests {
 		}
 
 		@Override
-		protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
+		protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 			return "success-from";
 		}
 
 		@Override
-		protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+		protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 			return "success-to";
 		}
 	}

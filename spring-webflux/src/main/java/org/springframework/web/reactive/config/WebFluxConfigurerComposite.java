@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -98,6 +99,7 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 		this.delegates.forEach(delegate -> delegate.configureViewResolvers(registry));
 	}
 
+	@Nullable
 	private <T> T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
 		List<T> result = this.delegates.stream().map(factory).filter(t -> t != null).collect(Collectors.toList());
 		if (result.isEmpty()) {

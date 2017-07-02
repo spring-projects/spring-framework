@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -113,6 +114,7 @@ import org.springframework.util.StringUtils;
  * returning {@code null} in the case that the parameter names cannot be discovered.
  *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -154,26 +156,23 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	private boolean raiseExceptions;
-
-	/**
-	 * If the advice is afterReturning, and binds the return value, this is the parameter name used.
-	 */
-	private String returningName;
-
-	/**
-	 * If the advice is afterThrowing, and binds the thrown value, this is the parameter name used.
-	 */
-	private String throwingName;
-
-	/**
-	 * The pointcut expression associated with the advice, as a simple String.
-	 */
+	/** The pointcut expression associated with the advice, as a simple String */
+	@Nullable
 	private String pointcutExpression;
 
-	private Class<?>[] argumentTypes;
+	private boolean raiseExceptions;
 
-	private String[] parameterNameBindings;
+	/** If the advice is afterReturning, and binds the return value, this is the parameter name used */
+	@Nullable
+	private String returningName;
+
+	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used */
+	@Nullable
+	private String throwingName;
+
+	private Class<?>[] argumentTypes = new Class<?>[0];
+
+	private String[] parameterNameBindings = new String[0];
 
 	private int numberOfRemainingUnboundArguments;
 
@@ -182,9 +181,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Create a new discoverer that attempts to discover parameter names
 	 * from the given pointcut expression.
 	 */
-	public AspectJAdviceParameterNameDiscoverer(String pointcutExpression) {
+	public AspectJAdviceParameterNameDiscoverer(@Nullable String pointcutExpression) {
 		this.pointcutExpression = pointcutExpression;
 	}
+
 
 	/**
 	 * Indicate whether {@link IllegalArgumentException} and {@link AmbiguousBindingException}
@@ -200,7 +200,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * returning variable name must be specified.
 	 * @param returningName the name of the returning variable
 	 */
-	public void setReturningName(String returningName) {
+	public void setReturningName(@Nullable String returningName) {
 		this.returningName = returningName;
 	}
 
@@ -209,9 +209,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * throwing variable name must be specified.
 	 * @param throwingName the name of the throwing variable
 	 */
-	public void setThrowingName(String throwingName) {
+	public void setThrowingName(@Nullable String throwingName) {
 		this.throwingName = throwingName;
 	}
+
 
 	/**
 	 * Deduce the parameter names for an advice method.
@@ -473,8 +474,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	/*
 	 * If the token starts meets Java identifier conventions, it's in.
 	 */
-	private String maybeExtractVariableName(String candidateToken) {
-		if (candidateToken == null || candidateToken.equals("")) {
+	@Nullable
+	private String maybeExtractVariableName(@Nullable String candidateToken) {
+		if (!StringUtils.hasLength(candidateToken)) {
 			return null;
 		}
 		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
@@ -496,7 +498,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Given an args pointcut body (could be {@code args} or {@code at_args}),
 	 * add any candidate variable names to the given list.
 	 */
-	private void maybeExtractVariableNamesFromArgs(String argsSpec, List<String> varNames) {
+	private void maybeExtractVariableNamesFromArgs(@Nullable String argsSpec, List<String> varNames) {
 		if (argsSpec == null) {
 			return;
 		}
@@ -777,9 +779,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 		private int numTokensConsumed;
 
+		@Nullable
 		private String text;
 
-		public PointcutBody(int tokens, String text) {
+		public PointcutBody(int tokens, @Nullable String text) {
 			this.numTokensConsumed = tokens;
 			this.text = text;
 		}

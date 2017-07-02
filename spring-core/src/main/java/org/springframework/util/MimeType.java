@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in
@@ -153,7 +155,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
-	public MimeType(MimeType other, Map<String, String> parameters) {
+	public MimeType(MimeType other, @Nullable Map<String, String> parameters) {
 		this(other.getType(), other.getSubtype(), parameters);
 	}
 
@@ -164,7 +166,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
-	public MimeType(String type, String subtype, Map<String, String> parameters) {
+	public MimeType(String type, String subtype, @Nullable Map<String, String> parameters) {
 		Assert.hasLength(type, "'type' must not be empty");
 		Assert.hasLength(subtype, "'subtype' must not be empty");
 		checkToken(type);
@@ -173,12 +175,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
-			for (Map.Entry<String, String> entry : parameters.entrySet()) {
-				String attribute = entry.getKey();
-				String value = entry.getValue();
+			parameters.forEach((attribute, value) -> {
 				checkParameters(attribute, value);
 				map.put(attribute, value);
-			}
+			});
 			this.parameters = Collections.unmodifiableMap(map);
 		}
 		else {
@@ -224,10 +224,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	protected String unquote(String s) {
-		if (s == null) {
-			return null;
-		}
-		return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
+		return (isQuotedString(s) ? s.substring(1, s.length() - 1) : s);
 	}
 
 	/**
@@ -276,6 +273,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return the character set, or {@code null} if not available
 	 * @since 4.3
 	 */
+	@Nullable
 	public Charset getCharset() {
 		String charset = getParameter(PARAM_CHARSET);
 		return (charset != null ? Charset.forName(unquote(charset)) : null);
@@ -286,6 +284,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param name the parameter name
 	 * @return the parameter value, or {@code null} if not present
 	 */
+	@Nullable
 	public String getParameter(String name) {
 		return this.parameters.get(name);
 	}
@@ -307,7 +306,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return {@code true} if this media type includes the given media type;
 	 * {@code false} otherwise
 	 */
-	public boolean includes(MimeType other) {
+	public boolean includes(@Nullable MimeType other) {
 		if (other == null) {
 			return false;
 		}
@@ -351,7 +350,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return {@code true} if this media type is compatible with the given media type;
 	 * {@code false} otherwise
 	 */
-	public boolean isCompatibleWith(MimeType other) {
+	public boolean isCompatibleWith(@Nullable MimeType other) {
 		if (other == null) {
 			return false;
 		}
@@ -455,12 +454,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	private void appendTo(Map<String, String> map, StringBuilder builder) {
-		for (Map.Entry<String, String> entry : map.entrySet()) {
+		map.forEach((key, val) -> {
 			builder.append(';');
-			builder.append(entry.getKey());
+			builder.append(key);
 			builder.append('=');
-			builder.append(entry.getValue());
-		}
+			builder.append(val);
+		});
 	}
 
 	/**

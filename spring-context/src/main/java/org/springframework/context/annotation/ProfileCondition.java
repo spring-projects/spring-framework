@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,14 @@ class ProfileCondition implements Condition {
 
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		if (context.getEnvironment() != null) {
-			MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
-			if (attrs != null) {
-				for (Object value : attrs.get("value")) {
-					if (context.getEnvironment().acceptsProfiles(((String[]) value))) {
-						return true;
-					}
+		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+		if (attrs != null) {
+			for (Object value : attrs.get("value")) {
+				if (context.getEnvironment().acceptsProfiles((String[]) value)) {
+					return true;
 				}
-				return false;
 			}
+			return false;
 		}
 		return true;
 	}

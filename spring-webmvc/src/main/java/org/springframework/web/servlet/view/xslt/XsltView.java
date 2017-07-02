@@ -44,6 +44,8 @@ import org.w3c.dom.Node;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -73,22 +75,28 @@ import org.springframework.web.util.WebUtils;
  */
 public class XsltView extends AbstractUrlBasedView {
 
+	@Nullable
 	private Class<? extends TransformerFactory> transformerFactoryClass;
 
+	@Nullable
 	private String sourceKey;
 
+	@Nullable
 	private URIResolver uriResolver;
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
 	private boolean indent = true;
 
+	@Nullable
 	private Properties outputProperties;
 
 	private boolean cacheTemplates = true;
 
+	@Nullable
 	private TransformerFactory transformerFactory;
 
+	@Nullable
 	private Templates cachedTemplates;
 
 
@@ -131,7 +139,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * and rethrows errors to discontinue the XML transformation.
 	 * @see org.springframework.util.xml.SimpleTransformErrorListener
 	 */
-	public void setErrorListener(ErrorListener errorListener) {
+	public void setErrorListener(@Nullable ErrorListener errorListener) {
 		this.errorListener = (errorListener != null ? errorListener : new SimpleTransformErrorListener(logger));
 	}
 
@@ -194,7 +202,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(Class<? extends TransformerFactory> transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(@Nullable Class<? extends TransformerFactory> transformerFactoryClass) {
 		if (transformerFactoryClass != null) {
 			try {
 				return ReflectionUtils.accessibleConstructor(transformerFactoryClass).newInstance();
@@ -213,6 +221,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @return the TransformerFactory (never {@code null})
 	 */
 	protected final TransformerFactory getTransformerFactory() {
+		Assert.state(this.transformerFactory != null, "No TransformerFactory available");
 		return this.transformerFactory;
 	}
 
@@ -267,6 +276,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setSourceKey
 	 * @see #convertSource
 	 */
+	@Nullable
 	protected Source locateSource(Map<String, Object> model) throws Exception {
 		if (this.sourceKey != null) {
 			return convertSource(model.get(this.sourceKey));
@@ -377,9 +387,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @param transformer the target transformer
 	 */
 	protected final void copyModelParameters(Map<String, Object> model, Transformer transformer) {
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			transformer.setParameter(entry.getKey(), entry.getValue());
-		}
+		model.forEach(transformer::setParameter);
 	}
 
 	/**
@@ -415,7 +423,7 @@ public class XsltView extends AbstractUrlBasedView {
 	private Templates loadTemplates() throws ApplicationContextException {
 		Source stylesheetSource = getStylesheetSource();
 		try {
-			Templates templates = this.transformerFactory.newTemplates(stylesheetSource);
+			Templates templates = getTransformerFactory().newTemplates(stylesheetSource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading templates '" + templates + "'");
 			}
@@ -451,11 +459,13 @@ public class XsltView extends AbstractUrlBasedView {
 	 */
 	protected Source getStylesheetSource() {
 		String url = getUrl();
+		Assert.state(url != null, "'url' not set");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading XSLT stylesheet from '" + url + "'");
 		}
 		try {
-			Resource resource = getApplicationContext().getResource(url);
+			Resource resource = obtainApplicationContext().getResource(url);
 			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		catch (IOException ex) {
@@ -468,7 +478,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * <p>Only works for {@link StreamSource StreamSources}.
 	 * @param source the XSLT Source to close (may be {@code null})
 	 */
-	private void closeSourceIfNecessary(Source source) {
+	private void closeSourceIfNecessary(@Nullable Source source) {
 		if (source instanceof StreamSource) {
 			StreamSource streamSource = (StreamSource) source;
 			if (streamSource.getReader() != null) {

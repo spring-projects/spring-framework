@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.io;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -70,10 +71,10 @@ public interface ResourceLoader {
 	 * <p>Clients which need to access the ClassLoader directly can do so
 	 * in a uniform manner with the ResourceLoader, rather than relying
 	 * on the thread context ClassLoader.
-	 * @return the ClassLoader (only {@code null} if even the system
-	 * ClassLoader isn't accessible)
+	 * @return the ClassLoader
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
+	@Nullable
 	ClassLoader getClassLoader();
 
 }

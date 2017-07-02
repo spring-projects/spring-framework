@@ -246,21 +246,6 @@ public class ResourceTests {
 		assertThat(resource.contentLength(), is(3L));
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void testContentLength_withNullInputStream() throws IOException {
-		AbstractResource resource = new AbstractResource() {
-			@Override
-			public InputStream getInputStream() throws IOException {
-				return null;
-			}
-			@Override
-			public String getDescription() {
-				return null;
-			}
-		};
-		resource.contentLength();
-	}
-
 	@Test
 	public void testGetReadableByteChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.TagUtils;
 
 /**
@@ -41,9 +42,11 @@ import org.springframework.web.util.TagUtils;
 public class TransformTag extends HtmlEscapingAwareTag {
 
 	/** the value to transform using the appropriate property editor */
+	@Nullable
 	private Object value;
 
 	/** the variable to put the result in */
+	@Nullable
 	private String var;
 
 	/** the scope of the variable the result will be put in */

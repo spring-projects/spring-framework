@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.jms.Session;
 import org.springframework.core.MethodParameter;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
@@ -99,6 +100,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException}
 	 * with a dedicated error message.
 	 */
+	@Nullable
 	private Object invokeHandler(javax.jms.Message jmsMessage, Session session, Message<?> message) {
 		try {
 			return this.handlerMethod.invoke(message, jmsMessage, session);

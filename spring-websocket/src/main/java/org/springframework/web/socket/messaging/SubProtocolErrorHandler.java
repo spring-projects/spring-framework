@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.messaging;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -39,7 +40,8 @@ public interface SubProtocolErrorHandler<P> {
 	 * @return the error message to send to the client, or {@code null} in which
 	 * case no message will be sent.
 	 */
-	Message<P> handleClientMessageProcessingError(Message<P> clientMessage, Throwable ex);
+	@Nullable
+	Message<P> handleClientMessageProcessingError(@Nullable Message<P> clientMessage, Throwable ex);
 
 	/**
 	 * Handle errors sent from the server side to clients, e.g. errors from the
@@ -50,6 +52,7 @@ public interface SubProtocolErrorHandler<P> {
 	 * @return the error message to send to the client, or {@code null} in which
 	 * case no message will be sent.
 	 */
+	@Nullable
 	Message<P> handleErrorMessageToClient(Message<P> errorMessage);
 
 }

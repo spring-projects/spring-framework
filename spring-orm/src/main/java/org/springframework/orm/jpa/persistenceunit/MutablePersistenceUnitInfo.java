@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,20 +45,26 @@ import org.springframework.util.ClassUtils;
  */
 public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
+	@Nullable
 	private String persistenceUnitName;
 
+	@Nullable
 	private String persistenceProviderClassName;
 
+	@Nullable
 	private PersistenceUnitTransactionType transactionType;
 
+	@Nullable
 	private DataSource nonJtaDataSource;
 
+	@Nullable
 	private DataSource jtaDataSource;
 
 	private final List<String> mappingFileNames = new LinkedList<>();
 
 	private List<URL> jarFileUrls = new LinkedList<>();
 
+	@Nullable
 	private URL persistenceUnitRootUrl;
 
 	private final List<String> managedClassNames = new LinkedList<>();
@@ -73,6 +81,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private String persistenceXMLSchemaVersion = "2.0";
 
+	@Nullable
 	private String persistenceProviderPackageName;
 
 
@@ -81,6 +90,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -90,6 +100,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
 	}
@@ -114,6 +125,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
+	@Nullable
 	public DataSource getJtaDataSource() {
 		return this.jtaDataSource;
 	}
@@ -123,6 +135,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
+	@Nullable
 	public DataSource getNonJtaDataSource() {
 		return this.nonJtaDataSource;
 	}
@@ -145,11 +158,12 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.jarFileUrls;
 	}
 
-	public void setPersistenceUnitRootUrl(URL persistenceUnitRootUrl) {
+	public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
 
 	@Override
+	@Nullable
 	public URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
 	}
@@ -214,13 +228,11 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	public void addProperty(String name, String value) {
-		if (this.properties == null) {
-			this.properties = new Properties();
-		}
 		this.properties.setProperty(name, value);
 	}
 
 	public void setProperties(Properties properties) {
+		Assert.notNull(properties, "Properties must not be null");
 		this.properties = properties;
 	}
 
@@ -243,6 +255,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceProviderPackageName = persistenceProviderPackageName;
 	}
 
+	@Nullable
 	public String getPersistenceProviderPackageName() {
 		return this.persistenceProviderPackageName;
 	}
@@ -253,6 +266,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}

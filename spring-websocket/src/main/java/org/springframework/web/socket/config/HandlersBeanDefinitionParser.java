@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,6 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 		private final ManagedList<?> interceptorsList;
 
-
 		private WebSocketHandlerMappingStrategy(RuntimeBeanReference handshakeHandler, ManagedList<?> interceptors) {
 			this.handshakeHandlerReference = handshakeHandler;
 			this.interceptorsList = interceptors;
@@ -126,9 +125,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, handlerReference);
-			if (this.handshakeHandlerReference != null) {
-				cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
-			}
+			cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
 			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
 			requestHandlerDef.setSource(context.extractSource(element));
 			requestHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -100,14 +101,18 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreUnknownPathExtensions = true;
 
+	@Nullable
 	private Boolean useRegisteredExtensionsOnly;
 
 	private String parameterName = "format";
 
+	@Nullable
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private ServletContext servletContext;
 
 
@@ -160,7 +165,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * @see #setMediaTypes
 	 * @see #addMediaType
 	 */
-	public void addMediaTypes(Map<String, MediaType> mediaTypes) {
+	public void addMediaTypes(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
 			this.mediaTypes.putAll(mediaTypes);
 		}
@@ -269,6 +274,10 @@ public class ContentNegotiationManagerFactoryBean
 
 	@Override
 	public void afterPropertiesSet() {
+		build();
+	}
+
+	public ContentNegotiationManager build() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
 		if (this.favorPathExtension) {
@@ -303,7 +312,9 @@ public class ContentNegotiationManagerFactoryBean
 		}
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
+		return this.contentNegotiationManager;
 	}
+
 
 	@Override
 	public ContentNegotiationManager getObject() {

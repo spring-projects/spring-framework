@@ -24,6 +24,7 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts an Object to a single-element Collection containing the Object.
@@ -54,7 +55,8 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}

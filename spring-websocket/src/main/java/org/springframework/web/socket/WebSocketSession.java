@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket
@@ -42,7 +43,9 @@ public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Return the URI used to open the WebSocket connection.
+	 * ({@code null} on the client side).
 	 */
+	@Nullable
 	URI getUri();
 
 	/**
@@ -66,16 +69,19 @@ public interface WebSocketSession extends Closeable {
 	 * of the authenticated user.
 	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
+	@Nullable
 	Principal getPrincipal();
 
 	/**
 	 * Return the address on which the request was received.
 	 */
+	@Nullable
 	InetSocketAddress getLocalAddress();
 
 	/**
 	 * Return the address of the remote client.
 	 */
+	@Nullable
 	InetSocketAddress getRemoteAddress();
 
 	/**
@@ -83,6 +89,7 @@ public interface WebSocketSession extends Closeable {
 	 * @return the protocol identifier, or {@code null} if no protocol
 	 * was specified or negotiated successfully
 	 */
+	@Nullable
 	String getAcceptedProtocol();
 
 	/**

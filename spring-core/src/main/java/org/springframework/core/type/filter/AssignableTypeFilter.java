@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.filter;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -63,6 +64,7 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		return matchTargetType(interfaceName);
 	}
 
+	@Nullable
 	protected Boolean matchTargetType(String typeName) {
 		if (this.targetType.getName().equals(typeName)) {
 			return true;

@@ -186,7 +186,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	@Test
 	public void supportsPackagesToScan() throws Exception {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setPackagesToScan(new String[] {CONTEXT_PATH});
+		marshaller.setPackagesToScan(CONTEXT_PATH);
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
@@ -306,11 +306,10 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 
-	@Test
+	@Test  // SPR-10714
 	public void marshalAWrappedObjectHoldingAnXmlElementDeclElement() throws Exception {
-		// SPR-10714
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setPackagesToScan(new String[]{"org.springframework.oxm.jaxb"});
+		marshaller.setPackagesToScan("org.springframework.oxm.jaxb");
 		marshaller.afterPropertiesSet();
 		Airplane airplane = new Airplane();
 		airplane.setName("test");
@@ -323,11 +322,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 				isSimilarTo("<airplane><name>test</name></airplane>").withDifferenceEvaluator(ev));
 	}
 
-	// SPR-10806
-
-	@Test
+	@Test  // SPR-10806
 	public void unmarshalStreamSourceWithXmlOptions() throws Exception {
-
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
@@ -360,11 +356,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
-	// SPR-10806
-
-	@Test
+	@Test  // SPR-10806
 	public void unmarshalSaxSourceWithXmlOptions() throws Exception {
-
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
@@ -421,4 +414,5 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	private JAXBElement<DummyType> createDummyType() {
 		return null;
 	}
+
 }

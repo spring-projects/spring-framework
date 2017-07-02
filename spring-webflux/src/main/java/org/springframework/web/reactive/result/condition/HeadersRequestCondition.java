@@ -61,7 +61,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 
 	private static Collection<HeaderExpression> parseExpressions(String... headers) {
-		Set<HeaderExpression> expressions = new LinkedHashSet<HeaderExpression>();
+		Set<HeaderExpression> expressions = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);

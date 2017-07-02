@@ -51,7 +51,6 @@ public class CorsUrlHandlerMappingTests {
 	@Before
 	public void setup() {
 		this.handlerMapping = new AbstractUrlHandlerMapping() {};
-		this.handlerMapping.setUseTrailingSlashMatch(true);
 		this.handlerMapping.registerHandler("/welcome.html", this.welcomeController);
 		this.handlerMapping.registerHandler("/cors.html", this.corsController);
 	}

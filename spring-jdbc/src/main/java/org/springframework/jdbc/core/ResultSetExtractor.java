@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Callback interface used by {@link JdbcTemplate}'s query methods.
@@ -59,6 +60,7 @@ public interface ResultSetExtractor<T> {
 	 * values or navigating (that is, there's no need to catch SQLException)
 	 * @throws DataAccessException in case of custom exceptions
 	 */
+	@Nullable
 	T extractData(ResultSet rs) throws SQLException, DataAccessException;
 
 }

@@ -21,14 +21,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.options.ClientOptions;
-import reactor.ipc.netty.http.client.HttpClient;
 
 import org.springframework.http.HttpMethod;
 
 /**
- * Reactor-Netty implementation of {@link ClientHttpConnector}
+ * Reactor-Netty implementation of {@link ClientHttpConnector}.
  *
  * @author Brian Clozel
  * @see HttpClient
@@ -59,7 +59,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		return httpClient
+		return this.httpClient
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
 						uri.toString(),
 						httpClientRequest -> requestCallback

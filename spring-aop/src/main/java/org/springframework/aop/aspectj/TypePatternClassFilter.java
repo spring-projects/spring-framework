@@ -20,6 +20,7 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.TypePatternMatcher;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -32,8 +33,9 @@ import org.springframework.util.StringUtils;
  */
 public class TypePatternClassFilter implements ClassFilter {
 
-	private String typePattern;
+	private String typePattern = "";
 
+	@Nullable
 	private TypePatternMatcher aspectJTypePatternMatcher;
 
 
@@ -51,8 +53,6 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * Create a fully configured {@link TypePatternClassFilter} using the
 	 * given type pattern.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
-	 * or is recognized as invalid
 	 */
 	public TypePatternClassFilter(String typePattern) {
 		setTypePattern(typePattern);
@@ -73,8 +73,6 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * that implements it.
 	 * <p>These conventions are established by AspectJ, not Spring AOP.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
-	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
 		Assert.notNull(typePattern, "Type pattern must not be null");

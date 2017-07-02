@@ -34,6 +34,7 @@ import javax.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -100,7 +101,7 @@ public abstract class SharedEntityManagerCreator {
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @return a shareable transaction EntityManager proxy
 	 */
-	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties) {
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
 		return createSharedEntityManager(emf, properties, true);
 	}
 
@@ -115,7 +116,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @since 4.0
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
+			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
 
 		Class<?> emIfc = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
@@ -133,7 +134,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transactional EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Map<?, ?> properties, Class<?>... entityManagerInterfaces) {
+			EntityManagerFactory emf, @Nullable Map<?, ?> properties, Class<?>... entityManagerInterfaces) {
 
 		return createSharedEntityManager(emf, properties, true, entityManagerInterfaces);
 	}
@@ -150,7 +151,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transactional EntityManager proxy
 	 * @since 4.0
 	 */
-	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties,
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties,
 			boolean synchronizedWithTransaction, Class<?>... entityManagerInterfaces) {
 
 		ClassLoader cl = null;
@@ -178,14 +179,17 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
+		@Nullable
 		private final Map<?, ?> properties;
 
 		private final boolean synchronizedWithTransaction;
 
+		@Nullable
 		private transient volatile ClassLoader proxyClassLoader;
 
 		public SharedEntityManagerInvocationHandler(
-				EntityManagerFactory target, Map<?, ?> properties, boolean synchronizedWithTransaction) {
+				EntityManagerFactory target, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
+
 			this.targetFactory = target;
 			this.properties = properties;
 			this.synchronizedWithTransaction = synchronizedWithTransaction;
@@ -202,6 +206,7 @@ public abstract class SharedEntityManagerCreator {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
@@ -338,6 +343,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Query target;
 
+		@Nullable
 		private EntityManager em;
 
 		public DeferredQueryInvocationHandler(Query target, EntityManager em) {

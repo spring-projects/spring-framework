@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -129,7 +130,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * plus the name of the method.
 	 */
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return ((targetClass != null && matchesPattern(ClassUtils.getQualifiedMethodName(method, targetClass))) ||
 				matchesPattern(ClassUtils.getQualifiedMethodName(method)));
 	}

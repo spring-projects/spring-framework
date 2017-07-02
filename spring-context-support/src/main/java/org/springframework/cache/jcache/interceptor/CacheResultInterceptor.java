@@ -23,6 +23,7 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ExceptionTypeFilter;
 import org.springframework.util.SerializationUtils;
 
@@ -92,6 +93,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 		}
 	}
 
+	@Nullable
 	private Cache resolveExceptionCache(CacheOperationInvocationContext<CacheResultOperation> context) {
 		CacheResolver exceptionCacheResolver = context.getOperation().getExceptionCacheResolver();
 		if (exceptionCacheResolver != null) {

@@ -29,6 +29,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -101,8 +102,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @throws Exception if WebDataBinder initialization fails
 	 */
 	@Override
-	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+
+		Assert.state(mavContainer != null, "ModelAttributeMethodProcessor requires ModelAndViewContainer");
+		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
 
 		String name = ModelFactory.getNameForParameter(parameter);
 		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
@@ -219,7 +223,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 */
 	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
-		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+		Class<?>[] paramTypes = parameter.getExecutable().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 		return !hasBindingResult;
 	}
@@ -239,7 +243,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Add non-null return values to the {@link ModelAndViewContainer}.
 	 */
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue != null) {

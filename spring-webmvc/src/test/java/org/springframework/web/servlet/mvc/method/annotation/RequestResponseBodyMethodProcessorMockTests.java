@@ -36,6 +36,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -403,7 +404,7 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);

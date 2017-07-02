@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,12 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 
-		CacheOperationInvoker aopAllianceInvoker = new CacheOperationInvoker() {
-			@Override
-			public Object invoke() {
-				try {
-					return invocation.proceed();
-				}
-				catch (Throwable ex) {
-					throw new ThrowableWrapper(ex);
-				}
+		CacheOperationInvoker aopAllianceInvoker = () -> {
+			try {
+				return invocation.proceed();
+			}
+			catch (Throwable ex) {
+				throw new CacheOperationInvoker.ThrowableWrapper(ex);
 			}
 		};
 

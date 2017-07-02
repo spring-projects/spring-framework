@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Base {@code MethodInterceptor} implementation for tracing.
@@ -50,6 +51,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * The default {@code Log} instance used to write trace messages.
 	 * This instance is mapped to the implementing {@code Class}.
 	 */
+	@Nullable
 	protected transient Log defaultLogger = LogFactory.getLog(getClass());
 
 	/**
@@ -83,7 +85,6 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * but rather into a specific named category.
 	 * <p><b>NOTE:</b> Specify either this property or "useDynamicLogger", not both.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
-	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setLoggerName(String loggerName) {

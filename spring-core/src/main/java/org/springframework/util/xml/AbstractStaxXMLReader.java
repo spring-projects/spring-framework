@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -55,6 +56,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private boolean namespacePrefixesFeature = false;
 
+	@Nullable
 	private Boolean isStandalone;
 
 	private final Map<String, String> namespaces = new LinkedHashMap<>();
@@ -181,7 +183,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * Start the prefix mapping for the given prefix.
 	 * @see org.xml.sax.ContentHandler#startPrefixMapping(String, String)
 	 */
-	protected void startPrefixMapping(String prefix, String namespace) throws SAXException {
+	protected void startPrefixMapping(@Nullable String prefix, String namespace) throws SAXException {
 		if (getContentHandler() != null) {
 			if (prefix == null) {
 				prefix = "";

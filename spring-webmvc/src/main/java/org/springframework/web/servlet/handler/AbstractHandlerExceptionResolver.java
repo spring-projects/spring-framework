@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -50,10 +51,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Nullable
 	private Set<?> mappedHandlers;
 
+	@Nullable
 	private Class<?>[] mappedHandlerClasses;
 
+	@Nullable
 	private Log warnLogger;
 
 	private boolean preventResponseCaching = false;
@@ -100,7 +104,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
 	 * category. Alternatively, override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
-	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
@@ -126,7 +129,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	@Override
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+			@Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
 			if (this.logger.isDebugEnabled()) {
@@ -157,7 +160,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @see #setMappedHandlers
 	 * @see #setMappedHandlerClasses
 	 */
-	protected boolean shouldApplyTo(HttpServletRequest request, Object handler) {
+	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
 		if (handler != null) {
 			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
 				return true;
@@ -239,7 +242,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding {@code ModelAndView} to forward to, or {@code null} for default processing
 	 */
+	@Nullable
 	protected abstract ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response, Object handler, Exception ex);
+			HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

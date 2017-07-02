@@ -46,6 +46,7 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -92,15 +93,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private JmsListenerEndpointRegistry endpointRegistry;
 
+	@Nullable
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
 	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
 			new MessageHandlerMethodFactoryAdapter();
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
@@ -211,13 +216,10 @@ public class JmsListenerAnnotationBeanPostProcessor
 		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
 			Class<?> targetClass = AopUtils.getTargetClass(bean);
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
-						@Override
-						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-									method, JmsListener.class, JmsListeners.class);
-							return (!listenerMethods.isEmpty() ? listenerMethods : null);
-						}
+					(MethodIntrospector.MetadataLookup<Set<JmsListener>>) method -> {
+						Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+								method, JmsListener.class, JmsListeners.class);
+						return (!listenerMethods.isEmpty() ? listenerMethods : null);
 					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
@@ -227,12 +229,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 			}
 			else {
 				// Non-empty set of methods
-				for (Map.Entry<Method, Set<JmsListener>> entry : annotatedMethods.entrySet()) {
-					Method method = entry.getKey();
-					for (JmsListener listener : entry.getValue()) {
-						processJmsListener(listener, method, bean);
-					}
-				}
+				annotatedMethods.forEach((method, listeners) ->
+						listeners.forEach(listener ->
+								processJmsListener(listener, method, bean)));
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @JmsListener methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -303,13 +302,15 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	private String getEndpointId(JmsListener jmsListener) {
 		if (StringUtils.hasText(jmsListener.id())) {
-			return resolve(jmsListener.id());
+			String id = resolve(jmsListener.id());
+			return (id != null ? id : "");
 		}
 		else {
 			return "org.springframework.jms.JmsListenerEndpointContainer#" + this.counter.getAndIncrement();
 		}
 	}
 
+	@Nullable
 	private String resolve(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
@@ -323,6 +324,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	 */
 	private class MessageHandlerMethodFactoryAdapter implements MessageHandlerMethodFactory {
 
+		@Nullable
 		private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 		public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {

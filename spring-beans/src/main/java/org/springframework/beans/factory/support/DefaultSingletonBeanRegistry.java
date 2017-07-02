@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.SimpleAliasRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -103,6 +104,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/** List of suppressed Exceptions, available for associating related causes */
+	@Nullable
 	private Set<Exception> suppressedExceptions;
 
 	/** Flag that indicates whether we're currently within destroySingletons */
@@ -140,7 +142,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean
 	 * @param singletonObject the singleton object
 	 */
-	protected void addSingleton(String beanName, Object singletonObject) {
+	protected void addSingleton(String beanName, @Nullable Object singletonObject) {
 		synchronized (this.singletonObjects) {
 			this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
 			this.singletonFactories.remove(beanName);
@@ -181,6 +183,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param allowEarlyReference whether early references should be created or not
 	 * @return the registered singleton object, or {@code null} if none found
 	 */
+	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -207,6 +210,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * with, if necessary
 	 * @return the registered singleton object
 	 */
+	@Nullable
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "'beanName' must not be null");
 		synchronized (this.singletonObjects) {
@@ -448,7 +452,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		return isDependent(beanName, dependentBeanName, null);
 	}
 
-	private boolean isDependent(String beanName, String dependentBeanName, Set<String> alreadySeen) {
+	private boolean isDependent(String beanName, String dependentBeanName, @Nullable Set<String> alreadySeen) {
 		if (alreadySeen != null && alreadySeen.contains(beanName)) {
 			return false;
 		}
@@ -560,7 +564,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean
 	 * @param bean the bean instance to destroy
 	 */
-	protected void destroyBean(String beanName, DisposableBean bean) {
+	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
 		Set<String> dependencies = this.dependentBeanMap.remove(beanName);
 		if (dependencies != null) {
