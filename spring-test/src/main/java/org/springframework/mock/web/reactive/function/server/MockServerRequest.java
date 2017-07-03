@@ -19,6 +19,7 @@ package org.springframework.mock.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +39,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.reactive.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -59,6 +62,8 @@ public class MockServerRequest implements ServerRequest {
 
 	private final URI uri;
 
+	private final RequestPath pathContainer;
+
 	private final MockHeaders headers;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
@@ -79,13 +84,14 @@ public class MockServerRequest implements ServerRequest {
 	private Principal principal;
 
 
-	private MockServerRequest(HttpMethod method, URI uri, MockHeaders headers,
+	private MockServerRequest(HttpMethod method, URI uri, String contextPath, MockHeaders headers,
 			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
 
 		this.method = method;
 		this.uri = uri;
+		this.pathContainer = RequestPath.create(uri, contextPath, StandardCharsets.UTF_8);
 		this.headers = headers;
 		this.cookies = cookies;
 		this.body = body;
@@ -105,6 +111,11 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public URI uri() {
 		return this.uri;
+	}
+
+	@Override
+	public PathContainer pathContainer() {
+		return this.pathContainer;
 	}
 
 	@Override
@@ -189,6 +200,8 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder uri(URI uri);
 
+		Builder contextPath(String contextPath);
+
 		Builder header(String key, String value);
 
 		Builder headers(HttpHeaders headers);
@@ -225,6 +238,8 @@ public class MockServerRequest implements ServerRequest {
 
 		private URI uri = URI.create("http://localhost");
 
+		private String contextPath = "";
+
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
 		private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
@@ -256,6 +271,14 @@ public class MockServerRequest implements ServerRequest {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
 			return this;
+		}
+
+		@Override
+		public Builder contextPath(String contextPath) {
+			Assert.notNull(contextPath, "'contextPath' must not be null");
+			this.contextPath = contextPath;
+			return this;
+
 		}
 
 		@Override
@@ -348,16 +371,16 @@ public class MockServerRequest implements ServerRequest {
 		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
-			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies,
-					this.body, this.attributes, this.queryParams, this.pathVariables, this.session,
-					this.principal);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal);
 		}
 
 		@Override
 		public MockServerRequest build() {
-			return new MockServerRequest(this.method, this.uri, this.headers, this.cookies, null,
-					this.attributes, this.queryParams, this.pathVariables, this.session,
-					this.principal);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal);
 		}
 	}
 

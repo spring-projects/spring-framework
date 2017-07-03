@@ -539,8 +539,8 @@ public class PathPattern implements Comparable<PathPattern> {
 		/**
 		 * Return the part of a path that was not matched by a pattern.
 		 */
-		public String getPathRemaining() {
-			return this.pathRemaining.value();
+		public PathContainer getPathRemaining() {
+			return this.pathRemaining;
 		}
 
 		/**

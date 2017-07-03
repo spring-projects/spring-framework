@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,6 +38,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -339,9 +341,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			String path = request.path();
-			boolean match = this.pattern.matches(path);
-			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
+			boolean match = this.pattern.matches(request.pathContainer());
+			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), match);
 			if (match) {
 				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()).getUriVariables());
 				return true;
@@ -353,14 +354,10 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.getPathRemaining(request.path()))
+			return Optional.ofNullable(this.pattern.getPathRemaining(request.pathContainer()))
 					.map(info -> {
 						mergeTemplateVariables(request, info.getUriVariables());
-						String path = info.getPathRemaining();
-						if (!path.startsWith("/")) {
-							path = "/" + path;
-						}
-						return new SubPathServerRequestWrapper(request, path);
+						return new SubPathServerRequestWrapper(request, info);
 					});
 		}
 
@@ -464,12 +461,12 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private final String subPath;
+		private final PathContainer subPathContainer;
 
 
-		public SubPathServerRequestWrapper(ServerRequest request, String subPath) {
+		public SubPathServerRequestWrapper(ServerRequest request, PathPattern.PathRemainingMatchInfo info) {
 			this.request = request;
-			this.subPath = subPath;
+			this.subPathContainer = new SubPathContainer(info.getPathRemaining());
 		}
 
 		@Override
@@ -484,7 +481,12 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String path() {
-			return this.subPath;
+			return this.subPathContainer.value();
+		}
+
+		@Override
+		public PathContainer pathContainer() {
+			return this.subPathContainer;
 		}
 
 		@Override
@@ -560,6 +562,47 @@ public abstract class RequestPredicates {
 		@Override
 		public String toString() {
 			return method() + " " +  path();
+		}
+
+		private static class SubPathContainer implements PathContainer {
+
+			private static final PathContainer.Separator SEPARATOR = () -> "/";
+
+
+			private final String value;
+
+			private final List<Element> elements;
+
+			public SubPathContainer(PathContainer original) {
+				this.value = prefixWithSlash(original.value());
+				this.elements = prependWithSeparator(original.elements());
+			}
+
+			private static String prefixWithSlash(String path) {
+				if (!path.startsWith("/")) {
+					path = "/" + path;
+				}
+				return path;
+			}
+
+			private static List<Element> prependWithSeparator(List<Element> elements) {
+				List<Element> result = new ArrayList<>(elements);
+				if (!(result.get(0) instanceof Separator)) {
+					result.add(0, SEPARATOR);
+				}
+				return Collections.unmodifiableList(result);
+			}
+
+
+			@Override
+			public String value() {
+				return this.value;
+			}
+
+			@Override
+			public List<Element> elements() {
+				return this.elements;
+			}
 		}
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -70,6 +72,13 @@ public interface ServerRequest {
 	 */
 	default String path() {
 		return uri().getRawPath();
+	}
+
+	/**
+	 * Return the request path as {@code PathContainer}.
+	 */
+	default PathContainer pathContainer() {
+		return PathContainer.parse(path(), StandardCharsets.UTF_8);
 	}
 
 	/**
