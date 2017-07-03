@@ -124,7 +124,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 			return Flux.from(inputStream).map(value ->
 					encodeValue(value, mimeType, bufferFactory, elementType, hints));
 		}
-		else if (MediaType.APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
+		else if (this.streamingMediaTypes.stream().anyMatch(streamingMediaType -> streamingMediaType.isCompatibleWith(mimeType))) {
 			return Flux.from(inputStream).map(value -> {
 				DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
 				buffer.write(new byte[]{'\n'});
