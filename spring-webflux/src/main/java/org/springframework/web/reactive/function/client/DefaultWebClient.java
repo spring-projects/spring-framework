@@ -86,48 +86,48 @@ class DefaultWebClient implements WebClient {
 
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> get() {
+	public RequestHeadersUriSpec<?> get() {
 		return methodInternal(HttpMethod.GET);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> head() {
+	public RequestHeadersUriSpec<?> head() {
 		return methodInternal(HttpMethod.HEAD);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> post() {
+	public RequestBodyUriSpec post() {
 		return methodInternal(HttpMethod.POST);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> put() {
+	public RequestBodyUriSpec put() {
 		return methodInternal(HttpMethod.PUT);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> patch() {
+	public RequestBodyUriSpec patch() {
 		return methodInternal(HttpMethod.PATCH);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> delete() {
+	public RequestHeadersUriSpec<?> delete() {
 		return methodInternal(HttpMethod.DELETE);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> options() {
+	public RequestHeadersUriSpec<?> options() {
 		return methodInternal(HttpMethod.OPTIONS);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> method(HttpMethod httpMethod) {
+	public RequestBodyUriSpec method(HttpMethod httpMethod) {
 		return methodInternal(httpMethod);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <S extends RequestHeadersSpec<?>> UriSpec<S> methodInternal(HttpMethod httpMethod) {
-		return new DefaultUriSpec<>(httpMethod);
+	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
+		return new DefaultRequestBodyUriSpec(httpMethod);
 	}
 
 	@Override
@@ -135,43 +135,13 @@ class DefaultWebClient implements WebClient {
 		return this.builder;
 	}
 
-	private class DefaultUriSpec<S extends RequestHeadersSpec<?>> implements UriSpec<S> {
+
+	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
 		private final HttpMethod httpMethod;
 
-
-		DefaultUriSpec(HttpMethod httpMethod) {
-			this.httpMethod = httpMethod;
-		}
-
-		@Override
-		public S uri(String uriTemplate, Object... uriVariables) {
-			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
-		}
-
-		@Override
-		public S uri(String uriTemplate, Map<String, ?> uriVariables) {
-			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
-		}
-
-		@Override
-		public S uri(Function<UriBuilder, URI> uriFunction) {
-			return uri(uriFunction.apply(uriBuilderFactory.builder()));
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public S uri(URI uri) {
-			return (S) new DefaultRequestBodySpec(this.httpMethod, uri);
-		}
-	}
-
-
-	private class DefaultRequestBodySpec implements RequestBodySpec {
-
-		private final HttpMethod httpMethod;
-
-		private final URI uri;
+		@Nullable
+		private URI uri;
 
 		@Nullable
 		private HttpHeaders headers;
@@ -185,9 +155,29 @@ class DefaultWebClient implements WebClient {
 		@Nullable
 		private Map<String, Object> attributes;
 
-		DefaultRequestBodySpec(HttpMethod httpMethod, URI uri) {
+		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
+		}
+
+		@Override
+		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
+		}
+
+		@Override
+		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
+		}
+
+		@Override
+		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
+			return uri(uriFunction.apply(uriBuilderFactory.builder()));
+		}
+
+		@Override
+		public RequestBodySpec uri(URI uri) {
 			this.uri = uri;
+			return this;
 		}
 
 		private HttpHeaders getHeaders() {
@@ -212,7 +202,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec header(String headerName, String... headerValues) {
+		public DefaultRequestBodyUriSpec header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
 				getHeaders().add(headerName, headerValue);
 			}
@@ -220,7 +210,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
+		public DefaultRequestBodyUriSpec headers(Consumer<HttpHeaders> headersConsumer) {
 			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 			headersConsumer.accept(getHeaders());
 			return this;
@@ -240,37 +230,37 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec accept(MediaType... acceptableMediaTypes) {
+		public DefaultRequestBodyUriSpec accept(MediaType... acceptableMediaTypes) {
 			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
 		}
 
 		@Override
-		public DefaultRequestBodySpec acceptCharset(Charset... acceptableCharsets) {
+		public DefaultRequestBodyUriSpec acceptCharset(Charset... acceptableCharsets) {
 			getHeaders().setAcceptCharset(Arrays.asList(acceptableCharsets));
 			return this;
 		}
 
 		@Override
-		public DefaultRequestBodySpec contentType(MediaType contentType) {
+		public DefaultRequestBodyUriSpec contentType(MediaType contentType) {
 			getHeaders().setContentType(contentType);
 			return this;
 		}
 
 		@Override
-		public DefaultRequestBodySpec contentLength(long contentLength) {
+		public DefaultRequestBodyUriSpec contentLength(long contentLength) {
 			getHeaders().setContentLength(contentLength);
 			return this;
 		}
 
 		@Override
-		public DefaultRequestBodySpec cookie(String name, String value) {
+		public DefaultRequestBodyUriSpec cookie(String name, String value) {
 			getCookies().add(name, value);
 			return this;
 		}
 
 		@Override
-		public DefaultRequestBodySpec cookies(
+		public DefaultRequestBodyUriSpec cookies(
 				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 			Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
 			cookiesConsumer.accept(this.cookies);
@@ -278,7 +268,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
+		public DefaultRequestBodyUriSpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
 			ZonedDateTime gmt = ifModifiedSince.withZoneSameInstant(ZoneId.of("GMT"));
 			String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
 			getHeaders().set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
@@ -286,7 +276,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodySpec ifNoneMatch(String... ifNoneMatches) {
+		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
 		}
@@ -320,7 +310,8 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
-			return ClientRequest.method(this.httpMethod, this.uri)
+			URI uri = this.uri != null ? this.uri : uriBuilderFactory.expand("");
+			return ClientRequest.method(this.httpMethod, uri)
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))
 					.attributes(attributes -> attributes.putAll(getAttributes()));
