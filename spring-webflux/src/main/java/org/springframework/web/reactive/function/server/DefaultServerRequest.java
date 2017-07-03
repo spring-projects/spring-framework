@@ -156,9 +156,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		List<String> queryParams = request().getQueryParams().get(name);
-		return queryParams != null ? queryParams : Collections.emptyList();
+	public MultiValueMap<String, String> queryParams() {
+		return request().getQueryParams();
 	}
 
 	@Override

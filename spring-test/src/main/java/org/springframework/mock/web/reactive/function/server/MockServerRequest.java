@@ -44,6 +44,7 @@ import org.springframework.http.server.reactive.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -168,8 +169,8 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return Collections.unmodifiableList(this.queryParams.get(name));
+	public MultiValueMap<String, String> queryParams() {
+		return CollectionUtils.unmodifiableMultiValueMap(this.queryParams);
 	}
 
 	@Override

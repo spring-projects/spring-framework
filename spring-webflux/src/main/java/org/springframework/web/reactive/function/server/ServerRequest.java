@@ -146,7 +146,7 @@ public interface ServerRequest {
 	 * @return the parameter value
 	 */
 	default Optional<String> queryParam(String name) {
-		List<String> queryParams = this.queryParams(name);
+		List<String> queryParams = queryParams().get(name);
 		if (queryParams.isEmpty()) {
 			return Optional.empty();
 		}
@@ -160,12 +160,9 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all query parameter with the given name.
-	 * <p>Returns an empty list if no values could be found.
-	 * @param name the parameter name
-	 * @return the parameter values
+	 * Return all query parameters for this request.
 	 */
-	List<String> queryParams(String name);
+	MultiValueMap<String, String> queryParams();
 
 	/**
 	 * Return the path variable with the given name, if present.
@@ -184,13 +181,12 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all path variables for the current request.
-	 * @return a {@code Map} from path variable name to associated value
+	 * Return all path variables for this request.
 	 */
 	Map<String, String> pathVariables();
 
 	/**
-	 * Return the web session for the current request. Always guaranteed  to
+	 * Return the web session for this request. Always guaranteed to
 	 * return an instance either matching to the session id requested by the
 	 * client, or with a new session id either because the client did not
 	 * specify one or because the underlying session had expired. Use of this

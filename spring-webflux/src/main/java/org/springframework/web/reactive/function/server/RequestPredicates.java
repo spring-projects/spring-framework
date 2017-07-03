@@ -535,8 +535,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public List<String> queryParams(String name) {
-			return this.request.queryParams(name);
+		public MultiValueMap<String, String> queryParams() {
+			return this.request.queryParams();
 		}
 
 		@Override

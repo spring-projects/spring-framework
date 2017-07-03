@@ -139,8 +139,8 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return this.delegate.queryParams(name);
+	public MultiValueMap<String, String> queryParams() {
+		return this.delegate.queryParams();
 	}
 
 	@Override
