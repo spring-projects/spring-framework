@@ -73,9 +73,9 @@ configure(allprojects) { project ->
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
-	ext.junitVintageVersion    = "4.12.0-M4"
-	ext.junitJupiterVersion    = '5.0.0-M4'
-	ext.junitPlatformVersion   = '1.0.0-M4'
+	ext.junitVintageVersion    = "4.12.0-M5"
+	ext.junitJupiterVersion    = '5.0.0-M5'
+	ext.junitPlatformVersion   = '1.0.0-M5'
 	ext.log4jVersion           = '2.8.2'
 	ext.nettyVersion           = "4.1.12.Final"
 	ext.niomultipartVersion    = "1.1.0"
