@@ -88,22 +88,22 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * Basic constructor with a host and a port.
 	 */
 	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
-		this(opts -> opts.connect(host, port), codec);
+		this(opts -> opts.host(host).port(port), codec);
 	}
 
 	/**
-	 * Alternate constructor with a {@link ClientOptions} consumer providing
-	 * additional control beyond a host and a port.
+	 * Alternate constructor with a {@link ClientOptions.Builder<?>} consumer
+	 * providing additional control beyond a host and a port.
 	 */
-	public ReactorNettyTcpClient(Consumer<ClientOptions> optionsConsumer, ReactorNettyCodec<P> codec) {
-		Assert.notNull(optionsConsumer, "Consumer<ClientOptions> is required");
+	public ReactorNettyTcpClient(Consumer<ClientOptions.Builder<?>> optionsConsumer, ReactorNettyCodec<P> codec) {
+		Assert.notNull(optionsConsumer, "Consumer<ClientOptions.Builder<?> is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("reactor-netty-tcp-client");
 		this.poolResources = PoolResources.fixed("reactor-netty-tcp-pool");
 
-		Consumer<ClientOptions> builtInConsumer = opts -> opts
+		Consumer<ClientOptions.Builder<?>> builtInConsumer = opts -> opts
 				.channelGroup(this.channelGroup)
 				.loopResources(this.loopResources)
 				.poolResources(this.poolResources)

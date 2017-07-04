@@ -52,10 +52,10 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	/**
-	 * Constructor that accepts an {@link HttpClientOptions} consumer to supply
-	 * to {@link HttpClient#create(Consumer)}.
+	 * Constructor that accepts an {@link HttpClientOptions.Builder} consumer
+	 * to supply to {@link HttpClient#create(Consumer)}.
 	 */
-	public ReactorNettyWebSocketClient(Consumer<? super HttpClientOptions> clientOptions) {
+	public ReactorNettyWebSocketClient(Consumer<? super HttpClientOptions.Builder> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);
 	}
 
