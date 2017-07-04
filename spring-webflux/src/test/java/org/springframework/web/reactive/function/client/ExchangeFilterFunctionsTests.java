@@ -20,8 +20,10 @@ import java.net.URI;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -131,6 +133,48 @@ public class ExchangeFilterFunctionsTests {
 		assertFalse(request.headers().containsKey(HttpHeaders.AUTHORIZATION));
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertEquals(response, result);
+	}
+
+	@Test
+	public void statusHandlerMatch() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
+				HttpStatus::is4xxClientError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify();
+	}
+
+	@Test
+	public void statusHandlerNoMatch() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
+				HttpStatus::is5xxServerError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectNext(response)
+				.expectComplete()
+				.verify();
+	}
+
+	@SuppressWarnings("serial")
+	private static class MyException extends Exception {
+
 	}
 
 }

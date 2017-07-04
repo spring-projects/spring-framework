@@ -21,10 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
@@ -110,7 +112,35 @@ public abstract class ExchangeFilterFunctions {
 		return "Basic " + encodedCredentials;
 	}
 
-	private static class Credentials {
+	/**
+	 * Return a filter that returns a given {@link Throwable} as response if the given
+	 * {@link HttpStatus} predicate matches.
+	 * @param statusPredicate the predicate that should match the
+	 * {@linkplain ClientResponse#statusCode() response status}
+	 * @param exceptionFunction the function that returns the exception
+	 * @return the {@link ExchangeFilterFunction} that returns the given exception if the predicate
+	 * matches
+	 */
+	public static ExchangeFilterFunction statusError(Predicate<HttpStatus> statusPredicate,
+			Function<ClientResponse, ? extends Throwable> exceptionFunction) {
+
+		Assert.notNull(statusPredicate, "'statusPredicate' must not be null");
+		Assert.notNull(exceptionFunction, "'exceptionFunction' must not be null");
+
+		return ExchangeFilterFunction.ofResponseProcessor(
+				clientResponse -> {
+					if (statusPredicate.test(clientResponse.statusCode())) {
+						return Mono.error(exceptionFunction.apply(clientResponse));
+					}
+					else {
+						return Mono.just(clientResponse);
+					}
+				}
+		);
+	}
+
+
+	private static final class Credentials {
 
 		private String username;
 
@@ -127,6 +157,5 @@ public abstract class ExchangeFilterFunctions {
 		}
 
 	}
-
 
 }
