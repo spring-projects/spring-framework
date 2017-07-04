@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -33,7 +34,8 @@ import static org.junit.Assert.assertNull;
  */
 public class UrlBasedCorsConfigurationSourceTests {
 
-	private final UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+	private final UrlBasedCorsConfigurationSource configSource
+			= new UrlBasedCorsConfigurationSource(new PathPatternParser());
 
 
 	@Test
@@ -52,11 +54,6 @@ public class UrlBasedCorsConfigurationSourceTests {
 
 		exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
 		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void unmodifiableConfigurationsMap() {
-		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
 	}
 
 }
