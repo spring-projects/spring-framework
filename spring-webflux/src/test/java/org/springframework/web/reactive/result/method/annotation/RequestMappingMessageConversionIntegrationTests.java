@@ -138,6 +138,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personResponseBodyWithMonoDeclaredAsObject() throws Exception {
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/person-response/mono-declared-as-object", JSON, Person.class).getBody());
+	}
+
+	@Test
 	public void personResponseBodyWithSingle() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/person-response/single", JSON, Person.class).getBody());
@@ -439,6 +445,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		@GetMapping("/mono")
 		public Mono<Person> getMono() {
+			return Mono.just(new Person("Robert"));
+		}
+
+		@GetMapping("/mono-declared-as-object")
+		public Object getMonoDeclaredAsObject() {
 			return Mono.just(new Person("Robert"));
 		}
 
