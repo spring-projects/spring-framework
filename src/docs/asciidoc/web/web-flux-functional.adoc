@@ -108,7 +108,7 @@ a completion signal when the person has been read from the request and stored. S
 when the `Person` has been saved.
 <3> `getPerson` is a handler function that returns a single person, identified via the path
 variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
-found. If it is not found, we use `otherwiseIfEmpty(Mono<T>)` to return a 404 Not Found response.
+found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
 
 ===== RouterFunctions
 
