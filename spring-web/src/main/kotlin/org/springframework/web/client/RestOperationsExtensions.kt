@@ -31,7 +31,7 @@ import java.net.URI
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriVariables: Any): T =
+inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriVariables: Any): T? =
 		getForObject(url, T::class.java, *uriVariables)
 
 /**
@@ -42,7 +42,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriV
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariables: Map<String, Any?>): T =
+inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariables: Map<String, Any?>): T? =
 		getForObject(url, T::class.java, uriVariables)
 
 /**
@@ -53,7 +53,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariable
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: URI): T =
+inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
 		getForObject(url, T::class.java)
 
 /**
@@ -75,7 +75,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriV
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any, vararg uriVariables: Any): T =
+inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any, vararg uriVariables: Any): T? =
 		postForObject(url, request, T::class.java, *uriVariables)
 
 /**
@@ -86,7 +86,7 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any, uriVariables: Map<String, *>): T =
+inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any, uriVariables: Map<String, *>): T? =
 		postForObject(url, request, T::class.java, uriVariables)
 
 /**
@@ -97,7 +97,7 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any): T =
+inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any): T? =
 		postForObject(url, request, T::class.java)
 
 /**

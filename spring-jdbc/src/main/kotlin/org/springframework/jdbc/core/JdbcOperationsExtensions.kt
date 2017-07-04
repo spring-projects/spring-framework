@@ -91,7 +91,7 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Arra
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.query(sql: String, vararg args: Any, crossinline function: (ResultSet) -> T): T =
+inline fun <reified T : Any> JdbcOperations.query(sql: String, vararg args: Any, crossinline function: (ResultSet) -> T): T? =
 		query(sql, ResultSetExtractor { function(it) }, *args)
 
 /**
