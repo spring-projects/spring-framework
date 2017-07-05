@@ -31,17 +31,17 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.9"
+	ext.aspectjVersion       = "1.8.10"
 	ext.caffeineVersion      = "2.3.5"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.4"
 	ext.ehcachejcacheVersion = "1.0.1"
 	ext.ehcache3Version      = "3.1.4"
 	ext.ejbVersion           = "3.0"
-	ext.fileuploadVersion    = "1.3.2"
+	ext.fileuploadVersion    = "1.3.3"
 	ext.freemarkerVersion    = "2.3.23"
 	ext.groovyVersion        = "2.4.12"
-	ext.gsonVersion          = "2.8.0"
+	ext.gsonVersion          = "2.8.1"
 	ext.guavaVersion         = "20.0"
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -504,8 +504,8 @@ project("spring-messaging") {
 
 	dependencies {
 		compile(project(":spring-beans"))
-		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		optional(project(":spring-oxm"))
 		optional("io.projectreactor:reactor-core:${reactorVersion}")
 		optional("io.projectreactor:reactor-net:${reactorVersion}") {
@@ -592,10 +592,10 @@ project("spring-jms") {
 	description = "Spring JMS"
 
 	dependencies {
-		compile(project(":spring-core"))
-		compile(project(":spring-beans"))
 		compile(project(":spring-aop"))
+		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
 		provided("javax.jms:jms-api:1.1-rev-1")
@@ -627,9 +627,9 @@ project("spring-context-support") {
 	description = "Spring Context Support"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		optional(project(":spring-jdbc"))  // for Quartz support
 		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
@@ -935,8 +935,8 @@ project("spring-websocket") {
 	description = "Spring WebSocket"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-web"))
 		optional(project(":spring-messaging"))
 		optional(project(":spring-webmvc"))
@@ -1010,7 +1010,7 @@ project("spring-test") {
 		optional("org.seleniumhq.selenium:htmlunit-driver:2.23.2")
 		optional("org.seleniumhq.selenium:selenium-java:2.53.1")
 		optional("org.skyscreamer:jsonassert:1.4.0")
-		optional("com.jayway.jsonpath:json-path:2.2.0")
+		optional("com.jayway.jsonpath:json-path:2.3.0")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
