@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -181,6 +182,9 @@ class DefaultWebClient implements WebClient {
 		@Nullable
 		private BodyInserter<?, ? super ClientHttpRequest> inserter;
 
+		@Nullable
+		private Map<String, Object> attributes;
+
 		DefaultRequestBodySpec(HttpMethod httpMethod, URI uri) {
 			this.httpMethod = httpMethod;
 			this.uri = uri;
@@ -200,6 +204,13 @@ class DefaultWebClient implements WebClient {
 			return this.cookies;
 		}
 
+		private Map<String, Object> getAttributes() {
+			if (this.attributes == null) {
+				this.attributes = new LinkedHashMap<>(4);
+			}
+			return this.attributes;
+		}
+
 		@Override
 		public DefaultRequestBodySpec header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
@@ -212,6 +223,19 @@ class DefaultWebClient implements WebClient {
 		public DefaultRequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
 			Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
 			headersConsumer.accept(getHeaders());
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			getAttributes().put(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			Assert.notNull(attributesConsumer, "'attributesConsumer' must not be null");
+			attributesConsumer.accept(getAttributes());
 			return this;
 		}
 
@@ -298,7 +322,8 @@ class DefaultWebClient implements WebClient {
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.method(this.httpMethod, this.uri)
 					.headers(headers -> headers.addAll(initHeaders()))
-					.cookies(cookies -> cookies.addAll(initCookies()));
+					.cookies(cookies -> cookies.addAll(initCookies()))
+					.attributes(attributes -> attributes.putAll(getAttributes()));
 		}
 
 		private HttpHeaders initHeaders() {

@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
@@ -35,7 +37,21 @@ import org.springframework.util.Assert;
 public abstract class ExchangeFilterFunctions {
 
 	/**
-	 * Return a filter that adds an Authorization header for HTTP Basic Authentication.
+	 * Name of the {@link ClientRequest} attribute that contains the username, as used by
+	 * {@link #basicAuthentication()}
+	 */
+	public static final String USERNAME_ATTRIBUTE = ExchangeFilterFunctions.class.getName() + ".username";
+
+	/**
+	 * Name of the {@link ClientRequest} attribute that contains the password, as used by
+	 * {@link #basicAuthentication()}
+	 */
+	public static final String PASSWORD_ATTRIBUTE = ExchangeFilterFunctions.class.getName() + ".password";
+
+
+	/**
+	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
+	 * the given username and password.
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
@@ -44,9 +60,41 @@ public abstract class ExchangeFilterFunctions {
 		Assert.notNull(username, "'username' must not be null");
 		Assert.notNull(password, "'password' must not be null");
 
+		return basicAuthentication(r -> username, r -> password);
+	}
+
+	/**
+	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
+	 * the username and password provided in the
+	 * {@linkplain ClientRequest#attributes() request attributes}.
+	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
+	 * @see #USERNAME_ATTRIBUTE
+	 * @see #PASSWORD_ATTRIBUTE
+	 */
+	public static ExchangeFilterFunction basicAuthentication() {
+		return basicAuthentication(
+				request -> getRequiredAttribute(request, USERNAME_ATTRIBUTE),
+				request -> getRequiredAttribute(request, PASSWORD_ATTRIBUTE)
+				);
+	}
+
+	private static String getRequiredAttribute(ClientRequest request, String key) {
+		Map<String, Object> attributes = request.attributes();
+		if (attributes.containsKey(key)) {
+			return (String) attributes.get(key);
+		} else {
+			throw new IllegalStateException(
+					"Could not find request attribute with key \"" + key + "\"");
+		}
+	}
+
+	private static ExchangeFilterFunction basicAuthentication(Function<ClientRequest, String> usernameFunction,
+			Function<ClientRequest, String> passwordFunction) {
+
 		return ExchangeFilterFunction.ofRequestProcessor(
 				clientRequest -> {
-					String authorization = authorization(username, password);
+					String authorization = authorization(usernameFunction.apply(clientRequest),
+							passwordFunction.apply(clientRequest));
 					ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
 							.headers(headers -> {
 								headers.set(HttpHeaders.AUTHORIZATION, authorization);

@@ -509,6 +509,23 @@ public interface WebTestClient {
 		S headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
+		 * Set the attribute with the given name to the given value.
+		 * @param name the name of the attribute to add
+		 * @param value the value of the attribute to add
+		 * @return this builder
+		 */
+		S attribute(String name, Object value);
+
+		/**
+		 * Manipulate the request attributes with the given consumer. The attributes provided to
+		 * the consumer are "live", so that the consumer can be used to inspect attributes,
+		 * remove attributes, or use any of the other map-provided methods.
+		 * @param attributesConsumer a function that consumes the attributes
+		 * @return this builder
+		 */
+		S attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
 		 * Perform the exchange without a request body.
 		 * @return spec for decoding the response
 		 */

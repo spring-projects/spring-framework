@@ -51,9 +51,11 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -193,6 +195,19 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
 			this.bodySpec.headers(headersConsumer);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			this.bodySpec.attribute(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(
+				Consumer<Map<String, Object>> attributesConsumer) {
+			this.bodySpec.attributes(attributesConsumer);
 			return this;
 		}
 
