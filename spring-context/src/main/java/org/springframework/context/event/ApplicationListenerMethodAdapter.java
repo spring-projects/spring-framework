@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -87,7 +88,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 
-		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
+		Method targetMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(targetMethod, EventListener.class);
+
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(method);
@@ -224,7 +227,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private void publishEvent(Object event) {
 		if (event != null) {
-			Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
+			Assert.notNull(this.applicationContext, "ApplicationContext must not be null");
 			this.applicationContext.publishEvent(event);
 		}
 	}
