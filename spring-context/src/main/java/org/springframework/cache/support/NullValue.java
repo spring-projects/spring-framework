@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,13 @@ import java.io.Serializable;
  */
 public final class NullValue implements Serializable {
 
-	static final Object INSTANCE = new NullValue();
+	/**
+	 * The canonical representation of a {@code null} replacement, as used by the
+	 * default implementation of {@link AbstractValueAdaptingCache#toStoreValue}/
+	 * {@link AbstractValueAdaptingCache#fromStoreValue}.
+	 * @since 4.3.10
+	 */
+	public static final Object INSTANCE = new NullValue();
 
 	private static final long serialVersionUID = 1L;
 
