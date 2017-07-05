@@ -568,7 +568,7 @@ project("spring-messaging") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		compile(project(":spring-context"))
+		optional(project(":spring-context"))
 		optional(project(":spring-oxm"))
 		optional("io.projectreactor:reactor-core")
 		optional("io.projectreactor.ipc:reactor-netty")
@@ -626,13 +626,13 @@ project("spring-jms") {
 	description = "Spring JMS"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-aop"))
-		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
 		provided("javax.jms:javax.jms-api:${jmsVersion}")
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
 		optional(project(":spring-oxm"))
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:javax.resource-api:${jcaVersion}")
@@ -662,9 +662,9 @@ project("spring-context-support") {
 	description = "Spring Context Support"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		optional(project(":spring-jdbc"))  // for Quartz support
 		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.activation:activation:${activationApiVersion}")
@@ -702,12 +702,12 @@ project("spring-web") {
 	apply plugin: "groovy"
 
 	dependencies {
-		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
-		compile(project(":spring-beans"))  // for MultipartFilter
-		compile(project(":spring-context"))
+		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		provided "javax.servlet:javax.servlet-api:${servletVersion}"
-		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
+		optional(project(":spring-oxm"))
+		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("javax.faces:javax.faces-api:${jsfVersion}")
@@ -820,7 +820,7 @@ project("spring-webmvc") {
 		compile(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional(project(":spring-context-support"))  // for FreeMarker support
-		optional(project(":spring-oxm"))  // for MarshallingView
+		optional(project(":spring-oxm"))
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
@@ -899,8 +899,8 @@ project("spring-websocket") {
 	description = "Spring WebSocket"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-web"))
 		optional(project(":spring-messaging"))
 		optional(project(":spring-webmvc"))
@@ -943,12 +943,14 @@ project("spring-webflux") {
 	description = "Spring WebFlux"
 
 	dependencies {
+		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-web"))
 		compile("org.reactivestreams:reactive-streams")
 		compile("io.projectreactor:reactor-core")
+		optional(project(":spring-context"))
 		optional(project(":spring-context-support"))  // for FreeMarker support
-		provided "javax.servlet:javax.servlet-api:${servletVersion}"
+		optional "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
