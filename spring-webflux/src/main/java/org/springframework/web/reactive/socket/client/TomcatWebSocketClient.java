@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.client;
 
 import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
@@ -31,6 +32,14 @@ import reactor.core.publisher.MonoProcessor;
  * @since 5.0
  */
 public class TomcatWebSocketClient extends StandardWebSocketClient {
+
+
+	public TomcatWebSocketClient() {
+	}
+
+	public TomcatWebSocketClient(WebSocketContainer webSocketContainer) {
+		super(webSocketContainer);
+	}
 
 
 	@Override
