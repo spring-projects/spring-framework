@@ -187,7 +187,9 @@ public abstract class UriComponents implements Serializable {
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
 	/**
-	 * Normalize the path removing sequences like "path/..".
+	 * Normalize the path removing sequences like "path/..". Note that calling this method will
+	 * combine all path segments into a full path before doing the actual normalisation, i.e.
+	 * individual path segments will not be normalized individually.
 	 * @see org.springframework.util.StringUtils#cleanPath(String)
 	 */
 	public abstract UriComponents normalize();
