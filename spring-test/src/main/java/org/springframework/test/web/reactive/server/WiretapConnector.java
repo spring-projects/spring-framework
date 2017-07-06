@@ -81,7 +81,7 @@ class WiretapConnector implements ClientHttpConnector {
 	 * Retrieve the {@code ExchangeResult} for the given "request-id" header value.
 	 */
 	public ExchangeResult claimRequest(String requestId) {
-		ExchangeResult result = this.exchanges.get(requestId);
+		ExchangeResult result = this.exchanges.remove(requestId);
 		Assert.notNull(result, "No match for " + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "=" + requestId);
 		return result;
 	}
