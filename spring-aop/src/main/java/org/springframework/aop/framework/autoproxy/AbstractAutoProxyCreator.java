@@ -453,10 +453,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
-		for (Advisor advisor : advisors) {
-			proxyFactory.addAdvisor(advisor);
-		}
-
+		
+		proxyFactory.addAdvisors(advisors);
+		
 		proxyFactory.setTargetSource(targetSource);
 		customizeProxyFactory(proxyFactory);
 
