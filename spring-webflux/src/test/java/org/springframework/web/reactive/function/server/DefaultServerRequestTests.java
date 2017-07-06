@@ -114,6 +114,14 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
+	public void absentQueryParam() throws Exception {
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.method(HttpMethod.GET, "http://example.com?foo").build();
+		DefaultServerRequest request = new DefaultServerRequest(mockRequest.toExchange(), messageReaders);
+
+		assertEquals(Optional.empty(), request.queryParam("bar"));
+	}
+
+	@Test
 	public void pathVariable() throws Exception {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.method(HttpMethod.GET, "http://example.com").build();
 		MockServerWebExchange exchange = new MockServerWebExchange(mockRequest);

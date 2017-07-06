@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
@@ -146,12 +148,12 @@ public interface ServerRequest {
 	 * @return the parameter value
 	 */
 	default Optional<String> queryParam(String name) {
-		List<String> queryParams = queryParams().get(name);
-		if (queryParams.isEmpty()) {
+		List<String> queryParamValues = queryParams().get(name);
+		if (CollectionUtils.isEmpty(queryParamValues)) {
 			return Optional.empty();
 		}
 		else {
-			String value = queryParams.get(0);
+			String value = queryParamValues.get(0);
 			if (value == null) {
 				value = "";
 			}
