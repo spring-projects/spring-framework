@@ -21,12 +21,15 @@ import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -365,11 +368,52 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
+		private static final Function<ClientResponse, Optional<? extends Throwable>> DEFAULT_STATUS_HANDLER =
+				clientResponse -> {
+					HttpStatus statusCode = clientResponse.statusCode();
+					if (statusCode.isError()) {
+						return Optional.of(new WebClientException(
+								"ClientResponse has erroneous status code: " + statusCode.value() +
+										" " + statusCode.getReasonPhrase()));
+					} else {
+						return Optional.empty();
+					}
+				};
+
 		private final Mono<ClientResponse> responseMono;
+
+		private List<Function<ClientResponse, Optional<? extends Throwable>>> statusHandlers =
+				new ArrayList<>(1);
 
 
 		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
 			this.responseMono = responseMono;
+			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
+		}
+
+		@Override
+		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+				Function<ClientResponse, ? extends Throwable> exceptionFunction) {
+
+			Assert.notNull(statusPredicate, "'statusPredicate' must not be null");
+			Assert.notNull(exceptionFunction, "'exceptionFunction' must not be null");
+
+			if (this.statusHandlers.size() == 1 && this.statusHandlers.get(0) == DEFAULT_STATUS_HANDLER) {
+				this.statusHandlers.clear();
+			}
+
+			Function<ClientResponse, Optional<? extends Throwable>> statusHandler =
+					clientResponse -> {
+						if (statusPredicate.test(clientResponse.statusCode())) {
+							return Optional.of(exceptionFunction.apply(clientResponse));
+						}
+						else {
+							return Optional.empty();
+						}
+					};
+			this.statusHandlers.add(statusHandler);
+
+			return this;
 		}
 
 		@Override
@@ -388,18 +432,15 @@ class DefaultWebClient implements WebClient {
 
 		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
 				BodyExtractor<T, ? super ClientHttpResponse> extractor,
-				Function<WebClientException, T> errorFunction) {
+				Function<Throwable, T> errorFunction) {
 
-			HttpStatus status = response.statusCode();
-			if (status.is4xxClientError() || status.is5xxServerError()) {
-				WebClientException ex = new WebClientException(
-						"ClientResponse has erroneous status code: " + status.value() +
-								" " + status.getReasonPhrase());
-				return errorFunction.apply(ex);
-			}
-			else {
-				return response.body(extractor);
-			}
+			return this.statusHandlers.stream()
+					.map(statusHandler -> statusHandler.apply(response))
+					.filter(Optional::isPresent)
+					.findFirst()
+					.map(Optional::get)
+					.map(errorFunction::apply)
+					.orElse(response.body(extractor));
 		}
 
 

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -30,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -536,6 +538,20 @@ public interface WebClient {
 
 
 	interface ResponseSpec {
+
+		/**
+		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
+		 * predicate applies. The exception returned from the function will be returned from
+		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
+		 * <p>By default, an error handler is register that throws a {@link WebClientException}
+		 * when the response status code is 4xx or 5xx.
+		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
+		 * applies
+		 * @param exceptionFunction the function that returns the exception
+		 * @return this builder
+		 */
+		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+				Function<ClientResponse, ? extends Throwable> exceptionFunction);
 
 		/**
 		 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the

@@ -391,6 +391,27 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void retrieveBodyToCustomStatusHandler() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> new MyException("500 error!"))
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
 	public void retrieveToEntityNotFound() throws Exception {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
