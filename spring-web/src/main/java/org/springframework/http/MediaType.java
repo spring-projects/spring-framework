@@ -102,6 +102,30 @@ public class MediaType extends MimeType implements Serializable {
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
 	 */
 	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
+	
+	/**
+	 * Public constant media type for Nottingham Problem {@code application/problem+json}.
+	 * https://tools.ietf.org/html/rfc7807
+	 * @see #APPLICATION_JSON_PROBLEM_UTF8
+	 */
+	public final static MediaType APPLICATION_JSON_PROBLEM;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSON_PROBLEM}.
+	 * @see #APPLICATION_JSON_PROBLEM_UTF8_VALUE
+	 */
+	public final static String APPLICATION_JSON_PROBLEM_VALUE = "application/problem+json";
+
+	/**
+	 * Public constant media type for Nottingham Problem {@code application/problem+json;charset=UTF-8}.
+	 * https://tools.ietf.org/html/rfc7807
+	 */
+	public final static MediaType APPLICATION_JSON_PROBLEM_UTF8;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSON_PROBLEM_UTF8}.
+	 */
+	public final static String APPLICATION_JSON_PROBLEM_UTF8_VALUE = APPLICATION_JSON_PROBLEM_VALUE + ";charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
