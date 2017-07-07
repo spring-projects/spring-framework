@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -666,12 +666,14 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 		@Override
 		public void onException(JMSException ex) {
+			// Iterate over temporary copy in order to avoid ConcurrentModificationException,
+			// since listener invocations may in turn trigger registration of listeners...
+			Set<ExceptionListener> copy;
 			synchronized (connectionMonitor) {
-				// Iterate over temporary copy in order to avoid ConcurrentModificationException,
-				// since listener invocations may in turn trigger registration of listeners...
-				for (ExceptionListener listener : new LinkedHashSet<ExceptionListener>(this.delegates)) {
-					listener.onException(ex);
-				}
+				copy = new LinkedHashSet<ExceptionListener>(this.delegates);
+			}
+			for (ExceptionListener listener : copy) {
+				listener.onException(ex);
 			}
 		}
 	}
