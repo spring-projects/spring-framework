@@ -34,6 +34,7 @@ class LiteralPathElement extends PathElement {
 
 	private boolean caseSensitive;
 
+
 	public LiteralPathElement(int pos, char[] literalText, boolean caseSensitive, char separator) {
 		super(pos, separator);
 		this.len = literalText.length;
@@ -49,6 +50,7 @@ class LiteralPathElement extends PathElement {
 			}
 		}
 	}
+
 
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
@@ -104,22 +106,22 @@ class LiteralPathElement extends PathElement {
 			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
 				return true;  // no more data but everything matched so far
 			}
-			return this.next.matches(pathIndex, matchingContext);
+			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
 
 	@Override
 	public int getNormalizedLength() {
-		return len;
+		return this.len;
+	}
+
+	public char[] getChars() {
+		return this.text;
 	}
 
 
 	public String toString() {
 		return "Literal(" + String.valueOf(this.text) + ")";
-	}
-	
-	public char[] getChars() {
-		return this.text;
 	}
 
 }

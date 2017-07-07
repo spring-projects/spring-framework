@@ -16,14 +16,13 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.pattern.PathPattern.MatchingContext;
-
 import java.util.List;
 
 import org.springframework.http.server.reactive.PathContainer.Element;
 import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A path element representing capturing the rest of a path. In the pattern
@@ -67,8 +66,8 @@ class CaptureTheRestPathElement extends PathElement {
 			for (int i = pathIndex; i < matchingContext.pathLength; i++) {
 				Element element = matchingContext.pathElements.get(i);
 				if (element instanceof Segment) {
-					MultiValueMap<String, String> parameters = ((Segment)element).parameters();
-					if (parameters != null && parameters.size()!=0) {
+					MultiValueMap<String, String> parameters = ((Segment) element).parameters();
+					if (!parameters.isEmpty()) {
 						if (parametersCollector == null) {
 							parametersCollector = new LinkedMultiValueMap<>();
 						}

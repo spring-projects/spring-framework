@@ -50,9 +50,6 @@ class WiretapConnector implements ClientHttpConnector {
 		this.delegate = delegate;
 	}
 
-	public ClientHttpConnector getDelegate() {
-		return this.delegate;
-	}
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -69,7 +66,7 @@ class WiretapConnector implements ClientHttpConnector {
 				.map(response ->  {
 					WiretapClientHttpRequest wrappedRequest = requestRef.get();
 					String requestId = wrappedRequest.getHeaders().getFirst(WebTestClient.WEBTESTCLIENT_REQUEST_ID);
-					Assert.notNull(requestId, "No \"" + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "\" header");
+					Assert.state(requestId != null, () -> "No \"" + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "\" header");
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
 					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
 					this.exchanges.put(requestId, result);
@@ -82,7 +79,7 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	public ExchangeResult claimRequest(String requestId) {
 		ExchangeResult result = this.exchanges.remove(requestId);
-		Assert.notNull(result, "No match for " + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "=" + requestId);
+		Assert.state(result != null, () -> "No match for " + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "=" + requestId);
 		return result;
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.nio.charset.Charset;
@@ -69,14 +70,15 @@ public interface PathContainer {
 		 * Return the original, raw (encoded) value for the path component.
 		 */
 		String value();
-
 	}
+
 
 	/**
 	 * A path separator element.
 	 */
 	interface Separator extends Element {
 	}
+
 
 	/**
 	 * A path segment element.
@@ -104,7 +106,6 @@ public interface PathContainer {
 		 * Path parameters parsed from the path segment.
 		 */
 		MultiValueMap<String, String> parameters();
-
 	}
 
 }

@@ -114,7 +114,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
 				return true;  // no more data but everything matched so far
 			}
-			return this.next.matches(pathIndex, matchingContext);
+			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
 

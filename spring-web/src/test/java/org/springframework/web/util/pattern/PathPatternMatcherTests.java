@@ -36,7 +36,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -47,6 +47,7 @@ import static org.junit.Assert.*;
 public class PathPatternMatcherTests {
 
 	private char separator = PathPatternParser.DEFAULT_SEPARATOR;
+
 
 	@Test
 	public void pathContainer() {
@@ -1044,16 +1045,15 @@ public class PathPatternMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/**", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
-		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar")); // SPR-8858
-		assertEquals("/user/user", pathMatcher.combine("/user", "/user")); // SPR-7970
+		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));  // SPR-8858
+		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));  // SPR-7970
 		assertEquals("/{foo:.*[^0-9].*}/edit/",
-				pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
+				pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/"));  // SPR-10062
 		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test"));
 		// SPR-10554
-		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
-		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
+		assertEquals("/hotel", pathMatcher.combine("/", "/hotel"));  // SPR-12975
+		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking"));  // SPR-12975
 		assertEquals("/hotel", pathMatcher.combine("", "/hotel"));
-		assertEquals("/hotel", pathMatcher.combine("/hotel", null));
 		assertEquals("/hotel", pathMatcher.combine("/hotel", ""));
 		// TODO Do we need special handling when patterns contain multiple dots?
 	}
@@ -1254,7 +1254,7 @@ public class PathPatternMatcherTests {
 		paths.clear();
 	}
 
-	@Test // SPR-13286
+	@Test  // SPR-13286
 	public void caseInsensitive() {
 		PathPatternParser pp = new PathPatternParser();
 		pp.setCaseSensitive(false);
@@ -1263,7 +1263,6 @@ public class PathPatternMatcherTests {
 		assertMatches(p,"/Group/Sales/Members");
 		assertMatches(p,"/group/Sales/members");
 	}
-
 
 	@Test
 	public void parameters() {
@@ -1297,7 +1296,6 @@ public class PathPatternMatcherTests {
 		assertNull(result.getMatrixVariables().get("var"));
 	}
 
-	// ---
 
 	private PathMatchResult matchAndExtract(String pattern, String path) {
 		 return parse(pattern).matchAndExtract(PathPatternMatcherTests.toPathContainer(path));
@@ -1374,19 +1372,6 @@ public class PathPatternMatcherTests {
 		assertEquals(expected, s);
 	}
 
-
-	static class TestPathCombiner {
-
-		PathPatternParser pp = new PathPatternParser();
-
-		public String combine(String string1, String string2) {
-			PathPattern pattern1 = pp.parse(string1);
-			PathPattern pattern2 = pp.parse(string2);
-			return pattern1.combine(pattern2).getPatternString();
-		}
-
-	}
-
 	private PathRemainingMatchInfo getPathRemaining(String pattern, String path) {
 		return parse(pattern).getPathRemaining(toPathContainer(path));
 	}
@@ -1405,6 +1390,19 @@ public class PathPatternMatcherTests {
 			s.append("[").append(element.value()).append("]");
 		}
 		return s.toString();
+	}
+
+
+	static class TestPathCombiner {
+
+		PathPatternParser pp = new PathPatternParser();
+
+		public String combine(String string1, String string2) {
+			PathPattern pattern1 = pp.parse(string1);
+			PathPattern pattern2 = pp.parse(string2);
+			return pattern1.combine(pattern2).getPatternString();
+		}
+
 	}
 
 }

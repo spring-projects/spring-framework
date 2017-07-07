@@ -16,13 +16,11 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.lang.Nullable;
-import org.springframework.web.util.UriUtils;
 import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.lang.Nullable;
 
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern
@@ -116,7 +114,7 @@ class CaptureVariablePathElement extends PathElement {
 			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
 				match = true;  // no more data but matches up to this point
 			}
-			else {
+			else if (this.next != null) {
 				match = this.next.matches(pathIndex, matchingContext);
 			}
 		}

@@ -26,6 +26,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -84,8 +85,10 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	private boolean languageTagCompliant = false;
 
+	@Nullable
 	private Locale defaultLocale;
 
+	@Nullable
 	private TimeZone defaultTimeZone;
 
 
@@ -224,12 +227,16 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, HttpServletResponse response, @Nullable Locale locale) {
+	public void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
 		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext) {
+	public void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext) {
+
+		Assert.notNull(response, "HttpServletResponse is required for CookieLocaleResolver");
+
 		Locale locale = null;
 		TimeZone timeZone = null;
 		if (localeContext != null) {

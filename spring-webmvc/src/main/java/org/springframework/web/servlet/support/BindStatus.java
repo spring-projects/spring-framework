@@ -93,9 +93,7 @@ public class BindStatus {
 	 * @param htmlEscape whether to HTML-escape error messages and string values
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
-	public BindStatus(RequestContext requestContext, String path, boolean htmlEscape)
-			throws IllegalStateException {
-
+	public BindStatus(RequestContext requestContext, String path, boolean htmlEscape) throws IllegalStateException {
 		this.requestContext = requestContext;
 		this.path = path;
 		this.htmlEscape = htmlEscape;

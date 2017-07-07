@@ -16,9 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 import org.springframework.http.server.reactive.PathContainer.Element;
 import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A wildcard path element. In the pattern '/foo/&ast;/goo' the * is
@@ -80,7 +80,7 @@ class WildcardPathElement extends PathElement {
 			if (segmentData == null || segmentData.length() == 0) {
 				return false;
 			}
-			return this.next.matches(pathIndex, matchingContext);
+			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}
 

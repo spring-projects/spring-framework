@@ -16,13 +16,12 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 import org.springframework.lang.Nullable;
-import org.springframework.web.util.UriUtils;
+import org.springframework.util.Assert;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
 /**
@@ -117,11 +116,10 @@ class InternalPathPatternParser {
 	 * @throws PatternParseException in case of parse errors
 	 */
 	public PathPattern parse(String pathPattern) throws PatternParseException {
-		if (pathPattern == null) {
-			pathPattern = "";
-		}
+		Assert.notNull(pathPattern, "Path pattern must not be null");
+
 		this.pathPatternData = pathPattern.toCharArray();
-		this.pathPatternLength = pathPatternData.length;
+		this.pathPatternLength = this.pathPatternData.length;
 		this.headPE = null;
 		this.currentPE = null;
 		this.capturedVariableNames = null;

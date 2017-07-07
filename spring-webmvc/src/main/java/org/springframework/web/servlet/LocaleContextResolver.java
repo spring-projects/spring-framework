@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet;
 
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -70,6 +69,7 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 * @see org.springframework.context.i18n.SimpleLocaleContext
 	 * @see org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext
 	 */
-	void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext);
+	void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext);
 
 }
