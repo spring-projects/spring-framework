@@ -706,12 +706,14 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 		@Override
 		public void onException(JMSException ex) {
+			// Iterate over temporary copy in order to avoid ConcurrentModificationException,
+			// since listener invocations may in turn trigger registration of listeners...
+			Set<ExceptionListener> copy;
 			synchronized (connectionMonitor) {
-				// Iterate over temporary copy in order to avoid ConcurrentModificationException,
-				// since listener invocations may in turn trigger registration of listeners...
-				for (ExceptionListener listener : new LinkedHashSet<>(this.delegates)) {
-					listener.onException(ex);
-				}
+				copy = new LinkedHashSet<>(this.delegates);
+			}
+			for (ExceptionListener listener : copy) {
+				listener.onException(ex);
 			}
 		}
 	}
