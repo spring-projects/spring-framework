@@ -1057,6 +1057,7 @@ project("spring-test") {
 		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
 		// Enable use of the JUnitPlatform Runner
 		testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
+		testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("com.rometools:rome:${romeVersion}")
