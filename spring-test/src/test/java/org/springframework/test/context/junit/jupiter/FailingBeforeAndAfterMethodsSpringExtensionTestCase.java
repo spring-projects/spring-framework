@@ -89,7 +89,6 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		return testClasses().map(clazz -> dynamicTest(clazz.getSimpleName(), () -> runTestAndAssertCounters(clazz)));
 	}
 
-	@SuppressWarnings("deprecation")
 	private void runTestAndAssertCounters(Class<?> testClass) {
 		Launcher launcher = LauncherFactory.create();
 		ExceptionTrackingListener listener = new ExceptionTrackingListener();
