@@ -36,8 +36,14 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Exercise matching of {@link PathPattern} objects.
@@ -1368,7 +1374,7 @@ public class PathPatternMatcherTests {
 	private void checkExtractPathWithinPattern(String pattern, String path, String expected) {
 		PathPatternParser ppp = new PathPatternParser();
 		PathPattern pp = ppp.parse(pattern);
-		String s = pp.extractPathWithinPattern(path);
+		String s = pp.extractPathWithinPattern(toPathContainer(path)).value();
 		assertEquals(expected, s);
 	}
 

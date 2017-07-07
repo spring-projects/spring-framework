@@ -341,10 +341,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.pattern.matches(request.pathContainer());
+			PathContainer pathContainer = request.pathContainer();
+			boolean match = this.pattern.matches(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), match);
 			if (match) {
-				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()).getUriVariables());
+				mergeTemplateVariables(request, this.pattern.matchAndExtract(pathContainer).getUriVariables());
 				return true;
 			}
 			else {

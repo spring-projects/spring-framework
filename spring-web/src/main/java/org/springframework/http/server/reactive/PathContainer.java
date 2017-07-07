@@ -60,7 +60,19 @@ public interface PathContainer {
 	 * @return the sub-path
 	 */
 	static PathContainer subPath(PathContainer path, int index) {
-		return DefaultPathContainer.subPath(path, index, path.elements().size());
+		return subPath(path, index, path.elements().size());
+	}
+
+	/**
+	 * Extract a sub-path from the given start offset (inclusive) into the path
+	 * element list and to the end offset (exclusive).
+	 * @param path the path to extract from
+	 * @param startIndex the start element index (inclusive)
+	 * @param endIndex the end element index (exclusive)
+	 * @return the sub-path
+	 */
+	static PathContainer subPath(PathContainer path, int startIndex, int endIndex) {
+		return DefaultPathContainer.subPath(path, startIndex, endIndex);
 	}
 
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -73,7 +75,8 @@ public class ResourceUrlProviderTests {
 
 	@Test
 	public void getStaticResourceUrl() {
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
+		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo.css", url);
 	}
 
@@ -102,7 +105,8 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
+		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -123,7 +127,8 @@ public class ResourceUrlProviderTests {
 		this.handlerMap.put("/resources/*.css", otherHandler);
 		this.urlProvider.setHandlerMap(this.handlerMap);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
+		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
@@ -73,14 +75,17 @@ public class PathPatternRegistryTests {
 
 		this.registry.register("/fo?", new Object());
 		this.registry.register("/f?o", new Object());
-		Set<PathMatchResult<Object>> matches = this.registry.findMatches("/foo");
+
+		PathContainer path = PathContainer.parse("/foo", StandardCharsets.UTF_8);
+		Set<PathMatchResult<Object>> matches = this.registry.findMatches(path);
 		assertThat(toPatterns(matches), contains(pattern("/f?o"), pattern("/fo?")));
 	}
 
 	@Test
 	public void findNoMatch() {
 		this.registry.register("/foo/{bar}", new Object());
-		assertThat(this.registry.findMatches("/other"), hasSize(0));
+		PathContainer path = PathContainer.parse("/other", StandardCharsets.UTF_8);
+		assertThat(this.registry.findMatches(path), hasSize(0));
 	}
 
 	@Test
@@ -88,7 +93,8 @@ public class PathPatternRegistryTests {
 		this.registry.register("/foo/{*baz}", new Object());
 		this.registry.register("/foo/bar/baz", new Object());
 		this.registry.register("/foo/bar/{baz}", new Object());
-		Set<PathMatchResult<Object>> matches = this.registry.findMatches("/foo/bar/baz");
+		PathContainer path = PathContainer.parse("/foo/bar/baz", StandardCharsets.UTF_8);
+		Set<PathMatchResult<Object>> matches = this.registry.findMatches(path);
 		assertThat(toPatterns(matches), contains(pattern("/foo/bar/baz"), pattern("/foo/bar/{baz}"),
 				pattern("/foo/{*baz}")));
 	}

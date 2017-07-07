@@ -73,7 +73,8 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.extractPathWithinPattern(path);
+		PathContainer pathContainer = PathContainer.parse(path, StandardCharsets.UTF_8);
+		return pathPattern.extractPathWithinPattern(pathContainer).value();
 	}
 
 	@Override

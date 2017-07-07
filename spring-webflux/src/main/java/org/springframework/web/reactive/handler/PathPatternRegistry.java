@@ -109,7 +109,7 @@ public class PathPatternRegistry<T> {
 	 * patterns first, according to the given {@code lookupPath}.
 	 * @param lookupPath the URL lookup path to be matched against
 	 */
-	public SortedSet<PathMatchResult<T>> findMatches(String lookupPath) {
+	public SortedSet<PathMatchResult<T>> findMatches(PathContainer lookupPath) {
 		return this.patternsMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
 				.sorted(Comparator.comparing(Map.Entry::getKey))

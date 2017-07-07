@@ -158,22 +158,6 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 
-	// TODO: remove String-variants
-
-	public boolean matches(String path) {
-		return matches(PathContainer.parse(path, StandardCharsets.UTF_8));
-	}
-
-	public PathMatchResult matchAndExtract(String path) {
-		return matchAndExtract(PathContainer.parse(path, StandardCharsets.UTF_8));
-	}
-
-	@Nullable
-	public PathRemainingMatchInfo getPathRemaining(String path) {
-		return getPathRemaining(PathContainer.parse(path, StandardCharsets.UTF_8));
-	}
-
-
 	/**
 	 * @param pathContainer the candidate path container to attempt to match against this pattern
 	 * @return true if the path matches this pattern
@@ -262,13 +246,6 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 	}
 
-	// TODO: implement extractPathWithinPattern natively for PathContainer
-
-	public PathContainer extractPathWithinPattern(PathContainer path) {
-		String result = extractPathWithinPattern(path.value());
-		return PathContainer.parse(result, StandardCharsets.UTF_8);
-	}
-
 	/**
 	 * Given a full path, determine the pattern-mapped part. <p>For example: <ul>
 	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
@@ -283,7 +260,14 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param path a path that matches this pattern
 	 * @return the subset of the path that is matched by pattern or "" if none of it is matched by pattern elements
 	 */
-	public String extractPathWithinPattern(String path) {
+	public PathContainer extractPathWithinPattern(PathContainer path) {
+		String result = extractPathWithinPattern(path.value());
+		return PathContainer.parse(result, StandardCharsets.UTF_8);
+	}
+
+	// TODO: implement extractPathWithinPattern natively for PathContainer
+
+	private String extractPathWithinPattern(String path) {
 		// assert this.matches(path)
 		PathElement elem = head;
 		int separatorCount = 0;
@@ -517,7 +501,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	/**
-	 * A holder for the result of a {@link PathPattern#getPathRemaining(String)} call. Holds
+	 * A holder for the result of a {@link PathPattern#getPathRemaining} call.Holds
 	 * information on the path left after the first part has successfully matched a pattern
 	 * and any variables bound in that first part that matched.
 	 */
