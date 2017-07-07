@@ -21,6 +21,7 @@ import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
@@ -28,7 +29,7 @@ import org.springframework.test.context.junit.jupiter.comics.Cat;
 import org.springframework.test.context.junit.jupiter.comics.Dog;
 import org.springframework.test.context.junit.jupiter.comics.Person;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests which demonstrate that the Spring TestContext Framework
