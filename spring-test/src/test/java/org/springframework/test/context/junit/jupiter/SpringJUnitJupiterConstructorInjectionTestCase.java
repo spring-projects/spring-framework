@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,19 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests which demonstrate support for autowiring individual
  * parameters in test class constructors using {@link Autowired @Autowired}
- * and {@link Value @Value} with the Spring TestContext Framework and JUnit 5.
+ * and {@link Value @Value} with the Spring TestContext Framework and JUnit Jupiter.
  *
- * <p>To run these tests in an IDE, simply run {@link SpringJUnitJupiterTestSuite}
- * as a JUnit 4 test.
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0
  * @see SpringExtension
- * @see SpringJUnit5AutowiredConstructorInjectionTestCase
+ * @see SpringJUnitJupiterAutowiredConstructorInjectionTestCase
  */
 @SpringJUnitConfig(TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class SpringJUnit5ConstructorInjectionTestCase {
+class SpringJUnitJupiterConstructorInjectionTestCase {
 
 	final ApplicationContext applicationContext;
 	final Person dilbert;
@@ -52,7 +52,7 @@ class SpringJUnit5ConstructorInjectionTestCase {
 	final Integer enigma;
 	final TestInfo testInfo;
 
-	SpringJUnit5ConstructorInjectionTestCase(ApplicationContext applicationContext, @Autowired Person dilbert,
+	SpringJUnitJupiterConstructorInjectionTestCase(ApplicationContext applicationContext, @Autowired Person dilbert,
 			@Autowired Dog dog, @Value("${enigma}") Integer enigma, TestInfo testInfo) {
 
 		this.applicationContext = applicationContext;

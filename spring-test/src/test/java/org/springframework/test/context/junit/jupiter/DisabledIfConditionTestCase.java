@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -41,6 +42,9 @@ import static org.mockito.Mockito.*;
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation
  * results and exception handling; whereas, {@link DisabledIfTestCase} only tests
  * the <em>happy paths</em>.
+ *
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0
