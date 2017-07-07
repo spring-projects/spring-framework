@@ -21,11 +21,11 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
-import reactor.util.context.Context;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -69,8 +69,8 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 	}
 
 	@Override
-	public void subscribe(Subscriber<? super Void> s, Context ctx) {
-		this.source.subscribe(new WriteWithBarrier(s), ctx);
+	public void subscribe(CoreSubscriber<? super Void> actual) {
+		this.source.subscribe(new WriteWithBarrier(actual));
 	}
 
 
