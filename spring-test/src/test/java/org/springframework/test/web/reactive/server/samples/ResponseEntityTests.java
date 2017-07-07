@@ -51,12 +51,15 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
  */
 public class ResponseEntityTests {
 
-	private final WebTestClient client = WebTestClient.bindToController(new PersonController()).build();
+	private final WebTestClient client = WebTestClient.bindToController(new PersonController())
+			.configureClient()
+			.baseUrl("/persons")
+			.build();
 
 
 	@Test
 	public void entity() throws Exception {
-		this.client.get().uri("/persons/John")
+		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -65,7 +68,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void entityWithConsumer() throws Exception {
-		this.client.get().uri("/persons/John")
+		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -79,7 +82,7 @@ public class ResponseEntityTests {
 		List<Person> expected = Arrays.asList(
 				new Person("Jane"), new Person("Jason"), new Person("John"));
 
-		this.client.get().uri("/persons")
+		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -94,7 +97,7 @@ public class ResponseEntityTests {
 		map.put("Jason", new Person("Jason"));
 		map.put("John", new Person("John"));
 
-		this.client.get().uri("/persons?map=true")
+		this.client.get().uri("?map=true")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(new ParameterizedTypeReference<Map<String, Person>>() {}).isEqualTo(map);
@@ -104,7 +107,6 @@ public class ResponseEntityTests {
 	public void entityStream() throws Exception {
 
 		FluxExchangeResult<Person> result = this.client.get()
-				.uri("/persons")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
 				.expectStatus().isOk()
@@ -121,7 +123,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void postEntity() throws Exception {
-		this.client.post().uri("/persons")
+		this.client.post()
 				.syncBody(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
