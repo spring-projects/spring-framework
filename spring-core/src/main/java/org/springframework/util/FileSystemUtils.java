@@ -27,7 +27,9 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.5.3
+ * @deprecated as of Spring Framework 5.0, in favor of native NIO API usage
  */
+@Deprecated
 public abstract class FileSystemUtils {
 
 	/**
@@ -60,7 +62,8 @@ public abstract class FileSystemUtils {
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void copyRecursively(@Nullable File src, File dest) throws IOException {
-		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()), "Source File must denote a directory or file");
+		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()),
+				"Source File must denote a directory or file");
 		Assert.notNull(dest, "Destination File must not be null");
 		doCopyRecursively(src, dest);
 	}
@@ -88,9 +91,7 @@ public abstract class FileSystemUtils {
 				dest.createNewFile();
 			}
 			catch (IOException ex) {
-				IOException ioex = new IOException("Failed to create file: " + dest);
-				ioex.initCause(ex);
-				throw ioex;
+				throw new IOException("Failed to create file: " + dest, ex);
 			}
 			FileCopyUtils.copy(src, dest);
 		}
