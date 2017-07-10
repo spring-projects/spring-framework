@@ -160,9 +160,7 @@ public class StompDecoder {
 				}
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete frame, resetting input buffer...");
-				}
+				logger.trace("Incomplete frame, resetting input buffer...");
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					@SuppressWarnings("unchecked")
@@ -299,7 +297,9 @@ public class StompDecoder {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			}
 			contentLength = null;
 		}
 
