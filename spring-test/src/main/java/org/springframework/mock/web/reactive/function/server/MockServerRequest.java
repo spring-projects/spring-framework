@@ -19,7 +19,6 @@ package org.springframework.mock.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,7 +91,7 @@ public class MockServerRequest implements ServerRequest {
 
 		this.method = method;
 		this.uri = uri;
-		this.pathContainer = RequestPath.create(uri, contextPath, StandardCharsets.UTF_8);
+		this.pathContainer = RequestPath.parse(uri, contextPath);
 		this.headers = headers;
 		this.cookies = cookies;
 		this.body = body;

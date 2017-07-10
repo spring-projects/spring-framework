@@ -261,11 +261,10 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return the subset of the path that is matched by pattern or "" if none of it is matched by pattern elements
 	 */
 	public PathContainer extractPathWithinPattern(PathContainer path) {
+		// TODO: implement extractPathWithinPattern for PathContainer
 		String result = extractPathWithinPattern(path.value());
 		return PathContainer.parse(result, StandardCharsets.UTF_8);
 	}
-
-	// TODO: implement extractPathWithinPattern natively for PathContainer
 
 	private String extractPathWithinPattern(String path) {
 		// assert this.matches(path)

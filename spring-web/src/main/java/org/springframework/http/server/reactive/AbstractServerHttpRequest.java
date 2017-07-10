@@ -61,7 +61,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	public AbstractServerHttpRequest(URI uri, String contextPath, HttpHeaders headers) {
 		this.uri = uri;
-		this.path = new DefaultRequestPath(uri, contextPath, StandardCharsets.UTF_8);
+		this.path = RequestPath.parse(uri, contextPath);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 

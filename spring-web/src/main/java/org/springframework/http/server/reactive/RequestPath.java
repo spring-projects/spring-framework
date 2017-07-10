@@ -16,7 +16,8 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Represents the complete path for a request.
@@ -41,11 +42,12 @@ public interface RequestPath extends PathContainer {
 	 */
 	PathContainer pathWithinApplication();
 
+
 	/**
 	 * Create a new {@code RequestPath} with the given parameters.
 	 */
-	static RequestPath create(URI uri, String contextPath, Charset charset) {
-		return new DefaultRequestPath(uri, contextPath, charset);
+	static RequestPath parse(URI uri, @Nullable String contextPath) {
+		return new DefaultRequestPath(uri, contextPath);
 	}
 
 }

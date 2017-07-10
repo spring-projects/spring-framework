@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -40,8 +39,8 @@ class DefaultRequestPath implements RequestPath {
 	private final PathContainer pathWithinApplication;
 
 
-	DefaultRequestPath(URI uri, @Nullable String contextPath, Charset charset) {
-		this.fullPath = PathContainer.parse(uri.getRawPath(), charset);
+	DefaultRequestPath(URI uri, @Nullable String contextPath) {
+		this.fullPath = PathContainer.parse(uri.getRawPath(), StandardCharsets.UTF_8);
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
@@ -85,7 +84,6 @@ class DefaultRequestPath implements RequestPath {
 
 
 	// PathContainer methods..
-
 
 	@Override
 	public String value() {
