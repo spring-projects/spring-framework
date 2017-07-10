@@ -62,7 +62,7 @@ configure(allprojects) { project ->
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.log4jVersion         = "1.2.17"
-	ext.nettyVersion         = "4.1.12.Final"
+	ext.nettyVersion         = "4.1.13.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.7.0"
 	ext.openjpaVersion       = "2.4.1"
@@ -499,6 +499,37 @@ project("spring-context") {
 	}
 }
 
+project("spring-oxm") {
+	description = "Spring Object/XML Marshalling"
+	apply from: "oxm.gradle"
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		optional("org.codehaus.castor:castor-xml:1.4.1")  {
+			exclude group: 'stax', module: 'stax-api'
+			exclude group: "org.springframework", module: "spring-context"
+		}
+		optional("org.apache.xmlbeans:xmlbeans:2.6.0") {
+			exclude group: 'stax', module: 'stax-api'
+		}
+		optional("com.thoughtworks.xstream:xstream:${xstreamVersion}") {
+			exclude group: 'xpp3', module: 'xpp3_min'
+			exclude group: 'xmlpull', module: 'xmlpull'
+		}
+		optional("org.jibx:jibx-run:1.2.6")
+		testCompile(project(":spring-context"))
+		testCompile("org.ogce:xpp3:1.1.6")
+		testCompile("org.codehaus.jettison:jettison:1.3.8") {
+			exclude group: 'stax', module: 'stax-api'
+		}
+		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile(files(genCastor.classesDir).builtBy(genCastor))
+		testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
+		testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
+	}
+}
+
 project("spring-messaging") {
 	description = "Spring Messaging"
 
@@ -554,37 +585,6 @@ project("spring-tx") {
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
 		testCompile("org.codehaus.groovy:groovy-all:${groovyVersion}")
-	}
-}
-
-project("spring-oxm") {
-	description = "Spring Object/XML Marshalling"
-	apply from: "oxm.gradle"
-
-	dependencies {
-		compile(project(":spring-beans"))
-		compile(project(":spring-core"))
-		optional("org.codehaus.castor:castor-xml:1.4.1")  {
-			exclude group: 'stax', module: 'stax-api'
-			exclude group: "org.springframework", module: "spring-context"
-		}
-		optional("org.apache.xmlbeans:xmlbeans:2.6.0") {
-			exclude group: 'stax', module: 'stax-api'
-		}
-		optional("com.thoughtworks.xstream:xstream:${xstreamVersion}") {
-			exclude group: 'xpp3', module: 'xpp3_min'
-			exclude group: 'xmlpull', module: 'xmlpull'
-		}
-		optional("org.jibx:jibx-run:1.2.6")
-		testCompile(project(":spring-context"))
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
-		testCompile("xpp3:xpp3:1.1.4c")
-		testCompile("org.codehaus.jettison:jettison:1.3.8") {
-			exclude group: 'stax', module: 'stax-api'
-		}
-		testCompile(files(genCastor.classesDir).builtBy(genCastor))
-		testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
-		testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
 	}
 }
 
@@ -981,11 +981,12 @@ project("spring-test") {
 
 	dependencies {
 		compile(project(":spring-core"))
+		optional(project(":spring-aop"))
 		optional(project(":spring-beans"))
 		optional(project(":spring-context"))
 		optional(project(":spring-jdbc"))
-		optional(project(":spring-tx"))
 		optional(project(":spring-orm"))
+		optional(project(":spring-tx"))
 		optional(project(":spring-web"))
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))

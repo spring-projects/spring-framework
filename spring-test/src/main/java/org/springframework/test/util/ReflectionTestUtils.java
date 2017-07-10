@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -62,13 +63,16 @@ import org.springframework.util.StringUtils;
  * @see ReflectionUtils
  * @see AopTestUtils
  */
-public class ReflectionTestUtils {
+public abstract class ReflectionTestUtils {
 
 	private static final String SETTER_PREFIX = "set";
 
 	private static final String GETTER_PREFIX = "get";
 
 	private static final Log logger = LogFactory.getLog(ReflectionTestUtils.class);
+
+	private static final boolean springAopPresent = ClassUtils.isPresent(
+			"org.springframework.aop.framework.Advised", ReflectionTestUtils.class.getClassLoader());
 
 
 	/**
@@ -164,26 +168,27 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
-
+		if (targetObject != null && springAopPresent) {
+			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+		}
 		if (targetClass == null) {
-			targetClass = ultimateTarget.getClass();
+			targetClass = targetObject.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name, type);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format(
 					"Could not find field '%s' of type [%s] on %s or target class [%s]", name, type,
-					safeToString(ultimateTarget), targetClass));
+					safeToString(targetObject), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Setting field '%s' of type [%s] on %s or target class [%s] to value [%s]", name, type,
-					safeToString(ultimateTarget), targetClass, value));
+					safeToString(targetObject), targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, ultimateTarget, value);
+		ReflectionUtils.setField(field, targetObject, value);
 	}
 
 	/**
@@ -245,24 +250,25 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
-
+		if (targetObject != null && springAopPresent) {
+			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+		}
 		if (targetClass == null) {
-			targetClass = ultimateTarget.getClass();
+			targetClass = targetObject.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format("Could not find field '%s' on %s or target class [%s]",
-					name, safeToString(ultimateTarget), targetClass));
+					name, safeToString(targetObject), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Getting field '%s' from %s or target class [%s]", name,
-					safeToString(ultimateTarget), targetClass));
+					safeToString(targetObject), targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, ultimateTarget);
+		return ReflectionUtils.getField(field, targetObject);
 	}
 
 	/**
