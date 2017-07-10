@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,9 +150,7 @@ public class StompDecoder {
 				}
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Incomplete frame, resetting input buffer...");
-				}
+				logger.trace("Incomplete frame, resetting input buffer...");
 				if (headers != null && headerAccessor != null) {
 					String name = NativeMessageHeaderAccessor.NATIVE_HEADERS;
 					@SuppressWarnings("unchecked")
@@ -288,7 +286,9 @@ public class StompDecoder {
 			contentLength = headerAccessor.getContentLength();
 		}
 		catch (NumberFormatException ex) {
-			logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+			}
 			contentLength = null;
 		}
 
