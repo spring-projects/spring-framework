@@ -1008,11 +1008,12 @@ project("spring-test") {
 
 	dependencies {
 		compile(project(":spring-core"))
+		optional(project(":spring-aop"))
 		optional(project(":spring-beans"))
 		optional(project(":spring-context"))
 		optional(project(":spring-jdbc"))
-		optional(project(":spring-tx"))
 		optional(project(":spring-orm"))
+		optional(project(":spring-tx"))
 		optional(project(":spring-web"))
 		optional(project(":spring-webflux"))
 		optional(project(":spring-webmvc"))
