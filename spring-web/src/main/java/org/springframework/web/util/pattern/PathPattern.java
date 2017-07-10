@@ -205,7 +205,7 @@ public class PathPattern implements Comparable<PathPattern> {
 				info = new PathRemainingMatchInfo(EMPTY_PATH, matchingContext.getPathMatchResult());
 			}
 			else {
-				info = new PathRemainingMatchInfo(PathContainer.subPath(pathContainer, matchingContext.remainingPathIndex),
+				info = new PathRemainingMatchInfo(pathContainer.subPath(matchingContext.remainingPathIndex),
 						 matchingContext.getPathMatchResult());
 			}
 			return info;

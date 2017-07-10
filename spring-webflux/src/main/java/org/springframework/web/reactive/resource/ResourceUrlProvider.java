@@ -215,7 +215,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 				.map(entry -> {
 					PathContainer path = entry.getKey().extractPathWithinPattern(lookupPath);
 					int endIndex = lookupPath.elements().size() - path.elements().size();
-					PathContainer mapping = PathContainer.subPath(lookupPath, 0, endIndex);
+					PathContainer mapping = lookupPath.subPath(0, endIndex);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Invoking ResourceResolverChain for URL pattern " +
 								"\"" + entry.getKey() + "\"");

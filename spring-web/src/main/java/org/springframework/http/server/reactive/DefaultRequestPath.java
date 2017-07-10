@@ -69,7 +69,7 @@ class DefaultRequestPath implements RequestPath {
 				counter += ((Segment) element).semicolonContent().length();
 			}
 			if (length == counter) {
-				return DefaultPathContainer.subPath(path, 0, i + 1);
+				return path.subPath(0, i + 1);
 			}
 		}
 
@@ -79,7 +79,7 @@ class DefaultRequestPath implements RequestPath {
 	}
 
 	private static PathContainer extractPathWithinApplication(PathContainer fullPath, PathContainer contextPath) {
-		return PathContainer.subPath(fullPath, contextPath.elements().size());
+		return fullPath.subPath(contextPath.elements().size());
 	}
 
 

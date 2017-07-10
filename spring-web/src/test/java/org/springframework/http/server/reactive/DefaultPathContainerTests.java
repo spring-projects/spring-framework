@@ -127,17 +127,17 @@ public class DefaultPathContainerTests {
 	public void subPath() throws Exception {
 		// basic
 		PathContainer path = PathContainer.parse("/a/b/c", UTF_8);
-		assertSame(path, PathContainer.subPath(path, 0));
-		assertEquals("/b/c", PathContainer.subPath(path, 2).value());
-		assertEquals("/c", PathContainer.subPath(path, 4).value());
+		assertSame(path, path.subPath(0));
+		assertEquals("/b/c", path.subPath(2).value());
+		assertEquals("/c", path.subPath(4).value());
 
 		// root path
 		path = PathContainer.parse("/", UTF_8);
-		assertEquals("/", PathContainer.subPath(path, 0).value());
+		assertEquals("/", path.subPath(0).value());
 
 		// trailing slash
 		path = PathContainer.parse("/a/b/", UTF_8);
-		assertEquals("/b/", PathContainer.subPath(path, 2).value());
+		assertEquals("/b/", path.subPath(2).value());
 	}
 
 }

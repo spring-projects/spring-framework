@@ -22,15 +22,20 @@ import java.util.List;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Structured path representation.
+ * Structured representation of a path whose {@link Element Elements} are
+ * accessible as a sequence of either {@link Separator Separator} and/or
+ * {@link Segment Segment} (element) types.
  *
- * <p>Typically consumed via {@link ServerHttpRequest#getPath()} but can also
- * be created by parsing a path value via {@link #parse(String, Charset)}.
+ * <p>Each {@code Segment} exposes its own structure decoded safely without the
+ * risk of encoded reserved characters altering the path or segment structure.
+ *
+ * <p>An instance of this class can also be created via
+ * {@link #parse(String, Charset)}. The path for an HTTP request is parsed once
+ * and subsequently accessible via {@link ServerHttpRequest#getPath()}.
  *
  * @author Rossen Stoyanchev
  */
 public interface PathContainer {
-
 
 	/**
 	 * The original, raw (encoded) path value including path parameters.
@@ -41,6 +46,26 @@ public interface PathContainer {
 	 * The list of path elements, either {@link Separator} or {@link Segment}.
 	 */
 	List<Element> elements();
+
+	/**
+	 * Extract a sub-path from the given offset into the elements list.
+	 * @param index the start element index (inclusive)
+	 * @return the sub-path
+	 */
+	default PathContainer subPath(int index) {
+		return subPath(index, elements().size());
+	}
+
+	/**
+	 * Extract a sub-path from the given start offset (inclusive) into the
+	 * element list and to the end offset (exclusive).
+	 * @param startIndex the start element index (inclusive)
+	 * @param endIndex the end element index (exclusive)
+	 * @return the sub-path
+	 */
+	default PathContainer subPath(int startIndex, int endIndex) {
+		return DefaultPathContainer.subPath(this, startIndex, endIndex);
+	}
 
 
 	/**
@@ -53,29 +78,10 @@ public interface PathContainer {
 		return DefaultPathContainer.parsePath(path, encoding);
 	}
 
-	/**
-	 * Extract a sub-path from the given offset into the path elements list.
-	 * @param path the path to extract from
-	 * @param index the start element index (inclusive)
-	 * @return the sub-path
-	 */
-	static PathContainer subPath(PathContainer path, int index) {
-		return subPath(path, index, path.elements().size());
-	}
 
 	/**
-	 * Extract a sub-path from the given start offset (inclusive) into the path
-	 * element list and to the end offset (exclusive).
-	 * @param path the path to extract from
-	 * @param startIndex the start element index (inclusive)
-	 * @param endIndex the end element index (exclusive)
-	 * @return the sub-path
+	 * Common representation of a path element, e.g. separator or segment.
 	 */
-	static PathContainer subPath(PathContainer path, int startIndex, int endIndex) {
-		return DefaultPathContainer.subPath(path, startIndex, endIndex);
-	}
-
-
 	interface Element {
 
 		/**
@@ -86,14 +92,14 @@ public interface PathContainer {
 
 
 	/**
-	 * A path separator element.
+	 * Path separator element.
 	 */
 	interface Separator extends Element {
 	}
 
 
 	/**
-	 * A path segment element.
+	 * Path segment element.
 	 */
 	interface Segment extends Element {
 
