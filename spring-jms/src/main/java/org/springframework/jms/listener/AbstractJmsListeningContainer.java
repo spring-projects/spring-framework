@@ -96,7 +96,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setConnectionFactory
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(@Nullable String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -143,7 +143,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	@Override
-	public void setBeanName(String beanName) {
+	public void setBeanName(@Nullable String beanName) {
 		this.beanName = beanName;
 	}
 

@@ -210,8 +210,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setClassesToBeBound "classesToBeBound"}
 	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
-	public void setContextPath(String contextPath) {
-		Assert.hasText(contextPath, "'contextPath' must not be null");
+	public void setContextPath(@Nullable String contextPath) {
 		this.contextPath = contextPath;
 	}
 
@@ -228,8 +227,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
 	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
-	public void setClassesToBeBound(Class<?>... classesToBeBound) {
-		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
+	public void setClassesToBeBound(@Nullable Class<?>... classesToBeBound) {
 		this.classesToBeBound = classesToBeBound;
 	}
 
@@ -248,7 +246,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
 	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
-	public void setPackagesToScan(String... packagesToScan) {
+	public void setPackagesToScan(@Nullable String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 

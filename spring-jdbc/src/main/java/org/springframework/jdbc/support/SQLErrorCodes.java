@@ -71,7 +71,7 @@ public class SQLErrorCodes {
 	 * Set this property if the database name contains spaces,
 	 * in which case we can not use the bean name for lookup.
 	 */
-	public void setDatabaseProductName(String databaseProductName) {
+	public void setDatabaseProductName(@Nullable String databaseProductName) {
 		this.databaseProductNames = new String[] {databaseProductName};
 	}
 
@@ -85,7 +85,7 @@ public class SQLErrorCodes {
 	 * Set this property to specify multiple database names that contains spaces,
 	 * in which case we can not use bean names for lookup.
 	 */
-	public void setDatabaseProductNames(String... databaseProductNames) {
+	public void setDatabaseProductNames(@Nullable String... databaseProductNames) {
 		this.databaseProductNames = databaseProductNames;
 	}
 
@@ -210,7 +210,7 @@ public class SQLErrorCodes {
 		}
 	}
 
-	public void setCustomSqlExceptionTranslator(SQLExceptionTranslator customSqlExceptionTranslator) {
+	public void setCustomSqlExceptionTranslator(@Nullable SQLExceptionTranslator customSqlExceptionTranslator) {
 		this.customSqlExceptionTranslator = customSqlExceptionTranslator;
 	}
 

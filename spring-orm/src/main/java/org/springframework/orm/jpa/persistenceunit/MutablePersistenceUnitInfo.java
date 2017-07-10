@@ -85,7 +85,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	private String persistenceProviderPackageName;
 
 
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
@@ -95,7 +95,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceUnitName;
 	}
 
-	public void setPersistenceProviderClassName(String persistenceProviderClassName) {
+	public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
 		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
 
@@ -120,7 +120,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		}
 	}
 
-	public void setJtaDataSource(DataSource jtaDataSource) {
+	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
 		this.jtaDataSource = jtaDataSource;
 	}
 
@@ -130,7 +130,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.jtaDataSource;
 	}
 
-	public void setNonJtaDataSource(DataSource nonJtaDataSource) {
+	public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
 		this.nonJtaDataSource = nonJtaDataSource;
 	}
 
@@ -251,7 +251,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
-	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {
+	public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
 		this.persistenceProviderPackageName = persistenceProviderPackageName;
 	}
 

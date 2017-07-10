@@ -63,7 +63,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	 * of the advisor.
 	 * @see #getAdvice()
 	 */
-	public void setAdviceBeanName(String adviceBeanName) {
+	public void setAdviceBeanName(@Nullable String adviceBeanName) {
 		this.adviceBeanName = adviceBeanName;
 	}
 

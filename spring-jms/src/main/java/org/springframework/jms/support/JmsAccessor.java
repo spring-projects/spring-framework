@@ -54,6 +54,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 	private boolean sessionTransacted = false;
@@ -64,7 +65,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Set the ConnectionFactory to use for obtaining JMS {@link Connection Connections}.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 

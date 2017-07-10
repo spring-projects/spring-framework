@@ -151,7 +151,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(String... methods) {
+	public final void setSupportedMethods(@Nullable String... methods) {
 		if (!ObjectUtils.isEmpty(methods)) {
 			this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
 		}
@@ -223,7 +223,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
-	public final void setCacheControl(CacheControl cacheControl) {
+	public final void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -269,7 +269,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public final void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(@Nullable String... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 

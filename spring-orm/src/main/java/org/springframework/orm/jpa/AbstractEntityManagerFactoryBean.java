@@ -271,7 +271,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * such as persistence provider class and JpaDialect, unless locally
 	 * overridden in this FactoryBean.
 	 */
-	public void setJpaVendorAdapter(JpaVendorAdapter jpaVendorAdapter) {
+	public void setJpaVendorAdapter(@Nullable JpaVendorAdapter jpaVendorAdapter) {
 		this.jpaVendorAdapter = jpaVendorAdapter;
 	}
 
@@ -296,7 +296,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * in init methods of related beans, even for metadata introspection purposes.
 	 * @since 4.3
 	 */
-	public void setBootstrapExecutor(AsyncTaskExecutor bootstrapExecutor) {
+	public void setBootstrapExecutor(@Nullable AsyncTaskExecutor bootstrapExecutor) {
 		this.bootstrapExecutor = bootstrapExecutor;
 	}
 

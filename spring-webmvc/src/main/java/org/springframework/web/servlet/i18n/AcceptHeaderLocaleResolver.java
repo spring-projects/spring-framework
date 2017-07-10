@@ -43,6 +43,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
 	private final List<Locale> supportedLocales = new ArrayList<>(4);
 
+	@Nullable
 	private Locale defaultLocale;
 
 
@@ -77,7 +78,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	 * @param defaultLocale the default locale to use
 	 * @since 4.3
 	 */
-	public void setDefaultLocale(Locale defaultLocale) {
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 

@@ -148,7 +148,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Specify the name of the default transaction manager bean.
 	 */
-	public void setTransactionManagerBeanName(String transactionManagerBeanName) {
+	public void setTransactionManagerBeanName(@Nullable String transactionManagerBeanName) {
 		this.transactionManagerBeanName = transactionManagerBeanName;
 	}
 
@@ -167,7 +167,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * default transaction manager bean has not been specified.
 	 * @see #setTransactionManagerBeanName
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -218,7 +218,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see NameMatchTransactionAttributeSource
 	 * @see org.springframework.transaction.annotation.AnnotationTransactionAttributeSource
 	 */
-	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
+	public void setTransactionAttributeSource(@Nullable TransactionAttributeSource transactionAttributeSource) {
 		this.transactionAttributeSource = transactionAttributeSource;
 	}
 
@@ -234,7 +234,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Set the BeanFactory to use for retrieving PlatformTransactionManager beans.
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 

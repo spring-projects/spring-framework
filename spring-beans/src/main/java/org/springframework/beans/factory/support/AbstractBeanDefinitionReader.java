@@ -122,7 +122,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 

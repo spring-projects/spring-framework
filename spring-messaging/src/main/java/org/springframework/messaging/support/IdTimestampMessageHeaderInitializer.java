@@ -43,7 +43,7 @@ public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitial
 	 * IdGenerator of {@link org.springframework.messaging.MessageHeaders} is used.
 	 * <p>To have no id's generated at all, see {@link #setDisableIdGeneration()}.
 	 */
-	public void setIdGenerator(IdGenerator idGenerator) {
+	public void setIdGenerator(@Nullable IdGenerator idGenerator) {
 		this.idGenerator = idGenerator;
 	}
 

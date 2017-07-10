@@ -71,7 +71,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 	/**
 	 * Set the default key type name (class name) to be used for this map.
 	 */
-	public void setKeyTypeName(String keyTypeName) {
+	public void setKeyTypeName(@Nullable String keyTypeName) {
 		this.keyTypeName = keyTypeName;
 	}
 
@@ -86,7 +86,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 	/**
 	 * Set the default value type name (class name) to be used for this map.
 	 */
-	public void setValueTypeName(String valueTypeName) {
+	public void setValueTypeName(@Nullable String valueTypeName) {
 		this.valueTypeName = valueTypeName;
 	}
 

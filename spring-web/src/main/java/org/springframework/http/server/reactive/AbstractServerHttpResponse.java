@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class for {@link ServerHttpResponse} implementations.
@@ -91,11 +92,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "Status code must not be null");
+	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
 		if (this.state.get() == State.COMMITTED) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + statusCode.toString() +
+				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
 						" because the HTTP response has already been committed");
 			}
 			return false;

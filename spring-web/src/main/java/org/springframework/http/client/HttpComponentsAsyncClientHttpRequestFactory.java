@@ -117,8 +117,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 * @since 4.3.10
 	 * @see #setHttpClient(HttpClient)
 	 */
-	public void setAsyncClient(HttpAsyncClient asyncClient) {
-		Assert.notNull(asyncClient, "HttpAsyncClient must not be null");
+	public void setAsyncClient(@Nullable HttpAsyncClient asyncClient) {
 		this.asyncClient = asyncClient;
 	}
 

@@ -71,7 +71,7 @@ public abstract class EisOperation implements InitializingBean {
 	/**
 	 * Set the CCI InteractionSpec for this operation.
 	 */
-	public void setInteractionSpec(InteractionSpec interactionSpec) {
+	public void setInteractionSpec(@Nullable InteractionSpec interactionSpec) {
 		this.interactionSpec = interactionSpec;
 	}
 

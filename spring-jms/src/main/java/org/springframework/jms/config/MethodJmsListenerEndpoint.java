@@ -68,7 +68,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set the actual bean instance to invoke this endpoint method on.
 	 */
-	public void setBean(Object bean) {
+	public void setBean(@Nullable Object bean) {
 		this.bean = bean;
 	}
 
@@ -80,7 +80,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	/**
 	 * Set the method to invoke for processing a message managed by this endpoint.
 	 */
-	public void setMethod(Method method) {
+	public void setMethod(@Nullable Method method) {
 		this.method = method;
 	}
 
@@ -95,7 +95,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * (if annotated itself, that is, if not just annotated in an interface).
 	 * @since 4.2.3
 	 */
-	public void setMostSpecificMethod(Method mostSpecificMethod) {
+	public void setMostSpecificMethod(@Nullable Method mostSpecificMethod) {
 		this.mostSpecificMethod = mostSpecificMethod;
 	}
 

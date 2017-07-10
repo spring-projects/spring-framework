@@ -109,7 +109,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * PathMatcher implementations that support mapping metadata other than the
 	 * Ant-style path patterns supported by default.
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 

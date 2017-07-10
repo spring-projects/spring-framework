@@ -555,7 +555,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Allow-Origin} response header.
 	 */
-	public void setAccessControlAllowOrigin(String allowedOrigin) {
+	public void setAccessControlAllowOrigin(@Nullable String allowedOrigin) {
 		set(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 	}
 
@@ -614,8 +614,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
 	 */
-	public void setAccessControlRequestMethod(HttpMethod requestMethod) {
-		set(ACCESS_CONTROL_REQUEST_METHOD, requestMethod.name());
+	public void setAccessControlRequestMethod(@Nullable HttpMethod requestMethod) {
+		set(ACCESS_CONTROL_REQUEST_METHOD, (requestMethod != null ? requestMethod.name() : null));
 	}
 
 	/**
@@ -705,7 +705,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Cache-Control} header.
 	 */
-	public void setCacheControl(String cacheControl) {
+	public void setCacheControl(@Nullable String cacheControl) {
 		set(CACHE_CONTROL, cacheControl);
 	}
 
@@ -811,9 +811,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * to set multiple content languages.</p>
 	 * @since 5.0
 	 */
-	public void setContentLanguage(Locale locale) {
-		Assert.notNull(locale, "'locale' must not be null");
-		set(CONTENT_LANGUAGE, locale.toLanguageTag());
+	public void setContentLanguage(@Nullable Locale locale) {
+		set(CONTENT_LANGUAGE, (locale != null ? locale.toLanguageTag() : null));
 	}
 
 	/**
@@ -855,10 +854,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the {@linkplain MediaType media type} of the body,
 	 * as specified by the {@code Content-Type} header.
 	 */
-	public void setContentType(MediaType mediaType) {
-		Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
-		Assert.isTrue(!mediaType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
-		set(CONTENT_TYPE, mediaType.toString());
+	public void setContentType(@Nullable MediaType mediaType) {
+		if (mediaType != null) {
+			Assert.isTrue(!mediaType.isWildcardType(), "'Content-Type' cannot contain wildcard type '*'");
+			Assert.isTrue(!mediaType.isWildcardSubtype(), "'Content-Type' cannot contain wildcard subtype '*'");
+			set(CONTENT_TYPE, mediaType.toString());
+		}
+		else {
+			set(CONTENT_TYPE, null);
+		}
 	}
 
 	/**
@@ -896,10 +900,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
 	 */
-	public void setETag(String etag) {
-		Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
-				"Invalid ETag: does not start with W/ or \"");
-		Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+	public void setETag(@Nullable String etag) {
+		if (etag != null) {
+			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
+					"Invalid ETag: does not start with W/ or \"");
+			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+		}
 		set(ETAG, etag);
 	}
 
@@ -939,10 +945,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@linkplain InetSocketAddress#getHostString() hostname}.
 	 * @since 5.0
 	 */
-	public void setHost(InetSocketAddress host) {
-		String value = (host.getPort() != 0 ?
-				String.format("%s:%d", host.getHostString(), host.getPort()) : host.getHostString());
-		set(HOST, value);
+	public void setHost(@Nullable InetSocketAddress host) {
+		if (host != null) {
+			String value = (host.getPort() != 0 ?
+					String.format("%s:%d", host.getHostString(), host.getPort()) : host.getHostString());
+			set(HOST, value);
+		}
+		else {
+			set(HOST, null);
+		}
 	}
 
 	/**
@@ -1086,8 +1097,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) location of a resource,
 	 * as specified by the {@code Location} header.
 	 */
-	public void setLocation(URI location) {
-		set(LOCATION, location.toASCIIString());
+	public void setLocation(@Nullable URI location) {
+		set(LOCATION, (location != null ? location.toASCIIString() : null));
 	}
 
 	/**
@@ -1104,7 +1115,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Origin} header.
 	 */
-	public void setOrigin(String origin) {
+	public void setOrigin(@Nullable String origin) {
 		set(ORIGIN, origin);
 	}
 
@@ -1119,7 +1130,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Pragma} header.
 	 */
-	public void setPragma(String pragma) {
+	public void setPragma(@Nullable String pragma) {
 		set(PRAGMA, pragma);
 	}
 
@@ -1151,7 +1162,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Upgrade} header.
 	 */
-	public void setUpgrade(String upgrade) {
+	public void setUpgrade(@Nullable String upgrade) {
 		set(UPGRADE, upgrade);
 	}
 
@@ -1428,7 +1439,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #add(String, String)
 	 */
 	@Override
-	public void set(String headerName, String headerValue) {
+	public void set(String headerName, @Nullable String headerValue) {
 		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
 		this.headers.put(headerName, headerValues);

@@ -61,7 +61,7 @@ public class StompDecoder {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
 	 * {@link Message}s from decoded STOMP frames.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

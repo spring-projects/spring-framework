@@ -26,6 +26,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -55,7 +56,7 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	// ServerHttpResponse delegation methods...
 
 	@Override
-	public boolean setStatusCode(HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		return getDelegate().setStatusCode(status);
 	}
 

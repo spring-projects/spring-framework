@@ -17,6 +17,7 @@
 package org.springframework.context;
 
 import org.springframework.beans.factory.Aware;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
@@ -37,6 +38,6 @@ public interface ApplicationEventPublisherAware extends Aware {
 	 * Invoked before ApplicationContextAware's setApplicationContext.
 	 * @param applicationEventPublisher event publisher to be used by this object
 	 */
-	void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher);
+	void setApplicationEventPublisher(@Nullable ApplicationEventPublisher applicationEventPublisher);
 
 }

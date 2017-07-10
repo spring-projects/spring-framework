@@ -76,7 +76,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	 * Set the JSR-356 {@link ServerContainer} to use for endpoint registration.
 	 * If not set, the container is going to be retrieved via the {@code ServletContext}.
 	 */
-	public void setServerContainer(ServerContainer serverContainer) {
+	public void setServerContainer(@Nullable ServerContainer serverContainer) {
 		this.serverContainer = serverContainer;
 	}
 

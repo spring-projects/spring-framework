@@ -229,7 +229,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
 	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -247,7 +247,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * looking up file extensions, etc.
 	 */
 	@Override
-	public void setServletContext(ServletContext servletContext) {
+	public void setServletContext(@Nullable ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
