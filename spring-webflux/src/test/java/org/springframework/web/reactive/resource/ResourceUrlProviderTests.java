@@ -69,7 +69,7 @@ public class ResourceUrlProviderTests {
 		this.handler.setLocations(locations);
 		this.handler.afterPropertiesSet();
 		this.handlerMap.put("/resources/**", this.handler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 	}
 
 
@@ -125,7 +125,7 @@ public class ResourceUrlProviderTests {
 		otherHandler.setResourceResolvers(resolvers);
 
 		this.handlerMap.put("/resources/*.css", otherHandler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 
 		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
 		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
