@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.client
 
 import org.reactivestreams.Publisher
-import org.springframework.http.ResponseEntity
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -49,19 +48,3 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToMono(): Mono<T> = body
  * @since 5.0
  */
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> = bodyToFlux(T::class.java)
-
-/**
- * Extension for [WebClient.ResponseSpec.toEntity] providing a `bodyToEntity<Foo>()` variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-inline fun <reified T : Any> WebClient.ResponseSpec.toEntity(): Mono<ResponseEntity<T>> = toEntity(T::class.java)
-
-/**
- * Extension for [WebClient.ResponseSpec.toEntityList] providing a `bodyToEntityList<Foo>()` variant.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-inline fun <reified T : Any> WebClient.ResponseSpec.toEntityList(): Mono<ResponseEntity<List<T>>> = toEntityList(T::class.java)

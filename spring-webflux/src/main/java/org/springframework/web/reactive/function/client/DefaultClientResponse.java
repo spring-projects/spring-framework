@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -101,6 +102,25 @@ class DefaultClientResponse implements ClientResponse {
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		return body(BodyExtractors.toFlux(elementClass));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
+		HttpHeaders headers = headers().asHttpHeaders();
+		HttpStatus statusCode = statusCode();
+		return bodyToMono(bodyType)
+				.map(body -> new ResponseEntity<>(body, headers, statusCode))
+				.switchIfEmpty(Mono.defer(
+						() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> responseType) {
+		HttpHeaders headers = headers().asHttpHeaders();
+		HttpStatus statusCode = statusCode();
+		return bodyToFlux(responseType)
+				.collectList()
+				.map(body -> new ResponseEntity<>(body, headers, statusCode));
 	}
 
 

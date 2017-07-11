@@ -158,7 +158,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void jsonStringRetrieveEntity() throws Exception {
+	public void jsonStringExchangeEntity() throws Exception {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody(content));
@@ -166,8 +166,8 @@ public class WebClientIntegrationTests {
 		Mono<ResponseEntity<String>> result = this.webClient.get()
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.toEntity(String.class);
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -186,15 +186,15 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void jsonStringRetrieveEntityList() throws Exception {
+	public void jsonStringExchangeEntityList() throws Exception {
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody(content));
 
 		Mono<ResponseEntity<List<Pojo>>> result = this.webClient.get()
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.toEntityList(Pojo.class);
+				.exchange()
+				.flatMap(response -> response.toEntityList(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -412,14 +412,14 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void retrieveToEntityNotFound() throws Exception {
+	public void exchangeToEntityNotFound() throws Exception {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
 		Mono<ResponseEntity<String>> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
-				.retrieve()
-				.toEntity(String.class);
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()))
@@ -518,21 +518,6 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result).assertNext(r -> {
 			assertTrue(r.statusCode().is2xxSuccessful());
 			StepVerifier.create(r.bodyToMono(Void.class)).verifyComplete();
-		}).verifyComplete();
-	}
-
-	@Test
-	public void retrieveNoContent() throws Exception  {
-		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
-
-		Mono<ResponseEntity<Void>> result = this.webClient.get()
-				.uri("/noContent")
-				.retrieve()
-				.toEntity(Void.class);
-
-		StepVerifier.create(result).assertNext(r -> {
-			assertFalse(r.hasBody());
-			assertTrue(r.getStatusCode().is2xxSuccessful());
 		}).verifyComplete();
 	}
 

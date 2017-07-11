@@ -39,7 +39,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.lang.Nullable;
@@ -443,28 +442,5 @@ class DefaultWebClient implements WebClient {
 					.orElse(response.body(extractor));
 		}
 
-
-		@Override
-		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-			return this.responseMono.flatMap(response -> {
-						HttpHeaders headers = response.headers().asHttpHeaders();
-						HttpStatus statusCode = response.statusCode();
-						return response.bodyToMono(bodyType)
-								.map(body -> new ResponseEntity<>(body, headers, statusCode))
-								.switchIfEmpty(Mono.defer(
-										() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
-					}
-			);
-		}
-
-		@Override
-		public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> responseType) {
-			return this.responseMono.flatMap(response ->
-					response.bodyToFlux(responseType).collectList().map(body -> {
-						HttpHeaders headers = response.headers().asHttpHeaders();
-						return new ResponseEntity<>(body, headers, response.statusCode());
-					})
-			);
-		}
 	}
 }

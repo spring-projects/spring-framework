@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -81,6 +82,22 @@ public interface ClientResponse {
 	 * @return a flux containing the body of the given type {@code T}
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
+
+	/**
+	 * Return this response as a delayed {@code ResponseEntity}.
+	 * @param bodyType the expected response body type
+	 * @param <T> response body type
+	 * @return {@code Mono} with the {@code ResponseEntity}
+	 */
+	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
+
+	/**
+	 * Return this response as a delayed list of {@code ResponseEntity}s.
+	 * @param elementType the expected response body list element type
+	 * @param <T> the type of elements in the list
+	 * @return {@code Mono} with the list of {@code ResponseEntity}s
+	 */
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
 
 
 	/**
