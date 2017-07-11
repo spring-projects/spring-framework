@@ -29,10 +29,11 @@ import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
-import static org.springframework.core.ReactiveTypeDescriptor.*;
+import static org.springframework.core.ReactiveTypeDescriptor.multiValue;
+import static org.springframework.core.ReactiveTypeDescriptor.noValue;
+import static org.springframework.core.ReactiveTypeDescriptor.singleOptionalValue;
+import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValue;
 
 /**
  * A registry of adapters to adapt a Reactive Streams {@link Publisher} to/from
@@ -48,18 +49,7 @@ import static org.springframework.core.ReactiveTypeDescriptor.*;
  */
 public class ReactiveAdapterRegistry {
 
-	private static final boolean reactorPresent =
-			ClassUtils.isPresent("reactor.core.publisher.Flux", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxJava1Present =
-			ClassUtils.isPresent("rx.Observable", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxReactiveStreamsPresent =
-			ClassUtils.isPresent("rx.RxReactiveStreams", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxJava2Present =
-			ClassUtils.isPresent("io.reactivex.Flowable", ReactiveAdapterRegistry.class.getClassLoader());
-
+	private final boolean reactorPresent;
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>(32);
 
@@ -68,14 +58,32 @@ public class ReactiveAdapterRegistry {
 	 * Create a registry and auto-register default adapters.
 	 */
 	public ReactiveAdapterRegistry() {
-		if (reactorPresent) {
+
+		// Reactor
+		boolean reactorRegistered = false;
+		try {
 			new ReactorRegistrar().registerAdapters(this);
+			reactorRegistered = true;
 		}
-		if (rxJava1Present && rxReactiveStreamsPresent) {
+		catch (Throwable ex) {
+			// Ignore
+		}
+		this.reactorPresent = reactorRegistered;
+
+		// RxJava1
+		try {
 			new RxJava1Registrar().registerAdapters(this);
 		}
-		if (rxJava2Present) {
+		catch (Throwable ex) {
+			// Ignore
+		}
+
+		// RxJava2
+		try {
 			new RxJava2Registrar().registerAdapters(this);
+		}
+		catch (Throwable ex) {
+			// Ignore
 		}
 	}
 
@@ -129,10 +137,6 @@ public class ReactiveAdapterRegistry {
 		if (clazz == null) {
 			return null;
 		}
-
-		Assert.isTrue(!rxJava1Present || rxReactiveStreamsPresent || !clazz.getName().startsWith("rx."),
-				"For RxJava 1.x adapter support please add " +
-						"\"io.reactivex:rxjava-reactive-streams\": " + clazz.getName());
 
 		return this.adapters.stream()
 				.filter(adapter -> adapter.getReactiveType() == clazz)
