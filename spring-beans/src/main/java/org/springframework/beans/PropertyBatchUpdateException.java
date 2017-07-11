@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -47,7 +48,7 @@ public class PropertyBatchUpdateException extends BeansException {
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
 	public PropertyBatchUpdateException(PropertyAccessException[] propertyAccessExceptions) {
-		super(null);
+		super(null, null);
 		Assert.notEmpty(propertyAccessExceptions, "At least 1 PropertyAccessException required");
 		this.propertyAccessExceptions = propertyAccessExceptions;
 	}
@@ -71,6 +72,7 @@ public class PropertyBatchUpdateException extends BeansException {
 	/**
 	 * Return the exception for this field, or {@code null} if there isn't any.
 	 */
+	@Nullable
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
 		for (PropertyAccessException pae : this.propertyAccessExceptions) {
 			if (ObjectUtils.nullSafeEquals(propertyName, pae.getPropertyName())) {
@@ -130,7 +132,7 @@ public class PropertyBatchUpdateException extends BeansException {
 	}
 
 	@Override
-	public boolean contains(Class<?> exType) {
+	public boolean contains(@Nullable Class<?> exType) {
 		if (exType == null) {
 			return false;
 		}

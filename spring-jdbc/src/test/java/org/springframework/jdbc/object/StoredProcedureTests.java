@@ -49,6 +49,7 @@ import org.springframework.jdbc.core.support.AbstractSqlTypeValue;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.junit.Assert.*;
@@ -689,7 +690,8 @@ public class StoredProcedureTests {
 			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
 
 				@Override
-				public DataAccessException translate(String task, String sql,
+				@Nullable
+				public DataAccessException translate(String task, @Nullable String sql,
 						SQLException sqlex) {
 					return new CustomDataException(sql, sqlex);
 				}

@@ -17,12 +17,12 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.webjars.WebJarAssetLocator;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource and then
@@ -71,7 +71,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
@@ -98,6 +98,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		return path;
 	}
 
+	@Nullable
 	protected String findWebJarResourcePath(String path) {
 		int startOffset = (path.startsWith("/") ? 1 : 0);
 		int endOffset = path.indexOf("/", 1);

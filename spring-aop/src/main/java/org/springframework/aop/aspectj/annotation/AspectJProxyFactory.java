@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,9 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
 		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
-		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
+		Class<?> targetClass = getTargetClass();
+		Assert.state(targetClass != null, "Unresolvable target class");
+		advisors = AopUtils.findAdvisorsThatCanApply(advisors, targetClass);
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
 		AnnotationAwareOrderComparator.sort(advisors);
 		addAdvisors(advisors);

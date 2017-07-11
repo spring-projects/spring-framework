@@ -2411,8 +2411,8 @@ how caching works, it is important to understand what is meant by __unique__ and
 suite__.
 
 An `ApplicationContext` can be __uniquely__ identified by the combination of
-configuration parameters that are used to load it. Consequently, the unique combination
-of configuration parameters are used to generate a __key__ under which the context is
+configuration parameters that is used to load it. Consequently, the unique combination
+of configuration parameters is used to generate a __key__ under which the context is
 cached. The TestContext framework uses the following configuration parameters to build
 the context cache key:
 

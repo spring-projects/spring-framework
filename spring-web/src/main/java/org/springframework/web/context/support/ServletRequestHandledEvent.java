@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.support;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Servlet-specific subclass of RequestHandledEvent,
  * adding servlet-specific context information.
@@ -58,7 +60,7 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
 			String clientAddress, String method, String servletName,
-			String sessionId, String userName, long processingTimeMillis) {
+			@Nullable String sessionId, @Nullable String userName, long processingTimeMillis) {
 
 		super(source, sessionId, userName, processingTimeMillis);
 		this.requestUrl = requestUrl;
@@ -82,8 +84,8 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 * @param failureCause the cause of failure, if any
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
-			String clientAddress, String method, String servletName, String sessionId,
-			String userName, long processingTimeMillis, Throwable failureCause) {
+			String clientAddress, String method, String servletName, @Nullable String sessionId,
+			@Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause) {
 
 		super(source, sessionId, userName, processingTimeMillis, failureCause);
 		this.requestUrl = requestUrl;
@@ -108,8 +110,8 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 * @param statusCode the HTTP status code of the response
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
-			String clientAddress, String method, String servletName, String sessionId,
-			String userName, long processingTimeMillis, Throwable failureCause, int statusCode) {
+			String clientAddress, String method, String servletName, @Nullable String sessionId,
+			@Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause, int statusCode) {
 
 		super(source, sessionId, userName, processingTimeMillis, failureCause);
 		this.requestUrl = requestUrl;

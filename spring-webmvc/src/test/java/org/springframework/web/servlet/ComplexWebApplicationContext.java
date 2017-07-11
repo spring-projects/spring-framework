@@ -39,6 +39,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.WebApplicationContext;
@@ -308,7 +309,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public void postHandle(
-				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+				HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
 				throws ServletException {
 
 			if (request.getAttribute("test2x") != null) {
@@ -356,7 +357,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public void postHandle(
-				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+				HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
 				throws ServletException {
 
 			if (request.getParameter("noView") != null) {
@@ -395,12 +396,12 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		@Override
-		public void postHandle(WebRequest request, ModelMap model) throws Exception {
+		public void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception {
 			request.setAttribute("test3x", "test3x", WebRequest.SCOPE_REQUEST);
 		}
 
 		@Override
-		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
+		public void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception {
 			request.setAttribute("test3y", "test3y", WebRequest.SCOPE_REQUEST);
 		}
 	}

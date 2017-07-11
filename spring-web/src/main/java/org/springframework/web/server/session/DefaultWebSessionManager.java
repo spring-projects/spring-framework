@@ -17,6 +17,7 @@ package org.springframework.web.server.session;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	private WebSessionStore sessionStore = new InMemoryWebSessionStore();
 
-	private Clock clock = Clock.systemDefaultZone();
+	private Clock clock = Clock.system(ZoneId.of("GMT"));
 
 
 	/**
@@ -82,7 +83,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	 * Configure the {@link Clock} for access to current time. During tests you
 	 * may use {code Clock.offset(clock, Duration.ofMinutes(-31))} to set the
 	 * clock back for example to test changes after sessions expire.
-	 * <p>By default {@link Clock#systemDefaultZone()} is used.
+	 * <p>By default {@code Clock.system(ZoneId.of("GMT"))} is used.
 	 * @param clock the clock to use
 	 */
 	public void setClock(Clock clock) {

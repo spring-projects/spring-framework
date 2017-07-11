@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -29,8 +30,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
-
-import org.xml.sax.InputSource;
 
 import static org.junit.Assert.*;
 
@@ -45,18 +44,6 @@ public class XmlBeanDefinitionReaderTests {
 	public void setParserClassSunnyDay() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(DefaultBeanDefinitionDocumentReader.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setParserClassToNull() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setParserClassToUnsupportedParserType() throws Exception {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(String.class);
 	}
 
 	@Test(expected = BeanDefinitionStoreException.class)

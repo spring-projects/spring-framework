@@ -59,7 +59,7 @@ public class BeanNameUrlHandlerMapping extends AbstractDetectingUrlHandlerMappin
 		if (beanName.startsWith("/")) {
 			urls.add(beanName);
 		}
-		String[] aliases = getApplicationContext().getAliases(beanName);
+		String[] aliases = obtainApplicationContext().getAliases(beanName);
 		for (String alias : aliases) {
 			if (alias.startsWith("/")) {
 				urls.add(alias);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that exposes an EhCache {@link net.sf.ehcache.CacheManager}
@@ -55,14 +56,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private String cacheManagerName;
 
 	private boolean acceptExisting = false;
 
 	private boolean shared = false;
 
+	@Nullable
 	private CacheManager cacheManager;
 
 	private boolean locallyManaged = true;
@@ -182,7 +186,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	@Override
 	public void destroy() {
-		if (this.locallyManaged) {
+		if (this.cacheManager != null && this.locallyManaged) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Shutting down EhCache CacheManager" +
 						(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));

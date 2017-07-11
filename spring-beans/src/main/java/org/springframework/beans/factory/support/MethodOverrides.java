@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
@@ -35,8 +37,7 @@ import java.util.Set;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides =
-			Collections.synchronizedSet(new LinkedHashSet<MethodOverride>(0));
+	private final Set<MethodOverride> overrides = Collections.synchronizedSet(new LinkedHashSet<>(0));
 
 	private volatile boolean modified = false;
 
@@ -58,7 +59,7 @@ public class MethodOverrides {
 	/**
 	 * Copy all given method overrides into this object.
 	 */
-	public void addOverrides(MethodOverrides other) {
+	public void addOverrides(@Nullable MethodOverrides other) {
 		if (other != null) {
 			this.modified = true;
 			this.overrides.addAll(other.overrides);
@@ -95,6 +96,7 @@ public class MethodOverrides {
 	 * @param method method to check for overrides for
 	 * @return the method override, or {@code null} if none
 	 */
+	@Nullable
 	public MethodOverride getOverride(Method method) {
 		if (!this.modified) {
 			return null;

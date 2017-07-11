@@ -7,4 +7,7 @@
  * {@link org.springframework.http.codec.HttpMessageWriter} for reading and
  * writing the body of HTTP requests and responses.
  */
+@NonNullApi
 package org.springframework.http.codec;
+
+import org.springframework.lang.NonNullApi;

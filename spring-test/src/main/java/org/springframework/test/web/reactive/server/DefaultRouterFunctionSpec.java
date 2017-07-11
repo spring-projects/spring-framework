@@ -43,9 +43,7 @@ class DefaultRouterFunctionSpec extends AbstractMockServerSpec<WebTestClient.Rou
 
 	@Override
 	public WebTestClient.RouterFunctionSpec handlerStrategies(HandlerStrategies handlerStrategies) {
-		if (handlerStrategies != null) {
-			this.handlerStrategies = handlerStrategies;
-		}
+		this.handlerStrategies = handlerStrategies;
 		return this;
 	}
 

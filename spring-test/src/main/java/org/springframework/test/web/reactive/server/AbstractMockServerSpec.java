@@ -18,11 +18,13 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
+import org.springframework.util.Assert;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.server.session.DefaultWebSessionManager;
+import org.springframework.web.server.session.WebSessionManager;
 
 /**
  * Base class for implementations of {@link WebTestClient.MockServerSpec}.
@@ -35,10 +37,28 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 
 	private final List<WebFilter> filters = new ArrayList<>(4);
 
+	private WebSessionManager sessionManager = new DefaultWebSessionManager();
+
+	private final List<MockServerConfigurer> configurers = new ArrayList<>(4);
+
 
 	@Override
 	public <T extends B> T webFilter(WebFilter... filter) {
 		this.filters.addAll(Arrays.asList(filter));
+		return self();
+	}
+
+	@Override
+	public <T extends B> T webSessionManager(WebSessionManager sessionManager) {
+		Assert.notNull(sessionManager, "WebSessionManager must not be null.");
+		this.sessionManager = sessionManager;
+		return self();
+	}
+
+	@Override
+	public <T extends B> T apply(MockServerConfigurer configurer) {
+		configurer.afterConfigureAdded(this);
+		this.configurers.add(configurer);
 		return self();
 	}
 
@@ -47,27 +67,20 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		return (T) this;
 	}
 
-
 	@Override
 	public WebTestClient.Builder configureClient() {
 		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
-		filtersInReverse().forEach(builder::prependFilter);
-		return new DefaultWebTestClientBuilder(builder.build());
+		builder.filters(theFilters -> theFilters.addAll(0, this.filters));
+		builder.sessionManager(this.sessionManager);
+		this.configurers.forEach(configurer -> configurer.beforeServerCreated(builder));
+		return new DefaultWebTestClientBuilder(builder);
 	}
 
 	/**
-	 * Sub-classes to create the {@code WebHttpHandlerBuilder} to use.
+	 * Sub-classes must create an {@code WebHttpHandlerBuilder} that will then
+	 * be used to create the HttpHandler for the mock server.
 	 */
 	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();
-
-	/**
-	 * Return the filters in reverse order for pre-pending.
-	 */
-	private List<WebFilter> filtersInReverse() {
-		List<WebFilter> result = new ArrayList<>(this.filters);
-		Collections.reverse(result);
-		return result;
-	}
 
 	@Override
 	public WebTestClient build() {

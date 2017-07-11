@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that locates a {@link java.rmi.registry.Registry} and
@@ -177,7 +178,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	 * @throws java.rmi.RemoteException if the registry couldn't be located or created
 	 */
 	protected Registry getRegistry(String registryHost, int registryPort,
-			RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (registryHost != null) {
@@ -203,8 +204,8 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	 * @return the RMI registry
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
-	protected Registry getRegistry(
-			int registryPort, RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+	protected Registry getRegistry(int registryPort,
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (clientSocketFactory != null) {

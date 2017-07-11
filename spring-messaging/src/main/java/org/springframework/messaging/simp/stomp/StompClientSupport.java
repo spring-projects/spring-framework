@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
@@ -70,7 +71,7 @@ public abstract class StompClientSupport {
 
 	/**
 	 * Configure a scheduler to use for heartbeats and for receipt tracking.
-	 * <p><strong>Note:</strong> some transports have built-in support to work
+	 * <p><strong>Note:</strong> Some transports have built-in support to work
 	 * with heartbeats and therefore do not require a TaskScheduler.
 	 * Receipts however, if needed, do require a TaskScheduler to be configured.
 	 * <p>By default, this is not set.
@@ -82,6 +83,7 @@ public abstract class StompClientSupport {
 	/**
 	 * The configured TaskScheduler.
 	 */
+	@Nullable
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
@@ -99,7 +101,7 @@ public abstract class StompClientSupport {
 	 * http://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>
 	 */
 	public void setDefaultHeartbeat(long[] heartbeat) {
-		if (heartbeat == null || heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+		if (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
 			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
 		}
 		this.defaultHeartbeat = heartbeat;
@@ -118,7 +120,8 @@ public abstract class StompClientSupport {
 	 * is set to "0,0", and {@code true} otherwise.
 	 */
 	public boolean isDefaultHeartbeatEnabled() {
-		return (getDefaultHeartbeat() != null && getDefaultHeartbeat()[0] != 0 && getDefaultHeartbeat()[1] != 0);
+		long[] heartbeat = getDefaultHeartbeat();
+		return (heartbeat[0] != 0 && heartbeat[1] != 0);
 	}
 
 	/**
@@ -144,7 +147,9 @@ public abstract class StompClientSupport {
 	 * @param handler the handler for the STOMP session
 	 * @return the created session
 	 */
-	protected ConnectionHandlingStompSession createSession(StompHeaders connectHeaders, StompSessionHandler handler) {
+	protected ConnectionHandlingStompSession createSession(
+			@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
+
 		connectHeaders = processConnectHeaders(connectHeaders);
 		DefaultStompSession session = new DefaultStompSession(handler, connectHeaders);
 		session.setMessageConverter(getMessageConverter());
@@ -159,7 +164,7 @@ public abstract class StompClientSupport {
 	 * @param connectHeaders the headers to modify
 	 * @return the modified headers
 	 */
-	protected StompHeaders processConnectHeaders(StompHeaders connectHeaders) {
+	protected StompHeaders processConnectHeaders(@Nullable StompHeaders connectHeaders) {
 		connectHeaders = (connectHeaders != null ? connectHeaders : new StompHeaders());
 		if (connectHeaders.getHeartbeat() == null) {
 			connectHeaders.setHeartbeat(getDefaultHeartbeat());

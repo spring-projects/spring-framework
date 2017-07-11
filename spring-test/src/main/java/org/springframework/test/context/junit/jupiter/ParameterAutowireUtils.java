@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * Collection of utilities related to autowiring of individual method parameters.
@@ -88,6 +89,7 @@ abstract class ParameterAutowireUtils {
 	 * @see SynthesizingMethodParameter#forParameter(Parameter)
 	 * @see AutowireCapableBeanFactory#resolveDependency(DependencyDescriptor, String)
 	 */
+	@Nullable
 	static Object resolveDependency(Parameter parameter, Class<?> containingClass, ApplicationContext applicationContext) {
 		boolean required = findMergedAnnotation(parameter, Autowired.class).map(Autowired::required).orElse(true);
 		MethodParameter methodParameter = SynthesizingMethodParameter.forParameter(parameter);

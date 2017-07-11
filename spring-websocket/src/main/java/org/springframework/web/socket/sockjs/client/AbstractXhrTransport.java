@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
@@ -118,7 +119,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	// InfoReceiver methods
 
 	@Override
-	public String executeInfoRequest(URI infoUrl, HttpHeaders headers) {
+	public String executeInfoRequest(URI infoUrl, @Nullable HttpHeaders headers) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SockJS Info request, url=" + infoUrl);
 		}
@@ -136,7 +137,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 		if (logger.isTraceEnabled()) {
 			logger.trace("SockJS Info request (url=" + infoUrl + ") response: " + response);
 		}
-		return response.getBody();
+		String result = response.getBody();
+		return (result != null ? result : "");
 	}
 
 	protected abstract ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers);

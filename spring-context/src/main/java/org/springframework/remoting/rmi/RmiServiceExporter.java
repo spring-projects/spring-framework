@@ -29,6 +29,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * RMI exporter that exposes the specified service as RMI object with the specified name.
@@ -319,7 +320,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
 	protected Registry getRegistry(String registryHost, int registryPort,
-			RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (registryHost != null) {
@@ -345,8 +346,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 * @return the RMI registry
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
-	protected Registry getRegistry(
-			int registryPort, RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
+	protected Registry getRegistry(int registryPort,
+			@Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
 			throws RemoteException {
 
 		if (clientSocketFactory != null) {

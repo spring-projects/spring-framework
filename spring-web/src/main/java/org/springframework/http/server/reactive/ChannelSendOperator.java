@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.Exceptions;
-import reactor.core.publisher.MonoSource;
+import reactor.core.Scannable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
+import reactor.util.context.Context;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,20 +42,35 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ChannelSendOperator<T> extends MonoSource<T, Void> {
+public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
 
+	private final Flux<T> source;
+
 
 	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>, Publisher<Void>> writeFunction) {
-		super(source);
+		this.source = Flux.from(source);
 		this.writeFunction = writeFunction;
 	}
 
 
 	@Override
-	public void subscribe(Subscriber<? super Void> s) {
-		this.source.subscribe(new WriteWithBarrier(s));
+	@Nullable
+	@SuppressWarnings("rawtypes")
+	public Object scanUnsafe(Attr key) {
+		if (key == IntAttr.PREFETCH) {
+			return Integer.MAX_VALUE;
+		}
+		if (key == ScannableAttr.PARENT) {
+			return this.source;
+		}
+		return null;
+	}
+
+	@Override
+	public void subscribe(Subscriber<? super Void> s, Context ctx) {
+		this.source.subscribe(new WriteWithBarrier(s), ctx);
 	}
 
 
@@ -70,15 +88,18 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		private boolean beforeFirstEmission = true;
 
 		/** Cached signal before readyToWrite */
+		@Nullable
 		private T item;
 
 		/** Cached 1st/2nd signal before readyToWrite */
+		@Nullable
 		private Throwable error;
 
 		/** Cached 1st/2nd signal before readyToWrite */
 		private boolean completed = false;
 
 		/** The actual writeSubscriber vs the downstream completion subscriber */
+		@Nullable
 		private Subscriber<? super T> writeSubscriber;
 
 		public WriteWithBarrier(Subscriber<? super Void> subscriber) {
@@ -94,12 +115,12 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		@Override
 		public void doNext(T item) {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onNext(item);
+				obtainWriteSubscriber().onNext(item);
 				return;
 			}
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onNext(item);
+					obtainWriteSubscriber().onNext(item);
 				}
 				else if (this.beforeFirstEmission) {
 					this.item = item;
@@ -107,7 +128,9 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 					writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
 				}
 				else {
-					subscription.cancel();
+					if (this.subscription != null) {
+						this.subscription.cancel();
+					}
 					downstream().onError(new IllegalStateException("Unexpected item."));
 				}
 			}
@@ -116,12 +139,12 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		@Override
 		public void doError(Throwable ex) {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onError(ex);
+				obtainWriteSubscriber().onError(ex);
 				return;
 			}
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onError(ex);
+					obtainWriteSubscriber().onError(ex);
 				}
 				else if (this.beforeFirstEmission) {
 					this.beforeFirstEmission = false;
@@ -136,12 +159,12 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		@Override
 		public void doComplete() {
 			if (this.readyToWrite) {
-				this.writeSubscriber.onComplete();
+				obtainWriteSubscriber().onComplete();
 				return;
 			}
 			synchronized (this) {
 				if (this.readyToWrite) {
-					this.writeSubscriber.onComplete();
+					obtainWriteSubscriber().onComplete();
 				}
 				else if (this.beforeFirstEmission) {
 					this.completed = true;
@@ -157,9 +180,8 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		@Override
 		public void subscribe(Subscriber<? super T> writeSubscriber) {
 			synchronized (this) {
-				Assert.isNull(this.writeSubscriber, "Only one writeSubscriber supported");
+				Assert.state(this.writeSubscriber == null, "Only one write subscriber supported");
 				this.writeSubscriber = writeSubscriber;
-
 				if (this.error != null || this.completed) {
 					this.writeSubscriber.onSubscribe(Operators.emptySubscription());
 					emitCachedSignals();
@@ -176,14 +198,14 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		 */
 		private boolean emitCachedSignals() {
 			if (this.item != null) {
-				this.writeSubscriber.onNext(this.item);
+				obtainWriteSubscriber().onNext(this.item);
 			}
 			if (this.error != null) {
-				this.writeSubscriber.onError(this.error);
+				obtainWriteSubscriber().onError(this.error);
 				return true;
 			}
 			if (this.completed) {
-				this.writeSubscriber.onComplete();
+				obtainWriteSubscriber().onComplete();
 				return true;
 			}
 			return false;
@@ -209,13 +231,20 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 				}
 			}
 		}
+
+		private Subscriber<? super T> obtainWriteSubscriber() {
+			Assert.state(this.writeSubscriber != null, "No write subscriber");
+			return this.writeSubscriber;
+		}
 	}
+
 
 	// TODO Remove this copy of Reactor 3.0.x Operators.SubscriberAdapter
 	private static class SubscriberAdapter<I, O> implements Subscriber<I>, Subscription {
 
 		protected final Subscriber<? super O> subscriber;
 
+		@Nullable
 		protected Subscription subscription;
 
 		public SubscriberAdapter(Subscriber<? super O> subscriber) {
@@ -223,15 +252,16 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		}
 
 		public Subscriber<? super O> downstream() {
-			return subscriber;
+			return this.subscriber;
 		}
 
 		@Override
 		public final void cancel() {
 			try {
 				doCancel();
-			} catch (Throwable throwable) {
-				doOnSubscriberError(Operators.onOperatorError(subscription, throwable));
+			}
+			catch (Throwable throwable) {
+				doOnSubscriberError(Operators.onOperatorError(this.subscription, throwable));
 			}
 		}
 
@@ -239,37 +269,32 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		public final void onComplete() {
 			try {
 				doComplete();
-			} catch (Throwable throwable) {
+			}
+			catch (Throwable throwable) {
 				doOnSubscriberError(Operators.onOperatorError(throwable));
 			}
 		}
 
 		@Override
 		public final void onError(Throwable t) {
-			if (t == null) {
-				throw Exceptions.argumentIsNullException();
-			}
 			doError(t);
 		}
 
 		@Override
 		public final void onNext(I i) {
-			if (i == null) {
-				throw Exceptions.argumentIsNullException();
-			}
 			try {
 				doNext(i);
 			}
 			catch (Throwable throwable) {
-				doOnSubscriberError(Operators.onOperatorError(subscription, throwable, i));
+				doOnSubscriberError(Operators.onOperatorError(this.subscription, throwable, i));
 			}
 		}
 
 		@Override
 		public final void onSubscribe(Subscription s) {
-			if (Operators.validate(subscription, s)) {
+			if (Operators.validate(this.subscription, s)) {
 				try {
-					subscription = s;
+					this.subscription = s;
 					doOnSubscribe(s);
 				}
 				catch (Throwable throwable) {
@@ -283,7 +308,8 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 			try {
 				Operators.checkRequest(n);
 				doRequest(n);
-			} catch (Throwable throwable) {
+			}
+			catch (Throwable throwable) {
 				doCancel();
 				doOnSubscriberError(Operators.onOperatorError(throwable));
 			}
@@ -299,28 +325,29 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		 * @param subscription the subscription to optionally process
 		 */
 		protected void doOnSubscribe(Subscription subscription) {
-			subscriber.onSubscribe(this);
+			this.subscriber.onSubscribe(this);
 		}
 
 		public Subscription upstream() {
-			return subscription;
+			Assert.state(this.subscription != null, "No subscription");
+			return this.subscription;
 		}
 
 		@SuppressWarnings("unchecked")
 		protected void doNext(I i) {
-			subscriber.onNext((O) i);
+			this.subscriber.onNext((O) i);
 		}
 
 		protected void doError(Throwable throwable) {
-			subscriber.onError(throwable);
+			this.subscriber.onError(throwable);
 		}
 
 		protected void doOnSubscriberError(Throwable throwable){
-			subscriber.onError(throwable);
+			this.subscriber.onError(throwable);
 		}
 
 		protected void doComplete() {
-			subscriber.onComplete();
+			this.subscriber.onComplete();
 		}
 
 		protected void doRequest(long n) {

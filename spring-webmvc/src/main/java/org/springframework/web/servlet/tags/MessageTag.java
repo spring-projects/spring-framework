@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.jsp.JspException;
@@ -26,6 +27,7 @@ import javax.servlet.jsp.JspTagException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -64,18 +66,23 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
 
 
+	@Nullable
 	private MessageSourceResolvable message;
 
+	@Nullable
 	private String code;
 
+	@Nullable
 	private Object arguments;
 
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
-	private List<Object> nestedArguments;
+	private List<Object> nestedArguments = Collections.emptyList();
 
+	@Nullable
 	private String text;
 
+	@Nullable
 	private String var;
 
 	private String scope = TagUtils.SCOPE_PAGE;
@@ -118,7 +125,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	}
 
 	@Override
-	public void addArgument(Object argument) throws JspTagException {
+	public void addArgument(@Nullable Object argument) throws JspTagException {
 		this.nestedArguments.add(argument);
 	}
 
@@ -213,9 +220,6 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 */
 	protected String resolveMessage() throws JspException, NoSuchMessageException {
 		MessageSource messageSource = getMessageSource();
-		if (messageSource == null) {
-			throw new JspTagException("No corresponding MessageSource found");
-		}
 
 		// Evaluate the specified MessageSourceResolvable, if any.
 		if (this.message != null) {
@@ -227,8 +231,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 			// We have a code or default text that we need to resolve.
 			Object[] argumentsArray = resolveArguments(this.arguments);
 			if (!this.nestedArguments.isEmpty()) {
-				argumentsArray = appendArguments(argumentsArray,
-						this.nestedArguments.toArray());
+				argumentsArray = appendArguments(argumentsArray, this.nestedArguments.toArray());
 			}
 
 			if (this.text != null) {
@@ -243,11 +246,10 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 			}
 		}
 
-		// All we have is a specified literal text.
-		return this.text;
+		throw new JspTagException("No resolvable message");
 	}
 
-	private Object[] appendArguments(Object[] sourceArguments, Object[] additionalArguments) {
+	private Object[] appendArguments(@Nullable Object[] sourceArguments, Object[] additionalArguments) {
 		if (ObjectUtils.isEmpty(sourceArguments)) {
 			return additionalArguments;
 		}
@@ -264,7 +266,8 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws JspException if argument conversion failed
 	 * @see #setArguments
 	 */
-	protected Object[] resolveArguments(Object arguments) throws JspException {
+	@Nullable
+	protected Object[] resolveArguments(@Nullable Object arguments) throws JspException {
 		if (arguments instanceof String) {
 			String[] stringArray =
 					StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);

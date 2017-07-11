@@ -25,6 +25,8 @@ import java.util.List;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -43,6 +45,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
 
+	@Nullable
 	private volatile List<Charset> availableCharsets;
 
 	private boolean writeAcceptCharset = true;
@@ -86,7 +89,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected Long getContentLength(String str, MediaType contentType) {
+	protected Long getContentLength(String str, @Nullable MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
 		return (long) str.getBytes(charset).length;
 	}
@@ -108,19 +111,22 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 * @return the list of accepted charsets
 	 */
 	protected List<Charset> getAcceptedCharsets() {
-		if (this.availableCharsets == null) {
-			this.availableCharsets = new ArrayList<>(
-					Charset.availableCharsets().values());
+		List<Charset> charsets = this.availableCharsets;
+		if (charsets == null) {
+			charsets = new ArrayList<>(Charset.availableCharsets().values());
+			this.availableCharsets = charsets;
 		}
-		return this.availableCharsets;
+		return charsets;
 	}
 
-	private Charset getContentTypeCharset(MediaType contentType) {
+	private Charset getContentTypeCharset(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
 		}
 		else {
-			return getDefaultCharset();
+			Charset charset = getDefaultCharset();
+			Assert.state(charset != null, "No default charset");
+			return charset;
 		}
 	}
 

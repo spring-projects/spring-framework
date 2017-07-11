@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract implementation of the SqlTypeValue interface, for convenient
@@ -53,7 +54,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
 public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 
 	@Override
-	public final void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
+	public final void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException {
 
 		Object value = createTypeValue(ps.getConnection(), sqlType, typeName);
@@ -75,6 +76,7 @@ public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @see java.sql.PreparedStatement#setObject(int, Object, int)
 	 */
-	protected abstract Object createTypeValue(Connection con, int sqlType, String typeName) throws SQLException;
+	protected abstract Object createTypeValue(Connection con, int sqlType, @Nullable String typeName)
+			throws SQLException;
 
 }

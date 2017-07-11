@@ -36,6 +36,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -133,6 +134,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 	@Override
+	@Nullable
 	public ServletConfig getServletConfig() {
 		return null;
 	}

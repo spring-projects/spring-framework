@@ -15,6 +15,8 @@
  */
 package org.springframework.core.codec;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Indicates an issue with decoding the input stream with a focus on content
  * related issues such as a parse failure. As opposed to more general I/O
@@ -45,7 +47,7 @@ public class DecodingException extends CodecException {
 	 * @param msg the detail message
 	 * @param cause root cause for the exception, if any
 	 */
-	public DecodingException(String msg, Throwable cause) {
+	public DecodingException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

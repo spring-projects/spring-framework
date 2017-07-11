@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,7 +67,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		if (matchesMethod(method)) {
 			return true;
 		}

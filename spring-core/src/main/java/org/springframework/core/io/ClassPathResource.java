@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -44,8 +45,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	private final String path;
 
+	@Nullable
 	private ClassLoader classLoader;
 
+	@Nullable
 	private Class<?> clazz;
 
 
@@ -72,7 +75,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * or {@code null} for the thread context class loader
 	 * @see ClassLoader#getResourceAsStream(String)
 	 */
-	public ClassPathResource(String path, ClassLoader classLoader) {
+	public ClassPathResource(String path, @Nullable ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
 		String pathToUse = StringUtils.cleanPath(path);
 		if (pathToUse.startsWith("/")) {
@@ -90,7 +93,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @param clazz the class to load resources with
 	 * @see java.lang.Class#getResourceAsStream
 	 */
-	public ClassPathResource(String path, Class<?> clazz) {
+	public ClassPathResource(String path, @Nullable Class<?> clazz) {
 		Assert.notNull(path, "Path must not be null");
 		this.path = StringUtils.cleanPath(path);
 		this.clazz = clazz;
@@ -103,7 +106,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @param classLoader the class loader to load the resource with, if any
 	 * @param clazz the class to load resources with, if any
 	 */
-	protected ClassPathResource(String path, ClassLoader classLoader, Class<?> clazz) {
+	protected ClassPathResource(String path, @Nullable ClassLoader classLoader, @Nullable Class<?> clazz) {
 		this.path = StringUtils.cleanPath(path);
 		this.classLoader = classLoader;
 		this.clazz = clazz;
@@ -120,6 +123,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * Return the ClassLoader that this resource will be obtained from.
 	 */
+	@Nullable
 	public final ClassLoader getClassLoader() {
 		return (this.clazz != null ? this.clazz.getClassLoader() : this.classLoader);
 	}
@@ -139,6 +143,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * Resolves a URL for the underlying class path resource.
 	 * @return the resolved URL, or {@code null} if not resolvable
 	 */
+	@Nullable
 	protected URL resolveURL() {
 		if (this.clazz != null) {
 			return this.clazz.getResource(this.path);

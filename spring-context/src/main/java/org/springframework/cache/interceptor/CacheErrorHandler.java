@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 
 /**
  * A strategy for handling cache-related errors. In most cases, any
@@ -54,7 +55,7 @@ public interface CacheErrorHandler {
 	 * @param value the value to associate with the key
 	 * @see Cache#put(Object, Object)
 	 */
-	void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value);
+	void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value);
 
 	/**
 	 * Handle the given runtime exception thrown by the cache provider when

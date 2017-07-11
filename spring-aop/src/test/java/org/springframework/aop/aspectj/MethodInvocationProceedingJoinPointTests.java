@@ -33,6 +33,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -81,7 +82,7 @@ public class MethodInvocationProceedingJoinPointTests {
 			private int depth;
 
 			@Override
-			public void before(Method method, Object[] args, Object target) throws Throwable {
+			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
 				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
 				// Ensure that these don't cause problems
@@ -138,7 +139,7 @@ public class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			@Override
-			public void before(Method method, Object[] args, Object target) throws Throwable {
+			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
 				assertEquals("Same source location must be returned on subsequent requests", sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
 				assertEquals(TestBean.class, sloc.getWithinType());
@@ -171,7 +172,7 @@ public class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			@Override
-			public void before(Method method, Object[] args, Object target) throws Throwable {
+			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 				StaticPart staticPart = AbstractAspectJAdvice.currentJoinPoint().getStaticPart();
 				assertEquals("Same static part must be returned on subsequent requests", staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
 				assertEquals(ProceedingJoinPoint.METHOD_EXECUTION, staticPart.getKind());
@@ -191,7 +192,7 @@ public class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			@Override
-			public void before(Method method, Object[] args, Object target) throws Throwable {
+			public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 				// makeEncSJP, although meant for computing the enclosing join point,
 				// it serves our purpose here
 				JoinPoint.StaticPart aspectJVersionJp = Factory.makeEncSJP(method);

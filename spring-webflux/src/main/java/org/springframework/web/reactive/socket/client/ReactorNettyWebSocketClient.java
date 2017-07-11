@@ -93,7 +93,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	}
 
 	private void setNettyHeaders(HttpHeaders headers, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
-		headers.keySet().stream().forEach(key -> nettyHeaders.set(key, headers.get(key)));
+		headers.forEach(nettyHeaders::set);
 	}
 
 	private HttpHeaders toHttpHeaders(HttpClientResponse response) {

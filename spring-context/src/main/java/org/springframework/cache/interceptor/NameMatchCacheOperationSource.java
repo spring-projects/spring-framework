@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
@@ -56,9 +57,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	 * @see CacheOperation
 	 */
 	public void setNameMap(Map<String, Collection<CacheOperation>> nameMap) {
-		for (Map.Entry<String, Collection<CacheOperation>> entry : nameMap.entrySet()) {
-			addCacheMethod(entry.getKey(), entry.getValue());
-		}
+		nameMap.forEach(this::addCacheMethod);
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	@Override
-	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
+	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();
 		Collection<CacheOperation> ops = this.nameMap.get(methodName);

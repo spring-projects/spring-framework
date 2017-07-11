@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.lang.Nullable;
 
 /**
  * Bean that checks if a database has already started up. To be referenced
@@ -47,8 +48,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private DataSource dataSource;
 
+	@Nullable
 	private String validationQuery;
 
 	private int interval = DEFAULT_INTERVAL;
@@ -112,6 +115,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 				Statement stmt = null;
 				try {
 					con = this.dataSource.getConnection();
+					if (con == null) {
+						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
+								"DataSource returned null from getConnection(): " + this.dataSource);
+					}
 					stmt = con.createStatement();
 					stmt.execute(this.validationQuery);
 					validated = true;

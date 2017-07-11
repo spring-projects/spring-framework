@@ -26,6 +26,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -48,6 +49,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	private volatile boolean subscriberCompleted;
 
+	@Nullable
 	private Subscription subscription;
 
 
@@ -101,6 +103,14 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		if (this.subscription != null) {
 			this.subscription.cancel();
 		}
+	}
+
+	/**
+	 * Invoked when an error happens while flushing. Defaults to no-op.
+	 * Servlet 3.1 based implementations will receive an
+	 * {@link javax.servlet.AsyncListener#onError} event.
+	 */
+	protected void flushingFailed(Throwable t) {
 	}
 
 
@@ -167,8 +177,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					processor.flush();
 				}
 				catch (IOException ex) {
-					processor.cancel();
-					processor.onError(ex);
+					processor.flushingFailed(ex);
+					return;
 				}
 				if (processor.subscriberCompleted) {
 					if (processor.changeState(this, COMPLETED)) {
@@ -177,6 +187,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				}
 				else {
 					if (processor.changeState(this, REQUESTED)) {
+						Assert.state(processor.subscription != null, "No subscription");
 						processor.subscription.request(1);
 					}
 				}

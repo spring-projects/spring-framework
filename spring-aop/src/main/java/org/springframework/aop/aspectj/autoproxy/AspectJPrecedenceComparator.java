@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,9 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 
 	// pre-condition is that hasAspectName returned true
 	private String getAspectName(Advisor anAdvisor) {
-		return AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor).getAspectName();
+		AspectJPrecedenceInformation pi = AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
+		Assert.state(pi != null, "Unresolvable precedence information");
+		return pi.getAspectName();
 	}
 
 	private int getAspectDeclarationOrder(Advisor anAdvisor) {

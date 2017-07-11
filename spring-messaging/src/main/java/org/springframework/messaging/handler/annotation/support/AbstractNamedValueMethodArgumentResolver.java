@@ -27,6 +27,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -75,7 +76,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * and {@code #{...}} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
+	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, @Nullable ConfigurableBeanFactory beanFactory) {
 		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
@@ -177,6 +178,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @return the resolved argument. May be {@code null}
 	 * @throws Exception in case of errors
 	 */
+	@Nullable
 	protected abstract Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception;
 
@@ -194,7 +196,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an
 	 * exception for other primitives.
 	 */
-	private Object handleNullValue(String name, Object value, Class<?> paramType) {
+	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;

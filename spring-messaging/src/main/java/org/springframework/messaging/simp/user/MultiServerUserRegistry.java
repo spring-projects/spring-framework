@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.Assert;
@@ -97,7 +98,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
 		return (this.delegateApplicationEvents &&
 				((SmartApplicationListener) this.localRegistry).supportsSourceType(sourceType));
 	}
@@ -278,6 +279,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		private Set<TransferSimpSession> sessions;
 
 		/* Cross-server session lookup (e.g. user connected to multiple servers) */
+		@Nullable
 		private SessionLookup sessionLookup;
 
 		/**

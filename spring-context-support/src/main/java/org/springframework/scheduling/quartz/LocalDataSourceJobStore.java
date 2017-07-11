@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.quartz.utils.DBConnectionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed
@@ -78,6 +79,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
 
 
+	@Nullable
 	private DataSource dataSource;
 
 
@@ -147,7 +149,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 		// No, if HSQL is the platform, we really don't want to use locks...
 		try {
-			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource, "getDatabaseProductName").toString();
+			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource, "getDatabaseProductName");
 			productName = JdbcUtils.commonDatabaseName(productName);
 			if (productName != null && productName.toLowerCase().contains("hsql")) {
 				setUseDBLocks(false);

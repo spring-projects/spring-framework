@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketExtension;
@@ -72,7 +73,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			WebSocketHttpHeaders headers, URI uri) {
+			@Nullable WebSocketHttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 		assertUri(uri);
@@ -84,17 +85,17 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		HttpHeaders headersToUse = new HttpHeaders();
 		if (headers != null) {
 			for (String header : headers.keySet()) {
-				if (!specialHeaders.contains(header.toLowerCase())) {
-					headersToUse.put(header, headers.get(header));
+				List<String> values = headers.get(header);
+				if (values != null && !specialHeaders.contains(header.toLowerCase())) {
+					headersToUse.put(header, values);
 				}
 			}
 		}
 
-		List<String> subProtocols = (headers != null && headers.getSecWebSocketProtocol() != null ?
-				headers.getSecWebSocketProtocol() : Collections.emptyList());
-
-		List<WebSocketExtension> extensions = (headers != null && headers.getSecWebSocketExtensions() != null ?
-				headers.getSecWebSocketExtensions() : Collections.emptyList());
+		List<String> subProtocols =
+				(headers != null ? headers.getSecWebSocketProtocol() : Collections.emptyList());
+		List<WebSocketExtension> extensions =
+				(headers != null ? headers.getSecWebSocketExtensions() : Collections.emptyList());
 
 		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols, extensions,
 				Collections.emptyMap());
@@ -112,8 +113,8 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * Perform the actual handshake to establish a connection to the server.
 	 * @param webSocketHandler the client-side handler for WebSocket messages
 	 * @param headers HTTP headers to use for the handshake, with unwanted (forbidden)
-	 * headers filtered out, never {@code null}
-	 * @param uri the target URI for the handshake, never {@code null}
+	 * headers filtered out (never {@code null})
+	 * @param uri the target URI for the handshake (never {@code null})
 	 * @param subProtocols requested sub-protocols, or an empty list
 	 * @param extensions requested WebSocket extensions, or an empty list
 	 * @param attributes attributes to associate with the WebSocketSession, i.e. via

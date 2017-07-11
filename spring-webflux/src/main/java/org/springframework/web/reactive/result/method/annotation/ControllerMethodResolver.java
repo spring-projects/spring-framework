@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -38,6 +38,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -51,7 +52,7 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
-import static org.springframework.core.MethodIntrospector.selectMethods;
+import static org.springframework.core.MethodIntrospector.*;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -134,10 +135,10 @@ class ControllerMethodResolver {
 		// Annotation-based...
 		registrar.add(new RequestParamMethodArgumentResolver(beanFactory, reactiveRegistry, false));
 		registrar.add(new RequestParamMapMethodArgumentResolver(reactiveRegistry));
-		registrar.add(new RequestPartMethodArgumentResolver(reactiveRegistry));
 		registrar.add(new PathVariableMethodArgumentResolver(beanFactory, reactiveRegistry));
 		registrar.add(new PathVariableMapMethodArgumentResolver(reactiveRegistry));
 		registrar.addIfRequestBody(readers -> new RequestBodyArgumentResolver(readers, reactiveRegistry));
+		registrar.addIfRequestBody(readers -> new RequestPartMethodArgumentResolver(readers, reactiveRegistry));
 		registrar.addIfModelAttribute(() -> new ModelAttributeMethodArgumentResolver(reactiveRegistry, false));
 		registrar.add(new RequestHeaderMethodArgumentResolver(beanFactory, reactiveRegistry));
 		registrar.add(new RequestHeaderMapMethodArgumentResolver(reactiveRegistry));
@@ -162,7 +163,7 @@ class ControllerMethodResolver {
 		registrar.addIfModelAttribute(() -> new ModelAttributeMethodArgumentResolver(reactiveRegistry, true));
 	}
 
-	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
+	private void initControllerAdviceCaches(@Nullable ApplicationContext applicationContext) {
 		if (applicationContext == null) {
 			return;
 		}
@@ -175,25 +176,27 @@ class ControllerMethodResolver {
 
 		for (ControllerAdviceBean bean : beans) {
 			Class<?> beanType = bean.getBeanType();
-			Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
-			if (!attrMethods.isEmpty()) {
-				this.modelAttributeAdviceCache.put(bean, attrMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + bean);
+			if (beanType != null) {
+				Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
+				if (!attrMethods.isEmpty()) {
+					this.modelAttributeAdviceCache.put(bean, attrMethods);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @ModelAttribute methods in " + bean);
+					}
 				}
-			}
-			Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
-			if (!binderMethods.isEmpty()) {
-				this.initBinderAdviceCache.put(bean, binderMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + bean);
+				Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
+				if (!binderMethods.isEmpty()) {
+					this.initBinderAdviceCache.put(bean, binderMethods);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @InitBinder methods in " + bean);
+					}
 				}
-			}
-			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ExceptionHandler methods in " + bean);
+				ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
+				if (resolver.hasExceptionMappings()) {
+					this.exceptionHandlerAdviceCache.put(bean, resolver);
+					if (logger.isInfoEnabled()) {
+						logger.info("Detected @ExceptionHandler methods in " + bean);
+					}
 				}
 			}
 		}
@@ -215,15 +218,14 @@ class ControllerMethodResolver {
 	 * or in the controller of the given {@code @RequestMapping} method.
 	 */
 	public List<SyncInvocableHandlerMethod> getInitBinderMethods(HandlerMethod handlerMethod) {
-
 		List<SyncInvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
 		// Global methods first
-		this.initBinderAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(getInitBinderMethod(bean, method)));
+		this.initBinderAdviceCache.forEach((adviceBean, methods) -> {
+			if (adviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = adviceBean.resolveBean();
+				methods.forEach(method -> result.add(getInitBinderMethod(bean, method)));
 			}
 		});
 
@@ -248,15 +250,14 @@ class ControllerMethodResolver {
 	 * components or in the controller of the given {@code @RequestMapping} method.
 	 */
 	public List<InvocableHandlerMethod> getModelAttributeMethods(HandlerMethod handlerMethod) {
-
 		List<InvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
 		// Global methods first
-		this.modelAttributeAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(createAttributeMethod(bean, method)));
+		this.modelAttributeAdviceCache.forEach((adviceBean, methods) -> {
+			if (adviceBean.isApplicableToBeanType(handlerType)) {
+				Object bean = adviceBean.resolveBean();
+				methods.forEach(method -> result.add(createAttributeMethod(bean, method)));
 			}
 		});
 
@@ -280,8 +281,8 @@ class ControllerMethodResolver {
 	 * Find an {@code @ExceptionHandler} method in {@code @ControllerAdvice}
 	 * components or in the controller of the given {@code @RequestMapping} method.
 	 */
-	public Optional<InvocableHandlerMethod> getExceptionHandlerMethod(Throwable ex,
-			HandlerMethod handlerMethod) {
+	@Nullable
+	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = handlerMethod.getBeanType();
 
@@ -305,12 +306,12 @@ class ControllerMethodResolver {
 		}
 
 		if (targetMethod == null) {
-			return Optional.empty();
+			return null;
 		}
 
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(targetBean, targetMethod);
 		invocable.setArgumentResolvers(this.exceptionHandlerResolvers);
-		return Optional.of(invocable);
+		return invocable;
 	}
 
 
@@ -328,18 +329,18 @@ class ControllerMethodResolver {
 
 		private final List<HandlerMethodArgumentResolver> customResolvers;
 
+		@Nullable
 		private final List<HttpMessageReader<?>> messageReaders;
 
 		private final boolean modelAttributeSupported;
 
 		private final List<HandlerMethodArgumentResolver> result = new ArrayList<>();
 
-
 		private ArgumentResolverRegistrar(ArgumentResolverConfigurer resolvers,
-				ServerCodecConfigurer codecs, boolean modelAttribute) {
+				@Nullable ServerCodecConfigurer codecs, boolean modelAttribute) {
 
 			this.customResolvers = resolvers.getCustomResolvers();
-			this.messageReaders = codecs != null ? codecs.getReaders() : null;
+			this.messageReaders = (codecs != null ? codecs.getReaders() : null);
 			this.modelAttributeSupported = modelAttribute;
 		}
 
@@ -376,7 +377,6 @@ class ControllerMethodResolver {
 					.collect(Collectors.toList());
 		}
 
-
 		public static Builder configurer(ArgumentResolverConfigurer configurer) {
 			return new Builder(configurer);
 		}
@@ -386,11 +386,9 @@ class ControllerMethodResolver {
 
 			private final ArgumentResolverConfigurer resolvers;
 
-
 			public Builder(ArgumentResolverConfigurer configurer) {
 				this.resolvers = configurer;
 			}
-
 
 			public ArgumentResolverRegistrar fullSupport(ServerCodecConfigurer codecs) {
 				return new ArgumentResolverRegistrar(this.resolvers, codecs, true);
@@ -404,7 +402,6 @@ class ControllerMethodResolver {
 				return new ArgumentResolverRegistrar(this.resolvers, null, false);
 			}
 		}
-
 	}
 
 }

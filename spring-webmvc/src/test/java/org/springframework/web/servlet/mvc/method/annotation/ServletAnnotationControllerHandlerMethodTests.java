@@ -84,6 +84,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -2489,7 +2490,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 				@Override
 				@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
-				public void render(Map model, HttpServletRequest request, HttpServletResponse response)
+				public void render(@Nullable Map model, HttpServletRequest request, HttpServletResponse response)
 						throws Exception {
 					TestBean tb = (TestBean) model.get("testBean");
 					if (tb == null) {
@@ -2534,7 +2535,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 					return null;
 				}
 				@Override
-				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+				public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
 				}
@@ -2756,12 +2757,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class NotReadableMessageConverter implements HttpMessageConverter<Object> {
 
 		@Override
-		public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 			return true;
 		}
 
 		@Override
-		public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 			return true;
 		}
 
@@ -2777,7 +2778,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
+		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			throw new UnsupportedOperationException("Not implemented");
 		}
@@ -2792,12 +2793,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
 		@Override
-		public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
@@ -2813,7 +2814,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
+		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			outputMessage.getHeaders().setContentType(contentType);
 			outputMessage.getBody(); // force a header write
@@ -2924,7 +2925,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 						return "text/html";
 					}
 					@Override
-					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+					public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 							throws Exception {
 						response.getWriter().write("myValue");
 					}

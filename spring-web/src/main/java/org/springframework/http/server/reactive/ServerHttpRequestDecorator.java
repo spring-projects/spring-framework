@@ -69,6 +69,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
+	public RequestPath getPath() {
+		return getDelegate().getPath();
+	}
+
+	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		return getDelegate().getQueryParams();
 	}

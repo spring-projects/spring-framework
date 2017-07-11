@@ -34,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -213,7 +214,7 @@ public class RestTemplateXhrTransportTests {
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, RequestCallback callback, ResponseExtractor<T> extractor) throws RestClientException {
+		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback, @Nullable ResponseExtractor<T> extractor) throws RestClientException {
 			try {
 				extractor.extractData(this.responses.remove());
 			}

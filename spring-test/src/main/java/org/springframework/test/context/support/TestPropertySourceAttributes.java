@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -72,12 +73,11 @@ class TestPropertySourceAttributes {
 
 	private TestPropertySourceAttributes(Class<?> declaringClass, String[] locations, boolean inheritLocations,
 			String[] properties, boolean inheritProperties) {
-		Assert.notNull(declaringClass, "declaringClass must not be null");
 
+		Assert.notNull(declaringClass, "declaringClass must not be null");
 		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
 			locations = new String[] { detectDefaultPropertiesFile(declaringClass) };
 		}
-
 		this.declaringClass = declaringClass;
 		this.locations = locations;
 		this.inheritLocations = inheritLocations;
@@ -85,53 +85,48 @@ class TestPropertySourceAttributes {
 		this.inheritProperties = inheritProperties;
 	}
 
+
 	/**
 	 * Get the {@linkplain Class class} that declared {@code @TestPropertySource}.
-	 *
 	 * @return the declaring class; never {@code null}
 	 */
 	Class<?> getDeclaringClass() {
-		return declaringClass;
+		return this.declaringClass;
 	}
 
 	/**
 	 * Get the resource locations that were declared via {@code @TestPropertySource}.
-	 *
 	 * <p>Note: The returned value may represent a <em>detected default</em>
 	 * that does not match the original value declared via {@code @TestPropertySource}.
-	 *
-	 * @return the resource locations; potentially {@code null} or <em>empty</em>
+	 * @return the resource locations; potentially <em>empty</em>
 	 * @see TestPropertySource#value
 	 * @see TestPropertySource#locations
-	 * @see #setLocations(String[])
 	 */
 	String[] getLocations() {
-		return locations;
+		return this.locations;
 	}
 
 	/**
 	 * Get the {@code inheritLocations} flag that was declared via {@code @TestPropertySource}.
-	 *
 	 * @return the {@code inheritLocations} flag
 	 * @see TestPropertySource#inheritLocations
 	 */
 	boolean isInheritLocations() {
-		return inheritLocations;
+		return this.inheritLocations;
 	}
 
 	/**
 	 * Get the inlined properties that were declared via {@code @TestPropertySource}.
-	 *
 	 * @return the inlined properties; potentially {@code null} or <em>empty</em>
 	 * @see TestPropertySource#properties
 	 */
+	@Nullable
 	String[] getProperties() {
 		return this.properties;
 	}
 
 	/**
 	 * Get the {@code inheritProperties} flag that was declared via {@code @TestPropertySource}.
-	 *
 	 * @return the {@code inheritProperties} flag
 	 * @see TestPropertySource#inheritProperties
 	 */
@@ -154,6 +149,7 @@ class TestPropertySourceAttributes {
 		.toString();
 	}
 
+
 	/**
 	 * Detect a default properties file for the supplied class, as specified
 	 * in the class-level Javadoc for {@link TestPropertySource}.
@@ -171,10 +167,10 @@ class TestPropertySourceAttributes {
 			return prefixedResourcePath;
 		}
 		else {
-			String msg = String.format("Could not detect default properties file for test [%s]: "
-					+ "%s does not exist. Either declare the 'locations' or 'properties' attributes "
-					+ "of @TestPropertySource or make the default properties file available.", testClass.getName(),
-				classPathResource);
+			String msg = String.format("Could not detect default properties file for test [%s]: " +
+					"%s does not exist. Either declare the 'locations' or 'properties' attributes " +
+					"of @TestPropertySource or make the default properties file available.", testClass.getName(),
+					classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

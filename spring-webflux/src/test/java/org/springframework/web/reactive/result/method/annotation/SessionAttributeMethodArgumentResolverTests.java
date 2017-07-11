@@ -43,10 +43,10 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -82,7 +82,8 @@ public class SessionAttributeMethodArgumentResolverTests {
 		WebSessionManager sessionManager = new MockWebSessionManager(this.session);
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager, ServerCodecConfigurer.create());
+		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(),
+				sessionManager, ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
 
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 	}
@@ -101,7 +102,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
+		when(this.session.getAttribute("foo")).thenReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
@@ -110,7 +111,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void resolveWithName() throws Exception {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
-		when(this.session.getAttribute("specialFoo")).thenReturn(Optional.of(foo));
+		when(this.session.getAttribute("specialFoo")).thenReturn(foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
@@ -122,32 +123,32 @@ public class SessionAttributeMethodArgumentResolverTests {
 		assertNull(mono.block());
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
+		when(this.session.getAttribute("foo")).thenReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveOptional() throws Exception {
 		MethodParameter param = initMethodParameter(3);
-		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertNotNull(mono.block());
-		assertEquals(Optional.class, mono.block().getClass());
-		assertFalse(((Optional<?>) mono.block()).isPresent());
+		Optional<Object> actual = (Optional<Object>) this.resolver
+				.resolveArgument(param, new BindingContext(), this.exchange).block();
+
+		assertNotNull(actual);
+		assertFalse(actual.isPresent());
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
 		BindingContext bindingContext = new BindingContext(initializer);
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, bindingContext, this.exchange);
+		when(this.session.getAttribute("foo")).thenReturn(foo);
+		actual = (Optional<Object>) this.resolver.resolveArgument(param, bindingContext, this.exchange).block();
 
-		assertNotNull(mono.block());
-		assertEquals(Optional.class, mono.block().getClass());
-		Optional<?> optional = (Optional<?>) mono.block();
-		assertTrue(optional.isPresent());
-		assertSame(foo, optional.get());
+		assertNotNull(actual);
+		assertTrue(actual.isPresent());
+		assertSame(foo, actual.get());
 	}
 
 

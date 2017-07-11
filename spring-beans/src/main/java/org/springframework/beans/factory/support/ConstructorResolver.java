@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -100,7 +102,7 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(final String beanName, final RootBeanDefinition mbd,
-			Constructor<?>[] chosenCtors, final Object[] explicitArgs) {
+			@Nullable Constructor<?>[] chosenCtors, @Nullable final Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -254,22 +256,18 @@ class ConstructorResolver {
 		}
 
 		try {
+			final InstantiationStrategy strategy = beanFactory.getInstantiationStrategy();
 			Object beanInstance;
 
 			if (System.getSecurityManager() != null) {
 				final Constructor<?> ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
-				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
-					public Object run() {
-						return beanFactory.getInstantiationStrategy().instantiate(
-								mbd, beanName, beanFactory, ctorToUse, argumentsToUse);
-					}
-				}, beanFactory.getAccessControlContext());
+				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+						strategy.instantiate(mbd, beanName, beanFactory, ctorToUse, argumentsToUse),
+						beanFactory.getAccessControlContext());
 			}
 			else {
-				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
-						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
+				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
 
 			bw.setBeanInstance(beanInstance);
@@ -297,6 +295,7 @@ class ConstructorResolver {
 			factoryClass = mbd.getBeanClass();
 			isStatic = true;
 		}
+		Assert.state(factoryClass != null, "Unresolvable factory class");
 		factoryClass = ClassUtils.getUserClass(factoryClass);
 
 		Method[] candidates = getCandidateMethods(factoryClass, mbd);
@@ -324,13 +323,9 @@ class ConstructorResolver {
 	 */
 	private Method[] getCandidateMethods(final Class<?> factoryClass, final RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
-			return AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
-				@Override
-				public Method[] run() {
-					return (mbd.isNonPublicAccessAllowed() ?
-							ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
-				}
-			});
+			return AccessController.doPrivileged((PrivilegedAction<Method[]>) () ->
+					(mbd.isNonPublicAccessAllowed() ?
+						ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods()));
 		}
 		else {
 			return (mbd.isNonPublicAccessAllowed() ?
@@ -353,8 +348,9 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
+	@Nullable
 	public BeanWrapper instantiateUsingFactoryMethod(
-			final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
+			final String beanName, final RootBeanDefinition mbd, @Nullable final Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -370,10 +366,6 @@ class ConstructorResolver {
 						"factory-bean reference points back to the same bean definition");
 			}
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
-			if (factoryBean == null) {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"factory-bean '" + factoryBeanName + "' (or a BeanPostProcessor involved) returned null");
-			}
 			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
 				throw new ImplicitlyAppearedSingletonException();
 			}
@@ -575,13 +567,9 @@ class ConstructorResolver {
 				final Object fb = factoryBean;
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
-				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
-					public Object run() {
-						return beanFactory.getInstantiationStrategy().instantiate(
-								mbd, beanName, beanFactory, fb, factoryMethod, args);
-					}
-				}, beanFactory.getAccessControlContext());
+				beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+						beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, beanFactory, fb, factoryMethod, args),
+						beanFactory.getAccessControlContext());
 			}
 			else {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
@@ -645,8 +633,8 @@ class ConstructorResolver {
 			else {
 				Object resolvedValue =
 						valueResolver.resolveValueIfNecessary("constructor argument", valueHolder.getValue());
-				ConstructorArgumentValues.ValueHolder resolvedValueHolder =
-						new ConstructorArgumentValues.ValueHolder(resolvedValue, valueHolder.getType(), valueHolder.getName());
+				ConstructorArgumentValues.ValueHolder resolvedValueHolder = new ConstructorArgumentValues.ValueHolder(
+						resolvedValue, valueHolder.getType(), valueHolder.getName());
 				resolvedValueHolder.setSource(valueHolder);
 				resolvedValues.addGenericArgumentValue(resolvedValueHolder);
 			}
@@ -661,15 +649,14 @@ class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class<?>[] paramTypes, String[] paramNames, Executable executable,
+			BeanWrapper bw, Class<?>[] paramTypes, @Nullable String[] paramNames, Executable executable,
 			boolean autowiring) throws UnsatisfiedDependencyException {
 
 		TypeConverter customConverter = this.beanFactory.getCustomTypeConverter();
 		TypeConverter converter = (customConverter != null ? customConverter : bw);
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
-		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-				new HashSet<>(paramTypes.length);
+		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
@@ -695,31 +682,22 @@ class ConstructorResolver {
 					args.preparedArguments[paramIndex] = convertedValue;
 				}
 				else {
-					ConstructorArgumentValues.ValueHolder sourceHolder =
-							(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
-					Object sourceValue = sourceHolder.getValue();
 					MethodParameter methodParam = MethodParameter.forExecutable(executable, paramIndex);
 					try {
 						convertedValue = converter.convertIfNecessary(originalValue, paramType, methodParam);
-						// TODO re-enable once race condition has been found (SPR-7423)
-						/*
-						if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
-							// Either a converted value or still the original one: store converted value.
-							sourceHolder.setConvertedValue(convertedValue);
-							args.preparedArguments[paramIndex] = convertedValue;
-						}
-						else {
-						*/
-							args.resolveNecessary = true;
-							args.preparedArguments[paramIndex] = sourceValue;
-						// }
 					}
 					catch (TypeMismatchException ex) {
 						throw new UnsatisfiedDependencyException(
 								mbd.getResourceDescription(), beanName, new InjectionPoint(methodParam),
 								"Could not convert argument value of type [" +
-								ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
-								"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
+										ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
+										"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
+					}
+					Object sourceHolder = valueHolder.getSource();
+					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder) {
+						Object sourceValue = ((ConstructorArgumentValues.ValueHolder) sourceHolder).getValue();
+						args.resolveNecessary = true;
+						args.preparedArguments[paramIndex] = sourceValue;
 					}
 				}
 				args.arguments[paramIndex] = convertedValue;
@@ -820,8 +798,9 @@ class ConstructorResolver {
 	/**
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
+	@Nullable
 	protected Object resolveAutowiredArgument(
-			MethodParameter param, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+			MethodParameter param, String beanName, @Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
 		if (InjectionPoint.class.isAssignableFrom(param.getParameterType())) {
 			InjectionPoint injectionPoint = currentInjectionPoint.get();
@@ -835,8 +814,7 @@ class ConstructorResolver {
 	}
 
 
-
-	static InjectionPoint setCurrentInjectionPoint(InjectionPoint injectionPoint) {
+	static InjectionPoint setCurrentInjectionPoint(@Nullable InjectionPoint injectionPoint) {
 		InjectionPoint old = currentInjectionPoint.get();
 		if (injectionPoint != null) {
 			currentInjectionPoint.set(injectionPoint);
@@ -924,6 +902,7 @@ class ConstructorResolver {
 	 */
 	private static class ConstructorPropertiesChecker {
 
+		@Nullable
 		public static String[] evaluate(Constructor<?> candidate, int paramCount) {
 			ConstructorProperties cp = candidate.getAnnotation(ConstructorProperties.class);
 			if (cp != null) {

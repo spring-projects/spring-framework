@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -41,8 +42,10 @@ public class HandlerExecutionChain {
 
 	private final Object handler;
 
+	@Nullable
 	private HandlerInterceptor[] interceptors;
 
+	@Nullable
 	private List<HandlerInterceptor> interceptorList;
 
 	private int interceptorIndex = -1;
@@ -62,7 +65,7 @@ public class HandlerExecutionChain {
 	 * @param interceptors the array of interceptors to apply
 	 * (in the given order) before the handler itself executes
 	 */
-	public HandlerExecutionChain(Object handler, HandlerInterceptor... interceptors) {
+	public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
@@ -79,7 +82,6 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (may be {@code null})
 	 */
 	public Object getHandler() {
 		return this.handler;
@@ -111,6 +113,7 @@ public class HandlerExecutionChain {
 	 * Return the array of interceptors to apply (in the given order).
 	 * @return the array of HandlerInterceptors instances (may be {@code null})
 	 */
+	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
 			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
@@ -143,7 +146,9 @@ public class HandlerExecutionChain {
 	/**
 	 * Apply postHandle methods of registered interceptors.
 	 */
-	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) throws Exception {
+	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
+			throws Exception {
+
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = interceptors.length - 1; i >= 0; i--) {
@@ -158,7 +163,7 @@ public class HandlerExecutionChain {
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
 	 */
-	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, Exception ex)
+	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {
 
 		HandlerInterceptor[] interceptors = getInterceptors();
@@ -202,9 +207,6 @@ public class HandlerExecutionChain {
 	@Override
 	public String toString() {
 		Object handler = getHandler();
-		if (handler == null) {
-			return "HandlerExecutionChain with no handler";
-		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("HandlerExecutionChain with handler [").append(handler).append("]");
 		HandlerInterceptor[] interceptors = getInterceptors();

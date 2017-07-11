@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,24 @@ class CallableInterceptorChain {
 		for (CallableProcessingInterceptor interceptor : this.interceptors) {
 			try {
 				Object result = interceptor.handleTimeout(request, task);
+				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
+					break;
+				}
+				else if (result != CallableProcessingInterceptor.RESULT_NONE) {
+					return result;
+				}
+			}
+			catch (Throwable t) {
+				return t;
+			}
+		}
+		return CallableProcessingInterceptor.RESULT_NONE;
+	}
+
+	public Object triggerAfterError(NativeWebRequest request, Callable<?> task, Throwable throwable) {
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			try {
+				Object result = interceptor.handleError(request, task, throwable);
 				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
 					break;
 				}

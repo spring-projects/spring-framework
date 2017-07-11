@@ -36,7 +36,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  */
 class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
+	private final List<WebMvcConfigurer> delegates = new ArrayList<>();
 
 
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {

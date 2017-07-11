@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
@@ -53,10 +54,13 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private final ByteArrayOutputStream cachedContent;
 
+	@Nullable
 	private final Integer contentCacheLimit;
 
+	@Nullable
 	private ServletInputStream inputStream;
 
+	@Nullable
 	private BufferedReader reader;
 
 
@@ -224,27 +228,6 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 					if (sizeToCache < count) {
 						this.overflow = true;
 						handleContentOverflow(contentCacheLimit);
-					}
-				}
-			}
-			return count;
-		}
-
-		@Override
-		public int read(final byte[] b) throws IOException {
-			int count = super.read(b);
-			if (!this.overflow && count > 0) {
-				if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
-					this.overflow = true;
-					handleContentOverflow(contentCacheLimit);
-				} else {
-                    int sizeToCache = contentCacheLimit == null || count + cachedContent.size() < contentCacheLimit
-                            ? count
-                            : contentCacheLimit - cachedContent.size();
-                    cachedContent.write(b, 0, sizeToCache);
-                    if (sizeToCache < count) {
-                    	this.overflow = true;
-                    	handleContentOverflow(contentCacheLimit);
 					}
 				}
 			}

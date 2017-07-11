@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.WebRequest;
 
 /**
@@ -35,7 +36,7 @@ public interface SessionAttributeStore {
 	 * @param attributeName the name of the attribute
 	 * @param attributeValue the attribute value to store
 	 */
-	void storeAttribute(WebRequest request, String attributeName, Object attributeValue);
+	void storeAttribute(WebRequest request, String attributeName, @Nullable Object attributeValue);
 
 	/**
 	 * Retrieve the specified attribute from the backend session.
@@ -46,6 +47,7 @@ public interface SessionAttributeStore {
 	 * @param attributeName the name of the attribute
 	 * @return the current attribute value, or {@code null} if none
 	 */
+	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName);
 
 	/**

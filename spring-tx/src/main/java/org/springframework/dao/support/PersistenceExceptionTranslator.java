@@ -17,6 +17,7 @@
 package org.springframework.dao.support;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface implemented by Spring integrations with data access technologies
@@ -51,6 +52,7 @@ public interface PersistenceExceptionTranslator {
 	 * @see org.springframework.dao.DataIntegrityViolationException
 	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
 	 */
+	@Nullable
 	DataAccessException translateExceptionIfPossible(RuntimeException ex);
 
 }

@@ -24,6 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link LinkedHashMap} variant that stores String keys in a case-insensitive
  * manner, for example for key-based access in a results table.
@@ -60,7 +62,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @param locale the Locale to use for lower-case conversion
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
-	public LinkedCaseInsensitiveMap(Locale locale) {
+	public LinkedCaseInsensitiveMap(@Nullable Locale locale) {
 		this(16, locale);
 	}
 
@@ -83,7 +85,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @param locale the Locale to use for lower-case conversion
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
-	public LinkedCaseInsensitiveMap(int initialCapacity, Locale locale) {
+	public LinkedCaseInsensitiveMap(int initialCapacity, @Nullable Locale locale) {
 		this.targetMap = new LinkedHashMap<String, V>(initialCapacity) {
 			@Override
 			public boolean containsKey(Object key) {
@@ -134,6 +136,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 	@Override
+	@Nullable
 	public V get(Object key) {
 		if (key instanceof String) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
@@ -173,6 +176,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 	@Override
+	@Nullable
 	public V remove(Object key) {
 		if (key instanceof String) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.remove(convertKey((String) key));

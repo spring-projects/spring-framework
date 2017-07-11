@@ -34,10 +34,13 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
@@ -293,7 +296,7 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static void traceMatch(String prefix, Object desired, Object actual, boolean match) {
+	private static void traceMatch(String prefix, Object desired, @Nullable Object actual, boolean match) {
 		if (logger.isTraceEnabled()) {
 			String message = String.format("%s \"%s\" %s against value \"%s\"",
 					prefix, desired, match ? "matches" : "does not match", actual);
@@ -340,7 +343,7 @@ public abstract class RequestPredicates {
 			boolean match = this.pattern.matches(path);
 			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
 			if (match) {
-				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()));
+				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()).getUriVariables());
 				return true;
 			}
 			else {
@@ -352,7 +355,7 @@ public abstract class RequestPredicates {
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.getPathRemaining(request.path()))
 					.map(info -> {
-						mergeTemplateVariables(request, info.getMatchingVariables());
+						mergeTemplateVariables(request, info.getUriVariables());
 						String path = info.getPathRemaining();
 						if (!path.startsWith("/")) {
 							path = "/" + path;
@@ -487,6 +490,11 @@ public abstract class RequestPredicates {
 		@Override
 		public Headers headers() {
 			return this.request.headers();
+		}
+
+		@Override
+		public MultiValueMap<String, HttpCookie> cookies() {
+			return this.request.cookies();
 		}
 
 		@Override

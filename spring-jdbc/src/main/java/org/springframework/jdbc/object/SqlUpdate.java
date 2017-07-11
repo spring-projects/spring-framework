@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,10 +149,10 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	protected void checkRowsAffected(int rowsAffected) throws JdbcUpdateAffectedIncorrectNumberOfRowsException {
 		if (this.maxRowsAffected > 0 && rowsAffected > this.maxRowsAffected) {
-			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), this.maxRowsAffected, rowsAffected);
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(resolveSql(), this.maxRowsAffected, rowsAffected);
 		}
 		if (this.requiredRowsAffected > 0 && rowsAffected != this.requiredRowsAffected) {
-			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(getSql(), this.requiredRowsAffected, rowsAffected);
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(resolveSql(), this.requiredRowsAffected, rowsAffected);
 		}
 	}
 
@@ -194,7 +194,7 @@ public class SqlUpdate extends SqlOperation {
 	 * Convenience method to execute an update with no parameters.
 	 */
 	public int update() throws DataAccessException {
-		return update((Object[]) null);
+		return update(new Object[0]);
 	}
 
 	/**

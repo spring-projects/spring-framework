@@ -28,6 +28,7 @@ import org.hibernate.context.spi.CurrentSessionContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -47,8 +48,10 @@ public class SpringSessionContext implements CurrentSessionContext {
 
 	private final SessionFactoryImplementor sessionFactory;
 
+	@Nullable
 	private TransactionManager transactionManager;
 
+	@Nullable
 	private CurrentSessionContext jtaSessionContext;
 
 
@@ -102,7 +105,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 			return session;
 		}
 
-		if (this.transactionManager != null) {
+		if (this.transactionManager != null && this.jtaSessionContext != null) {
 			try {
 				if (this.transactionManager.getStatus() == Status.STATUS_ACTIVE) {
 					Session session = this.jtaSessionContext.currentSession();

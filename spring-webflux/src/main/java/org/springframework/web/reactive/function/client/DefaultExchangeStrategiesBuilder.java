@@ -46,18 +46,9 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 	}
 
 	@Override
-	public ExchangeStrategies.Builder defaultCodecs(
-			Consumer<ClientCodecConfigurer.ClientDefaultCodecsConfigurer> consumer) {
+	public ExchangeStrategies.Builder codecs(Consumer<ClientCodecConfigurer> consumer) {
 		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.defaultCodecs());
-		return this;
-	}
-
-	@Override
-	public ExchangeStrategies.Builder customCodecs(
-			Consumer<ClientCodecConfigurer.CustomCodecsConfigurer> consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
-		consumer.accept(this.codecConfigurer.customCodecs());
+		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 

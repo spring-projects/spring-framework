@@ -23,6 +23,7 @@ import java.util.Collections;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -91,8 +92,9 @@ public abstract class AbstractCacheResolver implements CacheResolver, Initializi
 	 * <p>It is acceptable to return {@code null} to indicate that no cache could
 	 * be resolved for this invocation.
 	 * @param context the context of the particular invocation
-	 * @return the cache name(s) to resolve or {@code null} if no cache should be resolved
+	 * @return the cache name(s) to resolve, or {@code null} if no cache should be resolved
 	 */
+	@Nullable
 	protected abstract Collection<String> getCacheNames(CacheOperationInvocationContext<?> context);
 
 }

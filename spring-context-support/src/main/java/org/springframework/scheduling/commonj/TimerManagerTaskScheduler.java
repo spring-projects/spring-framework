@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,12 @@ import java.util.concurrent.TimeUnit;
 import commonj.timers.Timer;
 import commonj.timers.TimerListener;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -41,6 +43,7 @@ import org.springframework.util.ErrorHandler;
  */
 public class TimerManagerTaskScheduler extends TimerManagerAccessor implements TaskScheduler {
 
+	@Nullable
 	private volatile ErrorHandler errorHandler;
 
 
@@ -60,7 +63,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, false));
-		Timer timer = getTimerManager().schedule(futureTask, startTime);
+		Timer timer = obtainTimerManager().schedule(futureTask, startTime);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
@@ -68,7 +71,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
-		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, startTime, period);
+		Timer timer = obtainTimerManager().scheduleAtFixedRate(futureTask, startTime, period);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
@@ -76,7 +79,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
-		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, 0, period);
+		Timer timer = obtainTimerManager().scheduleAtFixedRate(futureTask, 0, period);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
@@ -84,7 +87,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
-		Timer timer = getTimerManager().schedule(futureTask, startTime, delay);
+		Timer timer = obtainTimerManager().schedule(futureTask, startTime, delay);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
@@ -92,7 +95,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
-		Timer timer = getTimerManager().schedule(futureTask, 0, delay);
+		Timer timer = obtainTimerManager().schedule(futureTask, 0, delay);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
@@ -107,6 +110,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	 */
 	private static class TimerScheduledFuture extends FutureTask<Object> implements TimerListener, ScheduledFuture<Object> {
 
+		@Nullable
 		protected transient Timer timer;
 
 		protected transient boolean cancelled = false;
@@ -127,13 +131,16 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			boolean result = super.cancel(mayInterruptIfRunning);
-			this.timer.cancel();
+			if (this.timer != null) {
+				this.timer.cancel();
+			}
 			this.cancelled = true;
 			return result;
 		}
 
 		@Override
 		public long getDelay(TimeUnit unit) {
+			Assert.state(this.timer != null, "No Timer available");
 			return unit.convert(this.timer.getScheduledExecutionTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 		}
 
@@ -157,19 +164,21 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 
 		private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
 
-		private volatile Date scheduledExecutionTime;
+		private volatile Date scheduledExecutionTime = new Date();
 
 		public ReschedulingTimerListener(Runnable runnable, Trigger trigger) {
 			super(runnable);
 			this.trigger = trigger;
 		}
 
+		@Nullable
 		public ScheduledFuture<?> schedule() {
-			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
-			if (this.scheduledExecutionTime == null) {
+			Date nextExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
+			if (nextExecutionTime == null) {
 				return null;
 			}
-			setTimer(getTimerManager().schedule(this, this.scheduledExecutionTime));
+			this.scheduledExecutionTime = nextExecutionTime;
+			setTimer(obtainTimerManager().schedule(this, this.scheduledExecutionTime));
 			return this;
 		}
 

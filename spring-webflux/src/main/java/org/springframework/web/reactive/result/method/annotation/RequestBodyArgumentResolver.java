@@ -23,9 +23,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -61,8 +61,9 @@ public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentRe
 	public Mono<Object> resolveArgument(
 			MethodParameter param, BindingContext bindingContext, ServerWebExchange exchange) {
 
-		RequestBody annotation = param.getParameterAnnotation(RequestBody.class);
-		return readBody(param, annotation.required(), bindingContext, exchange);
+		RequestBody ann = param.getParameterAnnotation(RequestBody.class);
+		Assert.state(ann != null, "No RequestBody annotation");
+		return readBody(param, ann.required(), bindingContext, exchange);
 	}
 
 }

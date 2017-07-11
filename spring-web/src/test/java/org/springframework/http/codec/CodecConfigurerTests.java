@@ -39,17 +39,20 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
- * Unit tests for {@link org.springframework.http.codec.DefaultCodecConfigurer.AbstractDefaultCodecsConfigurer}.
+ * Unit tests for {@link AbstractCodecConfigurer.AbstractDefaultCodecs}.
  * @author Rossen Stoyanchev
  */
 public class CodecConfigurerTests {
 
-	private final CodecConfigurer configurer = new DefaultCodecConfigurer(new TestDefaultCodecConfigurer());
+	private final CodecConfigurer configurer = new TestCodecConfigurer();
 
 	private final AtomicInteger index = new AtomicInteger(0);
 
@@ -277,18 +280,19 @@ public class CodecConfigurerTests {
 
 
 
+	private static class TestCodecConfigurer extends AbstractCodecConfigurer {
 
-		private static class TestDefaultCodecConfigurer extends DefaultCodecConfigurer.AbstractDefaultCodecsConfigurer {
+		TestCodecConfigurer() {
+			super(new TestDefaultCodecs());
+		}
+
+		private static class TestDefaultCodecs extends AbstractDefaultCodecs {
 
 			@Override
-			protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-			}
-
-			@Override
-			protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+			protected boolean splitTextOnNewLine() {
+				return true;
 			}
 		}
+	}
 
 }

@@ -24,15 +24,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
@@ -94,7 +94,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
 				.flatMapMany(response -> response.body(toFlux(
-						forClassWithGenerics(ServerSentEvent.class, String.class))));
+						new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {

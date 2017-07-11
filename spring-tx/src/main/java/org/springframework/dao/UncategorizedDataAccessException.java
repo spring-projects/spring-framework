@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.dao;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Normal superclass when we can't distinguish anything more specific
  * than "something went wrong with the underlying resource": for example,
@@ -31,7 +33,7 @@ public abstract class UncategorizedDataAccessException extends NonTransientDataA
 	 * @param msg the detail message
 	 * @param cause the exception thrown by underlying data access API
 	 */
-	public UncategorizedDataAccessException(String msg, Throwable cause) {
+	public UncategorizedDataAccessException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

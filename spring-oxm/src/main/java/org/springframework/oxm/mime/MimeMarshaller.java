@@ -19,6 +19,7 @@ package org.springframework.oxm.mime;
 import java.io.IOException;
 import javax.xml.transform.Result;
 
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
 
@@ -42,6 +43,6 @@ public interface MimeMarshaller extends Marshaller {
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
 	 * @throws IOException if an I/O exception occurs
 	 */
-	void marshal(Object graph, Result result, MimeContainer mimeContainer) throws XmlMappingException, IOException;
+	void marshal(Object graph, Result result, @Nullable MimeContainer mimeContainer) throws XmlMappingException, IOException;
 
 }

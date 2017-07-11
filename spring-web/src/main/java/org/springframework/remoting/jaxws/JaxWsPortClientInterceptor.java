@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,12 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -63,34 +65,46 @@ import org.springframework.util.StringUtils;
 public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		implements MethodInterceptor, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Service jaxWsService;
 
+	@Nullable
 	private String portName;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String endpointAddress;
 
 	private boolean maintainSession;
 
 	private boolean useSoapAction;
 
+	@Nullable
 	private String soapActionUri;
 
+	@Nullable
 	private Map<String, Object> customProperties;
 
+	@Nullable
 	private WebServiceFeature[] portFeatures;
 
+	@Nullable
 	private Class<?> serviceInterface;
 
 	private boolean lookupServiceOnStartup = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private QName portQName;
 
+	@Nullable
 	private Object portStub;
 
 	private final Object preparationMonitor = new Object();
@@ -112,6 +126,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return a reference to an existing JAX-WS Service instance, if any.
 	 */
+	@Nullable
 	public Service getJaxWsService() {
 		return this.jaxWsService;
 	}
@@ -127,6 +142,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the name of the port.
 	 */
+	@Nullable
 	public String getPortName() {
 		return this.portName;
 	}
@@ -142,6 +158,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the username to specify on the stub.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -157,6 +174,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the password to specify on the stub.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}
@@ -172,6 +190,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the endpoint address to specify on the stub.
 	 */
+	@Nullable
 	public String getEndpointAddress() {
 		return this.endpointAddress;
 	}
@@ -217,6 +236,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the SOAP action URI to specify on the stub.
 	 */
+	@Nullable
 	public String getSoapActionUri() {
 		return this.soapActionUri;
 	}
@@ -270,15 +290,15 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
-		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("'serviceInterface' must be an interface");
-		}
+		Assert.notNull(serviceInterface, "'serviceInterface' must not be null");
+		Assert.isTrue(serviceInterface.isInterface(), "'serviceInterface' must be an interface");
 		this.serviceInterface = serviceInterface;
 	}
 
 	/**
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
+	@Nullable
 	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
@@ -305,6 +325,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the bean ClassLoader to use for this interceptor.
 	 */
+	@Nullable
 	protected ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -322,18 +343,19 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public void prepare() {
 		Class<?> ifc = getServiceInterface();
-		if (ifc == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
+		Assert.notNull(ifc, "Property 'serviceInterface' is required");
+
 		WebService ann = ifc.getAnnotation(WebService.class);
 		if (ann != null) {
 			applyDefaultsFromAnnotation(ann);
 		}
+
 		Service serviceToUse = getJaxWsService();
 		if (serviceToUse == null) {
 			serviceToUse = createJaxWsService();
 		}
-		this.portQName = getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
+
+		this.portQName = getQName(getPortName() != null ? getPortName() : ifc.getName());
 		Object stub = getPortStub(serviceToUse, (getPortName() != null ? this.portQName : null));
 		preparePortStub(stub);
 		this.portStub = stub;
@@ -394,6 +416,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setPortName
 	 * @see #getQName
 	 */
+	@Nullable
 	protected final QName getPortQName() {
 		return this.portQName;
 	}
@@ -405,7 +428,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @return the corresponding port object as returned from
 	 * {@code Service.getPort(...)}
 	 */
-	protected Object getPortStub(Service service, QName portQName) {
+	protected Object getPortStub(Service service, @Nullable QName portQName) {
 		if (this.portFeatures != null) {
 			return (portQName != null ? service.getPort(portQName, getServiceInterface(), this.portFeatures) :
 					service.getPort(getServiceInterface(), this.portFeatures));
@@ -464,6 +487,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Return the underlying JAX-WS port stub that this interceptor delegates to
 	 * for each method invocation on the proxy.
 	 */
+	@Nullable
 	protected Object getPortStub() {
 		return this.portStub;
 	}
@@ -491,6 +515,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #getPortStub()
 	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, Object)
 	 */
+	@Nullable
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation, getPortStub());
@@ -516,7 +541,8 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @throws Throwable in case of invocation failure
 	 * @see #getPortStub()
 	 */
-	protected Object doInvoke(MethodInvocation invocation, Object portStub) throws Throwable {
+	@Nullable
+	protected Object doInvoke(MethodInvocation invocation, @Nullable Object portStub) throws Throwable {
 		Method method = invocation.getMethod();
 		try {
 			return method.invoke(portStub, invocation.getArguments());

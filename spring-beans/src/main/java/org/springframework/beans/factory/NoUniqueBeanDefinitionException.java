@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -85,6 +86,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @since 4.3
 	 * @see #getBeanType()
 	 */
+	@Nullable
 	public Collection<String> getBeanNamesFound() {
 		return this.beanNamesFound;
 	}

@@ -16,12 +16,12 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -42,26 +42,27 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 	 * or {@code null} if default values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
 	 */
-	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+	public ExpressionValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
 		super(factory, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, Value.class, (annot, type) -> true);
+		return checkAnnotatedParamNoReactiveWrapper(param, Value.class, (ann, type) -> true);
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		Value annotation = parameter.getParameterAnnotation(Value.class);
-		return new ExpressionValueNamedValueInfo(annotation);
+		Value ann = parameter.getParameterAnnotation(Value.class);
+		Assert.state(ann != null, "No Value annotation");
+		return new ExpressionValueNamedValueInfo(ann);
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		// No name to resolve
-		return Optional.empty();
+		return null;
 	}
 
 	@Override

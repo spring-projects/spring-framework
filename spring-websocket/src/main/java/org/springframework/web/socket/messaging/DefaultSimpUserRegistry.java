@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
@@ -72,15 +73,22 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	public void onApplicationEvent(ApplicationEvent event) {
 		AbstractSubProtocolEvent subProtocolEvent = (AbstractSubProtocolEvent) event;
 		Message<?> message = subProtocolEvent.getMessage();
-		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+
+		SimpMessageHeaderAccessor accessor =
+				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+		Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
+
 		String sessionId = accessor.getSessionId();
+		Assert.state(sessionId != null, "No session id");
 
 		if (event instanceof SessionSubscribeEvent) {
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
 				String id = accessor.getSubscriptionId();
 				String destination = accessor.getDestination();
-				session.addSubscription(id, destination);
+				if (id != null && destination != null) {
+					session.addSubscription(id, destination);
+				}
 			}
 		}
 		else if (event instanceof SessionConnectedEvent) {
@@ -119,13 +127,15 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
 				String subscriptionId = accessor.getSubscriptionId();
-				session.removeSubscription(subscriptionId);
+				if (subscriptionId != null) {
+					session.removeSubscription(subscriptionId);
+				}
 			}
 		}
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
 		return true;
 	}
 
@@ -188,7 +198,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public SimpSession getSession(String sessionId) {
+		public SimpSession getSession(@Nullable String sessionId) {
 			return (sessionId != null ? this.userSessions.get(sessionId) : null);
 		}
 

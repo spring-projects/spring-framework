@@ -18,6 +18,7 @@ package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +83,8 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	@Override
 	public Set<String> getMetaAnnotationTypes(String annotationName) {
 		return (this.annotations.length > 0 ?
-				AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationName) : null);
+				AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationName) :
+				Collections.emptySet());
 	}
 
 	@Override

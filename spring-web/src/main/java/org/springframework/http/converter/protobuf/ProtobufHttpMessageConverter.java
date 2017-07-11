@@ -41,6 +41,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.http.MediaType.*;
@@ -89,6 +91,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
 
+	@Nullable
 	private final ProtobufFormatSupport protobufFormatSupport;
 
 
@@ -104,11 +107,13 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 * initializer that allows the registration of message extensions.
 	 * @param registryInitializer an initializer for message extensions
 	 */
-	public ProtobufHttpMessageConverter(ExtensionRegistryInitializer registryInitializer) {
+	public ProtobufHttpMessageConverter(@Nullable ExtensionRegistryInitializer registryInitializer) {
 		this(null, registryInitializer);
 	}
 
-	ProtobufHttpMessageConverter(ProtobufFormatSupport formatSupport, ExtensionRegistryInitializer registryInitializer) {
+	ProtobufHttpMessageConverter(@Nullable ProtobufFormatSupport formatSupport,
+			@Nullable ExtensionRegistryInitializer registryInitializer) {
+
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
 		}
@@ -175,7 +180,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 	@Override
-	protected boolean canWrite(MediaType mediaType) {
+	protected boolean canWrite(@Nullable MediaType mediaType) {
 		return (super.canWrite(mediaType) ||
 				(this.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(mediaType)));
 	}
@@ -187,6 +192,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType == null) {
 			contentType = getDefaultContentType(message);
+			Assert.state(contentType != null, "No content type");
 		}
 		Charset charset = contentType.getCharset();
 		if (charset == null) {
@@ -241,12 +247,13 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		MediaType[] supportedMediaTypes();
 
-		boolean supportsWriteOnly(MediaType mediaType);
+		boolean supportsWriteOnly(@Nullable MediaType mediaType);
 
-		void merge(InputStream input, Charset charset, MediaType contentType, ExtensionRegistry extensionRegistry,
-				Message.Builder builder) throws IOException;
+		void merge(InputStream input, Charset charset, MediaType contentType,
+				ExtensionRegistry extensionRegistry, Message.Builder builder) throws IOException;
 
-		void print(Message message, OutputStream output, MediaType contentType, Charset charset) throws IOException;
+		void print(Message message, OutputStream output, MediaType contentType, Charset charset)
+				throws IOException;
 	}
 
 
@@ -271,7 +278,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public boolean supportsWriteOnly(MediaType mediaType) {
+		public boolean supportsWriteOnly(@Nullable MediaType mediaType) {
 			return TEXT_HTML.isCompatibleWith(mediaType);
 		}
 
@@ -316,7 +323,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 		private final JsonFormat.Printer printer;
 
-		public ProtobufJavaUtilSupport(JsonFormat.Parser parser, JsonFormat.Printer printer) {
+		public ProtobufJavaUtilSupport(@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
 			this.parser = (parser != null ? parser : JsonFormat.parser());
 			this.printer = (printer != null ? printer : JsonFormat.printer());
 		}
@@ -327,7 +334,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public boolean supportsWriteOnly(MediaType mediaType) {
+		public boolean supportsWriteOnly(@Nullable MediaType mediaType) {
 			return false;
 		}
 

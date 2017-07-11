@@ -19,6 +19,8 @@ package org.springframework.ui;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Subclass of {@link ModelMap} that implements the {@link Model} interface.
  * Java 5 specific like the {@code Model} interface itself.
@@ -35,7 +37,7 @@ import java.util.Map;
 public class ExtendedModelMap extends ModelMap implements Model {
 
 	@Override
-	public ExtendedModelMap addAttribute(String attributeName, Object attributeValue) {
+	public ExtendedModelMap addAttribute(String attributeName, @Nullable Object attributeValue) {
 		super.addAttribute(attributeName, attributeValue);
 		return this;
 	}

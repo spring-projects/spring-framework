@@ -16,12 +16,18 @@
 
 package org.springframework.web.util.pattern;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
+import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 
 /**
  * {@link PathMatcher} implementation for path patterns parsed
@@ -29,6 +35,10 @@ import org.springframework.util.PathMatcher;
  *
  * <p>Once parsed, {@link PathPattern}s are tailored for fast matching
  * and quick comparison.
+ *
+ * <p>Calls this {@link PathMatcher} implementation can lead to
+ * {@link PatternParseException} if the provided patterns are
+ * illegal.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -51,13 +61,13 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public boolean match(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matches(path);
+		return pathPattern.matches(PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchStart(path);
+		return pathPattern.matchStart(PathContainer.parse(path, StandardCharsets.UTF_8));
 	}
 
 	@Override
@@ -69,7 +79,17 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchAndExtract(path);
+		PathContainer pathContainer = PathContainer.parse(path, StandardCharsets.UTF_8);
+		PathMatchResult results = pathPattern.matchAndExtract(pathContainer);
+		// Collapse PathMatchResults to simple value results
+		// TODO: (path parameters are lost in this translation)
+		if (results.getUriVariables().size() == 0) {
+			return Collections.emptyMap();
+		}
+		else {
+			return results.getUriVariables().entrySet().stream()
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		}
 	}
 
 	@Override
@@ -80,7 +100,7 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public String combine(String pattern1, String pattern2) {
 		PathPattern pathPattern = getPathPattern(pattern1);
-		return pathPattern.combine(pattern2);
+		return pathPattern.combine(getPathPattern(pattern2)).getPatternString();
 	}
 
 	private PathPattern getPathPattern(String pattern) {
@@ -102,7 +122,7 @@ public class ParsingPathMatcher implements PathMatcher {
 		}
 
 		@Override
-		public int compare(String o1, String o2) {
+		public int compare(@Nullable String o1, @Nullable String o2) {
 			if (o1 == null) {
 				return (o2 == null ? 0 : +1);
 			}
@@ -129,7 +149,7 @@ public class ParsingPathMatcher implements PathMatcher {
 		}
 
 		@Override
-		public int compare(PathPattern o1, PathPattern o2) {
+		public int compare(@Nullable PathPattern o1, @Nullable PathPattern o2) {
 			// Nulls get sorted to the end
 			if (o1 == null) {
 				return (o2 == null ? 0 : +1);

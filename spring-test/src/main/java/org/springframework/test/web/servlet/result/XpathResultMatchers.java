@@ -22,6 +22,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -49,7 +50,7 @@ public class XpathResultMatchers {
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
-	protected XpathResultMatchers(String expression, Map<String, String> namespaces, Object ... args)
+	protected XpathResultMatchers(String expression, @Nullable Map<String, String> namespaces, Object ... args)
 			throws XPathExpressionException {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
@@ -70,8 +71,9 @@ public class XpathResultMatchers {
 	/**
 	 * Get the response encoding if explicitly defined in the response, {code null} otherwise.
 	 */
+	@Nullable
 	private String getDefinedEncoding(MockHttpServletResponse response) {
-		return response.isCharset() ? response.getCharacterEncoding() : null;
+		return (response.isCharset() ? response.getCharacterEncoding() : null);
 	}
 
 	/**

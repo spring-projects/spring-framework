@@ -31,8 +31,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Container for request and response details for exchanges performed through
@@ -60,6 +62,7 @@ public class ExchangeResult {
 
 	private final WiretapClientHttpResponse response;
 
+	@Nullable
 	private final String uriTemplate;
 
 
@@ -77,7 +80,7 @@ public class ExchangeResult {
 	 * Constructor to copy the from the yet undecoded ExchangeResult with extra
 	 * information to expose such as the original URI template used, if any.
 	 */
-	ExchangeResult(ExchangeResult other, String uriTemplate) {
+	ExchangeResult(ExchangeResult other, @Nullable String uriTemplate) {
 		this.request = other.request;
 		this.response = other.response;
 		this.uriTemplate = uriTemplate;
@@ -101,7 +104,7 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return the request headers that were sent to the server.
+	 * Return the URI of the request.
 	 */
 	public URI getUrl() {
 		return this.request.getURI();
@@ -110,6 +113,7 @@ public class ExchangeResult {
 	/**
 	 * Return the original URI template used to prepare the request, if any.
 	 */
+	@Nullable
 	public String getUriTemplate() {
 		return this.uriTemplate;
 	}
@@ -125,6 +129,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written as a {@code byte[]}.
 	 * @throws IllegalStateException if the request body is not fully written yet.
 	 */
+	@Nullable
 	public byte[] getRequestBodyContent() {
 		MonoProcessor<byte[]> body = this.request.getRecordedContent();
 		Assert.isTrue(body.isTerminated(), "Request body incomplete.");
@@ -157,9 +162,10 @@ public class ExchangeResult {
 	 * Return the raw request body content written as a {@code byte[]}.
 	 * @throws IllegalStateException if the response is not fully read yet.
 	 */
+	@Nullable
 	public byte[] getResponseBodyContent() {
 		MonoProcessor<byte[]> body = this.response.getRecordedContent();
-		Assert.state(body.isTerminated(), "Response body incomplete.");
+		Assert.state(body.isTerminated(), "Response body incomplete");
 		return body.block(Duration.ZERO);
 	}
 
@@ -194,11 +200,7 @@ public class ExchangeResult {
 	}
 
 	private String getStatusReason() {
-		String reason = "";
-		if (getStatus() != null && getStatus().getReasonPhrase() != null) {
-			reason = getStatus().getReasonPhrase();
-		}
-		return reason;
+		return getStatus().getReasonPhrase();
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {
@@ -207,30 +209,26 @@ public class ExchangeResult {
 				.collect(Collectors.joining(delimiter));
 	}
 
-	private String formatBody(MediaType contentType, MonoProcessor<byte[]> body) {
+	private String formatBody(@Nullable MediaType contentType, MonoProcessor<byte[]> body) {
 		if (body.isSuccess()) {
 			byte[] bytes = body.block(Duration.ZERO);
-			if (bytes.length == 0) {
+			if (ObjectUtils.isEmpty(bytes)) {
 				return "No content";
 			}
-
 			if (contentType == null) {
 				return "Unknown content type (" + bytes.length + " bytes)";
 			}
-
 			Charset charset = contentType.getCharset();
 			if (charset != null) {
 				return new String(bytes, charset);
 			}
-
 			if (PRINTABLE_MEDIA_TYPES.stream().anyMatch(contentType::isCompatibleWith)) {
 				return new String(bytes, StandardCharsets.UTF_8);
 			}
-
 			return "Unknown charset (" + bytes.length + " bytes)";
 		}
 		else if (body.isError()) {
-			return "I/O failure: " + body.getError().getMessage();
+			return "I/O failure: " + body.getError();
 		}
 		else {
 			return "Content not available yet";

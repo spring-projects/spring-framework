@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * General error that indicates a problem while encoding and decoding to and
@@ -42,7 +43,7 @@ public class CodecException extends NestedRuntimeException {
 	 * @param msg the detail message
 	 * @param cause root cause for the exception, if any
 	 */
-	public CodecException(String msg, Throwable cause) {
+	public CodecException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

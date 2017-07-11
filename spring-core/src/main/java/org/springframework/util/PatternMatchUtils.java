@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.util;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for simple pattern matching, in particular for
@@ -33,7 +35,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches the given pattern
 	 */
-	public static boolean simpleMatch(String pattern, String str) {
+	public static boolean simpleMatch(@Nullable String pattern, @Nullable String str) {
 		if (pattern == null || str == null) {
 			return false;
 		}
@@ -75,7 +77,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches any of the given patterns
 	 */
-	public static boolean simpleMatch(String[] patterns, String str) {
+	public static boolean simpleMatch(@Nullable String[] patterns, String str) {
 		if (patterns != null) {
 			for (String pattern : patterns) {
 				if (simpleMatch(pattern, str)) {

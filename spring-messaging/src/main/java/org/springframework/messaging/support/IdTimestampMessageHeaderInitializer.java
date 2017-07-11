@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.support;
 
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
 
@@ -57,6 +58,7 @@ public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitial
 	/**
 	 * Return the configured {@code IdGenerator}, if any.
 	 */
+	@Nullable
 	public IdGenerator getIdGenerator() {
 		return this.idGenerator;
 	}
@@ -81,7 +83,10 @@ public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitial
 
 	@Override
 	public void initHeaders(MessageHeaderAccessor headerAccessor) {
-		headerAccessor.setIdGenerator(getIdGenerator());
+		IdGenerator idGenerator = getIdGenerator();
+		if (idGenerator != null) {
+			headerAccessor.setIdGenerator(idGenerator);
+		}
 		headerAccessor.setEnableTimestamp(isEnableTimestamp());
 	}
 

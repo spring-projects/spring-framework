@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
@@ -67,6 +69,9 @@ import org.springframework.web.servlet.HandlerMapping;
  * @since 5.0
  */
 class ReactiveTypeHandler {
+
+	private static final long STREAMING_TIMEOUT_VALUE = -1;
+
 
 	private static Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
 
@@ -107,6 +112,7 @@ class ReactiveTypeHandler {
 	 * @return an emitter for streaming or {@code null} if handled internally
 	 * with a {@link DeferredResult}.
 	 */
+	@Nullable
 	public ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
@@ -123,7 +129,7 @@ class ReactiveTypeHandler {
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementClass)) {
-				SseEmitter emitter = new SseEmitter();
+				SseEmitter emitter = new SseEmitter(STREAMING_TIMEOUT_VALUE);
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
@@ -159,7 +165,7 @@ class ReactiveTypeHandler {
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
-		return new ResponseBodyEmitter() {
+		return new ResponseBodyEmitter(STREAMING_TIMEOUT_VALUE) {
 			@Override
 			protected void extendResponse(ServerHttpResponse outputMessage) {
 				outputMessage.getHeaders().setContentType(mediaType);
@@ -174,10 +180,12 @@ class ReactiveTypeHandler {
 
 		private final TaskExecutor taskExecutor;
 
+		@Nullable
 		private Subscription subscription;
 
 		private final AtomicReference<Object> elementRef = new AtomicReference<>();
 
+		@Nullable
 		private Throwable error;
 
 		private volatile boolean terminated;
@@ -213,6 +221,7 @@ class ReactiveTypeHandler {
 				terminate();
 				this.emitter.complete();
 			});
+			this.emitter.onError(this.emitter::completeWithError);
 			subscription.request(1);
 		}
 
@@ -269,6 +278,7 @@ class ReactiveTypeHandler {
 			Object element = this.elementRef.get();
 			if (element != null) {
 				this.elementRef.lazySet(null);
+				Assert.state(this.subscription != null, "No subscription");
 				try {
 					send(element);
 					this.subscription.request(1);
@@ -310,7 +320,9 @@ class ReactiveTypeHandler {
 
 		private void terminate() {
 			this.done = true;
-			this.subscription.cancel();
+			if (this.subscription != null) {
+				this.subscription.cancel();
+			}
 		}
 
 	}
@@ -333,19 +345,27 @@ class ReactiveTypeHandler {
 			}
 		}
 
-		private SseEmitter.SseEventBuilder adapt(ServerSentEvent<?> event) {
+		private SseEmitter.SseEventBuilder adapt(ServerSentEvent<?> sse) {
 			SseEmitter.SseEventBuilder builder = SseEmitter.event();
-			if (event.id() != null) {
-				builder.id(event.id());
+			String id = sse.id();
+			String event = sse.event();
+			Duration retry = sse.retry();
+			String comment = sse.comment();
+			Object data = sse.data();
+			if (id != null) {
+				builder.id(id);
 			}
-			if (event.comment() != null) {
-				builder.comment(event.comment());
+			if (event != null) {
+				builder.name(event);
 			}
-			if (event.data() != null) {
-				builder.data(event.data());
+			if (data != null) {
+				builder.data(data);
 			}
-			if (event.retry() != null) {
-				builder.reconnectTime(event.retry().toMillis());
+			if (retry != null) {
+				builder.reconnectTime(retry.toMillis());
+			}
+			if (comment != null) {
+				builder.comment(comment);
 			}
 			return builder;
 		}

@@ -24,6 +24,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Static holder for local Spring properties, i.e. defined at the Spring library level.
  *
@@ -83,7 +85,7 @@ public abstract class SpringProperties {
 	 * @param key the property key
 	 * @param value the associated property value, or {@code null} to reset it
 	 */
-	public static void setProperty(String key, String value) {
+	public static void setProperty(String key, @Nullable String value) {
 		if (value != null) {
 			localProperties.setProperty(key, value);
 		}
@@ -98,6 +100,7 @@ public abstract class SpringProperties {
 	 * @param key the property key
 	 * @return the associated property value, or {@code null} if none found
 	 */
+	@Nullable
 	public static String getProperty(String key) {
 		String value = localProperties.getProperty(key);
 		if (value == null) {

@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for determining whether a specific bean definition
@@ -64,6 +65,7 @@ public interface AutowireCandidateResolver {
 	 * or {@code null} if none found
 	 * @since 3.0
 	 */
+	@Nullable
 	default Object getSuggestedValue(DependencyDescriptor descriptor) {
 		return null;
 	}
@@ -78,7 +80,8 @@ public interface AutowireCandidateResolver {
 	 * or {@code null} if straight resolution is to be performed
 	 * @since 4.0
 	 */
-	default Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+	@Nullable
+	default Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
 	}
 

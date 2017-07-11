@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -131,6 +132,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * Return the fixed Locale that this resolver will return if no cookie found,
 	 * if any.
 	 */
+	@Nullable
 	protected Locale getDefaultLocale() {
 		return this.defaultLocale;
 	}
@@ -148,6 +150,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * if any.
 	 * @since 4.0
 	 */
+	@Nullable
 	protected TimeZone getDefaultTimeZone() {
 		return this.defaultTimeZone;
 	}
@@ -221,12 +224,12 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	public void setLocale(HttpServletRequest request, HttpServletResponse response, @Nullable Locale locale) {
 		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
 	}
 
 	@Override
-	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
+	public void setLocaleContext(HttpServletRequest request, HttpServletResponse response, @Nullable LocaleContext localeContext) {
 		Locale locale = null;
 		TimeZone timeZone = null;
 		if (localeContext != null) {
@@ -256,6 +259,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return the corresponding {@code Locale} instance
 	 * @since 4.3
 	 */
+	@Nullable
 	protected Locale parseLocaleValue(String locale) {
 		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
 	}
@@ -283,6 +287,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @see #setDefaultLocale
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
+	@Nullable
 	protected Locale determineDefaultLocale(HttpServletRequest request) {
 		Locale defaultLocale = getDefaultLocale();
 		if (defaultLocale == null) {
@@ -300,6 +305,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return the default time zone (or {@code null} if none defined)
 	 * @see #setDefaultTimeZone
 	 */
+	@Nullable
 	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
 		return getDefaultTimeZone();
 	}

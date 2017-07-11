@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpMethod;
@@ -63,21 +61,21 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
-			BindingContext context, ServerWebExchange exchange) {
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
+			ServerWebExchange exchange) {
 
 		Class<?> paramType = methodParameter.getParameterType();
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {
-			return Optional.of(exchange);
+			return exchange;
 		}
 		else if (ServerHttpRequest.class.isAssignableFrom(paramType)) {
-			return Optional.of(exchange.getRequest());
+			return exchange.getRequest();
 		}
 		else if (ServerHttpResponse.class.isAssignableFrom(paramType)) {
-			return Optional.of(exchange.getResponse());
+			return exchange.getResponse();
 		}
 		else if (HttpMethod.class == paramType) {
-			return Optional.of(exchange.getRequest().getMethod());
+			return exchange.getRequest().getMethod();
 		}
 		else {
 			// should never happen...

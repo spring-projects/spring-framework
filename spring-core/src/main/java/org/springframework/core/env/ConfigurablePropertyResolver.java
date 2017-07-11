@@ -17,6 +17,7 @@
 package org.springframework.core.env;
 
 import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration interface to be implemented by most if not all {@link PropertyResolver}
@@ -71,7 +72,7 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 * resolver and their associated default value, or {@code null} if no such
 	 * special character should be processed as a value separator.
 	 */
-	void setValueSeparator(String valueSeparator);
+	void setValueSeparator(@Nullable String valueSeparator);
 
 	/**
 	 * Set whether to throw an exception when encountering an unresolvable placeholder

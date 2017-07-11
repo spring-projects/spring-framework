@@ -18,10 +18,13 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.jstl.core.Config;
+
+import org.springframework.lang.Nullable;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
@@ -55,7 +58,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * @param model the model attributes for the current view
 	 * (can be {@code null}, using the request attributes for Errors retrieval)
 	 */
-	public JspAwareRequestContext(PageContext pageContext, Map<String, Object> model) {
+	public JspAwareRequestContext(PageContext pageContext, @Nullable Map<String, Object> model) {
 		initContext(pageContext, model);
 	}
 
@@ -66,7 +69,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * @param model the model attributes for the current view
 	 * (can be {@code null}, using the request attributes for Errors retrieval)
 	 */
-	protected void initContext(PageContext pageContext, Map<String, Object> model) {
+	protected void initContext(PageContext pageContext, @Nullable Map<String, Object> model) {
 		if (!(pageContext.getRequest() instanceof HttpServletRequest)) {
 			throw new IllegalArgumentException("RequestContext only supports HTTP requests");
 		}

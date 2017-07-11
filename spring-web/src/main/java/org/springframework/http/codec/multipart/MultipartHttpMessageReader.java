@@ -30,6 +30,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -66,7 +67,7 @@ public class MultipartHttpMessageReader implements HttpMessageReader<MultiValueM
 	}
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return MULTIPART_VALUE_TYPE.isAssignableFrom(elementType) &&
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}

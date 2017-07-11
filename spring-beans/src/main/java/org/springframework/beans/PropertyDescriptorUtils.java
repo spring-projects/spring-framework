@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -60,7 +61,10 @@ class PropertyDescriptorUtils {
 	/**
 	 * See {@link java.beans.PropertyDescriptor#findPropertyType}.
 	 */
-	public static Class<?> findPropertyType(Method readMethod, Method writeMethod) throws IntrospectionException {
+	@Nullable
+	public static Class<?> findPropertyType(@Nullable Method readMethod, @Nullable Method writeMethod)
+			throws IntrospectionException {
+
 		Class<?> propertyType = null;
 
 		if (readMethod != null) {
@@ -103,8 +107,9 @@ class PropertyDescriptorUtils {
 	/**
 	 * See {@link java.beans.IndexedPropertyDescriptor#findIndexedPropertyType}.
 	 */
-	public static Class<?> findIndexedPropertyType(String name, Class<?> propertyType,
-			Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
+	@Nullable
+	public static Class<?> findIndexedPropertyType(String name, @Nullable Class<?> propertyType,
+			@Nullable Method indexedReadMethod, @Nullable Method indexedWriteMethod) throws IntrospectionException {
 
 		Class<?> indexedPropertyType = null;
 

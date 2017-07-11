@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -174,10 +175,12 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return (location != null ? location.getLineNumber() : -1);
 				}
 				@Override
+				@Nullable
 				public String getPublicId() {
 					return (location != null ? location.getPublicId() : null);
 				}
 				@Override
+				@Nullable
 				public String getSystemId() {
 					return (location != null ? location.getSystemId() : null);
 				}

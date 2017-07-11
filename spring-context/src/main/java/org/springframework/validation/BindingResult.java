@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.beans.PropertyEditor;
 import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.lang.Nullable;
 
 /**
  * General interface that represents binding results. Extends the
@@ -54,6 +55,7 @@ public interface BindingResult extends Errors {
 	 * Return the wrapped target object, which may be a bean, an object with
 	 * public fields, a Map - depending on the concrete binding strategy.
 	 */
+	@Nullable
 	Object getTarget();
 
 	/**
@@ -83,6 +85,7 @@ public interface BindingResult extends Errors {
 	 * @return the current value of the field in its raw form,
 	 * or {@code null} if not known
 	 */
+	@Nullable
 	Object getRawFieldValue(String field);
 
 	/**
@@ -93,13 +96,15 @@ public interface BindingResult extends Errors {
 	 * is given but should be specified in any case for consistency checking)
 	 * @return the registered editor, or {@code null} if none
 	 */
-	PropertyEditor findEditor(String field, Class<?> valueType);
+	@Nullable
+	PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType);
 
 	/**
 	 * Return the underlying PropertyEditorRegistry.
 	 * @return the PropertyEditorRegistry, or {@code null} if none
 	 * available for this BindingResult
 	 */
+	@Nullable
 	PropertyEditorRegistry getPropertyEditorRegistry();
 
 	/**

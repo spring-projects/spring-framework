@@ -18,6 +18,7 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -43,6 +44,7 @@ public abstract class AbstractLocaleResolver implements LocaleResolver {
 	/**
 	 * Return the default Locale that this resolver is supposed to fall back to, if any.
 	 */
+	@Nullable
 	protected Locale getDefaultLocale() {
 		return this.defaultLocale;
 	}

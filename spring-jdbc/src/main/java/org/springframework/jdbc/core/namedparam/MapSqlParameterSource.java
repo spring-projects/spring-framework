@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,7 +70,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * Create a new MapSqlParameterSource based on a Map.
 	 * @param values a Map holding existing parameter values (can be {@code null})
 	 */
-	public MapSqlParameterSource(Map<String, ?> values) {
+	public MapSqlParameterSource(@Nullable Map<String, ?> values) {
 		addValues(values);
 	}
 
@@ -128,15 +129,14 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */
-	public MapSqlParameterSource addValues(Map<String, ?> values) {
+	public MapSqlParameterSource addValues(@Nullable Map<String, ?> values) {
 		if (values != null) {
-			for (Map.Entry<String, ?> entry : values.entrySet()) {
-				this.values.put(entry.getKey(), entry.getValue());
-				if (entry.getValue() instanceof SqlParameterValue) {
-					SqlParameterValue value = (SqlParameterValue) entry.getValue();
-					registerSqlType(entry.getKey(), value.getSqlType());
+			values.forEach((key, value) -> {
+				this.values.put(key, value);
+				if (value instanceof SqlParameterValue) {
+					registerSqlType(key, ((SqlParameterValue) value).getSqlType());
 				}
-			}
+			});
 		}
 		return this;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -70,14 +71,14 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return (super.canDecode(elementType, mimeType) &&
 				String.class.equals(elementType.getRawClass()));
 	}
 
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {
@@ -88,7 +89,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	@Override
 	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.reduce(DataBuffer::write)
@@ -112,14 +113,14 @@ public class StringDecoder extends AbstractDecoder<String> {
 		return Flux.fromIterable(results);
 	}
 
-	private String decodeDataBuffer(DataBuffer dataBuffer, MimeType mimeType) {
+	private String decodeDataBuffer(DataBuffer dataBuffer, @Nullable MimeType mimeType) {
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
 		return charBuffer.toString();
 	}
 
-	private Charset getCharset(MimeType mimeType) {
+	private Charset getCharset(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			return mimeType.getCharset();
 		}

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 416 (unsupported media type).
@@ -31,6 +32,7 @@ import org.springframework.http.MediaType;
 @SuppressWarnings("serial")
 public class UnsupportedMediaTypeStatusException extends ResponseStatusException {
 
+	@Nullable
 	private final MediaType contentType;
 
 	private final List<MediaType> supportedMediaTypes;
@@ -39,7 +41,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	/**
 	 * Constructor for when the specified Content-Type is invalid.
 	 */
-	public UnsupportedMediaTypeStatusException(String reason) {
+	public UnsupportedMediaTypeStatusException(@Nullable String reason) {
 		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason);
 		this.contentType = null;
 		this.supportedMediaTypes = Collections.emptyList();
@@ -48,8 +50,9 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	/**
 	 * Constructor for when the Content-Type can be parsed but is not supported.
 	 */
-	public UnsupportedMediaTypeStatusException(MediaType contentType, List<MediaType> supportedMediaTypes) {
-		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type '" + contentType + "' not supported");
+	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
+		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+				"Content type '" + (contentType != null ? contentType : "") + "' not supported");
 		this.contentType = contentType;
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
 	}
@@ -59,6 +62,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * Return the request Content-Type header if it was parsed successfully,
 	 * or {@code null} otherwise.
 	 */
+	@Nullable
 	public MediaType getContentType() {
 		return this.contentType;
 	}

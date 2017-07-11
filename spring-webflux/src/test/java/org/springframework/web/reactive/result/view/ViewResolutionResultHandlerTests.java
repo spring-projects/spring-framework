@@ -43,6 +43,7 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ConcurrentModel;
@@ -389,7 +390,7 @@ public class ViewResolutionResultHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> render(Map<String, ?> model, MediaType mediaType, ServerWebExchange exchange) {
+		public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType mediaType, ServerWebExchange exchange) {
 			ServerHttpResponse response = exchange.getResponse();
 			if (mediaType != null) {
 				response.getHeaders().setContentType(mediaType);

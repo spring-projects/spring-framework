@@ -52,7 +52,6 @@ public class WebClientIntegrationTests {
 
 	private WebClient webClient;
 
-
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
@@ -394,13 +393,16 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void filter() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
 
-		WebClient filteredClient = this.webClient.filter(
-				(request, next) -> {
-					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+		WebClient filteredClient = this.webClient.mutate()
+				.filter((request, next) -> {
+					ClientRequest filteredRequest =
+							ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
-				});
+				})
+				.build();
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
@@ -429,7 +431,9 @@ public class WebClientIntegrationTests {
 						}
 				);
 
-		WebClient filteredClient = this.webClient.filter(filter);
+		WebClient filteredClient = this.webClient.mutate()
+				.filter(filter)
+				.build();
 
 		// header not present
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
@@ -461,6 +465,36 @@ public class WebClientIntegrationTests {
 
 		Assert.assertEquals(2, server.getRequestCount());
 	}
+
+	@Test
+	public void exchangeNoContent() throws Exception  {
+		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/noContent")
+				.exchange();
+
+		StepVerifier.create(result).assertNext(r -> {
+			assertTrue(r.statusCode().is2xxSuccessful());
+			StepVerifier.create(r.bodyToMono(Void.class)).verifyComplete();
+		}).verifyComplete();
+	}
+
+	@Test
+	public void retrieveNoContent() throws Exception  {
+		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
+				.uri("/noContent")
+				.retrieve()
+				.toEntity(Void.class);
+
+		StepVerifier.create(result).assertNext(r -> {
+			assertFalse(r.hasBody());
+			assertTrue(r.getStatusCode().is2xxSuccessful());
+		}).verifyComplete();
+	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyException extends RuntimeException {

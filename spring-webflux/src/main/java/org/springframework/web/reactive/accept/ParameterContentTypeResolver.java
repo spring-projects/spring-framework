@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,47 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.accept;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestedContentTypeResolver} that extracts the media type lookup
- * key from a known query parameter named "format" by default.
+ * Resolver that checks a query parameter and uses it to lookup a matching
+ * MediaType. Lookup keys can be registered or as a fallback
+ * {@link MediaTypeFactory} can be used to perform a lookup.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ParameterContentTypeResolver extends AbstractMappingContentTypeResolver {
+public class ParameterContentTypeResolver implements RequestedContentTypeResolver {
 
-	private static final Log logger = LogFactory.getLog(ParameterContentTypeResolver.class);
+	/** Primary lookup for media types by key (e.g. "json" -> "application/json") */
+	private final Map<String, MediaType> mediaTypes = new ConcurrentHashMap<>(64);
 
 	private String parameterName = "format";
 
 
-	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
 	public ParameterContentTypeResolver(Map<String, MediaType> mediaTypes) {
-		super(mediaTypes);
+		mediaTypes.forEach((key, value) -> this.mediaTypes.put(formatKey(key), value));
+	}
+
+	private static String formatKey(String key) {
+		return key.toLowerCase(Locale.ENGLISH);
 	}
 
 
 	/**
 	 * Set the name of the parameter to use to determine requested media types.
-	 * <p>By default this is set to {@code "format"}.
+	 * <p>By default this is set to {@literal "format"}.
 	 */
 	public void setParameterName(String parameterName) {
-		Assert.notNull(parameterName, "parameterName is required");
+		Assert.notNull(parameterName, "'parameterName' is required");
 		this.parameterName = parameterName;
 	}
 
@@ -63,21 +69,22 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 
 
 	@Override
-	protected String extractKey(ServerWebExchange exchange) {
-		return exchange.getRequest().getQueryParams().getFirst(getParameterName());
-	}
-
-	@Override
-	protected void handleMatch(String mediaTypeKey, MediaType mediaType) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media type is '" + mediaType +
-					"' based on '" + getParameterName() + "'='" + mediaTypeKey + "'.");
+	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
+		String key = exchange.getRequest().getQueryParams().getFirst(getParameterName());
+		if (!StringUtils.hasText(key)) {
+			return Collections.emptyList();
 		}
-	}
-
-	@Override
-	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
-		throw new NotAcceptableStatusException(getAllMediaTypes());
+		key = formatKey(key);
+		MediaType match = this.mediaTypes.get(key);
+		if (match == null) {
+			match = MediaTypeFactory.getMediaType("filename." + key)
+					.orElseThrow(() -> {
+						List<MediaType> supported = new ArrayList<>(this.mediaTypes.values());
+						return new NotAcceptableStatusException(supported);
+					});
+		}
+		this.mediaTypes.putIfAbsent(key, match);
+		return Collections.singletonList(match);
 	}
 
 }

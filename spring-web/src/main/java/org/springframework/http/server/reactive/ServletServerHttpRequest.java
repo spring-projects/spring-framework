@@ -40,6 +40,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
@@ -71,7 +72,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(initUri(request), initHeaders(request));
+		super(initUri(request), request.getContextPath(), initHeaders(request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
@@ -154,11 +155,6 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public String getContextPath() {
-		return getServletRequest().getContextPath();
-	}
-
-	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> httpCookies = new LinkedMultiValueMap<>();
 		Cookie[] cookies;
@@ -189,6 +185,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
 	 */
+	@Nullable
 	protected DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {

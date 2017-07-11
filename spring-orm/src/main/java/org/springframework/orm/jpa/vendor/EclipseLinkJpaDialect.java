@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.persistence.PersistenceException;
 import org.eclipse.persistence.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -114,6 +115,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		private final EntityManager entityManager;
 
+		@Nullable
 		private Connection connection;
 
 		public EclipseLinkConnectionHandle(EntityManager entityManager) {

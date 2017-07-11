@@ -84,9 +84,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public EntityResponse.Builder<T> headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
@@ -115,16 +113,14 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
-	public EntityResponse.Builder<T> eTag(String eTag) {
-		if (eTag != null) {
-			if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
-				eTag = "\"" + eTag;
-			}
-			if (!eTag.endsWith("\"")) {
-				eTag = eTag + "\"";
-			}
+	public EntityResponse.Builder<T> eTag(String etag) {
+		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+			etag = "\"" + etag;
 		}
-		this.headers.setETag(eTag);
+		if (!etag.endsWith("\"")) {
+			etag = etag + "\"";
+		}
+		this.headers.setETag(etag);
 		return this;
 	}
 

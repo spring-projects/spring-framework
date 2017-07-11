@@ -29,6 +29,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -46,25 +48,26 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (InputStreamResource.class.equals(clazz) ||
-				clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType);
+		return (clazz != null &&
+				(InputStreamResource.class == clazz || clazz.isAssignableFrom(ByteArrayResource.class)) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
 	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(decodeToMono(inputStream, elementType, mimeType, hints));
 	}
 
 	@Override
 	public Mono<Resource> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Class<?> clazz = elementType.getRawClass();
+		Assert.state(clazz != null, "No resource class");
 
 		Mono<byte[]> byteArray = Flux.from(inputStream).
 				reduce(DataBuffer::write).
@@ -76,7 +79,7 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 				});
 
 
-		if (InputStreamResource.class.equals(clazz)) {
+		if (InputStreamResource.class == clazz) {
 			return Mono.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {

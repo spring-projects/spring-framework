@@ -17,8 +17,11 @@
 package org.springframework.web.servlet;
 
 import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for web-based locale resolution strategies that allows for
@@ -66,6 +69,6 @@ public interface LocaleResolver {
 	 * @throws UnsupportedOperationException if the LocaleResolver
 	 * implementation does not support dynamic changing of the locale
 	 */
-	void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale);
+	void setLocale(HttpServletRequest request, HttpServletResponse response, @Nullable Locale locale);
 
 }

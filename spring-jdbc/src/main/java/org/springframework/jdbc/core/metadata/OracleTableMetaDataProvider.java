@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -42,6 +43,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	private final boolean includeSynonyms;
 
+	@Nullable
 	private String defaultSchema;
 
 
@@ -103,7 +105,8 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	@Override
 	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
-			String catalogName, String schemaName, String tableName) throws SQLException {
+			@Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName)
+			throws SQLException {
 
 		if (!this.includeSynonyms) {
 			logger.debug("Defaulting to no synonyms in table metadata lookup");

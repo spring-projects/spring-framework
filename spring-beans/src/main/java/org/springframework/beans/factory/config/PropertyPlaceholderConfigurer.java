@@ -22,6 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.core.Constants;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -152,6 +153,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * @see System#getProperty
 	 * @see #resolvePlaceholder(String, java.util.Properties)
 	 */
+	@Nullable
 	protected String resolvePlaceholder(String placeholder, Properties props, int systemPropertiesMode) {
 		String propVal = null;
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
@@ -179,6 +181,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * @return the resolved value, of {@code null} if none
 	 * @see #setSystemPropertiesMode
 	 */
+	@Nullable
 	protected String resolvePlaceholder(String placeholder, Properties props) {
 		return props.getProperty(placeholder);
 	}
@@ -192,6 +195,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * @see System#getProperty(String)
 	 * @see System#getenv(String)
 	 */
+	@Nullable
 	protected String resolveSystemProperty(String key) {
 		try {
 			String value = System.getProperty(key);

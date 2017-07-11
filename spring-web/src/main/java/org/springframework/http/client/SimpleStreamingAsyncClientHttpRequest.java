@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -45,6 +46,7 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	private final int chunkSize;
 
+	@Nullable
 	private OutputStream body;
 
 	private final boolean outputStreaming;

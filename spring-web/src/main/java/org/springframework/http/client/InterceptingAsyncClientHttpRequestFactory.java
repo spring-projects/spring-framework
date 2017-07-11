@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * Wrapper for a {@link AsyncClientHttpRequestFactory} that has support for
@@ -46,7 +47,7 @@ public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHtt
 	 * @param interceptors the list of interceptors to use
 	 */
 	public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate,
-			List<AsyncClientHttpRequestInterceptor> interceptors) {
+			@Nullable List<AsyncClientHttpRequestInterceptor> interceptors) {
 
 		this.delegate = delegate;
 		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());

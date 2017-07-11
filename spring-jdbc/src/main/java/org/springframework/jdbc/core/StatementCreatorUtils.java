@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.jdbc.support.SqlValue;
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
@@ -109,9 +110,12 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Derive a default SQL type from the given Java type.
 	 * @param javaType the Java type to translate
-	 * @return the corresponding SQL type, or {@code null} if none found
+	 * @return the corresponding SQL type, or {@link SqlTypeValue#TYPE_UNKNOWN} if none found
 	 */
-	public static int javaTypeToSqlParameterType(Class<?> javaType) {
+	public static int javaTypeToSqlParameterType(@Nullable Class<?> javaType) {
+		if (javaType == null) {
+			return SqlTypeValue.TYPE_UNKNOWN;
+		}
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {
 			return sqlType;
@@ -137,8 +141,8 @@ public abstract class StatementCreatorUtils {
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
-			throws SQLException {
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param,
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
 	}
@@ -153,8 +157,8 @@ public abstract class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
-			throws SQLException {
+	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType,
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
 	}
@@ -172,7 +176,7 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-			Object inValue) throws SQLException {
+			@Nullable Object inValue) throws SQLException {
 
 		setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
 	}
@@ -192,7 +196,7 @@ public abstract class StatementCreatorUtils {
 	 * @see SqlTypeValue
 	 */
 	private static void setParameterValueInternal(PreparedStatement ps, int paramIndex, int sqlType,
-			String typeName, Integer scale, Object inValue) throws SQLException {
+			@Nullable String typeName, @Nullable Integer scale, @Nullable Object inValue) throws SQLException {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;
@@ -233,7 +237,9 @@ public abstract class StatementCreatorUtils {
 	 * Set the specified PreparedStatement parameter to null,
 	 * respecting database-specific peculiarities.
 	 */
-	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
+	private static void setNull(PreparedStatement ps, int paramIndex, int sqlType, @Nullable String typeName)
+			throws SQLException {
+
 		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
@@ -273,8 +279,8 @@ public abstract class StatementCreatorUtils {
 		}
 	}
 
-	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-			Integer scale, Object inValue) throws SQLException {
+	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType,
+			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
 
 		if (inValue instanceof SqlTypeValue) {
 			((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
@@ -422,7 +428,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Object... paramValues) {
+	public static void cleanupParameters(@Nullable Object... paramValues) {
 		if (paramValues != null) {
 			cleanupParameters(Arrays.asList(paramValues));
 		}
@@ -435,7 +441,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Collection<?> paramValues) {
+	public static void cleanupParameters(@Nullable Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
 				if (inValue instanceof DisposableSqlTypeValue) {

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import javax.xml.stream.events.XMLEvent;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,6 +59,7 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 	}
 
 	@Override
+	@Nullable
 	public XMLEvent peek() {
 		if (this.cursor < this.events.size()) {
 			return this.events.get(this.cursor);

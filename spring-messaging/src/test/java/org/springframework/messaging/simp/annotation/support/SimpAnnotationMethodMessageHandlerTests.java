@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -511,7 +512,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			String value = (String) target;
 			if (invalidValue.equals(value)) {
 				errors.reject("invalid value '"+invalidValue+"'");

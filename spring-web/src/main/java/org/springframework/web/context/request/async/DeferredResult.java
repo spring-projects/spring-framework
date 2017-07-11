@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.web.context.request.async;
 
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -60,6 +62,8 @@ public class DeferredResult<T> {
 
 	private Runnable timeoutCallback;
 
+	private Consumer<Throwable> errorCallback;
+
 	private Runnable completionCallback;
 
 	private DeferredResultHandler resultHandler;
@@ -93,7 +97,7 @@ public class DeferredResult<T> {
 	 * @param timeout timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(Long timeout, Object timeoutResult) {
+	public DeferredResult(@Nullable Long timeout, Object timeoutResult) {
 		this.timeoutResult = timeoutResult;
 		this.timeout = timeout;
 	}
@@ -125,6 +129,7 @@ public class DeferredResult<T> {
 	 * to check if there is a result prior to calling this method.
 	 * @since 4.0
 	 */
+	@Nullable
 	public Object getResult() {
 		Object resultToCheck = this.result;
 		return (resultToCheck != RESULT_NONE ? resultToCheck : null);
@@ -146,6 +151,19 @@ public class DeferredResult<T> {
 	 */
 	public void onTimeout(Runnable callback) {
 		this.timeoutCallback = callback;
+	}
+
+	/**
+	 * Register code to invoke when an error occurred during the async request.
+	 * <p>This method is called from a container thread when an error occurs
+	 * while processing an async request before the {@code DeferredResult} has
+	 * been populated. It may invoke {@link DeferredResult#setResult setResult}
+	 * or {@link DeferredResult#setErrorResult setErrorResult} to resume
+	 * processing.
+	 * @since 5.0
+	 */
+	public void onError(Consumer<Throwable> callback) {
+		this.errorCallback = callback;
 	}
 
 	/**
@@ -250,7 +268,7 @@ public class DeferredResult<T> {
 
 
 	final DeferredResultProcessingInterceptor getInterceptor() {
-		return new DeferredResultProcessingInterceptorAdapter() {
+		return new DeferredResultProcessingInterceptor() {
 			@Override
 			public <S> boolean handleTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
 				boolean continueProcessing = true;
@@ -271,6 +289,23 @@ public class DeferredResult<T> {
 					}
 				}
 				return continueProcessing;
+			}
+			@Override
+			public <S> boolean handleError(NativeWebRequest request, DeferredResult<S> deferredResult, Throwable t) {
+				try {
+					if (errorCallback != null) {
+						errorCallback.accept(t);
+					}
+				}
+				finally {
+					try {
+						setResultInternal(t);
+					}
+					catch (Throwable ex) {
+						logger.debug("Failed to handle error result", ex);
+					}
+				}
+				return false;
 			}
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {

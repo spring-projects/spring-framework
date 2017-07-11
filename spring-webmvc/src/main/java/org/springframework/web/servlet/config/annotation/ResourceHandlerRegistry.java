@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -55,6 +56,7 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
+	@Nullable
 	private final ContentNegotiationManager contentNegotiationManager;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
@@ -79,7 +81,7 @@ public class ResourceHandlerRegistry {
 	 * @since 4.3
 	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
-			ContentNegotiationManager contentNegotiationManager) {
+			@Nullable ContentNegotiationManager contentNegotiationManager) {
 
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
@@ -131,6 +133,7 @@ public class ResourceHandlerRegistry {
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
 	 * of no registrations.
 	 */
+	@Nullable
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
@@ -140,9 +143,11 @@ public class ResourceHandlerRegistry {
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
+				if (this.contentNegotiationManager != null) {
+					handler.setContentNegotiationManager(this.contentNegotiationManager);
+				}
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.applicationContext);
-				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}

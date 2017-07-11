@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * A factory for common {@link org.springframework.core.convert.ConversionService}
@@ -40,7 +41,7 @@ public abstract class ConversionServiceFactory {
 	 * {@link ConverterFactory}, or {@link GenericConverter}
 	 * @param registry the target registry
 	 */
-	public static void registerConverters(Set<?> converters, ConverterRegistry registry) {
+	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
 				if (converter instanceof GenericConverter) {

@@ -18,6 +18,8 @@ package org.springframework.web;
 
 import javax.servlet.ServletException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown when an HTTP request handler requires a pre-existing session.
  *
@@ -54,6 +56,7 @@ public class HttpSessionRequiredException extends ServletException {
 	 * Return the name of the expected session attribute, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	public String getExpectedAttribute() {
 		return this.expectedAttribute;
 	}

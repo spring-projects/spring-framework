@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -136,7 +137,7 @@ public class CachedIntrospectionResults {
 	 * be paired with a {@link #clearClassLoader} call at application shutdown.
 	 * @param classLoader the ClassLoader to accept
 	 */
-	public static void acceptClassLoader(ClassLoader classLoader) {
+	public static void acceptClassLoader(@Nullable ClassLoader classLoader) {
 		if (classLoader != null) {
 			acceptedClassLoaders.add(classLoader);
 		}
@@ -148,7 +149,7 @@ public class CachedIntrospectionResults {
 	 * removing the ClassLoader (and its children) from the acceptance list.
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
-	public static void clearClassLoader(ClassLoader classLoader) {
+	public static void clearClassLoader(@Nullable ClassLoader classLoader) {
 		for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
 			ClassLoader registeredLoader = it.next();
 			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
@@ -226,7 +227,7 @@ public class CachedIntrospectionResults {
 	 * @param candidate the candidate ClassLoader to check
 	 * @param parent the parent ClassLoader to check for
 	 */
-	private static boolean isUnderneathClassLoader(ClassLoader candidate, ClassLoader parent) {
+	private static boolean isUnderneathClassLoader(@Nullable ClassLoader candidate, @Nullable ClassLoader parent) {
 		if (candidate == parent) {
 			return true;
 		}
@@ -336,6 +337,7 @@ public class CachedIntrospectionResults {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
+	@Nullable
 	PropertyDescriptor getPropertyDescriptor(String name) {
 		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
 		if (pd == null && StringUtils.hasLength(name)) {
@@ -375,6 +377,7 @@ public class CachedIntrospectionResults {
 		return (existing != null ? existing : td);
 	}
 
+	@Nullable
 	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
 		return this.typeDescriptorCache.get(pd);
 	}

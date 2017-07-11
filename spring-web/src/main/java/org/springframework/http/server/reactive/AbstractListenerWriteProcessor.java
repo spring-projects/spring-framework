@@ -25,6 +25,7 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -48,10 +49,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
+	@Nullable
 	protected volatile T currentData;
 
 	private volatile boolean subscriberCompleted;
 
+	@Nullable
 	private Subscription subscription;
 
 
@@ -145,8 +148,8 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	/**
 	 * Writes the given data to the output.
 	 * @param data the data to write
-	 * @return whether the data was fully written (true)and new data can be
-	 * requested or otherwise (false)
+	 * @return whether the data was fully written ({@code true})
+	 * and new data can be requested, or otherwise ({@code false})
 	 */
 	protected abstract boolean write(T data) throws IOException;
 
@@ -161,6 +164,15 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	protected void writingComplete() {
 	}
+
+	/**
+	 * Invoked when an error happens while writing.
+	 * <p>Defaults to no-op. Servlet 3.1 based implementations will receive
+	 * {@code javax.servlet.WriteListener#onError(Throwable)} event.
+	 */
+	protected void writingFailed(Throwable ex) {
+	}
+
 
 
 	private boolean changeState(State oldState, State newState) {
@@ -223,6 +235,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				if (processor.isDataEmpty(data)) {
+					Assert.state(processor.subscription != null, "No subscription");
 					processor.subscription.request(1);
 				}
 				else {
@@ -255,6 +268,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, WRITING)) {
 					T data = processor.currentData;
+					Assert.state(data != null, "No data");
 					try {
 						boolean writeCompleted = processor.write(data);
 						if (writeCompleted) {
@@ -262,6 +276,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 							if (!processor.subscriberCompleted) {
 								processor.changeState(WRITING, REQUESTED);
 								processor.suspendWriting();
+								Assert.state(processor.subscription != null, "No subscription");
 								processor.subscription.request(1);
 							}
 							else {
@@ -276,8 +291,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						}
 					}
 					catch (IOException ex) {
-						processor.cancel();
-						processor.onError(ex);
+						processor.writingFailed(ex);
 					}
 				}
 			}

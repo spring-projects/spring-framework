@@ -138,7 +138,7 @@ public class OpDec extends Operator {
 
 	@Override
 	public SpelNodeImpl getRightOperand() {
-		return null;
+		throw new IllegalStateException("No right operand");
 	}
 
 }

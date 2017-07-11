@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -48,6 +49,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -96,7 +98,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see EntityManagerFactoryInfo#getPersistenceUnitName()
 	 */
 	public static EntityManagerFactory findEntityManagerFactory(
-			ListableBeanFactory beanFactory, String unitName) throws NoSuchBeanDefinitionException {
+			ListableBeanFactory beanFactory, @Nullable String unitName) throws NoSuchBeanDefinitionException {
 
 		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
 		if (StringUtils.hasLength(unitName)) {
@@ -130,6 +132,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
 			throws DataAccessResourceFailureException {
 
@@ -147,7 +150,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
+	@Nullable
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties, true);
@@ -169,6 +173,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws PersistenceException {
 
@@ -189,8 +194,10 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) throws PersistenceException {
+			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction)
+			throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
@@ -289,6 +296,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * (to be passed into cleanupTransaction)
 	 * @see JpaDialect#prepareTransaction
 	 */
+	@Nullable
 	private static Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
@@ -309,7 +317,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param emf the EntityManagerFactory that the EntityManager has been created with
 	 * @see JpaDialect#cleanupTransaction
 	 */
-	private static void cleanupTransaction(Object transactionData, EntityManagerFactory emf) {
+	private static void cleanupTransaction(@Nullable Object transactionData, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
@@ -350,6 +358,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @return the corresponding DataAccessException instance,
 	 * or {@code null} if the exception should not be translated
 	 */
+	@Nullable
 	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
 		// Following the JPA specification, a persistence provider can also
 		// throw these two exceptions, besides PersistenceException.
@@ -406,7 +415,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param em the JPA EntityManager to close (may be {@code null})
 	 * @see javax.persistence.EntityManager#close()
 	 */
-	public static void closeEntityManager(EntityManager em) {
+	public static void closeEntityManager(@Nullable EntityManager em) {
 		if (em != null) {
 			logger.debug("Closing JPA EntityManager");
 			try {
@@ -434,14 +443,16 @@ public abstract class EntityManagerFactoryUtils {
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
+		@Nullable
 		private final Object transactionData;
 
+		@Nullable
 		private final JpaDialect jpaDialect;
 
 		private final boolean newEntityManager;
 
 		public TransactionalEntityManagerSynchronization(
-				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
+				EntityManagerHolder emHolder, EntityManagerFactory emf, @Nullable Object txData, boolean newEm) {
 
 			super(emHolder, emf);
 			this.transactionData = txData;

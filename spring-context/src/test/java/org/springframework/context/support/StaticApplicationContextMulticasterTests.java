@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -97,7 +98,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		private static int counter = 0;
 
 		@Override
-		public void multicastEvent(ApplicationEvent event, ResolvableType eventType) {
+		public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
 			super.multicastEvent(event, eventType);
 			counter++;
 		}

@@ -25,6 +25,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -38,12 +39,12 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ServerResponseResultHandler implements HandlerResultHandler, InitializingBean,
-		Ordered {
+public class ServerResponseResultHandler implements HandlerResultHandler, InitializingBean, Ordered {
 
+	@Nullable
 	private ServerCodecConfigurer messageCodecConfigurer;
 
-	private List<ViewResolver> viewResolvers;
+	private List<ViewResolver> viewResolvers = Collections.emptyList();
 
 	private int order = LOWEST_PRECEDENCE;
 
@@ -79,10 +80,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.messageCodecConfigurer == null) {
-			throw new IllegalArgumentException("'messageCodecConfigurer' is required");
-		}
-		if (this.viewResolvers == null) {
-			this.viewResolvers = Collections.emptyList();
+			throw new IllegalArgumentException("Property 'messageCodecConfigurer' is required");
 		}
 	}
 
@@ -98,9 +96,9 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 		return response.writeTo(exchange, new ServerResponse.Context() {
 			@Override
 			public List<HttpMessageWriter<?>> messageWriters() {
-				return messageCodecConfigurer.getWriters();
+				return (messageCodecConfigurer != null ?
+						messageCodecConfigurer.getWriters() : Collections.emptyList());
 			}
-
 			@Override
 			public List<ViewResolver> viewResolvers() {
 				return viewResolvers;

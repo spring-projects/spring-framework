@@ -30,10 +30,13 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
@@ -81,7 +84,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
+	@Nullable
 	private ServerCodecConfigurer codecConfigurer;
+
+	@Nullable
+	private LocaleContextResolver localeContextResolver;
 
 
 	public HttpWebHandlerAdapter(WebHandler delegate) {
@@ -120,10 +127,27 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
+	 * Configure a custom {@link LocaleContextResolver}. The provided instance is set on
+	 * each created {@link DefaultServerWebExchange}.
+	 * <p>By default this is set to {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
+	 * @param localeContextResolver the locale context resolver to use
+	 */
+	public void setLocaleContextResolver(LocaleContextResolver localeContextResolver) {
+		this.localeContextResolver = localeContextResolver;
+	}
+
+	/**
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
 		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
+	}
+
+	/**
+	 * Return the configured {@link LocaleContextResolver}.
+	 */
+	public LocaleContextResolver getLocaleContextResolver() {
+		return (this.localeContextResolver != null ? this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
 	}
 
 
@@ -140,7 +164,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer());
+		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer(), getLocaleContextResolver());
 	}
 
 	private void logHandleFailure(Throwable ex) {

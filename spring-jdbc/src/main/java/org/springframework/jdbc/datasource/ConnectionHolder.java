@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -43,12 +44,15 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
 
+	@Nullable
 	private ConnectionHandle connectionHandle;
 
+	@Nullable
 	private Connection currentConnection;
 
 	private boolean transactionActive = false;
 
+	@Nullable
 	private Boolean savepointsSupported;
 
 	private int savepointCounter = 0;
@@ -92,6 +96,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	/**
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
+	@Nullable
 	public ConnectionHandle getConnectionHandle() {
 		return this.connectionHandle;
 	}
@@ -125,9 +130,11 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * <p>Used for releasing the Connection on suspend (with a {@code null}
 	 * argument) and setting a fresh Connection on resume.
 	 */
-	protected void setConnection(Connection connection) {
+	protected void setConnection(@Nullable Connection connection) {
 		if (this.currentConnection != null) {
-			this.connectionHandle.releaseConnection(this.currentConnection);
+			if (this.connectionHandle != null) {
+				this.connectionHandle.releaseConnection(this.currentConnection);
+			}
 			this.currentConnection = null;
 		}
 		if (connection != null) {
@@ -188,7 +195,9 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	public void released() {
 		super.released();
 		if (!isOpen() && this.currentConnection != null) {
-			this.connectionHandle.releaseConnection(this.currentConnection);
+			if (this.connectionHandle != null) {
+				this.connectionHandle.releaseConnection(this.currentConnection);
+			}
 			this.currentConnection = null;
 		}
 	}

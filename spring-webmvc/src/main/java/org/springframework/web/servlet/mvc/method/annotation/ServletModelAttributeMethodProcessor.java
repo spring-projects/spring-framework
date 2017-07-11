@@ -24,6 +24,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -90,6 +92,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @param request the current request
 	 * @return the request value to try to convert, or {@code null} if none
 	 */
+	@Nullable
 	protected String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
 		Map<String, String> variables = getUriTemplateVariables(request);
 		String variableValue = variables.get(attributeName);
@@ -124,6 +127,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * conversion found
 	 * @throws Exception
 	 */
+	@Nullable
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
 			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
@@ -148,6 +152,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
 		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
 	}

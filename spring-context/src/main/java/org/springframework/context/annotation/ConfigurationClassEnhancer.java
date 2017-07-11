@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -49,6 +48,7 @@ import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
@@ -95,7 +95,7 @@ class ConfigurationClassEnhancer {
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
 	 * @return the enhanced subclass
 	 */
-	public Class<?> enhance(Class<?> configClass, ClassLoader classLoader) {
+	public Class<?> enhance(Class<?> configClass, @Nullable ClassLoader classLoader) {
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -118,7 +118,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
-	private Enhancer newEnhancer(Class<?> superclass, ClassLoader classLoader) {
+	private Enhancer newEnhancer(Class<?> superclass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
@@ -210,9 +210,10 @@ class ConfigurationClassEnhancer {
 	 */
 	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
 
+		@Nullable
 		private final ClassLoader classLoader;
 
-		public BeanFactoryAwareGeneratorStrategy(ClassLoader classLoader) {
+		public BeanFactoryAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {
 			this.classLoader = classLoader;
 		}
 
@@ -269,6 +270,7 @@ class ConfigurationClassEnhancer {
 	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		@Override
+		@Nullable
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Field field = ReflectionUtils.findField(obj.getClass(), BEAN_FACTORY_FIELD);
 			Assert.state(field != null, "Unable to find generated BeanFactory field");
@@ -387,7 +389,7 @@ class ConfigurationClassEnhancer {
 				}
 				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
 						beanFactory.getBean(beanName));
-				if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
+				if (!ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 					String msg = String.format("@Bean method %s.%s called as a bean reference " +
 								"for type [%s] but overridden by non-compatible bean instance of type [%s].",
 								beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
@@ -507,14 +509,11 @@ class ConfigurationClassEnhancer {
 
 			return Proxy.newProxyInstance(
 					factoryBean.getClass().getClassLoader(), new Class<?>[] {interfaceType},
-					new InvocationHandler() {
-						@Override
-						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-							if (method.getName().equals("getObject") && args == null) {
-								return beanFactory.getBean(beanName);
-							}
-							return ReflectionUtils.invokeMethod(method, factoryBean, args);
+					(proxy, method, args) -> {
+						if (method.getName().equals("getObject") && args == null) {
+							return beanFactory.getBean(beanName);
 						}
+						return ReflectionUtils.invokeMethod(method, factoryBean, args);
 					});
 		}
 

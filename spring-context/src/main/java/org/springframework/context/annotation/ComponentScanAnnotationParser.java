@@ -66,17 +66,14 @@ class ComponentScanAnnotationParser {
 	public ComponentScanAnnotationParser(Environment environment, ResourceLoader resourceLoader,
 			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry registry) {
 
-		this.resourceLoader = resourceLoader;
 		this.environment = environment;
+		this.resourceLoader = resourceLoader;
 		this.beanNameGenerator = beanNameGenerator;
 		this.registry = registry;
 	}
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
-		Assert.state(this.environment != null, "Environment must not be null");
-		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
-
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 

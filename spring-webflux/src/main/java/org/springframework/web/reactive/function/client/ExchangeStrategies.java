@@ -87,20 +87,11 @@ public interface ExchangeStrategies {
 	interface Builder {
 
 		/**
-		 * Customize the list of default client-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the default codecs
+		 * Customize the list of client-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the codecs
 		 * @return this builder
-		 * @see #customCodecs(Consumer)
 		 */
-		Builder defaultCodecs(Consumer<ClientCodecConfigurer.ClientDefaultCodecsConfigurer> consumer);
-
-		/**
-		 * Customize the list of custom client-side HTTP message readers and writers.
-		 * @param consumer the consumer to customize the custom codecs
-		 * @return this builder
-		 * @see #defaultCodecs(Consumer)
-		 */
-		Builder customCodecs(Consumer<ClientCodecConfigurer.CustomCodecsConfigurer> consumer);
+		Builder codecs(Consumer<ClientCodecConfigurer> consumer);
 
 		/**
 		 * Builds the {@link ExchangeStrategies}.

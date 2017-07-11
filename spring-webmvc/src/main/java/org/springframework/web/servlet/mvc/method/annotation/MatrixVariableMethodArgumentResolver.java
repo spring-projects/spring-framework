@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -55,16 +56,17 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			return false;
 		}
 		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-			String variableName = parameter.getParameterAnnotation(MatrixVariable.class).name();
-			return StringUtils.hasText(variableName);
+			MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
+			return (matrixVariable != null && StringUtils.hasText(matrixVariable.name()));
 		}
 		return true;
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		MatrixVariable annotation = parameter.getParameterAnnotation(MatrixVariable.class);
-		return new MatrixVariableNamedValueInfo(annotation);
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		return new MatrixVariableNamedValueInfo(ann);
 	}
 
 	@Override
@@ -76,7 +78,9 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			return null;
 		}
 
-		String pathVar = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		String pathVar = ann.pathVar();
 		List<String> paramValues = null;
 
 		if (!pathVar.equals(ValueConstants.DEFAULT_NONE)) {

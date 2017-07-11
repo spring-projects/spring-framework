@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -36,13 +37,16 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method method;
 
+	@Nullable
 	private final Integer varargsPosition;
 
 	private boolean computedPublicDeclaringClass = false;
 
+	@Nullable
 	private Class<?> publicDeclaringClass;
 
 	private boolean argumentConversionOccurred = false;
+
 
 	public ReflectiveMethodExecutor(Method method) {
 		this.method = method;
@@ -67,14 +71,16 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 * helper method will walk up the type hierarchy to find the first public type that declares the
 	 * method (if there is one!). For toString() it may walk as far as Object.
 	 */
+	@Nullable
 	public Class<?> getPublicDeclaringClass() {
-		if (!computedPublicDeclaringClass) {
-			this.publicDeclaringClass = discoverPublicClass(method, method.getDeclaringClass());
+		if (!this.computedPublicDeclaringClass) {
+			this.publicDeclaringClass = discoverPublicClass(this.method, this.method.getDeclaringClass());
 			this.computedPublicDeclaringClass = true;
 		}
 		return this.publicDeclaringClass;
 	}
 
+	@Nullable
 	private Class<?> discoverPublicClass(Method method, Class<?> clazz) {
 		if (Modifier.isPublic(clazz.getModifiers())) {
 			try {
@@ -103,11 +109,11 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	@Override
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
-			if (arguments != null) {
-				this.argumentConversionOccurred = ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.method, this.varargsPosition);
-			}
+			this.argumentConversionOccurred = ReflectionHelper.convertArguments(
+					context.getTypeConverter(), arguments, this.method, this.varargsPosition);
 			if (this.method.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
+				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
+						this.method.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.method);
 			Object value = this.method.invoke(target, arguments);

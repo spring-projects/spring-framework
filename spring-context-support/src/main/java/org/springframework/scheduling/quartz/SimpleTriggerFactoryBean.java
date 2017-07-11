@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,14 +60,18 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	private static final Constants constants = new Constants(SimpleTrigger.class);
 
 
+	@Nullable
 	private String name;
 
+	@Nullable
 	private String group;
 
+	@Nullable
 	private JobDetail jobDetail;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
+	@Nullable
 	private Date startTime;
 
 	private long startDelay;
@@ -79,10 +84,13 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int misfireInstruction;
 
+	@Nullable
 	private String description;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private SimpleTrigger simpleTrigger;
 
 
@@ -226,7 +234,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		}
 
 		SimpleTriggerImpl sti = new SimpleTriggerImpl();
-		sti.setName(this.name);
+		sti.setName(this.name != null ? this.name : toString());
 		sti.setGroup(this.group);
 		if (this.jobDetail != null) {
 			sti.setJobKey(this.jobDetail.getKey());

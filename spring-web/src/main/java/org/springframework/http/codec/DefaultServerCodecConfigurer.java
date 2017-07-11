@@ -16,13 +16,13 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -31,77 +31,72 @@ import org.springframework.util.ClassUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultServerCodecConfigurer extends DefaultCodecConfigurer implements ServerCodecConfigurer {
+class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements ServerCodecConfigurer {
 
-	static final boolean synchronossMultipartPresent =
-			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
-					org.springframework.http.codec.DefaultCodecConfigurer.class.getClassLoader());
+	static final boolean synchronossMultipartPresent = ClassUtils.isPresent(
+			"org.synchronoss.cloud.nio.multipart.NioMultipartParser",
+			DefaultServerCodecConfigurer.class.getClassLoader());
 
 
 	public DefaultServerCodecConfigurer() {
-		super(new DefaultServerDefaultCodecsConfigurer());
+		super(new ServerDefaultCodecsImpl());
 	}
 
 	@Override
-	public ServerDefaultCodecsConfigurer defaultCodecs() {
-		return (ServerDefaultCodecsConfigurer) super.defaultCodecs();
+	public ServerDefaultCodecs defaultCodecs() {
+		return (ServerDefaultCodecs) super.defaultCodecs();
 	}
 
 
 	/**
-	 * Default implementation of {@link ServerCodecConfigurer.ServerDefaultCodecsConfigurer}.
+	 * Default implementation of {@link ServerDefaultCodecs}.
 	 */
-	private static class DefaultServerDefaultCodecsConfigurer
-			extends AbstractDefaultCodecsConfigurer
-			implements ServerCodecConfigurer.ServerDefaultCodecsConfigurer {
+	private static class ServerDefaultCodecsImpl extends AbstractDefaultCodecs implements ServerDefaultCodecs {
+
+		@Nullable
+		private Encoder<?> sseEncoder;
 
 		@Override
 		public void serverSentEventEncoder(Encoder<?> encoder) {
-			HttpMessageWriter<?> writer = new ServerSentEventHttpMessageWriter(encoder);
-			getWriters().put(ServerSentEventHttpMessageWriter.class, writer);
+			this.sseEncoder = encoder;
 		}
 
 		@Override
-		public void addTypedReadersTo(List<HttpMessageReader<?>> result) {
-			super.addTypedReadersTo(result);
-			addReaderTo(result, FormHttpMessageReader::new);
+		protected boolean splitTextOnNewLine() {
+			return true;
+		}
+
+		@Override
+		public List<HttpMessageReader<?>> getTypedReaders() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageReader<?>> result = super.getTypedReaders();
+			result.add(new FormHttpMessageReader());
 			if (synchronossMultipartPresent) {
 				SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
-				addReaderTo(result, () -> partReader);
-				addReaderTo(result, () -> new MultipartHttpMessageReader(partReader));
+				result.add(partReader);
+				result.add(new MultipartHttpMessageReader(partReader));
 			}
+			return result;
 		}
 
 		@Override
-		protected void addObjectWritersTo(List<HttpMessageWriter<?>> result) {
-			super.addObjectWritersTo(result);
-			addServerSentEventWriterTo(result);
+		public List<HttpMessageWriter<?>> getObjectWriters() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageWriter<?>> result = super.getObjectWriters();
+			result.add(new ServerSentEventHttpMessageWriter(getSseEncoder()));
+			return result;
 		}
 
-
-		private void addServerSentEventWriterTo(List<HttpMessageWriter<?>> result) {
-			addWriterTo(result, () -> findWriter(ServerSentEventHttpMessageWriter.class, () -> {
-				Encoder<?> encoder = null;
-				if (jackson2Present) {
-					encoder = findEncoderWriter(
-							Jackson2JsonEncoder.class, Jackson2JsonEncoder::new).getEncoder();
-				}
-				return new ServerSentEventHttpMessageWriter(encoder);
-			}));
+		private Encoder<?> getSseEncoder() {
+			if (this.sseEncoder != null) {
+				return this.sseEncoder;
+			}
+			return jackson2Present ? jackson2Encoder() : null;
 		}
-
-		@Override
-		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-		}
-
-		@Override
-		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		}
-
 	}
 
 }

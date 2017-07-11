@@ -23,7 +23,7 @@ import java.util.Set;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -81,14 +81,14 @@ public interface EntityResponse<T> extends ServerResponse {
 	/**
 	 * Create a builder with the given publisher.
 	 * @param publisher the publisher that represents the body of the response
-	 * @param elementType the type of elements contained in the publisher
+	 * @param typeReference the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the type of the {@code Publisher}
 	 * @return the created builder
 	 */
-	static <T, P extends Publisher<T>> Builder<P> fromPublisher(P publisher, ResolvableType elementType) {
+	static <T, P extends Publisher<T>> Builder<P> fromPublisher(P publisher, ParameterizedTypeReference<T> typeReference) {
 		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, elementType));
+				BodyInserters.fromPublisher(publisher, typeReference));
 	}
 
 

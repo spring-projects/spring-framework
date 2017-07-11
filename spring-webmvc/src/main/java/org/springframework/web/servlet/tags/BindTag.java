@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
 
@@ -53,14 +55,17 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	public static final String STATUS_VARIABLE_NAME = "status";
 
 
-	private String path;
+	private String path = "";
 
 	private boolean ignoreNestedPath = false;
 
+	@Nullable
 	private BindStatus status;
 
+	@Nullable
 	private Object previousPageStatus;
 
+	@Nullable
 	private Object previousRequestStatus;
 
 
@@ -149,14 +154,23 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 
 	/**
+	 * Return the current BindStatus.
+	 */
+	private BindStatus getStatus() {
+		Assert.state(this.status != null, "No current BindStatus");
+		return this.status;
+	}
+
+	/**
 	 * Retrieve the property that this tag is currently bound to,
 	 * or {@code null} if bound to an object rather than a specific property.
 	 * Intended for cooperating nesting tags.
 	 * @return the property that this tag is currently bound to,
 	 * or {@code null} if none
 	 */
+	@Nullable
 	public final String getProperty() {
-		return this.status.getExpression();
+		return getStatus().getExpression();
 	}
 
 	/**
@@ -164,13 +178,14 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Intended for cooperating nesting tags.
 	 * @return the current Errors instance, or {@code null} if none
 	 */
+	@Nullable
 	public final Errors getErrors() {
-		return this.status.getErrors();
+		return getStatus().getErrors();
 	}
 
 	@Override
 	public final PropertyEditor getEditor() {
-		return this.status.getEditor();
+		return getStatus().getEditor();
 	}
 
 

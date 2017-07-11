@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server;
 
 import java.security.Principal;
@@ -22,10 +23,11 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Package private implementation of {@link ServerWebExchange.Builder}.
+ * Package-private implementation of {@link ServerWebExchange.Builder}.
  * 
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -34,15 +36,18 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 	private final ServerWebExchange delegate;
 
+	@Nullable
 	private ServerHttpRequest request;
 
+	@Nullable
 	private ServerHttpResponse response;
 
+	@Nullable
 	private Mono<Principal> principalMono;
 
 
 	DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+		Assert.notNull(delegate, "Delegate is required");
 		this.delegate = delegate;
 	}
 
@@ -84,22 +89,23 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 	 */
 	private static class MutativeDecorator extends ServerWebExchangeDecorator {
 
+		@Nullable
 		private final ServerHttpRequest request;
 
+		@Nullable
 		private final ServerHttpResponse response;
 
+		@Nullable
 		private final Mono<Principal> principalMono;
 
-
-		public MutativeDecorator(ServerWebExchange delegate, ServerHttpRequest request,
-				ServerHttpResponse response, Mono<Principal> principalMono) {
+		public MutativeDecorator(ServerWebExchange delegate, @Nullable ServerHttpRequest request,
+				@Nullable ServerHttpResponse response, @Nullable Mono<Principal> principalMono) {
 
 			super(delegate);
 			this.request = request;
 			this.response = response;
 			this.principalMono = principalMono;
 		}
-
 
 		@Override
 		public ServerHttpRequest getRequest() {
@@ -114,8 +120,7 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T extends Principal> Mono<T> getPrincipal() {
-			return (this.principalMono != null ?
-					(Mono<T>) this.principalMono : getDelegate().getPrincipal());
+			return (this.principalMono != null ? (Mono<T>) this.principalMono : getDelegate().getPrincipal());
 		}
 	}
 

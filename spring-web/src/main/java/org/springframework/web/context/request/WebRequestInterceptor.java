@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 
 /**
@@ -75,7 +76,7 @@ public interface WebRequestInterceptor {
 	 * and/or to add further model attributes, if desired.
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(WebRequest request, ModelMap model) throws Exception;
+	void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception;
 
 	/**
 	 * Callback after completion of request processing, that is, after rendering
@@ -87,6 +88,6 @@ public interface WebRequestInterceptor {
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(WebRequest request, Exception ex) throws Exception;
+	void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception;
 
 }

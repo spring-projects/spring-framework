@@ -35,6 +35,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.UndertowServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -52,7 +53,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Assert.isInstanceOf(UndertowServerHttpRequest.class, request, "UndertowServerHttpRequest required");
 		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();

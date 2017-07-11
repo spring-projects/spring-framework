@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.setup;
 
 import javax.servlet.http.HttpSession;
@@ -24,23 +25,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.*;
 
 /**
  * Tests for {@link SharedHttpSessionConfigurer}.
+ *
  * @author Rossen Stoyanchev
  */
 public class SharedHttpSessionTests {
 
-
 	@Test
 	public void httpSession() throws Exception {
-
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
 				.apply(sharedHttpSession())
 				.build();
@@ -65,7 +63,6 @@ public class SharedHttpSessionTests {
 
 	@Test
 	public void noHttpSession() throws Exception {
-
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
 				.apply(sharedHttpSession())
 				.build();

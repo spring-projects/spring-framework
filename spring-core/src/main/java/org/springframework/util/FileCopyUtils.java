@@ -30,6 +30,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple utility methods for file and stream copying. All copy methods use a block size
  * of 4096 bytes, and close all affected streams when done. A variation of the copy
@@ -156,7 +158,7 @@ public abstract class FileCopyUtils {
 	 * @return the new byte array that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
-	public static byte[] copyToByteArray(InputStream in) throws IOException {
+	public static byte[] copyToByteArray(@Nullable InputStream in) throws IOException {
 		if (in == null) {
 			return new byte[0];
 		}
@@ -238,7 +240,7 @@ public abstract class FileCopyUtils {
 	 * @return the String that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String copyToString(Reader in) throws IOException {
+	public static String copyToString(@Nullable Reader in) throws IOException {
 		if (in == null) {
 			return "";
 		}

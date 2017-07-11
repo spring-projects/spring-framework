@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -39,17 +40,6 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 
 
 	/**
-	 * Create an instance with the given extension-to-MediaType lookup.
-	 */
-	public ServletPathExtensionContentNegotiationStrategy(
-			ServletContext servletContext, Map<String, MediaType> mediaTypes) {
-
-		super(mediaTypes);
-		Assert.notNull(servletContext, "ServletContext is required");
-		this.servletContext = servletContext;
-	}
-
-	/**
 	 * Create an instance without any mappings to start with. Mappings may be
 	 * added later when extensions are resolved through
 	 * {@link ServletContext#getMimeType(String)} or via
@@ -57,6 +47,17 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 */
 	public ServletPathExtensionContentNegotiationStrategy(ServletContext context) {
 		this(context, null);
+	}
+
+	/**
+	 * Create an instance with the given extension-to-MediaType lookup.
+	 */
+	public ServletPathExtensionContentNegotiationStrategy(
+			ServletContext servletContext, @Nullable Map<String, MediaType> mediaTypes) {
+
+		super(mediaTypes);
+		Assert.notNull(servletContext, "ServletContext is required");
+		this.servletContext = servletContext;
 	}
 
 
@@ -70,11 +71,9 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 			throws HttpMediaTypeNotAcceptableException {
 
 		MediaType mediaType = null;
-		if (this.servletContext != null) {
-			String mimeType = this.servletContext.getMimeType("file." + extension);
-			if (StringUtils.hasText(mimeType)) {
-				mediaType = MediaType.parseMediaType(mimeType);
-			}
+		String mimeType = this.servletContext.getMimeType("file." + extension);
+		if (StringUtils.hasText(mimeType)) {
+			mediaType = MediaType.parseMediaType(mimeType);
 		}
 		if (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			MediaType superMediaType = super.handleNoMatch(webRequest, extension);
@@ -96,11 +95,9 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	@Override
 	public MediaType getMediaTypeForResource(Resource resource) {
 		MediaType mediaType = null;
-		if (this.servletContext != null) {
-			String mimeType = this.servletContext.getMimeType(resource.getFilename());
-			if (StringUtils.hasText(mimeType)) {
-				mediaType = MediaType.parseMediaType(mimeType);
-			}
+		String mimeType = this.servletContext.getMimeType(resource.getFilename());
+		if (StringUtils.hasText(mimeType)) {
+			mediaType = MediaType.parseMediaType(mimeType);
 		}
 		if (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			MediaType superMediaType = super.getMediaTypeForResource(resource);

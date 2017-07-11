@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -40,6 +41,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final int chunkSize;
 
+	@Nullable
 	private OutputStream body;
 
 	private final boolean outputStreaming;

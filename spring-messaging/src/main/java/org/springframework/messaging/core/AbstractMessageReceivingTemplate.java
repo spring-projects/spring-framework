@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -48,6 +49,7 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
+	@Nullable
 	protected abstract Message<?> doReceive(D destination);
 
 
@@ -74,6 +76,7 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 	 * @return the converted payload of the reply message (never {@code null})
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected <T> T doConvert(Message<?> message, Class<T> targetClass) {
 		MessageConverter messageConverter = getMessageConverter();
 		T value = (T) messageConverter.fromMessage(message, targetClass);

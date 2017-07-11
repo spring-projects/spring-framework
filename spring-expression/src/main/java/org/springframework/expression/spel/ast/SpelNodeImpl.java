@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -50,6 +50,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
+	@Nullable
 	private SpelNodeImpl parent;
 
 	/**
@@ -61,6 +62,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * It does not include the trailing semicolon (for non array reference types).
 	 * Some examples: Ljava/lang/String, I, [I
      */
+	@Nullable
 	protected volatile String exitTypeDescriptor;
 
 
@@ -76,19 +78,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		}
 	}
 
-
-	protected SpelNodeImpl getPreviousChild() {
-		SpelNodeImpl result = null;
-		if (this.parent != null) {
-			for (SpelNodeImpl child : this.parent.children) {
-				if (this == child) {
-					break;
-				}
-				result = child;
-			}
-		}
-		return result;
-	}
 
 	/**
      * @return true if the next child is one of the specified classes
@@ -116,24 +105,12 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	@Override
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState).getValue();
-		}
-		else {
-			// configuration not set - does that matter?
-			return getValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState).getValue();
 	}
 
 	@Override
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
-		if (expressionState != null) {
-			return getValueInternal(expressionState);
-		}
-		else {
-			// configuration not set - does that matter?
-			return getTypedValue(new ExpressionState(new StandardEvaluationContext()));
-		}
+		return getValueInternal(expressionState);
 	}
 
 	// by default Ast nodes are not writable
@@ -143,7 +120,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
+	public void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException {
 		throw new SpelEvaluationException(getStartPosition(),
 				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
@@ -159,13 +136,14 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	public Class<?> getObjectClass(Object obj) {
+	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
 		}
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
+	@Nullable
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
 		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
@@ -206,6 +184,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
 	}
 
+	@Nullable
 	public String getExitDescriptor() {
 		return this.exitTypeDescriptor;
 	}
@@ -246,25 +225,25 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 				generateCodeForArgument(mv, cf, arguments[p], paramDescriptors[p]);
 			}
 			
-			SpelNodeImpl lastchild = (childCount == 0 ? null : arguments[childCount - 1]);
-			String arraytype = paramDescriptors[paramDescriptors.length - 1];
+			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
+			String arrayType = paramDescriptors[paramDescriptors.length - 1];
 			// Determine if the final passed argument is already suitably packaged in array
 			// form to be passed to the method
-			if (lastchild != null && lastchild.getExitDescriptor().equals(arraytype)) {
-				generateCodeForArgument(mv, cf, lastchild, paramDescriptors[p]);
+			if (lastChild != null && arrayType.equals(lastChild.getExitDescriptor())) {
+				generateCodeForArgument(mv, cf, lastChild, paramDescriptors[p]);
 			}
 			else {
-				arraytype = arraytype.substring(1); // trim the leading '[', may leave other '['		
+				arrayType = arrayType.substring(1); // trim the leading '[', may leave other '['
 				// build array big enough to hold remaining arguments
-				CodeFlow.insertNewArrayCode(mv, childCount - p, arraytype);
+				CodeFlow.insertNewArrayCode(mv, childCount - p, arrayType);
 				// Package up the remaining arguments into the array
 				int arrayindex = 0;
 				while (p < childCount) {
 					SpelNodeImpl child = arguments[p];
 					mv.visitInsn(DUP);
 					CodeFlow.insertOptimalLoad(mv, arrayindex++);
-					generateCodeForArgument(mv, cf, child, arraytype);
-					CodeFlow.insertArrayStore(mv, arraytype);
+					generateCodeForArgument(mv, cf, child, arrayType);
+					CodeFlow.insertArrayStore(mv, arrayType);
 					p++;
 				}
 			}
@@ -283,15 +262,17 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected static void generateCodeForArgument(MethodVisitor mv, CodeFlow cf, SpelNodeImpl argument, String paramDesc) {
 		cf.enterCompilationScope();
 		argument.generateCode(mv, cf);
-		boolean primitiveOnStack = CodeFlow.isPrimitive(cf.lastDescriptor());
+		String lastDesc = cf.lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		boolean primitiveOnStack = CodeFlow.isPrimitive(lastDesc);
 		// Check if need to box it for the method reference?
 		if (primitiveOnStack && paramDesc.charAt(0) == 'L') {
-			CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		else if (paramDesc.length() == 1 && !primitiveOnStack) {
-			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), cf.lastDescriptor());
+			CodeFlow.insertUnboxInsns(mv, paramDesc.charAt(0), lastDesc);
 		}
-		else if (!cf.lastDescriptor().equals(paramDesc)) {
+		else if (!paramDesc.equals(lastDesc)) {
 			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
 			CodeFlow.insertCheckCast(mv, paramDesc);
 		}

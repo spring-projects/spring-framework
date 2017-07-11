@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 
@@ -35,12 +36,14 @@ public class HandlerResult {
 
 	private final Object handler;
 
+	@Nullable
 	private final Object returnValue;
 
 	private final ResolvableType returnType;
 
 	private final BindingContext bindingContext;
 
+	@Nullable
 	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
 
@@ -50,7 +53,7 @@ public class HandlerResult {
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnType the return value type
 	 */
-	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType) {
+	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType) {
 		this(handler, returnValue, returnType, null);
 	}
 
@@ -61,8 +64,8 @@ public class HandlerResult {
 	 * @param returnType the return value type
 	 * @param context the binding context used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType,
-			BindingContext context) {
+	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType,
+			@Nullable BindingContext context) {
 
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnType, "'returnType' is required");
@@ -83,6 +86,7 @@ public class HandlerResult {
 	/**
 	 * Return the value returned from the handler, if any.
 	 */
+	@Nullable
 	public Object getReturnValue() {
 		return this.returnValue;
 	}
@@ -142,7 +146,7 @@ public class HandlerResult {
 	 * @return the new result or the same error if there is no exception handler
 	 */
 	public Mono<HandlerResult> applyExceptionHandler(Throwable failure) {
-		return (hasExceptionHandler() ? this.exceptionHandler.apply(failure) : Mono.error(failure));
+		return (this.exceptionHandler != null ? this.exceptionHandler.apply(failure) : Mono.error(failure));
 	}
 
 }

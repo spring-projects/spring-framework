@@ -18,6 +18,8 @@ package org.springframework.messaging.simp.user;
 
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A registry of currently connected users.
  *
@@ -31,6 +33,7 @@ public interface SimpUserRegistry {
 	 * @param userName the name of the user to look up
 	 * @return the user, or {@code null} if not connected
 	 */
+	@Nullable
 	SimpUser getUser(String userName);
 
 	/**

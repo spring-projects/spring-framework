@@ -27,6 +27,7 @@ import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.DetachedCriteria;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that specifies a basic set of Hibernate operations,
@@ -64,6 +65,7 @@ public interface HibernateOperations {
 	 * @see HibernateTransactionManager
 	 * @see org.hibernate.Session
 	 */
+	@Nullable
 	<T> T execute(HibernateCallback<T> action) throws DataAccessException;
 
 
@@ -84,6 +86,7 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, Serializable)
 	 */
+	@Nullable
 	<T> T get(Class<T> entityClass, Serializable id) throws DataAccessException;
 
 	/**
@@ -101,6 +104,7 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, Serializable, LockMode)
 	 */
+	@Nullable
 	<T> T get(Class<T> entityClass, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**
@@ -116,6 +120,7 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, Serializable)
 	 */
+	@Nullable
 	Object get(String entityName, Serializable id) throws DataAccessException;
 
 	/**
@@ -133,6 +138,7 @@ public interface HibernateOperations {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, Serializable, LockMode)
 	 */
+	@Nullable
 	Object get(String entityName, Serializable id, LockMode lockMode) throws DataAccessException;
 
 	/**

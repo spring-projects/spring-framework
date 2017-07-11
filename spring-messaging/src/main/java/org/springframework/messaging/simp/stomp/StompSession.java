@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represents a STOMP session with operations to send messages, create
  * subscriptions and receive messages on those subscriptions.
@@ -115,6 +117,7 @@ public interface StompSession {
 		 * Return the receipt id, or {@code null} if the STOMP frame for which
 		 * the handle was returned did not have a "receipt" header.
 		 */
+		@Nullable
 		String getReceiptId();
 
 		/**
@@ -131,6 +134,7 @@ public interface StompSession {
 		void addReceiptLostTask(Runnable runnable);
 	}
 
+
 	/**
 	 * A handle to use to unsubscribe or to track a receipt.
 	 */
@@ -139,6 +143,7 @@ public interface StompSession {
 		/**
 		 * Return the id for the subscription.
 		 */
+		@Nullable
 		String getSubscriptionId();
 
 		/**
@@ -156,7 +161,7 @@ public interface StompSession {
 		 * to send to the server.
 		 * <p><strong>Note:</strong> There is no need to set the subscription id.
 		 */
-		void unsubscribe(StompHeaders stompHeaders);
+		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}
 
 }

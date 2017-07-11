@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.security.Principal;
-import java.util.Optional;
 
 import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -28,6 +27,7 @@ import rx.RxReactiveStreams;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
@@ -44,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
 		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
 		HttpServerResponse<?> rxNettyResponse = response.getRxNettyResponse();
 

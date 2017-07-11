@@ -49,7 +49,7 @@ abstract class AbstractBufferingAsyncClientHttpRequest extends AbstractAsyncClie
 			headers.setContentLength(bytes.length);
 		}
 		ListenableFuture<ClientHttpResponse> result = executeInternal(headers, bytes);
-		this.bufferedOutput = null;
+		this.bufferedOutput = new ByteArrayOutputStream(0);
 		return result;
 	}
 

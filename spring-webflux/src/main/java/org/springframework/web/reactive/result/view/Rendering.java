@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 
 /**
@@ -45,6 +46,7 @@ public interface Rendering {
 	/**
 	 * Return the selected {@link String} view name or {@link View} object.
 	 */
+	@Nullable
 	Object view();
 
 	/**
@@ -55,6 +57,7 @@ public interface Rendering {
 	/**
 	 * Return the HTTP status to set the response to.
 	 */
+	@Nullable
 	HttpStatus status();
 
 	/**

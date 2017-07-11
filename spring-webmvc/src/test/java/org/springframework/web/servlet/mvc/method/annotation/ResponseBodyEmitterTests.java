@@ -102,6 +102,7 @@ public class ResponseBodyEmitterTests {
 	public void sendAfterHandlerInitialized() throws Exception {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).onTimeout(any());
+		verify(this.handler).onError(any());
 		verify(this.handler).onCompletion(any());
 		verifyNoMoreInteractions(this.handler);
 
@@ -119,6 +120,7 @@ public class ResponseBodyEmitterTests {
 	public void sendAfterHandlerInitializedWithError() throws Exception {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).onTimeout(any());
+		verify(this.handler).onError(any());
 		verify(this.handler).onCompletion(any());
 		verifyNoMoreInteractions(this.handler);
 
@@ -137,6 +139,7 @@ public class ResponseBodyEmitterTests {
 	public void sendWithError() throws Exception {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).onTimeout(any());
+		verify(this.handler).onError(any());
 		verify(this.handler).onCompletion(any());
 		verifyNoMoreInteractions(this.handler);
 
@@ -150,7 +153,6 @@ public class ResponseBodyEmitterTests {
 			// expected
 		}
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
-		verify(this.handler).completeWithError(failure);
 		verifyNoMoreInteractions(this.handler);
 	}
 

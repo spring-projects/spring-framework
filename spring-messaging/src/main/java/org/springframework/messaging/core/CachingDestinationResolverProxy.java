@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +38,7 @@ public class CachingDestinationResolverProxy<D> implements DestinationResolver<D
 
 	private final Map<String, D> resolvedDestinationCache = new ConcurrentHashMap<>();
 
+	@Nullable
 	private DestinationResolver<D> targetDestinationResolver;
 
 
@@ -85,6 +87,7 @@ public class CachingDestinationResolverProxy<D> implements DestinationResolver<D
 	public D resolveDestination(String name) throws DestinationResolutionException {
 		D destination = this.resolvedDestinationCache.get(name);
 		if (destination == null) {
+			Assert.state(this.targetDestinationResolver != null, "No target DestinationResolver set");
 			destination = this.targetDestinationResolver.resolveDestination(name);
 			this.resolvedDestinationCache.put(name, destination);
 		}

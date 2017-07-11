@@ -31,9 +31,9 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
-
 
 /**
  * {@code View} that writes model attribute(s) with an {@link HttpMessageWriter}.
@@ -96,7 +96,7 @@ public class HttpMessageWriterView implements View {
 	 * otherwise raise an {@link IllegalStateException}.
 	 * </ul>
 	 */
-	public void setModelKeys(Set<String> modelKeys) {
+	public void setModelKeys(@Nullable Set<String> modelKeys) {
 		this.modelKeys.clear();
 		if (modelKeys != null) {
 			this.modelKeys.addAll(modelKeys);
@@ -113,14 +113,18 @@ public class HttpMessageWriterView implements View {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange) {
+	public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
 		Object value = getObjectToRender(model);
 		return (value != null) ?
 				write(value, contentType, exchange) :
 				exchange.getResponse().setComplete();
 	}
 
-	private Object getObjectToRender(Map<String, ?> model) {
+	@Nullable
+	private Object getObjectToRender(@Nullable Map<String, ?> model) {
+		if (model == null) {
+			return null;
+		}
 
 		Map<String, ?> result = model.entrySet().stream()
 				.filter(this::isMatch)
@@ -153,7 +157,7 @@ public class HttpMessageWriterView implements View {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Mono<Void> write(T value, MediaType contentType, ServerWebExchange exchange) {
+	private <T> Mono<Void> write(T value, @Nullable MediaType contentType, ServerWebExchange exchange) {
 		Publisher<T> input = Mono.justOrEmpty(value);
 		ResolvableType elementType = ResolvableType.forClass(value.getClass());
 		return ((HttpMessageWriter<T>) this.writer).write(

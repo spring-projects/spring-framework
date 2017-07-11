@@ -48,7 +48,7 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
-import org.springframework.web.reactive.socket.client.StandardWebSocketClient;
+import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -93,7 +93,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	public static Object[][] arguments() throws IOException {
 
 		Flux<? extends WebSocketClient> clients = Flux.concat(
-				Flux.just(new StandardWebSocketClient()).repeat(5),
+				Flux.just(new TomcatWebSocketClient()).repeat(5),
 				Flux.just(new JettyWebSocketClient()).repeat(5),
 				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
 				Flux.just(new RxNettyWebSocketClient()).repeat(5),

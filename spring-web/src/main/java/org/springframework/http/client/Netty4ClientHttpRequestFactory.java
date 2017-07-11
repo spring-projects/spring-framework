@@ -39,6 +39,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -75,12 +76,14 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private int maxResponseSize = DEFAULT_MAX_RESPONSE_SIZE;
 
+	@Nullable
 	private SslContext sslContext;
 
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
 
+	@Nullable
 	private volatile Bootstrap bootstrap;
 
 
@@ -183,10 +186,12 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 			return buildBootstrap(uri, true);
 		}
 		else {
-			if (this.bootstrap == null) {
-				this.bootstrap = buildBootstrap(uri, false);
+			Bootstrap bootstrap = this.bootstrap;
+			if (bootstrap == null) {
+				bootstrap = buildBootstrap(uri, false);
+				this.bootstrap = bootstrap;
 			}
-			return this.bootstrap;
+			return bootstrap;
 		}
 	}
 

@@ -33,6 +33,7 @@ import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -303,7 +304,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			String value = (String) target;
 			if ("failValidation".equals(value)) {
 				errors.reject("TEST: expected invalid value");

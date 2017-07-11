@@ -16,6 +16,7 @@
 
 package org.springframework.util.concurrent;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 /**
@@ -27,6 +28,7 @@ import java.util.concurrent.Future;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public interface ListenableFuture<T> extends Future<T> {
@@ -44,5 +46,16 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * @since 4.1
 	 */
 	void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback);
+
+
+	/**
+	 * Expose this {@link ListenableFuture} as a JDK {@link CompletableFuture}.
+	 * @since 5.0
+	 */
+	default CompletableFuture<T> completable() {
+		CompletableFuture<T> completable = new DelegatingCompletableFuture<>(this);
+		addCallback(completable::complete, completable::completeExceptionally);
+		return completable;
+	}
 
 }

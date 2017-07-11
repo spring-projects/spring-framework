@@ -24,6 +24,7 @@ import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.HandshakeResponse;
+import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import reactor.core.publisher.Mono;
@@ -109,8 +110,14 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 		return new StandardWebSocketHandlerAdapter(handler, session -> {
 			HttpHeaders responseHeaders = configurator.getResponseHeaders();
 			HandshakeInfo info = afterHandshake(url, responseHeaders);
-			return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
+			return createWebSocketSession(session, info, completion);
 		});
+	}
+
+	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
+			MonoProcessor<Void> completion) {
+
+		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
 	}
 
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
@@ -118,6 +125,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 				.configurator(configurator)
 				.preferredSubprotocols(subProtocols)
 				.build();
+	}
+
+	protected DataBufferFactory bufferFactory() {
+		return this.bufferFactory;
 	}
 
 

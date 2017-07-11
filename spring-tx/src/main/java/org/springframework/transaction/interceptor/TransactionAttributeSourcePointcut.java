@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -33,8 +34,8 @@ import org.springframework.util.ObjectUtils;
 abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
-		if (TransactionalProxy.class.isAssignableFrom(targetClass)) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+		if (targetClass != null && TransactionalProxy.class.isAssignableFrom(targetClass)) {
 			return false;
 		}
 		TransactionAttributeSource tas = getTransactionAttributeSource();
@@ -68,6 +69,7 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 	 * Obtain the underlying TransactionAttributeSource (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
+	@Nullable
 	protected abstract TransactionAttributeSource getTransactionAttributeSource();
 
 }

@@ -16,12 +16,14 @@
 
 package org.springframework.http.codec;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer}.
@@ -29,67 +31,114 @@ import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements ClientCodecConfigurer {
+class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements ClientCodecConfigurer {
 
 	public DefaultClientCodecConfigurer() {
-		super(new DefaultClientDefaultCodecsConfigurer());
+		super(new ClientDefaultCodecsImpl());
 	}
 
 	@Override
-	public ClientDefaultCodecsConfigurer defaultCodecs() {
-		return (ClientDefaultCodecsConfigurer) super.defaultCodecs();
+	public ClientDefaultCodecs defaultCodecs() {
+		return (ClientDefaultCodecs) super.defaultCodecs();
 	}
 
 
-	/**
-	 * Default implementation of {@link ClientCodecConfigurer.ClientDefaultCodecsConfigurer}.
-	 */
-	private static class DefaultClientDefaultCodecsConfigurer
-			extends AbstractDefaultCodecsConfigurer
-			implements ClientCodecConfigurer.ClientDefaultCodecsConfigurer {
+	private static class ClientDefaultCodecsImpl extends AbstractDefaultCodecs implements ClientDefaultCodecs {
+
+		@Nullable
+		private DefaultMultipartCodecs multipartCodecs;
+
+		@Nullable
+		private Decoder<?> sseDecoder;
+
+		@Override
+		public MultipartCodecs multipartCodecs() {
+			if (this.multipartCodecs == null) {
+				this.multipartCodecs = new DefaultMultipartCodecs();
+			}
+			return this.multipartCodecs;
+		}
 
 		@Override
 		public void serverSentEventDecoder(Decoder<?> decoder) {
-			HttpMessageReader<?> reader = new ServerSentEventHttpMessageReader(decoder);
-			getReaders().put(ServerSentEventHttpMessageReader.class, reader);
+			this.sseDecoder = decoder;
 		}
 
 		@Override
-		protected void addTypedWritersTo(List<HttpMessageWriter<?>> result) {
-			super.addTypedWritersTo(result);
-			addWriterTo(result, FormHttpMessageWriter::new);
-			addWriterTo(result, MultipartHttpMessageWriter::new);
+		protected boolean splitTextOnNewLine() {
+			return false;
 		}
 
 		@Override
-		protected void addObjectReadersTo(List<HttpMessageReader<?>> result) {
-			super.addObjectReadersTo(result);
-			addServerSentEventReaderTo(result);
+		public List<HttpMessageReader<?>> getObjectReaders() {
+			if (!shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageReader<?>> result = super.getObjectReaders();
+			result.add(new ServerSentEventHttpMessageReader(getSseDecoder()));
+			return result;
 		}
 
-		private void addServerSentEventReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> findReader(ServerSentEventHttpMessageReader.class, () -> {
-				Decoder<?> decoder = null;
-				if (jackson2Present) {
-					decoder = findDecoderReader(
-							Jackson2JsonDecoder.class, Jackson2JsonDecoder::new).getDecoder();
+		private Decoder<?> getSseDecoder() {
+			if (this.sseDecoder != null) {
+				return this.sseDecoder;
+			}
+			return (jackson2Present ? jackson2Decoder() : null);
+		}
+
+		@Override
+		public List<HttpMessageWriter<?>> getTypedWriters() {
+			if (!this.shouldRegisterDefaults()) {
+				return Collections.emptyList();
+			}
+			List<HttpMessageWriter<?>> result = super.getTypedWriters();
+			result.add(new FormHttpMessageWriter());
+			result.add(getMultipartHttpMessageWriter());
+			return result;
+		}
+
+		private MultipartHttpMessageWriter getMultipartHttpMessageWriter() {
+			List<HttpMessageWriter<?>> partWriters;
+			if (this.multipartCodecs != null) {
+				partWriters = this.multipartCodecs.getWriters();
+			}
+			else {
+				DefaultCustomCodecs customCodecs = getCustomCodecs();
+				partWriters = new ArrayList<>();
+				partWriters.addAll(super.getTypedWriters());
+				if (customCodecs != null) {
+					partWriters.addAll(customCodecs.getTypedWriters());
 				}
-				return new ServerSentEventHttpMessageReader(decoder);
-			}));
+				partWriters.addAll(super.getObjectWriters());
+				if (customCodecs != null) {
+					partWriters.addAll(customCodecs.getObjectWriters());
+				}
+				partWriters.addAll(super.getCatchAllWriters());
+			}
+			return new MultipartHttpMessageWriter(partWriters);
+		}
+	}
+
+
+	private static class DefaultMultipartCodecs implements MultipartCodecs {
+
+		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
+
+		@Override
+		public MultipartCodecs encoder(Encoder<?> encoder) {
+			writer(new EncoderHttpMessageWriter<>(encoder));
+			return this;
 		}
 
 		@Override
-		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(false)));
+		public MultipartCodecs writer(HttpMessageWriter<?> writer) {
+			this.writers.add(writer);
+			return this;
 		}
 
-		@Override
-		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result,
-					() -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
+		public List<HttpMessageWriter<?>> getWriters() {
+			return this.writers;
 		}
-
 	}
 
 }

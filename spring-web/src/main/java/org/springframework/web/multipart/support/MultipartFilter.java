@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.multipart.support;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -146,7 +147,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
-	 * @return the MultipartResolver instance, or {@code null} if none found
+	 * @return the MultipartResolver instance
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
 		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(getServletContext());

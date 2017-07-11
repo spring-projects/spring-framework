@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -36,6 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class BindingContext {
 
+	@Nullable
 	private final WebBindingInitializer initializer;
 
 	private final Model model = new BindingAwareConcurrentModel();
@@ -52,7 +54,7 @@ public class BindingContext {
 	 * Create a new {@code BindingContext} with the given initializer.
 	 * @param initializer the binding initializer to apply (may be {@code null})
 	 */
-	public BindingContext(WebBindingInitializer initializer) {
+	public BindingContext(@Nullable WebBindingInitializer initializer) {
 		this.initializer = initializer;
 	}
 
@@ -73,7 +75,7 @@ public class BindingContext {
 	 * @param name the name of the target object
 	 * @return the created data binder
 	 */
-	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, Object target, String name) {
+	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
 		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);

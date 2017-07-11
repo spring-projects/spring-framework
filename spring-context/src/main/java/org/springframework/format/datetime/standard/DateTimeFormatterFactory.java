@@ -22,6 +22,7 @@ import java.time.format.ResolverStyle;
 import java.util.TimeZone;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -45,14 +46,19 @@ import org.springframework.util.StringUtils;
  */
 public class DateTimeFormatterFactory {
 
+	@Nullable
 	private String pattern;
 
+	@Nullable
 	private ISO iso;
 
+	@Nullable
 	private FormatStyle dateStyle;
 
+	@Nullable
 	private FormatStyle timeStyle;
 
+	@Nullable
 	private TimeZone timeZone;
 
 
@@ -126,11 +132,12 @@ public class DateTimeFormatterFactory {
 	 * @param style two characters from the set {"S", "M", "L", "F", "-"}
 	 */
 	public void setStylePattern(String style) {
-		Assert.isTrue(style != null && style.length() == 2, "Style pattern must consist of two characters");
+		Assert.isTrue(style.length() == 2, "Style pattern must consist of two characters");
 		this.dateStyle = convertStyleCharacter(style.charAt(0));
 		this.timeStyle = convertStyleCharacter(style.charAt(1));
 	}
 
+	@Nullable
 	private FormatStyle convertStyleCharacter(char c) {
 		switch (c) {
 			case 'S': return FormatStyle.SHORT;
@@ -166,8 +173,8 @@ public class DateTimeFormatterFactory {
 	 * Create a new {@code DateTimeFormatter} using this factory.
 	 * <p>If no specific pattern or style has been defined,
 	 * the supplied {@code fallbackFormatter} will be used.
-	 * @param fallbackFormatter the fall-back formatter to use when no specific
-	 * factory properties have been set (can be {@code null}).
+	 * @param fallbackFormatter the fall-back formatter to use
+	 * when no specific factory properties have been set
 	 * @return a new date time formatter
 	 */
 	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
@@ -189,9 +196,6 @@ public class DateTimeFormatterFactory {
 					break;
 				case DATE_TIME:
 					dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-					break;
-				case NONE:
-					/* no-op */
 					break;
 				default:
 					throw new IllegalStateException("Unsupported ISO format: " + this.iso);

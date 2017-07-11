@@ -21,10 +21,12 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,7 +67,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	 * @param servletContext the ServletContext that the request runs in
 	 * (may be {@code null} to use a default {@link MockServletContext})
 	 */
-	public MockMultipartHttpServletRequest(ServletContext servletContext) {
+	public MockMultipartHttpServletRequest(@Nullable ServletContext servletContext) {
 		super(servletContext);
 		setMethod("POST");
 		setContentType("multipart/form-data");

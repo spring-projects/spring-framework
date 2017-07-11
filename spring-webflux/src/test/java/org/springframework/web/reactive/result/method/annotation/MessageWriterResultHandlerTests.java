@@ -42,8 +42,8 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -62,6 +62,7 @@ import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_T
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MessageWriterResultHandlerTests {
@@ -133,7 +134,7 @@ public class MessageWriterResultHandlerTests {
 
 		assertNull(this.exchange.getResponse().getHeaders().get("Content-Type"));
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set.")).verify();
+				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written")).verify();
 	}
 
 	@Test  // SPR-13135

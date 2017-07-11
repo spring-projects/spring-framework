@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,8 +36,10 @@ public class Problem {
 
 	private final Location location;
 
+	@Nullable
 	private final ParseState parseState;
 
+	@Nullable
 	private final Throwable rootCause;
 
 
@@ -66,7 +69,7 @@ public class Problem {
 	 * @param parseState the {@link ParseState} at the time of the error
 	 * @param location the location within a bean configuration source that triggered the error
 	 */
-	public Problem(String message, Location location, ParseState parseState, Throwable rootCause) {
+	public Problem(String message, Location location, @Nullable ParseState parseState, @Nullable Throwable rootCause) {
 		Assert.notNull(message, "Message must not be null");
 		Assert.notNull(location, "Location must not be null");
 		this.message = message;
@@ -102,6 +105,7 @@ public class Problem {
 	/**
 	 * Get the {@link ParseState} at the time of the error (may be {@code null}).
 	 */
+	@Nullable
 	public ParseState getParseState() {
 		return this.parseState;
 	}
@@ -109,6 +113,7 @@ public class Problem {
 	/**
 	 * Get the underlying exception that caused the error (may be {@code null}).
 	 */
+	@Nullable
 	public Throwable getRootCause() {
 		return this.rootCause;
 	}

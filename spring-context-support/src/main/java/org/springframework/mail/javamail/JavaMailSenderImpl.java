@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
@@ -78,18 +79,24 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private Properties javaMailProperties = new Properties();
 
+	@Nullable
 	private Session session;
 
+	@Nullable
 	private String protocol;
 
+	@Nullable
 	private String host;
 
 	private int port = DEFAULT_PORT;
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String defaultEncoding;
 
 	private FileTypeMap defaultFileTypeMap;
@@ -165,6 +172,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the mail protocol.
 	 */
+	@Nullable
 	public String getProtocol() {
 		return this.protocol;
 	}
@@ -180,6 +188,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the mail server host.
 	 */
+	@Nullable
 	public String getHost() {
 		return this.host;
 	}
@@ -218,6 +227,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the username for the account at the mail host.
 	 */
+	@Nullable
 	public String getUsername() {
 		return this.username;
 	}
@@ -240,6 +250,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the password for the account at the mail host.
 	 */
+	@Nullable
 	public String getPassword() {
 		return this.password;
 	}
@@ -257,6 +268,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default encoding for {@link MimeMessage MimeMessages},
 	 * or {@code null} if none.
 	 */
+	@Nullable
 	public String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
@@ -282,6 +294,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default Java Activation {@link FileTypeMap} for
 	 * {@link MimeMessage MimeMessages}, or {@code null} if none.
 	 */
+	@Nullable
 	public FileTypeMap getDefaultFileTypeMap() {
 		return this.defaultFileTypeMap;
 	}
@@ -399,7 +412,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending a message
 	 */
-	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
+	protected void doSend(MimeMessage[] mimeMessages, @Nullable Object[] originalMessages) throws MailException {
 		Map<Object, Exception> failedMessages = new LinkedHashMap<>();
 		Transport transport = null;
 

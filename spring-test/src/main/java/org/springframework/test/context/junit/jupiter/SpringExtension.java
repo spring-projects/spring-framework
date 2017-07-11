@@ -39,6 +39,7 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.util.Assert;
 
@@ -168,6 +169,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * @see ParameterAutowireUtils#resolveDependency
 	 */
 	@Override
+	@Nullable
 	public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		Class<?> testClass = extensionContext.getTestClass().get();

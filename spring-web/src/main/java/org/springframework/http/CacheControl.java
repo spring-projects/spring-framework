@@ -18,6 +18,7 @@ package org.springframework.http;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -246,6 +247,7 @@ public class CacheControl {
 	 * Return the "Cache-Control" header value.
 	 * @return {@code null} if no directive was added, or the header value otherwise
 	 */
+	@Nullable
 	public String getHeaderValue() {
 		StringBuilder ccValue = new StringBuilder();
 		if (this.maxAge != -1) {

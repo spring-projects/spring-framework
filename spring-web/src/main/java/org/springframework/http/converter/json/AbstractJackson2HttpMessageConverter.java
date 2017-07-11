@@ -47,6 +47,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.TypeUtils;
 
@@ -70,8 +71,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected ObjectMapper objectMapper;
 
+	@Nullable
 	private Boolean prettyPrint;
 
+	@Nullable
 	private PrettyPrinter ssePrettyPrinter;
 
 
@@ -118,6 +121,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
+	@Nullable
 	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}
@@ -144,12 +148,12 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 		return canRead(clazz, null, mediaType);
 	}
 
 	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
 		if (!canRead(mediaType)) {
 			return false;
 		}
@@ -166,7 +170,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
 		}
@@ -189,11 +193,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * (typically a {@link JsonMappingException})
 	 * @since 4.3
 	 */
-	protected void logWarningIfNecessary(Type type, Throwable cause) {
-		if (cause != null && !(cause instanceof JsonMappingException && cause.getMessage().startsWith("Can not find"))) {
+	protected void logWarningIfNecessary(Type type, @Nullable Throwable cause) {
+		if (cause == null) {
+			return;
+		}
+
+		boolean debugLevel = (cause instanceof JsonMappingException &&
+				cause.getMessage().startsWith("Can not find"));
+
+		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
 					"serialization for type [" + type + "]";
-			if (logger.isDebugEnabled()) {
+			if (debugLevel) {
+				logger.debug(msg, cause);
+			}
+			else if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
 			else {
@@ -211,7 +225,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+	public Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		JavaType javaType = getJavaType(type, contextClass);
@@ -238,7 +252,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -257,7 +271,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}
-			if (type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
+			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
 			ObjectWriter objectWriter;
@@ -315,7 +329,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * in which the target type appears in a method signature (can be {@code null})
 	 * @return the Jackson JavaType
 	 */
-	protected JavaType getJavaType(Type type, Class<?> contextClass) {
+	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
@@ -325,7 +339,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @param contentType the media type as requested by the caller
 	 * @return the JSON encoding to use (never {@code null})
 	 */
-	protected JsonEncoding getJsonEncoding(MediaType contentType) {
+	protected JsonEncoding getJsonEncoding(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
 			for (JsonEncoding encoding : JsonEncoding.values()) {
@@ -346,7 +360,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected Long getContentLength(Object object, MediaType contentType) throws IOException {
+	protected Long getContentLength(Object object, @Nullable MediaType contentType) throws IOException {
 		if (object instanceof MappingJacksonValue) {
 			object = ((MappingJacksonValue) object).getValue();
 		}

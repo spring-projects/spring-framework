@@ -45,6 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -401,7 +402,7 @@ public class MessageReaderArgumentResolverTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			TestBean testBean = (TestBean) target;
 			if (testBean.getFoo() == null) {
 				errors.rejectValue("foo", "nullValue");
