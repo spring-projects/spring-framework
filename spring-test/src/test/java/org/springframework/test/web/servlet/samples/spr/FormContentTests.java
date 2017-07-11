@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class FormContentTests {
 
+
 	@Test // SPR-15753
 	public void formContentIsNotDuplicated() throws Exception {
 
@@ -42,12 +43,11 @@ public class FormContentTests {
 
 		mockMvc.perform(put("/").content("d1=a&d2=s").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(content().string("d1:a, d2:s."));
-
 	}
 
 
 	@RestController
-	public class Spr15753Controller {
+	private static class Spr15753Controller {
 
 		@PutMapping
 		public String test(Data d) {
@@ -55,7 +55,7 @@ public class FormContentTests {
 		}
 	}
 
-	public class Data {
+	private static class Data {
 
 		private String d1;
 
