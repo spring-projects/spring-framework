@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,25 +90,28 @@ class DefaultPathContainer implements PathContainer {
 	}
 
 
-	static PathContainer createFromPath(String path) {
-		return parsePathInternal(path, DefaultPathSegment::new);
+	static PathContainer createFromPath(String path, String separator) {
+		return parsePathInternal(path, separator, DefaultPathSegment::new);
 	}
 
-	private static PathContainer parsePathInternal(String path, Function<String, PathSegment> segmentParser) {
+	private static PathContainer parsePathInternal(String path, String separator,
+			Function<String, PathSegment> segmentParser) {
+
 		if (path.equals("")) {
 			return EMPTY_PATH;
 		}
+		Separator separatorElement = separator.equals(SEPARATOR.value()) ? SEPARATOR : () -> separator;
 		List<Element> elements = new ArrayList<>();
 		int begin;
-		if (path.length() > 0 && path.charAt(0) == '/') {
-			begin = 1;
-			elements.add(SEPARATOR);
+		if (path.length() > 0 && path.startsWith(separator)) {
+			begin = separator.length();
+			elements.add(separatorElement);
 		}
 		else {
 			begin = 0;
 		}
 		while (begin < path.length()) {
-			int end = path.indexOf('/', begin);
+			int end = path.indexOf(separator, begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
 			if (!segment.equals("")) {
 				elements.add(segmentParser.apply(segment));
@@ -115,28 +119,27 @@ class DefaultPathContainer implements PathContainer {
 			if (end == -1) {
 				break;
 			}
-			elements.add(SEPARATOR);
-			begin = end + 1;
+			elements.add(separatorElement);
+			begin = end + separator.length();
 		}
 		return new DefaultPathContainer(path, elements);
 	}
 
-	static PathContainer createFromUrlPath(String path, Charset charset) {
-		return parsePathInternal(path, segment -> parseUrlPathSegment(segment, charset));
-	}
-
-	private static PathContainer.UrlPathSegment parseUrlPathSegment(String input, Charset charset) {
-		int index = input.indexOf(';');
-		if (index == -1) {
-			String valueToMatch = StringUtils.uriDecode(input, charset);
-			return new DefaultUrlPathSegment(input, valueToMatch, EMPTY_MAP);
-		}
-		else {
-			String valueToMatch = StringUtils.uriDecode(input.substring(0, index), charset);
-			String pathParameterContent = input.substring(index);
-			MultiValueMap<String, String> parameters = parsePathParams(pathParameterContent, charset);
-			return new DefaultUrlPathSegment(input, valueToMatch, parameters);
-		}
+	static PathContainer createFromUrlPath(String path) {
+		return parsePathInternal(path, "/", segment -> {
+			Charset charset = StandardCharsets.UTF_8;
+			int index = segment.indexOf(';');
+			if (index == -1) {
+				String valueToMatch = StringUtils.uriDecode(segment, charset);
+				return new DefaultUrlPathSegment(segment, valueToMatch, EMPTY_MAP);
+			}
+			else {
+				String valueToMatch = StringUtils.uriDecode(segment.substring(0, index), charset);
+				String pathParameterContent = segment.substring(index);
+				MultiValueMap<String, String> parameters = parsePathParams(pathParameterContent, charset);
+				return new DefaultUrlPathSegment(segment, valueToMatch, parameters);
+			}
+		});
 	}
 
 	private static MultiValueMap<String, String> parsePathParams(String input, Charset charset) {

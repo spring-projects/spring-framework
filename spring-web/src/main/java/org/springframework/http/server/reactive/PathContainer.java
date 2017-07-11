@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.util.MultiValueMap;
@@ -77,7 +76,18 @@ public interface PathContainer {
 	 * @return the parsed path
 	 */
 	static PathContainer parsePath(String path) {
-		return DefaultPathContainer.createFromPath(path);
+		return parsePath(path, "/");
+	}
+
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link PathSegment PathSegment} elements.
+	 * @param path the path value to parse
+	 * @param separator the value to treat as separator
+	 * @return the parsed path
+	 */
+	static PathContainer parsePath(String path, String separator) {
+		return DefaultPathContainer.createFromPath(path, separator);
 	}
 
 	/**
@@ -87,7 +97,7 @@ public interface PathContainer {
 	 * @return the parsed path
 	 */
 	static PathContainer parseUrlPath(String path) {
-		return DefaultPathContainer.createFromUrlPath(path, StandardCharsets.UTF_8);
+		return DefaultPathContainer.createFromUrlPath(path);
 	}
 
 
