@@ -19,9 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -80,7 +78,7 @@ public interface ServerRequest {
 	 * Return the request path as {@code PathContainer}.
 	 */
 	default PathContainer pathContainer() {
-		return PathContainer.parse(path(), StandardCharsets.UTF_8);
+		return PathContainer.parseUrlPath(path());
 	}
 
 	/**

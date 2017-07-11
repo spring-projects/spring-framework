@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -174,7 +173,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		int queryIndex = getQueryIndex(requestUrl);
 		String lookupPath = requestUrl.substring(0, queryIndex);
 		String query = requestUrl.substring(queryIndex);
-		PathContainer parsedLookupPath = PathContainer.parse(lookupPath, StandardCharsets.UTF_8);
+		PathContainer parsedLookupPath = PathContainer.parseUrlPath(lookupPath);
 		return getForLookupPath(parsedLookupPath).map(resolvedPath ->
 				request.getPath().contextPath().value() + resolvedPath + query);
 	}

@@ -16,8 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -46,11 +46,11 @@ class WildcardPathElement extends PathElement {
 		// Assert if it exists it is a segment
 		if (pathIndex < matchingContext.pathLength) {
 			Element element = matchingContext.pathElements.get(pathIndex);
-			if (!(element instanceof Segment)) {
+			if (!(element instanceof PathContainer.PathSegment)) {
 				// Should not match a separator
 				return false;
 			}
-			segmentData = ((Segment)element).valueToMatch();
+			segmentData = ((PathContainer.PathSegment)element).valueToMatch();
 			pathIndex++;
 		}
 		

@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
@@ -61,26 +60,26 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public boolean match(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matches(PathContainer.parse(path, StandardCharsets.UTF_8));
+		return pathPattern.matches(PathContainer.parseUrlPath(path));
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchStart(PathContainer.parse(path, StandardCharsets.UTF_8));
+		return pathPattern.matchStart(PathContainer.parseUrlPath(path));
 	}
 
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		PathContainer pathContainer = PathContainer.parse(path, StandardCharsets.UTF_8);
+		PathContainer pathContainer = PathContainer.parseUrlPath(path);
 		return pathPattern.extractPathWithinPattern(pathContainer).value();
 	}
 
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		PathContainer pathContainer = PathContainer.parse(path, StandardCharsets.UTF_8);
+		PathContainer pathContainer = PathContainer.parseUrlPath(path);
 		PathMatchResult results = pathPattern.matchAndExtract(pathContainer);
 		// Collapse PathMatchResults to simple value results
 		// TODO: (path parameters are lost in this translation)

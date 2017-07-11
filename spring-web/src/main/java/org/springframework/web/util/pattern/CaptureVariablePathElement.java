@@ -19,7 +19,7 @@ package org.springframework.web.util.pattern;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
 import org.springframework.lang.Nullable;
 
 /**
@@ -120,7 +120,7 @@ class CaptureVariablePathElement extends PathElement {
 		}
 
 		if (match && matchingContext.extractingVariables) {
-			matchingContext.set(this.variableName, candidateCapture, ((Segment)matchingContext.pathElements.get(pathIndex-1)).parameters());
+			matchingContext.set(this.variableName, candidateCapture, ((UrlPathSegment)matchingContext.pathElements.get(pathIndex-1)).parameters());
 		}
 		return match;
 	}

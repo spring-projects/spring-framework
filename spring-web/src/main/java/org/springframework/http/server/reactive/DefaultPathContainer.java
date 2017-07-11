@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -88,7 +89,11 @@ class DefaultPathContainer implements PathContainer {
 	}
 
 
-	static PathContainer parsePath(String path, Charset charset) {
+	static PathContainer createFromPath(String path) {
+		return parsePathInternal(path, DefaultPathSegment::new);
+	}
+
+	private static PathContainer parsePathInternal(String path, Function<String, PathSegment> segmentParser) {
 		if (path.equals("")) {
 			return EMPTY_PATH;
 		}
@@ -105,7 +110,7 @@ class DefaultPathContainer implements PathContainer {
 			int end = path.indexOf('/', begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
 			if (!segment.equals("")) {
-				elements.add(parsePathSegment(segment, charset));
+				elements.add(segmentParser.apply(segment));
 			}
 			if (end == -1) {
 				break;
@@ -116,27 +121,31 @@ class DefaultPathContainer implements PathContainer {
 		return new DefaultPathContainer(path, elements);
 	}
 
-	private static PathContainer.Segment parsePathSegment(String input, Charset charset) {
+	static PathContainer createFromUrlPath(String path, Charset charset) {
+		return parsePathInternal(path, segment -> parseUrlPathSegment(segment, charset));
+	}
+
+	private static PathContainer.UrlPathSegment parseUrlPathSegment(String input, Charset charset) {
 		int index = input.indexOf(';');
 		if (index == -1) {
 			String valueToMatch = StringUtils.uriDecode(input, charset);
-			return new DefaultPathSegment(input, valueToMatch, EMPTY_MAP);
+			return new DefaultUrlPathSegment(input, valueToMatch, EMPTY_MAP);
 		}
 		else {
 			String valueToMatch = StringUtils.uriDecode(input.substring(0, index), charset);
 			String pathParameterContent = input.substring(index);
-			MultiValueMap<String, String> parameters = parseParams(pathParameterContent, charset);
-			return new DefaultPathSegment(input, valueToMatch, parameters);
+			MultiValueMap<String, String> parameters = parsePathParams(pathParameterContent, charset);
+			return new DefaultUrlPathSegment(input, valueToMatch, parameters);
 		}
 	}
 
-	private static MultiValueMap<String, String> parseParams(String input, Charset charset) {
+	private static MultiValueMap<String, String> parsePathParams(String input, Charset charset) {
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 		int begin = 1;
 		while (begin < input.length()) {
 			int end = input.indexOf(';', begin);
 			String param = (end != -1 ? input.substring(begin, end) : input.substring(begin));
-			parseParamValues(param, charset, result);
+			parsePathParamValues(param, charset, result);
 			if (end == -1) {
 				break;
 			}
@@ -145,7 +154,7 @@ class DefaultPathContainer implements PathContainer {
 		return result;
 	}
 
-	private static void parseParamValues(String input, Charset charset, MultiValueMap<String, String> output) {
+	private static void parsePathParamValues(String input, Charset charset, MultiValueMap<String, String> output) {
 		if (StringUtils.hasText(input)) {
 			int index = input.indexOf("=");
 			if (index != -1) {
@@ -186,23 +195,18 @@ class DefaultPathContainer implements PathContainer {
 	}
 
 
-	private static class DefaultPathSegment implements PathContainer.Segment {
+	private static class DefaultPathSegment implements PathSegment {
 
 		private final String value;
 
-		private final String valueToMatch;
+		private final char[] valueAsChars;
 
-		private final char[] valueToMatchAsChars;
 
-		private final MultiValueMap<String, String> parameters;
-
-		DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
-			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
+		DefaultPathSegment(String value) {
 			this.value = value;
-			this.valueToMatch = valueToMatch;
-			this.valueToMatchAsChars = valueToMatch.toCharArray();
-			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
+			this.valueAsChars = value.toCharArray();
 		}
+
 
 		@Override
 		public String value() {
@@ -211,17 +215,12 @@ class DefaultPathContainer implements PathContainer {
 
 		@Override
 		public String valueToMatch() {
-			return this.valueToMatch;
+			return this.value;
 		}
 
 		@Override
 		public char[] valueToMatchAsChars() {
-			return this.valueToMatchAsChars;
-		}
-
-		@Override
-		public MultiValueMap<String, String> parameters() {
-			return this.parameters;
+			return this.valueAsChars;
 		}
 
 		@Override
@@ -241,7 +240,42 @@ class DefaultPathContainer implements PathContainer {
 		}
 
 		public String toString() {
-			return "[value='" + this.value + "', parameters=" + this.parameters + "']"; }
+			return "[value='" + this.value + "']"; }
+	}
+
+
+	private static class DefaultUrlPathSegment extends DefaultPathSegment implements UrlPathSegment {
+
+		private final String valueToMatch;
+
+		private final char[] valueToMatchAsChars;
+
+		private final MultiValueMap<String, String> parameters;
+
+
+		DefaultUrlPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
+			super(value);
+			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
+			this.valueToMatch = valueToMatch;
+			this.valueToMatchAsChars = valueToMatch.toCharArray();
+			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
+		}
+
+
+		@Override
+		public String valueToMatch() {
+			return this.valueToMatch;
+		}
+
+		@Override
+		public char[] valueToMatchAsChars() {
+			return this.valueToMatchAsChars;
+		}
+
+		@Override
+		public MultiValueMap<String, String> parameters() {
+			return this.parameters;
+		}
 	}
 
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +74,7 @@ public class ResourceUrlProviderTests {
 
 	@Test
 	public void getStaticResourceUrl() {
-		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		PathContainer path = PathContainer.parsePath("/resources/foo.css");
 		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo.css", url);
 	}
@@ -105,7 +104,7 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		PathContainer path = PathContainer.parsePath("/resources/foo.css");
 		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
@@ -127,7 +126,7 @@ public class ResourceUrlProviderTests {
 		this.handlerMap.put("/resources/*.css", otherHandler);
 		this.urlProvider.registerHandlers(this.handlerMap);
 
-		PathContainer path = PathContainer.parse("/resources/foo.css", StandardCharsets.UTF_8);
+		PathContainer path = PathContainer.parsePath("/resources/foo.css");
 		String url = this.urlProvider.getForLookupPath(path).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}

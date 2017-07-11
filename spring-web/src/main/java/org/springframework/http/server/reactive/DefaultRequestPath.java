@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -40,7 +39,7 @@ class DefaultRequestPath implements RequestPath {
 
 
 	DefaultRequestPath(URI uri, @Nullable String contextPath) {
-		this.fullPath = PathContainer.parse(uri.getRawPath(), StandardCharsets.UTF_8);
+		this.fullPath = PathContainer.parseUrlPath(uri.getRawPath());
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
@@ -53,7 +52,7 @@ class DefaultRequestPath implements RequestPath {
 
 	private static PathContainer initContextPath(PathContainer path, @Nullable String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
-			return PathContainer.parse("", StandardCharsets.UTF_8);
+			return PathContainer.parseUrlPath("");
 		}
 
 		Assert.isTrue(contextPath.startsWith("/") && !contextPath.endsWith("/") &&
