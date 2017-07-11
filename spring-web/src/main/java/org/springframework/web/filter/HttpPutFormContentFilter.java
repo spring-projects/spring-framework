@@ -160,18 +160,18 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		@Override
 		public String[] getParameterValues(String name) {
-			String[] queryStringValues = super.getParameterValues(name);
-			List<String> formValues = this.formParameters.get(name);
-			if (formValues == null) {
-				return queryStringValues;
+			String[] queryParam = (super.getQueryString() != null ? super.getParameterValues(name) : null);
+			List<String> formParam = this.formParameters.get(name);
+			if (formParam == null) {
+				return queryParam;
 			}
-			else if (queryStringValues == null) {
-				return formValues.toArray(new String[formValues.size()]);
+			else if (queryParam == null) {
+				return formParam.toArray(new String[formParam.size()]);
 			}
 			else {
-				List<String> result = new ArrayList<String>(queryStringValues.length + formValues.size());
-				result.addAll(Arrays.asList(queryStringValues));
-				result.addAll(formValues);
+				List<String> result = new ArrayList<String>(queryParam.length + formParam.size());
+				result.addAll(Arrays.asList(queryParam));
+				result.addAll(formParam);
 				return result.toArray(new String[result.size()]);
 			}
 		}
