@@ -5198,10 +5198,14 @@ And in XML use the `<mvc:interceptors>` element:
 [[mvc-config-content-negotiation]]
 === Content Negotiation
 You can configure how Spring MVC determines the requested media types from the request.
-The available options are to check the URL path for a file extension, check the
-"Accept" header, a specific query parameter, or to fall back on a default content
-type when nothing is requested. By default the path extension in the request URI
-is checked first and the "Accept" header is checked second.
+The available options are to check a query parameter, the URL path for a file extension,
+the "Accept" header, use a fixed list, or a custom strategy.
+
+By default for backwards compatibility the path extension in the request URI is checked
+first and the "Accept" header is checked second. However if you must use URL-based content
+type resolution, we highly recommend using the query parameter strategy over the path
+extension since the latter can cause issues with URI variables, path parameters, and also
+in combination with URI decoding.
 
 The MVC Java config and the MVC namespace register `json`, `xml`, `rss`, `atom` by
 default if corresponding dependencies are on the classpath. Additional
