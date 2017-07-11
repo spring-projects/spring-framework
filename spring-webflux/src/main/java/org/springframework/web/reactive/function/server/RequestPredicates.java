@@ -521,7 +521,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public <T> Optional<T> attribute(String name) {
+		public Optional<Object> attribute(String name) {
 			return this.request.attribute(name);
 		}
 

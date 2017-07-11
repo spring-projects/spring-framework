@@ -129,10 +129,17 @@ public interface ServerRequest {
 	/**
 	 * Return the request attribute value if present.
 	 * @param name the attribute name
-	 * @param <T> the attribute type
 	 * @return the attribute value
 	 */
-	<T> Optional<T> attribute(String name);
+	default Optional<Object> attribute(String name) {
+		Map<String, Object> attributes = attributes();
+		if (attributes.containsKey(name)) {
+			return Optional.of(attributes.get(name));
+		}
+		else {
+			return Optional.empty();
+		}
+	}
 
 	/**
 	 * Return a mutable map of request attributes.

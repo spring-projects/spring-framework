@@ -156,12 +156,6 @@ public class MockServerRequest implements ServerRequest {
 		return (Flux<S>) this.body;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <S> Optional<S> attribute(String name) {
-		return Optional.ofNullable((S) this.attributes.get(name));
-	}
-
 	@Override
 	public Map<String, Object> attributes() {
 		return this.attributes;

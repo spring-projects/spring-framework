@@ -146,11 +146,6 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
-		return Optional.ofNullable(this.exchange.getAttribute(name));
-	}
-
-	@Override
 	public Map<String, Object> attributes() {
 		return this.exchange.getAttributes();
 	}

@@ -124,7 +124,7 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
+	public Optional<Object> attribute(String name) {
 		return this.delegate.attribute(name);
 	}
 
