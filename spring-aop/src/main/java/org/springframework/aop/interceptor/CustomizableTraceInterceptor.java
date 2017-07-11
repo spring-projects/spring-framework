@@ -230,8 +230,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		checkForInvalidPlaceholders(exceptionMessage);
 		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,
 				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
-		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_INVOCATION_TIME,
-				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_INVOCATION_TIME + "]");
 		this.exceptionMessage = exceptionMessage;
 	}
 
