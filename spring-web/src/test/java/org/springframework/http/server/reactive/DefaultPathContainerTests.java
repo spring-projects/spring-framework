@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
+import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -38,14 +38,14 @@ public class DefaultPathContainerTests {
 	@Test
 	public void pathSegment() throws Exception {
 		// basic
-		testPathSegment("cars", "", "cars", "cars", new LinkedMultiValueMap<>());
+		testPathSegment("cars", "cars", new LinkedMultiValueMap<>());
 
 		// empty
-		testPathSegment("", "", "", "", new LinkedMultiValueMap<>());
+		testPathSegment("", "", new LinkedMultiValueMap<>());
 
 		// spaces
-		testPathSegment("%20%20", "", "%20%20", "  ", new LinkedMultiValueMap<>());
-		testPathSegment("%20a%20", "", "%20a%20", " a ", new LinkedMultiValueMap<>());
+		testPathSegment("%20%20", "  ", new LinkedMultiValueMap<>());
+		testPathSegment("%20a%20", " a ", new LinkedMultiValueMap<>());
 	}
 
 	@Test
@@ -56,40 +56,38 @@ public class DefaultPathContainerTests {
 		params.add("colors", "blue");
 		params.add("colors", "green");
 		params.add("year", "2012");
-		testPathSegment("cars", ";colors=red,blue,green;year=2012", "cars", "cars", params);
+		testPathSegment("cars;colors=red,blue,green;year=2012", "cars", params);
 
 		// trailing semicolon
 		params = new LinkedMultiValueMap<>();
 		params.add("p", "1");
-		testPathSegment("path", ";p=1;", "path", "path", params);
+		testPathSegment("path;p=1;", "path", params);
 
 		// params with spaces
 		params = new LinkedMultiValueMap<>();
 		params.add("param name", "param value");
-		testPathSegment("path", ";param%20name=param%20value;%20", "path", "path", params);
+		testPathSegment("path;param%20name=param%20value;%20", "path", params);
 
 		// empty params
 		params = new LinkedMultiValueMap<>();
 		params.add("p", "1");
-		testPathSegment("path", ";;;%20;%20;p=1;%20", "path", "path", params);
+		testPathSegment("path;;;%20;%20;p=1;%20", "path", params);
 	}
 
-	private void testPathSegment(String rawValue, String semicolonContent,
-			String value, String valueDecoded, MultiValueMap<String, String> params) {
+	private void testPathSegment(String rawValue, String valueToMatch, MultiValueMap<String, String> params) {
 
-		PathContainer container = DefaultPathContainer.parsePath(rawValue + semicolonContent, UTF_8);
+		PathContainer container = PathContainer.parseUrlPath(rawValue);
 
-		if ("".equals(value)) {
+		if ("".equals(rawValue)) {
 			assertEquals(0, container.elements().size());
 			return;
 		}
 
 		assertEquals(1, container.elements().size());
-		PathContainer.Segment segment = (PathContainer.Segment) container.elements().get(0);
+		UrlPathSegment segment = (UrlPathSegment) container.elements().get(0);
 
-		assertEquals("value: '" + rawValue + "'", value, segment.value());
-		assertEquals("valueDecoded: '" + rawValue + "'", valueDecoded, segment.valueDecoded());
-		assertEquals("semicolonContent: '" + rawValue + "'", semicolonContent, segment.semicolonContent());
+		assertEquals("value: '" + rawValue + "'", rawValue, segment.value());
+		assertEquals("valueToMatch: '" + rawValue + "'", valueToMatch, segment.valueToMatch());
 		assertEquals("params: '" + rawValue + "'", params, segment.parameters());
 	}
 
@@ -116,7 +114,7 @@ public class DefaultPathContainerTests {
 
 	private void testPath(String input, String value, List<String> expectedElements) {
 
-		PathContainer path = PathContainer.parse(input, UTF_8);
+		PathContainer path = PathContainer.parseUrlPath(input);
 
 		assertEquals("value: '" + input + "'", value, path.value());
 		assertEquals("elements: " + input, expectedElements, path.elements().stream()
@@ -126,18 +124,18 @@ public class DefaultPathContainerTests {
 	@Test
 	public void subPath() throws Exception {
 		// basic
-		PathContainer path = PathContainer.parse("/a/b/c", UTF_8);
-		assertSame(path, PathContainer.subPath(path, 0));
-		assertEquals("/b/c", PathContainer.subPath(path, 2).value());
-		assertEquals("/c", PathContainer.subPath(path, 4).value());
+		PathContainer path = PathContainer.parseUrlPath("/a/b/c");
+		assertSame(path, path.subPath(0));
+		assertEquals("/b/c", path.subPath(2).value());
+		assertEquals("/c", path.subPath(4).value());
 
 		// root path
-		path = PathContainer.parse("/", UTF_8);
-		assertEquals("/", PathContainer.subPath(path, 0).value());
+		path = PathContainer.parseUrlPath("/");
+		assertEquals("/", path.subPath(0).value());
 
 		// trailing slash
-		path = PathContainer.parse("/a/b/", UTF_8);
-		assertEquals("/b/", PathContainer.subPath(path, 2).value());
+		path = PathContainer.parseUrlPath("/a/b/");
+		assertEquals("/b/", path.subPath(2).value());
 	}
 
 }

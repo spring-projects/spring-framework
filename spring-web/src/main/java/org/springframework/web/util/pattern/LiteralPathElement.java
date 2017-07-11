@@ -16,8 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.http.server.reactive.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -59,16 +60,16 @@ class LiteralPathElement extends PathElement {
 			return false;
 		}
 		Element element = matchingContext.pathElements.get(pathIndex);
-		if (!(element instanceof Segment)) {
+		if (!(element instanceof PathContainer.PathSegment)) {
 			return false;
 		}
-		String value = ((Segment)element).valueDecoded();
+		String value = ((PathSegment)element).valueToMatch();
 		if (value.length() != len) {
 			// Not enough data to match this path element
 			return false;
 		}
 
-		char[] data = ((Segment)element).valueDecodedChars();
+		char[] data = ((PathContainer.PathSegment)element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
 				if (data[i] != this.text[i]) {

@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -587,7 +586,7 @@ public class PathPatternMatcherTests {
 		PathPatternParser ppp = new PathPatternParser();
 		ppp.setMatchOptionalTrailingSlash(false);
 		PathPattern pp = ppp.parse("test");
-		assertFalse(pp.matchStart(PathContainer.parse("test/",StandardCharsets.UTF_8)));
+		assertFalse(pp.matchStart(PathContainer.parsePath("test/")));
 		
 		checkStartNoMatch("test/*/","test//");
 		checkStartMatches("test/*","test/abc");
@@ -1317,7 +1316,7 @@ public class PathPatternMatcherTests {
 		if (path == null) {
 			return null;
 		}
-		return PathContainer.parse(path, StandardCharsets.UTF_8);
+		return PathContainer.parseUrlPath(path);
 	}
 	
 	private void checkMatches(String uriTemplate, String path) {

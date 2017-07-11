@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -107,14 +106,14 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Nullable
 	private RequestPath getRequestPathToUse(@Nullable URI uriToUse) {
-		if (uriToUse == null) {
-			if (this.contextPath == null) {
-				return null;
-			}
+		if (uriToUse == null && this.contextPath == null) {
+			return null;
+		}
+		else if (uriToUse == null) {
 			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath);
 		}
 		else {
-			return new DefaultRequestPath(uriToUse, this.contextPath, StandardCharsets.UTF_8);
+			return RequestPath.parse(uriToUse, this.contextPath);
 		}
 	}
 

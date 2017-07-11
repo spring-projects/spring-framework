@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.Map;
 
 import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
 import org.springframework.http.server.reactive.PathContainer.Separator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -71,7 +69,7 @@ import org.springframework.util.StringUtils;
  */
 public class PathPattern implements Comparable<PathPattern> {
 
-	private final static PathContainer EMPTY_PATH = PathContainer.parse("", StandardCharsets.UTF_8);
+	private final static PathContainer EMPTY_PATH = PathContainer.parsePath("");
 
 	/** The parser used to construct this pattern */
 	private final PathPatternParser parser;
@@ -205,7 +203,7 @@ public class PathPattern implements Comparable<PathPattern> {
 				info = new PathRemainingMatchInfo(EMPTY_PATH, matchingContext.getPathMatchResult());
 			}
 			else {
-				info = new PathRemainingMatchInfo(PathContainer.subPath(pathContainer, matchingContext.remainingPathIndex),
+				info = new PathRemainingMatchInfo(pathContainer.subPath(matchingContext.remainingPathIndex),
 						 matchingContext.getPathMatchResult());
 			}
 			return info;
@@ -261,11 +259,10 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return the subset of the path that is matched by pattern or "" if none of it is matched by pattern elements
 	 */
 	public PathContainer extractPathWithinPattern(PathContainer path) {
+		// TODO: implement extractPathWithinPattern for PathContainer
 		String result = extractPathWithinPattern(path.value());
-		return PathContainer.parse(result, StandardCharsets.UTF_8);
+		return PathContainer.parseUrlPath(result);
 	}
-
-	// TODO: implement extractPathWithinPattern natively for PathContainer
 
 	private String extractPathWithinPattern(String path) {
 		// assert this.matches(path)
@@ -406,7 +403,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		// /usr + /user => /usr/user 
 		// /{foo} + /bar => /{foo}/bar
 		if (!this.patternString.equals(pattern2string.patternString) && this.capturedVariableCount == 0 && 
-				matches(PathContainer.parse(pattern2string.patternString, StandardCharsets.UTF_8))) {
+				matches(PathContainer.parseUrlPath(pattern2string.patternString))) {
 			return pattern2string;
 		}
 
@@ -683,8 +680,8 @@ public class PathPattern implements Comparable<PathPattern> {
 		 */
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < pathLength) ? pathElements.get(pathIndex) : null;
-			if (element instanceof Segment) {
-				return ((Segment)element).valueDecoded();
+			if (element instanceof PathContainer.PathSegment) {
+				return ((PathContainer.PathSegment)element).valueToMatch();
 			}
 			return "";
 		}

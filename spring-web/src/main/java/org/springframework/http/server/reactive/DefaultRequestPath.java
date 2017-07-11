@@ -17,8 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -40,8 +38,8 @@ class DefaultRequestPath implements RequestPath {
 	private final PathContainer pathWithinApplication;
 
 
-	DefaultRequestPath(URI uri, @Nullable String contextPath, Charset charset) {
-		this.fullPath = PathContainer.parse(uri.getRawPath(), charset);
+	DefaultRequestPath(URI uri, @Nullable String contextPath) {
+		this.fullPath = PathContainer.parseUrlPath(uri.getRawPath());
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
@@ -54,7 +52,7 @@ class DefaultRequestPath implements RequestPath {
 
 	private static PathContainer initContextPath(PathContainer path, @Nullable String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
-			return PathContainer.parse("", StandardCharsets.UTF_8);
+			return PathContainer.parseUrlPath("");
 		}
 
 		Assert.isTrue(contextPath.startsWith("/") && !contextPath.endsWith("/") &&
@@ -66,11 +64,8 @@ class DefaultRequestPath implements RequestPath {
 		for (int i=0; i < path.elements().size(); i++) {
 			PathContainer.Element element = path.elements().get(i);
 			counter += element.value().length();
-			if (element instanceof PathContainer.Segment) {
-				counter += ((Segment) element).semicolonContent().length();
-			}
 			if (length == counter) {
-				return DefaultPathContainer.subPath(path, 0, i + 1);
+				return path.subPath(0, i + 1);
 			}
 		}
 
@@ -80,12 +75,11 @@ class DefaultRequestPath implements RequestPath {
 	}
 
 	private static PathContainer extractPathWithinApplication(PathContainer fullPath, PathContainer contextPath) {
-		return PathContainer.subPath(fullPath, contextPath.elements().size());
+		return fullPath.subPath(contextPath.elements().size());
 	}
 
 
 	// PathContainer methods..
-
 
 	@Override
 	public String value() {

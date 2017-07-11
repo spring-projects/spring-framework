@@ -17,9 +17,11 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -88,54 +90,65 @@ class DefaultPathContainer implements PathContainer {
 	}
 
 
-	static PathContainer parsePath(String path, Charset charset) {
+	static PathContainer createFromPath(String path, String separator) {
+		return parsePathInternal(path, separator, DefaultPathSegment::new);
+	}
+
+	private static PathContainer parsePathInternal(String path, String separator,
+			Function<String, PathSegment> segmentParser) {
+
 		if (path.equals("")) {
 			return EMPTY_PATH;
 		}
+		Separator separatorElement = separator.equals(SEPARATOR.value()) ? SEPARATOR : () -> separator;
 		List<Element> elements = new ArrayList<>();
 		int begin;
-		if (path.length() > 0 && path.charAt(0) == '/') {
-			begin = 1;
-			elements.add(SEPARATOR);
+		if (path.length() > 0 && path.startsWith(separator)) {
+			begin = separator.length();
+			elements.add(separatorElement);
 		}
 		else {
 			begin = 0;
 		}
 		while (begin < path.length()) {
-			int end = path.indexOf('/', begin);
+			int end = path.indexOf(separator, begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
 			if (!segment.equals("")) {
-				elements.add(parsePathSegment(segment, charset));
+				elements.add(segmentParser.apply(segment));
 			}
 			if (end == -1) {
 				break;
 			}
-			elements.add(SEPARATOR);
-			begin = end + 1;
+			elements.add(separatorElement);
+			begin = end + separator.length();
 		}
 		return new DefaultPathContainer(path, elements);
 	}
 
-	private static PathContainer.Segment parsePathSegment(String input, Charset charset) {
-		int index = input.indexOf(';');
-		if (index == -1) {
-			String inputDecoded = StringUtils.uriDecode(input, charset);
-			return new DefaultPathSegment(input, inputDecoded, "", EMPTY_MAP);
-		}
-		String value = input.substring(0, index);
-		String valueDecoded = StringUtils.uriDecode(value, charset);
-		String semicolonContent = input.substring(index);
-		MultiValueMap<String, String> parameters = parseParams(semicolonContent, charset);
-		return new DefaultPathSegment(value, valueDecoded, semicolonContent, parameters);
+	static PathContainer createFromUrlPath(String path) {
+		return parsePathInternal(path, "/", segment -> {
+			Charset charset = StandardCharsets.UTF_8;
+			int index = segment.indexOf(';');
+			if (index == -1) {
+				String valueToMatch = StringUtils.uriDecode(segment, charset);
+				return new DefaultUrlPathSegment(segment, valueToMatch, EMPTY_MAP);
+			}
+			else {
+				String valueToMatch = StringUtils.uriDecode(segment.substring(0, index), charset);
+				String pathParameterContent = segment.substring(index);
+				MultiValueMap<String, String> parameters = parsePathParams(pathParameterContent, charset);
+				return new DefaultUrlPathSegment(segment, valueToMatch, parameters);
+			}
+		});
 	}
 
-	private static MultiValueMap<String, String> parseParams(String input, Charset charset) {
+	private static MultiValueMap<String, String> parsePathParams(String input, Charset charset) {
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 		int begin = 1;
 		while (begin < input.length()) {
 			int end = input.indexOf(';', begin);
 			String param = (end != -1 ? input.substring(begin, end) : input.substring(begin));
-			parseParamValues(param, charset, result);
+			parsePathParamValues(param, charset, result);
 			if (end == -1) {
 				break;
 			}
@@ -144,7 +157,7 @@ class DefaultPathContainer implements PathContainer {
 		return result;
 	}
 
-	private static void parseParamValues(String input, Charset charset, MultiValueMap<String, String> output) {
+	private static void parsePathParamValues(String input, Charset charset, MultiValueMap<String, String> output) {
 		if (StringUtils.hasText(input)) {
 			int index = input.indexOf("=");
 			if (index != -1) {
@@ -185,28 +198,18 @@ class DefaultPathContainer implements PathContainer {
 	}
 
 
-	private static class DefaultPathSegment implements PathContainer.Segment {
+	private static class DefaultPathSegment implements PathSegment {
 
 		private final String value;
 
-		private final String valueDecoded;
+		private final char[] valueAsChars;
 
-		private final char[] valueDecodedChars;
 
-		private final String semicolonContent;
-
-		private final MultiValueMap<String, String> parameters;
-
-		DefaultPathSegment(String value, String valueDecoded, String semicolonContent,
-				MultiValueMap<String, String> params) {
-
-			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
+		DefaultPathSegment(String value) {
 			this.value = value;
-			this.valueDecoded = valueDecoded;
-			this.valueDecodedChars = valueDecoded.toCharArray();
-			this.semicolonContent = semicolonContent;
-			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
+			this.valueAsChars = value.toCharArray();
 		}
+
 
 		@Override
 		public String value() {
@@ -214,23 +217,13 @@ class DefaultPathContainer implements PathContainer {
 		}
 
 		@Override
-		public String valueDecoded() {
-			return this.valueDecoded;
+		public String valueToMatch() {
+			return this.value;
 		}
 
 		@Override
-		public char[] valueDecodedChars() {
-			return this.valueDecodedChars;
-		}
-
-		@Override
-		public String semicolonContent() {
-			return this.semicolonContent;
-		}
-
-		@Override
-		public MultiValueMap<String, String> parameters() {
-			return this.parameters;
+		public char[] valueToMatchAsChars() {
+			return this.valueAsChars;
 		}
 
 		@Override
@@ -241,25 +234,50 @@ class DefaultPathContainer implements PathContainer {
 			if (other == null || getClass() != other.getClass()) {
 				return false;
 			}
-
-			DefaultPathSegment segment = (DefaultPathSegment) other;
-			return (this.value.equals(segment.value) &&
-					this.semicolonContent.equals(segment.semicolonContent) &&
-					this.parameters.equals(segment.parameters));
+			return this.value.equals(((DefaultPathSegment) other).value);
 		}
 
 		@Override
 		public int hashCode() {
-			int result = this.value.hashCode();
-			result = 31 * result + this.semicolonContent.hashCode();
-			result = 31 * result + this.parameters.hashCode();
-			return result;
+			return this.value.hashCode();
 		}
 
 		public String toString() {
-			return "[value='" + this.value + "\', " +
-					"semicolonContent='" + this.semicolonContent + "\', " +
-					"parameters=" + this.parameters + "']";
+			return "[value='" + this.value + "']"; }
+	}
+
+
+	private static class DefaultUrlPathSegment extends DefaultPathSegment implements UrlPathSegment {
+
+		private final String valueToMatch;
+
+		private final char[] valueToMatchAsChars;
+
+		private final MultiValueMap<String, String> parameters;
+
+
+		DefaultUrlPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
+			super(value);
+			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
+			this.valueToMatch = valueToMatch;
+			this.valueToMatchAsChars = valueToMatch.toCharArray();
+			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
+		}
+
+
+		@Override
+		public String valueToMatch() {
+			return this.valueToMatch;
+		}
+
+		@Override
+		public char[] valueToMatchAsChars() {
+			return this.valueToMatchAsChars;
+		}
+
+		@Override
+		public MultiValueMap<String, String> parameters() {
+			return this.parameters;
 		}
 	}
 

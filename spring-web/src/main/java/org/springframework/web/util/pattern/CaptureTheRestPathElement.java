@@ -19,7 +19,7 @@ package org.springframework.web.util.pattern;
 import java.util.List;
 
 import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.Segment;
+import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
@@ -65,8 +65,8 @@ class CaptureTheRestPathElement extends PathElement {
 			MultiValueMap<String,String> parametersCollector = null;
 			for (int i = pathIndex; i < matchingContext.pathLength; i++) {
 				Element element = matchingContext.pathElements.get(i);
-				if (element instanceof Segment) {
-					MultiValueMap<String, String> parameters = ((Segment) element).parameters();
+				if (element instanceof UrlPathSegment) {
+					MultiValueMap<String, String> parameters = ((UrlPathSegment) element).parameters();
 					if (!parameters.isEmpty()) {
 						if (parametersCollector == null) {
 							parametersCollector = new LinkedMultiValueMap<>();
@@ -85,8 +85,8 @@ class CaptureTheRestPathElement extends PathElement {
 		StringBuilder buf = new StringBuilder();
 		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {
 			Element element = pathElements.get(i);
-			if (element instanceof Segment) {
-				buf.append(((Segment)element).valueDecoded());
+			if (element instanceof UrlPathSegment) {
+				buf.append(((UrlPathSegment)element).valueToMatch());
 			}
 			else {
 				buf.append(element.value());

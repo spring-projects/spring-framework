@@ -16,66 +16,94 @@
 
 package org.springframework.http.server.reactive;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.springframework.util.MultiValueMap;
 
 /**
- * Structured path representation.
+ * Structured representation of a path whose elements are parsed into a sequence
+ * of {@link Separator Separator} and {@link PathSegment PathSegment} elements.
  *
- * <p>Typically consumed via {@link ServerHttpRequest#getPath()} but can also
- * be created by parsing a path value via {@link #parse(String, Charset)}.
+ * <p>An instance of this class can be created via {@link #parsePath(String)} or
+ * {@link #parseUrlPath(String)}. For an HTTP request the path can be
+ * accessed via {@link ServerHttpRequest#getPath()}.
+ *
+ * <p>For a URL path each {@link UrlPathSegment UrlPathSegment} exposes its
+ * structure decoded safely without the risk of encoded reserved characters
+ * altering the path or segment structure and without path parameters for
+ * path matching purposes.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface PathContainer {
 
-
 	/**
-	 * The original, raw (encoded) path value including path parameters.
+	 * The original path that was parsed.
 	 */
 	String value();
 
 	/**
-	 * The list of path elements, either {@link Separator} or {@link Segment}.
+	 * The list of path elements, either {@link Separator} or {@link PathSegment}.
 	 */
 	List<Element> elements();
 
-
 	/**
-	 * Parse the given path value into a {@link PathContainer}.
-	 * @param path the encoded, raw path value to parse
-	 * @param encoding the charset to use for decoded path segment values
-	 * @return the parsed path
-	 */
-	static PathContainer parse(String path, Charset encoding) {
-		return DefaultPathContainer.parsePath(path, encoding);
-	}
-
-	/**
-	 * Extract a sub-path from the given offset into the path elements list.
-	 * @param path the path to extract from
+	 * Extract a sub-path from the given offset into the elements list.
 	 * @param index the start element index (inclusive)
 	 * @return the sub-path
 	 */
-	static PathContainer subPath(PathContainer path, int index) {
-		return subPath(path, index, path.elements().size());
+	default PathContainer subPath(int index) {
+		return subPath(index, elements().size());
 	}
 
 	/**
-	 * Extract a sub-path from the given start offset (inclusive) into the path
+	 * Extract a sub-path from the given start offset (inclusive) into the
 	 * element list and to the end offset (exclusive).
-	 * @param path the path to extract from
 	 * @param startIndex the start element index (inclusive)
 	 * @param endIndex the end element index (exclusive)
 	 * @return the sub-path
 	 */
-	static PathContainer subPath(PathContainer path, int startIndex, int endIndex) {
-		return DefaultPathContainer.subPath(path, startIndex, endIndex);
+	default PathContainer subPath(int startIndex, int endIndex) {
+		return DefaultPathContainer.subPath(this, startIndex, endIndex);
 	}
 
 
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link PathSegment PathSegment} elements.
+	 * @param path the path value to parse
+	 * @return the parsed path
+	 */
+	static PathContainer parsePath(String path) {
+		return parsePath(path, "/");
+	}
+
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link PathSegment PathSegment} elements.
+	 * @param path the path value to parse
+	 * @param separator the value to treat as separator
+	 * @return the parsed path
+	 */
+	static PathContainer parsePath(String path, String separator) {
+		return DefaultPathContainer.createFromPath(path, separator);
+	}
+
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link UrlPathSegment UrlPathSegment} elements.
+	 * @param path the encoded, raw URL path value to parse
+	 * @return the parsed path
+	 */
+	static PathContainer parseUrlPath(String path) {
+		return DefaultPathContainer.createFromUrlPath(path);
+	}
+
+
+	/**
+	 * Common representation of a path element, e.g. separator or segment.
+	 */
 	interface Element {
 
 		/**
@@ -86,33 +114,36 @@ public interface PathContainer {
 
 
 	/**
-	 * A path separator element.
+	 * Path separator element.
 	 */
 	interface Separator extends Element {
 	}
 
 
 	/**
-	 * A path segment element.
+	 * Path segment element.
 	 */
-	interface Segment extends Element {
+	interface PathSegment extends Element {
 
 		/**
-		 * Return the path segment {@link #value()} decoded.
+		 * Return the path segment value to use for pattern matching purposes.
+		 * By default this is the same as {@link #value()} but may also differ
+		 * in sub-interfaces (e.g. decoded, sanitized, etc.).
 		 */
-		String valueDecoded();
+		String valueToMatch();
 
 		/**
-		 * Variant of {@link #valueDecoded()} as a {@code char[]}.
+		 * The same as {@link #valueToMatch()} but as a {@code char[]}.
 		 */
-		char[] valueDecodedChars();
+		char[] valueToMatchAsChars();
+	}
 
-		/**
-		 * Return the portion of the path segment after and including the first
-		 * ";" (semicolon) representing path parameters. The actual parsed
-		 * parameters if any can be obtained via {@link #parameters()}.
-		 */
-		String semicolonContent();
+
+	/**
+	 * Specialization of {@link PathSegment} for a URL path.
+	 * The {@link #valueToMatch()} is decoded and without path parameters.
+	 */
+	interface UrlPathSegment extends PathSegment {
 
 		/**
 		 * Path parameters parsed from the path segment.

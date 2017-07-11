@@ -553,7 +553,7 @@ public class ResourceWebHandlerTests {
 
 	private void setPathWithinHandlerMapping(ServerWebExchange exchange, String path) {
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
-				PathContainer.parse(path, StandardCharsets.UTF_8));
+				PathContainer.parsePath(path));
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {
