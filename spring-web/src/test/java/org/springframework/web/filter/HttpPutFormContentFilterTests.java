@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterValues() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name=value4".getBytes("ISO-8859-1"));
@@ -149,6 +150,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterValuesFromQueryString() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
@@ -188,6 +190,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void getParameterMap() throws Exception {
+		request.setQueryString("name=value1&name=value2");
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name4=value4".getBytes("ISO-8859-1"));
