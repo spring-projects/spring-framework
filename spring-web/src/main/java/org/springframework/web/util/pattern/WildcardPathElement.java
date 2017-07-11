@@ -50,7 +50,7 @@ class WildcardPathElement extends PathElement {
 				// Should not match a separator
 				return false;
 			}
-			segmentData = ((Segment)element).valueDecoded();
+			segmentData = ((Segment)element).valueToMatch();
 			pathIndex++;
 		}
 		

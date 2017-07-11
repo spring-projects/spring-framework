@@ -683,7 +683,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < pathLength) ? pathElements.get(pathIndex) : null;
 			if (element instanceof Segment) {
-				return ((Segment)element).valueDecoded();
+				return ((Segment)element).valueToMatch();
 			}
 			return "";
 		}

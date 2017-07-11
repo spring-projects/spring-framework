@@ -104,21 +104,16 @@ public interface PathContainer {
 	interface Segment extends Element {
 
 		/**
-		 * Return the path segment {@link #value()} decoded.
+		 * Return the path segment value to use for pattern matching purposes.
+		 * This may differ from {@link #value()} such as being decoded, without
+		 * path parameters, etc.
 		 */
-		String valueDecoded();
+		String valueToMatch();
 
 		/**
-		 * Variant of {@link #valueDecoded()} as a {@code char[]}.
+		 * Variant of {@link #valueToMatch()} as a {@code char[]}.
 		 */
-		char[] valueDecodedChars();
-
-		/**
-		 * Return the portion of the path segment after and including the first
-		 * ";" (semicolon) representing path parameters. The actual parsed
-		 * parameters if any can be obtained via {@link #parameters()}.
-		 */
-		String semicolonContent();
+		char[] valueToMatchAsChars();
 
 		/**
 		 * Path parameters parsed from the path segment.

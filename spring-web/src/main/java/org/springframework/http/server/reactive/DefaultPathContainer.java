@@ -119,14 +119,15 @@ class DefaultPathContainer implements PathContainer {
 	private static PathContainer.Segment parsePathSegment(String input, Charset charset) {
 		int index = input.indexOf(';');
 		if (index == -1) {
-			String inputDecoded = StringUtils.uriDecode(input, charset);
-			return new DefaultPathSegment(input, inputDecoded, "", EMPTY_MAP);
+			String valueToMatch = StringUtils.uriDecode(input, charset);
+			return new DefaultPathSegment(input, valueToMatch, EMPTY_MAP);
 		}
-		String value = input.substring(0, index);
-		String valueDecoded = StringUtils.uriDecode(value, charset);
-		String semicolonContent = input.substring(index);
-		MultiValueMap<String, String> parameters = parseParams(semicolonContent, charset);
-		return new DefaultPathSegment(value, valueDecoded, semicolonContent, parameters);
+		else {
+			String valueToMatch = StringUtils.uriDecode(input.substring(0, index), charset);
+			String pathParameterContent = input.substring(index);
+			MultiValueMap<String, String> parameters = parseParams(pathParameterContent, charset);
+			return new DefaultPathSegment(input, valueToMatch, parameters);
+		}
 	}
 
 	private static MultiValueMap<String, String> parseParams(String input, Charset charset) {
@@ -189,22 +190,17 @@ class DefaultPathContainer implements PathContainer {
 
 		private final String value;
 
-		private final String valueDecoded;
+		private final String valueToMatch;
 
-		private final char[] valueDecodedChars;
-
-		private final String semicolonContent;
+		private final char[] valueToMatchAsChars;
 
 		private final MultiValueMap<String, String> parameters;
 
-		DefaultPathSegment(String value, String valueDecoded, String semicolonContent,
-				MultiValueMap<String, String> params) {
-
+		DefaultPathSegment(String value, String valueToMatch, MultiValueMap<String, String> params) {
 			Assert.isTrue(!value.contains("/"), () -> "Invalid path segment value: " + value);
 			this.value = value;
-			this.valueDecoded = valueDecoded;
-			this.valueDecodedChars = valueDecoded.toCharArray();
-			this.semicolonContent = semicolonContent;
+			this.valueToMatch = valueToMatch;
+			this.valueToMatchAsChars = valueToMatch.toCharArray();
 			this.parameters = CollectionUtils.unmodifiableMultiValueMap(params);
 		}
 
@@ -214,18 +210,13 @@ class DefaultPathContainer implements PathContainer {
 		}
 
 		@Override
-		public String valueDecoded() {
-			return this.valueDecoded;
+		public String valueToMatch() {
+			return this.valueToMatch;
 		}
 
 		@Override
-		public char[] valueDecodedChars() {
-			return this.valueDecodedChars;
-		}
-
-		@Override
-		public String semicolonContent() {
-			return this.semicolonContent;
+		public char[] valueToMatchAsChars() {
+			return this.valueToMatchAsChars;
 		}
 
 		@Override
@@ -241,26 +232,16 @@ class DefaultPathContainer implements PathContainer {
 			if (other == null || getClass() != other.getClass()) {
 				return false;
 			}
-
-			DefaultPathSegment segment = (DefaultPathSegment) other;
-			return (this.value.equals(segment.value) &&
-					this.semicolonContent.equals(segment.semicolonContent) &&
-					this.parameters.equals(segment.parameters));
+			return this.value.equals(((DefaultPathSegment) other).value);
 		}
 
 		@Override
 		public int hashCode() {
-			int result = this.value.hashCode();
-			result = 31 * result + this.semicolonContent.hashCode();
-			result = 31 * result + this.parameters.hashCode();
-			return result;
+			return this.value.hashCode();
 		}
 
 		public String toString() {
-			return "[value='" + this.value + "\', " +
-					"semicolonContent='" + this.semicolonContent + "\', " +
-					"parameters=" + this.parameters + "']";
-		}
+			return "[value='" + this.value + "', parameters=" + this.parameters + "']"; }
 	}
 
 }

@@ -65,9 +65,6 @@ class DefaultRequestPath implements RequestPath {
 		for (int i=0; i < path.elements().size(); i++) {
 			PathContainer.Element element = path.elements().get(i);
 			counter += element.value().length();
-			if (element instanceof PathContainer.Segment) {
-				counter += ((Segment) element).semicolonContent().length();
-			}
 			if (length == counter) {
 				return path.subPath(0, i + 1);
 			}

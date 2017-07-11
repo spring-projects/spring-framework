@@ -38,14 +38,14 @@ public class DefaultPathContainerTests {
 	@Test
 	public void pathSegment() throws Exception {
 		// basic
-		testPathSegment("cars", "", "cars", "cars", new LinkedMultiValueMap<>());
+		testPathSegment("cars", "cars", new LinkedMultiValueMap<>());
 
 		// empty
-		testPathSegment("", "", "", "", new LinkedMultiValueMap<>());
+		testPathSegment("", "", new LinkedMultiValueMap<>());
 
 		// spaces
-		testPathSegment("%20%20", "", "%20%20", "  ", new LinkedMultiValueMap<>());
-		testPathSegment("%20a%20", "", "%20a%20", " a ", new LinkedMultiValueMap<>());
+		testPathSegment("%20%20", "  ", new LinkedMultiValueMap<>());
+		testPathSegment("%20a%20", " a ", new LinkedMultiValueMap<>());
 	}
 
 	@Test
@@ -56,30 +56,29 @@ public class DefaultPathContainerTests {
 		params.add("colors", "blue");
 		params.add("colors", "green");
 		params.add("year", "2012");
-		testPathSegment("cars", ";colors=red,blue,green;year=2012", "cars", "cars", params);
+		testPathSegment("cars;colors=red,blue,green;year=2012", "cars", params);
 
 		// trailing semicolon
 		params = new LinkedMultiValueMap<>();
 		params.add("p", "1");
-		testPathSegment("path", ";p=1;", "path", "path", params);
+		testPathSegment("path;p=1;", "path", params);
 
 		// params with spaces
 		params = new LinkedMultiValueMap<>();
 		params.add("param name", "param value");
-		testPathSegment("path", ";param%20name=param%20value;%20", "path", "path", params);
+		testPathSegment("path;param%20name=param%20value;%20", "path", params);
 
 		// empty params
 		params = new LinkedMultiValueMap<>();
 		params.add("p", "1");
-		testPathSegment("path", ";;;%20;%20;p=1;%20", "path", "path", params);
+		testPathSegment("path;;;%20;%20;p=1;%20", "path", params);
 	}
 
-	private void testPathSegment(String rawValue, String semicolonContent,
-			String value, String valueDecoded, MultiValueMap<String, String> params) {
+	private void testPathSegment(String rawValue, String valueToMatch, MultiValueMap<String, String> params) {
 
-		PathContainer container = DefaultPathContainer.parsePath(rawValue + semicolonContent, UTF_8);
+		PathContainer container = DefaultPathContainer.parsePath(rawValue, UTF_8);
 
-		if ("".equals(value)) {
+		if ("".equals(rawValue)) {
 			assertEquals(0, container.elements().size());
 			return;
 		}
@@ -87,9 +86,8 @@ public class DefaultPathContainerTests {
 		assertEquals(1, container.elements().size());
 		PathContainer.Segment segment = (PathContainer.Segment) container.elements().get(0);
 
-		assertEquals("value: '" + rawValue + "'", value, segment.value());
-		assertEquals("valueDecoded: '" + rawValue + "'", valueDecoded, segment.valueDecoded());
-		assertEquals("semicolonContent: '" + rawValue + "'", semicolonContent, segment.semicolonContent());
+		assertEquals("value: '" + rawValue + "'", rawValue, segment.value());
+		assertEquals("valueToMatch: '" + rawValue + "'", valueToMatch, segment.valueToMatch());
 		assertEquals("params: '" + rawValue + "'", params, segment.parameters());
 	}
 

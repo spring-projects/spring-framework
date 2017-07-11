@@ -68,13 +68,13 @@ class SingleCharWildcardedPathElement extends PathElement {
 		if (!(element instanceof Segment)) {
 			return false;
 		}
-		String value = ((Segment)element).valueDecoded();
+		String value = ((Segment)element).valueToMatch();
 		if (value.length() != len) {
 			// Not enough data to match this path element
 			return false;
 		}
 		
-		char[] data = ((Segment)element).valueDecodedChars();
+		char[] data = ((Segment)element).valueToMatchAsChars();
 		if (this.caseSensitive) {
 			for (int i = 0; i < len; i++) {
 				char ch = this.text[i];

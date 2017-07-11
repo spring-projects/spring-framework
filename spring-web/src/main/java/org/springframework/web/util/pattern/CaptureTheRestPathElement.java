@@ -86,7 +86,7 @@ class CaptureTheRestPathElement extends PathElement {
 		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {
 			Element element = pathElements.get(i);
 			if (element instanceof Segment) {
-				buf.append(((Segment)element).valueDecoded());
+				buf.append(((Segment)element).valueToMatch());
 			}
 			else {
 				buf.append(element.value());
