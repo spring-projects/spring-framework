@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
@@ -68,6 +69,22 @@ public interface ClientRequest {
 	 * Return the body inserter of this request.
 	 */
 	BodyInserter<?, ? super ClientHttpRequest> body();
+
+	/**
+	 * Return the request attribute value if present.
+	 * @param name the attribute name
+	 * @return the attribute value
+	 */
+	default Optional<Object> attribute(String name) {
+		Map<String, Object> attributes = attributes();
+		if (attributes.containsKey(name)) {
+			return Optional.of(attributes.get(name));
+		}
+		else {
+			return Optional.empty();
+		}
+	}
+
 
 	/**
 	 * Return the attributes of this request.

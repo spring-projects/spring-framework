@@ -16,9 +16,10 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -60,56 +61,71 @@ public abstract class ExchangeFilterFunctions {
 		Assert.notNull(username, "'username' must not be null");
 		Assert.notNull(password, "'password' must not be null");
 
-		return basicAuthentication(r -> username, r -> password);
+		return basicAuthenticationInternal(r -> Optional.of(new Credentials(username, password)));
 	}
 
 	/**
 	 * Return a filter that adds an Authorization header for HTTP Basic Authentication, based on
 	 * the username and password provided in the
-	 * {@linkplain ClientRequest#attributes() request attributes}.
+	 * {@linkplain ClientRequest#attributes() request attributes}. If the attributes are not found,
+	 * no authorization header
 	 * @return the {@link ExchangeFilterFunction} that adds the Authorization header
 	 * @see #USERNAME_ATTRIBUTE
 	 * @see #PASSWORD_ATTRIBUTE
 	 */
 	public static ExchangeFilterFunction basicAuthentication() {
-		return basicAuthentication(
-				request -> getRequiredAttribute(request, USERNAME_ATTRIBUTE),
-				request -> getRequiredAttribute(request, PASSWORD_ATTRIBUTE)
-				);
-	}
-
-	private static String getRequiredAttribute(ClientRequest request, String key) {
-		Map<String, Object> attributes = request.attributes();
-		if (attributes.containsKey(key)) {
-			return (String) attributes.get(key);
-		} else {
-			throw new IllegalStateException(
-					"Could not find request attribute with key \"" + key + "\"");
-		}
-	}
-
-	private static ExchangeFilterFunction basicAuthentication(Function<ClientRequest, String> usernameFunction,
-			Function<ClientRequest, String> passwordFunction) {
-
-		return ExchangeFilterFunction.ofRequestProcessor(
-				clientRequest -> {
-					String authorization = authorization(usernameFunction.apply(clientRequest),
-							passwordFunction.apply(clientRequest));
-					ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
-							.headers(headers -> {
-								headers.set(HttpHeaders.AUTHORIZATION, authorization);
-							})
-							.build();
-					return Mono.just(authorizedRequest);
+		return basicAuthenticationInternal(
+				request -> {
+					Optional<String> username = request.attribute(USERNAME_ATTRIBUTE).map(o -> (String)o);
+					Optional<String> password = request.attribute(PASSWORD_ATTRIBUTE).map(o -> (String)o);
+					if (username.isPresent() && password.isPresent()) {
+						return Optional.of(new Credentials(username.get(), password.get()));
+					} else {
+						return Optional.empty();
+					}
 				});
 	}
 
-	private static String authorization(String username, String password) {
-		String credentials = username + ":" + password;
-		byte[] credentialBytes = credentials.getBytes(StandardCharsets.ISO_8859_1);
+	private static ExchangeFilterFunction basicAuthenticationInternal(
+			Function<ClientRequest, Optional<Credentials>> credentialsFunction) {
+
+		return ExchangeFilterFunction.ofRequestProcessor(
+				clientRequest -> credentialsFunction.apply(clientRequest).map(
+						credentials -> {
+							ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
+									.headers(headers -> {
+										headers.set(HttpHeaders.AUTHORIZATION,
+												authorization(credentials));
+									})
+									.build();
+							return Mono.just(authorizedRequest);
+						})
+						.orElse(Mono.just(clientRequest)));
+	}
+
+	private static String authorization(Credentials credentials) {
+		byte[] credentialBytes = credentials.toByteArray(StandardCharsets.ISO_8859_1);
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialBytes);
 		String encodedCredentials = new String(encodedBytes, StandardCharsets.ISO_8859_1);
 		return "Basic " + encodedCredentials;
+	}
+
+	private static class Credentials {
+
+		private String username;
+
+		private String password;
+
+		public Credentials(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public byte[] toByteArray(Charset charset) {
+			String credentials = this.username + ":" + this.password;
+			return credentials.getBytes(charset);
+		}
+
 	}
 
 
