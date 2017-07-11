@@ -191,11 +191,11 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * When {@link #setFavorPathExtension favorPathExtension} is set, this
-	 * property determines whether to use only registered {@code MediaType} mappings
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
+	 * When {@link #setFavorPathExtension favorPathExtension} or
+	 * {@link #setFavorParameter(boolean)} is set, this property determines
+	 * whether to use only registered {@code MediaType} mappings or to allow
+	 * dynamic resolution, e.g. via {@link MediaTypeFactory}.
+	 * <p>By default this is not set in which case dynamic resolution is on.
 	 */
 	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
 		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
@@ -300,6 +300,12 @@ public class ContentNegotiationManagerFactoryBean
 			ParameterContentNegotiationStrategy strategy =
 					new ParameterContentNegotiationStrategy(this.mediaTypes);
 			strategy.setParameterName(this.parameterName);
+			if (this.useRegisteredExtensionsOnly != null) {
+				strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
+			}
+			else {
+				strategy.setUseRegisteredExtensionsOnly(true); // backwards compatibility
+			}
 			strategies.add(strategy);
 		}
 

@@ -146,7 +146,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
 		this.servletRequest.setRequestURI("/flower");
-		this.servletRequest.setParameter("format", "xyz");
+		this.servletRequest.setParameter("format", "invalid");
 
 		manager.resolveMediaTypes(this.webRequest);
 	}
