@@ -155,9 +155,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return false;
 		}
 		JavaType javaType = getJavaType(type, contextClass);
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canDeserialize(javaType);
-		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
@@ -170,9 +167,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
-		}
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canSerialize(clazz);
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {

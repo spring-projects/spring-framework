@@ -142,9 +142,6 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return false;
 		}
 		JavaType javaType = this.objectMapper.constructType(targetClass);
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canDeserialize(javaType);
-		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
@@ -157,9 +154,6 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
 		if (payload == null || !supportsMimeType(headers)) {
 			return false;
-		}
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canSerialize(payload.getClass());
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
 		if (this.objectMapper.canSerialize(payload.getClass(), causeRef)) {
