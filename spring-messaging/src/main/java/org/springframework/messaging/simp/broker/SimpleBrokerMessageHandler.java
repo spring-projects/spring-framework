@@ -388,7 +388,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		/* STOMP spec: receiver SHOULD take into account an error margin */
 		private static final long HEARTBEAT_MULTIPLIER = 3;
 
-		private final String sessiondId;
+		private final String sessionId;
 
 		@Nullable
 		private final Principal user;
@@ -401,10 +401,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private volatile long lastWriteTime;
 
-		public SessionInfo(String sessiondId, @Nullable Principal user,
+		public SessionInfo(String sessionId, @Nullable Principal user,
 				@Nullable long[] clientHeartbeat, @Nullable long[] serverHeartbeat) {
 
-			this.sessiondId = sessiondId;
+			this.sessionId = sessionId;
 			this.user = user;
 			if (clientHeartbeat != null && serverHeartbeat != null) {
 				this.readInterval = (clientHeartbeat[0] > 0 && serverHeartbeat[1] > 0 ?
@@ -419,8 +419,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			this.lastReadTime = this.lastWriteTime = System.currentTimeMillis();
 		}
 
-		public String getSessiondId() {
-			return this.sessiondId;
+		public String getSessionId() {
+			return this.sessionId;
 		}
 
 		@Nullable
@@ -461,11 +461,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			long now = System.currentTimeMillis();
 			for (SessionInfo info : sessions.values()) {
 				if (info.getReadInterval() > 0 && (now - info.getLastReadTime()) > info.getReadInterval()) {
-					handleDisconnect(info.getSessiondId(), info.getUser(), null);
+					handleDisconnect(info.getSessionId(), info.getUser(), null);
 				}
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
-					accessor.setSessionId(info.getSessiondId());
+					accessor.setSessionId(info.getSessionId());
 					Principal user = info.getUser();
 					if (user != null) {
 						accessor.setUser(user);
