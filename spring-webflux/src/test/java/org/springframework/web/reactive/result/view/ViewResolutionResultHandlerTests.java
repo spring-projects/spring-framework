@@ -240,7 +240,7 @@ public class ViewResolutionResultHandlerTests {
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
-				.expectErrorMessage("Could not resolve view with name 'account'.")
+				.expectErrorMessage("Could not resolve view with name 'path'.")
 				.verify();
 	}
 

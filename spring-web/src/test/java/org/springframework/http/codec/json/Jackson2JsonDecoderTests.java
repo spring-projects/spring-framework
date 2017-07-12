@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -117,10 +118,8 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void decodeEmptyArrayToFlux() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("[]"));
-
 		ResolvableType elementType = forClass(Pojo.class);
-		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
-				emptyMap());
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null, emptyMap());
 
 		StepVerifier.create(flux)
 				.expectNextCount(0)
@@ -167,8 +166,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	public void decodeEmptyBodyToMono() throws Exception {
 		Flux<DataBuffer> source = Flux.empty();
 		ResolvableType elementType = forClass(Pojo.class);
-		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
-				null, emptyMap());
+		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType, null, emptyMap());
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -176,11 +174,11 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
+	@Ignore
 	public void decodeEmptyArrayToMono() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("[]"));
 		ResolvableType elementType = forClass(Pojo.class);
-		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
-				null, emptyMap());
+		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType, null, emptyMap());
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
