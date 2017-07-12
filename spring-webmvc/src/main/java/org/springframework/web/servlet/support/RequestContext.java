@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,6 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
  * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
- * @see #getFallbackLocale()
  */
 public class RequestContext {
 
@@ -91,8 +90,8 @@ public class RequestContext {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
 
-	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
-			RequestContext.class.getClassLoader());
+	protected static final boolean jstlPresent = ClassUtils.isPresent(
+			"javax.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
 	private HttpServletRequest request;
 
@@ -276,56 +275,6 @@ public class RequestContext {
 		}
 	}
 
-	/**
-	 * Determine the fallback locale for this context.
-	 * <p>The default implementation checks for a JSTL locale attribute in request, session
-	 * or application scope; if not found, returns the {@code HttpServletRequest.getLocale()}.
-	 * @return the fallback locale (never {@code null})
-	 * @see javax.servlet.http.HttpServletRequest#getLocale()
-	 */
-	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
-			Locale locale = JstlLocaleResolver.getJstlLocale(getRequest(), getServletContext());
-			if (locale != null) {
-				return locale;
-			}
-		}
-		return getRequest().getLocale();
-	}
-
-	/**
-	 * Determine the fallback time zone for this context.
-	 * <p>The default implementation checks for a JSTL time zone attribute in request,
-	 * session or application scope; returns {@code null} if not found.
-	 * @return the fallback time zone (or {@code null} if none derivable from the request)
-	 */
-	protected TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
-			TimeZone timeZone = JstlLocaleResolver.getJstlTimeZone(getRequest(), getServletContext());
-			if (timeZone != null) {
-				return timeZone;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Determine the fallback theme for this context.
-	 * <p>The default implementation returns the default theme (with name "theme").
-	 * @return the fallback theme (never {@code null})
-	 */
-	protected Theme getFallbackTheme() {
-		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
-		if (themeSource == null) {
-			themeSource = new ResourceBundleThemeSource();
-		}
-		Theme theme = themeSource.getTheme(DEFAULT_THEME_NAME);
-		if (theme == null) {
-			throw new IllegalStateException("No theme defined and no fallback theme found");
-		}
-		return theme;
-	}
-
 
 	/**
 	 * Return the underlying HttpServletRequest. Only intended for cooperating classes in this package.
@@ -384,6 +333,39 @@ public class RequestContext {
 	}
 
 	/**
+	 * Determine the fallback locale for this context.
+	 * <p>The default implementation checks for a JSTL locale attribute in request, session
+	 * or application scope; if not found, returns the {@code HttpServletRequest.getLocale()}.
+	 * @return the fallback locale (never {@code null})
+	 * @see javax.servlet.http.HttpServletRequest#getLocale()
+	 */
+	protected Locale getFallbackLocale() {
+		if (jstlPresent) {
+			Locale locale = JstlLocaleResolver.getJstlLocale(getRequest(), getServletContext());
+			if (locale != null) {
+				return locale;
+			}
+		}
+		return getRequest().getLocale();
+	}
+
+	/**
+	 * Determine the fallback time zone for this context.
+	 * <p>The default implementation checks for a JSTL time zone attribute in request,
+	 * session or application scope; returns {@code null} if not found.
+	 * @return the fallback time zone (or {@code null} if none derivable from the request)
+	 */
+	protected TimeZone getFallbackTimeZone() {
+		if (jstlPresent) {
+			TimeZone timeZone = JstlLocaleResolver.getJstlTimeZone(getRequest(), getServletContext());
+			if (timeZone != null) {
+				return timeZone;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Change the current locale to the specified one,
 	 * storing the new locale through the configured {@link LocaleResolver}.
 	 * @param locale the new locale
@@ -432,6 +414,23 @@ public class RequestContext {
 			}
 		}
 		return this.theme;
+	}
+
+	/**
+	 * Determine the fallback theme for this context.
+	 * <p>The default implementation returns the default theme (with name "theme").
+	 * @return the fallback theme (never {@code null})
+	 */
+	protected Theme getFallbackTheme() {
+		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
+		if (themeSource == null) {
+			themeSource = new ResourceBundleThemeSource();
+		}
+		Theme theme = themeSource.getTheme(DEFAULT_THEME_NAME);
+		if (theme == null) {
+			throw new IllegalStateException("No theme defined and no fallback theme found");
+		}
+		return theme;
 	}
 
 	/**
@@ -870,7 +869,8 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the model object for the given model name, either from the model or from the request attributes.
+	 * Retrieve the model object for the given model name, either from the model
+	 * or from the request attributes.
 	 * @param modelName the name of the model object
 	 * @return the model object
 	 */

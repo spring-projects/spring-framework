@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -85,9 +86,9 @@ public class JspAwareRequestContext extends RequestContext {
 	}
 
 	/**
-	 * This implementation checks for a JSTL locale attribute
-	 * in page, request, session or application scope; if not found,
-	 * returns the {@code HttpServletRequest.getLocale()}.
+	 * This implementation checks for a JSTL locale attribute in page,
+	 * request, session or application scope; if not found, returns the
+	 * {@code HttpServletRequest.getLocale()}.
 	 */
 	@Override
 	protected Locale getFallbackLocale() {
@@ -100,6 +101,21 @@ public class JspAwareRequestContext extends RequestContext {
 		return getRequest().getLocale();
 	}
 
+	/**
+	 * This implementation checks for a JSTL time zone attribute in page,
+	 * request, session or application scope; if not found, returns {@code null}.
+	 */
+	@Override
+	protected TimeZone getFallbackTimeZone() {
+		if (jstlPresent) {
+			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
+			if (timeZone != null) {
+				return timeZone;
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Inner class that isolates the JSTL dependency.
@@ -110,6 +126,11 @@ public class JspAwareRequestContext extends RequestContext {
 		public static Locale getJstlLocale(PageContext pageContext) {
 			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
+		}
+
+		public static TimeZone getJstlTimeZone(PageContext pageContext) {
+			Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
+			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);
 		}
 	}
 
