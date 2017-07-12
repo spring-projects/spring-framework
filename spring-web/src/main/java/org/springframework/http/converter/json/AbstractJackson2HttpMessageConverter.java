@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -79,25 +81,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-		init(objectMapper);
-	}
-
-	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
-		super(supportedMediaType);
-		init(objectMapper);
-	}
-
-	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
-		super(supportedMediaTypes);
-		init(objectMapper);
-	}
-
-	protected void init(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 		setDefaultCharset(DEFAULT_CHARSET);
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
 		this.ssePrettyPrinter = prettyPrinter;
+	}
+
+	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
+		this(objectMapper);
+		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
+	}
+
+	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
+		this(objectMapper);
+		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
 
@@ -158,9 +156,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return false;
 		}
 		JavaType javaType = getJavaType(type, contextClass);
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canDeserialize(javaType);
-		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
@@ -173,9 +168,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
-		}
-		if (!logger.isWarnEnabled()) {
-			return this.objectMapper.canSerialize(clazz);
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
