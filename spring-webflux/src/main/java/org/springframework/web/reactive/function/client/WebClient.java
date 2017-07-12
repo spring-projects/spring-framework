@@ -29,6 +29,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -559,8 +560,9 @@ public interface WebClient {
 				Function<ClientResponse, ? extends Throwable> exceptionFunction);
 
 		/**
-		 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
-		 * {@code Mono} will contain a {@link WebClientException}.
+		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
+		 * with {@link #onStatus(Predicate, Function)}.
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
@@ -569,14 +571,37 @@ public interface WebClient {
 		<T> Mono<T> bodyToMono(Class<T> bodyType);
 
 		/**
-		 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
-		 * {@code Flux} will contain a {@link WebClientException}.
+		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
+		 * with {@link #onStatus(Predicate, Function)}.
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> response body type
+		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
+		 * 4xx or 5xx
+		 */
+		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
+         * with {@link #onStatus(Predicate, Function)}.
 		 * @param elementType the type of element in the response
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
 		 * 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(Class<T> elementType);
+
+		/**
+		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
+		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
+         * with {@link #onStatus(Predicate, Function)}.
+		 * @param typeReference a type reference describing the expected response body type
+		 * @param <T> the type of elements in the response
+		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
+		 * 4xx or 5xx
+		 */
+		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
 	}
 

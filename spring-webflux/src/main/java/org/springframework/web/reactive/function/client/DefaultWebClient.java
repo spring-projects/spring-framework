@@ -35,6 +35,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -423,9 +424,23 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+			return this.responseMono.flatMap(
+					response -> bodyToPublisher(response, BodyExtractors.toMono(typeReference),
+							Mono::error));
+		}
+
+		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
 			return this.responseMono.flatMapMany(
 					response -> bodyToPublisher(response, BodyExtractors.toFlux(elementType),
+							Flux::error));
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+			return this.responseMono.flatMapMany(
+					response -> bodyToPublisher(response, BodyExtractors.toFlux(typeReference),
 							Flux::error));
 		}
 
