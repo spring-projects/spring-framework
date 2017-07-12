@@ -397,6 +397,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private final Map<String, List<String>> headers;
 
+	private final boolean readOnly;
+
 
 	/**
 	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
@@ -422,6 +424,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		else {
 			this.headers = headers;
 		}
+		this.readOnly = readOnly;
 	}
 
 
@@ -1542,7 +1545,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return a {@code HttpHeaders} object that can only be read, not written to.
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
-		return new HttpHeaders(headers, true);
+		return headers.readOnly ? headers : new HttpHeaders(headers, true);
 	}
 
 }
