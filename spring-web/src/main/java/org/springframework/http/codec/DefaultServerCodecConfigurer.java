@@ -95,7 +95,7 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 			if (this.sseEncoder != null) {
 				return this.sseEncoder;
 			}
-			return jackson2Present ? jackson2Encoder() : null;
+			return jackson2Present ? jackson2JsonEncoder() : null;
 		}
 	}
 

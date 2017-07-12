@@ -34,6 +34,8 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.Jackson2SmileDecoder;
+import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.lang.Nullable;
@@ -53,6 +55,10 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 					AbstractCodecConfigurer.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
 							AbstractCodecConfigurer.class.getClassLoader());
+
+	private static final boolean jackson2SmilePresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory",
+					AbstractCodecConfigurer.class.getClassLoader());
 
 	protected static final boolean jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder",
 			AbstractCodecConfigurer.class.getClassLoader());
@@ -119,10 +125,10 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 		private boolean registerDefaults = true;
 
 		@Nullable
-		private Jackson2JsonDecoder jackson2Decoder;
+		private Jackson2JsonDecoder jackson2JsonDecoder;
 
 		@Nullable
-		private Jackson2JsonEncoder jackson2Encoder;
+		private Jackson2JsonEncoder jackson2JsonEncoder;
 
 		@Nullable
 		private DefaultCustomCodecs customCodecs;
@@ -148,21 +154,21 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 		}
 
 		@Override
-		public void jackson2Decoder(Jackson2JsonDecoder decoder) {
-			this.jackson2Decoder = decoder;
+		public void jackson2JsonDecoder(Jackson2JsonDecoder decoder) {
+			this.jackson2JsonDecoder = decoder;
 		}
 
-		protected Jackson2JsonDecoder jackson2Decoder() {
-			return (this.jackson2Decoder != null ? this.jackson2Decoder : new Jackson2JsonDecoder());
+		protected Jackson2JsonDecoder jackson2JsonDecoder() {
+			return (this.jackson2JsonDecoder != null ? this.jackson2JsonDecoder : new Jackson2JsonDecoder());
 		}
 
 		@Override
-		public void jackson2Encoder(Jackson2JsonEncoder encoder) {
-			this.jackson2Encoder = encoder;
+		public void jackson2JsonEncoder(Jackson2JsonEncoder encoder) {
+			this.jackson2JsonEncoder = encoder;
 		}
 
-		protected Jackson2JsonEncoder jackson2Encoder() {
-			return (this.jackson2Encoder != null ? this.jackson2Encoder : new Jackson2JsonEncoder());
+		protected Jackson2JsonEncoder jackson2JsonEncoder() {
+			return (this.jackson2JsonEncoder != null ? this.jackson2JsonEncoder : new Jackson2JsonEncoder());
 		}
 
 		// Readers...
@@ -191,7 +197,10 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 				result.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 			}
 			if (jackson2Present) {
-				result.add(new DecoderHttpMessageReader<>(jackson2Decoder()));
+				result.add(new DecoderHttpMessageReader<>(jackson2JsonDecoder()));
+			}
+			if (jackson2SmilePresent) {
+				result.add(new DecoderHttpMessageReader<>(new Jackson2SmileDecoder()));
 			}
 			return result;
 		}
@@ -229,7 +238,10 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 				result.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 			}
 			if (jackson2Present) {
-				result.add(new EncoderHttpMessageWriter<>(jackson2Encoder()));
+				result.add(new EncoderHttpMessageWriter<>(jackson2JsonEncoder()));
+			}
+			if (jackson2SmilePresent) {
+				result.add(new EncoderHttpMessageWriter<>(new Jackson2SmileEncoder()));
 			}
 			return result;
 		}

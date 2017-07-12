@@ -952,6 +952,7 @@ project("spring-webflux") {
 		optional "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
 			exclude group: "commons-logging", module: "commons-logging"

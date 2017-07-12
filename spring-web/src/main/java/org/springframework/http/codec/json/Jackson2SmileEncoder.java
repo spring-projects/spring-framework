@@ -16,32 +16,41 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Decode a byte stream into JSON and convert to Object's with Jackson 2.9.
+ * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 2.9.
  *
  * @author Sebastien Deleuze
- * @author Rossen Stoyanchev
  * @since 5.0
- * @see Jackson2JsonEncoder
+ * @see Jackson2SmileDecoder
  */
-public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
+public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 
-	public Jackson2JsonDecoder() {
-		super(Jackson2ObjectMapperBuilder.json().build());
+	private static final MimeType SMILE_MIME_TYPE = new MediaType("application", "x-jackson-smile");
+	
+	
+	public Jackson2SmileEncoder() {
+		this(Jackson2ObjectMapperBuilder.smile().build(), new MediaType("application", "x-jackson-smile"));
 	}
 
-	public Jackson2JsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	public Jackson2SmileEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
+		Assert.isAssignable(SmileFactory.class, mapper.getFactory().getClass());
+		this.streamingMediaTypes.add(new MediaType("application", "stream+x-jackson-smile"));
 	}
 
 	@Override
-	public List<MimeType> getDecodableMimeTypes() {
-		return JSON_MIME_TYPES;
+	public List<MimeType> getEncodableMimeTypes() {
+		return Arrays.asList(SMILE_MIME_TYPE);
 	}
 }

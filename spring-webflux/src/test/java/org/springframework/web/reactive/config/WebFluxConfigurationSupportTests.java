@@ -138,7 +138,7 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageCodecConfigurer().getReaders();
-		assertEquals(11, readers.size());
+		assertEquals(12, readers.size());
 
 		assertHasMessageReader(readers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -147,6 +147,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageReader(readers, forClassWithGenerics(MultiValueMap.class, String.class, String.class), APPLICATION_FORM_URLENCODED);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_JSON);
+		assertHasMessageReader(readers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
 		assertHasMessageReader(readers, forClass(TestBean.class), null);
 
 		WebBindingInitializer bindingInitializer = adapter.getWebBindingInitializer();
@@ -189,7 +190,7 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(9, writers.size());
+		assertEquals(10, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -197,6 +198,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
+		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), MediaType.parseMediaType("text/event-stream"));
 
 		name = "webFluxContentTypeResolver";
@@ -215,7 +217,7 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(9, writers.size());
+		assertEquals(10, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -223,6 +225,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
+		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), null);
 
 		name = "webFluxContentTypeResolver";
