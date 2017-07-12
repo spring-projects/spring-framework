@@ -119,58 +119,14 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		}
 
 
-		@Override
-		public void cancel() {
-			Subscription s = this.subscription;
-			if (s != null) {
-				this.subscription = null;
-				s.cancel();
-			}
-		}
+		// CoreSubscriber<T> methods (we're the subscriber to the write source)..
 
 		@Override
-		public Context currentContext() {
-			return completionSubscriber.currentContext();
-		}
-
-		@Override
-		public final void onComplete() {
-			if (this.readyToWrite) {
-				requiredWriteSubscriber().onComplete();
-				return;
-			}
-			synchronized (this) {
-				if (this.readyToWrite) {
-					requiredWriteSubscriber().onComplete();
-				}
-				else if (this.beforeFirstEmission) {
-					this.completed = true;
-					this.beforeFirstEmission = false;
-					writeFunction.apply(this).subscribe(new DownstreamBridge(this.completionSubscriber));
-				}
-				else {
-					this.completed = true;
-				}
-			}
-		}
-
-		@Override
-		public final void onError(Throwable ex) {
-			if (this.readyToWrite) {
-				requiredWriteSubscriber().onError(ex);
-				return;
-			}
-			synchronized (this) {
-				if (this.readyToWrite) {
-					requiredWriteSubscriber().onError(ex);
-				}
-				else if (this.beforeFirstEmission) {
-					this.beforeFirstEmission = false;
-					this.completionSubscriber.onError(ex);
-				}
-				else {
-					this.error = ex;
-				}
+		public final void onSubscribe(Subscription s) {
+			if (Operators.validate(this.subscription, s)) {
+				this.subscription = s;
+				this.completionSubscriber.onSubscribe(this);
+				s.request(1);
 			}
 		}
 
@@ -199,48 +155,59 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 			}
 		}
 
-		@Override
-		public final void onSubscribe(Subscription s) {
-			if (Operators.validate(this.subscription, s)) {
-				this.subscription = s;
-				this.completionSubscriber.onSubscribe(this);
-				s.request(1);
-			}
+		private Subscriber<? super T> requiredWriteSubscriber() {
+			Assert.state(this.writeSubscriber != null, "No write subscriber");
+			return this.writeSubscriber;
 		}
 
 		@Override
-		public void subscribe(Subscriber<? super T> writeSubscriber) {
+		public final void onError(Throwable ex) {
+			if (this.readyToWrite) {
+				requiredWriteSubscriber().onError(ex);
+				return;
+			}
 			synchronized (this) {
-				Assert.state(this.writeSubscriber == null, "Only one write subscriber supported");
-				this.writeSubscriber = writeSubscriber;
-				if (this.error != null || this.completed) {
-					this.writeSubscriber.onSubscribe(Operators.emptySubscription());
-					emitCachedSignals();
+				if (this.readyToWrite) {
+					requiredWriteSubscriber().onError(ex);
+				}
+				else if (this.beforeFirstEmission) {
+					this.beforeFirstEmission = false;
+					this.completionSubscriber.onError(ex);
 				}
 				else {
-					this.writeSubscriber.onSubscribe(this);
+					this.error = ex;
 				}
 			}
 		}
 
-		/**
-		 * Emit cached signals to the write subscriber.
-		 * @return true if no more signals expected
-		 */
-		private boolean emitCachedSignals() {
-			if (this.item != null) {
-				requiredWriteSubscriber().onNext(this.item);
-			}
-			if (this.error != null) {
-				requiredWriteSubscriber().onError(this.error);
-				return true;
-			}
-			if (this.completed) {
+		@Override
+		public final void onComplete() {
+			if (this.readyToWrite) {
 				requiredWriteSubscriber().onComplete();
-				return true;
+				return;
 			}
-			return false;
+			synchronized (this) {
+				if (this.readyToWrite) {
+					requiredWriteSubscriber().onComplete();
+				}
+				else if (this.beforeFirstEmission) {
+					this.completed = true;
+					this.beforeFirstEmission = false;
+					writeFunction.apply(this).subscribe(new DownstreamBridge(this.completionSubscriber));
+				}
+				else {
+					this.completed = true;
+				}
+			}
 		}
+
+		@Override
+		public Context currentContext() {
+			return this.completionSubscriber.currentContext();
+		}
+
+
+		// Subscription methods (we're the subscription to completion~ and writeSubscriber)..
 
 		@Override
 		public void request(long n) {
@@ -267,9 +234,46 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 			s.request(n);
 		}
 
-		private Subscriber<? super T> requiredWriteSubscriber() {
-			Assert.state(this.writeSubscriber != null, "No write subscriber");
-			return this.writeSubscriber;
+		private boolean emitCachedSignals() {
+			if (this.item != null) {
+				requiredWriteSubscriber().onNext(this.item);
+			}
+			if (this.error != null) {
+				requiredWriteSubscriber().onError(this.error);
+				return true;
+			}
+			if (this.completed) {
+				requiredWriteSubscriber().onComplete();
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void cancel() {
+			Subscription s = this.subscription;
+			if (s != null) {
+				this.subscription = null;
+				s.cancel();
+			}
+		}
+
+
+		// Publisher<T> methods (we're the Publisher to the write subscriber)...
+
+		@Override
+		public void subscribe(Subscriber<? super T> writeSubscriber) {
+			synchronized (this) {
+				Assert.state(this.writeSubscriber == null, "Only one write subscriber supported");
+				this.writeSubscriber = writeSubscriber;
+				if (this.error != null || this.completed) {
+					this.writeSubscriber.onSubscribe(Operators.emptySubscription());
+					emitCachedSignals();
+				}
+				else {
+					this.writeSubscriber.onSubscribe(this);
+				}
+			}
 		}
 	}
 
