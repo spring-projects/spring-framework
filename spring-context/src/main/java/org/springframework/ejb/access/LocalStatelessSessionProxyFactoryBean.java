@@ -70,7 +70,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 	 * Using a business methods interface is a best practice when implementing EJBs.
 	 * @param businessInterface set the business interface of the EJB
 	 */
-	public void setBusinessInterface(Class<?> businessInterface) {
+	public void setBusinessInterface(@Nullable Class<?> businessInterface) {
 		this.businessInterface = businessInterface;
 	}
 

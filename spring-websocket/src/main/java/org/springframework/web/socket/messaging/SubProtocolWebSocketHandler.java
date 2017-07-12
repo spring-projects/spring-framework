@@ -172,7 +172,7 @@ public class SubProtocolWebSocketHandler
 	 * sub-protocol.
 	 * @param defaultProtocolHandler the default handler
 	 */
-	public void setDefaultProtocolHandler(SubProtocolHandler defaultProtocolHandler) {
+	public void setDefaultProtocolHandler(@Nullable SubProtocolHandler defaultProtocolHandler) {
 		this.defaultProtocolHandler = defaultProtocolHandler;
 		if (this.protocolHandlerLookup.isEmpty()) {
 			setProtocolHandlers(Collections.singletonList(defaultProtocolHandler));

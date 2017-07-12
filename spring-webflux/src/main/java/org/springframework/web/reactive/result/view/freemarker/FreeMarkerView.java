@@ -67,8 +67,10 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class FreeMarkerView extends AbstractUrlBasedView {
 
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private String encoding;
 
 
@@ -78,7 +80,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * {@link FreeMarkerConfig} is expected in the Spring application context
 	 * which is used to obtain the FreeMarker configuration.
 	 */
-	public void setConfiguration(Configuration configuration) {
+	public void setConfiguration(@Nullable Configuration configuration) {
 		this.configuration = configuration;
 	}
 
@@ -109,7 +111,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * encoding in the FreeMarker Configuration rather than per template if all
 	 * your templates share a common encoding.
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
 	}
 

@@ -45,7 +45,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * This is required only for links expressed as full paths and not for
 	 * relative links.
 	 */
-	public void setResourceUrlProvider(ResourceUrlProvider resourceUrlProvider) {
+	public void setResourceUrlProvider(@Nullable ResourceUrlProvider resourceUrlProvider) {
 		this.resourceUrlProvider = resourceUrlProvider;
 	}
 

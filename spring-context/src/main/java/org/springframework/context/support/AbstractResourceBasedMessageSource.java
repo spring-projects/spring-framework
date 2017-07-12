@@ -119,7 +119,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
 	 */
-	public void setDefaultEncoding(String defaultEncoding) {
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 

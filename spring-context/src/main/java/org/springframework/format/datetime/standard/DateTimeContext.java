@@ -47,7 +47,7 @@ public class DateTimeContext {
 	/**
 	 * Set the user's chronology (calendar system).
 	 */
-	public void setChronology(Chronology chronology) {
+	public void setChronology(@Nullable Chronology chronology) {
 		this.chronology = chronology;
 	}
 
@@ -67,7 +67,7 @@ public class DateTimeContext {
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 * @see org.springframework.context.i18n.LocaleContextHolder#setLocaleContext
 	 */
-	public void setTimeZone(ZoneId timeZone) {
+	public void setTimeZone(@Nullable ZoneId timeZone) {
 		this.timeZone = timeZone;
 	}
 

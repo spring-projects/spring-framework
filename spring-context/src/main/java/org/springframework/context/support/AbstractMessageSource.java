@@ -90,7 +90,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * <p>May also link to an externally defined Properties object, e.g. defined
 	 * through a {@link org.springframework.beans.factory.config.PropertiesFactoryBean}.
 	 */
-	public void setCommonMessages(Properties commonMessages) {
+	public void setCommonMessages(@Nullable Properties commonMessages) {
 		this.commonMessages = commonMessages;
 	}
 

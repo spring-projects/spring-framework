@@ -127,7 +127,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	/**
 	 * Set a fixed Locale that this resolver will return if no cookie found.
 	 */
-	public void setDefaultLocale(Locale defaultLocale) {
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 
@@ -144,7 +144,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * Set a fixed TimeZone that this resolver will return if no cookie found.
 	 * @since 4.0
 	 */
-	public void setDefaultTimeZone(TimeZone defaultTimeZone) {
+	public void setDefaultTimeZone(@Nullable TimeZone defaultTimeZone) {
 		this.defaultTimeZone = defaultTimeZone;
 	}
 

@@ -131,7 +131,6 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Return the prefix for parameters that mark potentially empty fields.
 	 */
-	@Nullable
 	public String getFieldMarkerPrefix() {
 		return this.fieldMarkerPrefix;
 	}
@@ -157,7 +156,6 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Return the prefix for parameters that mark default fields.
 	 */
-	@Nullable
 	public String getFieldDefaultPrefix() {
 		return this.fieldDefaultPrefix;
 	}

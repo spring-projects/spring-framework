@@ -41,8 +41,10 @@ public class RemoteInvocationResult implements Serializable {
 	private static final long serialVersionUID = 2138555143707773549L;
 
 
+	@Nullable
 	private Object value;
 
+	@Nullable
 	private Throwable exception;
 
 
@@ -81,7 +83,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * Use {@link #RemoteInvocationResult(Object)} otherwise.
 	 * @see #RemoteInvocationResult()
 	 */
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		this.value = value;
 	}
 
@@ -102,7 +104,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * Use {@link #RemoteInvocationResult(Throwable)} otherwise.
 	 * @see #RemoteInvocationResult()
 	 */
-	public void setException(Throwable exception) {
+	public void setException(@Nullable Throwable exception) {
 		this.exception = exception;
 	}
 

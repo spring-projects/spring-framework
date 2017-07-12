@@ -90,8 +90,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Set the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
-	public void setHttpClient(HttpClient httpClient) {
-		Assert.notNull(httpClient, "HttpClient must not be null");
+	public void setHttpClient(@Nullable HttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 

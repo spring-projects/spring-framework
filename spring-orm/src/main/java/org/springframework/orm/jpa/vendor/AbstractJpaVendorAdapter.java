@@ -47,7 +47,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Specify the target database to operate on, as a value of the {@code Database} enum:
 	 * DB2, DERBY, H2, HSQL, INFORMIX, MYSQL, ORACLE, POSTGRESQL, SQL_SERVER, SYBASE
 	 */
-	public void setDatabase(Database database) {
+	public void setDatabase(@Nullable Database database) {
 		this.database = database;
 	}
 
@@ -63,7 +63,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Specify the name of the target database to operate on.
 	 * The supported values are vendor-dependent platform identifiers.
 	 */
-	public void setDatabasePlatform(String databasePlatform) {
+	public void setDatabasePlatform(@Nullable String databasePlatform) {
 		this.databasePlatform = databasePlatform;
 	}
 

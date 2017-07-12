@@ -75,7 +75,7 @@ public class TableMetaDataContext {
 	/**
 	 * Set the name of the table for this context.
 	 */
-	public void setTableName(String tableName) {
+	public void setTableName(@Nullable String tableName) {
 		this.tableName = tableName;
 	}
 
@@ -90,7 +90,7 @@ public class TableMetaDataContext {
 	/**
 	 * Set the name of the catalog for this context.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		this.catalogName = catalogName;
 	}
 
@@ -105,7 +105,7 @@ public class TableMetaDataContext {
 	/**
 	 * Set the name of the schema for this context.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		this.schemaName = schemaName;
 	}
 

@@ -119,7 +119,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the table for this insert.
 	 */
-	public void setTableName(String tableName) {
+	public void setTableName(@Nullable String tableName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setTableName(tableName);
 	}
@@ -135,7 +135,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the schema for this insert.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setSchemaName(schemaName);
 	}
@@ -151,7 +151,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the catalog for this insert.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setCatalogName(catalogName);
 	}

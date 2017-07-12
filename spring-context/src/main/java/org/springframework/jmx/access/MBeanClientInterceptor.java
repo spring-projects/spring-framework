@@ -158,7 +158,7 @@ public class MBeanClientInterceptor
 	 * Specify the environment for the JMX connector.
 	 * @see javax.management.remote.JMXConnectorFactory#connect(javax.management.remote.JMXServiceURL, java.util.Map)
 	 */
-	public void setEnvironment(Map<String, ?> environment) {
+	public void setEnvironment(@Nullable Map<String, ?> environment) {
 		this.environment = environment;
 	}
 
@@ -229,7 +229,7 @@ public class MBeanClientInterceptor
 	 * setters and getters for MBean attributes and conventional Java methods
 	 * for MBean operations.
 	 */
-	public void setManagementInterface(Class<?> managementInterface) {
+	public void setManagementInterface(@Nullable Class<?> managementInterface) {
 		this.managementInterface = managementInterface;
 	}
 

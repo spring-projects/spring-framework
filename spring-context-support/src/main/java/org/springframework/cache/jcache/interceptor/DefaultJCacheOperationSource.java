@@ -63,7 +63,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the default {@link CacheManager} to use to lookup cache by name. Only mandatory
 	 * if the {@linkplain CacheResolver cache resolvers} have not been set.
 	 */
-	public void setCacheManager(CacheManager cacheManager) {
+	public void setCacheManager(@Nullable CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
@@ -79,7 +79,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the {@link CacheResolver} to resolve regular caches. If none is set, a default
 	 * implementation using the specified cache manager will be used.
 	 */
-	public void setCacheResolver(CacheResolver cacheResolver) {
+	public void setCacheResolver(@Nullable CacheResolver cacheResolver) {
 		this.cacheResolver = cacheResolver;
 	}
 
@@ -95,7 +95,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the {@link CacheResolver} to resolve exception caches. If none is set, a default
 	 * implementation using the specified cache manager will be used.
 	 */
-	public void setExceptionCacheResolver(CacheResolver exceptionCacheResolver) {
+	public void setExceptionCacheResolver(@Nullable CacheResolver exceptionCacheResolver) {
 		this.exceptionCacheResolver = exceptionCacheResolver;
 	}
 
@@ -112,7 +112,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * honoring the JSR-107 {@link javax.cache.annotation.CacheKey} and
 	 * {@link javax.cache.annotation.CacheValue} will be used.
 	 */
-	public void setKeyGenerator(KeyGenerator keyGenerator) {
+	public void setKeyGenerator(@Nullable KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
 	}
 

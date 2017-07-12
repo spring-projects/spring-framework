@@ -93,6 +93,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	protected void init(ObjectMapper objectMapper) {
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 		setDefaultCharset(DEFAULT_CHARSET);
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
@@ -121,7 +122,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
-	@Nullable
 	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}

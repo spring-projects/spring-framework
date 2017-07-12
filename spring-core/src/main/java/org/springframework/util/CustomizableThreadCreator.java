@@ -127,7 +127,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Specify the thread group that threads should be created in.
 	 * @see #setThreadGroupName
 	 */
-	public void setThreadGroup(ThreadGroup threadGroup) {
+	public void setThreadGroup(@Nullable ThreadGroup threadGroup) {
 		this.threadGroup = threadGroup;
 	}
 

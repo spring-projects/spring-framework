@@ -129,7 +129,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher publisher) {
 		this.eventPublisher = publisher;
 	}
 

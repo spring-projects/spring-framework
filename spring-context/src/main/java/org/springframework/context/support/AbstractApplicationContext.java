@@ -262,9 +262,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Typically done during initialization of concrete context implementations.
 	 * <p>Default is the object id of the context instance.
 	 */
-	public void setDisplayName(String displayName) {
-		Assert.hasLength(displayName, "Display name must not be empty");
-		this.displayName = displayName;
+	public void setDisplayName(@Nullable String displayName) {
+		this.displayName = (displayName != null ? displayName : ObjectUtils.identityToString(this));
 	}
 
 	/**

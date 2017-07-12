@@ -534,7 +534,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * <p>By default this is not set.
 		 * @since 4.2.8
 		 */
-		public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 			this.urlPathHelper = urlPathHelper;
 		}
 
@@ -550,7 +550,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
 		 * <p>By default this is not set.
 		 */
-		public void setPathMatcher(PathMatcher pathMatcher) {
+		public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 			this.pathMatcher = pathMatcher;
 		}
 

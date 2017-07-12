@@ -181,7 +181,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter messageConverter) {
+	public void setResourceHttpMessageConverter(@Nullable ResourceHttpMessageConverter messageConverter) {
 		this.resourceHttpMessageConverter = messageConverter;
 	}
 
@@ -199,7 +199,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceRegionHttpMessageConverter(ResourceRegionHttpMessageConverter messageConverter) {
+	public void setResourceRegionHttpMessageConverter(@Nullable ResourceRegionHttpMessageConverter messageConverter) {
 		this.resourceRegionHttpMessageConverter = messageConverter;
 	}
 
@@ -219,7 +219,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param contentNegotiationManager the manager in use
 	 * @since 4.3
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 

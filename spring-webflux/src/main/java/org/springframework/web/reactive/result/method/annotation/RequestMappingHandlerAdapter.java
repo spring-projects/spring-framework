@@ -76,7 +76,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 * Configure HTTP message readers to de-serialize the request body with.
 	 * <p>By default this is set to {@link ServerCodecConfigurer} with defaults.
 	 */
-	public void setMessageCodecConfigurer(ServerCodecConfigurer configurer) {
+	public void setMessageCodecConfigurer(@Nullable ServerCodecConfigurer configurer) {
 		this.messageCodecConfigurer = configurer;
 	}
 
@@ -92,7 +92,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 * Provide a WebBindingInitializer with "global" initialization to apply
 	 * to every DataBinder instance.
 	 */
-	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+	public void setWebBindingInitializer(@Nullable WebBindingInitializer webBindingInitializer) {
 		this.webBindingInitializer = webBindingInitializer;
 	}
 
@@ -107,8 +107,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Configure resolvers for controller method arguments.
 	 */
-	public void setArgumentResolverConfigurer(ArgumentResolverConfigurer configurer) {
-		Assert.notNull(configurer, "ArgumentResolverConfigurer is required");
+	public void setArgumentResolverConfigurer(@Nullable ArgumentResolverConfigurer configurer) {
 		this.argumentResolverConfigurer = configurer;
 	}
 
@@ -125,7 +124,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
 	 * default settings.
 	 */
-	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+	public void setReactiveAdapterRegistry(@Nullable ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
 	}
 

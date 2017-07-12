@@ -92,7 +92,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	 * Set the CCI ConnectionFactory that this instance should manage local
 	 * transactions for.
 	 */
-	public void setConnectionFactory(ConnectionFactory cf) {
+	public void setConnectionFactory(@Nullable ConnectionFactory cf) {
 		if (cf instanceof TransactionAwareConnectionFactoryProxy) {
 			// If we got a TransactionAwareConnectionFactoryProxy, we need to perform transactions
 			// for its underlying target ConnectionFactory, else JMS access code won't see

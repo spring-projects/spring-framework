@@ -92,7 +92,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	/**
 	 * Set the QueueConnectionFactory to use for obtaining JMS QueueConnections.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 

@@ -76,7 +76,7 @@ class DefaultMvcResult implements MvcResult {
 		return this.mockResponse;
 	}
 
-	public void setHandler(Object handler) {
+	public void setHandler(@Nullable Object handler) {
 		this.handler = handler;
 	}
 

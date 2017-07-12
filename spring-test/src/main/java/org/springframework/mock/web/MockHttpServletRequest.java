@@ -917,7 +917,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.asyncSupported;
 	}
 
-	public void setAsyncContext(MockAsyncContext asyncContext) {
+	public void setAsyncContext(@Nullable MockAsyncContext asyncContext) {
 		this.asyncContext = asyncContext;
 	}
 
@@ -941,7 +941,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// HttpServletRequest interface
 	// ---------------------------------------------------------------------
 
-	public void setAuthType(String authType) {
+	public void setAuthType(@Nullable String authType) {
 		this.authType = authType;
 	}
 
@@ -1102,7 +1102,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	public void setMethod(String method) {
+	public void setMethod(@Nullable String method) {
 		this.method = method;
 	}
 
@@ -1167,7 +1167,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
 	}
 
-	public void setUserPrincipal(Principal userPrincipal) {
+	public void setUserPrincipal(@Nullable Principal userPrincipal) {
 		this.userPrincipal = userPrincipal;
 	}
 
@@ -1177,7 +1177,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.userPrincipal;
 	}
 
-	public void setRequestedSessionId(String requestedSessionId) {
+	public void setRequestedSessionId(@Nullable String requestedSessionId) {
 		this.requestedSessionId = requestedSessionId;
 	}
 
@@ -1187,7 +1187,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.requestedSessionId;
 	}
 
-	public void setRequestURI(String requestURI) {
+	public void setRequestURI(@Nullable String requestURI) {
 		this.requestURI = requestURI;
 	}
 

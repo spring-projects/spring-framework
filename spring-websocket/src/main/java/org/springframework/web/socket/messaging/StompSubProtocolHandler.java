@@ -176,7 +176,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * client inbound channel.
 	 * <p>By default this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 		this.stompDecoder.setHeaderInitializer(headerInitializer);
 	}
@@ -195,7 +195,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+	public void setApplicationEventPublisher(@Nullable ApplicationEventPublisher applicationEventPublisher) {
 		this.eventPublisher = applicationEventPublisher;
 	}
 

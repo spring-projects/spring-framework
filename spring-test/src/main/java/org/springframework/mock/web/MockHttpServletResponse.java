@@ -642,7 +642,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// Methods for MockRequestDispatcher
 	//---------------------------------------------------------------------
 
-	public void setForwardedUrl(String forwardedUrl) {
+	public void setForwardedUrl(@Nullable String forwardedUrl) {
 		this.forwardedUrl = forwardedUrl;
 	}
 

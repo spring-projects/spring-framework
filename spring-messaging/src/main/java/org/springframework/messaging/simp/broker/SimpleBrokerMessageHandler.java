@@ -157,10 +157,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * <p>By default this is not set.
 	 * @since 4.2
 	 */
-	public void setTaskScheduler(TaskScheduler taskScheduler) {
-		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
+	public void setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
-		if (this.heartbeatValue == null) {
+		if (taskScheduler != null && this.heartbeatValue == null) {
 			this.heartbeatValue = new long[] {10000, 10000};
 		}
 	}
@@ -183,8 +182,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * (in milliseconds).
 	 * @since 4.2
 	 */
-	public void setHeartbeatValue(long[] heartbeat) {
-		if (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+	public void setHeartbeatValue(@Nullable long[] heartbeat) {
+		if (heartbeat != null && (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0)) {
 			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
 		}
 		this.heartbeatValue = heartbeat;
@@ -205,7 +204,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * <p>By default this property is not set.
 	 * @since 4.1
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

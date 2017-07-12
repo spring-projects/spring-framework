@@ -110,7 +110,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
 	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 

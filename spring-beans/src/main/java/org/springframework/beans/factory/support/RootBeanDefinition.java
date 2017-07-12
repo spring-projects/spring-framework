@@ -257,7 +257,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register a target definition that is being decorated by this bean definition.
 	 */
-	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
+	public void setDecoratedDefinition(@Nullable BeanDefinitionHolder decoratedDefinition) {
 		this.decoratedDefinition = decoratedDefinition;
 	}
 
@@ -276,7 +276,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setTargetType(ResolvableType)
 	 * @see #getResolvedFactoryMethod()
 	 */
-	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+	public void setQualifiedElement(@Nullable AnnotatedElement qualifiedElement) {
 		this.qualifiedElement = qualifiedElement;
 	}
 

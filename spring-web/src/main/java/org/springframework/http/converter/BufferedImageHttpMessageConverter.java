@@ -99,12 +99,13 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	 * Sets the default {@code Content-Type} to be used for writing.
 	 * @throws IllegalArgumentException if the given content type is not supported by the Java Image I/O API
 	 */
-	public void setDefaultContentType(MediaType defaultContentType) {
-		Assert.notNull(defaultContentType, "'contentType' must not be null");
-		Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(defaultContentType.toString());
-		if (!imageWriters.hasNext()) {
-			throw new IllegalArgumentException(
-					"Content-Type [" + defaultContentType + "] is not supported by the Java Image I/O API");
+	public void setDefaultContentType(@Nullable MediaType defaultContentType) {
+		if (defaultContentType!= null) {
+			Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(defaultContentType.toString());
+			if (!imageWriters.hasNext()) {
+				throw new IllegalArgumentException(
+						"Content-Type [" + defaultContentType + "] is not supported by the Java Image I/O API");
+			}
 		}
 
 		this.defaultContentType = defaultContentType;

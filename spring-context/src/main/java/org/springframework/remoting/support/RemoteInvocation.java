@@ -181,7 +181,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
-	public void setAttributes(Map<String, Serializable> attributes) {
+	public void setAttributes(@Nullable Map<String, Serializable> attributes) {
 		this.attributes = attributes;
 	}
 

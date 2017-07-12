@@ -96,6 +96,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
 			new HandlerMethodReturnValueHandlerComposite();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
@@ -211,7 +212,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
