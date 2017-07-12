@@ -229,9 +229,9 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 					if (n == 0) {
 						return;
 					}
+					s.request(n);
 				}
 			}
-			s.request(n);
 		}
 
 		private boolean emitCachedSignals() {
