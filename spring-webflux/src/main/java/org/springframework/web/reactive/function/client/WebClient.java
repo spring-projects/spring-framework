@@ -302,14 +302,20 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
-		 * Builder the {@link WebClient} instance.
-		 */
-		WebClient build();
-
-		/**
 		 * Clone this {@code WebClient.Builder}
 		 */
 		Builder clone();
+
+		/**
+		 * Shortcut for pre-packaged customizations to WebTest builder.
+		 * @param builderConsumer the consumer to apply
+		 */
+		Builder apply(Consumer<Builder> builderConsumer);
+
+		/**
+		 * Builder the {@link WebClient} instance.
+		 */
+		WebClient build();
 
 	}
 

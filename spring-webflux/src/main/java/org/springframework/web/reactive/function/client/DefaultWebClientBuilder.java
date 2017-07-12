@@ -256,4 +256,12 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 		return new DefaultWebClientBuilder(this);
 	}
 
+	@Override
+	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
+		Assert.notNull(builderConsumer, "'builderConsumer' must not be null");
+
+		builderConsumer.accept(this);
+		return this;
+	}
+
 }
