@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * @see ReflectionUtils
  * @see AopTestUtils
  */
-public class ReflectionTestUtils {
+public abstract class ReflectionTestUtils {
 
 	private static final String SETTER_PREFIX = "set";
 
