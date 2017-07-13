@@ -48,7 +48,6 @@ import reactor.ipc.netty.resources.LoopResources;
 import reactor.ipc.netty.resources.PoolResources;
 import reactor.ipc.netty.tcp.TcpClient;
 import reactor.ipc.netty.tcp.TcpResources;
-import reactor.util.concurrent.QueueSupplier;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.ReconnectStrategy;
@@ -68,6 +67,9 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @since 5.0
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
+
+	private static final int PUBLISH_ON_BUFFER_SIZE = 16;
+
 
 	private final TcpClient tcpClient;
 
@@ -246,7 +248,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 			inbound.receiveObject()
 					.cast(Message.class)
-					.publishOn(scheduler, QueueSupplier.SMALL_BUFFER_SIZE)
+					.publishOn(scheduler, PUBLISH_ON_BUFFER_SIZE)
 					.subscribe(
 							connectionHandler::handleMessage,
 							connectionHandler::handleFailure,
