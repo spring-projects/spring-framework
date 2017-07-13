@@ -119,7 +119,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
-	@Nullable
 	public ObjectMapper getObjectMapper() {
 		return this.objectMapper;
 	}

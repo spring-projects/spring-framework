@@ -31,21 +31,18 @@ import org.springframework.lang.Nullable;
 public interface Expression {
 
 	/**
+	 * Return the original string used to create this expression, unmodified.
+	 * @return the original expression string
+	 */
+	String getExpressionString();
+
+	/**
 	 * Evaluate this expression in the default standard context.
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
 	Object getValue() throws EvaluationException;
-
-	/**
-	 * Evaluate this expression against the specified root object
-	 * @param rootObject the root object against which properties/etc will be resolved
-	 * @return the evaluation result
-	 * @throws EvaluationException if there is a problem during evaluation
-	 */
-	@Nullable
-	Object getValue(Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in the default context. If the result of the evaluation does not match (and
@@ -56,6 +53,15 @@ public interface Expression {
 	 */
 	@Nullable
 	<T> T getValue(@Nullable Class<T> desiredResultType) throws EvaluationException;
+
+	/**
+	 * Evaluate this expression against the specified root object
+	 * @param rootObject the root object against which properties/etc will be resolved
+	 * @return the evaluation result
+	 * @throws EvaluationException if there is a problem during evaluation
+	 */
+	@Nullable
+	Object getValue(Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in the default context against the specified root object. If the
@@ -198,6 +204,14 @@ public interface Expression {
 
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
+	 * @param rootObject the root object against which to evaluate the expression
+	 * @return true if the expression is writable
+	 * @throws EvaluationException if there is a problem determining if it is writable
+	 */
+	boolean isWritable(Object rootObject) throws EvaluationException;
+
+	/**
+	 * Determine if an expression can be written to, i.e. setValue() can be called.
 	 * @param context the context in which the expression should be checked
 	 * @return true if the expression is writable
 	 * @throws EvaluationException if there is a problem determining if it is writable
@@ -215,29 +229,20 @@ public interface Expression {
 	boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException;
 
 	/**
-	 * Determine if an expression can be written to, i.e. setValue() can be called.
+	 * Set this expression in the provided context to the value provided.
 	 * @param rootObject the root object against which to evaluate the expression
-	 * @return true if the expression is writable
-	 * @throws EvaluationException if there is a problem determining if it is writable
+	 * @param value the new value
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	boolean isWritable(Object rootObject) throws EvaluationException;
+	void setValue(Object rootObject, @Nullable Object value) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
-	 *
 	 * @param context the context in which to set the value of the expression
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	void setValue(EvaluationContext context, Object value) throws EvaluationException;
-
-	/**
-	 * Set this expression in the provided context to the value provided.
-	 * @param rootObject the root object against which to evaluate the expression
-	 * @param value the new value
-	 * @throws EvaluationException if there is a problem during evaluation
-	 */
-	void setValue(Object rootObject, Object value) throws EvaluationException;
+	void setValue(EvaluationContext context, @Nullable Object value) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
@@ -247,12 +252,6 @@ public interface Expression {
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException;
-
-	/**
-	 * Returns the original string used to create this expression, unmodified.
-	 * @return the original expression string
-	 */
-	String getExpressionString();
+	void setValue(EvaluationContext context, Object rootObject, @Nullable Object value) throws EvaluationException;
 
 }
