@@ -276,29 +276,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Writes the supplied message to the supplied {@code Log} instance.
-	 * @see #writeToLog(org.apache.commons.logging.Log, String, Throwable)
-	 */
-	protected void writeToLog(Log logger, String message) {
-		writeToLog(logger, message, null);
-	}
-
-	/**
-	 * Writes the supplied message and {@link Throwable} to the
-	 * supplied {@code Log} instance. By default messages are written
-	 * at {@code TRACE} level. Sub-classes can override this method
-	 * to control which level the message is written at.
-	 */
-	protected void writeToLog(Log logger, String message, Throwable ex) {
-		if (ex != null) {
-			logger.trace(message, ex);
-		}
-		else {
-			logger.trace(message);
-		}
-	}
-
-	/**
 	 * Replace the placeholders in the given message with the supplied values,
 	 * or values derived from those supplied.
 	 * @param message the message template containing the placeholders to be replaced
