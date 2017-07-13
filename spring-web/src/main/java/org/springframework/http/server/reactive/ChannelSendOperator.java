@@ -78,19 +78,19 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 
 	/**
-	 * A barrier between the write source and the write subscriber (i.e. the
-	 * HTTP server adapter) that pre-fetches and waits for the first signal
-	 * before deciding whether to hook in to the write subscriber.
+	 * A barrier inserted between the write source and the write subscriber
+	 * (i.e. the HTTP server adapter) that pre-fetches and waits for the first
+	 * signal before deciding whether to hook in to the write subscriber.
 	 *
 	 * <p>Acts as:
 	 * <ul>
 	 * <li>Subscriber to the write source.
 	 * <li>Subscription to the write subscriber.
-	 * <li>Publisher ot the write subscriber.
+	 * <li>Publisher to the write subscriber.
 	 * </ul>
 	 *
-	 * <p>Also uses {@link WriteCompletionBarrier} for delegating signals to
-	 * and from the write completion subscriber.
+	 * <p>Also uses {@link WriteCompletionBarrier} to communicate completion
+	 * and detect cancel signals from the completion subscriber.
 	 */
 	@SuppressWarnings("deprecation")
 	private final class WriteBarrier implements CoreSubscriber<T>, Subscription, Publisher<T> {
@@ -133,7 +133,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		}
 
 
-		// CoreSubscriber<T> methods (we're the subscriber to the write source)..
+		// Subscriber<T> methods (we're the subscriber to the write source)..
 
 		@Override
 		public final void onSubscribe(Subscription s) {
@@ -293,12 +293,13 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 
 	/**
-	 * We need an extra barrier between the WriteBarrier and the actual
+	 * We need an extra barrier between the WriteBarrier itself and the actual
 	 * completion subscriber.
 	 *
-	 * <p>The actual completionSubscriber is subscribed immediately to the
-	 * WriteBarrier initially. Later after the first signal is received, we need
-	 * this wrapper to subscribe again, this time to the write function.
+	 * <p>The completionSubscriber is subscribed initially to the WriteBarrier.
+	 * Later after the first signal is received, we need one more subscriber
+	 * instance (per spec can only subscribe once) to subscribe to the write
+	 * function and switch to delegating completion signals from it.
 	 */
 	private class WriteCompletionBarrier implements CoreSubscriber<Void>, Subscription {
 
