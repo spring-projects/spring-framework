@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,14 +184,16 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse != null) {
-			try {
-				return accessorToUse.read(evalContext, contextObject.getValue(), name);
+			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
+				try {
+					return accessorToUse.read(evalContext, contextObject.getValue(), name);
+				}
+				catch (Exception ex) {
+					// This is OK - it may have gone stale due to a class change,
+					// let's try to get a new one and call it before giving up...
+				}
 			}
-			catch (Exception ex) {
-				// This is OK - it may have gone stale due to a class change,
-				// let's try to get a new one and call it before giving up...
-				this.cachedReadAccessor = null;
-			}
+			this.cachedReadAccessor = null;
 		}
 
 		List<PropertyAccessor> accessorsToTry =
@@ -234,15 +236,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		PropertyAccessor accessorToUse = this.cachedWriteAccessor;
 		if (accessorToUse != null) {
-			try {
-				accessorToUse.write(evalContext, contextObject.getValue(), name, newValue);
-				return;
+			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
+				try {
+					accessorToUse.write(evalContext, contextObject.getValue(), name, newValue);
+					return;
+				}
+				catch (Exception ex) {
+					// This is OK - it may have gone stale due to a class change,
+					// let's try to get a new one and call it before giving up...
+				}
 			}
-			catch (Exception ex) {
-				// This is OK - it may have gone stale due to a class change,
-				// let's try to get a new one and call it before giving up...
-				this.cachedWriteAccessor = null;
-			}
+			this.cachedWriteAccessor = null;
 		}
 
 		List<PropertyAccessor> accessorsToTry =
