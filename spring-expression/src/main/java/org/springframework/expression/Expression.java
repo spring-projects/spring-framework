@@ -19,18 +19,19 @@ package org.springframework.expression;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * An expression capable of evaluating itself against context objects. Encapsulates the
- * details of a previously parsed expression string. Provides a common abstraction for
- * expression evaluation independent of any language like OGNL or the Unified EL.
+ * An expression capable of evaluating itself against context objects.
+ * Encapsulates the details of a previously parsed expression string.
+ * Provides a common abstraction for expression evaluation.
  *
  * @author Keith Donald
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public interface Expression {
 
 	/**
-	 * Return the original string used to create this expression, unmodified.
+	 * Return the original string used to create this expression (unmodified).
 	 * @return the original expression string
 	 */
 	String getExpressionString();
@@ -43,8 +44,9 @@ public interface Expression {
 	Object getValue() throws EvaluationException;
 
 	/**
-	 * Evaluate the expression in the default context. If the result of the evaluation does not match (and
-	 * cannot be converted to) the expected result type then an exception will be returned.
+	 * Evaluate the expression in the default context. If the result
+	 * of the evaluation does not match (and cannot be converted to)
+	 * the expected result type then an exception will be returned.
 	 * @param desiredResultType the class the caller would like the result to be
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -52,18 +54,18 @@ public interface Expression {
 	<T> T getValue(Class<T> desiredResultType) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression against the specified root object
-	 * @param rootObject the root object against which properties/etc will be resolved
+	 * Evaluate this expression against the specified root object.
+	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	Object getValue(Object rootObject) throws EvaluationException;
 
 	/**
-	 * Evaluate the expression in the default context against the specified root object. If the
-	 * result of the evaluation does not match (and cannot be converted to) the expected result type
-	 * then an exception will be returned.
-	 * @param rootObject the root object against which properties/etc will be resolved
+	 * Evaluate the expression in the default context against the specified root
+	 * object. If the result of the evaluation does not match (and cannot be
+	 * converted to) the expected result type then an exception will be returned.
+	 * @param rootObject the root object against which to evaluate the expression
 	 * @param desiredResultType the class the caller would like the result to be
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -71,7 +73,8 @@ public interface Expression {
 	<T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context and return the result of evaluation.
+	 * Evaluate this expression in the provided context and return the result
+	 * of evaluation.
 	 * @param context the context in which to evaluate the expression
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -79,18 +82,20 @@ public interface Expression {
 	Object getValue(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context and return the result of evaluation, but use
-	 * the supplied root context as an override for any default root object specified in the context.
+	 * Evaluate this expression in the provided context and return the result
+	 * of evaluation, but use the supplied root context as an override for any
+	 * default root object specified in the context.
 	 * @param context the context in which to evaluate the expression
-	 * @param rootObject the root object against which properties/etc will be resolved
+	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException;
 
 	/**
-	 * Evaluate the expression in a specified context which can resolve references to properties, methods, types, etc -
-	 * the type of the evaluation result is expected to be of a particular class and an exception will be thrown if it
+	 * Evaluate the expression in a specified context which can resolve references
+	 * to properties, methods, types, etc. The type of the evaluation result is
+	 * expected to be of a particular class and an exception will be thrown if it
 	 * is not and cannot be converted to that type.
 	 * @param context the context in which to evaluate the expression
 	 * @param desiredResultType the class the caller would like the result to be
@@ -100,20 +105,22 @@ public interface Expression {
 	<T> T getValue(EvaluationContext context, Class<T> desiredResultType) throws EvaluationException;
 
 	/**
-	 * Evaluate the expression in a specified context which can resolve references to properties, methods, types, etc -
-	 * the type of the evaluation result is expected to be of a particular class and an exception will be thrown if it
-	 * is not and cannot be converted to that type.  The supplied root object overrides any default specified on the
-	 * supplied context.
+	 * Evaluate the expression in a specified context which can resolve references
+	 * to properties, methods, types, etc. The type of the evaluation result is
+	 * expected to be of a particular class and an exception will be thrown if it
+	 * is not and cannot be converted to that type. The supplied root object
+	 * overrides any default specified on the supplied context.
 	 * @param context the context in which to evaluate the expression
-	 * @param rootObject the root object against which properties/etc will be resolved
+	 * @param rootObject the root object against which to evaluate the expression
 	 * @param desiredResultType the class the caller would like the result to be
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
-	<T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException;
+	<T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType)
+			throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
+	 * Return the most general type that can be passed to a {@link #setValue}
 	 * method using the default context.
 	 * @return the most general type of value that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
@@ -121,8 +128,8 @@ public interface Expression {
 	Class<?> getValueType() throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
-	 * method using the default context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(Object, Object)} method using the default context.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the most general type of value that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
@@ -130,8 +137,8 @@ public interface Expression {
 	Class<?> getValueType(Object rootObject) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
-	 * method for the given context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(EvaluationContext, Object)} method for the given context.
 	 * @param context the context in which to evaluate the expression
 	 * @return the most general type of value that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
@@ -139,8 +146,9 @@ public interface Expression {
 	Class<?> getValueType(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
-	 * method for the given context. The supplied root object overrides any specified in the context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(EvaluationContext, Object, Object)} method for the given
+	 * context. The supplied root object overrides any specified in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the most general type of value that can be set on this context
@@ -149,37 +157,38 @@ public interface Expression {
 	Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
+	 * Return the most general type that can be passed to a {@link #setValue}
 	 * method using the default context.
-	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @return a type descriptor for values that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
 
 	/**
-	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
-	 * method using the default context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(Object, Object)} method using the default context.
 	 * @param rootObject the root object against which to evaluate the expression
-	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @return a type descriptor for values that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException;
 
 	/**
-	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
-	 * method for the given context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(EvaluationContext, Object)} method for the given context.
 	 * @param context the context in which to evaluate the expression
-	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @return a type descriptor for values that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
-	 * the given context. The supplied root object overrides any specified in the context.
+	 * Return the most general type that can be passed to the
+	 * {@link #setValue(EvaluationContext, Object, Object)} method for the given
+	 * context. The supplied root object overrides any specified in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
-	 * @return a type descriptor for the most general type of value that can be set on this context
+	 * @return a type descriptor for values that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException;
@@ -187,7 +196,7 @@ public interface Expression {
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
 	 * @param rootObject the root object against which to evaluate the expression
-	 * @return true if the expression is writable
+	 * @return {@code true} if the expression is writable; {@code false} otherwise
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
 	boolean isWritable(Object rootObject) throws EvaluationException;
@@ -195,7 +204,7 @@ public interface Expression {
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
 	 * @param context the context in which the expression should be checked
-	 * @return true if the expression is writable
+	 * @return {@code true} if the expression is writable; {@code false} otherwise
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
 	boolean isWritable(EvaluationContext context) throws EvaluationException;
@@ -205,7 +214,7 @@ public interface Expression {
 	 * The supplied root object overrides any specified in the context.
 	 * @param context the context in which the expression should be checked
 	 * @param rootObject the root object against which to evaluate the expression
-	 * @return true if the expression is writable
+	 * @return {@code true} if the expression is writable; {@code false} otherwise
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
 	boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException;

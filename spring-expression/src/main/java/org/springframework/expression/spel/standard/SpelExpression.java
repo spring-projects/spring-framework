@@ -112,7 +112,6 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public Object getValue() throws EvaluationException {
-		Object result;
 		if (this.compiledAst != null) {
 			try {
 				TypedValue contextRoot =
@@ -132,8 +131,9 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), this.configuration);
-		result = this.ast.getValue(expressionState);
+		Object result = this.ast.getValue(expressionState);
 		checkCompile(expressionState);
 		return result;
 	}
@@ -167,6 +167,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
 		checkCompile(expressionState);
@@ -176,7 +177,6 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public Object getValue(Object rootObject) throws EvaluationException {
-		Object result;
 		if (this.compiledAst != null) {
 			try {
 				return this.compiledAst.getValue(rootObject, evaluationContext);
@@ -193,9 +193,10 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
-		result = this.ast.getValue(expressionState);
+		Object result = this.ast.getValue(expressionState);
 		checkCompile(expressionState);
 		return result;
 	}
@@ -226,6 +227,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
@@ -237,7 +239,8 @@ public class SpelExpression implements Expression {
 	@Override
 	public Object getValue(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
-		if (compiledAst!= null) {
+
+		if (this.compiledAst != null) {
 			try {
 				TypedValue contextRoot = context.getRootObject();
 				return this.compiledAst.getValue(contextRoot.getValue(), context);
@@ -254,6 +257,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		Object result = this.ast.getValue(expressionState);
 		checkCompile(expressionState);
@@ -264,6 +268,7 @@ public class SpelExpression implements Expression {
 	@Override
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
+
 		if (this.compiledAst != null) {
 			try {
 				TypedValue contextRoot = context.getRootObject();
@@ -287,6 +292,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
 		checkCompile(expressionState);
@@ -296,6 +302,7 @@ public class SpelExpression implements Expression {
 	@Override
 	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
+
 		if (this.compiledAst != null) {
 			try {
 				return this.compiledAst.getValue(rootObject,context);
@@ -312,6 +319,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		Object result = this.ast.getValue(expressionState);
 		checkCompile(expressionState);
@@ -323,9 +331,11 @@ public class SpelExpression implements Expression {
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> expectedResultType)
 			throws EvaluationException {
 
+		Assert.notNull(context, "EvaluationContext is required");
+
 		if (this.compiledAst != null) {
 			try {
-				Object result = this.compiledAst.getValue(rootObject,context);
+				Object result = this.compiledAst.getValue(rootObject, context);
 				if (expectedResultType != null) {
 					return ExpressionUtils.convertTypedValue(context, new TypedValue(result), expectedResultType);
 				}
@@ -345,6 +355,7 @@ public class SpelExpression implements Expression {
 				}
 			}
 		}
+
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
 		checkCompile(expressionState);
@@ -406,7 +417,8 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public boolean isWritable(Object rootObject) throws EvaluationException {
-		return this.ast.isWritable(new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration));
+		return this.ast.isWritable(
+				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration));
 	}
 
 	@Override

@@ -3274,8 +3274,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		ex = parser.parseRaw("#it?.age.equals([0])");
 		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
-		assertTrue((Boolean)ex.getValue(context));
-		assertTrue((Boolean)ex.getValue(context));
+		assertTrue((Boolean) ex.getValue(context));
+		assertTrue((Boolean) ex.getValue(context));
 	}
 
 	@Test
