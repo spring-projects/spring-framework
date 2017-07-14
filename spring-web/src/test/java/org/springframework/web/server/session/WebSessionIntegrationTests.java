@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,7 +38,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -116,9 +116,12 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertEquals(2, this.handler.getCount());
 
 		// Update lastAccessTime of the created session to -31 min
-		WebSession session = this.sessionManager.getSessionStore().retrieveSession(id).block();
-		((DefaultWebSession) session).setLastAccessTime(
-				Clock.offset(this.sessionManager.getClock(), Duration.ofMinutes(-31)).instant());
+		WebSessionStore store = this.sessionManager.getSessionStore();
+		DefaultWebSession session = (DefaultWebSession) store.retrieveSession(id).block();
+		assertNotNull(session);
+		Instant lastAccessTime = Clock.offset(this.sessionManager.getClock(), Duration.ofMinutes(-31)).instant();
+		session = new DefaultWebSession(session, lastAccessTime);
+		store.storeSession(session);
 
 		// Third request: expired session, new session created
 		request = RequestEntity.get(createUri("/")).header("Cookie", "SESSION=" + id).build();

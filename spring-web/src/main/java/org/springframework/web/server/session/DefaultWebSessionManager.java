@@ -107,34 +107,27 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return Mono.defer(() ->
 				retrieveSession(exchange)
 						.flatMap(session -> removeSessionIfExpired(exchange, session))
-						.switchIfEmpty(createSession())
-						.doOnNext(session -> {
-							if (session instanceof ConfigurableWebSession) {
-								ConfigurableWebSession configurable = (ConfigurableWebSession) session;
-								configurable.setSaveOperation(() -> saveSession(exchange, session));
-								configurable.setLastAccessTime(Instant.now(getClock()));
-							}
-							exchange.getResponse().beforeCommit(session::save);
-						}));
+						.map(session -> {
+							Instant lastAccessTime = Instant.now(getClock());
+							return new DefaultWebSession(session, lastAccessTime, s -> saveSession(exchange, s));
+						})
+						.switchIfEmpty(createSession(exchange))
+						.doOnNext(session -> exchange.getResponse().beforeCommit(session::save)));
 	}
 
-	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
+	private Mono<DefaultWebSession> retrieveSession(ServerWebExchange exchange) {
 		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
 				.concatMap(this.sessionStore::retrieveSession)
+				.cast(DefaultWebSession.class)
 				.next();
 	}
 
-	private Mono<WebSession> removeSessionIfExpired(ServerWebExchange exchange, WebSession session) {
+	private Mono<DefaultWebSession> removeSessionIfExpired(ServerWebExchange exchange, DefaultWebSession session) {
 		if (session.isExpired()) {
-			this.sessionIdResolver.setSessionId(exchange, "");
+			this.sessionIdResolver.expireSession(exchange);
 			return this.sessionStore.removeSession(session.getId()).then(Mono.empty());
 		}
 		return Mono.just(session);
-	}
-
-	private Mono<DefaultWebSession> createSession() {
-		return Mono.fromSupplier(() ->
-				new DefaultWebSession(UUID.randomUUID().toString(), getClock()));
 	}
 
 	private Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
@@ -163,6 +156,13 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	private boolean hasNewSessionId(ServerWebExchange exchange, WebSession session) {
 		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
 		return ids.isEmpty() || !session.getId().equals(ids.get(0));
+	}
+
+	private Mono<DefaultWebSession> createSession(ServerWebExchange exchange) {
+		return Mono.fromSupplier(() -> {
+			String id = UUID.randomUUID().toString();
+			return new DefaultWebSession(id, getClock(), sess -> saveSession(exchange, sess));
+		});
 	}
 
 }

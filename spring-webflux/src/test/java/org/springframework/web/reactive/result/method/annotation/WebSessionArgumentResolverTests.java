@@ -15,8 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.time.Clock;
-
 import io.reactivex.Single;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -32,11 +30,12 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
-import org.springframework.web.server.session.DefaultWebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link WebSessionArgumentResolver}.
@@ -62,7 +61,7 @@ public class WebSessionArgumentResolverTests {
 	public void resolverArgument() throws Exception {
 
 		BindingContext context = new BindingContext();
-		WebSession session = new DefaultWebSession("id", Clock.systemDefaultZone());
+		WebSession session = mock(WebSession.class);
 		WebSessionManager manager = exchange -> Mono.just(session);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(),
@@ -74,11 +73,13 @@ public class WebSessionArgumentResolverTests {
 
 		param = this.testMethod.arg(Mono.class, WebSession.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
+		assertNotNull(actual);
 		assertTrue(Mono.class.isAssignableFrom(actual.getClass()));
 		assertSame(session, ((Mono<?>) actual).block());
 
 		param = this.testMethod.arg(Single.class, WebSession.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
+		assertNotNull(actual);
 		assertTrue(Single.class.isAssignableFrom(actual.getClass()));
 		assertSame(session, ((Single<?>) actual).blockingGet());
 	}

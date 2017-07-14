@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
@@ -104,20 +105,22 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void existingSession() throws Exception {
-		DefaultWebSession existing = new DefaultWebSession("1", Clock.systemDefaultZone());
+		DefaultWebSession existing = new DefaultWebSession("1", Clock.systemDefaultZone(), s -> Mono.empty());
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 
 		WebSession actual = this.manager.getSession(this.exchange).block();
-		assertSame(existing, actual);
+		assertNotNull(actual);
+		assertEquals(existing.getId(), actual.getId());
 	}
 
 	@Test
 	public void existingSessionIsExpired() throws Exception {
 		Clock clock = Clock.systemDefaultZone();
-		DefaultWebSession existing = new DefaultWebSession("1", clock);
+		DefaultWebSession existing = new DefaultWebSession("1", clock, s -> Mono.empty());
 		existing.start();
-		existing.setLastAccessTime(Instant.now(clock).minus(Duration.ofMinutes(31)));
+		Instant lastAccessTime = Instant.now(clock).minus(Duration.ofMinutes(31));
+		existing = new DefaultWebSession(existing, lastAccessTime, s -> Mono.empty());
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 
@@ -127,12 +130,13 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void multipleSessions() throws Exception {
-		DefaultWebSession existing = new DefaultWebSession("3", Clock.systemDefaultZone());
+		DefaultWebSession existing = new DefaultWebSession("3", Clock.systemDefaultZone(), s -> Mono.empty());
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Arrays.asList("1", "2", "3"));
 
 		WebSession actual = this.manager.getSession(this.exchange).block();
-		assertSame(existing, actual);
+		assertNotNull(actual);
+		assertEquals(existing.getId(), actual.getId());
 	}
 
 
