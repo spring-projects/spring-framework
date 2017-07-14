@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,8 +140,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
 				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}

@@ -165,7 +165,8 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 			return result;
 		}
 		catch (UnmarshalException ex) {
-			throw new HttpMessageNotReadableException("Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException(
+					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);

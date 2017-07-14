@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ public abstract class FileSystemUtils {
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void copyRecursively(File src, File dest) throws IOException {
-		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()), "Source File must denote a directory or file");
+		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()),
+				"Source File must denote a directory or file");
 		Assert.notNull(dest, "Destination File must not be null");
 		doCopyRecursively(src, dest);
 	}
@@ -86,9 +87,7 @@ public abstract class FileSystemUtils {
 				dest.createNewFile();
 			}
 			catch (IOException ex) {
-				IOException ioex = new IOException("Failed to create file: " + dest);
-				ioex.initCause(ex);
-				throw ioex;
+				throw new IOException("Failed to create file: " + dest, ex);
 			}
 			FileCopyUtils.copy(src, dest);
 		}

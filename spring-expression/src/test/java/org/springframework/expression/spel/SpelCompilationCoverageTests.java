@@ -453,7 +453,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parser.parseExpression("T(Integer).valueOf(42)");
 		expression.getValue(Integer.class);
 		assertCanCompile(expression);
-		assertEquals(new Integer(42), expression.getValue(null, Integer.class));
+		assertEquals(new Integer(42), expression.getValue(Integer.class));
 
 		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those
 		// values
@@ -832,9 +832,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("4.0", expression.getValue(ctx).toString());
 	}
 
-	// Confirms visibility of what is being called.
 	@Test
 	public void functionReferenceVisibility_SPR12359() throws Exception {
+		// Confirms visibility of what is being called.
 		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] {"1"});
 		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
 				"compare", Object.class, Object.class));
@@ -845,7 +845,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCantCompile(expression);
 
 		// type not public but method is
-		context = new StandardEvaluationContext(new  Object[] {"1"});
+		context = new StandardEvaluationContext(new Object[] {"1"});
 		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
 				"compare2", Object.class, Object.class));
 		context.setVariable("arg", "2");
@@ -856,7 +856,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void functionReferenceNonCompilableArguments_SPR12359() throws Exception {
-		StandardEvaluationContext context = new StandardEvaluationContext(new  Object[] {"1"});
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] {"1"});
 		context.registerFunction("negate", SomeCompareMethod2.class.getDeclaredMethod(
 				"negate", Integer.TYPE));
 		context.setVariable("arg", "2");
@@ -3072,7 +3072,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, getClass().getClassLoader()));
 		Person3 person = new Person3("foo", 1);
 		SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
-		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] {1});
 		context.setVariable("it", person);
 		expression.setEvaluationContext(context);
 		assertTrue(expression.getValue(Boolean.class));
@@ -3099,8 +3099,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		// code generation for ENGLISH should notice there is something on the stack that
 		// is not required and pop it off.
 		expression = parser.parseExpression("#userId.toString().toLowerCase(T(java.util.Locale).ENGLISH)");
-		StandardEvaluationContext context =
-				new StandardEvaluationContext();
+		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("userId", "RoDnEy");
 		assertEquals("rodney", expression.getValue(context));
 		assertCanCompile(expression);
@@ -3249,8 +3248,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		expression = parser.parseExpression("#it?.age.equals([0])");
 		Person person = new Person(1);
-		StandardEvaluationContext context =
-				new StandardEvaluationContext(new Object[] { person.getAge() });
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] {person.getAge()});
 		context.setVariable("it", person);
 		assertTrue(expression.getValue(context, Boolean.class));
 		assertCanCompile(expression);
@@ -3258,26 +3256,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// Variant of above more like what was in the bug report:
 		SpelExpressionParser parser = new SpelExpressionParser(
-				new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-						getClass().getClassLoader()));
+				new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, getClass().getClassLoader()));
 
 		SpelExpression ex = parser.parseRaw("#it?.age.equals([0])");
-		context = new StandardEvaluationContext(new Object[] { person.getAge() });
+		context = new StandardEvaluationContext(new Object[] {person.getAge()});
 		context.setVariable("it", person);
 		assertTrue(ex.getValue(context, Boolean.class));
 		assertTrue(ex.getValue(context, Boolean.class));
 
 		PersonInOtherPackage person2 = new PersonInOtherPackage(1);
 		ex = parser.parseRaw("#it?.age.equals([0])");
-		context =
-				new StandardEvaluationContext(new Object[] { person2.getAge() });
+		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
 		assertTrue(ex.getValue(context, Boolean.class));
 		assertTrue(ex.getValue(context, Boolean.class));
 
 		ex = parser.parseRaw("#it?.age.equals([0])");
-		context =
-				new StandardEvaluationContext(new Object[] { person2.getAge() });
+		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
 		assertTrue((Boolean)ex.getValue(context));
 		assertTrue((Boolean)ex.getValue(context));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,17 @@ import org.springframework.core.convert.TypeDescriptor;
 public interface Expression {
 
 	/**
+	 * Return the original string used to create this expression, unmodified.
+	 * @return the original expression string
+	 */
+	String getExpressionString();
+
+	/**
 	 * Evaluate this expression in the default standard context.
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	Object getValue() throws EvaluationException;
-
-	/**
-	 * Evaluate this expression against the specified root object
-	 * @param rootObject the root object against which properties/etc will be resolved
-	 * @return the evaluation result
-	 * @throws EvaluationException if there is a problem during evaluation
-	 */
-	Object getValue(Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in the default context. If the result of the evaluation does not match (and
@@ -52,6 +50,14 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	<T> T getValue(Class<T> desiredResultType) throws EvaluationException;
+
+	/**
+	 * Evaluate this expression against the specified root object
+	 * @param rootObject the root object against which properties/etc will be resolved
+	 * @return the evaluation result
+	 * @throws EvaluationException if there is a problem during evaluation
+	 */
+	Object getValue(Object rootObject) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression in the default context against the specified root object. If the
@@ -151,7 +157,7 @@ public interface Expression {
 	TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
+	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
 	 * method using the default context.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return a type descriptor for the most general type of value that can be set on this context
@@ -160,7 +166,7 @@ public interface Expression {
 	TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
+	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
 	 * method for the given context.
 	 * @param context the context in which to evaluate the expression
 	 * @return a type descriptor for the most general type of value that can be set on this context
@@ -169,7 +175,7 @@ public interface Expression {
 	TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
+	 * Return the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
 	 * the given context. The supplied root object overrides any specified in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
@@ -177,6 +183,14 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException;
+
+	/**
+	 * Determine if an expression can be written to, i.e. setValue() can be called.
+	 * @param rootObject the root object against which to evaluate the expression
+	 * @return true if the expression is writable
+	 * @throws EvaluationException if there is a problem determining if it is writable
+	 */
+	boolean isWritable(Object rootObject) throws EvaluationException;
 
 	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
@@ -197,29 +211,20 @@ public interface Expression {
 	boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException;
 
 	/**
-	 * Determine if an expression can be written to, i.e. setValue() can be called.
-	 * @param rootObject the root object against which to evaluate the expression
-	 * @return true if the expression is writable
-	 * @throws EvaluationException if there is a problem determining if it is writable
-	 */
-	boolean isWritable(Object rootObject) throws EvaluationException;
-
-	/**
-	 * Set this expression in the provided context to the value provided.
-	 *
-	 * @param context the context in which to set the value of the expression
-	 * @param value the new value
-	 * @throws EvaluationException if there is a problem during evaluation
-	 */
-	void setValue(EvaluationContext context, Object value) throws EvaluationException;
-
-	/**
 	 * Set this expression in the provided context to the value provided.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	void setValue(Object rootObject, Object value) throws EvaluationException;
+
+	/**
+	 * Set this expression in the provided context to the value provided.
+	 * @param context the context in which to set the value of the expression
+	 * @param value the new value
+	 * @throws EvaluationException if there is a problem during evaluation
+	 */
+	void setValue(EvaluationContext context, Object value) throws EvaluationException;
 
 	/**
 	 * Set this expression in the provided context to the value provided.
@@ -230,11 +235,5 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException;
-
-	/**
-	 * Returns the original string used to create this expression, unmodified.
-	 * @return the original expression string
-	 */
-	String getExpressionString();
 
 }
