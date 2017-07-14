@@ -125,7 +125,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 					return Flux.generate(new LineGenerator(content))
 							.concatMap(info -> processLine(info, exchange, resource, chain))
 							.collect(() -> new LineAggregator(resource, content), LineAggregator::add)
-							.flatMap(aggregator -> Mono.just(aggregator.createResource()));
+							.map(LineAggregator::createResource);
 				});
 	}
 
