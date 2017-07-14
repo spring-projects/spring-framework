@@ -26,16 +26,16 @@ import java.nio.channels.Channels;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.lang.Nullable;
@@ -49,6 +49,12 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 public abstract class DataBufferUtils {
+
+	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
+
+	//---------------------------------------------------------------------
+	// Reading
+	//---------------------------------------------------------------------
 
 	/**
 	 * Read the given {@code InputStream} into a {@code Flux} of
@@ -128,19 +134,24 @@ public abstract class DataBufferUtils {
 		});
 	}
 
+	//---------------------------------------------------------------------
+	// Writing
+	//---------------------------------------------------------------------
+
 	/**
 	 * Write the given stream of {@link DataBuffer}s to the given {@code OutputStream}. Does
-	 * <strong>not</strong> close the output stream when the flux is terminated, but
-	 * <strong>does</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
-	 * source.
-	 * <p>Note that the writing process does not start until the returned {@code Mono} is subscribed
+	 * <strong>not</strong> close the output stream when the flux is terminated, and does
+	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
+	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
+	 * {@link #releaseConsumer()}.
+	 * <p>Note that the writing process does not start until the returned {@code Flux} is subscribed
 	 * to.
 	 * @param source the stream of data buffers to be written
 	 * @param outputStream the output stream to write to
-	 * @return a mono that starts the writing process when subscribed to, and that indicates the
-	 * completion of the process
+	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
+	 * process when subscribed to, and that publishes any writing errors and the completion signal
 	 */
-	public static Mono<Void> write(Publisher<DataBuffer> source,
+	public static Flux<DataBuffer> write(Publisher<DataBuffer> source,
 			OutputStream outputStream) {
 
 		Assert.notNull(source, "'source' must not be null");
@@ -152,17 +163,18 @@ public abstract class DataBufferUtils {
 
 	/**
 	 * Write the given stream of {@link DataBuffer}s to the given {@code WritableByteChannel}. Does
-	 * <strong>not</strong> close the channel when the flux is terminated, but
-	 * <strong>does</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
-	 * source.
-	 * <p>Note that the writing process does not start until the returned {@code Mono} is subscribed
+	 * <strong>not</strong> close the channel when the flux is terminated, and does
+	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
+	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
+	 * {@link #releaseConsumer()}.
+	 * <p>Note that the writing process does not start until the returned {@code Flux} is subscribed
 	 * to.
 	 * @param source the stream of data buffers to be written
 	 * @param channel the channel to write to
-	 * @return a mono that starts the writing process when subscribed to, and that indicates the
-	 * completion of the process
+	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
+	 * process when subscribed to, and that publishes any writing errors and the completion signal
 	 */
-	public static Mono<Void> write(Publisher<DataBuffer> source,
+	public static Flux<DataBuffer> write(Publisher<DataBuffer> source,
 			WritableByteChannel channel) {
 
 		Assert.notNull(source, "'source' must not be null");
@@ -170,14 +182,14 @@ public abstract class DataBufferUtils {
 
 		Flux<DataBuffer> flux = Flux.from(source);
 
-		return Mono.create(sink ->
+		return Flux.create(sink ->
 				flux.subscribe(dataBuffer -> {
 							try {
 								ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
 								while (byteBuffer.hasRemaining()) {
 									channel.write(byteBuffer);
 								}
-								release(dataBuffer);
+								sink.next(dataBuffer);
 							}
 							catch (IOException ex) {
 								sink.error(ex);
@@ -185,22 +197,23 @@ public abstract class DataBufferUtils {
 
 						},
 						sink::error,
-						sink::success));
+						sink::complete));
 	}
 
 	/**
 	 * Write the given stream of {@link DataBuffer}s to the given {@code AsynchronousFileChannel}.
-	 * Does <strong>not</strong> close the channel when the flux is terminated, but
-	 * <strong>does</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
-	 * source.
-	 * <p>Note that the writing process does not start until the returned {@code Mono} is subscribed
+	 * Does <strong>not</strong> close the channel when the flux is terminated, and does
+	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
+	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
+	 * {@link #releaseConsumer()}.
+	 * <p>Note that the writing process does not start until the returned {@code Flux} is subscribed
 	 * to.
 	 * @param source the stream of data buffers to be written
 	 * @param channel the channel to write to
-	 * @return a mono that starts the writing process when subscribed to, and that indicates the
-	 * completion of the process
+	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
+	 * process when subscribed to, and that publishes any writing errors and the completion signal
 	 */
-	public static Mono<Void> write(Publisher<DataBuffer> source, AsynchronousFileChannel channel,
+	public static Flux<DataBuffer> write(Publisher<DataBuffer> source, AsynchronousFileChannel channel,
 			long position) {
 
 		Assert.notNull(source, "'source' must not be null");
@@ -209,7 +222,7 @@ public abstract class DataBufferUtils {
 
 		Flux<DataBuffer> flux = Flux.from(source);
 
-		return Mono.create(sink -> {
+		return Flux.create(sink -> {
 			BaseSubscriber<DataBuffer> subscriber =
 					new AsynchronousFileChannelWriteCompletionHandler(sink, channel, position);
 			flux.subscribe(subscriber);
@@ -258,6 +271,10 @@ public abstract class DataBufferUtils {
 					}
 				});
 	}
+
+	//---------------------------------------------------------------------
+	// Various
+	//---------------------------------------------------------------------
 
 	/**
 	 * Skip buffers from the given {@link Publisher} until the total
@@ -320,6 +337,14 @@ public abstract class DataBufferUtils {
 			return ((PooledDataBuffer) dataBuffer).release();
 		}
 		return false;
+	}
+
+	/**
+	 * Returns a consumer that calls {@link #release(DataBuffer)} on all
+	 * passed data buffers.
+	 */
+	public static Consumer<DataBuffer> releaseConsumer() {
+		return RELEASE_CONSUMER;
 	}
 
 
@@ -425,9 +450,11 @@ public abstract class DataBufferUtils {
 			extends BaseSubscriber<DataBuffer>
 			implements CompletionHandler<Integer, ByteBuffer> {
 
-		private final MonoSink<Void> sink;
+		private final FluxSink<DataBuffer> sink;
 
 		private final AsynchronousFileChannel channel;
+
+		private final AtomicBoolean completed = new AtomicBoolean();
 
 		private long position;
 
@@ -435,7 +462,7 @@ public abstract class DataBufferUtils {
 		private DataBuffer dataBuffer;
 
 		public AsynchronousFileChannelWriteCompletionHandler(
-				MonoSink<Void> sink, AsynchronousFileChannel channel, long position) {
+				FluxSink<DataBuffer> sink, AsynchronousFileChannel channel, long position) {
 			this.sink = sink;
 			this.channel = channel;
 			this.position = position;
@@ -461,7 +488,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		protected void hookOnComplete() {
-			this.sink.success();
+			this.completed.set(true);
 		}
 
 		@Override
@@ -469,12 +496,17 @@ public abstract class DataBufferUtils {
 			this.position += written;
 			if (byteBuffer.hasRemaining()) {
 				this.channel.write(byteBuffer, this.position, byteBuffer, this);
+				return;
+			}
+			else if (this.dataBuffer != null) {
+				this.sink.next(this.dataBuffer);
+			}
+			if (this.completed.get()) {
+				this.sink.complete();
 			}
 			else {
-				release(this.dataBuffer);
 				request(1);
 			}
-
 		}
 
 		@Override

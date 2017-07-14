@@ -16,6 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.Assert.*;
@@ -129,8 +129,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Path tempFile = Files.createTempFile("DataBufferUtilsTests", null);
 		OutputStream os = Files.newOutputStream(tempFile);
 
-		Mono<Void> writeResult = DataBufferUtils.write(flux, os);
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, os);
 		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
 				.verify();
 
@@ -153,8 +157,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Path tempFile = Files.createTempFile("DataBufferUtilsTests", null);
 		WritableByteChannel channel = Files.newByteChannel(tempFile, StandardOpenOption.WRITE);
 
-		Mono<Void> writeResult = DataBufferUtils.write(flux, channel);
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
 		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
 				.verify();
 
@@ -178,8 +186,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		AsynchronousFileChannel channel =
 				AsynchronousFileChannel.open(tempFile, StandardOpenOption.WRITE);
 
-		Mono<Void> writeResult = DataBufferUtils.write(flux, channel, 0);
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel, 0);
 		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
 				.verify();
 
@@ -234,6 +246,30 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	public void releaseConsumer() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+
+		flux.subscribe(DataBufferUtils.releaseConsumer());
+
+		// AbstractDataBufferAllocatingTestCase.LeakDetector will assert the release of the buffers
+	}
+
+	public void foo() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataBufferUtils.write(flux, bos)
+				.subscribe(DataBufferUtils.releaseConsumer());
+
+
 	}
 
 }
