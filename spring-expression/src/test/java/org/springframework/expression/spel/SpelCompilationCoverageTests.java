@@ -48,8 +48,7 @@ import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import static org.junit.Assert.*;
 
 /**
- * Checks the behaviour of the SpelCompiler.
- * This should cover compilation all compiled node types.
+ * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
  *
  * @author Andy Clement
  * @since 4.1
@@ -322,29 +321,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		double resultI = expression.getValue(new TestClass1(), Double.TYPE);
 		assertCanCompile(expression);
 		double resultC = expression.getValue(new TestClass1(), Double.TYPE);
-		assertEquals(3.4d, resultI,0.1d);
-		assertEquals(3.4d, resultC,0.1d);
-
+		assertEquals(3.4d, resultI, 0.1d);
+		assertEquals(3.4d, resultC, 0.1d);
 		assertEquals(3.4d, expression.getValue());
-	}
-	
-	@Test
-	public void repeatedCompilation() throws Exception {
-		// Verifying that after a number of compilations, the classloaders
-		// used to load the compiled expressions are discarded/replaced.
-		// See SpelCompiler.loadClass()
-		Field f = SpelExpression.class.getDeclaredField("compiledAst");
-		Set<Object> classloadersUsed = new HashSet<>();
-		for (int i =0; i < 1500; i++) {  // 1500 is greater than SpelCompiler.CLASSES_DEFINED_LIMIT
-			expression = parser.parseExpression("4 + 5");
-			assertEquals(9, (int) expression.getValue(Integer.class));
-			assertCanCompile(expression);
-			f.setAccessible(true);
-			CompiledExpression cEx = (CompiledExpression)f.get(expression);
-			classloadersUsed.add(cEx.getClass().getClassLoader());
-			assertEquals(9, (int) expression.getValue(Integer.class));
-		}
-		assertTrue(classloadersUsed.size() > 1);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -476,13 +455,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertEquals(new Integer(42), expression.getValue(Integer.class));
 
-		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those
-		// values
+		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those values
 
 		// Not an int literal but an opminus with one operand:
-//		expression = parser.parseExpression("-1");
-//		assertCanCompile(expression);
-//		assertEquals(-1, expression.getValue());
+		// expression = parser.parseExpression("-1");
+		// assertCanCompile(expression);
+		// assertEquals(-1, expression.getValue());
 		expression = parser.parseExpression("0");
 		assertCanCompile(expression);
 		assertEquals(0, expression.getValue());
@@ -527,8 +505,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		float resultI = expression.getValue(new TestClass1(), Float.TYPE);
 		assertCanCompile(expression);
 		float resultC = expression.getValue(new TestClass1(), Float.TYPE);
-		assertEquals(3.4f, resultI,0.1f);
-		assertEquals(3.4f, resultC,0.1f);
+		assertEquals(3.4f, resultI, 0.1f);
+		assertEquals(3.4f, resultC, 0.1f);
 
 		assertEquals(3.4f, expression.getValue());
 	}
@@ -3314,10 +3292,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		Object o = expression.getValue();
 		assertEquals(testclass8,o.getClass().getName());
-		TestClass8 tc8 = (TestClass8)o;
+		TestClass8 tc8 = (TestClass8) o;
 		assertEquals(42, tc8.i);
 		assertEquals("123", tc8.s);
-		assertEquals(4.0d, tc8.d,0.5d);
+		assertEquals(4.0d, tc8.d, 0.5d);
 		assertEquals(true, tc8.z);
 
 		// no-arg ctor
@@ -4372,7 +4350,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		expression = parser.parseExpression("DR[0].three");
 		Object v = expression.getValue(payload);
-		assertEquals("Lorg/springframework/expression/spel/SpelCompilationCoverageTests$Three", getAst().getExitDescriptor());
+		assertEquals("Lorg/springframework/expression/spel/SpelCompilationCoverageTests$Three",
+				getAst().getExitDescriptor());
 
 		Expression expression = parser.parseExpression("DR[0].three.four lt 0.1d?#root:null");
 		v = expression.getValue(payload);
@@ -4380,7 +4359,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		SpelExpression sExpr = (SpelExpression) expression;
 		Ternary ternary = (Ternary) sExpr.getAST();
 		OpLT oplt = (OpLT) ternary.getChild(0);
-		CompoundExpression cExpr = (CompoundExpression)oplt.getLeftOperand();
+		CompoundExpression cExpr = (CompoundExpression) oplt.getLeftOperand();
 		String cExprExitDescriptor = cExpr.getExitDescriptor();
 		assertEquals("D", cExprExitDescriptor);
 		assertEquals("Z", oplt.getExitDescriptor());
@@ -4620,14 +4599,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void indexerMapAccessor_12045() throws Exception {
-		SpelParserConfiguration spc = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,getClass().getClassLoader());
+		SpelParserConfiguration spc = new SpelParserConfiguration(
+				SpelCompilerMode.IMMEDIATE,getClass().getClassLoader());
 		SpelExpressionParser sep = new SpelExpressionParser(spc);
 		expression=sep.parseExpression("headers[command]");
 		MyMessage root = new MyMessage();
 		assertEquals("wibble", expression.getValue(root));
-		// This next call was failing because the isCompilable check in Indexer did not check on the key being compilable
-		// (and also generateCode in the Indexer was missing the optimization that it didn't need necessarily need to call
-		// generateCode for that accessor)
+		// This next call was failing because the isCompilable check in Indexer
+		// did not check on the key being compilable (and also generateCode in the
+		// Indexer was missing the optimization that it didn't need necessarily
+		// need to call generateCode for that accessor)
 		assertEquals("wibble", expression.getValue(root));
 		assertCanCompile(expression);
 
@@ -4801,6 +4782,25 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(exp);
 		assertEquals("1,2,3", exp.getValue(context, new Foo(), String.class));
 		assertIsCompiled(exp);
+	}
+
+	@Test
+	public void repeatedCompilation() throws Exception {
+		// Verifying that after a number of compilations, the classloaders
+		// used to load the compiled expressions are discarded/replaced.
+		// See SpelCompiler.loadClass()
+		Field f = SpelExpression.class.getDeclaredField("compiledAst");
+		Set<Object> classloadersUsed = new HashSet<>();
+		for (int i = 0; i < 1500; i++) {  // 1500 is greater than SpelCompiler.CLASSES_DEFINED_LIMIT
+			expression = parser.parseExpression("4 + 5");
+			assertEquals(9, (int) expression.getValue(Integer.class));
+			assertCanCompile(expression);
+			f.setAccessible(true);
+			CompiledExpression cEx = (CompiledExpression) f.get(expression);
+			classloadersUsed.add(cEx.getClass().getClassLoader());
+			assertEquals(9, (int) expression.getValue(Integer.class));
+		}
+		assertTrue(classloadersUsed.size() > 1);
 	}
 
 
