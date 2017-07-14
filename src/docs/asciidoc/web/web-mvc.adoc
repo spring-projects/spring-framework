@@ -2690,7 +2690,8 @@ properties that you can use to customize their behavior:
 * `urlDecode` Defaults to `true`, as of Spring 2.5. If you prefer to compare encoded
   paths, set this flag to `false`. However, the `HttpServletRequest` always exposes the
   Servlet path in decoded form. Be aware that the Servlet path will not match when
-  compared with encoded paths.
+  compared with encoded paths so you cannot use `urlDecode=false` with prefix-based Servlet
+  mappings and likewise must also set `alwaysUseFullPath=true`.
 
 The following example shows how to configure an interceptor:
 
