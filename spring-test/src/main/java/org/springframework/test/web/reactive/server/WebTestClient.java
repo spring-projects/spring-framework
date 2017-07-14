@@ -135,11 +135,22 @@ public interface WebTestClient {
 	RequestBodyUriSpec method(HttpMethod method);
 
 
-
 	/**
 	 * Return a builder to mutate properties of this web test client.
 	 */
 	Builder mutate();
+
+	/**
+	 * Mutate the {@link WebTestClient}, apply the given configurer, and build
+	 * a new instance. Essentially a shortcut for:
+	 * <pre>
+	 * mutate().apply(configurer).build();
+	 * </pre>
+	 * @param configurer the configurer to apply
+	 * @return the mutated test client
+	 */
+	WebTestClient mutateWith(WebTestClientConfigurer configurer);
+
 
 	// Static, factory methods
 

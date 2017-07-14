@@ -141,6 +141,11 @@ class DefaultWebTestClient implements WebTestClient {
 		return this.builder;
 	}
 
+	@Override
+	public WebTestClient mutateWith(WebTestClientConfigurer configurer) {
+		return mutate().apply(configurer).build();
+	}
+
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
