@@ -17,17 +17,23 @@
 package org.springframework.core.io.buffer;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -110,6 +116,79 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	public void writeOutputStream() throws Exception {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		DataBuffer qux = stringBuffer("qux");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz, qux);
+
+		Path tempFile = Files.createTempFile("DataBufferUtilsTests", null);
+		OutputStream os = Files.newOutputStream(tempFile);
+
+		Mono<Void> writeResult = DataBufferUtils.write(flux, os);
+		StepVerifier.create(writeResult)
+				.expectComplete()
+				.verify();
+
+		String result = Files.readAllLines(tempFile)
+				.stream()
+				.collect(Collectors.joining());
+
+		assertEquals("foobarbazqux", result);
+		os.close();
+	}
+
+	@Test
+	public void writeWritableByteChannel() throws Exception {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		DataBuffer qux = stringBuffer("qux");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz, qux);
+
+		Path tempFile = Files.createTempFile("DataBufferUtilsTests", null);
+		WritableByteChannel channel = Files.newByteChannel(tempFile, StandardOpenOption.WRITE);
+
+		Mono<Void> writeResult = DataBufferUtils.write(flux, channel);
+		StepVerifier.create(writeResult)
+				.expectComplete()
+				.verify();
+
+		String result = Files.readAllLines(tempFile)
+				.stream()
+				.collect(Collectors.joining());
+
+		assertEquals("foobarbazqux", result);
+		channel.close();
+	}
+
+	@Test
+	public void writeAsynchronousFileChannel() throws Exception {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		DataBuffer qux = stringBuffer("qux");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz, qux);
+
+		Path tempFile = Files.createTempFile("DataBufferUtilsTests", null);
+		AsynchronousFileChannel channel =
+				AsynchronousFileChannel.open(tempFile, StandardOpenOption.WRITE);
+
+		Mono<Void> writeResult = DataBufferUtils.write(flux, channel, 0);
+		StepVerifier.create(writeResult)
+				.expectComplete()
+				.verify();
+
+		String result = Files.readAllLines(tempFile)
+				.stream()
+				.collect(Collectors.joining());
+
+		assertEquals("foobarbazqux", result);
+		channel.close();
 	}
 
 	@Test
