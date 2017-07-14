@@ -22,8 +22,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Contract for session id resolution strategies. Allows for session id
- * resolution through the request and for sending the session id to the
- * client through the response.
+ * resolution through the request and for sending the session id or expiring
+ * the session through the response.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -39,11 +39,16 @@ public interface WebSessionIdResolver {
 	List<String> resolveSessionIds(ServerWebExchange exchange);
 
 	/**
-	 * Send the given session id to the client or if the session id is "null"
-	 * instruct the client to end the current session.
+	 * Send the given session id to the client.
 	 * @param exchange the current exchange
 	 * @param sessionId the session id
 	 */
 	void setSessionId(ServerWebExchange exchange, String sessionId);
+
+	/**
+	 * Instruct the client to end the current session.
+	 * @param exchange the current exchange
+	 */
+	void expireSession(ServerWebExchange exchange);
 
 }

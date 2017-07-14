@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
@@ -139,6 +140,7 @@ public class DefaultWebSessionManagerTests {
 
 		private List<String> idsToResolve = new ArrayList<>();
 
+		@Nullable
 		private String id = null;
 
 
@@ -146,6 +148,7 @@ public class DefaultWebSessionManagerTests {
 			this.idsToResolve = idsToResolve;
 		}
 
+		@Nullable
 		public String getSavedId() {
 			return this.id;
 		}
@@ -158,6 +161,11 @@ public class DefaultWebSessionManagerTests {
 		@Override
 		public void setSessionId(ServerWebExchange exchange, String sessionId) {
 			this.id = sessionId;
+		}
+
+		@Override
+		public void expireSession(ServerWebExchange exchange) {
+			this.id = null;
 		}
 	}
 

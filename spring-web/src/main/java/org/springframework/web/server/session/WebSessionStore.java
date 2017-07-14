@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +28,23 @@ import org.springframework.web.server.WebSession;
 public interface WebSessionStore {
 
 	/**
-	 * Store the given session.
+	 * Store the given WebSession.
 	 * @param session the session to store
-	 * @return {@code Mono} for completion notification
+	 * @return a completion notification (success or error)
 	 */
 	Mono<Void> storeSession(WebSession session);
 
 	/**
-	 * Load the session for the given session id.
+	 * Return the WebSession for the given id.
 	 * @param sessionId the session to load
-	 * @return {@code Mono} for async access to the loaded session
+	 * @return the session, or an empty {@code Mono}.
 	 */
 	Mono<WebSession> retrieveSession(String sessionId);
 
 	/**
-	 * Remove the session with the given id.
-	 * @param sessionId the session to remove
-	 * @return {@code Mono} for completion notification
+	 * Remove the WebSession for the specified id.
+	 * @param sessionId the id of the session to remove
+	 * @return a completion notification (success or error)
 	 */
 	Mono<Void> removeSession(String sessionId);
 
