@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -52,7 +53,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 
 		assertFalse(channel.isOpen());
 	}
@@ -70,7 +71,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("rbazq"))
 				.consumeNextWith(stringConsumer("ux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 
 		assertFalse(channel.isOpen());
 	}
@@ -115,7 +116,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 
 		String result = Files.readAllLines(tempFile)
 				.stream()
@@ -164,7 +165,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 
 		String result = Files.readAllLines(tempFile)
 				.stream()
@@ -193,7 +194,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 
 		String result = Files.readAllLines(tempFile)
 				.stream()
@@ -214,7 +215,8 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("ba"))
-				.expectComplete().verify();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 
 		release(baz);
 	}
@@ -231,7 +233,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("r"))
 				.consumeNextWith(stringConsumer("baz"))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -245,7 +247,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		StepVerifier.create(result)
 				.expectNextCount(0)
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
