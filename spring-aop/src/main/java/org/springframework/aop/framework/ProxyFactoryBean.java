@@ -163,6 +163,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	public void setInterceptorNames(String... interceptorNames) {
 		this.interceptorNames = interceptorNames;
+		initializeAdvisorChain();
 	}
 
 	/**
@@ -248,7 +249,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	@Override
 	public Object getObject() throws BeansException {
-		initializeAdvisorChain();
+		if (!this.advisorChainInitialized) {
+			initializeAdvisorChain();
+		}
 		if (isSingleton()) {
 			return getSingletonInstance();
 		}
@@ -430,9 +433,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * are unaffected by such changes.
 	 */
 	private synchronized void initializeAdvisorChain() throws AopConfigException, BeansException {
-		if (this.advisorChainInitialized) {
-			return;
-		}
+		clearAdvisors();
 
 		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
 			if (this.beanFactory == null) {
