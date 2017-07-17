@@ -26,7 +26,6 @@ import static org.junit.Assert.*;
 /**
  * @author Rob Harrop
  */
-@Deprecated
 public class FileSystemUtilsTests {
 
 	@Test

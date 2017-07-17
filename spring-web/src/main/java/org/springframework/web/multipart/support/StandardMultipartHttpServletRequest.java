@@ -17,12 +17,12 @@
 package org.springframework.web.multipart.support;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -317,7 +317,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				// At least we offloaded the file from memory storage; it'll get deleted
 				// from the temp dir eventually in any case. And for our user's purposes,
 				// we can manually copy it to the requested location as a fallback.
-				FileCopyUtils.copy(this.part.getInputStream(), new FileOutputStream(dest));
+				FileCopyUtils.copy(this.part.getInputStream(), Files.newOutputStream(dest.toPath()));
 			}
 		}
 	}
