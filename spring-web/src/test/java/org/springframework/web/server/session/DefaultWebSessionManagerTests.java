@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.server.session;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +32,8 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.IdGenerator;
+import org.springframework.util.JdkIdGenerator;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -44,9 +47,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
+ * Unit tests for {@link DefaultWebSessionManager}.
  * @author Rossen Stoyanchev
  */
 public class DefaultWebSessionManagerTests {
+
+	private static final Clock CLOCK = Clock.system(ZoneId.of("GMT"));
+
+	private static final IdGenerator idGenerator = new JdkIdGenerator();
+
 
 	private DefaultWebSessionManager manager;
 
@@ -105,9 +114,10 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void existingSession() throws Exception {
-		DefaultWebSession existing = new DefaultWebSession("1", Clock.systemDefaultZone(), s -> Mono.empty());
+		DefaultWebSession existing = createDefaultWebSession();
+		String id = existing.getId();
 		this.manager.getSessionStore().storeSession(existing);
-		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
+		this.idResolver.setIdsToResolve(Collections.singletonList(id));
 
 		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertNotNull(actual);
@@ -116,10 +126,9 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void existingSessionIsExpired() throws Exception {
-		Clock clock = Clock.systemDefaultZone();
-		DefaultWebSession existing = new DefaultWebSession("1", clock, s -> Mono.empty());
+		DefaultWebSession existing = createDefaultWebSession();
 		existing.start();
-		Instant lastAccessTime = Instant.now(clock).minus(Duration.ofMinutes(31));
+		Instant lastAccessTime = Instant.now(CLOCK).minus(Duration.ofMinutes(31));
 		existing = new DefaultWebSession(existing, lastAccessTime, s -> Mono.empty());
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
@@ -129,14 +138,19 @@ public class DefaultWebSessionManagerTests {
 	}
 
 	@Test
-	public void multipleSessions() throws Exception {
-		DefaultWebSession existing = new DefaultWebSession("3", Clock.systemDefaultZone(), s -> Mono.empty());
+	public void multipleSessionIds() throws Exception {
+		DefaultWebSession existing = createDefaultWebSession();
+		String id = existing.getId();
 		this.manager.getSessionStore().storeSession(existing);
-		this.idResolver.setIdsToResolve(Arrays.asList("1", "2", "3"));
+		this.idResolver.setIdsToResolve(Arrays.asList("neither-this", "nor-that", id));
 
 		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertNotNull(actual);
 		assertEquals(existing.getId(), actual.getId());
+	}
+
+	private DefaultWebSession createDefaultWebSession() {
+		return new DefaultWebSession(idGenerator, CLOCK, (s, session) -> Mono.empty(), s -> Mono.empty());
 	}
 
 

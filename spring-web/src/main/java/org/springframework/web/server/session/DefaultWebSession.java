@@ -21,11 +21,13 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.server.WebSession;
 
 /**
@@ -36,11 +38,15 @@ import org.springframework.web.server.WebSession;
  */
 class DefaultWebSession implements WebSession {
 
-	private final String id;
+	private final AtomicReference<String> id;
+
+	private final IdGenerator idGenerator;
 
 	private final Map<String, Object> attributes;
 
 	private final Clock clock;
+
+	private final BiFunction<String, WebSession, Mono<Void>> changeIdOperation;
 
 	private final Function<WebSession, Mono<Void>> saveOperation;
 
@@ -55,14 +61,22 @@ class DefaultWebSession implements WebSession {
 
 	/**
 	 * Constructor for creating a brand, new session.
-	 * @param id the session id
+	 * @param idGenerator the session id generator
 	 * @param clock for access to current time
 	 */
-	DefaultWebSession(String id, Clock clock, Function<WebSession, Mono<Void>> saveOperation) {
-		Assert.notNull(id, "'id' is required.");
+	DefaultWebSession(IdGenerator idGenerator, Clock clock,
+			BiFunction<String, WebSession, Mono<Void>> changeIdOperation,
+			Function<WebSession, Mono<Void>> saveOperation) {
+
+		Assert.notNull(idGenerator, "'idGenerator' is required.");
 		Assert.notNull(clock, "'clock' is required.");
-		this.id = id;
+		Assert.notNull(changeIdOperation, "'changeIdOperation' is required.");
+		Assert.notNull(saveOperation, "'saveOperation' is required.");
+
+		this.id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
+		this.idGenerator = idGenerator;
 		this.clock = clock;
+		this.changeIdOperation = changeIdOperation;
 		this.saveOperation = saveOperation;
 		this.attributes = new ConcurrentHashMap<>();
 		this.creationTime = Instant.now(clock);
@@ -81,12 +95,14 @@ class DefaultWebSession implements WebSession {
 			Function<WebSession, Mono<Void>> saveOperation) {
 
 		this.id = existingSession.id;
+		this.idGenerator = existingSession.idGenerator;
 		this.attributes = existingSession.attributes;
 		this.clock = existingSession.clock;
+		this.changeIdOperation = existingSession.changeIdOperation;
+		this.saveOperation = saveOperation;
 		this.creationTime = existingSession.creationTime;
 		this.lastAccessTime = lastAccessTime;
 		this.maxIdleTime = existingSession.maxIdleTime;
-		this.saveOperation = saveOperation;
 		this.state = existingSession.state;
 	}
 
@@ -95,19 +111,21 @@ class DefaultWebSession implements WebSession {
 	 */
 	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime) {
 		this.id = existingSession.id;
+		this.idGenerator = existingSession.idGenerator;
 		this.attributes = existingSession.attributes;
 		this.clock = existingSession.clock;
+		this.changeIdOperation = existingSession.changeIdOperation;
+		this.saveOperation = existingSession.saveOperation;
 		this.creationTime = existingSession.creationTime;
 		this.lastAccessTime = lastAccessTime;
 		this.maxIdleTime = existingSession.maxIdleTime;
-		this.saveOperation = existingSession.saveOperation;
 		this.state = existingSession.state;
 	}
 
 
 	@Override
 	public String getId() {
-		return this.id;
+		return this.id.get();
 	}
 
 	@Override
@@ -149,6 +167,14 @@ class DefaultWebSession implements WebSession {
 	public boolean isStarted() {
 		State value = this.state.get();
 		return (State.STARTED.equals(value) || (State.NEW.equals(value) && !getAttributes().isEmpty()));
+	}
+
+	@Override
+	public Mono<Void> changeSessionId() {
+		String oldId = this.id.get();
+		String newId = String.valueOf(this.idGenerator.generateId());
+		this.id.set(newId);
+		return this.changeIdOperation.apply(oldId, this).doOnError(ex -> this.id.set(oldId));
 	}
 
 	@Override

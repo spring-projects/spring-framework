@@ -42,6 +42,18 @@ public interface WebSessionStore {
 	Mono<WebSession> retrieveSession(String sessionId);
 
 	/**
+	 * Update WebSession data storage to reflect a change in session id.
+	 * <p>Note that the same can be achieved via a combination of
+	 * {@link #removeSession} + {@link #storeSession}. The purpose of this method
+	 * is to allow a more efficient replacement of the session id mapping
+	 * without replacing and storing the session with all of its data.
+	 * @param oldId the previous session id
+	 * @param session the session reflecting the changed session id
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> changeSessionId(String oldId, WebSession session);
+
+	/**
 	 * Remove the WebSession for the specified id.
 	 * @param sessionId the id of the session to remove
 	 * @return a completion notification (success or error)

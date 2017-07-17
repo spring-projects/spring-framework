@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
+import org.springframework.util.JdkIdGenerator;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
@@ -38,6 +39,9 @@ import org.springframework.web.server.WebSession;
  * @since 5.0
  */
 public class DefaultWebSessionManager implements WebSessionManager {
+
+	private static final IdGenerator idGenerator = new JdkIdGenerator();
+
 
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -159,10 +163,10 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	private Mono<DefaultWebSession> createSession(ServerWebExchange exchange) {
-		return Mono.fromSupplier(() -> {
-			String id = UUID.randomUUID().toString();
-			return new DefaultWebSession(id, getClock(), sess -> saveSession(exchange, sess));
-		});
+		return Mono.fromSupplier(() ->
+				new DefaultWebSession(idGenerator, getClock(),
+						(oldId, session) -> this.sessionStore.changeSessionId(oldId, session),
+						session -> saveSession(exchange, session)));
 	}
 
 }
