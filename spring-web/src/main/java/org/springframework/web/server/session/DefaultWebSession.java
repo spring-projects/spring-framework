@@ -56,7 +56,7 @@ class DefaultWebSession implements WebSession {
 
 	private volatile Duration maxIdleTime;
 
-	private final AtomicReference<State> state;
+	private volatile State state;
 
 
 	/**
@@ -82,7 +82,7 @@ class DefaultWebSession implements WebSession {
 		this.creationTime = Instant.now(clock);
 		this.lastAccessTime = this.creationTime;
 		this.maxIdleTime = Duration.ofMinutes(30);
-		this.state = new AtomicReference<>(State.NEW);
+		this.state = State.NEW;
 	}
 
 	/**
@@ -160,12 +160,12 @@ class DefaultWebSession implements WebSession {
 
 	@Override
 	public void start() {
-		this.state.compareAndSet(State.NEW, State.STARTED);
+		this.state = State.STARTED;
 	}
 
 	@Override
 	public boolean isStarted() {
-		State value = this.state.get();
+		State value = this.state;
 		return (State.STARTED.equals(value) || (State.NEW.equals(value) && !getAttributes().isEmpty()));
 	}
 
