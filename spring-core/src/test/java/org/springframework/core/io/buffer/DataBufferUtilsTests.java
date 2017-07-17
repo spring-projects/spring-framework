@@ -34,6 +34,9 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import static org.junit.Assert.*;
 
 /**
@@ -112,6 +115,33 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void readResource() throws Exception {
+		Resource resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
+		Flux<DataBuffer> flux = DataBufferUtils.read(resource, this.bufferFactory, 3);
+
+		StepVerifier.create(flux)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void readResourcePosition() throws Exception {
+		Resource resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
+		Flux<DataBuffer> flux = DataBufferUtils.read(resource, 3, this.bufferFactory, 3);
+
+		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))

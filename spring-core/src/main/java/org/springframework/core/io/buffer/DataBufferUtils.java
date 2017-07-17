@@ -16,6 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +27,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
@@ -38,6 +40,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.SynchronousSink;
 
+import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -133,6 +136,64 @@ public abstract class DataBufferUtils {
 			channel.read(byteBuffer, position, channel, completionHandler);
 		});
 	}
+
+	/**
+	 * Read the given {@code Resource} into a {@code Flux} of {@code DataBuffer}s.
+	 * <p>If the resource is a file, it is read into an
+	 * {@code AsynchronousFileChannel} and turned to {@code Flux} via
+	 * {@link #read(AsynchronousFileChannel, DataBufferFactory, int)} or else
+	 * fall back on {@link #read(InputStream, DataBufferFactory, int)} closes
+	 * the channel when the flux is terminated.
+	 * @param resource the resource to read from
+	 * @param dataBufferFactory the factory to create data buffers with
+	 * @param bufferSize the maximum size of the data buffers
+	 * @return a flux of data buffers read from the given channel
+	 */
+	public static Flux<DataBuffer> read(Resource resource,
+			DataBufferFactory dataBufferFactory, int bufferSize) {
+
+		return read(resource, 0, dataBufferFactory, bufferSize);
+	}
+
+	/**
+	 * Read the given {@code Resource} into a {@code Flux} of {@code DataBuffer}s
+	 * starting at the given position.
+	 * <p>If the resource is a file, it is read into an
+	 * {@code AsynchronousFileChannel} and turned to {@code Flux} via
+	 * {@link #read(AsynchronousFileChannel, DataBufferFactory, int)} or else
+	 * fall back on {@link #read(InputStream, DataBufferFactory, int)}. Closes
+	 * the channel when the flux is terminated.
+	 * @param resource the resource to read from
+	 * @param position the position to start reading from
+	 * @param dataBufferFactory the factory to create data buffers with
+	 * @param bufferSize the maximum size of the data buffers
+	 * @return a flux of data buffers read from the given channel
+	 */
+	public static Flux<DataBuffer> read(Resource resource, long position,
+			DataBufferFactory dataBufferFactory, int bufferSize) {
+
+		try {
+			if (resource.isFile()) {
+				File file = resource.getFile();
+				AsynchronousFileChannel channel =
+						AsynchronousFileChannel.open(file.toPath(), StandardOpenOption.READ);
+				return DataBufferUtils.read(channel, position, dataBufferFactory, bufferSize);
+			}
+		}
+		catch (IOException ignore) {
+			// fallback to resource.readableChannel(), below
+		}
+
+		try {
+			ReadableByteChannel channel = resource.readableChannel();
+			Flux<DataBuffer> in = DataBufferUtils.read(channel, dataBufferFactory, bufferSize);
+			return DataBufferUtils.skipUntilByteCount(in, position);
+		}
+		catch (IOException ex) {
+			return Flux.error(ex);
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Writing
