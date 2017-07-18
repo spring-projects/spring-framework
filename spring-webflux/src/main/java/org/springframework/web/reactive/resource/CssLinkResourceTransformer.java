@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,13 +29,15 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -69,58 +71,62 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 
 	@Override
-	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
 
-		return transformerChain.transform(exchange, resource)
-				.flatMap(newResource -> {
-					String filename = newResource.getFilename();
+		return transformerChain.transform(exchange, inputResource)
+				.flatMap(ouptputResource -> {
+					String filename = ouptputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
-							resource instanceof GzipResourceResolver.GzippedResource) {
-						return Mono.just(newResource);
+							inputResource instanceof GzipResourceResolver.GzippedResource) {
+						return Mono.just(ouptputResource);
 					}
 
 					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + newResource);
+						logger.trace("Transforming resource: " + ouptputResource);
 					}
 
-					byte[] bytes;
-					try {
-						bytes = FileCopyUtils.copyToByteArray(newResource.getInputStream());
-					}
-					catch (IOException ex) {
-						return Mono.error(Exceptions.propagate(ex));
-					}
-					String cssContent = new String(bytes, DEFAULT_CHARSET);
-					List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
-
-					if (contentChunkInfos.isEmpty()) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("No links found.");
-						}
-						return Mono.just(newResource);
-					}
-
-					return Flux.fromIterable(contentChunkInfos)
-							.concatMap(contentChunkInfo -> {
-								String segmentContent = contentChunkInfo.getContent(cssContent);
-								if (contentChunkInfo.isLink() && !hasScheme(segmentContent)) {
-									String link = toAbsolutePath(segmentContent, exchange);
-									return resolveUrlPath(link, exchange, newResource, transformerChain)
-											.defaultIfEmpty(segmentContent);
-								}
-								else {
-									return Mono.just(segmentContent);
-								}
-							})
-							.reduce(new StringWriter(), (writer, chunk) -> {
-								writer.write(chunk);
-								return writer;
-							})
-							.map(writer -> {
-								byte[] newContent = writer.toString().getBytes(DEFAULT_CHARSET);
-								return new TransformedResource(resource, newContent);
+					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+					return DataBufferUtils.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE)
+							.reduce(DataBuffer::write)
+							.flatMap(dataBuffer -> {
+								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
+								DataBufferUtils.release(dataBuffer);
+								String cssContent = charBuffer.toString();
+								return transformContent(cssContent, ouptputResource, transformerChain, exchange);
 							});
+				});
+	}
+
+	private Mono<? extends Resource> transformContent(String cssContent, Resource resource,
+			ResourceTransformerChain chain, ServerWebExchange exchange) {
+
+		List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
+		if (contentChunkInfos.isEmpty()) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No links found.");
+			}
+			return Mono.just(resource);
+		}
+
+		return Flux.fromIterable(contentChunkInfos)
+				.concatMap(contentChunkInfo -> {
+					String contentChunk = contentChunkInfo.getContent(cssContent);
+					if (contentChunkInfo.isLink() && !hasScheme(contentChunk)) {
+						String link = toAbsolutePath(contentChunk, exchange);
+						return resolveUrlPath(link, exchange, resource, chain).defaultIfEmpty(contentChunk);
+					}
+					else {
+						return Mono.just(contentChunk);
+					}
+				})
+				.reduce(new StringWriter(), (writer, chunk) -> {
+					writer.write(chunk);
+					return writer;
+				})
+				.map(writer -> {
+					byte[] newContent = writer.toString().getBytes(DEFAULT_CHARSET);
+					return new TransformedResource(resource, newContent);
 				});
 	}
 
