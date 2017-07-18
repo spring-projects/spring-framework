@@ -403,6 +403,26 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("../foo/bar", redirectedUrl);
 	}
 
+	@Test
+	public void sendRedirectWhenRequestOnlyAndXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.filter.setRequestOnly(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
+
+	@Test
+	public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.filter.setRequestOnly(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
 		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {

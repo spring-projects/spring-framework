@@ -79,6 +79,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private boolean removeOnly;
 
+	private boolean requestOnly;
+
 
 	public ForwardedHeaderFilter() {
 		this.pathHelper = new UrlPathHelper();
@@ -97,6 +99,20 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		this.removeOnly = removeOnly;
 	}
 
+	/**
+	 * Enables mode in which only the HttpServletRequest is modified. This means that
+	 * {@link HttpServletResponse#sendRedirect(String)} will only work when the application is configured to use
+	 * relative redirects. This can be done with Servlet Container specific setup. For example,  using Tomcat's
+	 * <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Common_Attributes">useRelativeRedirects</a>
+	 * attribute.
+	 *
+	 * @param requestOnly whether to customize the {@code HttpServletResponse} or not. Default is false (customize the
+	 * {@code HttpServletResponse})
+	 * @since 4.3.10
+	 */
+	public void setRequestOnly(boolean requestOnly) {
+		this.requestOnly = requestOnly;
+	}
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -130,7 +146,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
-			HttpServletResponse theResponse = new ForwardedHeaderExtractingResponse(response, theRequest);
+			HttpServletResponse theResponse = this.requestOnly ? response :
+					new ForwardedHeaderExtractingResponse(response, theRequest);
 			filterChain.doFilter(theRequest, theResponse);
 		}
 	}
