@@ -62,10 +62,10 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 	@Nullable
 	@SuppressWarnings("rawtypes")
 	public Object scanUnsafe(Attr key) {
-		if (key == IntAttr.PREFETCH) {
+		if (key == Attr.PREFETCH) {
 			return Integer.MAX_VALUE;
 		}
-		if (key == ScannableAttr.PARENT) {
+		if (key == Attr.PARENT) {
 			return this.source;
 		}
 		return null;
