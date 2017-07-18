@@ -21,6 +21,7 @@ import org.junit.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
+import org.springframework.core.env.SimpleCommandLinePropertySource
 
 class BeanDefinitionDslTests {
 	
@@ -75,13 +76,16 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar")
+			bean { FooFoo(it.env.getProperty("name")) }
 			environment({it.activeProfiles.contains("baz")}) {
 				bean { Baz(it.ref()) }
 				bean { Baz(it.ref("bar")) }
 			}
 		}
 
-		val context = GenericApplicationContext()
+		val context = GenericApplicationContext().apply { 
+			environment.propertySources.addFirst(SimpleCommandLinePropertySource("--name=foofoo"))
+		}
 		beans.invoke(context)
 		context.refresh()
 
@@ -92,6 +96,8 @@ class BeanDefinitionDslTests {
 			fail("Expect NoSuchBeanDefinitionException to be thrown")
 		}
 		catch(ex: NoSuchBeanDefinitionException) { null }
+		val foofoo = context.getBean<FooFoo>()
+		assertEquals("foofoo", foofoo.name)
 	}
 	
 }
@@ -99,3 +105,4 @@ class BeanDefinitionDslTests {
 class Foo
 class Bar
 class Baz(val bar: Bar)
+class FooFoo(val name: String)

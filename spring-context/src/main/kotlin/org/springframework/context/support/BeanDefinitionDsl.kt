@@ -17,7 +17,6 @@
 package org.springframework.context.support
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
-import org.springframework.context.ApplicationContext
 import org.springframework.core.env.ConfigurableEnvironment
 import java.util.function.Supplier
 
@@ -38,12 +37,20 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 		PROTOTYPE
 	}
 
-	class BeanDefinitionContext(val context: ApplicationContext) {
+	class BeanDefinitionContext(val context: GenericApplicationContext) {
 
+		
 		inline fun <reified T : Any> ref(name: String? = null) : T = when (name) {
 			null -> context.getBean(T::class.java)
 			else -> context.getBean(name, T::class.java)
 		}
+
+		/**
+		 * Get the [ConfigurableEnvironment] associated to the underlying [GenericApplicationContext].
+		 */
+		val env : ConfigurableEnvironment
+			get() = context.environment
+		
 	}
 
 	/**
