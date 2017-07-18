@@ -16,12 +16,15 @@
 
 package org.springframework.web.reactive.result.condition;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +33,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PatternParseException;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -46,6 +51,9 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  */
 public class RequestMappingInfoTests {
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 	// TODO: CORS pre-flight (see @Ignore)
 
 
@@ -60,6 +68,21 @@ public class RequestMappingInfoTests {
 		assertNotNull(info.getParamsCondition());
 		assertNotNull(info.getHeadersCondition());
 		assertNull(info.getCustomCondition());
+	}
+
+	@Test
+	public void throwWhenInvalidPattern() {
+		this.thrown.expect(PatternParseException.class);
+		this.thrown.expectMessage("Expected close capture character after variable name }");
+		paths("/{foo").build();
+	}
+
+	@Test
+	public void prependPatternWithSlash() {
+		RequestMappingInfo actual = paths("foo").build();
+		List<PathPattern> patterns = new ArrayList<>(actual.getPatternsCondition().getPatterns());
+		assertEquals(1, patterns.size());
+		assertEquals("/foo", patterns.get(0).getPatternString());
 	}
 
 	@Test
