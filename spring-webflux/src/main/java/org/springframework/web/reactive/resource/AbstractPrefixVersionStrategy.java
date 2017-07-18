@@ -43,11 +43,6 @@ public abstract class AbstractPrefixVersionStrategy implements VersionStrategy {
 	}
 
 
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-
 	@Override
 	public String extractVersion(String requestPath) {
 		return requestPath.startsWith(this.prefix) ? this.prefix : null;

@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.resource;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
@@ -58,8 +60,8 @@ public interface VersionStrategy {
 	/**
 	 * Determine the version for the given resource.
 	 * @param resource the resource to check
-	 * @return the version (never {@code null})
+	 * @return the resource version
 	 */
-	String getResourceVersion(Resource resource);
+	Mono<String> getResourceVersion(Resource resource);
 
 }

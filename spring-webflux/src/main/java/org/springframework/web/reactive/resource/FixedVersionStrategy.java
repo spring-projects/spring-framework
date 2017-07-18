@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.resource;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 
 /**
@@ -33,6 +35,8 @@ import org.springframework.core.io.Resource;
  */
 public class FixedVersionStrategy extends AbstractPrefixVersionStrategy {
 
+	private final Mono<String> versionMono;
+
 
 	/**
 	 * Create a new FixedVersionStrategy with the given version string.
@@ -40,12 +44,13 @@ public class FixedVersionStrategy extends AbstractPrefixVersionStrategy {
 	 */
 	public FixedVersionStrategy(String version) {
 		super(version);
+		this.versionMono = Mono.just(version);
 	}
 
 
 	@Override
-	public String getResourceVersion(Resource resource) {
-		return getPrefix();
+	public Mono<String> getResourceVersion(Resource resource) {
+		return this.versionMono;
 	}
 
 }
