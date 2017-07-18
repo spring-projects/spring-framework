@@ -31,12 +31,7 @@ import org.springframework.util.DigestUtils;
  * @since 5.0
  * @see VersionResourceResolver
  */
-public class ContentVersionStrategy extends AbstractVersionStrategy {
-
-
-	public ContentVersionStrategy() {
-		super(new FileNameVersionPathStrategy());
-	}
+public class ContentVersionStrategy extends AbstractFileNameVersionStrategy {
 
 
 	@Override
