@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Med Belamachi
  * @since 3.0
  * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  */
@@ -335,9 +336,11 @@ public abstract class UriUtils {
 	 */
 	@Nullable
 	public static String extractFileExtension(String path) {
-		int end = path.indexOf('?');
+		int qIndex  = path.indexOf('?');
+		int fragIndex  = path.indexOf('#');
+		int end = (fragIndex != -1 &&  fragIndex < qIndex ? fragIndex : qIndex);
 		if (end == -1) {
-			end = path.indexOf('#');
+			end = fragIndex;
 			if (end == -1) {
 				end = path.length();
 			}
