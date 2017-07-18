@@ -192,6 +192,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "JMS invoker proxy for queue [" + this.queue + "]";

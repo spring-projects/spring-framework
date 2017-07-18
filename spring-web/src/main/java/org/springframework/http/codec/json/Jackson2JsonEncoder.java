@@ -43,6 +43,7 @@ import org.springframework.util.MimeType;
  */
 public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 	
+	@Nullable
 	private final PrettyPrinter ssePrettyPrinter;
 	
 

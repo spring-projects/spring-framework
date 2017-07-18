@@ -59,7 +59,6 @@ import org.springframework.util.Assert;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	@Nullable
 	private HttpClient httpClient;
 
 	@Nullable
@@ -82,7 +81,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		setHttpClient(httpClient);
+		this.httpClient = httpClient;
 	}
 
 
@@ -99,7 +98,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
-	@Nullable
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
@@ -156,7 +154,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
-		Assert.state(client != null, "No HttpClient set");
 
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);

@@ -354,6 +354,7 @@ public class MBeanClientInterceptor
 	 * @see #handleConnectFailure
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Lazily connect to MBeanServer if necessary.
 		synchronized (this.preparationMonitor) {

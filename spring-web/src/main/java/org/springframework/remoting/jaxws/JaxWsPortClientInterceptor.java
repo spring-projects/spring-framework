@@ -494,6 +494,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-WS proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";

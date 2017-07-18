@@ -420,8 +420,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JPA transaction as JDBC transaction [" +
-								conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHandle + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
@@ -601,13 +600,16 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		// Remove the JDBC connection holder from the thread, if exposed.
 		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
-			try {
-				getJpaDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),
-						txObject.getEntityManagerHolder().getEntityManager());
-			}
-			catch (Exception ex) {
-				// Just log it, to keep a transaction-related exception.
-				logger.error("Could not close JDBC connection after transaction", ex);
+			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
+			if (conHandle != null) {
+				try {
+					getJpaDialect().releaseJdbcConnection(conHandle,
+							txObject.getEntityManagerHolder().getEntityManager());
+				}
+				catch (Exception ex) {
+					// Just log it, to keep a transaction-related exception.
+					logger.error("Could not close JDBC connection after transaction", ex);
+				}
 			}
 		}
 
