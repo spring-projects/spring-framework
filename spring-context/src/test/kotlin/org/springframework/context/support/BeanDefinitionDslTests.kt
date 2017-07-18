@@ -22,6 +22,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
+import org.springframework.core.env.get
 
 class BeanDefinitionDslTests {
 	
@@ -76,7 +77,7 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Foo>()
 			bean<Bar>("bar")
-			bean { FooFoo(it.env.getProperty("name")) }
+			bean { FooFoo(it.env["name"]) }
 			environment({it.activeProfiles.contains("baz")}) {
 				bean { Baz(it.ref()) }
 				bean { Baz(it.ref("bar")) }
