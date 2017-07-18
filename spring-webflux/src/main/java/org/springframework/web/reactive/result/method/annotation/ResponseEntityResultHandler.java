@@ -80,12 +80,23 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		if (isSupportedType(result.getReturnType().getRawClass())) {
+		Class<?> valueType = resolveReturnValueType(result);
+		if (isSupportedType(valueType)) {
 			return true;
 		}
 		ReactiveAdapter adapter = getAdapter(result);
 		return adapter != null && !adapter.isNoValue() &&
 				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
+	}
+
+	@Nullable
+	private static Class<?> resolveReturnValueType(HandlerResult result) {
+		Class<?> valueType = result.getReturnType().getRawClass();
+		Object value = result.getReturnValue();
+		if ((valueType == null || valueType.equals(Object.class)) && value != null) {
+			valueType = value.getClass();
+		}
+		return valueType;
 	}
 
 	private boolean isSupportedType(@Nullable Class<?> clazz) {
