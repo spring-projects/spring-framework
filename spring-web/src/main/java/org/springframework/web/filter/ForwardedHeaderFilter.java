@@ -102,7 +102,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Enables mode in which only the HttpServletRequest is modified. This means that
 	 * {@link HttpServletResponse#sendRedirect(String)} will only work when the application is configured to use
-	 * relative redirects. This can be done with Servlet Container specific setup. For example,  using Tomcat's
+	 * relative redirects. This can be done by placing {@link RelativeRedirectFilter} after this Filter or Servlet
+	 * Container specific setup. For example, using Tomcat's
 	 * <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Common_Attributes">useRelativeRedirects</a>
 	 * attribute.
 	 *
