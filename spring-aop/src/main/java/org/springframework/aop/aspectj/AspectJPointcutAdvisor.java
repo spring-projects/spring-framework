@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
@@ -51,10 +50,10 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		this.pointcut = advice.buildSafePointcut();
 	}
 
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
-
 
 	@Override
 	public boolean isPerInstance() {
@@ -91,12 +90,12 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 			return false;
 		}
 		AspectJPointcutAdvisor otherAdvisor = (AspectJPointcutAdvisor) other;
-		return (ObjectUtils.nullSafeEquals(this.advice, otherAdvisor.advice));
+		return this.advice.equals(otherAdvisor.advice);
 	}
 
 	@Override
 	public int hashCode() {
-		return AspectJPointcutAdvisor.class.hashCode();
+		return AspectJPointcutAdvisor.class.hashCode() * 29 + this.advice.hashCode();
 	}
 
 }

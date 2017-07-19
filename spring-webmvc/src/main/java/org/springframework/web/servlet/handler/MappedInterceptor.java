@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -99,15 +100,13 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * method. This is an advanced property that is only required when using custom
 	 * PathMatcher implementations that support mapping metadata other than the
 	 * Ant-style path patterns supported by default.
-	 *
-	 * @param pathMatcher the path matcher to use
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
 	/**
-	 * The configured PathMatcher, or {@code null}.
+	 * The configured PathMatcher, or {@code null} if none.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
@@ -127,21 +126,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 		return this.interceptor;
 	}
 
-	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		return this.interceptor.preHandle(request, response, handler);
-	}
-
-	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-		this.interceptor.postHandle(request, response, handler, modelAndView);
-	}
-
-	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-		this.interceptor.afterCompletion(request, response, handler, ex);
-	}
-
 	/**
 	 * Returns {@code true} if the interceptor applies to the given request path.
 	 * @param lookupPath the current request path
@@ -156,7 +140,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 				}
 			}
 		}
-		if (this.includePatterns == null) {
+		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
 		else {
@@ -168,4 +152,26 @@ public final class MappedInterceptor implements HandlerInterceptor {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+
+		return this.interceptor.preHandle(request, response, handler);
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			ModelAndView modelAndView) throws Exception {
+
+		this.interceptor.postHandle(request, response, handler, modelAndView);
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			Exception ex) throws Exception {
+
+		this.interceptor.afterCompletion(request, response, handler, ex);
+	}
+
 }

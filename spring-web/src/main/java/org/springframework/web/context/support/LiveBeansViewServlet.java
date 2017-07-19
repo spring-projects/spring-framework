@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class LiveBeansViewServlet extends HttpServlet {
 
 	private LiveBeansView liveBeansView;
 
+
 	@Override
 	public void init() throws ServletException {
 		this.liveBeansView = buildLiveBeansView();
@@ -49,7 +50,9 @@ public class LiveBeansViewServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		String content = this.liveBeansView.getSnapshotAsJson();
 		response.setContentType("application/json");
 		response.setContentLength(content.length());

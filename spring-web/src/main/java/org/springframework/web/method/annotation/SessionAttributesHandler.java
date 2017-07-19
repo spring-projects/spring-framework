@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,19 +85,17 @@ public class SessionAttributesHandler {
 	 * session attributes through an {@link SessionAttributes} annotation.
 	 */
 	public boolean hasSessionAttributes() {
-		return (this.attributeNames.size() > 0 || this.attributeTypes.size() > 0);
+		return (!this.attributeNames.isEmpty() || !this.attributeTypes.isEmpty());
 	}
 
 	/**
 	 * Whether the attribute name or type match the names and types specified
 	 * via {@code @SessionAttributes} in underlying controller.
-	 *
 	 * <p>Attributes successfully resolved through this method are "remembered"
 	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
 	 * {@link #cleanupAttributes(WebRequest)}.
-	 *
-	 * @param attributeName the attribute name to check, never {@code null}
-	 * @param attributeType the type for the attribute, possibly {@code null}
+	 * @param attributeName the attribute name to check
+	 * @param attributeType the type for the attribute
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -120,7 +118,6 @@ public class SessionAttributesHandler {
 		for (String name : attributes.keySet()) {
 			Object value = attributes.get(name);
 			Class<?> attrType = (value != null) ? value.getClass() : null;
-
 			if (isHandlerSessionAttribute(name, attrType)) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}

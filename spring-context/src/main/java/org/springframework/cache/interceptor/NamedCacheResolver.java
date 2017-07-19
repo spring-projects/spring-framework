@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.cache.interceptor;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,13 +33,15 @@ public class NamedCacheResolver extends AbstractCacheResolver {
 
 	private Collection<String> cacheNames;
 
+
+	public NamedCacheResolver() {
+	}
+
 	public NamedCacheResolver(CacheManager cacheManager, String... cacheNames) {
 		super(cacheManager);
 		this.cacheNames = new ArrayList<String>(Arrays.asList(cacheNames));
 	}
 
-	public NamedCacheResolver() {
-	}
 
 	/**
 	 * Set the cache name(s) that this resolver should use.

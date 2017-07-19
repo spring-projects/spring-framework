@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,22 @@ import java.sql.SQLException;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Implementation of RowCallbackHandler. Convenient superclass for callback handlers.
- * An instance can only be used once.
+ * Implementation of {@link RowCallbackHandler}. An instance can only be used once.
  *
  * <p>We can either use this on its own (for example, in a test case, to ensure
- * that our result sets have valid dimensions), or use it as a superclass
- * for callback handlers that actually do something, and will benefit
- * from the dimension information it provides.
+ * that our result sets have valid dimensions), or use it as a superclass for
+ * callback handlers that actually do something, and will benefit from the
+ * dimension information it provides.
  *
- * <p>A usage example with JdbcTemplate:
+ * <p>A usage example with {@link JdbcTemplate}:
  *
- * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * <pre class="code">
+ * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
  *
  * RowCountCallbackHandler countCallback = new RowCountCallbackHandler();  // not reusable
  * jdbcTemplate.query("select * from user", countCallback);
- * int rowCount = countCallback.getRowCount();</pre>
+ * int rowCount = countCallback.getRowCount();
+ * </pre>
  *
  * @author Rod Johnson
  * @since May 3, 2001
@@ -63,7 +64,6 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 
 
 	/**
-	 * Implementation of ResultSetCallbackHandler.
 	 * Work out column size if this is the first row, otherwise just count rows.
 	 * <p>Subclasses can perform custom extraction or processing
 	 * by overriding the {@code processRow(ResultSet, int)} method.
@@ -103,7 +103,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * <b>Indexed from 0 to n-1.</b>
 	 */
 	public final int[] getColumnTypes() {
-		return columnTypes;
+		return this.columnTypes;
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * <b>Indexed from 0 to n-1.</b>
 	 */
 	public final String[] getColumnNames() {
-		return columnNames;
+		return this.columnNames;
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * @return the number of rows in this ResultSet
 	 */
 	public final int getRowCount() {
-		return rowCount;
+		return this.rowCount;
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * @return the number of columns in this result set
 	 */
 	public final int getColumnCount() {
-		return columnCount;
+		return this.columnCount;
 	}
 
 }

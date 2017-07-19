@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of {@link AspectInstanceFactory} that locates the aspect from the
@@ -50,9 +50,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		if (!StringUtils.hasText(this.aspectBeanName)) {
-			throw new IllegalArgumentException("'aspectBeanName' is required");
-		}
+		Assert.notNull(this.aspectBeanName, "'aspectBeanName' is required");
 	}
 
 

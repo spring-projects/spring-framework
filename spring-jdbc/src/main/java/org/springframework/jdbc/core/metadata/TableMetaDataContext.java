@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,13 +47,13 @@ public class TableMetaDataContext {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** name of table for this context **/
+	/** Name of table for this context */
 	private String tableName;
 
-	/** name of catalog for this context **/
+	/** Name of catalog for this context */
 	private String catalogName;
 
-	/** name of schema for this context **/
+	/** Name of schema for this context */
 	private String schemaName;
 
 	/** List of columns objects to be used in this context */
@@ -154,40 +154,6 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Does this database support the JDBC 3.0 feature of retrieving generated keys
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 */
-	public boolean isGetGeneratedKeysSupported() {
-		return this.metaDataProvider.isGetGeneratedKeysSupported();
-	}
-
-	/**
-	 * Does this database support simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported.
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 */
-	public boolean isGetGeneratedKeysSimulated() {
-		return this.metaDataProvider.isGetGeneratedKeysSimulated();
-	}
-
-	/**
-	 * Does this database support simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported.
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 */
-	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return this.metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
-	}
-
-	/**
-	 * Is a column name String array for retrieving generated keys supported?
-	 * {@link java.sql.Connection#createStruct(String, Object[])}?
-	 */
-	public boolean isGeneratedKeysColumnNameArraySupported() {
-		return this.metaDataProvider.isGeneratedKeysColumnNameArraySupported();
-	}
-
-	/**
 	 * Set {@link NativeJdbcExtractor} to be used to retrieve the native connection.
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
@@ -224,7 +190,7 @@ public class TableMetaDataContext {
 			keys.add(key.toUpperCase());
 		}
 		List<String> columns = new ArrayList<String>();
-		for (TableParameterMetaData meta : metaDataProvider.getTableParameterMetaData()) {
+		for (TableParameterMetaData meta : this.metaDataProvider.getTableParameterMetaData()) {
 			if (!keys.contains(meta.getParameterName().toUpperCase())) {
 				columns.add(meta.getParameterName());
 			}
@@ -366,6 +332,41 @@ public class TableMetaDataContext {
 			typeIndx++;
 		}
 		return types;
+	}
+
+
+	/**
+	 * Does this database support the JDBC 3.0 feature of retrieving generated keys
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 */
+	public boolean isGetGeneratedKeysSupported() {
+		return this.metaDataProvider.isGetGeneratedKeysSupported();
+	}
+
+	/**
+	 * Does this database support simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported.
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 */
+	public boolean isGetGeneratedKeysSimulated() {
+		return this.metaDataProvider.isGetGeneratedKeysSimulated();
+	}
+
+	/**
+	 * Does this database support simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported.
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 */
+	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+		return this.metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
+	}
+
+	/**
+	 * Is a column name String array for retrieving generated keys supported?
+	 * {@link java.sql.Connection#createStruct(String, Object[])}?
+	 */
+	public boolean isGeneratedKeysColumnNameArraySupported() {
+		return this.metaDataProvider.isGeneratedKeysColumnNameArraySupported();
 	}
 
 }

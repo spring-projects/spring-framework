@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,11 @@ public class RedirectViewControllerRegistration {
 
 	/**
 	 * Set the specific redirect 3xx status code to use.
-	 *
 	 * <p>If not set, {@link org.springframework.web.servlet.view.RedirectView}
 	 * will select {@code HttpStatus.MOVED_TEMPORARILY (302)} by default.
 	 */
 	public RedirectViewControllerRegistration setStatusCode(HttpStatus statusCode) {
-		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code.");
+		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
 		this.redirectView.setStatusCode(statusCode);
 		return this;
 	}
@@ -63,7 +62,6 @@ public class RedirectViewControllerRegistration {
 	 * Whether to interpret a given redirect URL that starts with a slash ("/")
 	 * as relative to the current ServletContext, i.e. as relative to the web
 	 * application root.
-	 *
 	 * <p>Default is {@code true}.
 	 */
 	public RedirectViewControllerRegistration setContextRelative(boolean contextRelative) {
@@ -74,7 +72,6 @@ public class RedirectViewControllerRegistration {
 	/**
 	 * Whether to propagate the query parameters of the current request through
 	 * to the target redirect URL.
-	 *
 	 * <p>Default is {@code false}.
 	 */
 	public RedirectViewControllerRegistration setKeepQueryParams(boolean propagate) {

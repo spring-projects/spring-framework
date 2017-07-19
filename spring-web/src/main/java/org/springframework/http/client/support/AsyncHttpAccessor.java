@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,13 @@ public class AsyncHttpAccessor {
 
 	private AsyncClientHttpRequestFactory asyncRequestFactory;
 
+
 	/**
 	 * Set the request factory that this accessor uses for obtaining {@link
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
 	public void setAsyncRequestFactory(AsyncClientHttpRequestFactory asyncRequestFactory) {
-		Assert.notNull(asyncRequestFactory, "'asyncRequestFactory' must not be null");
+		Assert.notNull(asyncRequestFactory, "AsyncClientHttpRequestFactory must not be null");
 		this.asyncRequestFactory = asyncRequestFactory;
 	}
 
@@ -64,15 +65,14 @@ public class AsyncHttpAccessor {
 	}
 
 	/**
-	 * Create a new {@link AsyncClientHttpRequest} via this template's {@link
-	 * AsyncClientHttpRequestFactory}.
+	 * Create a new {@link AsyncClientHttpRequest} via this template's
+	 * {@link AsyncClientHttpRequestFactory}.
 	 * @param url the URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc.)
 	 * @return the created request
 	 * @throws IOException in case of I/O errors
 	 */
-	protected AsyncClientHttpRequest createAsyncRequest(URI url, HttpMethod method)
-			throws IOException {
+	protected AsyncClientHttpRequest createAsyncRequest(URI url, HttpMethod method) throws IOException {
 		AsyncClientHttpRequest request = getAsyncRequestFactory().createAsyncRequest(url, method);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Created asynchronous " + method.name() + " request for \"" + url + "\"");
