@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -79,7 +80,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private boolean removeOnly;
 
-	private boolean requestOnly;
+	private boolean relativeRedirects;
 
 
 	public ForwardedHeaderFilter() {
@@ -100,20 +101,20 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Enables mode in which only the HttpServletRequest is modified. This means that
-	 * {@link HttpServletResponse#sendRedirect(String)} will only work when the application is configured to use
-	 * relative redirects. This can be done by placing {@link RelativeRedirectFilter} after this Filter or Servlet
-	 * Container specific setup. For example, using Tomcat's
-	 * <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Common_Attributes">useRelativeRedirects</a>
-	 * attribute.
-	 *
-	 * @param requestOnly whether to customize the {@code HttpServletResponse} or not. Default is false (customize the
-	 * {@code HttpServletResponse})
-	 * @since 4.3.10
+	 * Use this property to enable relative redirects as explained in and also
+	 * using the same response wrapper as {@link RelativeRedirectFilter} does.
+	 * Or if both filters are used, only one will wrap the response.
+	 * <p>By default, if this property is set to false, in which case calls to
+	 * {@link HttpServletResponse#sendRedirect(String)} are overridden in order
+	 * to turn relative into absolute URLs since (which Servlet containers are
+	 * also required to do) also taking forwarded headers into consideration.
+	 * @param relativeRedirects whether to use relative redirects
+	 * @since 5.0
 	 */
-	public void setRequestOnly(boolean requestOnly) {
-		this.requestOnly = requestOnly;
+	public void setRelativeRedirects(boolean relativeRedirects) {
+		this.relativeRedirects = relativeRedirects;
 	}
+
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -147,7 +148,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
-			HttpServletResponse theResponse = this.requestOnly ? response :
+			HttpServletResponse theResponse = this.relativeRedirects ?
+					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
 					new ForwardedHeaderExtractingResponse(response, theRequest);
 			filterChain.doFilter(theRequest, theResponse);
 		}

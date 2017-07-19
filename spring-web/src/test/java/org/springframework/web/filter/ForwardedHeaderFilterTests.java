@@ -408,7 +408,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
 		this.request.addHeader(X_FORWARDED_HOST, "example.com");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
-		this.filter.setRequestOnly(true);
+		this.filter.setRelativeRedirects(true);
 
 		String location = sendRedirect("/a");
 
@@ -417,7 +417,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
-		this.filter.setRequestOnly(true);
+		this.filter.setRelativeRedirects(true);
 
 		String location = sendRedirect("/a");
 
