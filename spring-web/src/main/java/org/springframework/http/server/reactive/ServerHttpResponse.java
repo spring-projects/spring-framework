@@ -64,7 +64,7 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * HTML template libraries to use consistently for all URLs emitted by
 	 * the application. Doing so enables the registration of URL encoders via
 	 * {@link #registerUrlEncoder} that can insert an id for authentication,
-	 * a nonce for CSRF protection, a version for a static resource, etc.
+	 * a nonce for CSRF protection, or other.
 	 * @param url the URL to encode
 	 * @return the encoded URL or the same
 	 */

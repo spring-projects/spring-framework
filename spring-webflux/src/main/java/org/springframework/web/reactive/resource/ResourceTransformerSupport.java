@@ -76,7 +76,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 		if (resourcePath.startsWith("/")) {
 			// full resource path
 			ResourceUrlProvider urlProvider = getResourceUrlProvider();
-			return (urlProvider != null ? urlProvider.getForRequestUrl(exchange, resourcePath) : Mono.empty());
+			return (urlProvider != null ? urlProvider.getForUriString(resourcePath, exchange) : Mono.empty());
 		}
 		else {
 			// try resolving as relative path
