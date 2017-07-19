@@ -90,7 +90,7 @@ public abstract class ScopedProxyUtils {
 	}
 
 	/**
-	 * Generates the bean name that is used within the scoped proxy to reference the target bean.
+	 * Generate the bean name that is used within the scoped proxy to reference the target bean.
 	 * @param originalBeanName the original name of bean
 	 * @return the generated bean to be used to reference the target bean
 	 */

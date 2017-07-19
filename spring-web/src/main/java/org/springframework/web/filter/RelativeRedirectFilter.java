@@ -16,14 +16,14 @@
 
 package org.springframework.web.filter;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
-
+import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 /**
  * Overrides {@link HttpServletResponse#sendRedirect(String)} and handles it by
@@ -32,12 +32,12 @@ import java.io.IOException;
  * recommendation in <a href="https://tools.ietf.org/html/rfc7231#section-7.1.2">
  * RFC 7231 Section 7.1.2</a>.
  *
- * <p><strong>Note:</strong> while relative redirects are more efficient they
+ * <p><strong>Note:</strong> While relative redirects are more efficient they
  * may not work with reverse proxies under some configurations.
  *
  * @author Rob Winch
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 4.3.10
  */
 public class RelativeRedirectFilter extends OncePerRequestFilter {
 
@@ -50,8 +50,8 @@ public class RelativeRedirectFilter extends OncePerRequestFilter {
 	 * @param status the 3xx redirect status to use
 	 */
 	public void setRedirectStatus(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus is required");
-		Assert.isTrue(status.is3xxRedirection(), "Not a redirect status: " + status);
+		Assert.notNull(status, "Property 'redirectStatus' is required");
+		Assert.isTrue(status.is3xxRedirection(), "Not a redirect status code");
 		this.redirectStatus = status;
 	}
 

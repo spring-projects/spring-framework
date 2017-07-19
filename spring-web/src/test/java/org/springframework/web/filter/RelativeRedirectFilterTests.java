@@ -32,11 +32,11 @@ import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RelativeRedirectFilter}.
+ *
  * @author Rob Winch
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -110,4 +110,5 @@ public class RelativeRedirectFilterTests {
 		HttpServletResponse wrappedResponse = (HttpServletResponse) chain.getResponse();
 		wrappedResponse.sendRedirect(location);
 	}
+
 }

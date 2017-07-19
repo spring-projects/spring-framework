@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * {@link RelativeRedirectFilter} also shared with {@link ForwardedHeaderFilter}.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 4.3.10
  */
 class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
@@ -38,7 +38,7 @@ class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
 	private RelativeRedirectResponseWrapper(HttpServletResponse response, HttpStatus redirectStatus) {
 		super(response);
-		Assert.notNull(redirectStatus, "'redirectStatus' is required.");
+		Assert.notNull(redirectStatus, "'redirectStatus' is required");
 		this.redirectStatus = redirectStatus;
 	}
 
@@ -53,8 +53,7 @@ class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 	public static HttpServletResponse wrapIfNecessary(HttpServletResponse response,
 			HttpStatus redirectStatus) {
 
-		return hasWrapper(response) ? response :
-				new RelativeRedirectResponseWrapper(response, redirectStatus);
+		return (hasWrapper(response) ? response : new RelativeRedirectResponseWrapper(response, redirectStatus));
 	}
 
 	private static boolean hasWrapper(ServletResponse response) {

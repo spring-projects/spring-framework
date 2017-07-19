@@ -93,7 +93,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Enables mode in which any "Forwarded" or "X-Forwarded-*" headers are
 	 * removed only and the information in them ignored.
-	 * @param removeOnly whether to discard and ingore forwarded headers
+	 * @param removeOnly whether to discard and ignore forwarded headers
 	 * @since 4.3.9
 	 */
 	public void setRemoveOnly(boolean removeOnly) {
@@ -109,7 +109,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 * to turn relative into absolute URLs since (which Servlet containers are
 	 * also required to do) also taking forwarded headers into consideration.
 	 * @param relativeRedirects whether to use relative redirects
-	 * @since 5.0
+	 * @since 4.3.10
 	 */
 	public void setRelativeRedirects(boolean relativeRedirects) {
 		this.relativeRedirects = relativeRedirects;
@@ -148,9 +148,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
-			HttpServletResponse theResponse = this.relativeRedirects ?
+			HttpServletResponse theResponse = (this.relativeRedirects ?
 					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
-					new ForwardedHeaderExtractingResponse(response, theRequest);
+					new ForwardedHeaderExtractingResponse(response, theRequest));
 			filterChain.doFilter(theRequest, theResponse);
 		}
 	}
