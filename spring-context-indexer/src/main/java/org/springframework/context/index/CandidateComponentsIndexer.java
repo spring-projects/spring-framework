@@ -109,7 +109,7 @@ public class CandidateComponentsIndexer implements Processor {
 		}
 	}
 
-	private CandidateComponentsMetadata writeMetaData() {
+	private void writeMetaData() {
 		CandidateComponentsMetadata metadata = this.metadataCollector.getMetadata();
 		if (!metadata.getItems().isEmpty()) {
 			try {
@@ -118,9 +118,7 @@ public class CandidateComponentsIndexer implements Processor {
 			catch (IOException ex) {
 				throw new IllegalStateException("Failed to write metadata", ex);
 			}
-			return metadata;
 		}
-		return null;
 	}
 
 }
