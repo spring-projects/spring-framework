@@ -681,10 +681,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	static class CompositeUriComponentsContributorFactoryBean
 			implements FactoryBean<CompositeUriComponentsContributor>, InitializingBean {
 
+		@Nullable
 		private RequestMappingHandlerAdapter handlerAdapter;
 
+		@Nullable
 		private ConversionService conversionService;
 
+		@Nullable
 		private CompositeUriComponentsContributor uriComponentsContributor;
 
 		public void setHandlerAdapter(RequestMappingHandlerAdapter handlerAdapter) {
@@ -697,6 +700,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		@Override
 		public void afterPropertiesSet() {
+			Assert.state(this.handlerAdapter != null, "No RequestMappingHandlerAdapter set");
 			this.uriComponentsContributor = new CompositeUriComponentsContributor(
 					this.handlerAdapter.getArgumentResolvers(), this.conversionService);
 		}

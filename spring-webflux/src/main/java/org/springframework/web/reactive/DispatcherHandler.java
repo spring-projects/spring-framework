@@ -17,6 +17,7 @@
 package org.springframework.web.reactive;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -67,11 +68,11 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
-	private List<HandlerMapping> handlerMappings;
+	private List<HandlerMapping> handlerMappings = Collections.emptyList();
 
-	private List<HandlerAdapter> handlerAdapters;
+	private List<HandlerAdapter> handlerAdapters = Collections.emptyList();
 
-	private List<HandlerResultHandler> resultHandlers;
+	private List<HandlerResultHandler> resultHandlers = Collections.emptyList();
 
 
 	/**

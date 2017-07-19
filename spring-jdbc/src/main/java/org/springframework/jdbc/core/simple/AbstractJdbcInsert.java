@@ -81,9 +81,11 @@ public abstract class AbstractJdbcInsert {
 	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
+	@Nullable
 	private String insertString;
 
 	/** The SQL type information for the insert columns */
+	@Nullable
 	private int[] insertTypes;
 
 
@@ -222,6 +224,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the insert string to be used.
 	 */
+	@Nullable
 	public String getInsertString() {
 		return this.insertString;
 	}
@@ -229,6 +232,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the array of {@link java.sql.Types} to be used for insert.
 	 */
+	@Nullable
 	public int[] getInsertTypes() {
 		return this.insertTypes;
 	}
@@ -276,7 +280,7 @@ public abstract class AbstractJdbcInsert {
 		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
 		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled insert object: insert string is [" + getInsertString() + "]");
+			logger.debug("Compiled insert object: insert string is [" + this.insertString + "]");
 		}
 		onCompileInternal();
 	}

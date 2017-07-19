@@ -103,6 +103,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the content type for this view.
 	 */
 	@Override
+	@Nullable
 	public String getContentType() {
 		return this.contentType;
 	}

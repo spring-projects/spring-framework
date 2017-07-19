@@ -157,6 +157,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
+	@Nullable
 	public BeanResolver getBeanResolver() {
 		return this.beanResolver;
 	}

@@ -59,7 +59,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * @param contextPath the context path for the request
 	 * @param headers the headers for the request
 	 */
-	public AbstractServerHttpRequest(URI uri, String contextPath, HttpHeaders headers) {
+	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, HttpHeaders headers) {
 		this.uri = uri;
 		this.path = RequestPath.parse(uri, contextPath);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);

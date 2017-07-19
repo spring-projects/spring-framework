@@ -59,6 +59,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	private boolean ignoreInvalidRequests = true;
 
+	@Nullable
 	private Object proxy;
 
 

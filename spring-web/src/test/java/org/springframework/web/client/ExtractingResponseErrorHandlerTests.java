@@ -31,8 +31,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
@@ -43,8 +43,9 @@ public class ExtractingResponseErrorHandlerTests {
 
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		HttpMessageConverter<Object> converter = new MappingJackson2HttpMessageConverter();
 		this.errorHandler = new ExtractingResponseErrorHandler(
 				Collections.singletonList(converter));
@@ -53,8 +54,8 @@ public class ExtractingResponseErrorHandlerTests {
 				Collections.singletonMap(HttpStatus.I_AM_A_TEAPOT, MyRestClientException.class));
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.SERVER_ERROR, MyRestClientException.class));
-		this.errorHandler.afterPropertiesSet();
 	}
+
 
 	@Test
 	public void hasError() throws Exception {
@@ -160,6 +161,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 		this.errorHandler.handleError(this.response);
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyRestClientException extends RestClientException {

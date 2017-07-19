@@ -36,8 +36,10 @@ public final class ResponseCookie extends HttpCookie {
 
 	private final Duration maxAge;
 
+	@Nullable
 	private final String domain;
 
+	@Nullable
 	private final String path;
 
 	private final boolean secure;
@@ -48,8 +50,8 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Private constructor. See {@link #from(String, String)}.
 	 */
-	private ResponseCookie(String name, String value, Duration maxAge, String domain,
-			String path, boolean secure, boolean httpOnly) {
+	private ResponseCookie(String name, String value, Duration maxAge, @Nullable String domain,
+			@Nullable String path, boolean secure, boolean httpOnly) {
 
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
@@ -168,8 +170,10 @@ public final class ResponseCookie extends HttpCookie {
 
 			private Duration maxAge = Duration.ofSeconds(-1);
 
+			@Nullable
 			private String domain;
 
+			@Nullable
 			private String path;
 
 			private boolean secure;

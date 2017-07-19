@@ -126,7 +126,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see #getCurrentReadOnlyFlag()
 	 */
 	@Override
-	protected Connection doGetConnection(String username, String password) throws SQLException {
+	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		Connection con = super.doGetConnection(username, password);
 		Boolean readOnlyToUse = getCurrentReadOnlyFlag();
 		if (readOnlyToUse != null) {

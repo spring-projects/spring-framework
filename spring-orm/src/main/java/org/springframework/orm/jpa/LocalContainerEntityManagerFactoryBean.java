@@ -140,9 +140,11 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
 	 */
 	@Override
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		super.setPersistenceUnitName(persistenceUnitName);
-		this.internalPersistenceUnitManager.setDefaultPersistenceUnitName(persistenceUnitName);
+		if (persistenceUnitName != null) {
+			this.internalPersistenceUnitManager.setDefaultPersistenceUnitName(persistenceUnitName);
+		}
 	}
 
 	/**
@@ -392,6 +394,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 
 	@Override
+	@Nullable
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return this.persistenceUnitInfo;
 	}

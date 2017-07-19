@@ -159,11 +159,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.spi.PersistenceProvider
 	 * @see javax.persistence.Persistence
 	 */
-	public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+	public void setPersistenceProvider(@Nullable PersistenceProvider persistenceProvider) {
 		this.persistenceProvider = persistenceProvider;
 	}
 
 	@Override
+	@Nullable
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}
@@ -175,11 +176,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * ambiguous EntityManager configurations are found.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
 	 */
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
 	@Override
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -240,11 +242,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
 	 */
-	public void setEntityManagerInterface(Class<? extends EntityManager> emInterface) {
+	public void setEntityManagerInterface(@Nullable Class<? extends EntityManager> emInterface) {
 		this.entityManagerInterface = emInterface;
 	}
 
 	@Override
+	@Nullable
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return this.entityManagerInterface;
 	}
@@ -256,11 +259,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * accessors that intend to use JpaDialect functionality.
 	 * @see EntityManagerFactoryInfo#getJpaDialect()
 	 */
-	public void setJpaDialect(JpaDialect jpaDialect) {
+	public void setJpaDialect(@Nullable JpaDialect jpaDialect) {
 		this.jpaDialect = jpaDialect;
 	}
 
 	@Override
+	@Nullable
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}

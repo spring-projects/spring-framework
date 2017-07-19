@@ -24,6 +24,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -84,8 +85,9 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
 	 * @since 3.2
 	 */
-	protected JdbcTemplate jdbcTemplate;
+	protected final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
+	@Nullable
 	private String sqlScriptEncoding;
 
 
@@ -95,7 +97,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate.setDataSource(dataSource);
 	}
 
 	/**

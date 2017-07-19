@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.socket.config.annotation;
 
+package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +31,13 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
  */
 public class WebSocketTransportRegistration {
 
+	@Nullable
 	private Integer messageSizeLimit;
 
+	@Nullable
 	private Integer sendTimeLimit;
 
+	@Nullable
 	private Integer sendBufferSizeLimit;
 
 	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories = new ArrayList<>(2);

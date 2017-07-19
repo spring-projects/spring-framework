@@ -79,7 +79,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		DeferredResult<Object> result = new DeferredResult<>();
 		future.addCallback(new ListenableFutureCallback<Object>() {
 			@Override
-			public void onSuccess(Object value) {
+			public void onSuccess(@Nullable Object value) {
 				result.setResult(value);
 			}
 			@Override

@@ -171,6 +171,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	 */
 	private static abstract class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
 
+		@Nullable
 		private SQLXML xmlObject;
 
 		@Override
@@ -187,11 +188,13 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 		@Override
 		public void cleanup() {
-			try {
-				this.xmlObject.free();
-			}
-			catch (SQLException ex) {
-				throw new DataAccessResourceFailureException("Could not free SQLXML object", ex);
+			if (this.xmlObject != null) {
+				try {
+					this.xmlObject.free();
+				}
+				catch (SQLException ex) {
+					throw new DataAccessResourceFailureException("Could not free SQLXML object", ex);
+				}
 			}
 		}
 

@@ -30,10 +30,7 @@ import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
 
-import static org.springframework.core.ReactiveTypeDescriptor.multiValue;
-import static org.springframework.core.ReactiveTypeDescriptor.noValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleOptionalValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValue;
+import static org.springframework.core.ReactiveTypeDescriptor.*;
 
 /**
  * A registry of adapters to adapt a Reactive Streams {@link Publisher} to/from
@@ -250,7 +247,7 @@ public class ReactiveAdapterRegistry {
 		}
 
 		@Override
-		public <T> Publisher<T> toPublisher(Object source) {
+		public <T> Publisher<T> toPublisher(@Nullable Object source) {
 			Publisher<T> publisher = super.toPublisher(source);
 			return (isMultiValue() ? Flux.from(publisher) : Mono.from(publisher));
 		}

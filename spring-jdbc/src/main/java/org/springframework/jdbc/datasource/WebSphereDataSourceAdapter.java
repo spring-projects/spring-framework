@@ -132,7 +132,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
 	 */
 	@Override
-	protected Connection doGetConnection(String username, String password) throws SQLException {
+	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
 		Object connSpec = createConnectionSpec(
 				getCurrentIsolationLevel(), getCurrentReadOnlyFlag(), username, password);

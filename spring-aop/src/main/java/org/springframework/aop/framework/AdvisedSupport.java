@@ -107,7 +107,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * No-arg constructor for use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 	/**
@@ -117,13 +117,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
-	}
-
-	/**
-	 * Initialize the method cache.
-	 */
-	private void initMethodCache() {
-		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -558,7 +551,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		initMethodCache();
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 

@@ -169,7 +169,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
-	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
 		Session session = getSession(entityManager);

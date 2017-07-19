@@ -20,7 +20,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -254,18 +253,16 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * This implementation is empty.
 	 */
 	@Override
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
-			throws Exception {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
 	}
 
 }

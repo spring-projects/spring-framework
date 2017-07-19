@@ -52,6 +52,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	private String paramName = DEFAULT_PARAM_NAME;
 
+	@Nullable
 	private String[] httpMethods;
 
 	private boolean ignoreInvalidLocale = false;
@@ -80,7 +81,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	 * @param httpMethods the methods
 	 * @since 4.2
 	 */
-	public void setHttpMethods(String... httpMethods) {
+	public void setHttpMethods(@Nullable String... httpMethods) {
 		this.httpMethods = httpMethods;
 	}
 
@@ -88,6 +89,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	 * Return the configured HTTP methods.
 	 * @since 4.2
 	 */
+	@Nullable
 	public String[] getHttpMethods() {
 		return this.httpMethods;
 	}
@@ -112,8 +114,6 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	 * Specify whether to parse request parameter values as BCP 47 language tags
 	 * instead of Java's legacy locale specification format.
 	 * The default is {@code false}.
-	 * <p>Note: This mode requires JDK 7 or higher. Set this flag to {@code true}
-	 * for BCP 47 compliance on JDK 7+ only.
 	 * @since 4.3
 	 * @see Locale#forLanguageTag(String)
 	 * @see Locale#toLanguageTag()

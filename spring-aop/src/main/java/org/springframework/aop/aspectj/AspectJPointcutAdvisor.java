@@ -23,7 +23,6 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
@@ -53,10 +52,10 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		this.pointcut = advice.buildSafePointcut();
 	}
 
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
-
 
 	@Override
 	public boolean isPerInstance() {
@@ -93,12 +92,12 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 			return false;
 		}
 		AspectJPointcutAdvisor otherAdvisor = (AspectJPointcutAdvisor) other;
-		return (ObjectUtils.nullSafeEquals(this.advice, otherAdvisor.advice));
+		return this.advice.equals(otherAdvisor.advice);
 	}
 
 	@Override
 	public int hashCode() {
-		return AspectJPointcutAdvisor.class.hashCode();
+		return AspectJPointcutAdvisor.class.hashCode() * 29 + this.advice.hashCode();
 	}
 
 }

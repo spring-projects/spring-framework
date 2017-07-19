@@ -31,7 +31,6 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -506,6 +505,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	@Override
+	@Nullable
 	public QosSettings getReplyQosSettings() {
 		return this.replyQosSettings;
 	}
@@ -514,11 +514,12 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
 	 * @since 4.1
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 
 	@Override
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}

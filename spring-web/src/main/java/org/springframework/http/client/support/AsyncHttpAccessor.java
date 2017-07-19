@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -44,14 +45,16 @@ public class AsyncHttpAccessor {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory;
+
 
 	/**
 	 * Set the request factory that this accessor uses for obtaining {@link
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
 	public void setAsyncRequestFactory(org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory) {
-		Assert.notNull(asyncRequestFactory, "'asyncRequestFactory' must not be null");
+		Assert.notNull(asyncRequestFactory, "AsyncClientHttpRequestFactory must not be null");
 		this.asyncRequestFactory = asyncRequestFactory;
 	}
 
@@ -60,6 +63,7 @@ public class AsyncHttpAccessor {
 	 * org.springframework.http.client.ClientHttpRequest HttpRequests}.
 	 */
 	public org.springframework.http.client.AsyncClientHttpRequestFactory getAsyncRequestFactory() {
+		Assert.state(asyncRequestFactory != null, "No AsyncClientHttpRequestFactory set");
 		return this.asyncRequestFactory;
 	}
 
@@ -73,7 +77,9 @@ public class AsyncHttpAccessor {
 	 */
 	protected org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(URI url, HttpMethod method)
 			throws IOException {
-		org.springframework.http.client.AsyncClientHttpRequest request = getAsyncRequestFactory().createAsyncRequest(url, method);
+
+		org.springframework.http.client.AsyncClientHttpRequest request =
+				getAsyncRequestFactory().createAsyncRequest(url, method);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Created asynchronous " + method.name() + " request for \"" + url + "\"");
 		}

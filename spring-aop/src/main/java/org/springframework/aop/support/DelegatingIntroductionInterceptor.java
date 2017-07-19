@@ -57,6 +57,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * Object that actually implements the interfaces.
 	 * May be "this" if a subclass implements the introduced interfaces.
 	 */
+	@Nullable
 	private Object delegate;
 
 

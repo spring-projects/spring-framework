@@ -215,7 +215,7 @@ public final class ModelFactory {
 		List<String> keyNames = new ArrayList<>(model.keySet());
 		for (String name : keyNames) {
 			Object value = model.get(name);
-			if (isBindingCandidate(name, value)) {
+			if (value != null && isBindingCandidate(name, value)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
 				if (!model.containsAttribute(bindingResultKey)) {
 					WebDataBinder dataBinder = this.dataBinderFactory.createBinder(request, value, name);
@@ -228,17 +228,16 @@ public final class ModelFactory {
 	/**
 	 * Whether the given attribute requires a {@link BindingResult} in the model.
 	 */
-	private boolean isBindingCandidate(String attributeName, @Nullable Object value) {
+	private boolean isBindingCandidate(String attributeName, Object value) {
 		if (attributeName.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 			return false;
 		}
 
-		Class<?> attrType = (value != null ? value.getClass() : null);
-		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, attrType)) {
+		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, value.getClass())) {
 			return true;
 		}
 
-		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
+		return (!value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 

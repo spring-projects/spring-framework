@@ -73,8 +73,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, locations);
 	}

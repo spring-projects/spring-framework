@@ -276,6 +276,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		private final boolean throwExceptionOnLateReply;
 
+		@Nullable
 		private volatile Message<?> replyMessage;
 
 		private volatile boolean hasReceived;

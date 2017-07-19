@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * @param beanName the name of the bean
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
-		super(beanDefinition, beanName);
-		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
+		this(new BeanDefinitionHolder(beanDefinition, beanName));
 	}
 
 	/**
@@ -58,27 +57,21 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, @Nullable String[] aliases) {
-		super(beanDefinition, beanName, aliases);
-		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
+		this(new BeanDefinitionHolder(beanDefinition, beanName, aliases));
 	}
 
 	/**
 	 * Create a new BeanComponentDefinition for the given bean.
-	 * @param holder the BeanDefinitionHolder encapsulating the
-	 * bean definition as well as the name of the bean
+	 * @param beanDefinitionHolder the BeanDefinitionHolder encapsulating
+	 * the bean definition as well as the name of the bean
 	 */
-	public BeanComponentDefinition(BeanDefinitionHolder holder) {
-		super(holder);
-		findInnerBeanDefinitionsAndBeanReferences(holder.getBeanDefinition());
-	}
+	public BeanComponentDefinition(BeanDefinitionHolder beanDefinitionHolder) {
+		super(beanDefinitionHolder);
 
-
-	private void findInnerBeanDefinitionsAndBeanReferences(BeanDefinition beanDefinition) {
 		List<BeanDefinition> innerBeans = new ArrayList<>();
 		List<BeanReference> references = new ArrayList<>();
-		PropertyValues propertyValues = beanDefinition.getPropertyValues();
-		for (int i = 0; i < propertyValues.getPropertyValues().length; i++) {
-			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
+		PropertyValues propertyValues = beanDefinitionHolder.getBeanDefinition().getPropertyValues();
+		for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 			Object value = propertyValue.getValue();
 			if (value instanceof BeanDefinitionHolder) {
 				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());

@@ -166,7 +166,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (super.equals(other) &&
 				this.resourceBasePath.equals(((WebMergedContextConfiguration) other).resourceBasePath)));
 	}

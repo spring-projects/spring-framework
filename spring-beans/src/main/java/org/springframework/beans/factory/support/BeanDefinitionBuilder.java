@@ -40,9 +40,7 @@ public class BeanDefinitionBuilder {
 	 * Create a new {@code BeanDefinitionBuilder} used to construct a {@link GenericBeanDefinition}.
 	 */
 	public static BeanDefinitionBuilder genericBeanDefinition() {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new GenericBeanDefinition();
-		return builder;
+		return new BeanDefinitionBuilder(new GenericBeanDefinition());
 	}
 
 	/**
@@ -50,8 +48,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClassName the class name for the bean that the definition is being created for
 	 */
 	public static BeanDefinitionBuilder genericBeanDefinition(String beanClassName) {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new GenericBeanDefinition();
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new GenericBeanDefinition());
 		builder.beanDefinition.setBeanClassName(beanClassName);
 		return builder;
 	}
@@ -61,8 +58,7 @@ public class BeanDefinitionBuilder {
 	 * @param beanClass the {@code Class} of the bean that the definition is being created for
 	 */
 	public static BeanDefinitionBuilder genericBeanDefinition(Class<?> beanClass) {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new GenericBeanDefinition();
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new GenericBeanDefinition());
 		builder.beanDefinition.setBeanClass(beanClass);
 		return builder;
 	}
@@ -76,8 +72,7 @@ public class BeanDefinitionBuilder {
 	public static <T> BeanDefinitionBuilder genericBeanDefinition(
 			@Nullable Class<T> beanClass, Supplier<T> instanceSupplier) {
 
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new GenericBeanDefinition();
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new GenericBeanDefinition());
 		builder.beanDefinition.setBeanClass(beanClass);
 		builder.beanDefinition.setInstanceSupplier(instanceSupplier);
 		return builder;
@@ -97,8 +92,7 @@ public class BeanDefinitionBuilder {
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, @Nullable String factoryMethodName) {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new RootBeanDefinition();
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new RootBeanDefinition());
 		builder.beanDefinition.setBeanClassName(beanClassName);
 		builder.beanDefinition.setFactoryMethodName(factoryMethodName);
 		return builder;
@@ -118,8 +112,7 @@ public class BeanDefinitionBuilder {
 	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(Class<?> beanClass, @Nullable String factoryMethodName) {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new RootBeanDefinition();
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder(new RootBeanDefinition());
 		builder.beanDefinition.setBeanClass(beanClass);
 		builder.beanDefinition.setFactoryMethodName(factoryMethodName);
 		return builder;
@@ -130,16 +123,14 @@ public class BeanDefinitionBuilder {
 	 * @param parentName the name of the parent bean
 	 */
 	public static BeanDefinitionBuilder childBeanDefinition(String parentName) {
-		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new ChildBeanDefinition(parentName);
-		return builder;
+		return new BeanDefinitionBuilder(new ChildBeanDefinition(parentName));
 	}
 
 
 	/**
 	 * The {@code BeanDefinition} instance we are creating.
 	 */
-	private AbstractBeanDefinition beanDefinition;
+	private final AbstractBeanDefinition beanDefinition;
 
 	/**
 	 * Our current position with respect to constructor args.
@@ -150,7 +141,8 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Enforce the use of factory methods.
 	 */
-	private BeanDefinitionBuilder() {
+	private BeanDefinitionBuilder(AbstractBeanDefinition beanDefinition) {
+		this.beanDefinition = beanDefinition;
 	}
 
 	/**

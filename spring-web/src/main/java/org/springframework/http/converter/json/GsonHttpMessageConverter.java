@@ -52,7 +52,7 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	 * Construct a new {@code GsonHttpMessageConverter} with default configuration.
 	 */
 	public GsonHttpMessageConverter() {
-		this(new Gson());
+		this.gson = new Gson();
 	}
 
 	/**
@@ -61,7 +61,8 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	 * @since 5.0
 	 */
 	public GsonHttpMessageConverter(Gson gson) {
-		setGson(gson);
+		Assert.notNull(gson, "A Gson instance is required");
+		this.gson = gson;
 	}
 
 

@@ -107,7 +107,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	@Override
 	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
-			@Nullable String schemaName, String procedureName) throws SQLException {
+			@Nullable String schemaName, @Nullable String procedureName) throws SQLException {
 
 		this.procedureColumnMetaDataUsed = true;
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);

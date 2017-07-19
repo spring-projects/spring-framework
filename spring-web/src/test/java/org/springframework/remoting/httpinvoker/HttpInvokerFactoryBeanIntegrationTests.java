@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
-import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
@@ -108,12 +107,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/dummy");
 			factory.setServiceInterface(MyService.class);
-			factory.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
-				@Override
-				public RemoteInvocationResult executeRequest(HttpInvokerClientConfiguration config, RemoteInvocation invocation) {
-					return new RemoteInvocationResult(null);
-				}
-			});
+			factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
 			return factory;
 		}
 
@@ -141,12 +135,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/" + name);
 			factory.setServiceInterface(MyService.class);
-			factory.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
-				@Override
-				public RemoteInvocationResult executeRequest(HttpInvokerClientConfiguration config, RemoteInvocation invocation) {
-					return new RemoteInvocationResult(null);
-				}
-			});
+			factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
 			return factory;
 		}
 	}

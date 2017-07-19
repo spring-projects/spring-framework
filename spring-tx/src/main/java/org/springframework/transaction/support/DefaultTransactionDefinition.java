@@ -216,6 +216,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	@Override
+	@Nullable
 	public final String getName() {
 		return this.name;
 	}
