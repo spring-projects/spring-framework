@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Med Belamachi
  */
 public class UriUtilsTests {
 
@@ -115,6 +116,8 @@ public class UriUtilsTests {
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/a"));
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a"));
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#aaa?bbb"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#aaa.xml?bbb"));
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=a"));
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a"));
 		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a.do"));
