@@ -5864,12 +5864,12 @@ metadata is provided per-instance rather than per-class.
 
 
 [[beans-scanning-index]]
-=== Generating a index of candidate components
-Rather than scanning the classpath to find components, it is also possible to generate an
-index at compilation time. When the `ApplicationContext` detects such index it will
-automatically use it rather than scanning the classpath. This can reduce the time required
-to refresh the `ApplicationContext` as scanning large applications can take a significant
-amount of time.
+=== Generating an index of candidate components
+While classpath scanning is very fast, it is possible to improve the startup performance
+of large applications by creating a static list of candidates at compilation time. In this
+mode, _all modules_ of the application must use this mechanism as, when the
+`ApplicationContext` detects such index, it will automatically use it rather than scanning
+the classpath.
 
 To generate the index, simply add an additional dependency to each module that contains
 components that are target for component scan directives:
@@ -5899,6 +5899,13 @@ Or, using Gradle:
 
 That process will generate a `META-INF/spring.components` file that is going to be
 included in the jar.
+
+[NOTE]
+====
+When working with this mode in your IDE, the `spring-context-indexer` must be registered
+as an annotation processor to make sure the index is up to date when candidate components
+are updated.
+====
 
 [TIP]
 ====
