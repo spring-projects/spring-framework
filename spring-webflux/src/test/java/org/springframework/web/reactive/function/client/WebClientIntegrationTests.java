@@ -568,6 +568,16 @@ public class WebClientIntegrationTests {
 		}).verifyComplete();
 	}
 
+	@Test // SPR-15782
+	public void absoluteUri() throws Exception {
+		String uri = "/api/v4/groups/1";
+		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
+
+		StepVerifier.create(responseMono)
+				.expectErrorMessage("URI is not absolute: " + uri)
+				.verify(Duration.ofSeconds(5));
+	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyException extends RuntimeException {
