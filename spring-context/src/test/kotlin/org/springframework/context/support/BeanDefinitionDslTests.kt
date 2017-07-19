@@ -24,6 +24,7 @@ import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
 
+@Suppress("UNUSED_EXPRESSION")
 class BeanDefinitionDslTests {
 	
 	@Test
