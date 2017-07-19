@@ -320,13 +320,13 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			}
 			if (this.isWildcardSubtype()) {
 				// wildcard with suffix, e.g. application/*+xml
-				int thisPlusIdx = getSubtype().indexOf('+');
+				int thisPlusIdx = getSubtype().lastIndexOf('+');
 				if (thisPlusIdx == -1) {
 					return true;
 				}
 				else {
 					// application/*+xml includes application/soap+xml
-					int otherPlusIdx = other.getSubtype().indexOf('+');
+					int otherPlusIdx = other.getSubtype().lastIndexOf('+');
 					if (otherPlusIdx != -1) {
 						String thisSubtypeNoSuffix = getSubtype().substring(0, thisPlusIdx);
 						String thisSubtypeSuffix = getSubtype().substring(thisPlusIdx + 1);
@@ -364,8 +364,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			// wildcard with suffix? e.g. application/*+xml
 			if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
 
-				int thisPlusIdx = getSubtype().indexOf('+');
-				int otherPlusIdx = other.getSubtype().indexOf('+');
+				int thisPlusIdx = getSubtype().lastIndexOf('+');
+				int otherPlusIdx = other.getSubtype().lastIndexOf('+');
 
 				if (thisPlusIdx == -1 && otherPlusIdx == -1) {
 					return true;
