@@ -126,7 +126,7 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 */
 	public void setTargetField(@Nullable String targetField) {
-		this.targetField = StringUtils.trimAllWhitespace(targetField);
+		this.targetField = (targetField != null ? StringUtils.trimAllWhitespace(targetField) : null);
 	}
 
 	/**

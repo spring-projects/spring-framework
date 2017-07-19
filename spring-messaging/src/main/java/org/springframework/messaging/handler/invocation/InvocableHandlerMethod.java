@@ -252,7 +252,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	MethodParameter getAsyncReturnValueType(Object returnValue) {
+	MethodParameter getAsyncReturnValueType(@Nullable Object returnValue) {
 		return new AsyncResultMethodParameter(returnValue);
 	}
 
@@ -264,7 +264,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		private final ResolvableType returnType;
 
-		public AsyncResultMethodParameter(Object returnValue) {
+		public AsyncResultMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric();

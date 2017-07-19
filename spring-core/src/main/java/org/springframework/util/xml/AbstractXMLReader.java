@@ -144,6 +144,7 @@ abstract class AbstractXMLReader implements XMLReader {
 	 * handler. The property name for a lexical handler is {@code http://xml.org/sax/properties/lexical-handler}.
 	 */
 	@Override
+	@Nullable
 	public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
 		if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 			return this.lexicalHandler;

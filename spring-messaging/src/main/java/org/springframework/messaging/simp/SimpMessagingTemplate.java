@@ -54,6 +54,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private volatile long sendTimeout = -1;
 
+	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
 

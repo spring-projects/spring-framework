@@ -36,6 +36,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private Database database = Database.DEFAULT;
 
+	@Nullable
 	private String databasePlatform;
 
 	private boolean generateDdl = false;
@@ -47,14 +48,13 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Specify the target database to operate on, as a value of the {@code Database} enum:
 	 * DB2, DERBY, H2, HSQL, INFORMIX, MYSQL, ORACLE, POSTGRESQL, SQL_SERVER, SYBASE
 	 */
-	public void setDatabase(@Nullable Database database) {
+	public void setDatabase(Database database) {
 		this.database = database;
 	}
 
 	/**
 	 * Return the target database to operate on.
 	 */
-	@Nullable
 	protected Database getDatabase() {
 		return this.database;
 	}

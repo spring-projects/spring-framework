@@ -33,6 +33,7 @@ public class CustomSQLErrorCodesTranslation {
 
 	private String[] errorCodes = new String[0];
 
+	@Nullable
 	private Class<?> exceptionClass;
 
 

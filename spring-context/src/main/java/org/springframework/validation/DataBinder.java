@@ -535,9 +535,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	private void assertValidators(Validator... validators) {
-		if (validators == null) {
-			return;
-		}
 		for (Validator validator : validators) {
 			if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
 				throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());

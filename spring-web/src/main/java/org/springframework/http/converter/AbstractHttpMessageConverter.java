@@ -54,6 +54,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
+	@Nullable
 	private Charset defaultCharset;
 
 

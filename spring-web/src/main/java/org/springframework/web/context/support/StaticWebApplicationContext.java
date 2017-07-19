@@ -93,7 +93,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	@Override
 	public void setServletConfig(@Nullable ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
-		if (this.servletContext == null) {
+		if (servletConfig != null && this.servletContext == null) {
 			this.servletContext = servletConfig.getServletContext();
 		}
 	}
@@ -107,7 +107,9 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	@Override
 	public void setNamespace(@Nullable String namespace) {
 		this.namespace = namespace;
-		setDisplayName(namespace != null ? "WebApplicationContext for namespace '" + namespace + "'" : null);
+		if (namespace != null) {
+			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+		}
 	}
 
 	@Override

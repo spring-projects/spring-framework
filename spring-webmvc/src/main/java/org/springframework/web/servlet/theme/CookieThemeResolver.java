@@ -88,11 +88,14 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 		}
 
 		// Retrieve cookie value from request.
-		Cookie cookie = WebUtils.getCookie(request, getCookieName());
-		if (cookie != null) {
-			String value = cookie.getValue();
-			if (StringUtils.hasText(value)) {
-				themeName = value;
+		String cookieName = getCookieName();
+		if (cookieName != null) {
+			Cookie cookie = WebUtils.getCookie(request, cookieName);
+			if (cookie != null) {
+				String value = cookie.getValue();
+				if (StringUtils.hasText(value)) {
+					themeName = value;
+				}
 			}
 		}
 

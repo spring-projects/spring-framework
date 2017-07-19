@@ -41,6 +41,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	private boolean daemon = false;
 
+	@Nullable
 	private ThreadGroup threadGroup;
 
 	private final AtomicInteger threadCount = new AtomicInteger(0);

@@ -65,6 +65,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
+	@Nullable
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();

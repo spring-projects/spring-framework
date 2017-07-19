@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for JDBC {@link javax.sql.DataSource} implementations
@@ -58,8 +57,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	public void setUrl(@Nullable String url) {
-		Assert.hasText(url, "Property 'url' must not be empty");
-		this.url = url.trim();
+		this.url = (url != null ? url.trim() : null);
 	}
 
 	/**

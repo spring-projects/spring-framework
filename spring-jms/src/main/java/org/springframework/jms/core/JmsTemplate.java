@@ -95,6 +95,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	@Nullable
 	private Object defaultDestination;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
 
@@ -228,13 +229,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #receiveAndConvert
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the message converter for this template.
 	 */
+	@Nullable
 	public MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
