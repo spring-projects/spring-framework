@@ -264,7 +264,7 @@ public class ModelAndView {
 	 * <p>The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
-	public void setStatus(HttpStatus status) {
+	public void setStatus(@Nullable HttpStatus status) {
 		this.status = status;
 	}
 

@@ -39,7 +39,7 @@ public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	 * Set the {@link MessageListener} to invoke when a message matching
 	 * the endpoint is received.
 	 */
-	public void setMessageListener(MessageListener messageListener) {
+	public void setMessageListener(@Nullable MessageListener messageListener) {
 		this.messageListener = messageListener;
 	}
 

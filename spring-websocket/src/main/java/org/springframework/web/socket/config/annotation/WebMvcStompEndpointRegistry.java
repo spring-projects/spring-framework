@@ -125,7 +125,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	 * used to map handshake requests.
 	 */
 	@Override
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 

@@ -39,7 +39,7 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @return {@code false} if the status code has not been set because the HTTP response
 	 * is already committed, {@code true} if it has been set correctly.
 	 */
-	boolean setStatusCode(HttpStatus status);
+	boolean setStatusCode(@Nullable HttpStatus status);
 
 	/**
 	 * Return the HTTP status code or {@code null} if not set.

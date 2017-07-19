@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
+	@Nullable
 	private NavigationHandler decoratedNavigationHandler;
 
 

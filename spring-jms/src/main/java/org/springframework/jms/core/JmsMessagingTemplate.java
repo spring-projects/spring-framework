@@ -106,7 +106,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	/**
 	 * Set the {@link JmsTemplate} to use.
 	 */
-	public void setJmsTemplate(JmsTemplate jmsTemplate) {
+	public void setJmsTemplate(@Nullable JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 
@@ -147,7 +147,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * without a destination argument will raise an exception if invoked.
 	 * @see #setDefaultDestination(Object)
 	 */
-	public void setDefaultDestinationName(String defaultDestinationName) {
+	public void setDefaultDestinationName(@Nullable String defaultDestinationName) {
 		this.defaultDestinationName = defaultDestinationName;
 	}
 

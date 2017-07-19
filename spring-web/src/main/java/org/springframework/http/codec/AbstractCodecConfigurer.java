@@ -144,7 +144,7 @@ abstract class AbstractCodecConfigurer implements CodecConfigurer {
 		/**
 		 * Access to custom codecs for sub-classes, e.g. for multipart writers.
 		 */
-		public void setCustomCodecs(DefaultCustomCodecs customCodecs) {
+		public void setCustomCodecs(@Nullable DefaultCustomCodecs customCodecs) {
 			this.customCodecs = customCodecs;
 		}
 

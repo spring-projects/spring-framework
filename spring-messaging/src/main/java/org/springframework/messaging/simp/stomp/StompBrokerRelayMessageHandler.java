@@ -325,7 +325,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * providing the cloud-based STOMP service.
 	 * <p>By default this property is not set.
 	 */
-	public void setVirtualHost(String virtualHost) {
+	public void setVirtualHost(@Nullable String virtualHost) {
 		this.virtualHost = virtualHost;
 	}
 
@@ -341,7 +341,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
 	 * <p>By default {@link ReactorNettyTcpClient} is used.
 	 */
-	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
+	public void setTcpClient(@Nullable TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
 	}
 
@@ -361,7 +361,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * are sent to the client outbound message channel.
 	 * <p>By default this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

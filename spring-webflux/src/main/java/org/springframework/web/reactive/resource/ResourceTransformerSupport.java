@@ -35,6 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
+	@Nullable
 	private ResourceUrlProvider resourceUrlProvider;
 
 
@@ -45,7 +46,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * relative links.
 	 * @param resourceUrlProvider the URL provider to use
 	 */
-	public void setResourceUrlProvider(ResourceUrlProvider resourceUrlProvider) {
+	public void setResourceUrlProvider(@Nullable ResourceUrlProvider resourceUrlProvider) {
 		this.resourceUrlProvider = resourceUrlProvider;
 	}
 

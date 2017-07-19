@@ -51,8 +51,7 @@ public abstract class AbstractDestinationResolvingMessagingTemplate<D> extends A
 	 * require resolving a destination name will raise an {@link IllegalArgumentException}.
 	 * @param destinationResolver the destination resolver to use
 	 */
-	public void setDestinationResolver(DestinationResolver<D> destinationResolver) {
-		Assert.notNull(destinationResolver, "'destinationResolver' is required");
+	public void setDestinationResolver(@Nullable DestinationResolver<D> destinationResolver) {
 		this.destinationResolver = destinationResolver;
 	}
 

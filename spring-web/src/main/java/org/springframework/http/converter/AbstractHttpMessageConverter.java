@@ -110,7 +110,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Set the default character set, if any.
 	 * @since 4.3
 	 */
-	public void setDefaultCharset(Charset defaultCharset) {
+	public void setDefaultCharset(@Nullable Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
 	}
 

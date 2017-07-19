@@ -45,7 +45,7 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	/**
 	 * Specify the desired service type (typically the service's public API).
 	 */
-	public void setServiceType(Class<?> serviceType) {
+	public void setServiceType(@Nullable Class<?> serviceType) {
 		this.serviceType = serviceType;
 	}
 

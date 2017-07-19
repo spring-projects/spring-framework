@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  */
 public class CharacterEncodingFilter extends OncePerRequestFilter {
 
+	@Nullable
 	private String encoding;
 
 	private boolean forceRequestEncoding = false;
@@ -110,7 +111,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * (and whether it will be applied as default response encoding as well)
 	 * depends on the {@link #setForceEncoding "forceEncoding"} flag.
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
 	}
 

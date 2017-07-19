@@ -208,7 +208,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	// ---------------------------------------------------------------------
 
 	@Override
-	public void setServletConfig(ServletConfig servletConfig) {
+	public void setServletConfig(@Nullable ServletConfig servletConfig) {
 		// no-op
 	}
 
@@ -219,7 +219,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	public void setNamespace(String namespace) {
+	public void setNamespace(@Nullable String namespace) {
 		// no-op
 	}
 

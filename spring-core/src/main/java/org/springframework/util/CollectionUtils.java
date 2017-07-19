@@ -430,7 +430,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
-		public void set(K key, V value) {
+		public void set(K key, @Nullable V value) {
 			List<V> values = new LinkedList<>();
 			values.add(value);
 			this.map.put(key, values);

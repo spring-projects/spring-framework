@@ -90,7 +90,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 

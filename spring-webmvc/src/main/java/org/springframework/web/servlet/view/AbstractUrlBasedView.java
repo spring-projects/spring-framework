@@ -53,7 +53,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	 * Set the URL of the resource that this view wraps.
 	 * The URL must be appropriate for the concrete View implementation.
 	 */
-	public void setUrl(String url) {
+	public void setUrl(@Nullable String url) {
 		this.url = url;
 	}
 

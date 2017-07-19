@@ -92,7 +92,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * @see #setPersistenceUnitName
 	 * @see #DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME
 	 */
-	public void setEntityManagerFactoryBeanName(String entityManagerFactoryBeanName) {
+	public void setEntityManagerFactoryBeanName(@Nullable String entityManagerFactoryBeanName) {
 		this.entityManagerFactoryBeanName = entityManagerFactoryBeanName;
 	}
 
@@ -115,7 +115,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * @see #setEntityManagerFactoryBeanName
 	 * @see #DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME
 	 */
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 

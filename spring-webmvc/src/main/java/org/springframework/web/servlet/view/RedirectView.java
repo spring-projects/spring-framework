@@ -265,7 +265,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param hosts one or more application hosts
 	 * @since 4.3
 	 */
-	public void setHosts(String... hosts) {
+	public void setHosts(@Nullable String... hosts) {
 		this.hosts = hosts;
 	}
 

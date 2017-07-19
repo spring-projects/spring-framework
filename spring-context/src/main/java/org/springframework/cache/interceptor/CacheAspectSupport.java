@@ -86,12 +86,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator();
 
+	@Nullable
 	private CacheOperationSource cacheOperationSource;
 
 	private KeyGenerator keyGenerator = new SimpleKeyGenerator();
 
+	@Nullable
 	private CacheResolver cacheResolver;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
 	private boolean initialized = false;
@@ -150,8 +153,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @see #setCacheManager(org.springframework.cache.CacheManager)
 	 * @see SimpleCacheResolver
 	 */
-	public void setCacheResolver(CacheResolver cacheResolver) {
-		Assert.notNull(cacheResolver, "CacheResolver must not be null");
+	public void setCacheResolver(@Nullable CacheResolver cacheResolver) {
 		this.cacheResolver = cacheResolver;
 	}
 

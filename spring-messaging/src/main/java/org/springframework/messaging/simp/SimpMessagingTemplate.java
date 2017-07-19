@@ -111,7 +111,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * messages created through the {@code SimpMessagingTemplate}.
 	 * <p>By default, this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

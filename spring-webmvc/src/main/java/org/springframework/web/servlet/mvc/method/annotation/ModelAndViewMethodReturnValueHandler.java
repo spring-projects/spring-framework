@@ -44,6 +44,7 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private String[] redirectPatterns;
 
 
@@ -56,7 +57,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * prefix as well.
 	 * @since 4.1
 	 */
-	public void setRedirectPatterns(String... redirectPatterns) {
+	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
 		this.redirectPatterns = redirectPatterns;
 	}
 

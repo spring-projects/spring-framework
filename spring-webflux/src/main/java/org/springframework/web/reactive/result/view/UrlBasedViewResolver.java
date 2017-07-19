@@ -73,18 +73,22 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	public static final String REDIRECT_URL_PREFIX = "redirect:";
 
 
+	@Nullable
 	private Class<?> viewClass;
 
 	private String prefix = "";
 
 	private String suffix = "";
 
+	@Nullable
 	private String[] viewNames;
 
 	private Function<String, RedirectView> redirectViewProvider = RedirectView::new;
 
+	@Nullable
 	private String requestContextAttribute;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -93,8 +97,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * @param viewClass a class that is assignable to the required view class
 	 * which by default is AbstractUrlBasedView
 	 */
-	public void setViewClass(Class<?> viewClass) {
-		if (!requiredViewClass().isAssignableFrom(viewClass)) {
+	public void setViewClass(@Nullable Class<?> viewClass) {
+		if (viewClass != null && !requiredViewClass().isAssignableFrom(viewClass)) {
 			String name = viewClass.getName();
 			throw new IllegalArgumentException("Given view class [" + name + "] " +
 					"is not of type [" + requiredViewClass().getName() + "]");
@@ -153,7 +157,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * 'my*', '*Report' and '*Repo*' will all match the view name 'myReport'.
 	 * @see #canHandle
 	 */
-	public void setViewNames(String... viewNames) {
+	public void setViewNames(@Nullable String... viewNames) {
 		this.viewNames = viewNames;
 	}
 
@@ -179,7 +183,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 * @see AbstractView#setRequestContextAttribute
 	 */
-	public void setRequestContextAttribute(String requestContextAttribute) {
+	public void setRequestContextAttribute(@Nullable String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
@@ -200,7 +204,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * @see #applyLifecycleMethods
 	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 

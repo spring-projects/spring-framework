@@ -95,8 +95,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceHttpMessageWriter resourceHttpMessageWriter;
 
 
@@ -160,7 +162,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
-	public void setCacheControl(CacheControl cacheControl) {
+	public void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -177,7 +179,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Configure the {@link ResourceHttpMessageWriter} to use.
 	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
 	 */
-	public void setResourceHttpMessageWriter(ResourceHttpMessageWriter httpMessageWriter) {
+	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
 		this.resourceHttpMessageWriter = httpMessageWriter;
 	}
 

@@ -148,10 +148,13 @@ import org.springframework.util.Assert;
  */
 public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 
+	@Nullable
 	private ResourceAdapter resourceAdapter;
 
+	@Nullable
 	private MessageEndpointFactory messageEndpointFactory;
 
+	@Nullable
 	private ActivationSpec activationSpec;
 
 	private boolean autoStartup = true;
@@ -166,7 +169,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Set the JCA ResourceAdapter to manage endpoints for.
 	 */
-	public void setResourceAdapter(ResourceAdapter resourceAdapter) {
+	public void setResourceAdapter(@Nullable ResourceAdapter resourceAdapter) {
 		this.resourceAdapter = resourceAdapter;
 	}
 
@@ -186,7 +189,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * with different {@link #setActivationSpec ActivationSpec} objects applied.
 	 * @see GenericMessageEndpointFactory#setMessageListener
 	 */
-	public void setMessageEndpointFactory(MessageEndpointFactory messageEndpointFactory) {
+	public void setMessageEndpointFactory(@Nullable MessageEndpointFactory messageEndpointFactory) {
 		this.messageEndpointFactory = messageEndpointFactory;
 	}
 
@@ -203,7 +206,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * <p>Note that this ActivationSpec instance should not be shared
 	 * across multiple ResourceAdapter instances.
 	 */
-	public void setActivationSpec(ActivationSpec activationSpec) {
+	public void setActivationSpec(@Nullable ActivationSpec activationSpec) {
 		this.activationSpec = activationSpec;
 	}
 

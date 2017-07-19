@@ -111,9 +111,10 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "HttpStatus must not be null");
-		Assert.isTrue(statusCode.is3xxRedirection(), "Must be a redirection (3xx status code)");
+	public void setStatusCode(@Nullable HttpStatus statusCode) {
+		if (statusCode != null) {
+			Assert.isTrue(statusCode.is3xxRedirection(), "Must be a redirection (3xx status code)");
+		}
 		this.statusCode = statusCode;
 	}
 

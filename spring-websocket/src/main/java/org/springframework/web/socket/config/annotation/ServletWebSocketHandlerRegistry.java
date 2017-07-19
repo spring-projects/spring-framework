@@ -92,7 +92,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
 	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 

@@ -63,7 +63,7 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		return this.transactionActive;
 	}
 
-	protected void setSavepointManager(SavepointManager savepointManager) {
+	protected void setSavepointManager(@Nullable SavepointManager savepointManager) {
 		this.savepointManager = savepointManager;
 	}
 

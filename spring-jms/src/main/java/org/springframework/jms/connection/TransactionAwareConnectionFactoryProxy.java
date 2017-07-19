@@ -81,6 +81,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	private boolean synchedLocalTransactionAllowed = false;
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
 
@@ -102,8 +103,7 @@ public class TransactionAwareConnectionFactoryProxy
 	/**
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	public final void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
-		Assert.notNull(targetConnectionFactory, "'targetConnectionFactory' must not be null");
+	public final void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 

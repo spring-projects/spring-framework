@@ -234,7 +234,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * @see org.springframework.validation.annotation.Validated
 	 * @see PayloadArgumentResolver
 	 */
-	public void setValidator(Validator validator) {
+	public void setValidator(@Nullable Validator validator) {
 		this.validator = validator;
 	}
 
@@ -249,7 +249,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * that send messages from controller return values.
 	 * <p>By default, this property is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

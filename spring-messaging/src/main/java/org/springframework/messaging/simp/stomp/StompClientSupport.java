@@ -43,6 +43,7 @@ public abstract class StompClientSupport {
 
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
 	private long[] defaultHeartbeat = new long[] {10000, 10000};
@@ -76,7 +77,7 @@ public abstract class StompClientSupport {
 	 * Receipts however, if needed, do require a TaskScheduler to be configured.
 	 * <p>By default, this is not set.
 	 */
-	public void setTaskScheduler(TaskScheduler taskScheduler) {
+	public void setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
 	}
 

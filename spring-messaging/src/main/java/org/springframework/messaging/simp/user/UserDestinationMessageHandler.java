@@ -108,7 +108,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 * <p>By default this is not set.
 	 * @param destination the target destination.
 	 */
-	public void setBroadcastDestination(String destination) {
+	public void setBroadcastDestination(@Nullable String destination) {
 		this.broadcastHandler = (StringUtils.hasText(destination) ?
 				new BroadcastHandler(this.messagingTemplate, destination) : null);
 	}
@@ -134,7 +134,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 * headers of resolved target messages.
 	 * <p>By default this is not set.
 	 */
-	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
+	public void setHeaderInitializer(@Nullable MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
 	}
 

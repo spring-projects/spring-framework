@@ -57,7 +57,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC URL to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setUrl(String url) {
+	public void setUrl(@Nullable String url) {
 		Assert.hasText(url, "Property 'url' must not be empty");
 		this.url = url.trim();
 	}
@@ -74,7 +74,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC username to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setUsername(String username) {
+	public void setUsername(@Nullable String username) {
 		this.username = username;
 	}
 
@@ -90,7 +90,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC password to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setPassword(String password) {
+	public void setPassword(@Nullable String password) {
 		this.password = password;
 	}
 
@@ -107,7 +107,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @since 4.3.2
 	 * @see Connection#setCatalog
 	 */
-	public void setCatalog(String catalog) {
+	public void setCatalog(@Nullable String catalog) {
 		this.catalog = catalog;
 	}
 
@@ -125,7 +125,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @since 4.3.2
 	 * @see Connection#setSchema
 	 */
-	public void setSchema(String schema) {
+	public void setSchema(@Nullable String schema) {
 		this.schema = schema;
 	}
 
@@ -146,7 +146,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * DataSource will override the corresponding connection properties.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setConnectionProperties(Properties connectionProperties) {
+	public void setConnectionProperties(@Nullable Properties connectionProperties) {
 		this.connectionProperties = connectionProperties;
 	}
 

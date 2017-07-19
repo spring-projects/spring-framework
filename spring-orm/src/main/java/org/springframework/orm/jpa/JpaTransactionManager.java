@@ -154,7 +154,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * single unique bean of type EntityManagerFactory in the containing BeanFactory.
 	 * @see #setPersistenceUnitName
 	 */
-	public void setEntityManagerFactory(EntityManagerFactory emf) {
+	public void setEntityManagerFactory(@Nullable EntityManagerFactory emf) {
 		this.entityManagerFactory = emf;
 	}
 
@@ -186,7 +186,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * be retrieved by finding a single unique bean of type EntityManagerFactory.
 	 * @see #setEntityManagerFactory
 	 */
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
@@ -254,8 +254,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
-	public void setDataSource(DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+	public void setDataSource(@Nullable DataSource dataSource) {
+		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).

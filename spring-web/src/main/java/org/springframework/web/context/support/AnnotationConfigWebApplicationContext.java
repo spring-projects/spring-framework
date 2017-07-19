@@ -84,8 +84,10 @@ import org.springframework.web.context.ContextLoader;
 public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
 		implements AnnotationConfigRegistry {
 
+	@Nullable
 	private BeanNameGenerator beanNameGenerator;
 
+	@Nullable
 	private ScopeMetadataResolver scopeMetadataResolver;
 
 	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
@@ -100,7 +102,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
 	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = beanNameGenerator;
 	}
 
@@ -120,7 +122,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see AnnotatedBeanDefinitionReader#setScopeMetadataResolver
 	 * @see ClassPathBeanDefinitionScanner#setScopeMetadataResolver
 	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver = scopeMetadataResolver;
 	}
 

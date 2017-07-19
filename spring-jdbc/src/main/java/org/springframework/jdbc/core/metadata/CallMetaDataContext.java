@@ -143,7 +143,7 @@ public class CallMetaDataContext {
 	/**
 	 * Specify the name of the procedure.
 	 */
-	public void setProcedureName(String procedureName) {
+	public void setProcedureName(@Nullable String procedureName) {
 		this.procedureName = procedureName;
 	}
 
@@ -158,7 +158,7 @@ public class CallMetaDataContext {
 	/**
 	 * Specify the name of the catalog.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		this.catalogName = catalogName;
 	}
 
@@ -173,7 +173,7 @@ public class CallMetaDataContext {
 	/**
 	 * Secify the name of the schema.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		this.schemaName = schemaName;
 	}
 
