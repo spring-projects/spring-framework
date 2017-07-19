@@ -24,7 +24,6 @@ import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of {@link AspectInstanceFactory} that locates the aspect from the

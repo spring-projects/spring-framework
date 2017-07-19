@@ -81,12 +81,10 @@ public abstract class AbstractJdbcInsert {
 	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
-	@Nullable
-	private String insertString;
+	private String insertString = "";
 
 	/** The SQL type information for the insert columns */
-	@Nullable
-	private int[] insertTypes;
+	private int[] insertTypes = new int[0];
 
 
 	/**
@@ -224,7 +222,6 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the insert string to be used.
 	 */
-	@Nullable
 	public String getInsertString() {
 		return this.insertString;
 	}
@@ -232,7 +229,6 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the array of {@link java.sql.Types} to be used for insert.
 	 */
-	@Nullable
 	public int[] getInsertTypes() {
 		return this.insertTypes;
 	}

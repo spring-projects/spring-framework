@@ -20,11 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,14 +35,13 @@ import static org.junit.Assert.*;
  * Unit tests for {@link RelativeRedirectFilter}.
  *
  * @author Rob Winch
+ * @author Juergen Hoeller
  */
-@RunWith(MockitoJUnitRunner.class)
 public class RelativeRedirectFilterTests {
 
-	@Mock
-	HttpServletResponse response;
+	private RelativeRedirectFilter filter = new RelativeRedirectFilter();
 
-	RelativeRedirectFilter filter = new RelativeRedirectFilter();
+	private HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
 
 	@Test(expected = IllegalArgumentException.class)
