@@ -222,11 +222,12 @@ public abstract class UriUtils {
 	 */
 	public static String extractFileExtension(String path) {
 		int end = path.indexOf('?');
+		int fragmentIndex = path.indexOf('#');
+		if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {
+			end = fragmentIndex;
+		}
 		if (end == -1) {
-			end = path.indexOf('#');
-			if (end == -1) {
-				end = path.length();
-			}
+			end = path.length();
 		}
 		int begin = path.lastIndexOf('/', end) + 1;
 		int paramIndex = path.indexOf(';', begin);
