@@ -249,7 +249,7 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/spr13319", method = POST, consumes = "multipart/form-data")
 		public ResponseEntity<Void> create(@RequestPart("file") MultipartFile multipartFile) {
-			assertEquals("%C3%A9l%C3%A8ve.txt", multipartFile.getOriginalFilename());
+			assertEquals("élève.txt", multipartFile.getOriginalFilename());
 			return ResponseEntity.ok().build();
 		}
 	}
