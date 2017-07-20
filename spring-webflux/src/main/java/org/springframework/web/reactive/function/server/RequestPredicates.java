@@ -588,7 +588,7 @@ public abstract class RequestPredicates {
 
 			private static List<Element> prependWithSeparator(List<Element> elements) {
 				List<Element> result = new ArrayList<>(elements);
-				if (!(result.get(0) instanceof Separator)) {
+				if (result.isEmpty() || !(result.get(0) instanceof Separator)) {
 					result.add(0, SEPARATOR);
 				}
 				return Collections.unmodifiableList(result);
