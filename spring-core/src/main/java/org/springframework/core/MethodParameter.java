@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import kotlin.Metadata;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -737,7 +736,7 @@ public class MethodParameter {
 		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type or not.
 		 */
 		public static boolean isNullable(MethodParameter param) {
-			if (param.getContainingClass().isAnnotationPresent(Metadata.class)) {
+			if (isKotlinClass(param.getContainingClass())) {
 				Method method = param.getMethod();
 				Constructor<?> ctor = param.getConstructor();
 				int index = param.getParameterIndex();
@@ -767,6 +766,16 @@ public class MethodParameter {
 			}
 			return false;
 		}
+
+		private static boolean isKotlinClass(Class<?> clazz) {
+			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+				if (annotation.annotationType().getName().equals("kotlin.Metadata")) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
 	}
 
 }

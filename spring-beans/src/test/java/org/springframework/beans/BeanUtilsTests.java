@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -274,6 +275,23 @@ public class BeanUtilsTests {
 			}
 		}
 	}
+	
+	@Test 
+	public void testFindDefaultConstructorAndInstantiate() {
+		Constructor<Bean> ctor = BeanUtils.findPrimaryConstructor(Bean.class);
+		assertNotNull(ctor);
+		Bean bean = BeanUtils.instantiateClass(ctor);
+		assertNotNull(bean);
+	}
+
+	@Test
+	public void testFindSingleNonDefaultConstructorAndInstantiate() {
+		Constructor<BeanWithSingleNonDefaultConstructor> ctor = BeanUtils.findPrimaryConstructor(BeanWithSingleNonDefaultConstructor.class);
+		assertNotNull(ctor);
+		BeanWithSingleNonDefaultConstructor bean = BeanUtils.instantiateClass(ctor, "foo");
+		assertNotNull(bean);
+		assertEquals("foo", bean.getName());
+	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
@@ -442,6 +460,19 @@ public class BeanUtilsTests {
 		@Override
 		public void setValue(String aValue) {
 			value = aValue;
+		}
+	}
+	
+	private static class BeanWithSingleNonDefaultConstructor {
+		
+		private final String name;
+
+		public BeanWithSingleNonDefaultConstructor(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 
