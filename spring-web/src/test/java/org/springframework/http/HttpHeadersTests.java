@@ -311,6 +311,7 @@ public class HttpHeadersTests {
 		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void contentDisposition() {
 		headers.setContentDispositionFormData("name", null);

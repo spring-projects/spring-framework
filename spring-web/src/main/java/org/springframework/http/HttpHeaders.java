@@ -670,13 +670,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the (new) value of the {@code Content-Disposition} header
-	 * for {@code form-data}.
+	 * Set the {@code Content-Disposition} header when creating a
+	 * {@code "multipart/form-data"} request.
+	 * <p>Applications typically would not set this header directly but
+	 * rather prepare a {@code MultiValueMap<String, Object>}, containing an
+	 * Object or a {@link org.springframework.core.io.Resource} for each part,
+	 * and then pass that to the {@code RestTemplate} or {@code WebClient}.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
 	 */
 	public void setContentDispositionFormData(String name, String filename) {
-		setContentDispositionFormData(name, filename, null);
+		Assert.notNull(name, "'name' must not be null");
+		StringBuilder builder = new StringBuilder("form-data; name=\"");
+		builder.append(name).append('\"');
+		if (filename != null) {
+			builder.append("; filename=\"");
+			builder.append(filename).append('\"');
+		}
+		set(CONTENT_DISPOSITION, builder.toString());
 	}
 
 	/**
@@ -686,10 +697,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
 	 * @param charset the charset used for the filename (may be {@code null})
-	 * @since 4.3.3
-	 * @see #setContentDispositionFormData(String, String)
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
+	 * @deprecated deprecated in 4.3.11 and removed from 5.0; as per
+	 * <a link="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>,
+	 * an RFC 5987 style encoding should not be used for multipart/form-data requests.
+	 * Furthermore there should be no reason for applications to set this header
+	 * explicitly; for more details also read
+	 * {@link #setContentDispositionFormData(String, String)}
 	 */
+	@Deprecated
 	public void setContentDispositionFormData(String name, String filename, Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
 		StringBuilder builder = new StringBuilder("form-data; name=\"");
