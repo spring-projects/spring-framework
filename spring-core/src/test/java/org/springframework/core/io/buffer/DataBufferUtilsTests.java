@@ -30,6 +30,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.stream.Collectors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -206,6 +207,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	@Ignore  // SPR-15798
 	public void writeAsynchronousFileChannel() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
