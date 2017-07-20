@@ -168,6 +168,14 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
 	}
 
+	@Test
+	public void ipv6Host() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("[::1]", 0);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "[::1]", headers.getFirst("Host"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void illegalETag() {
 		String eTag = "v2.6";

@@ -971,7 +971,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (value == null) {
 			return null;
 		}
-		int idx = value.lastIndexOf(':');
+		final int idx;
+		if (value.startsWith("[")) {
+			idx = value.indexOf(':', value.indexOf(']'));
+		} else {
+			idx = value.lastIndexOf(':');
+		}
 		String hostname = null;
 		int port = 0;
 		if (idx != -1 && idx < value.length() - 1) {
