@@ -27,8 +27,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static java.nio.charset.StandardCharsets.*;
-import static java.time.format.DateTimeFormatter.*;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
  * Represent the Content-Disposition type and parameters as defined in RFC 2183.
@@ -416,8 +417,14 @@ public class ContentDisposition {
 		Builder filename(String filename);
 
 		/**
-		 * Set the value of the {@literal filename*} that will be encoded as defined in
-		 * the RFC 5987. Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
+		 * Set the value of the {@literal filename*} that will be encoded as
+		 * defined in the RFC 5987. Only the US-ASCII, UTF-8 and ISO-8859-1
+		 * charsets are supported.
+		 * <p><strong>Note:</strong> Do not use this for a
+		 * {@code "multipart/form-data"} requests as per
+		 * <a link="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
+		 * and also RFC 5987 itself mentions it does not apply to multipart
+		 * requests.
 		 */
 		Builder filename(String filename, Charset charset);
 

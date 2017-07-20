@@ -742,48 +742,32 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the (new) value of the {@code Content-Disposition} header
-	 * for {@code form-data}.
+	 * Set the {@code Content-Disposition} header when creating a
+	 * {@code "multipart/form-data"} request.
+	 * <p>Applications typically would not set this header directly but
+	 * rather prepare a {@code MultiValueMap<String, Object>}, containing an
+	 * Object or a {@link org.springframework.core.io.Resource} for each part,
+	 * and then pass that to the {@code RestTemplate} or {@code WebClient}.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
-	 * @see #setContentDisposition(ContentDisposition)
 	 * @see #getContentDisposition()
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
-		setContentDispositionFormData(name, filename, null);
-	}
-
-	/**
-	 * Set the (new) value of the {@code Content-Disposition} header
-	 * for {@code form-data}, optionally encoding the filename using the RFC 5987.
-	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
-	 * @param name the control name
-	 * @param filename the filename (may be {@code null})
-	 * @param charset the charset used for the filename (may be {@code null})
-	 * @since 4.3.3
-	 * @see #setContentDisposition(ContentDisposition)
-	 * @see #getContentDisposition()
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
-	 */
-	public void setContentDispositionFormData(String name, @Nullable String filename, @Nullable Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
 		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
 		if (filename != null) {
-			if (charset != null) {
-				disposition.filename(filename, charset);
-			}
-			else {
-				disposition.filename(filename);
-			}
+			disposition.filename(filename);
 		}
 		setContentDisposition(disposition.build());
 	}
 
 	/**
-	 * Set the (new) value of the {@literal Content-Disposition} header. Supports the
-	 * disposition type and {@literal filename}, {@literal filename*} (encoded according
-	 * to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported),
-	 * {@literal name}, {@literal size} parameters.
+	 * Set the {@literal Content-Disposition} header.
+	 * <p>This could be used on a response to indicate if the content is
+	 * expected to be displayed inline in the browser or as an attachment to be
+	 * saved locally.
+	 * <p>It can also be used for a {@code "multipart/form-data"} request.
+	 * For more details see notes on {@link #setContentDispositionFormData}.
 	 * @since 5.0
 	 * @see #getContentDisposition()
 	 */
@@ -792,10 +776,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the {@literal Content-Disposition} header parsed as a {@link ContentDisposition}
-	 * instance. Supports the disposition type and {@literal filename}, {@literal filename*}
-	 * (encoded according to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are
-	 * supported), {@literal name}, {@literal size} parameters.
+	 * Return a parsed representation of the {@literal Content-Disposition} header.
 	 * @since 5.0
 	 * @see #setContentDisposition(ContentDisposition)
 	 */
