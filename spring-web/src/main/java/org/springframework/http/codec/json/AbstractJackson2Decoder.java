@@ -45,13 +45,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Base class providing support methods for Jackson 2.9 decoding.
+ * Abstract base class for Jackson JSON 2.9 decoding.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Arjen Poutsma
  * @since 5.0
  */
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
+
 
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
@@ -59,6 +61,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -87,22 +90,17 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
 		try {
 			JsonFactory factory = objectMapper().getFactory();
-			JsonParser nonBlockingParser = factory.createNonBlockingByteArrayParser();
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(nonBlockingParser,
-					tokenizeArrayElements);
-			return Flux.from(input)
-					.flatMap(tokenizer)
-					.doFinally(t -> tokenizer.endOfInput());
+			JsonParser parser = factory.createNonBlockingByteArrayParser();
+			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, tokenizeArrayElements);
+			return Flux.from(input).flatMap(tokenizer).doFinally(t -> tokenizer.endOfInput());
 		}
 		catch (IOException ex) {
 			return Flux.error(new UncheckedIOException(ex));
 		}
-
 	}
 
-	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens,
-			ResolvableType elementType, @Nullable MimeType mimeType,
-			@Nullable Map<String, Object> hints) {
+	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(tokens, "'tokens' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
