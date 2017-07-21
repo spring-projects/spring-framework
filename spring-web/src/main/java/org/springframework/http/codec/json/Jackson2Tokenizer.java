@@ -152,8 +152,8 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 	}
 
 	private boolean isTopLevelArrayToken(JsonToken token) {
-		return (token == JsonToken.START_ARRAY && this.arrayDepth == 1) ||
-				(token == JsonToken.END_ARRAY && this.arrayDepth == 0);
+		return this.objectDepth == 0 && ((token == JsonToken.START_ARRAY && this.arrayDepth == 1) ||
+				(token == JsonToken.END_ARRAY && this.arrayDepth == 0));
 	}
 
 	public void endOfInput() {
