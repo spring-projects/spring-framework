@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -51,6 +54,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
 
+	@Nullable
 	private Object rootHandler;
 
 	private boolean useTrailingSlashMatch = false;
@@ -65,7 +69,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * the handler to be registered for the root path ("/").
 	 * <p>Default is {@code null}, indicating no root handler.
 	 */
-	public void setRootHandler(Object rootHandler) {
+	public void setRootHandler(@Nullable Object rootHandler) {
 		this.rootHandler = rootHandler;
 	}
 
@@ -73,6 +77,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * Return the root handler for this handler mapping (registered for "/"),
 	 * or {@code null} if none.
 	 */
+	@Nullable
 	public Object getRootHandler() {
 		return this.rootHandler;
 	}
@@ -113,6 +118,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @return the handler instance, or {@code null} if none found
 	 */
 	@Override
+	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		Object handler = lookupHandler(lookupPath, request);
@@ -130,7 +136,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				// Bean name or resolved handler?
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
-					rawHandler = getApplicationContext().getBean(handlerName);
+					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
@@ -158,6 +164,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @see #exposePathWithinMapping
 	 * @see org.springframework.util.AntPathMatcher
 	 */
+	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
 		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);
@@ -165,11 +172,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
-				handler = getApplicationContext().getBean(handlerName);
+				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
+
 		// Pattern match?
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
@@ -182,34 +190,40 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				}
 			}
 		}
-		String bestPatternMatch = null;
+
+		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
 			Collections.sort(matchingPatterns, patternComparator);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
 			}
-			bestPatternMatch = matchingPatterns.get(0);
+			bestMatch = matchingPatterns.get(0);
 		}
-		if (bestPatternMatch != null) {
-			handler = this.handlerMap.get(bestPatternMatch);
+		if (bestMatch != null) {
+			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
-				Assert.isTrue(bestPatternMatch.endsWith("/"));
-				handler = this.handlerMap.get(bestPatternMatch.substring(0, bestPatternMatch.length() - 1));
+				if (bestMatch.endsWith("/")) {
+					handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
+				}
+				if (handler == null) {
+					throw new IllegalStateException(
+							"Could not find handler for best pattern match [" + bestMatch + "]");
+				}
 			}
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
-				handler = getApplicationContext().getBean(handlerName);
+				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPatternMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
-				if (patternComparator.compare(bestPatternMatch, matchingPattern) == 0) {
+				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
 					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
@@ -218,8 +232,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (logger.isDebugEnabled()) {
 				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
 			}
-			return buildPathExposingHandler(handler, bestPatternMatch, pathWithinMapping, uriTemplateVariables);
+			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
+
 		// No handler found...
 		return null;
 	}
@@ -247,7 +262,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @return the final handler object
 	 */
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
-			String pathWithinMapping, Map<String, String> uriTemplateVariables) {
+			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
@@ -322,8 +337,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
-			if (getApplicationContext().isSingleton(handlerName)) {
-				resolvedHandler = getApplicationContext().getBean(handlerName);
+			ApplicationContext applicationContext = obtainApplicationContext();
+			if (applicationContext.isSingleton(handlerName)) {
+				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
 

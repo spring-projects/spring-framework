@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.transaction.support;
 import java.io.Serializable;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -59,6 +60,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	private boolean readOnly = false;
 
+	@Nullable
 	private String name;
 
 
@@ -114,7 +116,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(PREFIX_PROPAGATION)) {
+		if (!constantName.startsWith(PREFIX_PROPAGATION)) {
 			throw new IllegalArgumentException("Only propagation constants allowed");
 		}
 		setPropagationBehavior(constants.asNumber(constantName).intValue());
@@ -149,7 +151,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(PREFIX_ISOLATION)) {
+		if (!constantName.startsWith(PREFIX_ISOLATION)) {
 			throw new IllegalArgumentException("Only isolation constants allowed");
 		}
 		setIsolationLevel(constants.asNumber(constantName).intValue());
@@ -214,6 +216,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	@Override
+	@Nullable
 	public final String getName() {
 		return this.name;
 	}

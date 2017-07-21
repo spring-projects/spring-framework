@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JSP tag for collecting arguments and passing them to an {@link ArgumentAware}
  * ancestor in the tag hierarchy.
@@ -33,6 +35,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 @SuppressWarnings("serial")
 public class ArgumentTag extends BodyTagSupport {
 
+	@Nullable
 	private Object value;
 
 	private boolean valueSet;

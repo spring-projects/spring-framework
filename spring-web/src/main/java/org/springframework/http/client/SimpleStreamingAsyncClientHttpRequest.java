@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -37,13 +37,16 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @author Arjen Poutsma
  * @since 3.0
  * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHttpRequest {
 
 	private final HttpURLConnection connection;
 
 	private final int chunkSize;
 
+	@Nullable
 	private OutputStream body;
 
 	private final boolean outputStreaming;
@@ -62,8 +65,8 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.connection.getRequestMethod());
+	public String getMethodValue() {
+		return this.connection.getRequestMethod();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.core.codec;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
@@ -26,9 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -36,10 +35,13 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link ResourceRegionEncoder} class.
@@ -50,13 +52,9 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 
 	private ResourceRegionEncoder encoder;
 
-	private Resource resource;
-
 	@Before
 	public void setUp() {
 		this.encoder = new ResourceRegionEncoder();
-		String content = "Spring Framework test resource content.";
-		this.resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
 		this.bufferFactory = new DefaultDataBufferFactory();
 	}
 
@@ -70,30 +68,55 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Resource.class), allMimeType));
 		assertTrue(this.encoder.canEncode(resourceRegion, MimeTypeUtils.APPLICATION_OCTET_STREAM));
 		assertTrue(this.encoder.canEncode(resourceRegion, allMimeType));
+
+		// SPR-15464
+		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
 	@Test
-	public void shouldEncodeResourceRegion() throws Exception {
+	public void shouldEncodeResourceRegionFileResource() throws Exception {
+		shouldEncodeResourceRegion(
+				new ClassPathResource("ResourceRegionEncoderTests.txt", getClass()));
+	}
 
-		ResourceRegion region = new ResourceRegion(this.resource, 0, 6);
+	@Test
+	public void shouldEncodeResourceRegionByteArrayResource() throws Exception {
+		String content = "Spring Framework test resource content.";
+		shouldEncodeResourceRegion(new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	private void shouldEncodeResourceRegion(Resource resource) {
+		ResourceRegion region = new ResourceRegion(resource, 0, 6);
 		Flux<DataBuffer> result = this.encoder.encode(Mono.just(region), this.bufferFactory,
-				ResolvableType.forClass(ResourceRegion.class), MimeTypeUtils.APPLICATION_OCTET_STREAM
-				, Collections.emptyMap());
+				ResolvableType.forClass(ResourceRegion.class),
+				MimeTypeUtils.APPLICATION_OCTET_STREAM,
+				Collections.emptyMap());
 
-		TestSubscriber.subscribe(result)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("Spring"));
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("Spring"))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
-	public void shouldEncodeMultipleResourceRegions() throws Exception {
+	public void shouldEncodeMultipleResourceRegionsFileResource() throws Exception {
+		shouldEncodeMultipleResourceRegions(
+				new ClassPathResource("ResourceRegionEncoderTests.txt", getClass()));
+	}
 
+	@Test
+	public void shouldEncodeMultipleResourceRegionsByteArrayResource() throws Exception {
+		String content = "Spring Framework test resource content.";
+		shouldEncodeMultipleResourceRegions(
+				new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	private void shouldEncodeMultipleResourceRegions(Resource resource) {
 		Flux<ResourceRegion> regions = Flux.just(
-				new ResourceRegion(this.resource, 0, 6),
-				new ResourceRegion(this.resource, 7, 9),
-				new ResourceRegion(this.resource, 17, 4),
-				new ResourceRegion(this.resource, 22, 17)
+				new ResourceRegion(resource, 0, 6),
+				new ResourceRegion(resource, 7, 9),
+				new ResourceRegion(resource, 17, 4),
+				new ResourceRegion(resource, 22, 17)
 		);
 		String boundary = MimeTypeUtils.generateMultipartBoundaryString();
 
@@ -110,36 +133,34 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 					return previous;
 				});
 
-		TestSubscriber
-				.subscribe(reduced)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(dataBuffer -> {
-					String content = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
-
-					assertThat(ranges[0], is("--" + boundary));
-					assertThat(ranges[1], is("Content-Type: text/plain"));
-					assertThat(ranges[2], is("Content-Range: bytes 0-5/39"));
-					assertThat(ranges[3], is("Spring"));
-
-					assertThat(ranges[4], is("--" + boundary));
-					assertThat(ranges[5], is("Content-Type: text/plain"));
-					assertThat(ranges[6], is("Content-Range: bytes 7-15/39"));
-					assertThat(ranges[7], is("Framework"));
-
-					assertThat(ranges[8], is("--" + boundary));
-					assertThat(ranges[9], is("Content-Type: text/plain"));
-					assertThat(ranges[10], is("Content-Range: bytes 17-20/39"));
-					assertThat(ranges[11], is("test"));
-
-					assertThat(ranges[12], is("--" + boundary));
-					assertThat(ranges[13], is("Content-Type: text/plain"));
-					assertThat(ranges[14], is("Content-Range: bytes 22-38/39"));
-					assertThat(ranges[15], is("resource content."));
-
-					assertThat(ranges[16], is("--" + boundary + "--"));
-				});
+		StepVerifier.create(reduced)
+				.consumeNextWith(buf -> {
+					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
+					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n",
+							false, true);
+					String[] expected = new String[] {
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 0-5/39",
+							"Spring",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 7-15/39",
+							"Framework",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 17-20/39",
+							"test",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 22-38/39",
+							"resource content.",
+							"--" + boundary + "--"
+					};
+					assertArrayEquals(expected, ranges);
+				})
+				.expectComplete()
+				.verify();
 	}
 
 }

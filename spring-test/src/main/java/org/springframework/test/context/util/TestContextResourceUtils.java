@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,6 @@ public abstract class TestContextResourceUtils {
 	private static final String SLASH = "/";
 
 
-	private TestContextResourceUtils() {
-		/* prevent instantiation */
-	}
-
 	/**
 	 * Convert the supplied paths to classpath resource paths.
 	 *
@@ -65,7 +61,6 @@ public abstract class TestContextResourceUtils {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be
 	 * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.
-	 *
 	 * @param clazz the class with which the paths are associated
 	 * @param paths the paths to be converted
 	 * @return a new array of converted resource paths
@@ -79,8 +74,8 @@ public abstract class TestContextResourceUtils {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
 			else if (!ResourcePatternUtils.isUrl(path)) {
-				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
-						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
+				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +
+						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
 			}
 			else {
 				convertedPaths[i] = StringUtils.cleanPath(path);
@@ -92,7 +87,6 @@ public abstract class TestContextResourceUtils {
 	/**
 	 * Convert the supplied paths to an array of {@link Resource} handles using
 	 * the given {@link ResourceLoader}.
-	 *
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
 	 * @return a new array of resources
@@ -106,7 +100,6 @@ public abstract class TestContextResourceUtils {
 	/**
 	 * Convert the supplied paths to a list of {@link Resource} handles using
 	 * the given {@link ResourceLoader}.
-	 *
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
 	 * @return a new list of resources

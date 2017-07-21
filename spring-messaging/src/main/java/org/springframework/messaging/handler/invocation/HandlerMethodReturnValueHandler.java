@@ -17,6 +17,7 @@
 package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -40,13 +41,13 @@ public interface HandlerMethodReturnValueHandler {
 	/**
 	 * Handle the given return value.
 	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value. This type must have
-	 * previously been passed to
-	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
+	 * @param returnType the type of the return value. This type must have previously
+	 * been passed to {@link #supportsReturnType(org.springframework.core.MethodParameter)}
+	 * and it must have returned {@code true}.
 	 * @param message the message that caused this method to be called
 	 * @throws Exception if the return value handling results in an error
 	 */
-	void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception;
+	void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, Message<?> message)
+			throws Exception;
 
 }

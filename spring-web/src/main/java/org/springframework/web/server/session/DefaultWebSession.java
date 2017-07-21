@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
  */
 package org.springframework.web.server.session;
 
-import java.io.Serializable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
+import org.springframework.web.server.WebSession;
 
 /**
  * Default implementation of {@link org.springframework.web.server.WebSession}.
@@ -35,72 +36,96 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DefaultWebSession implements ConfigurableWebSession, Serializable {
+class DefaultWebSession implements WebSession {
 
-	private static final long serialVersionUID = -3567697426432961630L;
+	private final AtomicReference<String> id;
 
-
-	private final String id;
+	private final IdGenerator idGenerator;
 
 	private final Map<String, Object> attributes;
 
 	private final Clock clock;
 
+	private final BiFunction<String, WebSession, Mono<Void>> changeIdOperation;
+
+	private final Function<WebSession, Mono<Void>> saveOperation;
+
 	private final Instant creationTime;
 
-	private volatile Instant lastAccessTime;
+	private final Instant lastAccessTime;
 
 	private volatile Duration maxIdleTime;
 
-	private AtomicReference<State> state = new AtomicReference<>();
-
-	private volatile transient Supplier<Mono<Void>> saveOperation;
+	private volatile State state;
 
 
 	/**
-	 * Constructor to create a new session.
-	 * @param id the session id
+	 * Constructor for creating a brand, new session.
+	 * @param idGenerator the session id generator
 	 * @param clock for access to current time
 	 */
-	public DefaultWebSession(String id, Clock clock) {
-		Assert.notNull(id, "'id' is required.");
+	DefaultWebSession(IdGenerator idGenerator, Clock clock,
+			BiFunction<String, WebSession, Mono<Void>> changeIdOperation,
+			Function<WebSession, Mono<Void>> saveOperation) {
+
+		Assert.notNull(idGenerator, "'idGenerator' is required.");
 		Assert.notNull(clock, "'clock' is required.");
-		this.id = id;
+		Assert.notNull(changeIdOperation, "'changeIdOperation' is required.");
+		Assert.notNull(saveOperation, "'saveOperation' is required.");
+
+		this.id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
+		this.idGenerator = idGenerator;
 		this.clock = clock;
+		this.changeIdOperation = changeIdOperation;
+		this.saveOperation = saveOperation;
 		this.attributes = new ConcurrentHashMap<>();
 		this.creationTime = Instant.now(clock);
 		this.lastAccessTime = this.creationTime;
 		this.maxIdleTime = Duration.ofMinutes(30);
-		this.state.set(State.NEW);
+		this.state = State.NEW;
 	}
 
 	/**
-	 * Constructor to load existing session.
-	 * @param id the session id
-	 * @param attributes the attributes of the session
-	 * @param clock for access to current time
-	 * @param creationTime the creation time
+	 * Constructor to refresh an existing session for a new request.
+	 * @param existingSession the session to recreate
 	 * @param lastAccessTime the last access time
-	 * @param maxIdleTime the configured maximum session idle time
+	 * @param saveOperation save operation for the current request
 	 */
-	public DefaultWebSession(String id, Map<String, Object> attributes, Clock clock,
-			Instant creationTime, Instant lastAccessTime, Duration maxIdleTime) {
+	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime,
+			Function<WebSession, Mono<Void>> saveOperation) {
 
-		Assert.notNull(id, "'id' is required.");
-		Assert.notNull(clock, "'clock' is required.");
-		this.id = id;
-		this.attributes = new ConcurrentHashMap<>(attributes);
-		this.clock = clock;
-		this.creationTime = creationTime;
+		this.id = existingSession.id;
+		this.idGenerator = existingSession.idGenerator;
+		this.attributes = existingSession.attributes;
+		this.clock = existingSession.clock;
+		this.changeIdOperation = existingSession.changeIdOperation;
+		this.saveOperation = saveOperation;
+		this.creationTime = existingSession.creationTime;
 		this.lastAccessTime = lastAccessTime;
-		this.maxIdleTime = maxIdleTime;
-		this.state.set(State.STARTED);
+		this.maxIdleTime = existingSession.maxIdleTime;
+		this.state = existingSession.state;
+	}
+
+	/**
+	 * For testing purposes.
+	 */
+	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime) {
+		this.id = existingSession.id;
+		this.idGenerator = existingSession.idGenerator;
+		this.attributes = existingSession.attributes;
+		this.clock = existingSession.clock;
+		this.changeIdOperation = existingSession.changeIdOperation;
+		this.saveOperation = existingSession.saveOperation;
+		this.creationTime = existingSession.creationTime;
+		this.lastAccessTime = lastAccessTime;
+		this.maxIdleTime = existingSession.maxIdleTime;
+		this.state = existingSession.state;
 	}
 
 
 	@Override
 	public String getId() {
-		return this.id;
+		return this.id.get();
 	}
 
 	@Override
@@ -108,19 +133,9 @@ public class DefaultWebSession implements ConfigurableWebSession, Serializable {
 		return this.attributes;
 	}
 
-	@Override @SuppressWarnings("unchecked")
-	public <T> Optional<T> getAttribute(String name) {
-		return Optional.ofNullable((T) this.attributes.get(name));
-	}
-
 	@Override
 	public Instant getCreationTime() {
 		return this.creationTime;
-	}
-
-	@Override
-	public void setLastAccessTime(Instant lastAccessTime) {
-		this.lastAccessTime = lastAccessTime;
 	}
 
 	@Override
@@ -142,31 +157,29 @@ public class DefaultWebSession implements ConfigurableWebSession, Serializable {
 		return this.maxIdleTime;
 	}
 
-	@Override
-	public void setSaveOperation(Supplier<Mono<Void>> saveOperation) {
-		Assert.notNull(saveOperation, "'saveOperation' is required.");
-		this.saveOperation = saveOperation;
-	}
-
-	protected Supplier<Mono<Void>> getSaveOperation() {
-		return this.saveOperation;
-	}
-
 
 	@Override
 	public void start() {
-		this.state.compareAndSet(State.NEW, State.STARTED);
+		this.state = State.STARTED;
 	}
 
 	@Override
 	public boolean isStarted() {
-		State value = this.state.get();
+		State value = this.state;
 		return (State.STARTED.equals(value) || (State.NEW.equals(value) && !getAttributes().isEmpty()));
 	}
 
 	@Override
+	public Mono<Void> changeSessionId() {
+		String oldId = this.id.get();
+		String newId = String.valueOf(this.idGenerator.generateId());
+		this.id.set(newId);
+		return this.changeIdOperation.apply(oldId, this).doOnError(ex -> this.id.set(oldId));
+	}
+
+	@Override
 	public Mono<Void> save() {
-		return this.saveOperation.get();
+		return this.saveOperation.apply(this);
 	}
 
 	@Override

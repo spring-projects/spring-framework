@@ -44,12 +44,14 @@ public class UrlTagTests extends AbstractTagTests {
 
 	private MockPageContext context;
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		context = createPageContext();
 		tag = new UrlTag();
 		tag.setPageContext(context);
 	}
+
 
 	@Test
 	public void paramSupport() {
@@ -66,7 +68,6 @@ public class UrlTagTests extends AbstractTagTests {
 	@Test
 	public void doEndTag() throws JspException {
 		tag.setValue("url/path");
-
 		tag.doStartTag();
 		int action = tag.doEndTag();
 
@@ -77,12 +78,10 @@ public class UrlTagTests extends AbstractTagTests {
 	public void varDefaultScope() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-
 		tag.doStartTag();
 		tag.doEndTag();
 
-		assertEquals("url/path", context.getAttribute("var",
-				PageContext.PAGE_SCOPE));
+		assertEquals("url/path", context.getAttribute("var", PageContext.PAGE_SCOPE));
 	}
 
 	@Test
@@ -90,19 +89,16 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setScope("request");
-
 		tag.doStartTag();
 		tag.doEndTag();
 
-		assertEquals("url/path", context.getAttribute("var",
-				PageContext.REQUEST_SCOPE));
+		assertEquals("url/path", context.getAttribute("var", PageContext.REQUEST_SCOPE));
 	}
 
 	@Test
 	public void setHtmlEscapeDefault() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -116,9 +112,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-
-		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context
-				.getAttribute("var"));
+		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
 	}
 
 	@Test
@@ -140,9 +134,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-
-		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context
-				.getAttribute("var"));
+		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
 	}
 
 	@Test
@@ -150,7 +142,6 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setHtmlEscape(true);
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -164,9 +155,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-
-		assertEquals("url/path?n%20me=v%26l%3De&amp;name=value2", context
-				.getAttribute("var"));
+		assertEquals("url/path?n%20me=v%26l%3De&amp;name=value2", context.getAttribute("var"));
 	}
 
 	@Test
@@ -174,7 +163,6 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setJavaScriptEscape(true);
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -188,9 +176,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-
-		assertEquals("url\\/path?n%20me=v%26l%3De&name=value2", context
-				.getAttribute("var"));
+		assertEquals("url\\/path?n%20me=v%26l%3De&name=value2", context.getAttribute("var"));
 	}
 
 	@Test
@@ -199,7 +185,6 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.setVar("var");
 		tag.setHtmlEscape(true);
 		tag.setJavaScriptEscape(true);
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -213,9 +198,7 @@ public class UrlTagTests extends AbstractTagTests {
 		tag.addParam(param);
 
 		tag.doEndTag();
-
-		assertEquals("url\\/path?n%20me=v%26l%3De&amp;name=value2", context
-				.getAttribute("var"));
+		assertEquals("url\\/path?n%20me=v%26l%3De&amp;name=value2", context.getAttribute("var"));
 	}
 
 	@Test
@@ -224,7 +207,6 @@ public class UrlTagTests extends AbstractTagTests {
 		Set<String> usedParams = new HashSet<>();
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("", queryString);
 	}
 
@@ -239,13 +221,11 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("?name=value", queryString);
 	}
 
 	@Test
-	public void createQueryStringOneParamForExsistingQueryString()
-			throws JspException {
+	public void createQueryStringOneParamForExsistingQueryString() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -255,7 +235,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, false);
-
 		assertEquals("&name=value", queryString);
 	}
 
@@ -270,7 +249,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("?name=", queryString);
 	}
 
@@ -285,7 +263,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("?name", queryString);
 	}
 
@@ -298,11 +275,9 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setName("name");
 		param.setValue("value");
 		params.add(param);
-
 		usedParams.add("name");
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("", queryString);
 	}
 
@@ -322,7 +297,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("?name=value&name=value2", queryString);
 	}
 
@@ -342,7 +316,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("?n%20me=v%26l%3De&name=value2", queryString);
 	}
 
@@ -357,7 +330,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("", queryString);
 	}
 
@@ -372,7 +344,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-
 		assertEquals("", queryString);
 	}
 
@@ -381,29 +352,23 @@ public class UrlTagTests extends AbstractTagTests {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
-		String uri = tag.replaceUriTemplateParams("url/path", params,
-				usedParams);
-
+		String uri = tag.replaceUriTemplateParams("url/path", params, usedParams);
 		assertEquals("url/path", uri);
 		assertEquals(0, usedParams.size());
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithoutParamMatch()
-			throws JspException {
+	public void replaceUriTemplateParamsTemplateWithoutParamMatch() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
-		String uri = tag.replaceUriTemplateParams("url/{path}", params,
-				usedParams);
-
+		String uri = tag.replaceUriTemplateParams("url/{path}", params, usedParams);
 		assertEquals("url/{path}", uri);
 		assertEquals(0, usedParams.size());
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatch()
-			throws JspException {
+	public void replaceUriTemplateParamsTemplateWithParamMatch() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -412,17 +377,14 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setValue("value");
 		params.add(param);
 
-		String uri = tag.replaceUriTemplateParams("url/{name}", params,
-				usedParams);
-
+		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
 		assertEquals("url/value", uri);
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.contains("name"));
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatchNamePreEncoding()
-			throws JspException {
+	public void replaceUriTemplateParamsTemplateWithParamMatchNamePreEncoding() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -431,17 +393,14 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setValue("value");
 		params.add(param);
 
-		String uri = tag.replaceUriTemplateParams("url/{n me}", params,
-				usedParams);
-
+		String uri = tag.replaceUriTemplateParams("url/{n me}", params, usedParams);
 		assertEquals("url/value", uri);
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.contains("n me"));
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatchValueEncoded()
-			throws JspException {
+	public void replaceUriTemplateParamsTemplateWithParamMatchValueEncoded() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -458,11 +417,8 @@ public class UrlTagTests extends AbstractTagTests {
 		assertTrue(usedParams.contains("name"));
 	}
 
-	// SPR-11401
-
-	@Test
-	public void replaceUriTemplateParamsTemplateWithPathSegment()
-			throws JspException {
+	@Test  // SPR-11401
+	public void replaceUriTemplateParamsTemplateWithPathSegment() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -479,8 +435,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithPath()
-			throws JspException {
+	public void replaceUriTemplateParamsTemplateWithPath() throws JspException {
 		List<Param> params = new LinkedList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -490,7 +445,6 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
-
 		assertEquals("url/my/Id", uri);
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.contains("name"));
@@ -499,89 +453,71 @@ public class UrlTagTests extends AbstractTagTests {
 	@Test
 	public void createUrlRemoteServer() throws JspException {
 		tag.setValue("http://www.springframework.org/");
-
 		tag.doStartTag();
 
-		// String uri = tag.createUrl();
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("http://www.springframework.org/", uri);
 	}
 
 	@Test
 	public void createUrlRelative() throws JspException {
 		tag.setValue("url/path");
-
 		tag.doStartTag();
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("url/path", uri);
 	}
 
 	@Test
 	public void createUrlLocalContext() throws JspException {
-		((MockHttpServletRequest) context.getRequest())
-				.setContextPath("/app-context");
+		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
-
 		tag.doStartTag();
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("/app-context/url/path", uri);
 	}
 
 	@Test
 	public void createUrlRemoteContext() throws JspException {
-		((MockHttpServletRequest) context.getRequest())
-				.setContextPath("/app-context");
+		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
 		tag.setContext("some-other-context");
-
 		tag.doStartTag();
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("/some-other-context/url/path", uri);
 	}
 
 	@Test
 	public void createUrlRemoteContextWithSlash() throws JspException {
-		((MockHttpServletRequest) context.getRequest())
-				.setContextPath("/app-context");
+		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
 		tag.setContext("/some-other-context");
-
 		tag.doStartTag();
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("/some-other-context/url/path", uri);
 	}
 
 	@Test
 	public void createUrlRemoteContextSingleSlash() throws JspException {
-		((MockHttpServletRequest) context.getRequest())
-				.setContextPath("/app-context");
+		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
 		tag.setContext("/");
-
 		tag.doStartTag();
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("/url/path", uri);
 	}
 
 	@Test
 	public void createUrlWithParams() throws JspException {
 		tag.setValue("url/path");
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -594,15 +530,13 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setValue("v lue");
 		tag.addParam(param);
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("url/path?name=value&n%20me=v%20lue", uri);
 	}
 
 	@Test
 	public void createUrlWithTemplateParams() throws JspException {
 		tag.setValue("url/{name}");
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -615,16 +549,13 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setValue("v lue");
 		tag.addParam(param);
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("url/value?n%20me=v%20lue", uri);
 	}
 
 	@Test
-	public void createUrlWithParamAndExsistingQueryString()
-			throws JspException {
+	public void createUrlWithParamAndExistingQueryString() throws JspException {
 		tag.setValue("url/path?foo=bar");
-
 		tag.doStartTag();
 
 		Param param = new Param();
@@ -632,29 +563,8 @@ public class UrlTagTests extends AbstractTagTests {
 		param.setValue("value");
 		tag.addParam(param);
 
-		String uri = invokeCreateUrl(tag);
-
+		String uri = tag.createUrl();
 		assertEquals("url/path?foo=bar&name=value", uri);
-	}
-
-	@Test
-	public void jspWriterOutput() {
-		// TODO assert that the output to the JspWriter is the expected output
-	}
-
-	@Test
-	public void servletRepsonseEncodeUrl() {
-		// TODO assert that HttpServletResponse.encodeURL(String) is invoked for
-		// non absolute urls
-	}
-
-	// support methods
-
-	private String invokeCreateUrl(UrlTag tag) {
-		Method createUrl = ReflectionUtils.findMethod(tag.getClass(),
-				"createUrl");
-		ReflectionUtils.makeAccessible(createUrl);
-		return (String) ReflectionUtils.invokeMethod(createUrl, tag);
 	}
 
 }

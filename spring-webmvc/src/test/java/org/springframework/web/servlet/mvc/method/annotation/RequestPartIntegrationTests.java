@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +65,10 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.
@@ -123,7 +123,7 @@ public class RequestPartIntegrationTests {
 	}
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
 		emptyBodyConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -198,7 +198,7 @@ public class RequestPartIntegrationTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class RequestPartTestConfig extends WebMvcConfigurerAdapter {
+	static class RequestPartTestConfig implements WebMvcConfigurer {
 
 		@Bean
 		public RequestPartTestController controller() {
@@ -249,7 +249,7 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/spr13319", method = POST, consumes = "multipart/form-data")
 		public ResponseEntity<Void> create(@RequestPart("file") MultipartFile multipartFile) {
-			assertEquals("%C3%A9l%C3%A8ve.txt", multipartFile.getOriginalFilename());
+			assertEquals("élève.txt", multipartFile.getOriginalFilename());
 			return ResponseEntity.ok().build();
 		}
 	}

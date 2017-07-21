@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,20 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * Post-processor callback interface for <i>merged</i> bean definitions at runtime.
- * {@link BeanPostProcessor} implementations may implement this sub-interface in
- * order to post-process the merged bean definition that the Spring BeanFactory
- * uses to create a specific bean instance.
+ * {@link BeanPostProcessor} implementations may implement this sub-interface in order
+ * to post-process the merged bean definition (a processed copy of the original bean
+ * definition) that the Spring {@code BeanFactory} uses to create a bean instance.
  *
  * <p>The {@link #postProcessMergedBeanDefinition} method may for example introspect
  * the bean definition in order to prepare some cached metadata before post-processing
- * actual instances of a bean. It is also allowed to modify the bean definition
- * but <i>only</i> for bean definition properties which are actually intended
- * for concurrent modification. Basically, this only applies to operations
- * defined on the {@link RootBeanDefinition} itself but not to the properties
- * of its base classes.
+ * actual instances of a bean. It is also allowed to modify the bean definition but
+ * <i>only</i> for definition properties which are actually intended for concurrent
+ * modification. Essentially, this only applies to operations defined on the
+ * {@link RootBeanDefinition} itself but not to the properties of its base classes.
  *
  * @author Juergen Hoeller
  * @since 2.5
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getMergedBeanDefinition
  */
 public interface MergedBeanDefinitionPostProcessor extends BeanPostProcessor {
 

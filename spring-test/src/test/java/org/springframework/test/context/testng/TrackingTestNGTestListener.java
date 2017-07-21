@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,11 @@ import org.testng.ITestResult;
 public class TrackingTestNGTestListener implements ITestListener {
 
 	public int testStartCount = 0;
+
 	public int testSuccessCount = 0;
+
 	public int testFailureCount = 0;
+
 	public int failedConfigurationsCount = 0;
 
 
@@ -66,4 +69,5 @@ public class TrackingTestNGTestListener implements ITestListener {
 	public void onTestSuccess(ITestResult testResult) {
 		this.testSuccessCount++;
 	}
+
 }

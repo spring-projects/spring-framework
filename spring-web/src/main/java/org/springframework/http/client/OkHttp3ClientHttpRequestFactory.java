@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Roy Clarkson
  * @since 4.3
  */
+@SuppressWarnings("deprecation")
 public class OkHttp3ClientHttpRequestFactory
 		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
 
@@ -73,7 +73,7 @@ public class OkHttp3ClientHttpRequestFactory
 	/**
 	 * Sets the underlying read timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see okhttp3.OkHttpClient.Builder#readTimeout(long, TimeUnit)
+	 * @see OkHttpClient.Builder#readTimeout(long, TimeUnit)
 	 */
 	public void setReadTimeout(int readTimeout) {
 		this.client = this.client.newBuilder()
@@ -84,7 +84,7 @@ public class OkHttp3ClientHttpRequestFactory
 	/**
 	 * Sets the underlying write timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see okhttp3.OkHttpClient.Builder#writeTimeout(long, TimeUnit)
+	 * @see OkHttpClient.Builder#writeTimeout(long, TimeUnit)
 	 */
 	public void setWriteTimeout(int writeTimeout) {
 		this.client = this.client.newBuilder()
@@ -95,7 +95,7 @@ public class OkHttp3ClientHttpRequestFactory
 	/**
 	 * Sets the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see okhttp3.OkHttpClient.Builder#connectTimeout(long, TimeUnit)
+	 * @see OkHttpClient.Builder#connectTimeout(long, TimeUnit)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		this.client = this.client.newBuilder()
@@ -127,23 +127,21 @@ public class OkHttp3ClientHttpRequestFactory
 	}
 
 
-	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
-			HttpMethod method) throws MalformedURLException {
+	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri, HttpMethod method)
+			throws MalformedURLException {
 
 		okhttp3.MediaType contentType = getContentType(headers);
-		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+		RequestBody body = (content.length > 0 ||
+				okhttp3.internal.http.HttpMethod.requiresRequestBody(method.name()) ?
+				RequestBody.create(contentType, content) : null);
 
-		URL url = uri.toURL();
-		String methodName = method.name();
-		Request.Builder builder = new Request.Builder().url(url).method(methodName, body);
-
+		Request.Builder builder = new Request.Builder().url(uri.toURL()).method(method.name(), body);
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
 			for (String headerValue : entry.getValue()) {
 				builder.addHeader(headerName, headerValue);
 			}
 		}
-
 		return builder.build();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Set;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,8 +83,8 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 			initializers(BarInitializer.class), DelegatingSmartContextLoader.class);
 	}
 
-	private Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializers(
-			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>... classes) {
+	private Set<Class<? extends ApplicationContextInitializer<?>>> initializers(
+			Class<? extends ApplicationContextInitializer<?>>... classes) {
 
 		return new HashSet<>(Arrays.asList(classes));
 	}

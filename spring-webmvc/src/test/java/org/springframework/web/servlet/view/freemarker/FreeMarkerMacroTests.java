@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,7 +28,6 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,12 +69,14 @@ public class FreeMarkerMacroTests {
 
 	@Before
 	public void setUp() throws Exception {
+		ServletContext sc = new MockServletContext();
 		wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.setServletContext(sc);
 
 		// final Template expectedTemplate = new Template();
 		fc = new FreeMarkerConfigurer();
 		fc.setTemplateLoaderPaths("classpath:/", "file://" + System.getProperty("java.io.tmpdir"));
+		fc.setServletContext(sc);
 		fc.afterPropertiesSet();
 
 		wac.getDefaultListableBeanFactory().registerSingleton("freeMarkerConfigurer", fc);

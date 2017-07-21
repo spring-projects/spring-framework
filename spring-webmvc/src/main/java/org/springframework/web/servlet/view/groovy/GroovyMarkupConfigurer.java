@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -86,8 +88,10 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 
 	private String resourceLoaderPath = "classpath:";
 
+	@Nullable
 	private MarkupTemplateEngine templateEngine;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -118,7 +122,8 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	public MarkupTemplateEngine getTemplateEngine() {
-		return templateEngine;
+		Assert.state(this.templateEngine != null, "No MarkupTemplateEngine set");
+		return this.templateEngine;
 	}
 
 	@Override
@@ -127,6 +132,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	}
 
 	protected ApplicationContext getApplicationContext() {
+		Assert.state(this.applicationContext != null, "No ApplicationContext set");
 		return this.applicationContext;
 	}
 
@@ -173,6 +179,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 			}
 		}
 		ClassLoader classLoader = getApplicationContext().getClassLoader();
+		Assert.state(classLoader != null, "No ClassLoader");
 		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
 	}
 
@@ -207,6 +214,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	 */
 	private class LocaleTemplateResolver implements TemplateResolver {
 
+		@Nullable
 		private ClassLoader classLoader;
 
 		@Override
@@ -216,6 +224,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 
 		@Override
 		public URL resolveTemplate(String templatePath) throws IOException {
+			Assert.state(this.classLoader != null, "No template ClassLoader available");
 			return GroovyMarkupConfigurer.this.resolveTemplate(this.classLoader, templatePath);
 		}
 	}

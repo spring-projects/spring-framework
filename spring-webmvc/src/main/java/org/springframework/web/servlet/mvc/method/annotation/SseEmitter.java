@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
@@ -101,17 +104,14 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 */
 	@Override
-	public void send(Object object, MediaType mediaType) throws IOException {
-		if (object != null) {
-			send(event().data(object, mediaType));
-		}
+	public void send(Object object, @Nullable MediaType mediaType) throws IOException {
+		send(event().data(object, mediaType));
 	}
 
 	/**
 	 * Send an SSE event prepared with the given builder. For example:
 	 * <pre>
 	 * // static import of SseEmitter
-	 *
 	 * SseEmitter emitter = new SseEmitter();
 	 * emitter.send(event().name("update").id("1").data(myObject));
 	 * </pre>
@@ -127,6 +127,11 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "SseEmitter@" + ObjectUtils.getIdentityHexString(this);
+	}
+
 
 	public static SseEventBuilder event() {
 		return new SseEventBuilderImpl();
@@ -139,16 +144,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	public interface SseEventBuilder {
 
 		/**
-		 * Add an SSE "comment" line.
-		 */
-		SseEventBuilder comment(String comment);
-
-		/**
-		 * Add an SSE "event" line.
-		 */
-		SseEventBuilder name(String eventName);
-
-		/**
 		 * Add an SSE "id" line.
 		 */
 		SseEventBuilder id(String id);
@@ -156,7 +151,17 @@ public class SseEmitter extends ResponseBodyEmitter {
 		/**
 		 * Add an SSE "event" line.
 		 */
+		SseEventBuilder name(String eventName);
+
+		/**
+		 * Add an SSE "event" line.
+		 */
 		SseEventBuilder reconnectTime(long reconnectTimeMillis);
+
+		/**
+		 * Add an SSE "comment" line.
+		 */
+		SseEventBuilder comment(String comment);
 
 		/**
 		 * Add an SSE "data" line.
@@ -166,7 +171,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		/**
 		 * Add an SSE "data" line.
 		 */
-		SseEventBuilder data(Object object, MediaType mediaType);
+		SseEventBuilder data(Object object, @Nullable MediaType mediaType);
 
 		/**
 		 * Return one or more Object-MediaType  pairs to write via
@@ -184,23 +189,18 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
+		@Nullable
 		private StringBuilder sb;
 
 		@Override
-		public SseEventBuilder comment(String comment) {
-			append(":").append(comment != null ? comment : "").append("\n");
+		public SseEventBuilder id(String id) {
+			append("id:").append(id).append("\n");
 			return this;
 		}
 
 		@Override
 		public SseEventBuilder name(String name) {
-			append("event:").append(name != null ? name : "").append("\n");
-			return this;
-		}
-
-		@Override
-		public SseEventBuilder id(String id) {
-			append("id:").append(id != null ? id : "").append("\n");
+			append("event:").append(name).append("\n");
 			return this;
 		}
 
@@ -211,12 +211,18 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 
 		@Override
+		public SseEventBuilder comment(String comment) {
+			append(":").append(comment).append("\n");
+			return this;
+		}
+
+		@Override
 		public SseEventBuilder data(Object object) {
 			return data(object, null);
 		}
 
 		@Override
-		public SseEventBuilder data(Object object, MediaType mediaType) {
+		public SseEventBuilder data(Object object, @Nullable MediaType mediaType) {
 			append("data:");
 			saveAppendedText();
 			this.dataToSend.add(new DataWithMediaType(object, mediaType));
@@ -234,7 +240,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		@Override
 		public Set<DataWithMediaType> build() {
-			if ((this.sb == null || this.sb.length() == 0) && this.dataToSend.isEmpty()) {
+			if (!StringUtils.hasLength(this.sb) && this.dataToSend.isEmpty()) {
 				return Collections.emptySet();
 			}
 			append("\n");

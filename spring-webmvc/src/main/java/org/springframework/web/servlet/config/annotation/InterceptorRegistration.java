@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
@@ -41,6 +42,9 @@ public class InterceptorRegistration {
 
 	private final List<String> excludePatterns = new ArrayList<>();
 
+	private int order = 0;
+
+	@Nullable
 	private PathMatcher pathMatcher;
 
 
@@ -69,6 +73,18 @@ public class InterceptorRegistration {
 	}
 
 	/**
+	 * An order position to be used, default is 0.
+	 */
+	public InterceptorRegistration order(int order){
+		this.order = order;
+		return this;
+	}
+
+	protected int getOrder() {
+		return this.order;
+	}
+
+	/**
 	 * A PathMatcher implementation to use with this interceptor. This is an optional,
 	 * advanced property required only if using custom PathMatcher implementations
 	 * that support mapping metadata other than the Ant path patterns supported
@@ -88,8 +104,8 @@ public class InterceptorRegistration {
 			return this.interceptor;
 		}
 
-		String[] include = toArray(this.includePatterns);
-		String[] exclude = toArray(this.excludePatterns);
+		String[] include = StringUtils.toStringArray(this.includePatterns);
+		String[] exclude = StringUtils.toStringArray(this.excludePatterns);
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(include, exclude, this.interceptor);
 
 		if (this.pathMatcher != null) {
@@ -97,10 +113,6 @@ public class InterceptorRegistration {
 		}
 
 		return mappedInterceptor;
-	}
-
-	private static String[] toArray(List<String> list) {
-		return (CollectionUtils.isEmpty(list) ? null : list.toArray(new String[list.size()]));
 	}
 
 }

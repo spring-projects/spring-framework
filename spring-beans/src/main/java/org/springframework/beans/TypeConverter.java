@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.lang.reflect.Field;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines type conversion methods. Typically (but not necessarily)
@@ -49,7 +50,8 @@ public interface TypeConverter {
 	 * @see org.springframework.core.convert.ConversionService
 	 * @see org.springframework.core.convert.converter.Converter
 	 */
-	<T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException;
+	@Nullable
+	<T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException;
 
 	/**
 	 * Convert the value to the required type (if necessary from a String).
@@ -67,8 +69,9 @@ public interface TypeConverter {
 	 * @see org.springframework.core.convert.ConversionService
 	 * @see org.springframework.core.convert.converter.Converter
 	 */
-	<T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
-			throws TypeMismatchException;
+	@Nullable
+	<T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+			@Nullable MethodParameter methodParam) throws TypeMismatchException;
 
 	/**
 	 * Convert the value to the required type (if necessary from a String).
@@ -86,7 +89,8 @@ public interface TypeConverter {
 	 * @see org.springframework.core.convert.ConversionService
 	 * @see org.springframework.core.convert.converter.Converter
 	 */
-	<T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+	@Nullable
+	<T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException;
 
 }

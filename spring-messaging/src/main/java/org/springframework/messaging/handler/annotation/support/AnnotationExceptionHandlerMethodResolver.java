@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * A sub-class of {@link AbstractExceptionHandlerMethodResolver} that looks for
@@ -50,12 +49,8 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 
 	private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
 		Map<Method, MessageExceptionHandler> methods = MethodIntrospector.selectMethods(handlerType,
-				new MethodIntrospector.MetadataLookup<MessageExceptionHandler>() {
-					@Override
-					public MessageExceptionHandler inspect(Method method) {
-						return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class);
-					}
-				});
+				(MethodIntrospector.MetadataLookup<MessageExceptionHandler>) method ->
+						AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class));
 
 		Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {

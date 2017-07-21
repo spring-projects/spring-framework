@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -43,6 +46,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -116,6 +120,7 @@ public abstract class ResponseEntityExceptionHandler {
 			NoHandlerFoundException.class,
 			AsyncRequestTimeoutException.class
 		})
+	@Nullable
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		if (ex instanceof HttpRequestMethodNotSupportedException) {
@@ -199,7 +204,7 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the response status
 	 * @param request the current request
 	 */
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
@@ -224,7 +229,7 @@ public abstract class ResponseEntityExceptionHandler {
 		pageNotFoundLogger.warn(ex.getMessage());
 
 		Set<HttpMethod> supportedMethods = ex.getSupportedHttpMethods();
-		if (!supportedMethods.isEmpty()) {
+		if (!CollectionUtils.isEmpty(supportedMethods)) {
 			headers.setAllow(supportedMethods);
 		}
 		return handleExceptionInternal(ex, null, headers, status, request);
@@ -439,14 +444,27 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param ex the exception
 	 * @param headers the headers to be written to the response
 	 * @param status the selected response status
-	 * @param request the current request
+	 * @param webRequest the current request
 	 * @return a {@code ResponseEntity} instance
 	 * @since 4.2.8
 	 */
+	@Nullable
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
-			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
 
-		return handleExceptionInternal(ex, null, headers, status, request);
+		if (webRequest instanceof ServletWebRequest) {
+			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
+			HttpServletRequest request = servletWebRequest.getRequest();
+			HttpServletResponse response = servletWebRequest.getResponse();
+			if (response != null && response.isCommitted()) {
+				if (logger.isErrorEnabled()) {
+					logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+				}
+				return null;
+			}
+		}
+
+		return handleExceptionInternal(ex, null, headers, status, webRequest);
 	}
 
 }

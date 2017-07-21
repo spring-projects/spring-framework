@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -49,6 +50,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -111,12 +113,15 @@ import org.springframework.util.CollectionUtils;
 public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
+	@Nullable
 	private EntityManagerFactory entityManagerFactory;
 
+	@Nullable
 	private String persistenceUnitName;
 
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
+	@Nullable
 	private DataSource dataSource;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
@@ -149,15 +154,28 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * single unique bean of type EntityManagerFactory in the containing BeanFactory.
 	 * @see #setPersistenceUnitName
 	 */
-	public void setEntityManagerFactory(EntityManagerFactory emf) {
+	public void setEntityManagerFactory(@Nullable EntityManagerFactory emf) {
 		this.entityManagerFactory = emf;
 	}
 
 	/**
 	 * Return the EntityManagerFactory that this instance should manage transactions for.
 	 */
+	@Nullable
 	public EntityManagerFactory getEntityManagerFactory() {
 		return this.entityManagerFactory;
+	}
+
+	/**
+	 * Obtain the EntityManagerFactory for actual use.
+	 * @return the EntityManagerFactory (never {@code null})
+	 * @throws IllegalStateException in case of no EntityManagerFactory set
+	 * @since 5.0
+	 */
+	protected final EntityManagerFactory obtainEntityManagerFactory() {
+		EntityManagerFactory emf = getEntityManagerFactory();
+		Assert.state(emf != null, "No EntityManagerFactory set");
+		return emf;
 	}
 
 	/**
@@ -168,13 +186,14 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * be retrieved by finding a single unique bean of type EntityManagerFactory.
 	 * @see #setEntityManagerFactory
 	 */
-	public void setPersistenceUnitName(String persistenceUnitName) {
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
 	/**
 	 * Return the name of the persistence unit to manage transactions for, if any.
 	 */
+	@Nullable
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -186,7 +205,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * or a "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaProperties(Properties jpaProperties) {
+	public void setJpaProperties(@Nullable Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
 	}
 
@@ -196,7 +215,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map<String, ?> jpaProperties) {
+	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
 			this.jpaPropertyMap.putAll(jpaProperties);
 		}
@@ -235,8 +254,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
-	public void setDataSource(DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+	public void setDataSource(@Nullable DataSource dataSource) {
+		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
@@ -250,6 +269,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
+	@Nullable
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -265,7 +285,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see JpaDialect#beginTransaction
 	 * @see JpaDialect#getJdbcConnection
 	 */
-	public void setJpaDialect(JpaDialect jpaDialect) {
+	public void setJpaDialect(@Nullable JpaDialect jpaDialect) {
 		this.jpaDialect = (jpaDialect != null ? jpaDialect : new DefaultJpaDialect());
 	}
 
@@ -319,7 +339,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	@Override
 	public Object getResourceFactory() {
-		return getEntityManagerFactory();
+		return obtainEntityManagerFactory();
 	}
 
 	@Override
@@ -328,7 +348,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
 		EntityManagerHolder emHolder = (EntityManagerHolder)
-				TransactionSynchronizationManager.getResource(getEntityManagerFactory());
+				TransactionSynchronizationManager.getResource(obtainEntityManagerFactory());
 		if (emHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound EntityManager [" + emHolder.getEntityManager() +
@@ -364,7 +384,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		try {
-			if (txObject.getEntityManagerHolder() == null ||
+			if (!txObject.hasEntityManagerHolder() ||
 					txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
 				EntityManager newEm = createEntityManagerForTransaction();
 				if (logger.isDebugEnabled()) {
@@ -400,8 +420,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JPA transaction as JDBC transaction [" +
-								conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHandle + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
@@ -417,7 +436,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			// Bind the entity manager holder to the thread.
 			if (txObject.isNewEntityManagerHolder()) {
 				TransactionSynchronizationManager.bindResource(
-						getEntityManagerFactory(), txObject.getEntityManagerHolder());
+						obtainEntityManagerFactory(), txObject.getEntityManagerHolder());
 			}
 			txObject.getEntityManagerHolder().setSynchronizedWithTransaction(true);
 		}
@@ -440,7 +459,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see EntityManagerFactoryInfo#getNativeEntityManagerFactory()
 	 */
 	protected EntityManager createEntityManagerForTransaction() {
-		EntityManagerFactory emf = getEntityManagerFactory();
+		EntityManagerFactory emf = obtainEntityManagerFactory();
 		if (emf instanceof EntityManagerFactoryInfo) {
 			emf = ((EntityManagerFactoryInfo) emf).getNativeEntityManagerFactory();
 		}
@@ -477,7 +496,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 		txObject.setEntityManagerHolder(null, false);
 		EntityManagerHolder entityManagerHolder = (EntityManagerHolder)
-				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+				TransactionSynchronizationManager.unbindResource(obtainEntityManagerFactory());
 		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
@@ -487,10 +506,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	@Override
-	protected void doResume(Object transaction, Object suspendedResources) {
+	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
-				getEntityManagerFactory(), resourcesHolder.getEntityManagerHolder());
+				obtainEntityManagerFactory(), resourcesHolder.getEntityManagerHolder());
 		if (getDataSource() != null && resourcesHolder.getConnectionHolder() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
@@ -574,20 +593,23 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		// (Could have been removed by EntityManagerFactoryUtils in order
 		// to replace it with an unsynchronized EntityManager).
 		if (txObject.isNewEntityManagerHolder()) {
-			TransactionSynchronizationManager.unbindResourceIfPossible(getEntityManagerFactory());
+			TransactionSynchronizationManager.unbindResourceIfPossible(obtainEntityManagerFactory());
 		}
 		txObject.getEntityManagerHolder().clear();
 
 		// Remove the JDBC connection holder from the thread, if exposed.
-		if (txObject.hasConnectionHolder()) {
+		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
-			try {
-				getJpaDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),
-						txObject.getEntityManagerHolder().getEntityManager());
-			}
-			catch (Exception ex) {
-				// Just log it, to keep a transaction-related exception.
-				logger.error("Could not close JDBC connection after transaction", ex);
+			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
+			if (conHandle != null) {
+				try {
+					getJpaDialect().releaseJdbcConnection(conHandle,
+							txObject.getEntityManagerHolder().getEntityManager());
+				}
+				catch (Exception ex) {
+					// Just log it, to keep a transaction-related exception.
+					logger.error("Could not close JDBC connection after transaction", ex);
+				}
 			}
 		}
 
@@ -613,20 +635,28 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	private class JpaTransactionObject extends JdbcTransactionObjectSupport {
 
+		@Nullable
 		private EntityManagerHolder entityManagerHolder;
 
 		private boolean newEntityManagerHolder;
 
+		@Nullable
 		private Object transactionData;
 
 		public void setEntityManagerHolder(
-				EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
+				@Nullable EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
+
 			this.entityManagerHolder = entityManagerHolder;
 			this.newEntityManagerHolder = newEntityManagerHolder;
 		}
 
 		public EntityManagerHolder getEntityManagerHolder() {
+			Assert.state(this.entityManagerHolder != null, "No EntityManagerHolder available");
 			return this.entityManagerHolder;
+		}
+
+		public boolean hasEntityManagerHolder() {
+			return (this.entityManagerHolder != null);
 		}
 
 		public boolean isNewEntityManagerHolder() {
@@ -637,20 +667,21 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			return (this.entityManagerHolder != null && this.entityManagerHolder.isTransactionActive());
 		}
 
-		public void setTransactionData(Object transactionData) {
+		public void setTransactionData(@Nullable Object transactionData) {
 			this.transactionData = transactionData;
-			this.entityManagerHolder.setTransactionActive(true);
+			getEntityManagerHolder().setTransactionActive(true);
 			if (transactionData instanceof SavepointManager) {
-				this.entityManagerHolder.setSavepointManager((SavepointManager) transactionData);
+				getEntityManagerHolder().setSavepointManager((SavepointManager) transactionData);
 			}
 		}
 
+		@Nullable
 		public Object getTransactionData() {
 			return this.transactionData;
 		}
 
 		public void setRollbackOnly() {
-			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			EntityTransaction tx = getEntityManagerHolder().getEntityManager().getTransaction();
 			if (tx.isActive()) {
 				tx.setRollbackOnly();
 			}
@@ -661,14 +692,14 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public boolean isRollbackOnly() {
-			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			EntityTransaction tx = getEntityManagerHolder().getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
 		}
 
 		@Override
 		public void flush() {
 			try {
-				this.entityManagerHolder.getEntityManager().flush();
+				getEntityManagerHolder().getEntityManager().flush();
 			}
 			catch (RuntimeException ex) {
 				throw DataAccessUtils.translateIfNecessary(ex, getJpaDialect());
@@ -677,12 +708,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public Object createSavepoint() throws TransactionException {
+			if (getEntityManagerHolder().isRollbackOnly()) {
+				throw new CannotCreateTransactionException(
+						"Cannot create savepoint for transaction which is already marked as rollback-only");
+			}
 			return getSavepointManager().createSavepoint();
 		}
 
 		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().rollbackToSavepoint(savepoint);
+			getEntityManagerHolder().resetRollbackOnly();
 		}
 
 		@Override
@@ -713,9 +749,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		private final EntityManagerHolder entityManagerHolder;
 
+		@Nullable
 		private final ConnectionHolder connectionHolder;
 
-		private SuspendedResourcesHolder(EntityManagerHolder emHolder, ConnectionHolder conHolder) {
+		private SuspendedResourcesHolder(EntityManagerHolder emHolder, @Nullable ConnectionHolder conHolder) {
 			this.entityManagerHolder = emHolder;
 			this.connectionHolder = conHolder;
 		}
@@ -724,6 +761,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			return this.entityManagerHolder;
 		}
 
+		@Nullable
 		private ConnectionHolder getConnectionHolder() {
 			return this.connectionHolder;
 		}

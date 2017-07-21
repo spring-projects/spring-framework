@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 
-import org.springframework.http.client.AsyncClientHttpRequest;
-
 /**
- * Callback interface for code that operates on an {@link AsyncClientHttpRequest}. Allows
+ * Callback interface for code that operates on an {@link org.springframework.http.client.AsyncClientHttpRequest}. Allows
  * to manipulate the request headers, and write to the request body.
  *
  * <p>Used internally by the {@link AsyncRestTemplate}, but also useful for application code.
@@ -29,8 +27,10 @@ import org.springframework.http.client.AsyncClientHttpRequest;
  * @author Arjen Poutsma
  * @see org.springframework.web.client.AsyncRestTemplate#execute
  * @since 4.0
+ * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
  */
 @FunctionalInterface
+@Deprecated
 public interface AsyncRequestCallback {
 
 	/**
@@ -40,6 +40,6 @@ public interface AsyncRequestCallback {
 	 * @param request the active HTTP request
 	 * @throws java.io.IOException in case of I/O errors
 	 */
-	void doWithRequest(AsyncClientHttpRequest request) throws IOException;
+	void doWithRequest(org.springframework.http.client.AsyncClientHttpRequest request) throws IOException;
 
 }

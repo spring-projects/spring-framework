@@ -8,4 +8,7 @@
  * which defines a shared ValidatorFactory/Validator setup for availability
  * to other Spring components.
  */
+@NonNullApi
 package org.springframework.validation.beanvalidation;
+
+import org.springframework.lang.NonNullApi;

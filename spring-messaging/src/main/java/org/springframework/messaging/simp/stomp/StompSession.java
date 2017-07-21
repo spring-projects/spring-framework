@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.messaging.simp.stomp;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -115,6 +117,7 @@ public interface StompSession {
 		 * Return the receipt id, or {@code null} if the STOMP frame for which
 		 * the handle was returned did not have a "receipt" header.
 		 */
+		@Nullable
 		String getReceiptId();
 
 		/**
@@ -131,6 +134,7 @@ public interface StompSession {
 		void addReceiptLostTask(Runnable runnable);
 	}
 
+
 	/**
 	 * A handle to use to unsubscribe or to track a receipt.
 	 */
@@ -139,12 +143,25 @@ public interface StompSession {
 		/**
 		 * Return the id for the subscription.
 		 */
+		@Nullable
 		String getSubscriptionId();
+
+		/**
+		 * Return the headers used on the SUBSCRIBE frame.
+		 */
+		StompHeaders getSubscriptionHeaders();
 
 		/**
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
 		 */
 		void unsubscribe();
+
+		/**
+		 * Alternative to {@link #unsubscribe()} with additional custom headers
+		 * to send to the server.
+		 * <p><strong>Note:</strong> There is no need to set the subscription id.
+		 */
+		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}
 
 }

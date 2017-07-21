@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.IOException;
 
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface used by {@link RestTemplate}'s retrieval methods
@@ -41,6 +42,7 @@ public interface ResponseExtractor<T> {
 	 * @return the extracted data
 	 * @throws IOException in case of I/O errors
 	 */
+	@Nullable
 	T extractData(ClientHttpResponse response) throws IOException;
 
 }

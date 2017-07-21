@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
@@ -108,12 +107,6 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	@Override
 	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
-		return this;
-	}
-
-	@Override
-	public SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor) {
-		setNativeJdbcExtractor(nativeJdbcExtractor);
 		return this;
 	}
 

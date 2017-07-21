@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A simple descriptor for an injection point, pointing to a method/constructor
@@ -35,10 +37,13 @@ import org.springframework.util.Assert;
  */
 public class InjectionPoint {
 
+	@Nullable
 	protected MethodParameter methodParameter;
 
+	@Nullable
 	protected Field field;
 
+	@Nullable
 	private volatile Annotation[] fieldAnnotations;
 
 
@@ -83,6 +88,7 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the MethodParameter, or {@code null} if none
 	 */
+	@Nullable
 	public MethodParameter getMethodParameter() {
 		return this.methodParameter;
 	}
@@ -92,8 +98,20 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the Field, or {@code null} if none
 	 */
+	@Nullable
 	public Field getField() {
 		return this.field;
+	}
+
+	/**
+	 * Return the wrapped MethodParameter, assuming it is present.
+	 * @return the MethodParameter (never {@code null})
+	 * @throws IllegalStateException if no MethodParameter is available
+	 * @since 5.0
+	 */
+	protected final MethodParameter obtainMethodParameter() {
+		Assert.state(this.methodParameter != null, "Neither Field nor MethodParameter");
+		return this.methodParameter;
 	}
 
 	/**
@@ -101,14 +119,28 @@ public class InjectionPoint {
 	 */
 	public Annotation[] getAnnotations() {
 		if (this.field != null) {
-			if (this.fieldAnnotations == null) {
-				this.fieldAnnotations = this.field.getAnnotations();
+			Annotation[] fieldAnnotations = this.fieldAnnotations;
+			if (fieldAnnotations == null) {
+				fieldAnnotations = this.field.getAnnotations();
+				this.fieldAnnotations = fieldAnnotations;
 			}
-			return this.fieldAnnotations;
+			return fieldAnnotations;
 		}
 		else {
-			return this.methodParameter.getParameterAnnotations();
+			return obtainMethodParameter().getParameterAnnotations();
 		}
+	}
+
+	/**
+	 * Retrieve a field/parameter annotation of the given type, if any.
+	 * @param annotationType the annotation type to retrieve
+	 * @return the annotation instance, or {@code null} if none found
+	 * @since 4.3.9
+	 */
+	@Nullable
+	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+		return (this.field != null ? this.field.getAnnotation(annotationType) :
+				obtainMethodParameter().getParameterAnnotation(annotationType));
 	}
 
 	/**
@@ -116,7 +148,7 @@ public class InjectionPoint {
 	 * indicating the injection type.
 	 */
 	public Class<?> getDeclaredType() {
-		return (this.field != null ? this.field.getType() : this.methodParameter.getParameterType());
+		return (this.field != null ? this.field.getType() : obtainMethodParameter().getParameterType());
 	}
 
 	/**
@@ -124,7 +156,7 @@ public class InjectionPoint {
 	 * @return the Field / Method / Constructor as Member
 	 */
 	public Member getMember() {
-		return (this.field != null ? this.field : this.methodParameter.getMember());
+		return (this.field != null ? this.field : obtainMethodParameter().getMember());
 	}
 
 	/**
@@ -137,7 +169,7 @@ public class InjectionPoint {
 	 * @return the Field / Method / Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
-		return (this.field != null ? this.field : this.methodParameter.getAnnotatedElement());
+		return (this.field != null ? this.field : obtainMethodParameter().getAnnotatedElement());
 	}
 
 
@@ -150,18 +182,18 @@ public class InjectionPoint {
 			return false;
 		}
 		InjectionPoint otherPoint = (InjectionPoint) other;
-		return (this.field != null ? this.field.equals(otherPoint.field) :
-				this.methodParameter.equals(otherPoint.methodParameter));
+		return (ObjectUtils.nullSafeEquals(this.field, otherPoint.field) &&
+				ObjectUtils.nullSafeEquals(this.methodParameter, otherPoint.methodParameter));
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.field != null ? this.field.hashCode() : this.methodParameter.hashCode());
+		return (this.field != null ? this.field.hashCode() : ObjectUtils.nullSafeHashCode(this.methodParameter));
 	}
 
 	@Override
 	public String toString() {
-		return (this.field != null ? "field '" + this.field.getName() + "'" : this.methodParameter.toString());
+		return (this.field != null ? "field '" + this.field.getName() + "'" : String.valueOf(this.methodParameter));
 	}
 
 }

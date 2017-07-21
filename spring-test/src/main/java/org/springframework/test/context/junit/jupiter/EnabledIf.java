@@ -63,8 +63,8 @@ import org.springframework.core.annotation.AliasFor;
 public @interface EnabledIf {
 
 	/**
-	 * Alias for {@link #expression}; only intended to be used if an
-	 * explicit {@link #reason} is not provided.
+	 * Alias for {@link #expression}; only intended to be used if {@link #reason}
+	 * and {@link #loadContext} are not specified.
 	 *
 	 * @see #expression
 	 */
@@ -96,6 +96,7 @@ public @interface EnabledIf {
 	 * and {@code @EnabledIf("true")} is logically meaningless.
 	 *
 	 * @see #reason
+	 * @see #loadContext
 	 * @see #value
 	 */
 	@AliasFor("value")
@@ -107,5 +108,20 @@ public @interface EnabledIf {
 	 * @see #expression
 	 */
 	String reason() default "";
+
+	/**
+	 * Whether the {@code ApplicationContext} associated with the current test
+	 * should be eagerly loaded in order to evaluate the {@link #expression}.
+	 *
+	 * <p>Defaults to {@code false} so that test application contexts are not
+	 * eagerly loaded unnecessarily. If an expression is based solely on system
+	 * properties or environment variables or does not interact with beans in
+	 * the test's application context, there is no need to load the context
+	 * prematurely since doing so would be a waste of time if the test ends up
+	 * being disabled.
+	 *
+	 * @see #expression
+	 */
+	boolean loadContext() default false;
 
 }

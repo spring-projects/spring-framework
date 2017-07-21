@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.test.context.junit.jupiter;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,8 +30,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration tests which verify support for {@link EnabledIf @EnabledIf}
- * in conjunction with the {@link SpringExtension} in a JUnit 5 (Jupiter)
- * environment.
+ * in conjunction with the {@link SpringExtension} in a JUnit Jupiter environment.
+ *
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Tadaya Tsuyukubo
  * @author Sam Brannen
@@ -64,13 +68,19 @@ class EnabledIfTestCase {
 		}
 
 		@Test
-		@EnabledIf("${foo}")
+		@EnabledIf("${__EnigmaPropertyShouldNotExist__:false}")
+		void enabledIfWithPropertyPlaceholderForNonexistentPropertyWithDefaultValue() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@EnabledIf(expression = "${foo}", loadContext = true)
 		void enabledIfWithPropertyPlaceholder() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@EnabledIf("\t${foo}   ")
+		@EnabledIf(expression = "\t${foo}   ", loadContext = true)
 		void enabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
@@ -108,13 +118,13 @@ class EnabledIfTestCase {
 		}
 
 		@Test
-		@EnabledIf("#{@booleanFalseBean}")
+		@EnabledIf(expression = "#{@booleanFalseBean}", loadContext = true)
 		void enabledIfWithSpelBooleanFalseBean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@EnabledIf("#{@stringFalseBean}")
+		@EnabledIf(expression = "#{@stringFalseBean}", loadContext = true)
 		void enabledIfWithSpelStringFalseBean() {
 			fail("This test must be disabled");
 		}

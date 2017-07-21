@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -60,8 +61,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 
+	@Nullable
 	private HttpHeaders headers;
 
+	@Nullable
 	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 
@@ -83,8 +86,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.servletRequest.getMethod());
+	public String getMethodValue() {
+		return this.servletRequest.getMethod();
 	}
 
 	@Override
@@ -181,7 +184,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
 		if (this.asyncRequestControl == null) {
-			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+			if (!ServletServerHttpResponse.class.isInstance(response)) {
+				throw new IllegalArgumentException("Response must be a ServletServerHttpResponse: " + response.getClass());
+			}
 			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
 			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
 		}

@@ -182,7 +182,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 		}
 
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
-				getSql(),
+				resolveSql(),
 				new BatchPreparedStatementSetter() {
 					@Override
 					public int getBatchSize() {

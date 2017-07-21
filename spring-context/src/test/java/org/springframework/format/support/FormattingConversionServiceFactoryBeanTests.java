@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.support;
 
 import java.lang.annotation.ElementType;
@@ -27,6 +28,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.AnnotationFormatterFactory;
@@ -132,9 +134,15 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 
-	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+	@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface SpecialInt {
+
+		@AliasFor("alias")
+		String value() default "";
+
+		@AliasFor("value")
+		String alias() default "";
 	}
 
 
@@ -143,7 +151,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		@NumberFormat(pattern = "##,00")
 		private double pattern;
 
-		@SpecialInt
+		@SpecialInt("aliased")
 		private int specialInt;
 
 		public int getSpecialInt() {
@@ -187,6 +195,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 		@Override
 		public Printer<?> getPrinter(SpecialInt annotation, Class<?> fieldType) {
+			assertEquals("aliased", annotation.value());
+			assertEquals("aliased", annotation.alias());
 			return new Printer<Integer>() {
 				@Override
 				public String print(Integer object, Locale locale) {
@@ -197,6 +207,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 		@Override
 		public Parser<?> getParser(SpecialInt annotation, Class<?> fieldType) {
+			assertEquals("aliased", annotation.value());
+			assertEquals("aliased", annotation.alias());
 			return new Parser<Integer>() {
 				@Override
 				public Integer parse(String text, Locale locale) throws ParseException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,11 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	public ApplicationListenerMethodTransactionalAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		this.annotation = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
-		if (this.annotation == null) {
+		TransactionalEventListener ann = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		if (ann == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
+		this.annotation = ann;
 	}
 
 
@@ -99,6 +100,11 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 		}
 
 		@Override
+		public int getOrder() {
+			return this.listener.getOrder();
+		}
+
+		@Override
 		public void beforeCommit(boolean readOnly) {
 			if (this.phase == TransactionPhase.BEFORE_COMMIT) {
 				processEvent();
@@ -107,20 +113,15 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 		@Override
 		public void afterCompletion(int status) {
-			if (this.phase == TransactionPhase.AFTER_COMPLETION) {
-				processEvent();
-			}
-			else if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
+			if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
 				processEvent();
 			}
 			else if (this.phase == TransactionPhase.AFTER_ROLLBACK && status == STATUS_ROLLED_BACK) {
 				processEvent();
 			}
-		}
-
-		@Override
-		public int getOrder() {
-			return this.listener.getOrder();
+			else if (this.phase == TransactionPhase.AFTER_COMPLETION) {
+				processEvent();
+			}
 		}
 
 		protected void processEvent() {

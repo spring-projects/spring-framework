@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 the original author or authors.
+ * Copyright 2010-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  * of the Spring reference documentation for more information.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see CacheInterceptor
@@ -44,8 +45,15 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 
 	private final CacheInterceptor cachingInterceptor = new CacheInterceptor();
 
-	private Pointcut pointcut;
+	private Pointcut pointcut = Pointcut.TRUE;
 
+
+	/**
+	 * Set the sources used to find cache operations.
+	 */
+	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
+		this.cachingInterceptor.setCacheOperationSources(cacheOperationSources);
+	}
 
 	/**
 	 * Set a pointcut, i.e a bean that can cause conditional invocation
@@ -58,21 +66,11 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 		this.pointcut = pointcut;
 	}
 
+
 	@Override
 	protected Object createMainInterceptor() {
 		this.cachingInterceptor.afterPropertiesSet();
-		if (this.pointcut == null) {
-			// Rely on default pointcut.
-			throw new UnsupportedOperationException();
-		}
 		return new DefaultPointcutAdvisor(this.pointcut, this.cachingInterceptor);
-	}
-
-	/**
-	 * Set the sources used to find cache operations.
-	 */
-	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
-		this.cachingInterceptor.setCacheOperationSources(cacheOperationSources);
 	}
 
 }

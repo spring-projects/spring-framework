@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.context.request;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.util.Assert;
 
 /**
  * Abstract {@link Scope} implementation that reads from a particular scope
@@ -42,7 +43,16 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		Object scopedObject = attributes.getAttribute(name, getScope());
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
+			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			attributes.setAttribute(name, scopedObject, getScope());
+			// Retrieve object again, registering it for implicit session attribute updates.
+			// As a bonus, we also allow for potential decoration at the getAttribute level.
+			Object retrievedObject = attributes.getAttribute(name, getScope());
+			if (retrievedObject != null) {
+				// Only proceed with retrieved object if still present (the expected case).
+				// If it disappeared concurrently, we return our locally created instance.
+				scopedObject = retrievedObject;
+			}
 		}
 		return scopedObject;
 	}

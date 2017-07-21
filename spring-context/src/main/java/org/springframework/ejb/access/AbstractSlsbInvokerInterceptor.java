@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.jndi.JndiObjectLocator;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for AOP interceptors invoking local or remote Stateless Session Beans.
@@ -50,11 +51,13 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * The EJB's home object, potentially cached.
 	 * The type must be Object as it could be either EJBHome or EJBLocalHome.
 	 */
+	@Nullable
 	private Object cachedHome;
 
 	/**
 	 * The no-arg create() method required on EJB homes, potentially cached.
 	 */
+	@Nullable
 	private Method createMethod;
 
 	private final Object homeMonitor = new Object();
@@ -132,6 +135,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @return the create method
 	 * @throws EjbAccessException if the method couldn't be retrieved
 	 */
+	@Nullable
 	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		try {
 			// Cache the EJB create() method that must be declared on the home interface.
@@ -183,6 +187,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * {@link #invokeInContext}.
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Context ctx = (this.exposeAccessContext ? getJndiTemplate().getContext() : null);
 		try {
@@ -201,6 +206,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @return the invocation result, if any
 	 * @throws Throwable in case of invocation failure
 	 */
+	@Nullable
 	protected abstract Object invokeInContext(MethodInvocation invocation) throws Throwable;
 
 

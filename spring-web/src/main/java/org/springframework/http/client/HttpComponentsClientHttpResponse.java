@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * Apache HttpComponents HttpClient to execute requests.
+ * {@link ClientHttpResponse} implementation based on
+ * Apache HttpComponents HttpClient.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequest}.
- *
- * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
@@ -45,6 +44,7 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 
 	private final HttpResponse httpResponse;
 
+	@Nullable
 	private HttpHeaders headers;
 
 

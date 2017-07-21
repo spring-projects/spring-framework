@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -40,6 +41,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final int chunkSize;
 
+	@Nullable
 	private OutputStream body;
 
 	private final boolean outputStreaming;
@@ -52,8 +54,9 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.connection.getRequestMethod());
+	@Override
+	public String getMethodValue() {
+		return this.connection.getRequestMethod();
 	}
 
 	@Override

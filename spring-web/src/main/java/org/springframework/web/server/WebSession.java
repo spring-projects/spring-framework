@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.server;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Main contract for using a server-side session that provides access to session
@@ -48,12 +50,42 @@ public interface WebSession {
 	Map<String, Object> getAttributes();
 
 	/**
-	 * Return the attribute value if present.
+	 * Return the session attribute value if present.
 	 * @param name the attribute name
 	 * @param <T> the attribute type
 	 * @return the attribute value
 	 */
-	<T> Optional<T> getAttribute(String name);
+	@SuppressWarnings("unchecked")
+	@Nullable
+	default <T> T getAttribute(String name) {
+		return (T) getAttributes().get(name);
+	}
+
+	/**
+	 * Return the session attribute value or if not present raise an
+	 * {@link IllegalArgumentException}.
+	 * @param name the attribute name
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getRequiredAttribute(String name) {
+		T value = getAttribute(name);
+		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		return value;
+	}
+
+	/**
+	 * Return the session attribute value, or a default, fallback value.
+	 * @param name the attribute name
+	 * @param defaultValue a default value to return instead
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getAttributeOrDefault(String name, T defaultValue) {
+		return (T) getAttributes().getOrDefault(name, defaultValue);
+	}
 
 	/**
 	 * Force the creation of a session causing the session id to be sent when
@@ -68,6 +100,14 @@ public interface WebSession {
 	 * {@link #save()} method is essentially a no-op.
 	 */
 	boolean isStarted();
+
+	/**
+	 * Generate a new id for the session and update the underlying session
+	 * storage to reflect the new id. After a successful call {@link #getId()}
+	 * reflects the new session id.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> changeSessionId();
 
 	/**
 	 * Save the session persisting attributes (e.g. if stored remotely) and also

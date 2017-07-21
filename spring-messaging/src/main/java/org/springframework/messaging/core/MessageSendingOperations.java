@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -80,7 +81,7 @@ public interface MessageSendingOperations<D> {
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(Object payload, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -103,7 +104,7 @@ public interface MessageSendingOperations<D> {
 	 * @param headers headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(D destination, Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor)
+	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException;
 
 }

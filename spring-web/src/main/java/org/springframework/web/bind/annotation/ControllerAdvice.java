@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,28 +26,32 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
+
 /**
- * Indicates the annotated class assists a "Controller".
+ * Specialization of {@link Component @Component} for classes that declare
+ * {@link ExceptionHandler @ExceptionHandler}, {@link InitBinder @InitBinder}, or
+ * {@link ModelAttribute @ModelAttribute} methods to be shared across
+ * multiple {@code @Controller} classes.
  *
- * <p>Serves as a specialization of {@link Component @Component}, allowing for
- * implementation classes to be autodetected through classpath scanning.
+ * <p>Classes with {@code @ControllerAdvice} can be declared explicitly as Spring
+ * beans or auto-detected via classpath scanning. All such beans are sorted via
+ * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator
+ * AnnotationAwareOrderComparator}, i.e. based on
+ * {@link org.springframework.core.annotation.Order @Order} and
+ * {@link org.springframework.core.Ordered Ordered}, and applied in that order
+ * at runtime. For handling exceptions the first {@code @ExceptionHandler} to
+ * match the exception is used. For model attributes and {@code InitBinder}
+ * initialization, {@code @ModelAttribute} and {@code @InitBinder} methods will
+ * also follow {@code @ControllerAdvice} order.
  *
- * <p>It is typically used to define {@link ExceptionHandler @ExceptionHandler},
- * {@link InitBinder @InitBinder}, and {@link ModelAttribute @ModelAttribute}
- * methods that apply to all {@link RequestMapping @RequestMapping} methods.
- *
- * <p>One of {@link #annotations()}, {@link #basePackageClasses()},
- * {@link #basePackages()} or its alias {@link #value()}
- * may be specified to define specific subsets of Controllers
- * to assist. When multiple selectors are applied, OR logic is applied -
- * meaning selected Controllers should match at least one selector.
- *
- * <p>The default behavior (i.e. if used without any selector),
- * the {@code @ControllerAdvice} annotated class will
- * assist all known Controllers.
- *
- * <p>Note that those checks are done at runtime, so adding many attributes and using
- * multiple strategies may have negative impacts (complexity, performance).
+ * <p>By default the methods in an {@code @ControllerAdvice} apply globally to
+ * all Controllers. Use selectors {@link #annotations()},
+ * {@link #basePackageClasses()}, and {@link #basePackages()} (or its alias
+ * {@link #value()}) to define a more narrow subset of targeted Controllers.
+ * If multiple selectors are declared, OR logic is applied, meaning selected
+ * Controllers should match at least one selector. Note that selector checks
+ * are performed at runtime and so adding many selectors may negatively impact
+ * performance and add complexity.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel

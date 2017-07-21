@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -340,16 +341,15 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @return the selected protocols or {@code null}
 	 * @see #determineHandlerSupportedProtocols(WebSocketHandler)
 	 */
+	@Nullable
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
-		if (requestedProtocols != null) {
-			List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
-			for (String protocol : requestedProtocols) {
-				if (handlerProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
-				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
+		List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
+		for (String protocol : requestedProtocols) {
+			if (handlerProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
+			}
+			if (this.supportedProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
 			}
 		}
 		return null;
@@ -402,6 +402,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @param attributes handshake attributes to pass to the WebSocket session
 	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
+	@Nullable
 	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) {
 

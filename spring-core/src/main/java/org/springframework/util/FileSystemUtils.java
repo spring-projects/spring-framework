@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,13 @@ package org.springframework.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for working with the file system.
@@ -25,27 +32,60 @@ import java.io.IOException;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.5.3
+ * @see java.io.File
+ * @see java.nio.file.Path
+ * @see java.nio.file.Files
  */
 public abstract class FileSystemUtils {
 
 	/**
 	 * Delete the supplied {@link File} - for directories,
 	 * recursively delete any nested directories or files as well.
+	 * <p>Note: Like {@link File#delete()}, this method does not throw any
+	 * exception but rather silently returns {@code false} in case of I/O
+	 * errors. Consider using {@link #deleteRecursively(Path)} for NIO-style
+	 * handling of I/O errors, clearly differentiating between non-existence
+	 * and failure to delete an existing file.
 	 * @param root the root {@code File} to delete
-	 * @return {@code true} if the {@code File} was deleted,
+	 * @return {@code true} if the {@code File} was successfully deleted,
 	 * otherwise {@code false}
 	 */
-	public static boolean deleteRecursively(File root) {
-		if (root != null && root.exists()) {
-			if (root.isDirectory()) {
-				File[] children = root.listFiles();
-				if (children != null) {
-					for (File child : children) {
-						deleteRecursively(child);
-					}
-				}
+	public static boolean deleteRecursively(@Nullable File root) {
+		if (root != null) {
+			try {
+				return deleteRecursively(root.toPath());
 			}
-			return root.delete();
+			catch (IOException ex) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Delete the supplied {@link File} - for directories,
+	 * recursively delete any nested directories or files as well.
+	 * @param root the root {@code File} to delete
+	 * @return {@code true} if the {@code File} existed and was deleted,
+	 * or {@code false} it it did not exist
+	 * @throws IOException in the case of I/O errors
+	 * @since 5.0
+	 */
+	public static boolean deleteRecursively(@Nullable Path root) throws IOException {
+		if (root != null) {
+			Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					Files.delete(dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			return Files.deleteIfExists(root);
 		}
 		return false;
 	}
@@ -58,43 +98,43 @@ public abstract class FileSystemUtils {
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void copyRecursively(File src, File dest) throws IOException {
-		Assert.isTrue(src != null && (src.isDirectory() || src.isFile()), "Source File must denote a directory or file");
+		Assert.notNull(src, "Source File must not be null");
 		Assert.notNull(dest, "Destination File must not be null");
-		doCopyRecursively(src, dest);
+		copyRecursively(src.toPath(), dest.toPath());
 	}
 
 	/**
-	 * Actually copy the contents of the {@code src} file/directory
+	 * Recursively copy the contents of the {@code src} file/directory
 	 * to the {@code dest} file/directory.
 	 * @param src the source directory
 	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors
+	 * @since 5.0
 	 */
-	private static void doCopyRecursively(File src, File dest) throws IOException {
-		if (src.isDirectory()) {
-			dest.mkdir();
-			File[] entries = src.listFiles();
-			if (entries == null) {
-				throw new IOException("Could not list files in directory: " + src);
-			}
-			for (File entry : entries) {
-				doCopyRecursively(entry, new File(dest, entry.getName()));
-			}
+	public static void copyRecursively(Path src, Path dest) throws IOException {
+		Assert.notNull(src, "Source Path must not be null");
+		Assert.notNull(dest, "Destination Path must not be null");
+		BasicFileAttributes srcAttr = Files.readAttributes(src, BasicFileAttributes.class);
+
+		if (srcAttr.isDirectory()) {
+			Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					Files.createDirectories(dest.resolve(src.relativize(dir)));
+					return FileVisitResult.CONTINUE;
+				}
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.copy(file, dest.resolve(src.relativize(file)));
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		}
-		else if (src.isFile()) {
-			try {
-				dest.createNewFile();
-			}
-			catch (IOException ex) {
-				IOException ioex = new IOException("Failed to create file: " + dest);
-				ioex.initCause(ex);
-				throw ioex;
-			}
-			FileCopyUtils.copy(src, dest);
+		else if (srcAttr.isRegularFile()) {
+			Files.copy(src, dest);
 		}
 		else {
-			// Special File handle: neither a file not a directory.
-			// Simply skip it when contained in nested directory...
+			throw new IllegalArgumentException("Source File must denote a directory or file");
 		}
 	}
 

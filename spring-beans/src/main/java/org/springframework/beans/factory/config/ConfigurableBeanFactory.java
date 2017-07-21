@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -85,11 +86,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanClassLoader the class loader to use,
 	 * or {@code null} to suggest the default class loader
 	 */
-	void setBeanClassLoader(ClassLoader beanClassLoader);
+	void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
 
 	/**
 	 * Return this factory's class loader for loading bean classes.
 	 */
+	@Nullable
 	ClassLoader getBeanClassLoader();
 
 	/**
@@ -101,13 +103,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * then removed once the BeanFactory completes its bootstrap phase.
 	 * @since 2.5
 	 */
-	void setTempClassLoader(ClassLoader tempClassLoader);
+	void setTempClassLoader(@Nullable ClassLoader tempClassLoader);
 
 	/**
 	 * Return the temporary ClassLoader to use for type matching purposes,
 	 * if any.
 	 * @since 2.5
 	 */
+	@Nullable
 	ClassLoader getTempClassLoader();
 
 	/**
@@ -132,12 +135,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * here, supporting "#{...}" expressions in a Unified EL compatible style.
 	 * @since 3.0
 	 */
-	void setBeanExpressionResolver(BeanExpressionResolver resolver);
+	void setBeanExpressionResolver(@Nullable BeanExpressionResolver resolver);
 
 	/**
 	 * Return the resolution strategy for expressions in bean definition values.
 	 * @since 3.0
 	 */
+	@Nullable
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
@@ -145,12 +149,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
 	 */
-	void setConversionService(ConversionService conversionService);
+	void setConversionService(@Nullable ConversionService conversionService);
 
 	/**
 	 * Return the associated ConversionService, if any.
 	 * @since 3.0
 	 */
+	@Nullable
 	ConversionService getConversionService();
 
 	/**
@@ -222,6 +227,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the resolved value (may be the original value as-is)
 	 * @since 3.0
 	 */
+	@Nullable
 	String resolveEmbeddedValue(String value);
 
 	/**
@@ -265,6 +271,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the registered Scope implementation, or {@code null} if none
 	 * @see #registerScope
 	 */
+	@Nullable
 	Scope getRegisteredScope(String scopeName);
 
 	/**

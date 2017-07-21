@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,19 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -36,6 +41,8 @@ import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Utility class for easy access to request-specific state which has been
@@ -76,8 +83,9 @@ public abstract class RequestContextUtils {
 	 * @see WebApplicationContextUtils#getWebApplicationContext(ServletContext)
 	 * @see ContextLoader#getCurrentWebApplicationContext()
 	 */
+	@Nullable
 	public static WebApplicationContext findWebApplicationContext(
-			HttpServletRequest request, ServletContext servletContext) {
+			HttpServletRequest request, @Nullable ServletContext servletContext) {
 
 		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
@@ -107,6 +115,7 @@ public abstract class RequestContextUtils {
 	 * @see ServletRequest#getServletContext()
 	 * @see ContextLoader#getCurrentWebApplicationContext()
 	 */
+	@Nullable
 	public static WebApplicationContext findWebApplicationContext(HttpServletRequest request) {
 		return findWebApplicationContext(request, request.getServletContext());
 	}
@@ -117,6 +126,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current LocaleResolver, or {@code null} if not found
 	 */
+	@Nullable
 	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
 		return (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
 	}
@@ -158,6 +168,7 @@ public abstract class RequestContextUtils {
 	 * @see #getLocaleResolver
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 */
+	@Nullable
 	public static TimeZone getTimeZone(HttpServletRequest request) {
 		LocaleResolver localeResolver = getLocaleResolver(request);
 		if (localeResolver instanceof LocaleContextResolver) {
@@ -175,6 +186,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver, or {@code null} if not found
 	 */
+	@Nullable
 	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
 		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
@@ -185,6 +197,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current ThemeSource
 	 */
+	@Nullable
 	public static ThemeSource getThemeSource(HttpServletRequest request) {
 		return (ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
 	}
@@ -196,6 +209,7 @@ public abstract class RequestContextUtils {
 	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
 	 */
+	@Nullable
 	public static Theme getTheme(HttpServletRequest request) {
 		ThemeResolver themeResolver = getThemeResolver(request);
 		ThemeSource themeSource = getThemeSource(request);
@@ -209,35 +223,62 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return a read-only {@link Map} with "input" flash attributes saved on a
-	 * previous request.
-	 * @param request the current request
+	 * Return read-only "input" flash attributes from request before redirect.
+	 * @param request current request
 	 * @return a read-only Map, or {@code null} if not found
 	 * @see FlashMap
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static Map<String, ?> getInputFlashMap(HttpServletRequest request) {
 		return (Map<String, ?>) request.getAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE);
 	}
 
 	/**
-	 * Return the "output" FlashMap with attributes to save for a subsequent request.
-	 * @param request the current request
-	 * @return a {@link FlashMap} instance (never {@code null} within a DispatcherServlet request)
-	 * @see FlashMap
+	 * Return "output" FlashMap to save attributes for request after redirect.
+	 * @param request current request
+	 * @return a {@link FlashMap} instance, never {@code null} within a
+	 * {@code DispatcherServlet}-handled request
 	 */
 	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
 		return (FlashMap) request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE);
 	}
 
 	/**
-	 * Return the FlashMapManager instance to save flash attributes with
-	 * before a redirect.
+	 * Return the {@code FlashMapManager} instance to save flash attributes.
+	 * <p>As of 5.0 the convenience method {@link #saveOutputFlashMap} may be
+	 * used to save the "output" FlashMap.
 	 * @param request the current request
-	 * @return a {@link FlashMapManager} instance (never {@code null} within a DispatcherServlet request)
+	 * @return a {@link FlashMapManager} instance, never {@code null} within a
+	 * {@code DispatcherServlet}-handled request
 	 */
+	@Nullable
 	public static FlashMapManager getFlashMapManager(HttpServletRequest request) {
 		return (FlashMapManager) request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE);
+	}
+
+	/**
+	 * Convenience method that retrieves the {@link #getOutputFlashMap "output"
+	 * FlashMap}, updates it with the path and query params of the target URL,
+	 * and then saves it using the {@link #getFlashMapManager FlashMapManager}.
+	 * @param location the target URL for the redirect
+	 * @param request the current request
+	 * @param response the current response
+	 * @since 5.0
+	 */
+	public static void saveOutputFlashMap(String location, HttpServletRequest request, HttpServletResponse response) {
+		FlashMap flashMap = getOutputFlashMap(request);
+		if (CollectionUtils.isEmpty(flashMap)) {
+			return;
+		}
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(location).build();
+		flashMap.setTargetRequestPath(uriComponents.getPath());
+		flashMap.addTargetRequestParams(uriComponents.getQueryParams());
+
+		FlashMapManager manager = getFlashMapManager(request);
+		Assert.state(manager != null, "No FlashMapManager. Is this a DispatcherServlet handled request?");
+		manager.saveOutputFlashMap(flashMap, request, response);
 	}
 
 }

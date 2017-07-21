@@ -87,14 +87,6 @@ public class Jackson2ObjectMapperBuilderTests {
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
 
-	@Test
-	public void settersWithNullValues() {
-		// Should not crash:
-		Jackson2ObjectMapperBuilder.json().serializers((JsonSerializer<?>[]) null)
-				.serializersByType(null).deserializersByType(null)
-				.featuresToEnable((Object[]) null).featuresToDisable((Object[]) null);
-	}
-
 	@Test(expected = FatalBeanException.class)
 	public void unknownFeature() {
 		Jackson2ObjectMapperBuilder.json().featuresToEnable(Boolean.TRUE).build();

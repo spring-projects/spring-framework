@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -44,6 +45,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Original URI, if available; used for URI and File access.
 	 */
+	@Nullable
 	private final URI uri;
 
 	/**
@@ -121,7 +123,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException  {
+	public UrlResource(String protocol, String location, @Nullable String fragment) throws MalformedURLException  {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();
@@ -239,12 +241,11 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 	/**
 	 * This implementation returns the name of the file that this URL refers to.
-	 * @see java.net.URL#getFile()
-	 * @see java.io.File#getName()
+	 * @see java.net.URL#getPath()
 	 */
 	@Override
 	public String getFilename() {
-		return new File(this.url.getFile()).getName();
+		return StringUtils.getFilename(this.cleanedUrl.getPath());
 	}
 
 	/**

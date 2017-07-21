@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -44,7 +43,6 @@ import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -56,7 +54,8 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCase {
+@SuppressWarnings("deprecation")
+public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
 			new HttpComponentsAsyncClientHttpRequestFactory());
@@ -66,6 +65,16 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void getEntity() throws Exception {
 		Future<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
 		ResponseEntity<String> entity = future.get();
+		assertEquals("Invalid content", helloWorld, entity.getBody());
+		assertFalse("No headers", entity.getHeaders().isEmpty());
+		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
+		assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
+	}
+
+	@Test
+	public void getEntityFromCompletable() throws Exception {
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
+		ResponseEntity<String> entity = future.completable().get();
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
 		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
@@ -119,14 +128,12 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		assertNull("Invalid content", entity.getBody());
 	}
 
-
 	@Test
 	public void getNoContentTypeHeader() throws Exception {
 		Future<ResponseEntity<byte[]>> futureEntity = template.getForEntity(baseUrl + "/get/nocontenttype", byte[].class);
 		ResponseEntity<byte[]> responseEntity = futureEntity.get();
 		assertArrayEquals("Invalid content", helloWorld.getBytes("UTF-8"), responseEntity.getBody());
 	}
-
 
 	@Test
 	public void getNoContent() throws Exception {
@@ -590,7 +597,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void getAndInterceptResponse() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
 		template.setInterceptors(Collections.singletonList(interceptor));
-		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/get", String.class);
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/get", String.class);
 
 		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
@@ -603,7 +610,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void getAndInterceptError() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
 		template.setInterceptors(Collections.singletonList(interceptor));
-		template.getForEntity("/status/notfound", String.class);
+		template.getForEntity(baseUrl + "/status/notfound", String.class);
 
 		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
@@ -628,18 +635,6 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		@Override
 		public ListenableFuture<ClientHttpResponse> intercept(HttpRequest request, byte[] body,
 				AsyncClientHttpRequestExecution execution) throws IOException {
-
-			request = new HttpRequestWrapper(request) {
-				@Override
-				public URI getURI() {
-					try {
-						return new URI(baseUrl + super.getURI().toString());
-					}
-					catch (URISyntaxException ex) {
-						throw new IllegalStateException(ex);
-					}
-				}
-			};
 
 			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
 			future.addCallback(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -35,8 +36,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	public static final String ERROR_CODE = "typeMismatch";
 
 
+	@Nullable
 	private transient Object value;
 
+	@Nullable
 	private Class<?> requiredType;
 
 
@@ -55,12 +58,14 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class<?> requiredType, Throwable cause) {
+	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, @Nullable Class<?> requiredType,
+			@Nullable Throwable cause) {
+
 		super(propertyChangeEvent,
-				"Failed to convert property value of type [" +
-				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "]" +
+				"Failed to convert property value of type '" +
+				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
 				(requiredType != null ?
-				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
+				 " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
 				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
@@ -73,7 +78,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param value the offending value that couldn't be converted (may be {@code null})
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 */
-	public TypeMismatchException(Object value, Class<?> requiredType) {
+	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType) {
 		this(value, requiredType, null);
 	}
 
@@ -83,9 +88,9 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param requiredType the required target type (or {@code null} if not known)
 	 * @param cause the root cause (may be {@code null})
 	 */
-	public TypeMismatchException(Object value, Class<?> requiredType, Throwable cause) {
-		super("Failed to convert value of type [" + ClassUtils.getDescriptiveType(value) + "]" +
-				(requiredType != null ? " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
+	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
+		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
+				(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
 				cause);
 		this.value = value;
 		this.requiredType = requiredType;
@@ -96,6 +101,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Return the offending value (may be {@code null}).
 	 */
 	@Override
+	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
@@ -103,6 +109,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Return the required target type, if any.
 	 */
+	@Nullable
 	public Class<?> getRequiredType() {
 		return this.requiredType;
 	}

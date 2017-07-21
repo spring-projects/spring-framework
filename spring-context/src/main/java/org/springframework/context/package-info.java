@@ -10,4 +10,7 @@
  * is that application objects can often be configured without
  * any dependency on Spring-specific APIs.
  */
+@NonNullApi
 package org.springframework.context;
+
+import org.springframework.lang.NonNullApi;

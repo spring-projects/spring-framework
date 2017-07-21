@@ -360,16 +360,16 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
 		try {
 			propertyAccessor.read(context, null, "abc");
-			fail("Should have failed with an AccessException");
+			fail("Should have failed with an IllegalStateException");
 		}
-		catch (AccessException ae) {
+		catch (IllegalStateException ae) {
 			// success
 		}
 		try {
 			propertyAccessor.write(context, null, "abc", "foo");
-			fail("Should have failed with an AccessException");
+			fail("Should have failed with an AccessEIllegalStateExceptionxception");
 		}
-		catch (AccessException ae) {
+		catch (IllegalStateException ae) {
 			// success
 		}
 	}
@@ -1663,15 +1663,15 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR10146_malformedExpressions() throws Exception {
-		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("<foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146(">foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&&foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("||foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&foo", "EL1069E:(pos 0): missing expected character '&'");
-		doTestSpr10146("|foo", "EL1069E:(pos 0): missing expected character '|'");
+		doTestSpr10146("/foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("*foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("%foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("<foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146(">foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&&foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("||foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&foo", "EL1069E: missing expected character '&'");
+		doTestSpr10146("|foo", "EL1069E: missing expected character '|'");
 	}
 
 	private void doTestSpr10146(String expression, String expectedMessage) {
@@ -1702,7 +1702,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void SPR10328() throws Exception {
 		thrown.expect(SpelParseException.class);
-		thrown.expectMessage("EL1071E:(pos 2): A required selection expression has not been specified");
+		thrown.expectMessage("EL1071E: A required selection expression has not been specified");
 		Expression exp = parser.parseExpression("$[]");
 		exp.getValue(Arrays.asList("foo", "bar", "baz"));
 	}
@@ -1768,6 +1768,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 				};
 			}
 		});
+
 		result = spel.getValue(context);
 		assertNotNull(result);
 		assertTrue(result.getClass().isArray());

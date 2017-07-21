@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration tests which verify support for {@link DisabledIf @DisabledIf}
- * in conjunction with the {@link SpringExtension} in a JUnit 5 (Jupiter)
- * environment.
+ * in conjunction with the {@link SpringExtension} in a JUnit Jupiter environment.
+ *
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Tadaya Tsuyukubo
  * @author Sam Brannen
@@ -63,13 +67,19 @@ class DisabledIfTestCase {
 		}
 
 		@Test
-		@DisabledIf("${foo}")
+		@DisabledIf("${__EnigmaPropertyShouldNotExist__:true}")
+		void disabledIfWithPropertyPlaceholderForNonexistentPropertyWithDefaultValue() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@DisabledIf(expression = "${foo}", loadContext = true)
 		void disabledIfWithPropertyPlaceholder() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("\t${foo}   ")
+		@DisabledIf(expression = "\t${foo}   ", loadContext = true)
 		void disabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
@@ -105,13 +115,13 @@ class DisabledIfTestCase {
 		}
 
 		@Test
-		@DisabledIf("#{@booleanTrueBean}")
+		@DisabledIf(expression = "#{@booleanTrueBean}", loadContext = true)
 		void disabledIfWithSpelBooleanTrueBean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{@stringTrueBean}")
+		@DisabledIf(expression = "#{@stringTrueBean}", loadContext = true)
 		void disabledIfWithSpelStringTrueBean() {
 			fail("This test must be disabled");
 		}

@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionStatus;
 
 /**
@@ -50,6 +51,7 @@ public interface TransactionCallback<T> {
 	 * @see TransactionTemplate#execute
 	 * @see CallbackPreferringPlatformTransactionManager#execute
 	 */
+	@Nullable
 	T doInTransaction(TransactionStatus status);
 
 }

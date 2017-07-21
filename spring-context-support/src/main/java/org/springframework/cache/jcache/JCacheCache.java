@@ -22,6 +22,7 @@ import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -85,12 +86,12 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
 		return (set ? null : get(key));
 	}
@@ -110,8 +111,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T process(MutableEntry<Object, Object> entry, Object... arguments)
-				throws EntryProcessorException {
+		@Nullable
+		public T process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
 			Callable<T> valueLoader = (Callable<T>) arguments[0];
 			if (entry.exists()) {
 				return (T) fromStoreValue(entry.getValue());

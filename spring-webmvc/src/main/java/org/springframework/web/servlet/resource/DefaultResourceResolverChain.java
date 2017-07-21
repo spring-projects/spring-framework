@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +40,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	private int index = -1;
 
 
-	public DefaultResourceResolverChain(List<? extends ResourceResolver> resolvers) {
+	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {
 		if (resolvers != null) {
 			this.resolvers.addAll(resolvers);
 		}
@@ -47,7 +48,9 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
+	public Resource resolveResource(
+			@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
+
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
 			return null;

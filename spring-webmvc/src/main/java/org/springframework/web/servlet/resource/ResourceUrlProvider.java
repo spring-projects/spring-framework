@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -31,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -98,7 +100,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceHttpRequestHandler> handlerMap) {
+	public void setHandlerMap(@Nullable Map<String, ResourceHttpRequestHandler> handlerMap) {
 		if (handlerMap != null) {
 			this.handlerMap.clear();
 			this.handlerMap.putAll(handlerMap);
@@ -168,12 +170,13 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
+	@Nullable
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
 		}
 		int prefixIndex = getLookupPathIndex(request);
-		int suffixIndex = getQueryParamsIndex(requestUrl);
+		int suffixIndex = getEndPathIndex(requestUrl);
 		String prefix = requestUrl.substring(0, prefixIndex);
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
@@ -188,9 +191,17 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return requestUri.indexOf(lookupPath);
 	}
 
-	private int getQueryParamsIndex(String lookupPath) {
-		int index = lookupPath.indexOf("?");
-		return index > 0 ? index : lookupPath.length();
+	private int getEndPathIndex(String lookupPath) {
+		int suffixIndex = lookupPath.length();
+		int queryIndex = lookupPath.indexOf("?");
+		if(queryIndex > 0) {
+			suffixIndex = queryIndex;
+		}
+		int hashIndex = lookupPath.indexOf("#");
+		if(hashIndex > 0) {
+			suffixIndex = Math.min(suffixIndex, hashIndex);
+		}
+		return suffixIndex;
 	}
 
 	/**
@@ -205,6 +216,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
+	@Nullable
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");

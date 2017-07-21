@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -32,8 +33,10 @@ import org.springframework.util.ObjectUtils;
  */
 public class LookupOverride extends MethodOverride {
 
+	@Nullable
 	private final String beanName;
 
+	@Nullable
 	private Method method;
 
 
@@ -43,7 +46,7 @@ public class LookupOverride extends MethodOverride {
 	 * @param beanName the name of the bean in the current {@code BeanFactory}
 	 * that the overridden method should return (may be {@code null})
 	 */
-	public LookupOverride(String methodName, String beanName) {
+	public LookupOverride(String methodName, @Nullable String beanName) {
 		super(methodName);
 		this.beanName = beanName;
 	}
@@ -54,7 +57,7 @@ public class LookupOverride extends MethodOverride {
 	 * @param beanName the name of the bean in the current {@code BeanFactory}
 	 * that the overridden method should return (may be {@code null})
 	 */
-	public LookupOverride(Method method, String beanName) {
+	public LookupOverride(Method method, @Nullable String beanName) {
 		super(method.getName());
 		this.method = method;
 		this.beanName = beanName;
@@ -64,6 +67,7 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Return the name of the bean that should be returned by this method.
 	 */
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}

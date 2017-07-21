@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.http.codec.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -40,19 +40,23 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
- * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s. That is, given
- * the following XML:
+ * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s.
+ * That is, given the following XML:
+ *
  * <pre>{@code
  * <root>
  *     <child>foo</child>
  *     <child>bar</child>
  * </root>}
  * </pre>
+ *
  * this method with result in a flux with the following events:
  * <ol>
  * <li>{@link javax.xml.stream.events.StartDocument}</li>
@@ -74,12 +78,12 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
+	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
+
 	private static final boolean aaltoPresent = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
 
-	private static final XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-
-	boolean useAalto = true;
+	boolean useAalto = aaltoPresent;
 
 
 	public XmlEventDecoder() {
@@ -88,28 +92,30 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"rawtypes", "unchecked"})  // on JDK 9 where XMLEventReader is Iterator<Object>
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
-		if (useAalto && aaltoPresent) {
-			return flux.flatMap(new AaltoDataBufferToXmlEvent());
+		if (useAalto) {
+			AaltoDataBufferToXmlEvent aaltoMapper = new AaltoDataBufferToXmlEvent();
+			return flux.flatMap(aaltoMapper)
+					.doFinally(signalType -> aaltoMapper.endOfInput());
 		}
 		else {
 			Mono<DataBuffer> singleBuffer = flux.reduce(DataBuffer::write);
 			return singleBuffer.
-					flatMap(dataBuffer -> {
+					flatMapMany(dataBuffer -> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
-							XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
-							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader);
+							Iterator eventReader = inputFactory.createXMLEventReader(is);
+							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader)
+									.doFinally(t -> {
+										DataBufferUtils.release(dataBuffer);
+									});
 						}
 						catch (XMLStreamException ex) {
 							return Mono.error(ex);
-						}
-						finally {
-							DataBufferUtils.release(dataBuffer);
 						}
 					});
 		}
@@ -126,8 +132,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		private final AsyncXMLStreamReader<AsyncByteBufferFeeder> streamReader =
 				inputFactory.createAsyncForByteBuffer();
 
-		private final XMLEventAllocator eventAllocator =
-				EventAllocatorImpl.getDefaultInstance();
+		private final XMLEventAllocator eventAllocator = EventAllocatorImpl.getDefaultInstance();
 
 		@Override
 		public Publisher<? extends XMLEvent> apply(DataBuffer dataBuffer) {
@@ -155,6 +160,10 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			finally {
 				DataBufferUtils.release(dataBuffer);
 			}
+		}
+
+		public void endOfInput() {
+			this.streamReader.getInputFeeder().endOfInput();
 		}
 	}
 

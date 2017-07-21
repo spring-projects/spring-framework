@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,31 +43,30 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	private PathVariableMapMethodArgumentResolver resolver;
 
-	private MethodParameter paramMap;
-
-	private MethodParameter paramNamedMap;
-
-	private MethodParameter paramMapNoAnnot;
-
 	private ModelAndViewContainer mavContainer;
 
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest request;
 
+	private MethodParameter paramMap;
+	private MethodParameter paramNamedMap;
+	private MethodParameter paramMapNoAnnot;
+
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new PathVariableMapMethodArgumentResolver();
+		mavContainer = new ModelAndViewContainer();
+		request = new MockHttpServletRequest();
+		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
 		Method method = getClass().getMethod("handle", Map.class, Map.class, Map.class);
 		paramMap = new MethodParameter(method, 0);
 		paramNamedMap = new MethodParameter(method, 1);
 		paramMapNoAnnot = new MethodParameter(method, 2);
-
-		mavContainer = new ModelAndViewContainer();
-		request = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {

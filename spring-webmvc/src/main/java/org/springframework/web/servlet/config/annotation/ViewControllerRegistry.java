@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
@@ -38,11 +39,11 @@ public class ViewControllerRegistry {
 
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
-	private final List<RedirectViewControllerRegistration> redirectRegistrations =
-			new ArrayList<>(10);
+	private final List<RedirectViewControllerRegistration> redirectRegistrations = new ArrayList<>(10);
 
 	private int order = 1;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -96,7 +97,7 @@ public class ViewControllerRegistry {
 		this.order = order;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
+	protected void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -105,6 +106,7 @@ public class ViewControllerRegistry {
 	 * Return the {@code HandlerMapping} that contains the registered view
 	 * controller mappings, or {@code null} for no registrations.
 	 */
+	@Nullable
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;

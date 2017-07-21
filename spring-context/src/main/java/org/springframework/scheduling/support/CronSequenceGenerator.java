@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.scheduling.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collections;
@@ -26,6 +25,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,14 +42,15 @@ import org.springframework.util.StringUtils;
  * <li>"0 0 * * * *" = the top of every hour of every day.</li>
  * <li>"*&#47;10 * * * * *" = every ten seconds.</li>
  * <li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
- * <li>"0 * 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
- * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+ * <li>"0 0 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
+ * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
  * <li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
  * <li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
  * </ul>
  *
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Ruslan Sibgatullin
  * @since 3.0
  * @see CronTrigger
  */
@@ -57,6 +58,7 @@ public class CronSequenceGenerator {
 
 	private final String expression;
 
+	@Nullable
 	private final TimeZone timeZone;
 
 	private final BitSet months = new BitSet(12);
@@ -94,6 +96,12 @@ public class CronSequenceGenerator {
 		this.expression = expression;
 		this.timeZone = timeZone;
 		parse(expression);
+	}
+
+	private CronSequenceGenerator(String expression, String[] fields) {
+		this.expression = expression;
+		this.timeZone = null;
+		doParse(fields);
 	}
 
 
@@ -234,7 +242,7 @@ public class CronSequenceGenerator {
 		// roll over if needed
 		if (nextValue == -1) {
 			calendar.add(nextField, 1);
-			reset(calendar, Arrays.asList(field));
+			reset(calendar, Collections.singletonList(field));
 			nextValue = bits.nextSetBit(0);
 		}
 		if (nextValue != value) {
@@ -265,12 +273,17 @@ public class CronSequenceGenerator {
 			throw new IllegalArgumentException(String.format(
 					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
+		doParse(fields);
+	}
+
+	private void doParse(String[] fields) {
 		setNumberHits(this.seconds, fields[0], 0, 60);
 		setNumberHits(this.minutes, fields[1], 0, 60);
 		setNumberHits(this.hours, fields[2], 0, 24);
 		setDaysOfMonth(this.daysOfMonth, fields[3]);
 		setMonths(this.months, fields[4]);
 		setDays(this.daysOfWeek, replaceOrdinals(fields[5], "SUN,MON,TUE,WED,THU,FRI,SAT"), 8);
+
 		if (this.daysOfWeek.get(7)) {
 			// Sunday can be represented as 0 or 7
 			this.daysOfWeek.set(0);
@@ -388,18 +401,28 @@ public class CronSequenceGenerator {
 
 	/**
 	 * Determine whether the specified expression represents a valid cron pattern.
-	 * <p>Specifically, this method verifies that the expression contains six
-	 * fields separated by single spaces.
 	 * @param expression the expression to evaluate
 	 * @return {@code true} if the given expression is a valid cron expression
 	 * @since 4.3
 	 */
-	public static boolean isValidExpression(String expression) {
+	public static boolean isValidExpression(@Nullable String expression) {
+		if (expression == null) {
+			return false;
+		}
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		return areValidCronFields(fields);
+		if (!areValidCronFields(fields)) {
+			return false;
+		}
+		try {
+			new CronSequenceGenerator(expression, fields);
+			return true;
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
+		}
 	}
 
-	private static boolean areValidCronFields(String[] fields) {
+	private static boolean areValidCronFields(@Nullable String[] fields) {
 		return (fields != null && fields.length == 6);
 	}
 

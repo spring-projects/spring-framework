@@ -32,6 +32,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MethodCounter;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
@@ -207,7 +208,7 @@ class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
 	 */
 	@Override
-	public boolean matches(Method m, Class<?> targetClass) {
+	public boolean matches(Method m, @Nullable Class<?> targetClass) {
 		return false;
 	}
 
@@ -255,7 +256,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return method.getName().startsWith("setAge");
 	}
 

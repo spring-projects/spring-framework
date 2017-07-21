@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that creates a named EhCache {@link net.sf.ehcache.Cache} instance
@@ -63,24 +64,26 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private CacheManager cacheManager;
 
 	private boolean blocking = false;
 
+	@Nullable
 	private CacheEntryFactory cacheEntryFactory;
 
+	@Nullable
 	private BootstrapCacheLoader bootstrapCacheLoader;
 
+	@Nullable
 	private Set<CacheEventListener> cacheEventListeners;
-
-	private boolean statisticsEnabled = false;
-
-	private boolean sampledStatisticsEnabled = false;
 
 	private boolean disabled = false;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Ehcache cache;
 
 

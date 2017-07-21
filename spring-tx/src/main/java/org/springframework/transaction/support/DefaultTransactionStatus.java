@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
+import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link org.springframework.transaction.TransactionStatus}
@@ -48,6 +50,7 @@ import org.springframework.transaction.SavepointManager;
  */
 public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
+	@Nullable
 	private final Object transaction;
 
 	private final boolean newTransaction;
@@ -58,6 +61,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	private final boolean debug;
 
+	@Nullable
 	private final Object suspendedResources;
 
 
@@ -77,8 +81,8 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * for this transaction, if any
 	 */
 	public DefaultTransactionStatus(
-			Object transaction, boolean newTransaction, boolean newSynchronization,
-			boolean readOnly, boolean debug, Object suspendedResources) {
+			@Nullable Object transaction, boolean newTransaction, boolean newSynchronization,
+			boolean readOnly, boolean debug, @Nullable Object suspendedResources) {
 
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
@@ -91,8 +95,10 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	/**
 	 * Return the underlying transaction object.
+	 * @throws IllegalStateException if no transaction is active
 	 */
 	public Object getTransaction() {
+		Assert.state(this.transaction != null, "No transaction active");
 		return this.transaction;
 	}
 
@@ -136,6 +142,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * Return the holder for resources that have been suspended for this transaction,
 	 * if any.
 	 */
+	@Nullable
 	public Object getSuspendedResources() {
 		return this.suspendedResources;
 	}
@@ -175,11 +182,12 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	@Override
 	protected SavepointManager getSavepointManager() {
-		if (!isTransactionSavepointManager()) {
+		Object transaction = this.transaction;
+		if (!(transaction instanceof SavepointManager)) {
 			throw new NestedTransactionNotSupportedException(
-				"Transaction object [" + getTransaction() + "] does not support savepoints");
+				"Transaction object [" + this.transaction + "] does not support savepoints");
 		}
-		return (SavepointManager) getTransaction();
+		return (SavepointManager) transaction;
 	}
 
 	/**
@@ -189,7 +197,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * @see org.springframework.transaction.SavepointManager
 	 */
 	public boolean isTransactionSavepointManager() {
-		return (getTransaction() instanceof SavepointManager);
+		return (this.transaction instanceof SavepointManager);
 	}
 
 }

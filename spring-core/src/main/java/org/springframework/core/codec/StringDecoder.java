@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -60,32 +61,24 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
-	 * <p>By default, this decoder will split along new lines.
-	 */
-	public StringDecoder() {
-		this(true);
-	}
-
-	/**
-	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
 	 * @param splitOnNewline whether this decoder should split the received data buffers
 	 * along newline characters
 	 */
-	public StringDecoder(boolean splitOnNewline) {
-		super(new MimeType("text", "*", DEFAULT_CHARSET), MimeTypeUtils.ALL);
+	private StringDecoder(boolean splitOnNewline, MimeType... mimeTypes) {
+		super(mimeTypes);
 		this.splitOnNewline = splitOnNewline;
 	}
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return (super.canDecode(elementType, mimeType) &&
 				String.class.equals(elementType.getRawClass()));
 	}
 
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {
@@ -96,7 +89,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	@Override
 	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.reduce(DataBuffer::write)
@@ -120,20 +113,38 @@ public class StringDecoder extends AbstractDecoder<String> {
 		return Flux.fromIterable(results);
 	}
 
-	private String decodeDataBuffer(DataBuffer dataBuffer, MimeType mimeType) {
+	private String decodeDataBuffer(DataBuffer dataBuffer, @Nullable MimeType mimeType) {
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
 		DataBufferUtils.release(dataBuffer);
 		return charBuffer.toString();
 	}
 
-	private Charset getCharset(MimeType mimeType) {
+	private Charset getCharset(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			return mimeType.getCharset();
 		}
 		else {
 			return DEFAULT_CHARSET;
 		}
+	}
+
+
+	/**
+	 * Create a {@code StringDecoder} for {@code "text/plain"}.
+	 * @param splitOnNewline whether to split the byte stream into lines
+	 */
+	public static StringDecoder textPlainOnly(boolean splitOnNewline) {
+		return new StringDecoder(splitOnNewline, new MimeType("text", "plain", DEFAULT_CHARSET));
+	}
+
+	/**
+	 * Create a {@code StringDecoder} that supports all MIME types.
+	 * @param splitOnNewline whether to split the byte stream into lines
+	 */
+	public static StringDecoder allMimeTypes(boolean splitOnNewline) {
+		return new StringDecoder(splitOnNewline,
+				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
 	}
 
 }

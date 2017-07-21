@@ -34,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap.Entry;
 import org.springframework.util.ConcurrentReferenceHashMap.Reference;
 import org.springframework.util.ConcurrentReferenceHashMap.Restructure;
@@ -588,7 +589,7 @@ public class ConcurrentReferenceHashMapTests {
 		}
 
 		@Override
-		protected int getHash(Object o) {
+		protected int getHash(@Nullable Object o) {
 			if (this.disableTestHooks) {
 				return super.getHash(o);
 			}
@@ -606,7 +607,7 @@ public class ConcurrentReferenceHashMapTests {
 			return new ReferenceManager() {
 				@Override
 				public Reference<K, V> createReference(Entry<K, V> entry, int hash,
-						Reference<K, V> next) {
+						@Nullable Reference<K, V> next) {
 					if (TestWeakConcurrentCache.this.disableTestHooks) {
 						return super.createReference(entry, hash, next);
 					}

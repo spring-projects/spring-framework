@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -34,6 +35,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 
 	private int numberOfBeansFound;
 
+	@Nullable
 	private Collection<String> beanNamesFound;
 
 
@@ -85,6 +87,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @since 4.3
 	 * @see #getBeanType()
 	 */
+	@Nullable
 	public Collection<String> getBeanNamesFound() {
 		return this.beanNamesFound;
 	}

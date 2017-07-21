@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -42,8 +40,8 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
@@ -91,11 +89,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
-		implements HttpRequestHandler, InitializingBean, SmartInitializingSingleton, CorsConfigurationSource {
-
-	// Servlet 3.1 setContentLengthLong(long) available?
-	private static final boolean contentLengthLongAvailable =
-			ClassUtils.hasMethod(ServletResponse.class, "setContentLengthLong", long.class);
+		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
@@ -106,14 +100,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	@Nullable
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
+	@Nullable
 	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private PathExtensionContentNegotiationStrategy pathExtensionStrategy;
+	@Nullable
+	private PathExtensionContentNegotiationStrategy contentNegotiationStrategy;
 
+	@Nullable
 	private CorsConfiguration corsConfiguration;
 
 
@@ -145,7 +144,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default {@link PathResourceResolver} is configured. If using this property,
 	 * it is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
-	public void setResourceResolvers(List<ResourceResolver> resourceResolvers) {
+	public void setResourceResolvers(@Nullable List<ResourceResolver> resourceResolvers) {
 		this.resourceResolvers.clear();
 		if (resourceResolvers != null) {
 			this.resourceResolvers.addAll(resourceResolvers);
@@ -163,7 +162,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Configure the list of {@link ResourceTransformer}s to use.
 	 * <p>By default no transformers are configured for use.
 	 */
-	public void setResourceTransformers(List<ResourceTransformer> resourceTransformers) {
+	public void setResourceTransformers(@Nullable List<ResourceTransformer> resourceTransformers) {
 		this.resourceTransformers.clear();
 		if (resourceTransformers != null) {
 			this.resourceTransformers.addAll(resourceTransformers);
@@ -182,14 +181,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter resourceHttpMessageConverter) {
-		this.resourceHttpMessageConverter = resourceHttpMessageConverter;
+	public void setResourceHttpMessageConverter(@Nullable ResourceHttpMessageConverter messageConverter) {
+		this.resourceHttpMessageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the configured resource converter.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
 		return this.resourceHttpMessageConverter;
 	}
@@ -199,14 +199,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
-	public void setResourceRegionHttpMessageConverter(ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter) {
-		this.resourceRegionHttpMessageConverter = resourceRegionHttpMessageConverter;
+	public void setResourceRegionHttpMessageConverter(@Nullable ResourceRegionHttpMessageConverter messageConverter) {
+		this.resourceRegionHttpMessageConverter = messageConverter;
 	}
 
 	/**
 	 * Return the configured resource region converter.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
 		return this.resourceRegionHttpMessageConverter;
 	}
@@ -218,7 +219,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param contentNegotiationManager the manager in use
 	 * @since 4.3
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
@@ -226,6 +227,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the configured content negotiation manager.
 	 * @since 4.3
 	 */
+	@Nullable
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
@@ -253,16 +255,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			logger.warn("Locations list is empty. No resources will be served unless a " +
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
+
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
+
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
 		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
+
+		this.contentNegotiationStrategy = initContentNegotiationStrategy();
 	}
 
 	/**
@@ -285,11 +291,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 	}
 
-	@Override
-	public void afterSingletonsInstantiated() {
-		this.pathExtensionStrategy = initContentNegotiationStrategy();
-	}
-
+	/**
+	 * Initialize the content negotiation strategy depending on the {@code ContentNegotiationManager}
+	 * setup and the availability of a {@code ServletContext}.
+	 * @see ServletPathExtensionContentNegotiationStrategy
+	 * @see PathExtensionContentNegotiationStrategy
+	 */
 	protected PathExtensionContentNegotiationStrategy initContentNegotiationStrategy() {
 		Map<String, MediaType> mediaTypes = null;
 		if (getContentNegotiationManager() != null) {
@@ -299,9 +306,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				mediaTypes = new HashMap<>(strategy.getMediaTypes());
 			}
 		}
-		return (getServletContext() != null) ?
-			new ServletPathExtensionContentNegotiationStrategy(getServletContext(), mediaTypes) :
-			new PathExtensionContentNegotiationStrategy(mediaTypes);
+		return (getServletContext() != null ?
+				new ServletPathExtensionContentNegotiationStrategy(getServletContext(), mediaTypes) :
+				new PathExtensionContentNegotiationStrategy(mediaTypes));
 	}
 
 
@@ -368,10 +375,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
+			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
 			setHeaders(response, resource, mediaType);
 			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
 		}
 		else {
+			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");
 			response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
@@ -393,6 +402,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 	}
 
+	@Nullable
 	protected Resource getResource(HttpServletRequest request) throws IOException {
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (path == null) {
@@ -513,8 +523,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
+	@Nullable
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		return this.pathExtensionStrategy.getMediaTypeForResource(resource);
+		return (this.contentNegotiationStrategy != null ?
+				this.contentNegotiationStrategy.getMediaTypeForResource(resource) : null);
 	}
 
 	/**
@@ -525,15 +537,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param mediaType the resource's media type (never {@code null})
 	 * @throws IOException in case of errors while setting the headers
 	 */
-	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
+	protected void setHeaders(HttpServletResponse response, Resource resource, @Nullable MediaType mediaType)
+			throws IOException {
+
 		long length = resource.contentLength();
 		if (length > Integer.MAX_VALUE) {
-			if (contentLengthLongAvailable) {
-				response.setContentLengthLong(length);
-			}
-			else {
-				response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(length));
-			}
+			response.setContentLengthLong(length);
 		}
 		else {
 			response.setContentLength((int) length);

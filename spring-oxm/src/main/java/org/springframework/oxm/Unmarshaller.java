@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import javax.xml.transform.Source;
 public interface Unmarshaller {
 
 	/**
-	 * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
+	 * Indicate whether this unmarshaller can unmarshal instances of the supplied type.
 	 * @param clazz the class that this unmarshaller is being asked if it can marshal
 	 * @return {@code true} if this unmarshaller can indeed unmarshal to the supplied class;
 	 * {@code false} otherwise
@@ -38,7 +38,7 @@ public interface Unmarshaller {
 	boolean supports(Class<?> clazz);
 
 	/**
-	 * Unmarshals the given {@link Source} into an object graph.
+	 * Unmarshal the given {@link Source} into an object graph.
 	 * @param source the source to marshal from
 	 * @return the object graph
 	 * @throws IOException if an I/O error occurs

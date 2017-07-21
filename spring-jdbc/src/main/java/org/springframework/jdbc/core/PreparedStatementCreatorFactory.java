@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,9 +56,8 @@ public class PreparedStatementCreatorFactory {
 
 	private boolean returnGeneratedKeys = false;
 
-	private String[] generatedKeysColumnNames = null;
-
-	private NativeJdbcExtractor nativeJdbcExtractor;
+	@Nullable
+	private String[] generatedKeysColumnNames;
 
 
 	/**
@@ -133,19 +132,12 @@ public class PreparedStatementCreatorFactory {
 		this.generatedKeysColumnNames = names;
 	}
 
-	/**
-	 * Specify the NativeJdbcExtractor to use for unwrapping PreparedStatements, if any.
-	 */
-	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
-		this.nativeJdbcExtractor = nativeJdbcExtractor;
-	}
-
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(List<?> params) {
+	public PreparedStatementSetter newPreparedStatementSetter(@Nullable List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
@@ -153,7 +145,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+	public PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
@@ -161,7 +153,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(List<?> params) {
+	public PreparedStatementCreator newPreparedStatementCreator(@Nullable List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
@@ -169,7 +161,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	public PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
 
@@ -179,7 +171,7 @@ public class PreparedStatementCreatorFactory {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
 		return new PreparedStatementCreatorImpl(
 				sqlToUse, params != null ? Arrays.asList(params) : Collections.emptyList());
 	}
@@ -247,12 +239,6 @@ public class PreparedStatementCreatorFactory {
 
 		@Override
 		public void setValues(PreparedStatement ps) throws SQLException {
-			// Determine PreparedStatement to pass to custom types.
-			PreparedStatement psToUse = ps;
-			if (nativeJdbcExtractor != null) {
-				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
-			}
-
 			// Set arguments: Does nothing if there are no parameters.
 			int sqlColIndx = 1;
 			for (int i = 0; i < this.parameters.size(); i++) {
@@ -280,16 +266,16 @@ public class PreparedStatementCreatorFactory {
 						if (entry instanceof Object[]) {
 							Object[] valueArray = ((Object[])entry);
 							for (Object argValue : valueArray) {
-								StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, argValue);
+								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, argValue);
 							}
 						}
 						else {
-							StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, entry);
+							StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, entry);
 						}
 					}
 				}
 				else {
-					StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, in);
+					StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, in);
 				}
 			}
 		}
@@ -306,10 +292,7 @@ public class PreparedStatementCreatorFactory {
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
-			sb.append(sql).append("]; parameters=").append(this.parameters);
-			return sb.toString();
+			return "PreparedStatementCreator: sql=[" + sql + "]; parameters=" + this.parameters;
 		}
 	}
 

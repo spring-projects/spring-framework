@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
 
 import reactor.core.publisher.Flux;
@@ -27,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -57,22 +56,16 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		Class<?> clazz = elementType.resolve(Object.class);
 		return (super.canEncode(elementType, mimeType) && Resource.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
+			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		try {
-			ReadableByteChannel channel = resource.readableChannel();
-			return DataBufferUtils.read(channel, dataBufferFactory, this.bufferSize);
-		}
-		catch (IOException ex) {
-			return Flux.error(ex);
-		}
+		return DataBufferUtils.read(resource, dataBufferFactory, this.bufferSize);
 	}
 
 }

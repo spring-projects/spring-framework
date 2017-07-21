@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.springframework.jdbc.core;
 
 /**
  * Interface to be implemented by objects that can close resources
- * allocated by parameters like SqlLobValues.
+ * allocated by parameters like {@code SqlLobValue} objects.
  *
- * <p>Typically implemented by PreparedStatementCreators and
- * PreparedStatementSetters that support DisposableSqlTypeValue
- * objects (e.g. SqlLobValue) as parameters.
+ * <p>Typically implemented by {@code PreparedStatementCreators} and
+ * {@code PreparedStatementSetters} that support {@link DisposableSqlTypeValue}
+ * objects (e.g. {@code SqlLobValue}) as parameters.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -38,9 +38,9 @@ public interface ParameterDisposer {
 	 * Close the resources allocated by parameters that the implementing
 	 * object holds, for example in case of a DisposableSqlTypeValue
 	 * (like a SqlLobValue).
-	 * @see DisposableSqlTypeValue#cleanup
-	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
+	 * @see DisposableSqlTypeValue#cleanup()
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public void cleanupParameters();
+	void cleanupParameters();
 
 }

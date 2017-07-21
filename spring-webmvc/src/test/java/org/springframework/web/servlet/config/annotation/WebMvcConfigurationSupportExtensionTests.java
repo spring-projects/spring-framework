@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
@@ -53,9 +53,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
@@ -354,7 +352,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public Validator getValidator() {
 			return new Validator() {
 				@Override
-				public void validate(Object target, Errors errors) {
+				public void validate(@Nullable Object target, Errors errors) {
 					errors.reject("invalid");
 				}
 				@Override
@@ -372,8 +370,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
-				.registerCallableInterceptors(new CallableProcessingInterceptorAdapter() { })
-				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptorAdapter() {});
+				.registerCallableInterceptors(new CallableProcessingInterceptor() { })
+				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {});
 		}
 
 		@Override

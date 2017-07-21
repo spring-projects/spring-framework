@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -37,6 +38,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 
 	private final Set<String> basenameSet = new LinkedHashSet<>(4);
 
+	@Nullable
 	private String defaultEncoding;
 
 	private boolean fallbackToSystemLocale = true;
@@ -118,7 +120,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
 	 */
-	public void setDefaultEncoding(String defaultEncoding) {
+	public void setDefaultEncoding(@Nullable String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -126,6 +128,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return the default charset to use for parsing properties files, if any.
 	 * @since 4.3
 	 */
+	@Nullable
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}

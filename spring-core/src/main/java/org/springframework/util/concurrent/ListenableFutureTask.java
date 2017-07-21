@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link FutureTask} that implements {@link ListenableFuture}.
@@ -47,7 +50,7 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	 * @param runnable the runnable task
 	 * @param result the result to return on successful completion
 	 */
-	public ListenableFutureTask(Runnable runnable, T result) {
+	public ListenableFutureTask(Runnable runnable, @Nullable T result) {
 		super(runnable, result);
 	}
 
@@ -64,7 +67,16 @@ public class ListenableFutureTask<T> extends FutureTask<T> implements Listenable
 	}
 
 	@Override
-	protected final void done() {
+	public CompletableFuture<T> completable() {
+		CompletableFuture<T> completable = new DelegatingCompletableFuture<>(this);
+		this.callbacks.addSuccessCallback(completable::complete);
+		this.callbacks.addFailureCallback(completable::completeExceptionally);
+		return completable;
+	}
+
+
+	@Override
+	protected void done() {
 		Throwable cause;
 		try {
 			T result = get();

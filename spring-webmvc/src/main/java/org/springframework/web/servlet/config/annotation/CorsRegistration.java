@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,7 +44,6 @@ public class CorsRegistration {
 	 * Create a new {@link CorsRegistration} that allows all origins, headers, and
 	 * credentials for {@code GET}, {@code HEAD}, and {@code POST} requests with
 	 * max age set to 1800 seconds (30 minutes) for the specified path.
-	 *
 	 * @param pathPattern the path that the CORS configuration should apply to;
 	 * exact path mapping URIs (such as {@code "/admin"}) are supported as well
 	 * as Ant-style path patterns (such as {@code "/admin/**"}).
@@ -56,13 +54,14 @@ public class CorsRegistration {
 		this.config = new CorsConfiguration().applyPermitDefaultValues();
 	}
 
+
 	/**
 	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default, all origins are allowed.
 	 */
 	public CorsRegistration allowedOrigins(String... origins) {
-		this.config.setAllowedOrigins(new ArrayList<>(Arrays.asList(origins)));
+		this.config.setAllowedOrigins(Arrays.asList(origins));
 		return this;
 	}
 
@@ -74,7 +73,7 @@ public class CorsRegistration {
 	 * are allowed.
 	 */
 	public CorsRegistration allowedMethods(String... methods) {
-		this.config.setAllowedMethods(new ArrayList<>(Arrays.asList(methods)));
+		this.config.setAllowedMethods(Arrays.asList(methods));
 		return this;
 	}
 
@@ -88,7 +87,7 @@ public class CorsRegistration {
 	 * <p>By default all headers are allowed.
 	 */
 	public CorsRegistration allowedHeaders(String... headers) {
-		this.config.setAllowedHeaders(new ArrayList<>(Arrays.asList(headers)));
+		this.config.setAllowedHeaders(Arrays.asList(headers));
 		return this;
 	}
 
@@ -101,7 +100,7 @@ public class CorsRegistration {
 	 * <p>By default this is not set.
 	 */
 	public CorsRegistration exposedHeaders(String... headers) {
-		this.config.setExposedHeaders(new ArrayList<>(Arrays.asList(headers)));
+		this.config.setExposedHeaders(Arrays.asList(headers));
 		return this;
 	}
 

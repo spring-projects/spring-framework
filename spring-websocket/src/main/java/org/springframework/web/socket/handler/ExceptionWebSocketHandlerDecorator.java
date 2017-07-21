@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 
 
 	public static void tryCloseWithError(WebSocketSession session, Throwable exception, Log logger) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Closing due to exception for " + session, exception);
+		if (logger.isErrorEnabled()) {
+			logger.error("Closing session due to exception for " + session, exception);
 		}
 		if (session.isOpen()) {
 			try {

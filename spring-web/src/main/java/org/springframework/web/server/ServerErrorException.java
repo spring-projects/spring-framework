@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.web.server;
 
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 500 (bad request) for use in
@@ -32,6 +31,7 @@ import org.springframework.http.HttpStatus;
 @SuppressWarnings("serial")
 public class ServerErrorException extends ResponseStatusException {
 
+	@Nullable
 	private final MethodParameter parameter;
 
 
@@ -39,7 +39,7 @@ public class ServerErrorException extends ResponseStatusException {
 	 * Constructor with an explanation only.
 	 */
 	public ServerErrorException(String reason) {
-		this(reason, null);
+		this(reason, null, null);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class ServerErrorException extends ResponseStatusException {
 	/**
 	 * Constructor for a 500 error with a root cause.
 	 */
-	public ServerErrorException(String reason, MethodParameter parameter, Throwable cause) {
+	public ServerErrorException(String reason, @Nullable MethodParameter parameter, @Nullable Throwable cause) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.parameter = parameter;
 	}
@@ -61,8 +61,9 @@ public class ServerErrorException extends ResponseStatusException {
 	/**
 	 * Return the {@code MethodParameter} associated with this error, if any.
 	 */
-	public Optional<MethodParameter> getMethodParameter() {
-		return Optional.ofNullable(this.parameter);
+	@Nullable
+	public MethodParameter getMethodParameter() {
+		return this.parameter;
 	}
 
 }

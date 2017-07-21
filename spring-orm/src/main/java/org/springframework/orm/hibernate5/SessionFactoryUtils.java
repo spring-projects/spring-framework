@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -110,7 +111,7 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 		// Check that it is the Hibernate FlushMode type, not JPA's...
-		Assert.state(FlushMode.class == getFlushMode.getReturnType());
+		Assert.state(FlushMode.class == getFlushMode.getReturnType(), "Could not find Hibernate getFlushMode method");
 	}
 
 
@@ -121,7 +122,9 @@ public abstract class SessionFactoryUtils {
 	 * @since 4.3
 	 */
 	static FlushMode getFlushMode(Session session) {
-		return (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		Assert.state(flushMode != null, "No FlushMode from Session");
+		return flushMode;
 	}
 
 	/**
@@ -161,7 +164,7 @@ public abstract class SessionFactoryUtils {
 	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @see Session#close()
 	 */
-	public static void closeSession(Session session) {
+	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
 				session.close();
@@ -181,13 +184,16 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
+	@Nullable
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
 		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
 		if (getProperties != null) {
 			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
-			Object dataSourceValue = props.get(Environment.DATASOURCE);
-			if (dataSourceValue instanceof DataSource) {
-				return (DataSource) dataSourceValue;
+			if (props != null) {
+				Object dataSourceValue = props.get(Environment.DATASOURCE);
+				if (dataSourceValue instanceof DataSource) {
+					return (DataSource) dataSourceValue;
+				}
 			}
 		}
 		if (sessionFactory instanceof SessionFactoryImplementor) {

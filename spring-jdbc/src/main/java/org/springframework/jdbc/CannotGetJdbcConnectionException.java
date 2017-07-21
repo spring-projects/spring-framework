@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.springframework.jdbc;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.lang.Nullable;
 
 /**
  * Fatal exception thrown when we can't connect to an RDBMS using JDBC.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
 public class CannotGetJdbcConnectionException extends DataAccessResourceFailureException {
@@ -31,9 +33,18 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	/**
 	 * Constructor for CannotGetJdbcConnectionException.
 	 * @param msg the detail message
+	 * @since 5.0
+	 */
+	public CannotGetJdbcConnectionException(String msg) {
+		super(msg);
+	}
+
+	/**
+	 * Constructor for CannotGetJdbcConnectionException.
+	 * @param msg the detail message
 	 * @param ex SQLException root cause
 	 */
-	public CannotGetJdbcConnectionException(String msg, SQLException ex) {
+	public CannotGetJdbcConnectionException(String msg, @Nullable SQLException ex) {
 		super(msg, ex);
 	}
 

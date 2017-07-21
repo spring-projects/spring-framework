@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
@@ -39,7 +40,7 @@ public abstract class ChannelInterceptorAdapter implements ChannelInterceptor {
 	}
 
 	@Override
-	public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+	public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
 	}
 
 	public boolean preReceive(MessageChannel channel) {
@@ -52,7 +53,7 @@ public abstract class ChannelInterceptorAdapter implements ChannelInterceptor {
 	}
 
 	@Override
-	public void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
+	public void afterReceiveCompletion(@Nullable Message<?> message, MessageChannel channel, @Nullable Exception ex) {
 	}
 
 }

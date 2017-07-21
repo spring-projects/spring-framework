@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.7
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -32,6 +33,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 public class ChannelRegistration {
 
+	@Nullable
 	private TaskExecutorRegistration registration;
 
 	private final List<ChannelInterceptor> interceptors = new ArrayList<>();
@@ -62,9 +64,7 @@ public class ChannelRegistration {
 	 * Configure interceptors for the message channel.
 	 */
 	public ChannelRegistration setInterceptors(ChannelInterceptor... interceptors) {
-		if (interceptors != null) {
-			this.interceptors.addAll(Arrays.asList(interceptors));
-		}
+		this.interceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}
 
@@ -73,6 +73,7 @@ public class ChannelRegistration {
 		return (this.registration != null);
 	}
 
+	@Nullable
 	protected TaskExecutorRegistration getTaskExecRegistration() {
 		return this.registration;
 	}

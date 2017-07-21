@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
 import org.springframework.jmx.export.metadata.ManagedNotification;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,10 +38,10 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
 
+	@Nullable
 	private ModelMBeanNotificationInfo[] notificationInfos;
 
-	private final Map<String, ModelMBeanNotificationInfo[]> notificationInfoMappings =
-			new HashMap<>();
+	private final Map<String, ModelMBeanNotificationInfo[]> notificationInfoMappings = new HashMap<>();
 
 
 	public void setNotificationInfos(ManagedNotification[] notificationInfos) {
@@ -53,9 +54,8 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 	}
 
 	public void setNotificationInfoMappings(Map<String, Object> notificationInfoMappings) {
-		for (Map.Entry<String, Object> entry : notificationInfoMappings.entrySet()) {
-			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetadata(entry.getValue()));
-		}
+		notificationInfoMappings.forEach((beanKey, result) ->
+				this.notificationInfoMappings.put(beanKey, extractNotificationMetadata(result)));
 	}
 
 

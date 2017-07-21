@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -68,7 +69,7 @@ public class WebSocketExtension {
 	 * @param name the name of the extension
 	 * @param parameters the parameters
 	 */
-	public WebSocketExtension(String name, Map<String, String> parameters) {
+	public WebSocketExtension(String name, @Nullable Map<String, String> parameters) {
 		Assert.hasLength(name, "Extension name must not be empty");
 		this.name = name;
 		if (!CollectionUtils.isEmpty(parameters)) {
@@ -98,7 +99,7 @@ public class WebSocketExtension {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -138,7 +139,7 @@ public class WebSocketExtension {
 	public static List<WebSocketExtension> parseExtensions(String extensions) {
 		if (StringUtils.hasText(extensions)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
-			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(tokens.length);
+			List<WebSocketExtension> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				result.add(parseExtension(token));
 			}

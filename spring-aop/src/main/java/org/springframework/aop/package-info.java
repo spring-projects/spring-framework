@@ -17,4 +17,7 @@
  * <p>Spring AOP can be used programmatically or (preferably)
  * integrated with the Spring IoC container.
  */
+@NonNullApi
 package org.springframework.aop;
+
+import org.springframework.lang.NonNullApi;

@@ -5,4 +5,7 @@
  * Exceptions thrown are as in the {@code org.springframework.dao} package,
  * meaning that code using this package does not need to worry about error handling.
  */
+@NonNullApi
 package org.springframework.jca.cci.object;
+
+import org.springframework.lang.NonNullApi;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.Assert;
 
 /**
  * Proxy for a target JDBC {@link javax.sql.DataSource}, adding awareness of
@@ -61,13 +61,9 @@ import org.springframework.util.Assert;
  * that all operations performed through standard JDBC will automatically participate
  * in Spring-managed transaction timeouts.
  *
- * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections
- * (which implement the {@link ConnectionProxy} interface) in order to handle
- * close calls properly. Therefore, the returned Connections cannot be cast
- * to a native JDBC Connection type such as OracleConnection or to a connection
- * pool implementation type. Use a corresponding
- * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
- * or JDBC 4's {@link Connection#unwrap} to retrieve the native JDBC Connection.
+ * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections (which
+ * implement the {@link ConnectionProxy} interface) in order to handle close calls
+ * properly. Use {@link Connection#unwrap} to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -122,9 +118,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		DataSource ds = getTargetDataSource();
-		Assert.state(ds != null, "'targetDataSource' is required");
-		return getTransactionAwareConnectionProxy(ds);
+		return getTransactionAwareConnectionProxy(obtainTargetDataSource());
 	}
 
 	/**
@@ -166,6 +160,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 		private final DataSource targetDataSource;
 
+		@Nullable
 		private Connection target;
 
 		private boolean closed = false;
@@ -175,6 +170,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

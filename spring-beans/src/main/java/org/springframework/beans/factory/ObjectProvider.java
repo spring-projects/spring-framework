@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory;
 
+import java.util.function.Supplier;
+
 import org.springframework.beans.BeansException;
+import org.springframework.lang.Nullable;
 
 /**
  * A variant of {@link ObjectFactory} designed specifically for injection points,
@@ -37,6 +40,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getObject(Object... args) throws BeansException;
 
 	/**
@@ -46,7 +50,24 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfAvailable() throws BeansException;
+
+	/**
+	 * Return an instance (possibly shared or independent) of the object
+	 * managed by this factory.
+	 * @param defaultSupplier a callback for supplying a default object
+	 * if none is present in the factory
+	 * @return an instance of the bean, or the supplied default object
+	 * if no such bean is available
+	 * @throws BeansException in case of creation errors
+	 * @since 5.0
+	 * @see #getIfAvailable()
+	 */
+	default T getIfAvailable(Supplier<T> defaultSupplier) throws BeansException {
+		T dependency = getIfAvailable();
+		return (dependency != null ? dependency : defaultSupplier.get());
+	}
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -56,6 +77,24 @@ public interface ObjectProvider<T> extends ObjectFactory<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
+	@Nullable
 	T getIfUnique() throws BeansException;
+
+	/**
+	 * Return an instance (possibly shared or independent) of the object
+	 * managed by this factory.
+	 * @param defaultSupplier a callback for supplying a default object
+	 * if no unique candidate is present in the factory
+	 * @return an instance of the bean, or the supplied default object
+	 * if no such bean is available or if it is not unique in the factory
+	 * (i.e. multiple candidates found with none marked as primary)
+	 * @throws BeansException in case of creation errors
+	 * @since 5.0
+	 * @see #getIfUnique()
+	 */
+	default T getIfUnique(Supplier<T> defaultSupplier) throws BeansException {
+		T dependency = getIfUnique();
+		return (dependency != null ? dependency : defaultSupplier.get());
+	}
 
 }

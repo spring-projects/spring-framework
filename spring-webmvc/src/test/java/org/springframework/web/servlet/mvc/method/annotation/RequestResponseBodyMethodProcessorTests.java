@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -50,6 +51,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -69,11 +71,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
@@ -86,44 +84,41 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unused")
 public class RequestResponseBodyMethodProcessorTests {
 
+	private ModelAndViewContainer container;
+
+	private MockHttpServletRequest servletRequest;
+
+	private MockHttpServletResponse servletResponse;
+
+	private NativeWebRequest request;
+
+	private ValidatingBinderFactory factory;
+
 	private MethodParameter paramGenericList;
 	private MethodParameter paramSimpleBean;
 	private MethodParameter paramMultiValueMap;
 	private MethodParameter paramString;
 	private MethodParameter returnTypeString;
 
-	private ModelAndViewContainer container;
-
-	private NativeWebRequest request;
-
-	private MockHttpServletRequest servletRequest;
-
-	private MockHttpServletResponse servletResponse;
-
-	private ValidatingBinderFactory factory;
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
+		container = new ModelAndViewContainer();
+		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
+		servletResponse = new MockHttpServletResponse();
+		request = new ServletWebRequest(servletRequest, servletResponse);
+		this.factory = new ValidatingBinderFactory();
 
-		Method method = getClass().getDeclaredMethod("handle", List.class, SimpleBean.class,
-				MultiValueMap.class, String.class);
-
+		Method method = getClass().getDeclaredMethod("handle",
+				List.class, SimpleBean.class, MultiValueMap.class, String.class);
 		paramGenericList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 		paramMultiValueMap = new MethodParameter(method, 2);
 		paramString = new MethodParameter(method, 3);
 		returnTypeString = new MethodParameter(method, -1);
-
-		container = new ModelAndViewContainer();
-
-		servletRequest = new MockHttpServletRequest();
-		servletRequest.setMethod("POST");
-		servletResponse = new MockHttpServletResponse();
-		request = new ServletWebRequest(servletRequest, servletResponse);
-
-		this.factory = new ValidatingBinderFactory();
 	}
+
 
 	@Test
 	public void resolveArgumentParameterizedType() throws Exception {
@@ -255,8 +250,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
-		List<SimpleBean> result = (List<SimpleBean>)
-				processor.resolveArgument(methodParam, container, request, factory);
+		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
+				methodParam, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.get(0).getName());
@@ -312,9 +307,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Foo", servletResponse.getContentAsString());
 	}
 
-	// SPR-13423
-
-	@Test
+	@Test  // SPR-13423
 	public void handleReturnValueCharSequence() throws Exception {
 		List<HttpMessageConverter<?>>converters = new ArrayList<>();
 		converters.add(new ByteArrayHttpMessageConverter());
@@ -375,7 +368,6 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void addContentDispositionHeader() throws Exception {
-
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("pdf", new MediaType("application", "pdf"));
 		factory.afterPropertiesSet();
@@ -531,8 +523,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -557,8 +549,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(
-				methodParameter, this.container, this.request, this.factory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument( methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -584,8 +576,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -610,8 +602,8 @@ public class RequestResponseBodyMethodProcessorTests {
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
-				this.container, this.request, this.factory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -706,8 +698,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		String value = (String)processor.readWithMessageConverters(this.request, methodParameter,
-				methodParameter.getGenericParameterType());
+		String value = (String) processor.readWithMessageConverters(
+				this.request, methodParameter, methodParameter.getGenericParameterType());
 		assertEquals("foo", value);
 	}
 
@@ -732,7 +724,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
-
 	String handle(
 			@RequestBody List<SimpleBean> list,
 			@RequestBody SimpleBean simpleBean,
@@ -751,14 +742,17 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(@RequestBody DTO dto) {}
 	}
 
+
 	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
 	}
+
 
 	private interface Identifiable extends Serializable {
 
@@ -767,12 +761,14 @@ public class RequestResponseBodyMethodProcessorTests {
 		void setId(Long id);
 	}
 
+
 	@SuppressWarnings("unused")
 	private static abstract class MyParameterizedControllerWithList<DTO extends Identifiable> {
 
 		public void handleDto(@RequestBody List<DTO> dto) {
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class MySimpleParameterizedControllerWithList extends MyParameterizedControllerWithList<SimpleBean> {
@@ -809,7 +805,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest request, Object target, String objectName) {
+		public WebDataBinder createBinder(NativeWebRequest request, @Nullable Object target, String objectName) {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
@@ -843,8 +839,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	private interface MyJacksonView1 {}
+
 	private interface MyJacksonView2 {}
+
 
 	private static class JacksonViewBean {
 
@@ -881,6 +880,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	public static class ParentClass {
 
@@ -902,6 +902,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeName("foo")
 	public static class Foo extends ParentClass {
 
@@ -913,6 +914,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeName("bar")
 	public static class Bar extends ParentClass {
 
@@ -923,6 +925,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			super(parentProperty);
 		}
 	}
+
 
 	private static class JacksonController {
 
@@ -996,8 +999,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		public String defaultCharset() {
 			return "foo";
 		}
-
 	}
+
 
 	private static class EmptyRequestBodyAdvice implements RequestBodyAdvice {
 
@@ -1006,13 +1009,6 @@ public class RequestResponseBodyMethodProcessorTests {
 				Class<? extends HttpMessageConverter<?>> converterType) {
 
 			return StringHttpMessageConverter.class.equals(converterType);
-		}
-
-		@Override
-		public Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-
-			return "default value for empty body";
 		}
 
 		@Override
@@ -1028,13 +1024,23 @@ public class RequestResponseBodyMethodProcessorTests {
 
 			return body;
 		}
+
+		@Override
+		public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return "default value for empty body";
+		}
 	}
 
+
 	interface MappingInterface<A> {
+
 		default A handle(@RequestBody A arg) {
 			return arg;
 		}
 	}
+
 
 	static class MyControllerImplementingInterface implements MappingInterface<String> {
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -36,9 +38,10 @@ import org.springframework.util.ClassUtils;
  * Provides convenient access to method parameters, the method return value,
  * method annotations, etc.
  *
- * <p>The class may be created with a bean instance or with a bean name (e.g. lazy-init bean,
- * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@code HandlerMethod}
- * instance with a bean instance resolved through the associated {@link BeanFactory}.
+ * <p>The class may be created with a bean instance or with a bean name
+ * (e.g. lazy-init bean, prototype bean). Use {@link #createWithResolvedBean()}
+ * to obtain a {@code HandlerMethod} instance with a bean instance resolved
+ * through the associated {@link BeanFactory}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -52,6 +55,7 @@ public class HandlerMethod {
 
 	private final Object bean;
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final Class<?> beanType;
@@ -62,7 +66,8 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
-	private final HandlerMethod resolvedFromHandlerMethod;
+	@Nullable
+	private HandlerMethod resolvedFromHandlerMethod;
 
 
 	/**
@@ -77,7 +82,6 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
-		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -93,7 +97,6 @@ public class HandlerMethod {
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		this.parameters = initMethodParameters();
-		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -107,11 +110,14 @@ public class HandlerMethod {
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		this.beanType = ClassUtils.getUserClass(beanFactory.getType(beanName));
+		Class<?> beanType = beanFactory.getType(beanName);
+		if (beanType == null) {
+			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
+		}
+		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
-		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -148,20 +154,22 @@ public class HandlerMethod {
 		int count = this.bridgedMethod.getParameterCount();
 		MethodParameter[] result = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
-			result[i] = new HandlerMethodParameter(i);
+			HandlerMethodParameter parameter = new HandlerMethodParameter(i);
+			GenericTypeResolver.resolveParameterType(parameter, this.beanType);
+			result[i] = parameter;
 		}
 		return result;
 	}
 
 	/**
-	 * Returns the bean for this handler method.
+	 * Return the bean for this handler method.
 	 */
 	public Object getBean() {
 		return this.bean;
 	}
 
 	/**
-	 * Returns the method for this handler method.
+	 * Return the method for this handler method.
 	 */
 	public Method getMethod() {
 		return this.method;
@@ -185,19 +193,10 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns the method parameters for this handler method.
+	 * Return the method parameters for this handler method.
 	 */
 	public MethodParameter[] getMethodParameters() {
 		return this.parameters;
-	}
-
-	/**
-	 * Return the HandlerMethod from which this HandlerMethod instance was
-	 * resolved via {@link #createWithResolvedBean()}.
-	 * @since 4.3
-	 */
-	public HandlerMethod getResolvedFromHandlerMethod() {
-		return this.resolvedFromHandlerMethod;
 	}
 
 	/**
@@ -210,19 +209,19 @@ public class HandlerMethod {
 	/**
 	 * Return the actual return value type.
 	 */
-	public MethodParameter getReturnValueType(Object returnValue) {
+	public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 		return new ReturnValueMethodParameter(returnValue);
 	}
 
 	/**
-	 * Returns {@code true} if the method return type is void, {@code false} otherwise.
+	 * Return {@code true} if the method return type is void, {@code false} otherwise.
 	 */
 	public boolean isVoid() {
 		return Void.TYPE.equals(getReturnType().getParameterType());
 	}
 
 	/**
-	 * Returns a single annotation on the underlying method traversing its super methods
+	 * Return a single annotation on the underlying method traversing its super methods
 	 * if no annotation can be found on the given method itself.
 	 * <p>Also supports <em>merged</em> composed annotations with attribute
 	 * overrides as of Spring Framework 4.3.
@@ -230,6 +229,7 @@ public class HandlerMethod {
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
+	@Nullable
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
@@ -245,12 +245,23 @@ public class HandlerMethod {
 	}
 
 	/**
+	 * Return the HandlerMethod from which this HandlerMethod instance was
+	 * resolved via {@link #createWithResolvedBean()}.
+	 * @since 4.3
+	 */
+	@Nullable
+	public HandlerMethod getResolvedFromHandlerMethod() {
+		return this.resolvedFromHandlerMethod;
+	}
+
+	/**
 	 * If the provided instance contains a bean name rather than an object instance,
 	 * the bean name is resolved before a {@link HandlerMethod} is created and returned.
 	 */
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
 		if (this.bean instanceof String) {
+			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
@@ -329,9 +340,10 @@ public class HandlerMethod {
 	 */
 	private class ReturnValueMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
-		public ReturnValueMethodParameter(Object returnValue) {
+		public ReturnValueMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 		}

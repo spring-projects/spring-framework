@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -55,6 +57,7 @@ public class UrlPathHelper {
 
 	private static final Log logger = LogFactory.getLog(UrlPathHelper.class);
 
+	@Nullable
 	static volatile Boolean websphereComplianceFlag;
 
 
@@ -68,22 +71,28 @@ public class UrlPathHelper {
 
 
 	/**
-	 * Set if URL lookup should always use full path within current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Whether URL lookups should always use the full path within current
+	 * application context, i.e. within {@link ServletContext#getContextPath()}.
+	 * <p>If set to {@literal false} the path within the current servlet mapping
+	 * is used instead if applicable (i.e. in the case of a prefix based Servlet
+	 * mapping such as "/myServlet/*").
+	 * <p>By default this is set to "false".
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.alwaysUseFullPath = alwaysUseFullPath;
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Default is "true", as of Spring 2.5.
+	 * Whether the context path and request URI should be decoded -- both of
+	 * which are returned <i>undecoded</i> by the Servlet API, in contrast to
+	 * the servlet path.
+	 * <p>Either the request encoding or the default Servlet spec encoding
+	 * (ISO-8859-1) is used when set to "true".
+	 * <p>By default this is set to {@literal true}.
+	 * <p><strong>Note:</strong> Be aware the servlet path will not match when
+	 * compared to encoded paths. Therefore use of {@code urlDecode=false} is
+	 * not compatible with a prefix-based Servlet mappping and likewise implies
+	 * also setting {@code alwaysUseFullPath=true}.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
@@ -238,6 +247,7 @@ public class UrlPathHelper {
 	 * context path and the servlet path returned by the HttpServletRequest are
 	 * stripped of semicolon content unlike the requesUri.
 	 */
+	@Nullable
 	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
 		int index1 = 0;
 		int index2 = 0;
@@ -437,7 +447,7 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public String decodeRequestString(HttpServletRequest request, String source) {
-		if (this.urlDecode && source != null) {
+		if (this.urlDecode) {
 			return decodeInternal(request, source);
 		}
 		return source;
@@ -566,7 +576,8 @@ public class UrlPathHelper {
 			// Don't remove that slash.
 			return false;
 		}
-		if (websphereComplianceFlag == null) {
+		Boolean flagToUse = websphereComplianceFlag;
+		if (flagToUse == null) {
 			ClassLoader classLoader = UrlPathHelper.class.getClassLoader();
 			String className = "com.ibm.ws.webcontainer.WebContainer";
 			String methodName = "getWebContainerProperties";
@@ -582,11 +593,12 @@ public class UrlPathHelper {
 					logger.debug("Could not introspect WebSphere web container properties: " + ex);
 				}
 			}
+			flagToUse = flag;
 			websphereComplianceFlag = flag;
 		}
 		// Don't bother if WebSphere is configured to be fully Servlet compliant.
 		// However, if it is not compliant, do remove the improper trailing slash!
-		return !websphereComplianceFlag;
+		return !flagToUse;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class GenericMessageConverter extends SimpleMessageConverter {
 	 * Create a new instance with a default {@link ConversionService}.
 	 */
 	public GenericMessageConverter() {
-		this.conversionService = new DefaultConversionService();
+		this.conversionService = DefaultConversionService.getSharedInstance();
 	}
 
 	/**
@@ -59,10 +59,7 @@ public class GenericMessageConverter extends SimpleMessageConverter {
 	@Override
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
-		if (targetClass == null) {
-			return payload;
-		}
-		if (payload != null && this.conversionService.canConvert(payload.getClass(), targetClass)) {
+		if (this.conversionService.canConvert(payload.getClass(), targetClass)) {
 			try {
 				return this.conversionService.convert(payload, targetClass);
 			}

@@ -17,9 +17,12 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+
+import org.springframework.lang.Nullable;
 
 /**
  * SPI interface that allows to plug in vendor-specific behavior
@@ -44,6 +47,7 @@ public interface JpaVendorAdapter {
 	 * excluding provider classes from temporary class overriding.
 	 * @since 2.5.2
 	 */
+	@Nullable
 	String getPersistenceProviderRootPackage();
 
 	/**
@@ -58,12 +62,14 @@ public interface JpaVendorAdapter {
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
+	@Nullable
 	Map<String, ?> getJpaPropertyMap();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * provider, or {@code null} if there is none.
 	 */
+	@Nullable
 	JpaDialect getJpaDialect();
 
 	/**

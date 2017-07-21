@@ -1,17 +1,21 @@
 buildscript {
+	ext.kotlinVersion = '1.1.3-2'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
-		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.2")
+		classpath("io.spring.gradle:dependency-management-plugin:1.0.0.RELEASE")
+		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
-		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
+		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.14")
+		classpath("org.asciidoctor:asciidoctorj-epub3:1.5.0-alpha.6")
 	}
 }
 
 plugins {
-	id "org.sonarqube" version "2.1"
+	id "org.sonarqube" version "2.5"
 }
 
 ext {
@@ -32,73 +36,70 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.activationApiVersion   = "1.1.1"
-	ext.annotationApiVersion   = "1.2"
-	ext.aspectjVersion         = "1.9.0.BETA-5"
+	ext.annotationApiVersion   = "1.3"
+	ext.aspectjVersion         = "1.9.0.BETA-6"
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.cacheApiVersion        = "1.0.0"
-	ext.caffeineVersion        = "2.3.3"
-	ext.eclipselinkVersion     = "2.6.4"
-	ext.ehcacheVersion         = "2.10.3"
+	ext.caffeineVersion        = "2.5.3"
+	ext.eclipselinkVersion     = "2.6.5-RC2"
+	ext.ehcacheVersion         = "2.10.4"
 	ext.ehcachejcacheVersion   = "1.0.1"
-	ext.ehcache3Version        = "3.1.3"
+	ext.ehcache3Version        = "3.3.1"
 	ext.ejbApiVersion          = "3.2"
 	ext.elApiVersion           = "3.0.1-b04"
-	ext.fileuploadVersion      = "1.3.2"
-	ext.freemarkerVersion      = "2.3.25-incubating"
-	ext.groovyVersion          = "2.4.7"
-	ext.gsonVersion            = "2.7"
+	ext.fileuploadVersion      = "1.3.3"
+	ext.freemarkerVersion      = "2.3.26-incubating"
+	ext.groovyVersion          = "2.5.0-beta-1"
+	ext.gsonVersion            = "2.8.1"
 	ext.hamcrestVersion        = "1.3"
-	ext.hibernate5Version      = "5.2.3.Final"
-	ext.hibval5Version         = "5.3.0.Final"
-	ext.hsqldbVersion          = "2.3.4"
-	ext.httpasyncVersion       = "4.1.2"
-	ext.httpclientVersion      = "4.5.2"
+	ext.hibernate5Version      = "5.2.10.Final"
+	ext.hibvalVersion          = "5.4.1.Final"
+	ext.hsqldbVersion          = "2.4.0"
+	ext.httpasyncVersion       = "4.1.3"
+	ext.httpclientVersion      = "4.5.3"
 	ext.interceptorApiVersion  = "1.2"
-	ext.jackson2Version        = "2.8.4"
-	ext.javamailVersion        = "1.5.6"
+	ext.jackson2Version        = "2.9.0.pr4"
+	ext.javamailVersion        = "1.6.0"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.0.RC0"
+	ext.jettyVersion           = "9.4.6.v20170531"
 	ext.jmsVersion             = "2.0.1"
-	ext.jodaVersion            = "2.9.4"
+	ext.jodaVersion            = "2.9.9"
 	ext.jpaVersion             = "2.1.1"
 	ext.jsfVersion             = "2.2"
+	ext.jsonassertVersion      = "1.5.0"
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
-	ext.junitJupiterVersion    = '5.0.0-M2'
-	ext.junitPlatformVersion   = '1.0.0-M2'
-	ext.log4jVersion           = '2.7'
-	ext.nettyVersion           = "4.1.6.Final"
-	ext.okhttpVersion          = "2.7.5"
-	ext.okhttp3Version         = "3.4.1"
-	ext.poiVersion             = "3.15"
-	ext.protobufVersion        = "3.1.0"
-	ext.quartzVersion          = "2.2.3"
-	ext.reactivestreamsVersion = "1.0.0"
-	ext.reactorVersion         = "2.0.8.RELEASE"
-	ext.reactorCoreVersion     = '3.0.3.BUILD-SNAPSHOT'
-	ext.reactorNettyVersion    = '0.5.2.RELEASE'
-	ext.romeVersion            = "1.7.0"
-	ext.rxjavaVersion          = '1.2.1'
-	ext.rxjava2Version         = '2.0.0-RC5'
-	ext.rxjavaAdapterVersion   = '1.2.0'
-	ext.rxnettyVersion         = '0.5.2-rc.4'
+	ext.junitVintageVersion    = "4.12.0-M6"
+	ext.junitJupiterVersion    = '5.0.0-M6'
+	ext.junitPlatformVersion   = '1.0.0-M6'
+	ext.log4jVersion           = '2.8.2'
+	ext.nettyVersion           = "4.1.13.Final"
+	ext.niomultipartVersion    = "1.1.0"
+	ext.okhttp3Version         = "3.8.1"
+	ext.poiVersion             = "3.16"
+	ext.protobufVersion        = "3.3.1"
+	ext.quartzVersion          = "2.3.0"
+	ext.reactorVersion         = "Bismuth-M3"
+	ext.romeVersion            = "1.7.3"
+	ext.rxjavaVersion          = '1.3.0'
+	ext.rxjavaAdapterVersion   = '1.2.1'
+	ext.rxjava2Version         = '2.1.1'
+	ext.rxnettyVersion         = '0.5.2'
 	ext.servletVersion         = "3.1.0"
-	ext.slf4jVersion           = "1.7.21"
-	ext.snakeyamlVersion       = "1.17"
-	ext.snifferVersion         = "1.15"
-	ext.testngVersion          = "6.9.12"
-	ext.tiles3Version          = "3.0.5"
-	ext.tomcatVersion          = "8.5.6"
-	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.3.Final"
+	ext.slf4jVersion           = "1.7.25"
+	ext.snakeyamlVersion       = "1.18"
+	ext.testngVersion          = "6.11"
+	ext.tiles3Version          = "3.0.7"
+	ext.tomcatVersion          = "8.5.16"
+	ext.tyrusVersion           = "1.13.1"
+	ext.undertowVersion        = "1.4.18.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
-	ext.xmlunitVersion         = "2.2.1"
-	ext.xnioVersion            = "3.4.0.Final"
-	ext.xstreamVersion         = "1.4.9"
+	ext.xmlunitVersion         = "2.3.0"
+	ext.xstreamVersion         = "1.4.10"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -106,25 +107,27 @@ configure(allprojects) { project ->
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
+	apply from: "${gradleScriptDir}/sniffer.gradle"
 
-	configurations {
-		sniffer
-		javaApiSignature
+	apply plugin: "kotlin"
+	compileKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+
+	}
+	compileTestKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 	}
 
 	configurations.all {
-		// check for updates every build
+		// Check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 
-		// consistent netty version (e.g. clashes between netty-all vs netty-common)
+		// Consistent netty version (e.g. clashes between netty-all vs netty-common)
 		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
 			if (details.requested.group == 'io.netty') {
 				details.useVersion nettyVersion
-			}
-		}
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.name == 'reactor-core' && details.requested.version.startsWith('3.')) {
-				details.useVersion reactorCoreVersion
 			}
 		}
 	}
@@ -172,57 +175,24 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url "https://repo.spring.io/snapshot" }	// Reactor 3 snapshots
+		maven { url "https://repo.spring.io/snapshot" }
 	}
 
 	dependencies {
+		provided("com.google.code.findbugs:jsr305:3.0.2")
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:1.10.19") {
+		testCompile("org.mockito:mockito-core:2.6.1") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
+		}
+		testCompile("com.nhaarman:mockito-kotlin:1.5.0") {
+			exclude module:'kotlin-stdlib'
+			exclude module:'kotlin-reflect'
+			exclude module:'mockito-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
-		testRuntime("org.apache.logging.log4j:log4j-jcl:${log4jVersion}")
-
-		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
-		javaApiSignature("org.codehaus.mojo.signature:java18:1.0@signature")
-	}
-
-	task copyJavaApiSignature(type: Copy) {
-		ext.to = file("$buildDir/javaApiSignature/")
-		description "Copy the resolved Animal Sniffer signature dependency artifact to a known location and name"
-		from configurations.javaApiSignature
-		into to
-		rename '.*signature', 'javaApi.signature'
-	}
-
-	task sniff {
-		group = "Verification"
-		description = "Checks the Java API signatures"
-
-		dependsOn compileJava
-		dependsOn copyJavaApiSignature
-
-		inputs.dir sourceSets.main.output.classesDir
-		inputs.dir copyJavaApiSignature.to
-
-		doLast {
-			ant.taskdef(
-				name: 'animalSniffer',
-				classname: 'org.codehaus.mojo.animal_sniffer.ant.CheckSignatureTask',
-				classpath: configurations.sniffer.asPath
-			)
-
-			// TODO: Animal Sniffer currently chokes on optional JDK 9 bytecode in AspectJ 1.9 beta 5
-			// ant.animalSniffer(
-			// 		signature: "$buildDir/javaApiSignature/javaApi.signature",
-			// 		classpath: sourceSets.main.compileClasspath.asPath) {
-			// 	path(path: sourceSets.main.output.classesDir)
-			// 	annotation(className: "org.springframework.lang.UsesSunHttpServer")
-			// }
-		}
 	}
 
 	ext.javadocLinks = [
@@ -249,11 +219,22 @@ configure(allprojects) { project ->
 configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
+	apply plugin: "io.spring.dependency-management"
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+			mavenBom "io.netty:netty-bom:${nettyVersion}"
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
+		applyMavenExclusions = false
+	}
 
 	configurations {
 		jacoco
 	}
-
 	dependencies {
 		jacoco("org.jacoco:org.jacoco.agent:0.7.5.201505241946:runtime")
 	}
@@ -284,19 +265,21 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 		options.author = true
 		options.header = project.name
+		options.use = true
 		options.links(project.ext.javadocLinks)
 		options.addStringOption('Xdoclint:none', '-quiet')
 
-		// suppress warnings due to cross-module @see and @link references;
-		// note that global 'api' task does display all warnings.
+		// Suppress warnings due to cross-module @see and @link references.
+		// Note that global 'api' task does display all warnings.
 		logging.captureStandardError LogLevel.INFO
-		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
 	}
 
 	task sourcesJar(type: Jar, dependsOn: classes) {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		classifier = 'sources'
 		from sourceSets.main.allSource
-		// don't include or exclude anything explicitly by default. See SPR-12085.
+		// Don't include or exclude anything explicitly by default. See SPR-12085.
 	}
 
 	task javadocJar(type: Jar) {
@@ -312,6 +295,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 project("spring-build-src") {
 	description = "Exposes gradle buildSrc for IDE support"
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -322,6 +306,15 @@ project("spring-build-src") {
 	configurations.archives.artifacts.clear()
 }
 
+project("spring-jcl") {
+	description = "Spring Commons Logging Bridge"
+
+	dependencies {
+		optional("org.apache.logging.log4j:log4j-api:${log4jVersion}")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+	}
+}
+
 project("spring-core") {
 	description = "Spring Core"
 
@@ -329,8 +322,8 @@ project("spring-core") {
 	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
-	def cglibVersion = "3.2.4"
-	def objenesisVersion = "2.4"
+	def cglibVersion = "3.2.5"
+	def objenesisVersion = "2.6"
 
 	configurations {
 		jarjar
@@ -350,9 +343,9 @@ project("spring-core") {
 					configurations.cglib.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage net.sf.cglib => org.springframework.cglib
+					// Repackage net.sf.cglib => org.springframework.cglib
 					rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-					// as mentioned above, transform cglib"s internal asm dependencies from
+					// As mentioned above, transform cglib"s internal asm dependencies from
 					// org.objectweb.asm => org.springframework.asm. Doing this counts on the
 					// the fact that Spring and cglib depend on the same version of asm!
 					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
@@ -373,7 +366,7 @@ project("spring-core") {
 					configurations.objenesis.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage org.objenesis => org.springframework.objenesis
+					// Repackage org.objenesis => org.springframework.objenesis
 					rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
 				}
 			}
@@ -387,15 +380,18 @@ project("spring-core") {
 
 		compile(files(cglibRepackJar))
 		compile(files(objenesisRepackJar))
-		compile("commons-logging:commons-logging:1.2")
+		compile(project(":spring-jcl"))
+		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("net.sf.jopt-simple:jopt-simple:5.0.2")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional "io.reactivex:rxjava:${rxjavaVersion}"
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
-		optional "io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}"
-		optional("io.netty:netty-buffer:${nettyVersion}")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
+		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+		optional("io.netty:netty-buffer")
+		testCompile("io.projectreactor:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
@@ -405,7 +401,7 @@ project("spring-core") {
 	}
 
 	jar {
-		// inline repackaged cglib classes directly into the spring-core jar
+		// Inline repackaged cglib classes directly into spring-core jar
 		dependsOn cglibRepackJar
 		from(zipTree(cglibRepackJar.archivePath)) {
 			include "org/springframework/cglib/**"
@@ -425,7 +421,8 @@ project("spring-beans") {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
-		optional("javax.el:javax.el-api:${elApiVersion}")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	}
@@ -433,6 +430,7 @@ project("spring-beans") {
 
 project("spring-beans-groovy") {
 	description "Groovy Bean Definitions"
+
 	merge.into = project(":spring-beans")
 	apply plugin: "groovy"
 
@@ -441,8 +439,8 @@ project("spring-beans-groovy") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 
-	// this module's Java and Groovy sources need to be compiled together
-	compileJava.enabled=false
+	// This module's Java and Groovy sources need to be compiled together.
+	compileJava.enabled = false
 	sourceSets {
 		main {
 			groovy {
@@ -495,6 +493,7 @@ project("spring-instrument") {
 
 project("spring-context") {
 	description = "Spring Context"
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -513,18 +512,20 @@ project("spring-context") {
 		optional("javax.money:money-api:1.0.1")
 		optional("org.eclipse.persistence:javax.persistence:${jpaVersion}")
 		optional("javax.validation:validation-api:${beanvalVersion}")
-		optional("org.hibernate:hibernate-validator:${hibval5Version}")
+		optional("org.hibernate:hibernate-validator:${hibvalVersion}")
 		optional("joda-time:joda-time:${jodaVersion}")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
-		optional("org.beanshell:bsh:2.0b4")
-		testCompile("javax.inject:javax.inject-tck:1")
-		testCompile("javax.el:javax.el-api:${elApiVersion}")
-		testCompile("org.glassfish:javax.el:3.0.1-b08")
-		testCompile("org.javamoney:moneta:1.1")
+		optional("org.beanshell:bsh:2.0b5")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
+		testCompile("javax.inject:javax.inject-tck:1")
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		testRuntime("javax.el:javax.el-api:${elApiVersion}")
+		testRuntime("org.glassfish:javax.el:3.0.1-b08")
+		testRuntime("org.javamoney:moneta:1.1")
 	}
 }
 
@@ -540,14 +541,15 @@ project("spring-oxm") {
 		optional("org.codehaus.castor:castor-xml:1.4.1")  {
 			exclude group: 'stax', module: 'stax-api'
 			exclude group: "org.springframework", module: "spring-context"
+			exclude group: "commons-logging", module: "commons-logging"
 		}
 		optional("com.thoughtworks.xstream:xstream:${xstreamVersion}") {
 			exclude group: 'xpp3', module: 'xpp3_min'
 			exclude group: 'xmlpull', module: 'xmlpull'
 		}
-		optional("org.jibx:jibx-run:1.2.6")
+		optional("org.jibx:jibx-run:1.3.1")
 		testCompile(project(":spring-context"))
-		testCompile("xpp3:xpp3:1.1.4c")
+		testCompile("org.ogce:xpp3:1.1.6")
 		testCompile("org.codehaus.jettison:jettison:1.3.8") {
 			exclude group: 'stax', module: 'stax-api'
 		}
@@ -566,15 +568,11 @@ project("spring-messaging") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		compile(project(":spring-context"))
+		optional(project(":spring-context"))
 		optional(project(":spring-oxm"))
-		optional("io.projectreactor:reactor-core:${reactorVersion}") {
-			force = true  // enforce 2.0.x
-		}
-		optional("io.projectreactor:reactor-net:${reactorVersion}") {
-			exclude group: "io.netty", module: "netty-all"
-		}
-		optional("io.netty:netty-all:${nettyVersion}")
+		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor.ipc:reactor-netty")
+		optional("io.netty:netty-all")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -595,17 +593,13 @@ project("spring-messaging") {
 		}
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("io.netty:netty-all:${nettyVersion}")
+		testCompile("io.netty:netty-all")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
+		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -632,18 +626,17 @@ project("spring-jms") {
 	description = "Spring JMS"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-aop"))
-		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
 		provided("javax.jms:javax.jms-api:${jmsVersion}")
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
 		optional(project(":spring-oxm"))
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:javax.resource-api:${jcaVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -656,11 +649,12 @@ project("spring-jdbc") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.192")
-		optional("org.apache.derby:derby:10.12.1.1")
-		optional("org.apache.derby:derbyclient:10.12.1.1")
+		optional("com.h2database:h2:1.4.196")
+		optional("org.apache.derby:derby:10.13.1.1")
+		optional("org.apache.derby:derbyclient:10.13.1.1")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	}
 }
 
@@ -668,9 +662,9 @@ project("spring-context-support") {
 	description = "Spring Context Support"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		optional(project(":spring-jdbc"))  // for Quartz support
 		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.activation:activation:${activationApiVersion}")
@@ -704,64 +698,51 @@ project("spring-context-indexer") {
 
 project("spring-web") {
 	description = "Spring Web"
+
 	apply plugin: "groovy"
 
-	// Re-generate Protobuf classes from *.proto files and move them in test sources
-	if (project.hasProperty('genProtobuf')) {
-		apply plugin: 'protobuf'
-
-		task updateGenProtobuf(type:Copy, dependsOn: ":spring-web:generateTestProto") {
-			from "${project.buildDir}/generated-sources/test/"
-			into "${projectDir}/src/test/java"
-			doLast {
-				project.delete "${project.buildDir}/generated-sources/test"
-			}
-		}
-
-		tasks.getByPath("compileTestJava").dependsOn "updateGenProtobuf"
-	}
-
 	dependencies {
-		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
-		compile(project(":spring-beans"))  // for MultipartFilter
-		compile(project(":spring-context"))
+		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		provided "javax.servlet:javax.servlet-api:${servletVersion}"
-		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
+		optional(project(":spring-oxm"))
+		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("javax.faces:javax.faces-api:${jsfVersion}")
 		optional("javax.validation:validation-api:${beanvalVersion}")
-		optional("javax.activation:activation:${activationApiVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
-			exclude group: 'io.reactivex', module: 'rxjava'
-		}
+		optional("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor.ipc:reactor-netty")
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
-		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
-		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
+		optional("io.netty:netty-buffer")  // temporarily for JsonObjectDecoder
 	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {  // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
 		}
 		optional("com.fasterxml:aalto-xml:1.0.0")
-		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
-		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
-		optional("io.netty:netty-all:${nettyVersion}")
-		optional("com.squareup.okhttp:okhttp:${okhttpVersion}")
+		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional("io.netty:netty-all")
 		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
+		optional("javax.json.bind:javax.json.bind-api:1.0")
 		optional("com.rometools:rome:${romeVersion}")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -775,78 +756,31 @@ project("spring-web") {
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
-		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+		testCompile("io.projectreactor:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
-		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
+		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
-		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
-		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
-		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
-	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// Netty4ClientHttpRequestFactory requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
-	}
-}
-
-project("spring-web-reactive") {
-	description = "Spring Web Reactive"
-
-	dependencies {
-		compile(project(":spring-core"))
-		compile(project(":spring-web"))
-		compile "org.reactivestreams:reactive-streams:${reactivestreamsVersion}"
-		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
-		optional(project(":spring-context-support"))  // for FreeMarker support
-		provided "javax.servlet:javax.servlet-api:${servletVersion}"
-		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
-		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		optional("org.freemarker:freemarker:${freemarkerVersion}")
-		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
-		optional('org.webjars:webjars-locator:0.32')
-		testCompile("javax.validation:validation-api:${beanvalVersion}")
-		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
-		testCompile("javax.el:javax.el-api:${elApiVersion}")
-		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
-		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
-		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
-		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
-		testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-		testCompile("io.undertow:undertow-core:${undertowVersion}")
-		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
-		testCompile("com.fasterxml:aalto-xml:1.0.0")
+		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.skyscreamer:jsonassert:${jsonassertVersion}")
+		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
-		testRuntime("org.webjars:underscorejs:1.8.3")
-	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// ReactorClientHttpConnector requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
+		testRuntime("javax.json:javax.json-api:1.1")
+		testRuntime("org.apache.johnzon:johnzon-jsonb:1.1.1")
 	}
 }
 
@@ -870,7 +804,6 @@ project("spring-orm") {
 		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 	}
 }
@@ -888,7 +821,7 @@ project("spring-webmvc") {
 		compile(project(":spring-web"))
 		provided("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional(project(":spring-context-support"))  // for FreeMarker support
-		optional(project(":spring-oxm"))  // for MarshallingView
+		optional(project(":spring-oxm"))
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
@@ -920,7 +853,10 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
-		optional('org.webjars:webjars-locator:0.32')
+		optional('org.webjars:webjars-locator:0.32-1')
+		optional("org.reactivestreams:reactive-streams")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
@@ -937,16 +873,25 @@ project("spring-webmvc") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
-		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
-		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		testCompile("commons-fileupload:commons-fileupload:${fileuploadVersion}")
-		testCompile("commons-io:commons-io:1.3")
+		testCompile("commons-io:commons-io:2.5")
 		testCompile("joda-time:joda-time:${jodaVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
-		testRuntime("org.jruby:jruby:9.1.5.0")
+		testCompile("io.projectreactor:reactor-core")
+		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+		testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+		testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testRuntime("org.jruby:jruby:9.1.9.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
+		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
@@ -957,8 +902,8 @@ project("spring-websocket") {
 	description = "Spring WebSocket"
 
 	dependencies {
-		compile(project(":spring-core"))
 		compile(project(":spring-context"))
+		compile(project(":spring-core"))
 		compile(project(":spring-web"))
 		optional(project(":spring-messaging"))
 		optional(project(":spring-webmvc"))
@@ -988,23 +933,77 @@ project("spring-websocket") {
 		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
-		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("io.projectreactor:reactor-core:${reactorVersion}") {
-			force = true  // enforce 2.0.x
-		}
-		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
-		testCompile("io.netty:netty-all:${nettyVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
+		testCompile("io.projectreactor:reactor-core")
+		testCompile("io.projectreactor.ipc:reactor-netty")
+		testCompile("io.netty:netty-all")
 	}
+}
 
-	if (JavaVersion.current().java9Compatible) {
-		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
+project("spring-webflux") {
+	description = "Spring WebFlux"
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		compile(project(":spring-web"))
+		compile("org.reactivestreams:reactive-streams")
+		compile("io.projectreactor:reactor-core")
+		optional(project(":spring-context"))
+		optional(project(":spring-context-support"))  // for FreeMarker support
+		optional "javax.servlet:javax.servlet-api:${servletVersion}"
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+		optional("org.freemarker:freemarker:${freemarkerVersion}")
+		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional('org.webjars:webjars-locator:0.32-1')
+		optional("io.projectreactor.ipc:reactor-netty")
+		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
+		optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
+			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		}
+		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+			exclude group: "javax.servlet", module: "javax.servlet"
+		}
+		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
+			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
+		}
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+		testCompile("io.projectreactor:reactor-test")
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
+		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
+		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
+		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
+		testCompile("io.undertow:undertow-core:${undertowVersion}")
+		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
+		testCompile("com.fasterxml:aalto-xml:1.0.0")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testRuntime("org.jruby:jruby:9.1.9.0")
+		testRuntime("org.python:jython-standalone:2.5.3")
+		testRuntime("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")
+		testRuntime("org.webjars:underscorejs:1.8.3")
+		testRuntime("org.glassfish:javax.el:3.0.1-b08")
+		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
+		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
+		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -1013,12 +1012,14 @@ project("spring-test") {
 
 	dependencies {
 		compile(project(":spring-core"))
+		optional(project(":spring-aop"))
 		optional(project(":spring-beans"))
 		optional(project(":spring-context"))
 		optional(project(":spring-jdbc"))
-		optional(project(":spring-tx"))
 		optional(project(":spring-orm"))
+		optional(project(":spring-tx"))
 		optional(project(":spring-web"))
+		optional(project(":spring-webflux"))
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-websocket"))
 		optional("junit:junit:${junitVersion}")
@@ -1028,7 +1029,7 @@ project("spring-test") {
 		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
-		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
+		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		optional("javax.el:javax.el-api:${elApiVersion}")
@@ -1039,24 +1040,30 @@ project("spring-test") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
 		optional("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		optional("net.sourceforge.htmlunit:htmlunit:2.22")
-		optional("org.seleniumhq.selenium:htmlunit-driver:2.21")
-		optional("org.seleniumhq.selenium:selenium-java:2.53.1") {
+		optional("net.sourceforge.htmlunit:htmlunit:2.27") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional("org.seleniumhq.selenium:htmlunit-driver:2.27")
+		optional("org.seleniumhq.selenium:selenium-java:3.4.0") {
 			exclude group: "io.netty", module: "netty"
 		}
-		optional("org.skyscreamer:jsonassert:1.3.0")
-		optional("com.jayway.jsonpath:json-path:2.2.0")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
+		optional("com.jayway.jsonpath:json-path:2.3.0")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor:reactor-test")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile("javax.ejb:javax.ejb-api:${ejbApiVersion}")
 		testCompile("javax.interceptor:javax.interceptor-api:${interceptorApiVersion}")
 		testCompile("org.hibernate:hibernate-core:${hibernate5Version}")
-		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
+		testCompile("org.hibernate:hibernate-validator:${hibvalVersion}")
 		// Enable use of the JUnitPlatform Runner
 		testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
+		testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("com.rometools:rome:${romeVersion}")
@@ -1068,15 +1075,23 @@ project("spring-test") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
-
+		testCompile('io.projectreactor.ipc:reactor-netty')
+		// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
+		// so that we can run JUnit 4 tests in IntelliJ IDEA.
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+		testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
+		testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
+		testRuntime("javax.annotation:javax.annotation-api:${annotationApiVersion}")
+		testRuntime("javax.el:javax.el-api:${elApiVersion}")
+		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
@@ -1145,6 +1160,12 @@ project("spring-aspects") {
 project("spring-framework-bom") {
 	description = "Spring Framework (Bill of Materials)"
 
+	dependencyManagement {
+		generatedPomCustomization {
+			enabled = false
+		}
+	}
+
 	configurations.archives.artifacts.clear()
 	artifacts {
 		// work around GRADLE-2406 by attaching text artifact
@@ -1194,30 +1215,20 @@ sonarqube {
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "org.asciidoctor.convert"
-	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
-
+	apply plugin: "io.spring.dependency-management"
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
+	apply from: "${gradleScriptDir}/docs.gradle"
 
-	asciidoctor {
-		sourceDir project.file('src/asciidoc')
-		separateOutputDirs = false
-		backends = ['docbook']
-		options doctype: 'book', eruby: 'erubis'
-		attributes 'spring-version': project.version, 'revnumber': project.version, 'docinfo': ""
-	}
-
-	reference {
-		sourceDir = asciidoctor.outputDir
-		pdfFilename = "spring-framework-reference.pdf"
-		epubFilename = "spring-framework-reference.epub"
-		expandPlaceholders = ""
-	}
-
-	afterEvaluate {
-		tasks.findAll { it.name.startsWith("reference") }.each{ it.dependsOn.add("asciidoctor") }
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
+		applyMavenExclusions = false
 	}
 
 	// TODO: DetectSplitPackagesPlugin fails in line 154 due to method not found on java.io.File.
@@ -1248,161 +1259,6 @@ configure(rootProject) {
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
-	task api(type: Javadoc) {
-		group = "Documentation"
-		description = "Generates aggregated Javadoc API documentation."
-		title = "${rootProject.description} ${version} API"
-
-		dependsOn {
-			subprojects.collect {
-				it.tasks.getByName("jar")
-			}
-		}
-		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-		options.author = true
-		options.header = rootProject.description
-		options.overview = "src/api/overview.html"
-		options.stylesheetFile = file("src/api/stylesheet.css")
-		options.splitIndex = true
-		options.links(project.ext.javadocLinks)
-		options.addStringOption('Xdoclint:none', '-quiet')
-
-		source subprojects.collect { project ->
-			project.sourceSets.main.allJava
-		}
-
-		maxMemory = "1024m"
-		destinationDir = new File(buildDir, "api")
-
-		doFirst {
-			classpath = files(
-                // ensure Servlet 3.x has precedence on the javadoc classpath
-                project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
-				// ensure the javadoc process can resolve types compiled from .aj sources
-				project(":spring-aspects").sourceSets.main.output
-			)
-			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
-		}
-	}
-
-	task docsZip(type: Zip, dependsOn: 'reference') {
-		group = "Distribution"
-		baseName = "spring-framework"
-		classifier = "docs"
-		description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://static.springframework.org/spring-framework/docs."
-
-		from("src/dist") {
-			include "changelog.txt"
-		}
-
-		from (api) {
-			into "javadoc-api"
-		}
-
-		from (reference) {
-			into "spring-framework-reference"
-		}
-	}
-
-	task schemaZip(type: Zip) {
-		group = "Distribution"
-		baseName = "spring-framework"
-		classifier = "schema"
-		description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at http://springframework.org/schema."
-		duplicatesStrategy 'exclude'
-		moduleProjects.each { subproject ->
-			def Properties schemas = new Properties();
-
-			subproject.sourceSets.main.resources.find {
-				it.path.endsWith("META-INF/spring.schemas")
-			}?.withInputStream { schemas.load(it) }
-
-			for (def key : schemas.keySet()) {
-				def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
-				assert shortName != key
-				File xsdFile = subproject.sourceSets.main.resources.find {
-					it.path.endsWith(schemas.get(key))
-				}
-				assert xsdFile != null
-				into (shortName) {
-					from xsdFile.path
-				}
-			}
-		}
-	}
-
-	task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-		group = "Distribution"
-		baseName = "spring-framework"
-		classifier = "dist"
-		description = "Builds -${classifier} archive, containing all jars and docs, " +
-			"suitable for community download page."
-
-		ext.baseDir = "${baseName}-${project.version}";
-
-		from("src/dist") {
-			include "readme.txt"
-			include "license.txt"
-			include "notice.txt"
-			into "${baseDir}"
-			expand(copyright: new Date().format("yyyy"), version: project.version)
-		}
-
-		from(zipTree(docsZip.archivePath)) {
-			into "${baseDir}/docs"
-		}
-
-		from(zipTree(schemaZip.archivePath)) {
-			into "${baseDir}/schema"
-		}
-
-		moduleProjects.each { subproject ->
-			into ("${baseDir}/libs") {
-				from subproject.jar
-				if (subproject.tasks.findByPath("sourcesJar")) {
-					from subproject.sourcesJar
-				}
-				if (subproject.tasks.findByPath("javadocJar")) {
-					from subproject.javadocJar
-				}
-			}
-		}
-	}
-
-	// Create a distribution that contains all dependencies (required and optional).
-	// Not published by default; only for use when building from source.
-	task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
-		group = "Distribution"
-		baseName = "spring-framework"
-		classifier = "dist-with-deps"
-		description = "Builds -${classifier} archive, containing everything " +
-			"in the -${distZip.classifier} archive plus all runtime dependencies."
-
-		from zipTree(distZip.archivePath)
-
-		gradle.taskGraph.whenReady { taskGraph ->
-			if (taskGraph.hasTask(":${zipTask.name}")) {
-				def projectNames = rootProject.subprojects*.name
-				def artifacts = new HashSet()
-				subprojects.each { subproject ->
-					(subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts +
-					subproject.configurations.optional.resolvedConfiguration.resolvedArtifacts).each { artifact ->
-						def dependency = artifact.moduleVersion.id
-						if (!projectNames.contains(dependency.name)) {
-							artifacts << artifact.file
-						}
-					}
-				}
-
-				zipTask.from(artifacts) {
-					into "${distZip.baseDir}/deps"
-				}
-			}
-		}
-	}
-
 	artifacts {
 		archives docsZip
 		archives schemaZip
@@ -1411,7 +1267,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = '3.0'
+		gradleVersion = '3.5.1'
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"

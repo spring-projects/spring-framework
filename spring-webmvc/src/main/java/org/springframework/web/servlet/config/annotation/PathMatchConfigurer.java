@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.ParsingPathMatcher;
 
 /**
  * Helps with configuring HandlerMappings path matching options such as trailing
@@ -37,14 +39,19 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class PathMatchConfigurer {
 
+	@Nullable
 	private Boolean suffixPatternMatch;
 
+	@Nullable
 	private Boolean trailingSlashMatch;
 
+	@Nullable
 	private Boolean registeredSuffixPatternMatch;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 
@@ -106,23 +113,34 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
+
+	@Nullable
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
+	@Nullable
 	public Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
+	@Nullable
 	public Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
+	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+	@Nullable
 	public PathMatcher getPathMatcher() {
+		if (this.pathMatcher instanceof ParsingPathMatcher &&
+				(Boolean.TRUE.equals(this.trailingSlashMatch) || Boolean.TRUE.equals(this.suffixPatternMatch))) {
+			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
+					" and useSuffixPatternMatch should be set to 'false'.");
+		}
 		return this.pathMatcher;
 	}
 

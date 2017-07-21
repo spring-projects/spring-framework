@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,9 +270,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		aop.setConstructorArguments(new Object[] {"Rob Harrop", 22}, new Class<?>[] {String.class, int.class});
 
 		NoArgCtorTestBean proxy = (NoArgCtorTestBean) aop.getProxy();
-		proxy = (NoArgCtorTestBean) aop.getProxy();
-
-		assertNotNull("Proxy should be null", proxy);
+		assertNotNull(proxy);
 	}
 
 	@Test

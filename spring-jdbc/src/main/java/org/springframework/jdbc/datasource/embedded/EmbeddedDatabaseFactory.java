@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -75,10 +76,13 @@ public class EmbeddedDatabaseFactory {
 
 	private DataSourceFactory dataSourceFactory = new SimpleDriverDataSourceFactory();
 
+	@Nullable
 	private EmbeddedDatabaseConfigurer databaseConfigurer;
 
+	@Nullable
 	private DatabasePopulator databasePopulator;
 
+	@Nullable
 	private DataSource dataSource;
 
 
@@ -211,7 +215,6 @@ public class EmbeddedDatabaseFactory {
 	 */
 	protected void shutdownDatabase() {
 		if (this.dataSource != null) {
-
 			if (logger.isInfoEnabled()) {
 				if (this.dataSource instanceof SimpleDriverDataSource) {
 					logger.info(String.format("Shutting down embedded database: url='%s'",
@@ -221,8 +224,9 @@ public class EmbeddedDatabaseFactory {
 					logger.info(String.format("Shutting down embedded database '%s'", this.databaseName));
 				}
 			}
-
-			this.databaseConfigurer.shutdown(this.dataSource, this.databaseName);
+			if (this.databaseConfigurer != null) {
+				this.databaseConfigurer.shutdown(this.dataSource, this.databaseName);
+			}
 			this.dataSource = null;
 		}
 	}
@@ -234,6 +238,7 @@ public class EmbeddedDatabaseFactory {
 	 * or if the database has been shut down. Subclasses may call this method to
 	 * access the {@code DataSource} instance directly.
 	 */
+	@Nullable
 	protected final DataSource getDataSource() {
 		return this.dataSource;
 	}

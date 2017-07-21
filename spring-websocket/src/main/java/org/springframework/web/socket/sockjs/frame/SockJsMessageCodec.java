@@ -19,6 +19,8 @@ package org.springframework.web.socket.sockjs.frame;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Encode and decode messages to and from a SockJS message frame,
  * essentially an array of JSON-encoded messages. For example:
@@ -48,6 +50,7 @@ public interface SockJsMessageCodec {
 	 * @return an array of messages, or {@code null} if none
 	 * @throws IOException if the content could not be parsed
 	 */
+	@Nullable
 	String[] decode(String content) throws IOException;
 
 	/**
@@ -56,6 +59,7 @@ public interface SockJsMessageCodec {
 	 * @return an array of messages, or {@code null} if none
 	 * @throws IOException if the content could not be parsed
 	 */
+	@Nullable
 	String[] decodeInputStream(InputStream content) throws IOException;
 
 }

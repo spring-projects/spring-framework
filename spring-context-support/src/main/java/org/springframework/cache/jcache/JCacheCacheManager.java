@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.cache.Caching;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.cache.CacheManager} implementation
@@ -36,6 +38,7 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
  */
 public class JCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
+	@Nullable
 	private javax.cache.CacheManager cacheManager;
 
 	private boolean allowNullValues = true;
@@ -60,13 +63,14 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 	/**
 	 * Set the backing JCache {@link javax.cache.CacheManager}.
 	 */
-	public void setCacheManager(javax.cache.CacheManager cacheManager) {
+	public void setCacheManager(@Nullable javax.cache.CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
 	 * Return the backing JCache {@link javax.cache.CacheManager}.
 	 */
+	@Nullable
 	public javax.cache.CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
@@ -100,9 +104,12 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 	@Override
 	protected Collection<Cache> loadCaches() {
+		CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
 		Collection<Cache> caches = new LinkedHashSet<>();
-		for (String cacheName : getCacheManager().getCacheNames()) {
-			javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(cacheName);
+		for (String cacheName : cacheManager.getCacheNames()) {
+			javax.cache.Cache<Object, Object> jcache = cacheManager.getCache(cacheName);
 			caches.add(new JCacheCache(jcache, isAllowNullValues()));
 		}
 		return caches;
@@ -110,8 +117,11 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 	@Override
 	protected Cache getMissingCache(String name) {
+		CacheManager cacheManager = getCacheManager();
+		Assert.state(cacheManager != null, "No CacheManager set");
+
 		// Check the JCache cache again (in case the cache was added at runtime)
-		javax.cache.Cache<Object, Object> jcache = getCacheManager().getCache(name);
+		javax.cache.Cache<Object, Object> jcache = cacheManager.getCache(name);
 		if (jcache != null) {
 			return new JCacheCache(jcache, isAllowNullValues());
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import org.springframework.context.index.metadata.CandidateComponentsMetadata;
-import org.springframework.context.index.metadata.PropertiesMarshaller;
 import org.springframework.context.index.sample.AbstractController;
 import org.springframework.context.index.sample.MetaControllerIndexed;
 import org.springframework.context.index.sample.SampleComponent;
@@ -49,10 +47,10 @@ import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
 import org.springframework.context.index.sample.jpa.SampleEntity;
 import org.springframework.context.index.sample.jpa.SampleMappedSuperClass;
+import org.springframework.context.index.sample.type.Repo;
 import org.springframework.context.index.sample.type.SampleRepo;
 import org.springframework.context.index.sample.type.SampleSmartRepo;
 import org.springframework.context.index.sample.type.SampleSpecializedRepo;
-import org.springframework.context.index.sample.type.Repo;
 import org.springframework.context.index.sample.type.SmartRepo;
 import org.springframework.context.index.sample.type.SpecializedRepo;
 import org.springframework.context.index.test.TestCompiler;
@@ -60,7 +58,7 @@ import org.springframework.stereotype.Component;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.context.index.test.Metadata.*;
+import static org.springframework.context.index.Metadata.*;
 
 /**
  * Tests for {@link CandidateComponentsIndexer}.
@@ -69,18 +67,20 @@ import static org.springframework.context.index.test.Metadata.*;
  */
 public class CandidateComponentsIndexerTests {
 
+	private TestCompiler compiler;
+
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private TestCompiler compiler;
 
 	@Before
 	public void createCompiler() throws IOException {
 		this.compiler = new TestCompiler(this.temporaryFolder);
 	}
+
 
 	@Test
 	public void noCandidate() throws IOException {
@@ -230,15 +230,14 @@ public class CandidateComponentsIndexerTests {
 			File metadataFile = new File(outputLocation,
 					MetadataStore.METADATA_PATH);
 			if (metadataFile.isFile()) {
-				return new PropertiesMarshaller()
-						.read(new FileInputStream(metadataFile));
+				return PropertiesMarshaller.read(new FileInputStream(metadataFile));
 			}
 			else {
 				return new CandidateComponentsMetadata();
 			}
 		}
-		catch (IOException e) {
-			throw new RuntimeException("Failed to read metadata from disk", e);
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to read metadata from disk", ex);
 		}
 	}
 

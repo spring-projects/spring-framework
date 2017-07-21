@@ -21,6 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -34,8 +36,14 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static java.time.format.DateTimeFormatter.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -158,6 +166,14 @@ public class HttpHeadersTests {
 		headers.setHost(host);
 		assertEquals("Invalid Host header", host, headers.getHost());
 		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
+	}
+
+	@Test
+	public void ipv6Host() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("[::1]", 0);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "[::1]", headers.getFirst("Host"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -331,18 +347,13 @@ public class HttpHeadersTests {
 
 	@Test
 	public void contentDisposition() {
-		headers.setContentDispositionFormData("name", null);
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
-				headers.getFirst("Content-Disposition"));
+		ContentDisposition disposition = headers.getContentDisposition();
+		assertNotNull(disposition);
+		assertEquals("Invalid Content-Disposition header", ContentDisposition.empty(), headers.getContentDisposition());
 
-		headers.setContentDispositionFormData("name", "filename");
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
-				headers.getFirst("Content-Disposition"));
-
-		headers.setContentDispositionFormData("name", "中文.txt", StandardCharsets.UTF_8);
-		assertEquals("Invalid Content-Disposition header",
-				"form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
-				headers.getFirst("Content-Disposition"));
+		disposition = ContentDisposition.builder("attachment").name("foo").filename("foo.txt").size(123L).build();
+		headers.setContentDisposition(disposition);
+		assertEquals("Invalid Content-Disposition header", disposition, headers.getContentDisposition());
 	}
 
 	@Test  // SPR-11917
@@ -427,18 +438,79 @@ public class HttpHeadersTests {
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
 	}
 
-	@Test  // SPR-14547
-	public void encodeHeaderFieldParam() {
-		String result = HttpHeaders.encodeHeaderFieldParam("test.txt", StandardCharsets.US_ASCII);
-		assertEquals("test.txt", result);
+	@Test
+	public void acceptLanguage() {
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		headers.setAcceptLanguage(Locale.LanguageRange.parse(headerValue));
+		assertEquals(headerValue, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE));
 
-		result = HttpHeaders.encodeHeaderFieldParam("中文.txt", StandardCharsets.UTF_8);
-		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
+		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
+				new Locale.LanguageRange("fr-ch"),
+				new Locale.LanguageRange("fr", 0.9),
+				new Locale.LanguageRange("en-*", 0.8),
+				new Locale.LanguageRange("de", 0.7),
+				new Locale.LanguageRange("*", 0.5)
+		);
+		assertEquals(expectedRanges, headers.getAcceptLanguage());
+		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocales().get(0));
+
+		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
+		assertEquals(Locale.FRANCE, headers.getAcceptLanguageAsLocales().get(0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void encodeHeaderFieldParamInvalidCharset() {
-		HttpHeaders.encodeHeaderFieldParam("test", StandardCharsets.UTF_16);
+	@Test // SPR-15603
+	public void acceptLanguageWithEmptyValue() throws Exception {
+		this.headers.set(HttpHeaders.ACCEPT_LANGUAGE, "");
+		assertEquals(Collections.emptyList(), this.headers.getAcceptLanguageAsLocales());
+	}
+
+	@Test
+	public void contentLanguage() {
+		headers.setContentLanguage(Locale.FRANCE);
+		assertEquals(Locale.FRANCE, headers.getContentLanguage());
+		assertEquals("fr-FR", headers.getFirst(HttpHeaders.CONTENT_LANGUAGE));
+	}
+
+	@Test
+	public void contentLanguageSerialized() {
+		headers.set(HttpHeaders.CONTENT_LANGUAGE,  "de, en_CA");
+		assertEquals("Expected one (first) locale", Locale.GERMAN, headers.getContentLanguage());
+	}
+
+	@Test
+	public void firstDate() {
+		headers.setDate(HttpHeaders.DATE, 1229595600000L);
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+
+		headers.clear();
+
+		headers.add(HttpHeaders.DATE, "Thu, 18 Dec 2008 10:20:00 GMT");
+		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
+		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1229595600000L));
+	}
+
+	@Test
+	public void firstZonedDateTime() {
+		ZonedDateTime date = ZonedDateTime.of(2017, 6, 22, 22, 22, 0, 0, ZoneId.of("GMT"));
+		headers.setZonedDateTime(HttpHeaders.DATE, date);
+		assertThat(headers.getFirst(HttpHeaders.DATE), is("Thu, 22 Jun 2017 22:22:00 GMT"));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		headers.clear();
+		ZonedDateTime otherDate = ZonedDateTime.of(2010, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(date));
+		headers.add(HttpHeaders.DATE, RFC_1123_DATE_TIME.format(otherDate));
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// obsolete RFC 850 format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thursday, 22-Jun-17 22:22:00 GMT");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+
+		// ANSI C's asctime() format
+		headers.clear();
+		headers.set(HttpHeaders.DATE, "Thu Jun 22 22:22:00 2017");
+		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 	}
 
 }

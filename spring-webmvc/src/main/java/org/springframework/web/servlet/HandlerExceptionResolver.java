@@ -19,6 +19,8 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface to be implemented by objects that can resolve exceptions thrown during
  * handler mapping or execution, in the typical case to error views. Implementors are
@@ -47,7 +49,8 @@ public interface HandlerExceptionResolver {
 	 * @return a corresponding {@code ModelAndView} to forward to, or {@code null}
 	 * for default processing
 	 */
+	@Nullable
 	ModelAndView resolveException(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

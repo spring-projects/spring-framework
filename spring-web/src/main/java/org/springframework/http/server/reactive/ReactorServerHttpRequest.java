@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.server.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Adapt {@link ServerHttpRequest} to the Reactor Net {@link HttpChannel}.
+ * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
  *
  * @author Stephane Maldini
  * @author Rossen Stoyanchev
@@ -42,60 +42,78 @@ import org.springframework.util.MultiValueMap;
  */
 public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpChannel channel;
+	private final HttpServerRequest request;
 
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorServerHttpRequest(HttpChannel channel, NettyDataBufferFactory bufferFactory) {
-		super(initUri(channel), initHeaders(channel));
+	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
+			throws URISyntaxException {
+
+		super(initUri(request), "", initHeaders(request));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
-		this.channel = channel;
+		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
-	private static URI initUri(HttpChannel channel) {
-		Assert.notNull("'channel' must not be null");
-		try {
-			URI uri = new URI(channel.uri());
-			InetSocketAddress remoteAddress = channel.remoteAddress();
-			return new URI(
-					uri.getScheme(),
-					uri.getUserInfo(),
-					(remoteAddress != null ? remoteAddress.getHostString() : null),
-					(remoteAddress != null ? remoteAddress.getPort() : -1),
-					uri.getPath(),
-					uri.getQuery(),
-					uri.getFragment());
+	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
+		Assert.notNull(request, "'request' must not be null");
+		URI baseUri = resolveBaseUrl(request);
+		String requestUri = request.uri();
+		return (baseUri != null ? new URI(baseUri.toString() + requestUri) : new URI(requestUri));
+	}
+
+	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
+		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
+		if (header != null) {
+			final int portIndex;
+			if (header.startsWith("[")) {
+				portIndex = header.indexOf(':', header.indexOf(']'));
+			} else {
+				portIndex = header.indexOf(':');
+			}
+			if (portIndex != -1) {
+				try {
+					return new URI(null, null, header.substring(0, portIndex),
+							Integer.parseInt(header.substring(portIndex + 1)), null, null, null);
+				} catch (NumberFormatException ignore) {
+					throw new URISyntaxException(header, "Unable to parse port", portIndex);
+				}
+			}
+			else {
+				return new URI(null, header, null, null);
+			}
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+		else {
+			InetSocketAddress localAddress = (InetSocketAddress) request.context().channel().localAddress();
+			return new URI(null, null, localAddress.getHostString(),
+					localAddress.getPort(), null, null, null);
 		}
 	}
 
-	private static HttpHeaders initHeaders(HttpChannel channel) {
+	private static HttpHeaders initHeaders(HttpServerRequest channel) {
 		HttpHeaders headers = new HttpHeaders();
-		for (String name : channel.headers().names()) {
-			headers.put(name, channel.headers().getAll(name));
+		for (String name : channel.requestHeaders().names()) {
+			headers.put(name, channel.requestHeaders().getAll(name));
 		}
 		return headers;
 	}
 
 
-	public HttpChannel getReactorChannel() {
-		return this.channel;
+	public HttpServerRequest getReactorRequest() {
+		return this.request;
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.channel.method().name());
+	public String getMethodValue() {
+		return this.request.method().name();
 	}
 
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		for (CharSequence name : this.channel.cookies().keySet()) {
-			for (Cookie cookie : this.channel.cookies().get(name)) {
+		for (CharSequence name : this.request.cookies().keySet()) {
+			for (Cookie cookie : this.request.cookies().get(name)) {
 				HttpCookie httpCookie = new HttpCookie(name.toString(), cookie.value());
 				cookies.add(name.toString(), httpCookie);
 			}
@@ -104,8 +122,13 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
+	}
+
+	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive().retain().map(this.bufferFactory::wrap);
+		return this.request.receive().retain().map(this.bufferFactory::wrap);
 	}
 
 }

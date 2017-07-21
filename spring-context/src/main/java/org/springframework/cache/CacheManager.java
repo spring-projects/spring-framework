@@ -18,6 +18,8 @@ package org.springframework.cache;
 
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Spring's central cache manager SPI.
  * Allows for retrieving named {@link Cache} regions.
@@ -32,6 +34,7 @@ public interface CacheManager {
 	 * @param name the cache identifier (must not be {@code null})
 	 * @return the associated cache, or {@code null} if none found
 	 */
+	@Nullable
 	Cache getCache(String name);
 
 	/**

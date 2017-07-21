@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,11 +58,13 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	/**
 	 * Stores the set of method names to use for creating the management interface.
 	 */
+	@Nullable
 	private Set<String> managedMethods;
 
 	/**
 	 * Stores the mappings of bean keys to an array of method names.
 	 */
+	@Nullable
 	private Map<String, Set<String>> methodMappings;
 
 

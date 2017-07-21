@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -44,7 +46,7 @@ public class WebAsyncManagerTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
@@ -53,6 +55,7 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 		reset(this.asyncWebRequest);
 	}
+
 
 	@Test
 	public void startAsyncProcessingWithoutAsyncWebRequest() throws Exception {
@@ -137,6 +140,7 @@ public class WebAsyncManagerTests {
 		verify(interceptor).postProcess(this.asyncWebRequest, task, concurrentResult);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startCallableProcessingBeforeConcurrentHandlingException() throws Exception {
 		Callable<Object> task = new StubCallable(21);
@@ -158,6 +162,7 @@ public class WebAsyncManagerTests {
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
 		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 	}
 
@@ -227,18 +232,19 @@ public class WebAsyncManagerTests {
 		verify(interceptor2).preProcess(this.asyncWebRequest, task);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startCallableProcessingWithAsyncTask() throws Exception {
 		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
 		given(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).willReturn(this.servletRequest);
 
-		@SuppressWarnings("unchecked")
 		WebAsyncTask<Object> asyncTask = new WebAsyncTask<>(1000L, executor, mock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor).submit((Runnable) notNull());
 		verify(this.asyncWebRequest).setTimeout(1000L);
 		verify(this.asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+		verify(this.asyncWebRequest).addErrorHandler(any(Consumer.class));
 		verify(this.asyncWebRequest).addCompletionHandler(any(Runnable.class));
 		verify(this.asyncWebRequest).startAsync();
 	}
@@ -276,6 +282,7 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).setTimeout(1000L);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void startDeferredResultProcessingBeforeConcurrentHandlingException() throws Exception {
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
@@ -297,6 +304,7 @@ public class WebAsyncManagerTests {
 		assertFalse(this.asyncManager.hasConcurrentResult());
 
 		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 	}
 
@@ -327,7 +335,7 @@ public class WebAsyncManagerTests {
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
-		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);;
+		willThrow(exception).given(interceptor).postProcess(this.asyncWebRequest, deferredResult, 25);
 
 		setupDefaultAsyncScenario();
 
@@ -358,8 +366,10 @@ public class WebAsyncManagerTests {
 		given(this.asyncWebRequest.isAsyncComplete()).willReturn(false);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void verifyDefaultAsyncScenario() {
 		verify(this.asyncWebRequest).addTimeoutHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addErrorHandler((Consumer<Throwable>) notNull());
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 		verify(this.asyncWebRequest).startAsync();
 		verify(this.asyncWebRequest).dispatch();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.support;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -38,6 +39,7 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
+	@Nullable
 	private final Message<T> originalMessage;
 
 	private MessageHeaderAccessor headerAccessor;
@@ -73,7 +75,7 @@ public final class MessageBuilder<T> {
 	 * Set the value for the given header name. If the provided value is {@code null},
 	 * the header will be removed.
 	 */
-	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
+	public MessageBuilder<T> setHeader(String headerName, @Nullable Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
@@ -109,7 +111,7 @@ public final class MessageBuilder<T> {
 	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
-	public MessageBuilder<T> copyHeaders(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeaders(headersToCopy);
 		return this;
 	}
@@ -118,7 +120,7 @@ public final class MessageBuilder<T> {
 	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
 	 * overwrite any existing values.
 	 */
-	public MessageBuilder<T> copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
+	public MessageBuilder<T> copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
 		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
 		return this;
 	}
@@ -187,7 +189,7 @@ public final class MessageBuilder<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
+	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
 		if (payload instanceof Throwable) {

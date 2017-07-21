@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -333,10 +334,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(messageConverter);
 		assertTrue(messageConverter instanceof CompositeMessageConverter);
 
-		CompositeMessageConverter compositeMessageConverter = this.appContext.getBean(CompositeMessageConverter.class);
+		String name = MessageBrokerBeanDefinitionParser.MESSAGE_CONVERTER_BEAN_NAME;
+		CompositeMessageConverter compositeMessageConverter = this.appContext.getBean(name, CompositeMessageConverter.class);
 		assertNotNull(compositeMessageConverter);
 
-		SimpMessagingTemplate simpMessagingTemplate = this.appContext.getBean(SimpMessagingTemplate.class);
+		name = MessageBrokerBeanDefinitionParser.MESSAGING_TEMPLATE_BEAN_NAME;
+		SimpMessagingTemplate simpMessagingTemplate = this.appContext.getBean(name, SimpMessagingTemplate.class);
 		assertNotNull(simpMessagingTemplate);
 		assertEquals("/personal/", simpMessagingTemplate.getUserDestinationPrefix());
 
@@ -538,5 +541,5 @@ class TestValidator implements Validator {
 	}
 
 	@Override
-	public void validate(Object target, Errors errors) { }
+	public void validate(@Nullable Object target, Errors errors) { }
 }

@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for exceptions based on an {@link HttpStatus}.
@@ -63,7 +64,7 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	 * @since 3.0.5
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
-			byte[] responseBody, Charset responseCharset) {
+			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		this(statusCode, statusText, null, responseBody, responseCharset);
 	}
@@ -79,7 +80,7 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	 * @since 3.1.2
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(statusCode.value() + " " + statusText, statusCode.value(), statusText,
 				responseHeaders, responseBody, responseCharset);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +63,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * A protected constructor to create new headers.
 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
-	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
+	protected NativeMessageHeaderAccessor(@Nullable Map<String, List<String>> nativeHeaders) {
 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
 			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 		}
@@ -71,7 +72,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * A protected constructor accepting the headers of an existing message to copy.
 	 */
-	protected NativeMessageHeaderAccessor(Message<?> message) {
+	protected NativeMessageHeaderAccessor(@Nullable Message<?> message) {
 		super(message);
 		if (message != null) {
 			@SuppressWarnings("unchecked")
@@ -85,7 +86,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, List<String>> getNativeHeaders() {
+	@Nullable
+	protected Map<String, List<String>> getNativeHeaders() {
 		return (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 	}
 
@@ -104,7 +106,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			if (map != null) {
 				// Force removal since setHeader checks for equality
 				removeHeader(NATIVE_HEADERS);
-				setHeader(NATIVE_HEADERS, Collections.<String, List<String>>unmodifiableMap(map));
+				setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
 			}
 			super.setImmutable();
 		}
@@ -119,16 +121,20 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * @return all values for the specified native header or {@code null}.
+	 * Return all values for the specified native header.
+	 * or {@code null} if none.
 	 */
+	@Nullable
 	public List<String> getNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		return (map != null ? map.get(headerName) : null);
 	}
 
 	/**
-	 * @return the first value for the specified native header of {@code null}.
+	 * Return the first value for the specified native header,
+	 * or {@code null} if none.
 	 */
+	@Nullable
 	public String getFirstNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		if (map != null) {
@@ -143,7 +149,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Set the specified native header value replacing existing values.
 	 */
-	public void setNativeHeader(String name, String value) {
+	public void setNativeHeader(String name, @Nullable String value) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> map = getNativeHeaders();
 		if (value == null) {
@@ -168,7 +174,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	/**
 	 * Add the specified native header value to existing values.
 	 */
-	public void addNativeHeader(String name, String value) {
+	public void addNativeHeader(String name, @Nullable String value) {
 		Assert.state(isMutable(), "Already immutable");
 		if (value == null) {
 			return;
@@ -187,17 +193,15 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
-	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+	public void addNativeHeaders(@Nullable MultiValueMap<String, String> headers) {
 		if (headers == null) {
 			return;
 		}
-		for (String header : headers.keySet()) {
-			for (String value : headers.get(header)) {
-				addNativeHeader(header, value);
-			}
-		}
+		headers.forEach((key, values) ->
+				values.forEach(value -> addNativeHeader(key, value)));
 	}
 
+	@Nullable
 	public List<String> removeNativeHeader(String name) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
@@ -208,6 +212,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
 		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
 		if (map != null) {

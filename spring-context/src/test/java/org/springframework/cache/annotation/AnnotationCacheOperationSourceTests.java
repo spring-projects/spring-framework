@@ -245,6 +245,21 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
+	public void cacheConfigFromInterface() {
+		Collection<CacheOperation> ops = getOps(InterfaceCacheConfig.class, "interfaceCacheConfig");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertSharedConfig(cacheOperation, "", "", "", "myCache");
+	}
+
+	@Test
+	public void cacheAnnotationOverride() {
+		Collection<CacheOperation> ops = getOps(InterfaceCacheConfig.class, "interfaceCacheableOverride");
+		assertSame(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertTrue(cacheOperation instanceof CacheableOperation);
+	}
+
+	@Test
 	public void partialClassLevelWithCustomCacheManager() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClassWithSomeDefault.class, "methodLevelCacheManager", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
@@ -430,11 +445,35 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@CacheConfigFoo
-	@CacheConfig(cacheNames = "myCache") // multiple sources
+	@CacheConfig(cacheNames = "myCache")  // multiple sources
 	private static class MultipleCacheConfig {
 
 		@Cacheable
 		public void multipleCacheConfig() {
+		}
+	}
+
+
+	@CacheConfig(cacheNames = "myCache")
+	private interface CacheConfigIfc {
+
+		@Cacheable
+		void interfaceCacheConfig();
+
+		@CachePut
+		void interfaceCacheableOverride();
+	}
+
+
+	private static class InterfaceCacheConfig implements CacheConfigIfc {
+
+		@Override
+		public void interfaceCacheConfig() {
+		}
+
+		@Override
+		@Cacheable
+		public void interfaceCacheableOverride() {
 		}
 	}
 
@@ -491,7 +530,7 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Cacheable(cacheNames = "shadowed cache name", key = "shadowed key")
 	@interface ComposedCacheable {
 
@@ -507,7 +546,7 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@Target({ElementType.METHOD, ElementType.TYPE})
 	@CacheEvict(cacheNames = "shadowed cache name", key = "shadowed key")
 	@interface ComposedCacheEvict {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,9 +281,8 @@ public class BaseViewTests {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void checkContainsAll(Map expected, Map<String, Object> actual) {
-		expected.keySet().stream().forEach(
-			key -> assertEquals("Values for model key '" + key + "' must match", expected.get(key), actual.get(key))
-		);
+		expected.forEach((k, v) -> assertEquals("Values for model key '" + k
+				+ "' must match", expected.get(k), actual.get(k)));
 	}
 
 

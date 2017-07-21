@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
-import org.springframework.web.HttpMediaTypeException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
@@ -72,7 +71,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param consumes as described in {@link RequestMapping#consumes()}
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
-	public ConsumesRequestCondition(String[] consumes, String[] headers) {
+	public ConsumesRequestCondition(String[] consumes, @Nullable String[] headers) {
 		this(parseExpressions(consumes, headers));
 	}
 
@@ -85,22 +84,20 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	}
 
 
-	private static Set<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
+	private static Set<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, @Nullable String[] headers) {
 		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
-				if ("Content-Type".equalsIgnoreCase(expr.name)) {
+				if ("Content-Type".equalsIgnoreCase(expr.name) && expr.value != null) {
 					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ConsumeMediaTypeExpression(mediaType, expr.isNegated));
 					}
 				}
 			}
 		}
-		if (consumes != null) {
-			for (String consume : consumes) {
-				result.add(new ConsumeMediaTypeExpression(consume));
-			}
+		for (String consume : consumes) {
+			result.add(new ConsumeMediaTypeExpression(consume));
 		}
 		return result;
 	}

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -70,6 +71,7 @@ public class SimpAttributes {
 	 * @param name the name of the attribute
 	 * @return the current attribute value, or {@code null} if not found
 	 */
+	@Nullable
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}

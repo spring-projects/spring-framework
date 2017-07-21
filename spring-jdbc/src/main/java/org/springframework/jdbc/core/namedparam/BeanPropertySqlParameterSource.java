@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link SqlParameterSource} implementation that obtains parameter values
@@ -43,6 +44,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 
 	private final BeanWrapper beanWrapper;
 
+	@Nullable
 	private String[] propertyNames;
 
 

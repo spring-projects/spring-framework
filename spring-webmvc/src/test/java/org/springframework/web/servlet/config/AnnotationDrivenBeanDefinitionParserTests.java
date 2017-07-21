@@ -29,6 +29,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -254,7 +255,7 @@ class TestMessageCodesResolver implements MessageCodesResolver {
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class fieldType) {
 		return new String[] { "test.foo.bar" };
 	}
 

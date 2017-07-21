@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.transaction.support;
 
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionTimedOutException;
 
 /**
  * Convenient base class for resource holders.
  *
- * <p>Features rollback-only support for nested transactions.
- * Can expire after a certain number of seconds or milliseconds,
- * to determine transactional timeouts.
+ * <p>Features rollback-only support for participating transactions.
+ * Can expire after a certain number of seconds or milliseconds
+ * in order to determine a transactional timeout.
  *
  * @author Juergen Hoeller
  * @since 02.02.2004
@@ -38,6 +39,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	private boolean rollbackOnly = false;
 
+	@Nullable
 	private Date deadline;
 
 	private int referenceCount = 0;
@@ -64,6 +66,17 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	 */
 	public void setRollbackOnly() {
 		this.rollbackOnly = true;
+	}
+
+	/**
+	 * Reset the rollback-only status for this resource transaction.
+	 * <p>Only really intended to be called after custom rollback steps which
+	 * keep the original resource in action, e.g. in case of a savepoint.
+	 * @since 5.0
+	 * @see org.springframework.transaction.SavepointManager#rollbackToSavepoint
+	 */
+	public void resetRollbackOnly() {
+		this.rollbackOnly = false;
 	}
 
 	/**
@@ -100,6 +113,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	 * Return the expiration deadline of this object.
 	 * @return the deadline as Date object
 	 */
+	@Nullable
 	public Date getDeadline() {
 		return this.deadline;
 	}

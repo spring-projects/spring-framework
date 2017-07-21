@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -32,12 +32,8 @@ import static org.junit.Assert.*;
  */
 public class LinkedMultiValueMapTests {
 
-	private LinkedMultiValueMap<String, String> map;
+	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 
-	@Before
-	public void setUp() {
-		map = new LinkedMultiValueMap<>();
-	}
 
 	@Test
 	public void add() {
@@ -47,6 +43,18 @@ public class LinkedMultiValueMapTests {
 		List<String> expected = new ArrayList<>(2);
 		expected.add("value1");
 		expected.add("value2");
+		assertEquals(expected, map.get("key"));
+	}
+
+	@Test
+	public void addAll() throws Exception {
+		map.add("key", "value1");
+		map.addAll("key", Arrays.asList("value2", "value3"));
+		assertEquals(1, map.size());
+		List<String> expected = new ArrayList<>(2);
+		expected.add("value1");
+		expected.add("value2");
+		expected.add("value3");
 		assertEquals(expected, map.get("key"));
 	}
 

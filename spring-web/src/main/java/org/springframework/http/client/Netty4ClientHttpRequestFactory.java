@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,20 +39,27 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
- * uses <a href="http://netty.io/">Netty 4</a> to create requests.
+ * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation
+ * that uses <a href="http://netty.io/">Netty 4</a> to create requests.
  *
- * <p>Allows to use a pre-configured {@link EventLoopGroup} instance - useful for sharing
- * across multiple clients.
+ * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
+ * sharing across multiple clients.
+ *
+ * <p>Note that this implementation consistently closes the HTTP connection on each
+ * request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Mark Paluch
  * @since 4.1.2
+ * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
+@Deprecated
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		AsyncClientHttpRequestFactory, InitializingBean, DisposableBean {
 
@@ -69,15 +76,15 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private int maxResponseSize = DEFAULT_MAX_RESPONSE_SIZE;
 
+	@Nullable
 	private SslContext sslContext;
 
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
 
+	@Nullable
 	private volatile Bootstrap bootstrap;
-
-	private volatile Bootstrap sslBootstrap;
 
 
 	/**
@@ -103,15 +110,6 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.defaultEventLoopGroup = false;
 	}
 
-
-	private SslContext getDefaultClientSslContext() {
-		try {
-			return SslContextBuilder.forClient().build();
-		}
-		catch (SSLException exc) {
-			throw new IllegalStateException("Could not create default client SslContext", exc);
-		}
-	}
 
 	/**
 	 * Set the default maximum response size.
@@ -150,24 +148,54 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.readTimeout = readTimeout;
 	}
 
-	private Bootstrap getBootstrap(URI uri) {
-		boolean isSecure = (uri.getPort() == 443)
-				|| (uri.getPort() == -1 && "https".equalsIgnoreCase(uri.getScheme()));
-		if (isSecure) {
-			if (this.sslBootstrap == null) {
-				this.sslBootstrap = buildBootstrap(true);
-			}
-			return this.sslBootstrap;
-		}
-		else {
-			if (this.bootstrap == null) {
-				this.bootstrap = buildBootstrap(false);
-			}
-			return this.bootstrap;
+
+	@Override
+	public void afterPropertiesSet() {
+		if (this.sslContext == null) {
+			this.sslContext = getDefaultClientSslContext();
 		}
 	}
 
-	private Bootstrap buildBootstrap(boolean isSecure) {
+	private SslContext getDefaultClientSslContext() {
+		try {
+			return SslContextBuilder.forClient().build();
+		}
+		catch (SSLException ex) {
+			throw new IllegalStateException("Could not create default client SslContext", ex);
+		}
+	}
+
+
+	@Override
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		return createRequestInternal(uri, httpMethod);
+	}
+
+	@Override
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		return createRequestInternal(uri, httpMethod);
+	}
+
+	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
+		return new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
+	}
+
+	private Bootstrap getBootstrap(URI uri) {
+		boolean isSecure = (uri.getPort() == 443 || "https".equalsIgnoreCase(uri.getScheme()));
+		if (isSecure) {
+			return buildBootstrap(uri, true);
+		}
+		else {
+			Bootstrap bootstrap = this.bootstrap;
+			if (bootstrap == null) {
+				bootstrap = buildBootstrap(uri, false);
+				this.bootstrap = bootstrap;
+			}
+			return bootstrap;
+		}
+	}
+
+	private Bootstrap buildBootstrap(URI uri, boolean isSecure) {
 		Bootstrap bootstrap = new Bootstrap();
 		bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 				.handler(new ChannelInitializer<SocketChannel>() {
@@ -177,7 +205,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 						ChannelPipeline pipeline = channel.pipeline();
 						if (isSecure) {
 							Assert.notNull(sslContext, "sslContext should not be null");
-							pipeline.addLast(sslContext.newHandler(channel.alloc()));
+							pipeline.addLast(sslContext.newHandler(channel.alloc(), uri.getHost(), uri.getPort()));
 						}
 						pipeline.addLast(new HttpClientCodec());
 						pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
@@ -199,27 +227,6 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		if (this.connectTimeout >= 0) {
 			config.setConnectTimeoutMillis(this.connectTimeout);
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.sslContext == null) {
-			this.sslContext = getDefaultClientSslContext();
-		}
-	}
-
-	@Override
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return createRequestInternal(uri, httpMethod);
-	}
-
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return createRequestInternal(uri, httpMethod);
-	}
-
-	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
 	}
 
 

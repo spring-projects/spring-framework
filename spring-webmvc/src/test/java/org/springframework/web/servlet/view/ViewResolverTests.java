@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,18 +83,6 @@ public class ViewResolverTests {
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "/example2.jsp", ((JstlView) view).getUrl());
-	}
-
-	@Test
-	public void testUrlBasedViewResolverWithNullViewClass() {
-		UrlBasedViewResolver resolver = new UrlBasedViewResolver();
-		try {
-			resolver.setViewClass(null);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
 	}
 
 	@Test

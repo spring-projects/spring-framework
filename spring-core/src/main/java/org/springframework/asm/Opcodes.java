@@ -146,13 +146,17 @@ public interface Opcodes {
      */
     int F_SAME1 = 4;
 
-    Integer TOP = 0;
-    Integer INTEGER = 1;
-    Integer FLOAT = 2;
-    Integer DOUBLE = 3;
-    Integer LONG = 4;
-    Integer NULL = 5;
-    Integer UNINITIALIZED_THIS = 6;
+    // Do not try to change the following code to use auto-boxing,
+    // these values are compared by reference and not by value
+    // The constructor of Integer was deprecated in 9
+    // but we are stuck with it by backward compatibility
+    @SuppressWarnings("deprecation") Integer TOP = new Integer(0);
+    @SuppressWarnings("deprecation") Integer INTEGER = new Integer(1);
+    @SuppressWarnings("deprecation") Integer FLOAT = new Integer(2);
+    @SuppressWarnings("deprecation") Integer DOUBLE = new Integer(3);
+    @SuppressWarnings("deprecation") Integer LONG = new Integer(4);
+    @SuppressWarnings("deprecation") Integer NULL = new Integer(5);
+    @SuppressWarnings("deprecation") Integer UNINITIALIZED_THIS = new Integer(6);
 
     // opcodes // visit method (- = idem)
 

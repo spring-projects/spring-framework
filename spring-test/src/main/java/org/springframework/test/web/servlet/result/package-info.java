@@ -4,4 +4,7 @@
  * and {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}
  * to access instances of those implementations.
  */
+@NonNullApi
 package org.springframework.test.web.servlet.result;
+
+import org.springframework.lang.NonNullApi;

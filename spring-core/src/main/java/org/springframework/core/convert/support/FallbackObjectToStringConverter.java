@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * Simply calls {@link Object#toString()} to convert any supported object
@@ -60,7 +61,8 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 	}
 
 	@Override
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	@Nullable
+	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return (source != null ? source.toString() : null);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,8 @@ import org.springframework.util.concurrent.SettableListenableFuture;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.same;
 
 /**
  * Unit tests for {@link DefaultStompSession}.
@@ -474,6 +471,34 @@ public class DefaultStompSessionTests {
 		assertEquals(subscription.getSubscriptionId(), stompHeaders.getId());
 	}
 
+	@Test // SPR-15131
+	public void unsubscribeWithCustomHeader() throws Exception {
+		this.session.afterConnected(this.connection);
+		assertTrue(this.session.isConnected());
+
+		String headerName = "durable-subscription-name";
+		String headerValue = "123";
+
+		StompHeaders subscribeHeaders = new StompHeaders();
+		subscribeHeaders.setDestination("/topic/foo");
+		subscribeHeaders.set(headerName, headerValue);
+		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		Subscription subscription = this.session.subscribe(subscribeHeaders, frameHandler);
+
+		StompHeaders unsubscribeHeaders = new StompHeaders();
+		unsubscribeHeaders.set(headerName,  subscription.getSubscriptionHeaders().getFirst(headerName));
+		subscription.unsubscribe(unsubscribeHeaders);
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertEquals(StompCommand.UNSUBSCRIBE, accessor.getCommand());
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertEquals(stompHeaders.toString(), 2, stompHeaders.size());
+		assertEquals(subscription.getSubscriptionId(), stompHeaders.getId());
+		assertEquals(headerValue, stompHeaders.getFirst(headerName));
+	}
+
 	@Test
 	public void ack() throws Exception {
 		this.session.afterConnected(this.connection);
@@ -575,7 +600,7 @@ public class DefaultStompSessionTests {
 		receiptable.addReceiptLostTask(() -> notReceived.set(true));
 
 		ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
-		verify(taskScheduler).schedule(taskCaptor.capture(), notNull(Date.class));
+		verify(taskScheduler).schedule(taskCaptor.capture(), (Date) notNull());
 		Runnable scheduledTask = taskCaptor.getValue();
 		assertNotNull(scheduledTask);
 

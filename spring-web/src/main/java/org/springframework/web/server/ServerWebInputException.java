@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.web.server;
 
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 400 (bad request) for use in
@@ -32,6 +31,7 @@ import org.springframework.http.HttpStatus;
 @SuppressWarnings("serial")
 public class ServerWebInputException extends ResponseStatusException {
 
+	@Nullable
 	private final MethodParameter parameter;
 
 
@@ -39,20 +39,20 @@ public class ServerWebInputException extends ResponseStatusException {
 	 * Constructor with an explanation only.
 	 */
 	public ServerWebInputException(String reason) {
-		this(reason, null);
+		this(reason, null, null);
 	}
 
 	/**
 	 * Constructor for a 400 error linked to a specific {@code MethodParameter}.
 	 */
-	public ServerWebInputException(String reason, MethodParameter parameter) {
+	public ServerWebInputException(String reason, @Nullable MethodParameter parameter) {
 		this(reason, parameter, null);
 	}
 
 	/**
 	 * Constructor for a 400 error with a root cause.
 	 */
-	public ServerWebInputException(String reason, MethodParameter parameter, Throwable cause) {
+	public ServerWebInputException(String reason, @Nullable MethodParameter parameter, @Nullable Throwable cause) {
 		super(HttpStatus.BAD_REQUEST, reason, cause);
 		this.parameter = parameter;
 	}
@@ -61,8 +61,9 @@ public class ServerWebInputException extends ResponseStatusException {
 	/**
 	 * Return the {@code MethodParameter} associated with this error, if any.
 	 */
-	public Optional<MethodParameter> getMethodParameter() {
-		return Optional.ofNullable(this.parameter);
+	@Nullable
+	public MethodParameter getMethodParameter() {
+		return this.parameter;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link AutowireCandidateResolver} implementation to use when no annotation
@@ -27,18 +27,17 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
- * @see BeanDefinition#isAutowireCandidate()
  */
 public class SimpleAutowireCandidateResolver implements AutowireCandidateResolver {
 
-	/**
-	 * Determine if the provided bean definition is an autowire candidate.
-	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
-	 * attribute must not have been set to 'false'.
-	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();
+	}
+
+	@Override
+	public boolean isRequired(DependencyDescriptor descriptor) {
+		return descriptor.isRequired();
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	}
 
 	@Override
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
 	}
 

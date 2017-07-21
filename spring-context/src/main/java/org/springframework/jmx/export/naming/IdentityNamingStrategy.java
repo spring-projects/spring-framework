@@ -21,6 +21,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -47,7 +48,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	 * of the managed resource.
 	 */
 	@Override
-	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
+	public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
 		String domain = ClassUtils.getPackageName(managedBean.getClass());
 		Hashtable<String, String> keys = new Hashtable<>();
 		keys.put(TYPE_KEY, ClassUtils.getShortName(managedBean.getClass()));

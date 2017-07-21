@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when an unknown (or custom) HTTP status code is received.
@@ -42,7 +43,7 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 	 * @param responseCharset the response body charset, may be {@code null}
 	 */
 	public UnknownHttpStatusCodeException(int rawStatusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody,@Nullable Charset responseCharset) {
 
 		super("Unknown status code [" + String.valueOf(rawStatusCode) + "]" + " " + statusText,
 				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);

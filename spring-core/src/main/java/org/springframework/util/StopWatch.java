@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks,
@@ -54,12 +56,11 @@ public class StopWatch {
 	/** Start time of the current task */
 	private long startTimeMillis;
 
-	/** Is the stop watch currently running? */
-	private boolean running;
-
 	/** Name of the current task */
+	@Nullable
 	private String currentTaskName;
 
+	@Nullable
 	private TaskInfo lastTaskInfo;
 
 	private int taskCount;
@@ -123,10 +124,9 @@ public class StopWatch {
 	 * @see #stop()
 	 */
 	public void start(String taskName) throws IllegalStateException {
-		if (this.running) {
+		if (this.currentTaskName != null) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
-		this.running = true;
 		this.currentTaskName = taskName;
 		this.startTimeMillis = System.currentTimeMillis();
 	}
@@ -138,17 +138,16 @@ public class StopWatch {
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
-		if (!this.running) {
+		if (this.currentTaskName == null) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
 		}
 		long lastTime = System.currentTimeMillis() - this.startTimeMillis;
 		this.totalTimeMillis += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
 		if (this.keepTaskList) {
-			this.taskList.add(lastTaskInfo);
+			this.taskList.add(this.lastTaskInfo);
 		}
 		++this.taskCount;
-		this.running = false;
 		this.currentTaskName = null;
 	}
 
@@ -157,7 +156,7 @@ public class StopWatch {
 	 * @see #currentTaskName()
 	 */
 	public boolean isRunning() {
-		return this.running;
+		return (this.currentTaskName != null);
 	}
 
 	/**
@@ -165,6 +164,7 @@ public class StopWatch {
 	 * @since 4.2.2
 	 * @see #isRunning()
 	 */
+	@Nullable
 	public String currentTaskName() {
 		return this.currentTaskName;
 	}

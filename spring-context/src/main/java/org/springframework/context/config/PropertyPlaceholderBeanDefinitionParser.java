@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.util.StringUtils;
 
@@ -54,8 +55,8 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 	}
 
 	@Override
-	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-		super.doParse(element, builder);
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+		super.doParse(element, parserContext, builder);
 
 		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));

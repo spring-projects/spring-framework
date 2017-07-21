@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -55,19 +57,26 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
+	@Nullable
 	private Class<?> targetClass;
 
+	@Nullable
 	private Object targetObject;
 
+	@Nullable
 	private String targetField;
 
+	@Nullable
 	private String staticField;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	// the field we will retrieve
+	@Nullable
 	private Field fieldObject;
 
 
@@ -78,13 +87,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 * @see #setTargetField
 	 */
-	public void setTargetClass(Class<?> targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which the field is defined.
 	 */
+	@Nullable
 	public Class<?> getTargetClass() {
 		return targetClass;
 	}
@@ -96,13 +106,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetField
 	 */
-	public void setTargetObject(Object targetObject) {
+	public void setTargetObject(@Nullable Object targetObject) {
 		this.targetObject = targetObject;
 	}
 
 	/**
 	 * Return the target object on which the field is defined.
 	 */
+	@Nullable
 	public Object getTargetObject() {
 		return this.targetObject;
 	}
@@ -114,13 +125,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetClass
 	 * @see #setTargetObject
 	 */
-	public void setTargetField(String targetField) {
-		this.targetField = StringUtils.trimAllWhitespace(targetField);
+	public void setTargetField(@Nullable String targetField) {
+		this.targetField = (targetField != null ? StringUtils.trimAllWhitespace(targetField) : null);
 	}
 
 	/**
 	 * Return the name of the field to be retrieved.
 	 */
+	@Nullable
 	public String getTargetField() {
 		return this.targetField;
 	}
@@ -168,6 +180,7 @@ public class FieldRetrievingFactoryBean
 			// If no other property specified, consider bean name as static field expression.
 			if (this.staticField == null) {
 				this.staticField = this.beanName;
+				Assert.state(this.staticField != null, "No target field specified");
 			}
 
 			// Try to parse static field into class and field.

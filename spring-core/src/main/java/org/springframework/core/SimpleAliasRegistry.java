@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,14 +118,12 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @param result the resulting aliases list
 	 */
 	private void retrieveAliases(String name, List<String> result) {
-		for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
-			String registeredName = entry.getValue();
+		this.aliasMap.forEach((alias, registeredName) -> {
 			if (registeredName.equals(name)) {
-				String alias = entry.getKey();
 				result.add(alias);
 				retrieveAliases(alias, result);
 			}
-		}
+		});
 	}
 
 	/**

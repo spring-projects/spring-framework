@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.MessageCondition;
@@ -91,7 +92,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -110,11 +111,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder("{");
-		builder.append(this.destinationConditions);
-		builder.append(",messageType=").append(this.messageTypeMessageCondition);
-		builder.append('}');
-		return builder.toString();
+		return "{" + this.destinationConditions + ",messageType=" + this.messageTypeMessageCondition + '}';
 	}
 
 }

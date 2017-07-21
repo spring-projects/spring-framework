@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.lang.Nullable;
 
 /**
  * Helper class that efficiently creates multiple {@link CallableStatementCreator}
@@ -48,8 +48,6 @@ public class CallableStatementCreatorFactory {
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	private boolean updatableResults = false;
-
-	private NativeJdbcExtractor nativeJdbcExtractor;
 
 
 	/**
@@ -100,19 +98,12 @@ public class CallableStatementCreatorFactory {
 		this.updatableResults = updatableResults;
 	}
 
-	/**
-	 * Specify the NativeJdbcExtractor to use for unwrapping CallableStatements, if any.
-	 */
-	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
-		this.nativeJdbcExtractor = nativeJdbcExtractor;
-	}
-
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
+	public CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> params) {
 		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<>());
 	}
 
@@ -130,8 +121,10 @@ public class CallableStatementCreatorFactory {
 	 */
 	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
+		@Nullable
 		private ParameterMapper inParameterMapper;
 
+		@Nullable
 		private Map<String, ?> inParameters;
 
 		/**
@@ -172,12 +165,6 @@ public class CallableStatementCreatorFactory {
 						updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
-			// Determine CallabeStatement to pass to custom types.
-			CallableStatement csToUse = cs;
-			if (nativeJdbcExtractor != null) {
-				csToUse = nativeJdbcExtractor.getNativeCallableStatement(cs);
-			}
-
 			int sqlColIndx = 1;
 			for (SqlParameter declaredParam : declaredParameters) {
 				if (!declaredParam.isResultsParameter()) {
@@ -200,7 +187,7 @@ public class CallableStatementCreatorFactory {
 								}
 							}
 							if (declaredParam.isInputValueProvided()) {
-								StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParam, inValue);
+								StatementCreatorUtils.setParameterValue(cs, sqlColIndx, declaredParam, inValue);
 							}
 						}
 					}
@@ -210,7 +197,7 @@ public class CallableStatementCreatorFactory {
 							throw new InvalidDataAccessApiUsageException(
 									"Required input parameter '" + declaredParam.getName() + "' is missing");
 						}
-						StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParam, inValue);
+						StatementCreatorUtils.setParameterValue(cs, sqlColIndx, declaredParam, inValue);
 					}
 					sqlColIndx++;
 				}
@@ -233,10 +220,7 @@ public class CallableStatementCreatorFactory {
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql=[");
-			sb.append(callString).append("]; parameters=").append(this.inParameters);
-			return sb.toString();
+			return "CallableStatementCreator: sql=[" + callString + "]; parameters=" + this.inParameters;
 		}
 	}
 

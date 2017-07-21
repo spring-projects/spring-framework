@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,14 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -86,7 +87,7 @@ public class ResolvableTypeTests {
 		assertThat(none.getGenerics().length, equalTo(0));
 		assertThat(none.getInterfaces().length, equalTo(0));
 		assertThat(none.getSuperType(), equalTo(ResolvableType.NONE));
-		assertThat(none.getType(), nullValue());
+		assertThat(none.getType(), equalTo(ResolvableType.EmptyType.INSTANCE));
 		assertThat(none.hasGenerics(), equalTo(false));
 		assertThat(none.isArray(), equalTo(false));
 		assertThat(none.resolve(), nullValue());
@@ -855,7 +856,7 @@ public class ResolvableTypeTests {
 		VariableResolver variableResolver = mock(VariableResolver.class);
 		given(variableResolver.getSource()).willReturn(this);
 		ResolvableType longType = ResolvableType.forClass(Long.class);
-		given(variableResolver.resolveVariable((TypeVariable<?>) anyObject())).willReturn(longType);
+		given(variableResolver.resolveVariable(any())).willReturn(longType);
 
 		ResolvableType variable = ResolvableType.forType(
 				Fields.class.getField("typeVariableType").getGenericType(), variableResolver);

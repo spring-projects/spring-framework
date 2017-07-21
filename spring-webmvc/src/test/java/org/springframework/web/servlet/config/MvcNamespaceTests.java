@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockRequestDispatcher;
@@ -83,9 +84,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
@@ -142,9 +141,16 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests loading actual MVC namespace configuration.
@@ -159,7 +165,9 @@ import static org.junit.Assert.*;
  */
 public class MvcNamespaceTests {
 
-	public static final String VIEWCONTROLLER_BEAN_NAME = "org.springframework.web.servlet.config.viewControllerHandlerMapping";
+	public static final String VIEWCONTROLLER_BEAN_NAME =
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+
 
 	private GenericWebApplicationContext appContext;
 
@@ -197,7 +205,7 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -697,7 +705,8 @@ public class MvcNamespaceTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
-		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(MediaType.valueOf("application/rss+xml")),
+				manager.resolveMediaTypes(webRequest));
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
@@ -882,7 +891,7 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1800), config.getMaxAge());
+			assertEquals(Long.valueOf(1800), config.getMaxAge());
 		}
 	}
 
@@ -905,14 +914,14 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
 			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
 			assertFalse(config.getAllowCredentials());
-			assertEquals(new Long(123), config.getMaxAge());
+			assertEquals(Long.valueOf(123), config.getMaxAge());
 			config = configs.get("/resources/**");
 			assertArrayEquals(new String[]{"http://domain1.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1800), config.getMaxAge());
+			assertEquals(Long.valueOf(1800), config.getMaxAge());
 		}
 	}
 
@@ -928,21 +937,21 @@ public class MvcNamespaceTests {
 
 
 	@DateTimeFormat(iso = ISO.DATE)
-	@Target({ElementType.PARAMETER})
+	@Target(ElementType.PARAMETER)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IsoDate {
 	}
 
 
 	@NumberFormat(style = NumberFormat.Style.PERCENT)
-	@Target({ElementType.PARAMETER})
+	@Target(ElementType.PARAMETER)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface PercentNumber {
 	}
 
 
 	@Validated(MyGroup.class)
-	@Target({ElementType.PARAMETER})
+	@Target(ElementType.PARAMETER)
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyValid {
 	}
@@ -961,6 +970,7 @@ public class MvcNamespaceTests {
 		public void testBind(@RequestParam @IsoDate Date date,
 				@RequestParam(required = false) @PercentNumber Double percent,
 				@MyValid TestBean bean, BindingResult result) {
+
 			this.date = date;
 			this.percent = percent;
 			this.recordedValidationError = (result.getErrorCount() == 1);
@@ -978,7 +988,7 @@ public class MvcNamespaceTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 			this.validatorInvoked = true;
 		}
 	}
@@ -1025,11 +1035,11 @@ public class MvcNamespaceTests {
 	}
 
 
-	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+	public static class TestCallableProcessingInterceptor implements CallableProcessingInterceptor {
 	}
 
 
-	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
+	public static class TestDeferredResultProcessingInterceptor implements DeferredResultProcessingInterceptor {
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -56,7 +57,7 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
@@ -65,6 +66,7 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 		}
 
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
 		if (returnValue instanceof ResponseEntity) {
@@ -80,9 +82,10 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 		}
 
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
+		Assert.state(request != null, "No ServletRequest");
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
-		Assert.isInstanceOf(StreamingResponseBody.class, returnValue);
+		Assert.isInstanceOf(StreamingResponseBody.class, returnValue, "StreamingResponseBody expected");
 		StreamingResponseBody streamingBody = (StreamingResponseBody) returnValue;
 
 		Callable<Void> callable = new StreamingResponseBodyTask(outputMessage.getBody(), streamingBody);

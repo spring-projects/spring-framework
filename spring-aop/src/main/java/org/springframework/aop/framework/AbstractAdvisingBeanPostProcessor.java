@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link BeanPostProcessor} implementations that apply a
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 @SuppressWarnings("serial")
 public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSupport implements BeanPostProcessor {
 
+	@Nullable
 	protected Advisor advisor;
 
 	protected boolean beforeExistingAdvisors = false;
@@ -61,7 +63,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof AopInfrastructureBean) {
+		if (bean instanceof AopInfrastructureBean || this.advisor == null) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
@@ -124,6 +126,9 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		Boolean eligible = this.eligibleBeans.get(targetClass);
 		if (eligible != null) {
 			return eligible;
+		}
+		if (this.advisor == null) {
+			return false;
 		}
 		eligible = AopUtils.canApply(this.advisor, targetClass);
 		this.eligibleBeans.put(targetClass, eligible);

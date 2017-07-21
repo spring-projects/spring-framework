@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,6 +70,7 @@ import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
 public class XStreamMarshallerTests {
 
@@ -350,25 +352,20 @@ public class XStreamMarshallerTests {
 	private static void assertXpathExists(String xPathExpression, String inXMLString){
 		Source source = Input.fromString(inXMLString).build();
 		Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(xPathExpression, source);
-		assertNotNull(nodes);
-		int count = 0;
-
-		for (Node node : nodes){
-			count++;
-		}
-		assertTrue("Expecting to find matches for Xpath " + xPathExpression, count > 0);
+		assertTrue("Expecting to find matches for Xpath " + xPathExpression, count(nodes) > 0);
 	}
-
 
 	private static void assertXpathNotExists(String xPathExpression, String inXMLString){
 		Source source = Input.fromString(inXMLString).build();
 		Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(xPathExpression, source);
-		assertNotNull(nodes);
-		int count = 0;
-
-		for (Node node : nodes){
-			count++;
-		}
-		assertEquals("Should be zero matches for Xpath " + xPathExpression, 0, count);
+		assertEquals("Should be zero matches for Xpath " + xPathExpression, 0, count(nodes));
 	}
+
+	private static int count(Iterable<Node> nodes) {
+		assertNotNull(nodes);
+		AtomicInteger count = new AtomicInteger();
+		nodes.forEach(n -> count.incrementAndGet());
+		return count.get();
+	}
+
 }

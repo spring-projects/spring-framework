@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -77,12 +78,15 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
 
 
+	@Nullable
 	private String jsonPrefix;
 
+	@Nullable
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
 
+	@Nullable
 	private Set<String> jsonpParameterNames = new LinkedHashSet<>(Arrays.asList("jsonp", "callback"));
 
 
@@ -138,13 +142,14 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Set the attributes in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
 	 */
-	public void setModelKeys(Set<String> modelKeys) {
+	public void setModelKeys(@Nullable Set<String> modelKeys) {
 		this.modelKeys = modelKeys;
 	}
 
 	/**
 	 * Return the attributes in the model that should be rendered by this view.
 	 */
+	@Nullable
 	public final Set<String> getModelKeys() {
 		return this.modelKeys;
 	}
@@ -173,6 +178,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		this.jsonpParameterNames = jsonpParameterNames;
 	}
 
+	@Nullable
 	private String getJsonpParameterValue(HttpServletRequest request) {
 		if (this.jsonpParameterNames != null) {
 			for (String name : this.jsonpParameterNames) {
@@ -215,13 +221,13 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<>(model.size());
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (!(entry.getValue() instanceof BindingResult) && modelKeys.contains(entry.getKey()) &&
-					!entry.getKey().equals(JsonView.class.getName()) &&
-					!entry.getKey().equals(FilterProvider.class.getName())) {
-				result.put(entry.getKey(), entry.getValue());
+		model.forEach((clazz, value) -> {
+			if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&
+					!clazz.equals(JsonView.class.getName()) &&
+					!clazz.equals(FilterProvider.class.getName())) {
+				result.put(clazz, value);
 			}
-		}
+		});
 		return (this.extractValueFromSingleKeyModel && result.size() == 1 ? result.values().iterator().next() : result);
 	}
 

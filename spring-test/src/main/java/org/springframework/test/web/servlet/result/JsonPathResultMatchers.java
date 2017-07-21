@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringStartsWith;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -31,6 +32,7 @@ import org.springframework.util.StringUtils;
 /**
  * Factory for assertions on the response content using
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
+ *
  * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#jsonPath(String, Matcher)} or
  * {@link MockMvcResultMatchers#jsonPath(String, Object...)}.
@@ -45,6 +47,7 @@ public class JsonPathResultMatchers {
 
 	private final JsonPathExpectationsHelper jsonPathHelper;
 
+	@Nullable
 	private String prefix;
 
 
@@ -79,12 +82,9 @@ public class JsonPathResultMatchers {
 	 * assert the resulting value with the given Hamcrest {@link Matcher}.
 	 */
 	public <T> ResultMatcher value(final Matcher<T> matcher) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValue(content, matcher);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValue(content, matcher);
 		};
 	}
 
@@ -93,12 +93,7 @@ public class JsonPathResultMatchers {
 	 * assert that the result is equal to the supplied value.
 	 */
 	public ResultMatcher value(final Object expectedValue) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				jsonPathHelper.assertValue(getContent(result), expectedValue);
-			}
-		};
+		return result -> jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 
 	/**
@@ -109,12 +104,9 @@ public class JsonPathResultMatchers {
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher exists() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.exists(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.exists(content);
 		};
 	}
 
@@ -126,12 +118,9 @@ public class JsonPathResultMatchers {
 	 * <em>empty</em>.
 	 */
 	public ResultMatcher doesNotExist() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.doesNotExist(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.doesNotExist(content);
 		};
 	}
 
@@ -146,12 +135,9 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isEmpty() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsEmpty(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsEmpty(content);
 		};
 	}
 
@@ -166,12 +152,9 @@ public class JsonPathResultMatchers {
 	 * @see #doesNotExist()
 	 */
 	public ResultMatcher isNotEmpty() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsNotEmpty(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsNotEmpty(content);
 		};
 	}
 
@@ -181,12 +164,9 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isString() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsString(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsString(content);
 		};
 	}
 
@@ -196,12 +176,9 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isBoolean() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsBoolean(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsBoolean(content);
 		};
 	}
 
@@ -211,12 +188,9 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isNumber() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsNumber(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsNumber(content);
 		};
 	}
 
@@ -225,12 +199,9 @@ public class JsonPathResultMatchers {
 	 * assert that the result is an array.
 	 */
 	public ResultMatcher isArray() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsArray(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsArray(content);
 		};
 	}
 
@@ -240,12 +211,9 @@ public class JsonPathResultMatchers {
 	 * @since 4.2.1
 	 */
 	public ResultMatcher isMap() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) throws Exception {
-				String content = getContent(result);
-				jsonPathHelper.assertValueIsMap(content);
-			}
+		return result -> {
+			String content = getContent(result);
+			jsonPathHelper.assertValueIsMap(content);
 		};
 	}
 

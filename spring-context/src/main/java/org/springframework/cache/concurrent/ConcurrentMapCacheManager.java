@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.serializer.support.SerializationDelegate;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link CacheManager} implementation that lazily builds {@link ConcurrentMapCache}
@@ -55,6 +56,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 	private boolean storeByValue = false;
 
+	@Nullable
 	private SerializationDelegate serialization;
 
 
@@ -81,7 +83,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	 * <p>Calling this with a {@code null} collection argument resets the
 	 * mode to 'dynamic', allowing for further creation of caches again.
 	 */
-	public void setCacheNames(Collection<String> cacheNames) {
+	public void setCacheNames(@Nullable Collection<String> cacheNames) {
 		if (cacheNames != null) {
 			for (String name : cacheNames) {
 				this.cacheMap.put(name, createConcurrentMapCache(name));

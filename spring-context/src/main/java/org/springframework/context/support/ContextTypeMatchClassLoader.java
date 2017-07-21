@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.SmartClassLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -59,7 +60,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 	private final Map<String, byte[]> bytesCache = new ConcurrentHashMap<>(256);
 
 
-	public ContextTypeMatchClassLoader(ClassLoader parent) {
+	public ContextTypeMatchClassLoader(@Nullable ClassLoader parent) {
 		super(parent);
 	}
 

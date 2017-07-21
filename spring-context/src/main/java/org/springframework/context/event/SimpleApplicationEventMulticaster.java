@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.context.event;
 
 import java.util.concurrent.Executor;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -46,8 +48,10 @@ import org.springframework.util.ErrorHandler;
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private ErrorHandler errorHandler;
 
 
@@ -77,13 +81,14 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
-	public void setTaskExecutor(Executor taskExecutor) {
+	public void setTaskExecutor(@Nullable Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
 	 * Return the current task executor for this multicaster.
 	 */
+	@Nullable
 	protected Executor getTaskExecutor() {
 		return this.taskExecutor;
 	}
@@ -103,7 +108,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * (e.g. {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
-	public void setErrorHandler(ErrorHandler errorHandler) {
+	public void setErrorHandler(@Nullable ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
 
@@ -111,6 +116,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * Return the current error handler for this multicaster.
 	 * @since 4.1
 	 */
+	@Nullable
 	protected ErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
@@ -122,17 +128,12 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	}
 
 	@Override
-	public void multicastEvent(final ApplicationEvent event, ResolvableType eventType) {
+	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
 		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			Executor executor = getTaskExecutor();
 			if (executor != null) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						invokeListener(listener, event);
-					}
-				});
+				executor.execute(() -> invokeListener(listener, event));
 			}
 			else {
 				invokeListener(listener, event);
@@ -166,8 +167,17 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				listener.onApplicationEvent(event);
 			}
 			catch (ClassCastException ex) {
-				// Possibly a lambda-defined listener which we could not resolve the generic event type for
-				LogFactory.getLog(getClass()).debug("Non-matching event type for listener: " + listener, ex);
+				String msg = ex.getMessage();
+				if (msg == null || msg.startsWith(event.getClass().getName())) {
+					// Possibly a lambda-defined listener which we could not resolve the generic event type for
+					Log logger = LogFactory.getLog(getClass());
+					if (logger.isDebugEnabled()) {
+						logger.debug("Non-matching event type for listener: " + listener, ex);
+					}
+				}
+				else {
+					throw ex;
+				}
 			}
 		}
 	}

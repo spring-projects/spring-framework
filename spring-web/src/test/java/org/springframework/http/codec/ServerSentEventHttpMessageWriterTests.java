@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,142 +18,130 @@ package org.springframework.http.codec;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
+ * Unit tests for {@link ServerSentEventHttpMessageWriter}.
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
 
-	private ServerSentEventHttpMessageWriter messageWriter = new ServerSentEventHttpMessageWriter(
-			Collections.singletonList(new Jackson2JsonEncoder()));
+	public static final Map<String, Object> HINTS = Collections.emptyMap();
+
+	private ServerSentEventHttpMessageWriter messageWriter =
+			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
 
 
 	@Test
-	public void nullMimeType() {
-		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
+	public void canWrite() {
+
+		assertTrue(this.messageWriter.canWrite(forClass(Object.class), null));
+		assertFalse(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar")));
+
+		assertTrue(this.messageWriter.canWrite(null, MediaType.TEXT_EVENT_STREAM));
+		assertTrue(this.messageWriter.canWrite(forClass(ServerSentEvent.class), new MediaType("foo", "bar")));
+
+		// SPR-15464
+		assertTrue(this.messageWriter.canWrite(ResolvableType.NONE, MediaType.TEXT_EVENT_STREAM));
+		assertFalse(this.messageWriter.canWrite(ResolvableType.NONE, new MediaType("foo", "bar")));
 	}
 
 	@Test
-	public void unsupportedMimeType() {
-		assertFalse(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("foo", "bar")));
-	}
+	public void writeServerSentEvent() {
 
-	@Test
-	public void supportedMimeType() {
-		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("text", "event-stream")));
-	}
+		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
+				.comment("bla\nbla bla\nbla bla bla").retry(Duration.ofMillis(123L)).build();
 
-	@Test
-	public void encodeServerSentEvent() {
-		ServerSentEvent<String>
-				event = ServerSentEvent.<String>builder().data("bar").id("c42").event("foo").comment("bla\nbla bla\nbla bla bla")
-				.retry(Duration.ofMillis(123L)).build();
-		Mono<ServerSentEvent<String>> source = Mono.just(event);
+		Mono<ServerSentEvent> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+		testWrite(source, outputMessage, ServerSentEvent.class);
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		TestSubscriber.subscribe(result).
-				assertNoError().
-				assertValuesWith(publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError().assertValuesWith(
-							stringConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
-									":bla\n:bla bla\n:bla bla bla\n" +
-									"data:bar\n"),
-							stringConsumer("\n"));
-
-				});
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
-	public void encodeString() {
+	public void writeString() {
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+		testWrite(source, outputMessage, String.class);
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		TestSubscriber.subscribe(result).
-				assertNoError().
-				assertValuesWith(publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:foo\n"),
-									stringConsumer("\n"));
-
-				}, publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:bar\n"),
-									stringConsumer("\n"));
-
-				});
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:foo\n\ndata:bar\n\n")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
-	public void encodeMultiLineString() {
+	public void writeMultiLineString() {
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+		testWrite(source, outputMessage, String.class);
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		TestSubscriber.subscribe(result).
-				assertNoError().
-				assertValuesWith(publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:foo\ndata:bar\n"),
-									stringConsumer("\n"));
-
-				}, publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:foo\ndata:baz\n"),
-									stringConsumer("\n"));
-
-				});
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:foo\ndata:bar\n\ndata:foo\ndata:baz\n\n")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
-	public void encodePojo() {
-		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"),
-				new Pojo("foofoofoo", "barbarbar"));
+	public void writePojo() {
+		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+		testWrite(source, outputMessage, Pojo.class);
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		TestSubscriber.subscribe(result).
-				assertNoError().
-				assertValuesWith(publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:"), stringConsumer(
-									"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
-									stringConsumer("\n"), stringConsumer("\n"));
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n\n" +
+						"data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n\n")
+				.expectComplete()
+				.verify();
+	}
 
-				}, publisher -> {
-					TestSubscriber.subscribe(publisher).assertNoError()
-							.assertValuesWith(stringConsumer("data:"), stringConsumer(
-									"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
-									stringConsumer("\n"), stringConsumer("\n"));
+	@Test  // SPR-14899
+	public void writePojoWithPrettyPrint() {
 
-				});
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
+		this.messageWriter = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder(mapper));
+
+		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
+		testWrite(source, outputMessage, Pojo.class);
+
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:{\n" +
+						"data:  \"foo\" : \"foofoo\",\n" +
+						"data:  \"bar\" : \"barbar\"\n" + "data:}\n\n" +
+						"data:{\n" +
+						"data:  \"foo\" : \"foofoofoo\",\n" +
+						"data:  \"bar\" : \"barbarbar\"\n" + "data:}\n\n")
+				.expectComplete()
+				.verify();
+	}
+
+	private <T> void testWrite(Publisher<T> source, MockServerHttpResponse outputMessage, Class<T> clazz) {
+		this.messageWriter.write(source, forClass(clazz),
+				MediaType.TEXT_EVENT_STREAM, outputMessage, HINTS).block(Duration.ofMillis(5000));
 	}
 
 }

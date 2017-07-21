@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -69,7 +70,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<>(1024);
+	private final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<>(1024);
 
 
 	/**
@@ -81,7 +82,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * is not transactional
 	 */
 	@Override
-	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.attributeCache.get(cacheKey);
@@ -124,7 +129,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @param targetClass the target class (may be {@code null})
 	 * @return the cache key (never {@code null})
 	 */
-	protected Object getCacheKey(Method method, Class<?> targetClass) {
+	protected Object getCacheKey(Method method, @Nullable Class<?> targetClass) {
 		return new MethodClassKey(method, targetClass);
 	}
 
@@ -135,14 +140,15 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @since 4.1.8
 	 * @see #getTransactionAttribute
 	 */
-	protected TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
+	@Nullable
+	protected TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
 
 		// Ignore CGLIB subclasses - introspect the actual user class.
-		Class<?> userClass = ClassUtils.getUserClass(targetClass);
+		Class<?> userClass = (targetClass != null ? ClassUtils.getUserClass(targetClass) : null);
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = ClassUtils.getMostSpecificMethod(method, userClass);
@@ -185,6 +191,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return all transaction attribute associated with this method
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract TransactionAttribute findTransactionAttribute(Method method);
 
 	/**
@@ -194,6 +201,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return all transaction attribute associated with this class
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract TransactionAttribute findTransactionAttribute(Class<?> clazz);
 
 

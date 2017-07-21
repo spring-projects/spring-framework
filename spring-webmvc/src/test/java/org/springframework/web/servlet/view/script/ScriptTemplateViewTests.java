@@ -166,17 +166,16 @@ public class ScriptTemplateViewTests {
 
 	@Test
 	public void nonInvocableScriptEngine() throws Exception {
-		this.expectedException.expect(IllegalArgumentException.class);
 		this.view.setEngine(mock(ScriptEngine.class));
-		this.expectedException.expectMessage(contains("instance"));
+		this.view.setApplicationContext(this.wac);
 	}
 
 	@Test
-	public void noRenderFunctionDefined() {
-		this.view.setEngine(mock(InvocableScriptEngine.class));
+	public void nonInvocableScriptEngineWithRenderFunction() throws Exception {
+		this.view.setEngine(mock(ScriptEngine.class));
+		this.view.setRenderFunction("render");
 		this.expectedException.expect(IllegalArgumentException.class);
 		this.view.setApplicationContext(this.wac);
-		this.expectedException.expectMessage(contains("renderFunction"));
 	}
 
 	@Test

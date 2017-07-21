@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares that a field should be formatted as a date time.
+ * Declares that a field or method parameter should be formatted as a date or time.
  *
  * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
- * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code java.long.Long},
+ * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code java.lang.Long},
  * Joda-Time value types; and as of Spring 4 and JDK 8, to JSR-310 <code>java.time</code> types too.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to be the style pattern code.
@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * A date or time may be omitted by specifying the style character '-'.
  *
  * <p>For ISO-based formatting, set the {@link #iso} attribute to be the desired {@link ISO} format,
- * such as {@link ISO#DATE}. For custom formatting, set the {@link #pattern()} attribute to be the
+ * such as {@link ISO#DATE}. For custom formatting, set the {@link #pattern} attribute to be the
  * DateTime pattern, such as {@code yyyy/MM/dd hh:mm:ss a}.
  *
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
@@ -64,7 +64,7 @@ public @interface DateTimeFormat {
 
 	/**
 	 * The ISO pattern to use to format the field.
-	 * The possible ISO patterns are defined in the {@link ISO} enum.
+	 * <p>The possible ISO patterns are defined in the {@link ISO} enum.
 	 * <p>Defaults to {@link ISO#NONE}, indicating this attribute should be ignored.
 	 * Set this attribute when you wish to format your field in accordance with an ISO format.
 	 */

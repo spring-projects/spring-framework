@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,43 +58,20 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 
 /**
- * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
- * handling within {@link Configuration} class definitions.
+ * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and
+ * error handling within {@link Configuration} class definitions.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
 public class ConfigurationClassProcessingTests {
-
-	/**
-	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition} for
-	 * each of the given {@link Configuration} <var>configClasses</var>, and then
-	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
-	 * When complete, the factory is ready to service requests for any {@link Bean} methods
-	 * declared by <var>configClasses</var>.
-	 */
-	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
-		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		for (Class<?> configClass : configClasses) {
-			String configBeanName = configClass.getName();
-			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
-		}
-		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
-		ccpp.postProcessBeanDefinitionRegistry(factory);
-		ccpp.postProcessBeanFactory(factory);
-		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
-		rapp.setBeanFactory(factory);
-		factory.addBeanPostProcessor(rapp);
-		factory.freezeConfiguration();
-		return factory;
-	}
-
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -230,40 +207,74 @@ public class ConfigurationClassProcessingTests {
 
 	@Test
 	public void configurationWithAdaptivePrototypes() {
-		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
-		factory.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
-		factory.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		ctx.refresh();
 
-		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		AdaptiveInjectionPoints adaptive = ctx.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 
-		adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		adaptive = ctx.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
 		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
-		factory.close();
+		ctx.close();
 	}
 
 	@Test
 	public void configurationWithPostProcessor() {
-		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
-		factory.register(ConfigWithPostProcessor.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithPostProcessor.class);
 		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
-		factory.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
-		factory.refresh();
+		ctx.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
+		ctx.refresh();
 
-		TestBean foo = factory.getBean("foo", TestBean.class);
-		ITestBean bar = factory.getBean("bar", ITestBean.class);
-		ITestBean baz = factory.getBean("baz", ITestBean.class);
+		TestBean foo = ctx.getBean("foo", TestBean.class);
+		ITestBean bar = ctx.getBean("bar", ITestBean.class);
+		ITestBean baz = ctx.getBean("baz", ITestBean.class);
 
 		assertEquals("foo-processed-myValue", foo.getName());
 		assertEquals("bar-processed-myValue", bar.getName());
 		assertEquals("baz-processed-myValue", baz.getName());
 
-		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
+		SpousyTestBean listener = ctx.getBean("listenerTestBean", SpousyTestBean.class);
 		assertTrue(listener.refreshed);
-		factory.close();
+		ctx.close();
+	}
+
+	@Test
+	public void configurationWithFunctionalRegistration() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithFunctionalRegistration.class);
+		ctx.refresh();
+
+		assertSame(ctx.getBean("spouse"), ctx.getBean(TestBean.class).getSpouse());
+		assertEquals("functional", ctx.getBean(NestedTestBean.class).getCompany());
+	}
+
+
+	/**
+	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition}
+	 * for each of the given {@link Configuration} {@code configClasses}, and then
+	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
+	 * When complete, the factory is ready to service requests for any {@link Bean} methods
+	 * declared by {@code configClasses}.
+	 */
+	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		for (Class<?> configClass : configClasses) {
+			String configBeanName = configClass.getName();
+			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
+		}
+		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
+		ccpp.postProcessBeanDefinitionRegistry(factory);
+		ccpp.postProcessBeanFactory(factory);
+		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
+		rapp.setBeanFactory(factory);
+		factory.addBeanPostProcessor(rapp);
+		factory.freezeConfiguration();
+		return factory;
 	}
 
 
@@ -419,7 +430,6 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	static class ConfigWithPostProcessor extends ConfigWithPrototypeBean {
 
 		@Value("${myProp}")
@@ -493,6 +503,26 @@ public class ConfigurationClassProcessingTests {
 		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			this.refreshed = true;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithFunctionalRegistration {
+
+		@Autowired
+		void register(GenericApplicationContext ctx) {
+			ctx.registerBean("spouse", TestBean.class,
+					() -> new TestBean("functional"));
+			Supplier<TestBean> testBeanSupplier = () -> new TestBean(ctx.getBean("spouse", TestBean.class));
+			ctx.registerBean(TestBean.class,
+					testBeanSupplier,
+					bd -> bd.setPrimary(true));
+		}
+
+		@Bean
+		public NestedTestBean nestedTestBean(TestBean testBean) {
+			return new NestedTestBean(testBean.getSpouse().getName());
 		}
 	}
 

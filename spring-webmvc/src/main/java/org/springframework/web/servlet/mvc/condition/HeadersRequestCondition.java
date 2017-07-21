@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
 
@@ -63,14 +64,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 	private static Collection<HeaderExpression> parseExpressions(String... headers) {
 		Set<HeaderExpression> expressions = new LinkedHashSet<>();
-		if (headers != null) {
-			for (String header : headers) {
-				HeaderExpression expr = new HeaderExpression(header);
-				if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
-					continue;
-				}
-				expressions.add(expr);
+		for (String header : headers) {
+			HeaderExpression expr = new HeaderExpression(header);
+			if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
+				continue;
 			}
+			expressions.add(expr);
 		}
 		return expressions;
 	}
@@ -158,12 +157,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return request.getHeader(name) != null;
+			return (request.getHeader(this.name) != null);
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getHeader(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getHeader(this.name));
 		}
 	}
 

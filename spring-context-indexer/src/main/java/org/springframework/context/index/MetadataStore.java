@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,11 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-import org.springframework.context.index.metadata.PropertiesMarshaller;
-import org.springframework.context.index.metadata.CandidateComponentsMetadata;
-
 /**
  * Store {@link CandidateComponentsMetadata} on the filesystem.
  *
  * @author Stephane Nicoll
+ * @since 5.0
  */
 class MetadataStore {
 
@@ -37,15 +35,18 @@ class MetadataStore {
 
 	private final ProcessingEnvironment environment;
 
+
 	public MetadataStore(ProcessingEnvironment environment) {
 		this.environment = environment;
 	}
+
 
 	public CandidateComponentsMetadata readMetadata() {
 		try {
 			return readMetadata(getMetadataResource().openInputStream());
 		}
 		catch (IOException ex) {
+			// Failed to read metadata -> ignore.
 			return null;
 		}
 	}
@@ -53,17 +54,15 @@ class MetadataStore {
 	public void writeMetadata(CandidateComponentsMetadata metadata) throws IOException {
 		if (!metadata.getItems().isEmpty()) {
 			try (OutputStream outputStream = createMetadataResource().openOutputStream()) {
-				new PropertiesMarshaller().write(metadata, outputStream);
+				PropertiesMarshaller.write(metadata, outputStream);
 			}
 		}
 	}
 
+
 	private CandidateComponentsMetadata readMetadata(InputStream in) throws IOException {
 		try {
-			return new PropertiesMarshaller().read(in);
-		}
-		catch (IOException ex) {
-			return null;
+			return PropertiesMarshaller.read(in);
 		}
 		finally {
 			in.close();
@@ -71,13 +70,11 @@ class MetadataStore {
 	}
 
 	private FileObject getMetadataResource() throws IOException {
-		return this.environment.getFiler()
-				.getResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
+		return this.environment.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 	}
 
 	private FileObject createMetadataResource() throws IOException {
-		return this.environment.getFiler()
-				.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
+		return this.environment.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 	}
 
 }

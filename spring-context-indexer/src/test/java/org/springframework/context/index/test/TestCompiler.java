@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,12 @@ public class TestCompiler {
 
 	private final File outputLocation;
 
+
 	public TestCompiler(TemporaryFolder temporaryFolder) throws IOException {
 		this(ToolProvider.getSystemJavaCompiler(), temporaryFolder);
 	}
 
-	public TestCompiler(JavaCompiler compiler, TemporaryFolder temporaryFolder)
-			throws IOException {
+	public TestCompiler(JavaCompiler compiler, TemporaryFolder temporaryFolder) throws IOException {
 		this.compiler = compiler;
 		this.fileManager = compiler.getStandardFileManager(null, null, null);
 		this.outputLocation = temporaryFolder.newFolder();
@@ -59,6 +59,7 @@ public class TestCompiler {
 		this.fileManager.setLocation(StandardLocation.CLASS_OUTPUT, temp);
 		this.fileManager.setLocation(StandardLocation.SOURCE_OUTPUT, temp);
 	}
+
 
 	public TestCompilationTask getTask(Class<?>... types) {
 		List<String> names = Arrays.stream(types).map(Class::getName)
@@ -100,6 +101,7 @@ public class TestCompiler {
 	private File getSourceFolder() {
 		return ORIGINAL_SOURCE_FOLDER;
 	}
+
 
 	/**
 	 * A compilation task.

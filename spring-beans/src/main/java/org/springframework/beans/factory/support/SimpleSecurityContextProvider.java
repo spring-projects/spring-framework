@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple {@link SecurityContextProvider} implementation.
  *
@@ -27,6 +29,7 @@ import java.security.AccessController;
  */
 public class SimpleSecurityContextProvider implements SecurityContextProvider {
 
+	@Nullable
 	private final AccessControlContext acc;
 
 
@@ -46,7 +49,7 @@ public class SimpleSecurityContextProvider implements SecurityContextProvider {
 	 * @param acc access control context (can be {@code null})
 	 * @see AccessController#getContext()
 	 */
-	public SimpleSecurityContextProvider(AccessControlContext acc) {
+	public SimpleSecurityContextProvider(@Nullable AccessControlContext acc) {
 		this.acc = acc;
 	}
 

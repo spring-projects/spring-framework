@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
-import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
@@ -33,10 +33,11 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Undertow {@link HttpServerExchange}.
@@ -51,25 +52,20 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final RequestBodyPublisher body;
 
-	public UndertowServerHttpRequest(HttpServerExchange exchange,
-			DataBufferFactory dataBufferFactory) {
 
-		super(initUri(exchange), initHeaders(exchange));
+	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+		super(initUri(exchange), "", initHeaders(exchange));
 		this.exchange = exchange;
-		this.body = new RequestBodyPublisher(exchange, dataBufferFactory);
-		this.body.registerListener();
+		this.body = new RequestBodyPublisher(exchange, bufferFactory);
+		this.body.registerListeners(exchange);
 	}
 
 	private static URI initUri(HttpServerExchange exchange) {
-		Assert.notNull(exchange, "'exchange' is required.");
-		try {
-			return new URI(exchange.getRequestScheme(), null,
-					exchange.getHostName(), exchange.getHostPort(),
-					exchange.getRequestURI(), exchange.getQueryString(), null);
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-		}
+		Assert.notNull(exchange, "HttpServerExchange is required.");
+		String requestURL = exchange.getRequestURL();
+		String query = exchange.getQueryString();
+		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
+		return URI.create(requestUriAndQuery);
 	}
 
 	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
@@ -86,8 +82,8 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.getUndertowExchange().getRequestMethod().toString());
+	public String getMethodValue() {
+		return this.getUndertowExchange().getRequestMethod().toString();
 	}
 
 	@Override
@@ -102,54 +98,65 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return this.exchange.getSourceAddress();
+	}
+
+	@Override
 	public Flux<DataBuffer> getBody() {
 		return Flux.from(this.body);
 	}
 
-	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
-		private final ChannelListener<StreamSourceChannel> readListener =
-				new ReadListener();
+	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
-		private final ChannelListener<StreamSourceChannel> closeListener =
-				new CloseListener();
+		private final StreamSourceChannel channel;
 
-		private final StreamSourceChannel requestChannel;
+		private final DataBufferFactory bufferFactory;
 
-		private final DataBufferFactory dataBufferFactory;
+		private final ByteBufferPool byteBufferPool;
 
-		private final PooledByteBuffer pooledByteBuffer;
+		@Nullable
+		private PooledByteBuffer pooledByteBuffer;
 
-		public RequestBodyPublisher(HttpServerExchange exchange,
-				DataBufferFactory dataBufferFactory) {
-			this.requestChannel = exchange.getRequestChannel();
-			this.pooledByteBuffer =
-					exchange.getConnection().getByteBufferPool().allocate();
-			this.dataBufferFactory = dataBufferFactory;
+		public RequestBodyPublisher(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+			this.channel = exchange.getRequestChannel();
+			this.bufferFactory = bufferFactory;
+			this.byteBufferPool = exchange.getConnection().getByteBufferPool();
 		}
 
-		private void registerListener() {
-			this.requestChannel.getReadSetter().set(this.readListener);
-			this.requestChannel.getCloseSetter().set(this.closeListener);
-			this.requestChannel.resumeReads();
+		private void registerListeners(HttpServerExchange exchange) {
+			exchange.addExchangeCompleteListener((ex, next) -> {
+				onAllDataRead();
+				next.proceed();
+			});
+			this.channel.getReadSetter().set(c -> onDataAvailable());
+			this.channel.getCloseSetter().set(c -> onAllDataRead());
+			this.channel.resumeReads();
 		}
 
 		@Override
 		protected void checkOnDataAvailable() {
+			// TODO: The onDataAvailable() call below can cause a StackOverflowError
+			// since this method is being called from onDataAvailable() itself.
 			onDataAvailable();
 		}
 
 		@Override
 		protected DataBuffer read() throws IOException {
+			if (this.pooledByteBuffer == null) {
+				this.pooledByteBuffer = this.byteBufferPool.allocate();
+			}
 			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
-			int read = this.requestChannel.read(byteBuffer);
+			byteBuffer.clear();
+			int read = this.channel.read(byteBuffer);
 			if (logger.isTraceEnabled()) {
 				logger.trace("read:" + read);
 			}
 
 			if (read > 0) {
 				byteBuffer.flip();
-				return this.dataBufferFactory.wrap(byteBuffer);
+				return this.bufferFactory.wrap(byteBuffer);
 			}
 			else if (read == -1) {
 				onAllDataRead();
@@ -157,20 +164,12 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			return null;
 		}
 
-		private class ReadListener implements ChannelListener<StreamSourceChannel> {
-
-			@Override
-			public void handleEvent(StreamSourceChannel channel) {
-				onDataAvailable();
+		@Override
+		public void onAllDataRead() {
+			if (this.pooledByteBuffer != null && this.pooledByteBuffer.isOpen()) {
+				this.pooledByteBuffer.close();
 			}
-		}
-
-		private class CloseListener implements ChannelListener<StreamSourceChannel> {
-
-			@Override
-			public void handleEvent(StreamSourceChannel channel) {
-				onAllDataRead();
-			}
+			super.onAllDataRead();
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -77,20 +78,27 @@ public class FreeMarkerConfigurationFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Resource configLocation;
 
+	@Nullable
 	private Properties freemarkerSettings;
 
+	@Nullable
 	private Map<String, Object> freemarkerVariables;
 
+	@Nullable
 	private String defaultEncoding;
 
 	private final List<TemplateLoader> templateLoaders = new ArrayList<>();
 
+	@Nullable
 	private List<TemplateLoader> preTemplateLoaders;
 
+	@Nullable
 	private List<TemplateLoader> postTemplateLoaders;
 
+	@Nullable
 	private String[] templateLoaderPaths;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -342,7 +350,7 @@ public class FreeMarkerConfigurationFactory {
 				}
 				return new FileTemplateLoader(file);
 			}
-			catch (IOException ex) {
+			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cannot resolve template loader path [" + templateLoaderPath +
 							"] to [java.io.File]: using SpringTemplateLoader as fallback", ex);
@@ -380,6 +388,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @param templateLoaders the final List of TemplateLoader instances
 	 * @return the aggregate TemplateLoader
 	 */
+	@Nullable
 	protected TemplateLoader getAggregateTemplateLoader(List<TemplateLoader> templateLoaders) {
 		int loaderCount = templateLoaders.size();
 		switch (loaderCount) {

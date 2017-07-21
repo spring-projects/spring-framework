@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -34,7 +36,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -42,6 +47,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
@@ -96,7 +103,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	 * {@code ResponseEntity}.
 	 */
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
-			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
+			@Nullable ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 
 		super(converters, manager, requestResponseBodyAdvice);
 	}
@@ -115,8 +122,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
@@ -136,6 +143,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 	}
 
+	@Nullable
 	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
 		Type parameterType = parameter.getGenericParameterType();
@@ -156,7 +164,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
@@ -179,11 +187,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			}
 		}
 		if (!entityHeaders.isEmpty()) {
-			for (Map.Entry<String, List<String>> entry : entityHeaders.entrySet()) {
-				if (!outputHeaders.containsKey(entry.getKey())) {
-					outputHeaders.put(entry.getKey(), entry.getValue());
+			entityHeaders.forEach((key, value) -> {
+				if (!outputHeaders.containsKey(key)) {
+					outputHeaders.put(key, value);
 				}
-			}
+			});
 		}
 
 		if (responseEntity instanceof ResponseEntity) {
@@ -197,6 +205,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 					return;
 				}
 			}
+			else if (returnStatus / 100 == 3) {
+				String location = outputHeaders.getFirst("location");
+				if (location != null) {
+					saveFlashAttributes(mavContainer, webRequest, location);
+				}
+			}
 		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
@@ -207,24 +221,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private List<String> getVaryRequestHeadersToAdd(HttpHeaders responseHeaders, HttpHeaders entityHeaders) {
-		if (!responseHeaders.containsKey(HttpHeaders.VARY)) {
-			return entityHeaders.getVary();
-		}
 		List<String> entityHeadersVary = entityHeaders.getVary();
-		List<String> result = new ArrayList<>(entityHeadersVary);
-		for (String header : responseHeaders.get(HttpHeaders.VARY)) {
-			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
-				if ("*".equals(existing)) {
-					return Collections.emptyList();
-				}
-				for (String value : entityHeadersVary) {
-					if (value.equalsIgnoreCase(existing)) {
-						result.remove(value);
+		List<String> vary = responseHeaders.get(HttpHeaders.VARY);
+		if (vary != null) {
+			List<String> result = new ArrayList<>(entityHeadersVary);
+			for (String header : vary) {
+				for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+					if ("*".equals(existing)) {
+						return Collections.emptyList();
+					}
+					for (String value : entityHeadersVary) {
+						if (value.equalsIgnoreCase(existing)) {
+							result.remove(value);
+						}
 					}
 				}
 			}
+			return result;
 		}
-		return result;
+		return entityHeadersVary;
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
@@ -241,8 +256,26 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return servletWebRequest.checkNotModified(etag, lastModifiedTimestamp);
 	}
 
+	private void saveFlashAttributes(ModelAndViewContainer mav, NativeWebRequest request, String location) {
+		mav.setRedirectModelScenario(true);
+		ModelMap model = mav.getModel();
+		if (model instanceof RedirectAttributes) {
+			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+			if (!CollectionUtils.isEmpty(flashAttributes)) {
+				HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
+				HttpServletResponse res = request.getNativeResponse(HttpServletResponse.class);
+				if (req != null) {
+					RequestContextUtils.getOutputFlashMap(req).putAll(flashAttributes);
+					if (res != null) {
+						RequestContextUtils.saveOutputFlashMap(location, req, res);
+					}
+				}
+			}
+		}
+	}
+
 	@Override
-	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+	protected Class<?> getReturnValueType(@Nullable Object returnValue, MethodParameter returnType) {
 		if (returnValue != null) {
 			return returnValue.getClass();
 		}

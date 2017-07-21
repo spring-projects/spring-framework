@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other
@@ -52,6 +54,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConnectionFactory connectionFactory;
 
 	private boolean sessionTransacted = false;
@@ -62,7 +65,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Set the ConnectionFactory to use for obtaining JMS {@link Connection Connections}.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+	public void setConnectionFactory(@Nullable ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
@@ -70,8 +73,21 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Return the ConnectionFactory that this accessor uses for obtaining
 	 * JMS {@link Connection Connections}.
 	 */
+	@Nullable
 	public ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
+	}
+
+	/**
+	 * Obtain the ConnectionFactory for actual use.
+	 * @return the ConnectionFactory (never {@code null})
+	 * @throws IllegalStateException in case of no ConnectionFactory set
+	 * @since 5.0
+	 */
+	protected final ConnectionFactory obtainConnectionFactory() {
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		Assert.state(connectionFactory != null, "No ConnectionFactory set");
+		return connectionFactory;
 	}
 
 	/**
@@ -177,7 +193,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
 	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
+		return obtainConnectionFactory().createConnection();
 	}
 
 	/**
