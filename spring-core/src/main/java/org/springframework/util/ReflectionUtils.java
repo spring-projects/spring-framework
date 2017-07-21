@@ -43,6 +43,7 @@ import org.springframework.lang.Nullable;
  * @author Costin Leau
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Med Belamachi
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
@@ -598,23 +599,12 @@ public abstract class ReflectionUtils {
 		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, method -> {
 			boolean knownSignature = false;
-			Method methodBeingOverriddenWithCovariantReturnType = null;
 			for (Method existingMethod : methods) {
 				if (method.getName().equals(existingMethod.getName()) &&
 						Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
-					// Is this a covariant return type situation?
-					if (existingMethod.getReturnType() != method.getReturnType() &&
-							existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
-						methodBeingOverriddenWithCovariantReturnType = existingMethod;
-					}
-					else {
-						knownSignature = true;
-					}
+					knownSignature = true;
 					break;
 				}
-			}
-			if (methodBeingOverriddenWithCovariantReturnType != null) {
-				methods.remove(methodBeingOverriddenWithCovariantReturnType);
 			}
 			if (!knownSignature && !isCglibRenamedMethod(method)) {
 				methods.add(method);
