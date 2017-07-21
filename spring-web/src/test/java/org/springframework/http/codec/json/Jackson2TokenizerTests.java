@@ -116,6 +116,19 @@ public class Jackson2TokenizerTests extends AbstractDataBufferAllocatingTestCase
 				asList("{\"foo\": \"bar\"}",
 						"{\"foo\": \"baz\"}"));
 
+		// SPR-15803
+		testTokenize(
+				singletonList("[" +
+						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}," +
+						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}," +
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}" +
+						"]"),
+				asList(
+						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
+						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}")
+		);
+
 		testTokenize(
 				asList("[{\"foo\": \"foofoo\", \"bar\"",
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),

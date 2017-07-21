@@ -140,7 +140,7 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 	}
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
-		if (token != JsonToken.START_ARRAY && token != JsonToken.END_ARRAY) {
+		if (!isTopLevelArrayToken(token)) {
 			this.tokenBuffer.copyCurrentEvent(this.parser);
 		}
 
@@ -149,6 +149,11 @@ class Jackson2Tokenizer implements Function<DataBuffer, Flux<TokenBuffer>> {
 			result.add(this.tokenBuffer);
 			this.tokenBuffer = new TokenBuffer(this.parser);
 		}
+	}
+
+	private boolean isTopLevelArrayToken(JsonToken token) {
+		return (token == JsonToken.START_ARRAY && this.arrayDepth == 1) ||
+				(token == JsonToken.END_ARRAY && this.arrayDepth == 0);
 	}
 
 	public void endOfInput() {
