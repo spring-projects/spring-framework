@@ -27,23 +27,22 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -55,29 +54,25 @@ public class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
 
 	private MethodParameter paramNamedString;
-
 	private MethodParameter paramString;
-
 	private MethodParameter paramNotRequired;
-
 	private MethodParameter paramOptional;
+	private MethodParameter paramMono;
 
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PathVariableMethodArgumentResolver(null);
-
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
+		this.resolver = new PathVariableMethodArgumentResolver(null, new ReactiveAdapterRegistry());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		paramNamedString = new SynthesizingMethodParameter(method, 0);
 		paramString = new SynthesizingMethodParameter(method, 1);
 		paramNotRequired = new SynthesizingMethodParameter(method, 2);
 		paramOptional = new SynthesizingMethodParameter(method, 3);
+		paramMono = new SynthesizingMethodParameter(method, 4);
 	}
 
 
@@ -85,6 +80,15 @@ public class PathVariableMethodArgumentResolverTests {
 	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.paramNamedString));
 		assertFalse(this.resolver.supportsParameter(this.paramString));
+		try {
+			this.resolver.supportsParameter(this.paramMono);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"PathVariableMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -154,17 +158,20 @@ public class PathVariableMethodArgumentResolverTests {
 		StepVerifier.create(mono)
 				.consumeNextWith(value -> {
 					assertTrue(value instanceof Optional);
-					assertFalse(((Optional) value).isPresent());
+					assertFalse(((Optional<?>) value).isPresent());
 				})
 				.expectComplete()
 				.verify();
 	}
 
 
-	@SuppressWarnings("unused")
-	public void handle(@PathVariable(value = "name") String param1, String param2,
+	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
+	public void handle(
+			@PathVariable(value = "name") String param1,
+			String param2,
 			@PathVariable(name = "name", required = false) String param3,
-			@PathVariable("name") Optional<String> param4) {
+			@PathVariable("name") Optional<String> param4,
+			@PathVariable Mono<String> param5) {
 	}
 
 }

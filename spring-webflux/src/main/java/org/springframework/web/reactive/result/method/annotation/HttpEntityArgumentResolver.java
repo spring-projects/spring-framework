@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.validation.Validator;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -41,57 +38,35 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver
-		implements HandlerMethodArgumentResolver {
+public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	/**
-	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
-	 * @param readers readers for de-serializing the request body with
-	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers) {
-		super(readers);
-	}
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers,
+			ReactiveAdapterRegistry registry) {
 
-	/**
-	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
-	 * @param readers readers for de-serializing the request body with
-	 * @param registry for adapting to other reactive types from Flux and Mono
-	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> clazz = parameter.getParameterType();
-		return (HttpEntity.class.equals(clazz) || RequestEntity.class.equals(clazz));
+		return checkParameterTypeNoReactiveWrapper(parameter,
+				type -> HttpEntity.class.equals(type) || RequestEntity.class.equals(type));
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
-		ResolvableType entityType = ResolvableType.forMethodParameter(param);
-		MethodParameter bodyParameter = new MethodParameter(param);
-		bodyParameter.increaseNestingLevel();
-
-		return readBody(bodyParameter, false, bindingContext, exchange)
-				.map(body -> createHttpEntity(body, entityType, exchange))
-				.defaultIfEmpty(createHttpEntity(null, entityType, exchange));
+		Class<?> entityType = parameter.getParameterType();
+		return readBody(parameter.nested(), false, bindingContext, exchange)
+				.map(body -> createEntity(body, entityType, exchange.getRequest()))
+				.defaultIfEmpty(createEntity(null, entityType, exchange.getRequest()));
 	}
 
-	private Object createHttpEntity(Object body, ResolvableType entityType,
-			ServerWebExchange exchange) {
-
-		ServerHttpRequest request = exchange.getRequest();
-		HttpHeaders headers = request.getHeaders();
-		if (RequestEntity.class == entityType.getRawClass()) {
-			return new RequestEntity<>(body, headers, request.getMethod(), request.getURI());
-		}
-		else {
-			return new HttpEntity<>(body, headers);
-		}
+	private Object createEntity(@Nullable Object body, Class<?> entityType, ServerHttpRequest request) {
+		return RequestEntity.class.equals(entityType) ?
+				new RequestEntity<>(body, request.getHeaders(), request.getMethod(), request.getURI()) :
+				new HttpEntity<>(body, request.getHeaders());
 	}
 
 }

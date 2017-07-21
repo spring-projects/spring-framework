@@ -19,34 +19,19 @@ package org.springframework.web.reactive.function.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Default implementation of {@link HandlerStrategies.Builder}.
@@ -56,77 +41,33 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  */
 class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
-	static final Function<ServerRequest, Optional<Locale>> DEFAULT_LOCALE_RESOLVER =
-			request -> request.headers().acceptLanguage().stream()
-					.map(Locale.LanguageRange::getRange)
-					.map(Locale::forLanguageTag).findFirst();
-
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultHandlerStrategiesBuilder.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultHandlerStrategiesBuilder.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					DefaultHandlerStrategiesBuilder.class.getClassLoader());
-
-
-	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
-
-	private final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
-	private Function<ServerRequest, Optional<Locale>> localeResolver;
+	private final List<WebFilter> webFilters = new ArrayList<>();
+
+	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
+
+	@Nullable
+	private LocaleContextResolver localeContextResolver;
+
+
+	public DefaultHandlerStrategiesBuilder() {
+		this.codecConfigurer.registerDefaults(false);
+	}
 
 
 	public void defaultConfiguration() {
-		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new StringDecoder()));
-		messageReader(new FormHttpMessageReader());
-
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
-		messageWriter(new ResourceHttpMessageWriter());
-
-		if (jaxb2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		}
-		if (jackson2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
-			Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
-			messageWriter(new Jackson2ServerHttpMessageWriter(jsonEncoder));
-			messageWriter(
-					new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
-		}
-		else {
-			messageWriter(new ServerSentEventHttpMessageWriter());
-		}
-		localeResolver(DEFAULT_LOCALE_RESOLVER);
-	}
-
-	public void applicationContext(ApplicationContext applicationContext) {
-		applicationContext.getBeansOfType(HttpMessageReader.class).values().forEach(this::messageReader);
-		applicationContext.getBeansOfType(HttpMessageWriter.class).values().forEach(this::messageWriter);
-		applicationContext.getBeansOfType(ViewResolver.class).values().forEach(this::viewResolver);
-		localeResolver(DEFAULT_LOCALE_RESOLVER);
+		this.codecConfigurer.registerDefaults(true);
+		this.exceptionHandlers.add(new ResponseStatusExceptionHandler());
+		this.localeContextResolver = new AcceptHeaderLocaleContextResolver();
 	}
 
 	@Override
-	public HandlerStrategies.Builder messageReader(HttpMessageReader<?> messageReader) {
-		Assert.notNull(messageReader, "'messageReader' must not be null");
-		this.messageReaders.add(messageReader);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
-		Assert.notNull(messageWriter, "'messageWriter' must not be null");
-		this.messageWriters.add(messageWriter);
+	public HandlerStrategies.Builder codecs(Consumer<ServerCodecConfigurer> consumer) {
+		Assert.notNull(consumer, "'consumer' must not be null");
+		consumer.accept(this.codecConfigurer);
 		return this;
 	}
 
@@ -138,16 +79,31 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
-	public HandlerStrategies.Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver) {
-		Assert.notNull(localeResolver, "'localeResolver' must not be null");
-		this.localeResolver = localeResolver;
+	public HandlerStrategies.Builder webFilter(WebFilter filter) {
+		Assert.notNull(filter, "'filter' must not be null");
+		this.webFilters.add(filter);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder exceptionHandler(WebExceptionHandler exceptionHandler) {
+		Assert.notNull(exceptionHandler, "'exceptionHandler' must not be null");
+		this.exceptionHandlers.add(exceptionHandler);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder localeContextResolver(LocaleContextResolver localeContextResolver) {
+		Assert.notNull(localeContextResolver, "'localeContextResolver' must not be null");
+		this.localeContextResolver = localeContextResolver;
 		return this;
 	}
 
 	@Override
 	public HandlerStrategies build() {
-		return new DefaultHandlerStrategies(this.messageReaders, this.messageWriters,
-				this.viewResolvers, localeResolver);
+		return new DefaultHandlerStrategies(this.codecConfigurer.getReaders(),
+				this.codecConfigurer.getWriters(), this.viewResolvers, this.webFilters,
+				this.exceptionHandlers, this.localeContextResolver);
 	}
 
 
@@ -159,18 +115,27 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<ViewResolver> viewResolvers;
 
-		private final Function<ServerRequest, Optional<Locale>> localeResolver;
+		private final List<WebFilter> webFilters;
+
+		private final List<WebExceptionHandler> exceptionHandlers;
+
+		@Nullable
+		private final LocaleContextResolver localeContextResolver;
 
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
-				Function<ServerRequest, Optional<Locale>> localeResolver) {
+				List<WebFilter> webFilters,
+				List<WebExceptionHandler> exceptionHandlers,
+				@Nullable LocaleContextResolver localeContextResolver) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);
-			this.localeResolver = localeResolver;
+			this.webFilters = unmodifiableCopy(webFilters);
+			this.exceptionHandlers = unmodifiableCopy(exceptionHandlers);
+			this.localeContextResolver = localeContextResolver;
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
@@ -178,23 +143,33 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-			return this.messageReaders::stream;
+		public List<HttpMessageReader<?>> messageReaders() {
+			return this.messageReaders;
 		}
 
 		@Override
-		public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-			return this.messageWriters::stream;
+		public List<HttpMessageWriter<?>> messageWriters() {
+			return this.messageWriters;
 		}
 
 		@Override
-		public Supplier<Stream<ViewResolver>> viewResolvers() {
-			return this.viewResolvers::stream;
+		public List<ViewResolver> viewResolvers() {
+			return this.viewResolvers;
 		}
 
 		@Override
-		public Function<ServerRequest, Optional<Locale>> localeResolver() {
-			return this.localeResolver;
+		public List<WebFilter> webFilters() {
+			return this.webFilters;
+		}
+
+		@Override
+		public List<WebExceptionHandler> exceptionHandlers() {
+			return this.exceptionHandlers;
+		}
+
+		@Override
+		public LocaleContextResolver localeContextResolver() {
+			return this.localeContextResolver;
 		}
 	}
 

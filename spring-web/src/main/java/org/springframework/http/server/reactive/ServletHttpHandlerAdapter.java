@@ -17,8 +17,9 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.util.Map;
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletRequest;
@@ -28,11 +29,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,12 +49,18 @@ import org.springframework.util.Assert;
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")
-public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport implements Servlet {
+public class ServletHttpHandlerAdapter implements Servlet {
+
+	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
+
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
 
+	private final HttpHandler httpHandler;
+
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
+
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
@@ -58,11 +68,8 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 
 
 	public ServletHttpHandlerAdapter(HttpHandler httpHandler) {
-		super(httpHandler);
-	}
-
-	public ServletHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
+		Assert.notNull(httpHandler, "HttpHandler must not be null");
+		this.httpHandler = httpHandler;
 	}
 
 
@@ -98,20 +105,25 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 	public void service(ServletRequest request, ServletResponse response) throws IOException {
 		// Start async before Read/WriteListener registration
 		AsyncContext asyncContext = request.startAsync();
+		asyncContext.setTimeout(-1);
 
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
+		asyncContext.addListener(ERROR_LISTENER);
+
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
-		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
+		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
 	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
-		return new ServletServerHttpRequest(request, context, getDataBufferFactory(), getBufferSize());
+		return new ServletServerHttpRequest(
+				request, context, getDataBufferFactory(), getBufferSize());
 	}
 
 	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
-		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
+		return new ServletServerHttpResponse(
+				response, context, getDataBufferFactory(), getBufferSize());
 	}
 
 
@@ -122,6 +134,7 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 	}
 
 	@Override
+	@Nullable
 	public ServletConfig getServletConfig() {
 		return null;
 	}
@@ -136,11 +149,54 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 	}
 
 
+	/**
+	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
+	 * https://issues.jboss.org/browse/WFLY-8515
+	 */
+	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
+		try {
+			if (asyncContext.getRequest().isAsyncStarted()) {
+				task.run();
+			}
+		}
+		catch (IllegalStateException ex) {
+			// Ignore: AsyncContext recycled and should not be used
+			// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
+		}
+	}
+
+
+	private final static AsyncListener ERROR_LISTENER = new AsyncListener() {
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+			AsyncContext context = event.getAsyncContext();
+			runIfAsyncNotComplete(context, context::complete);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+			AsyncContext context = event.getAsyncContext();
+			runIfAsyncNotComplete(context, context::complete);
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+			// No-op
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			// No-op
+		}
+	};
+
+
 	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final AsyncContext asyncContext;
 
-		public HandlerResultSubscriber(AsyncContext asyncContext) {
+		HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
 
@@ -156,16 +212,20 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			this.asyncContext.complete();
+			runIfAsyncNotComplete(this.asyncContext, () -> {
+				logger.error("Could not complete request", ex);
+				HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				this.asyncContext.complete();
+			});
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
-			this.asyncContext.complete();
+			runIfAsyncNotComplete(this.asyncContext, () -> {
+				logger.debug("Successfully completed request");
+				this.asyncContext.complete();
+			});
 		}
 	}
 

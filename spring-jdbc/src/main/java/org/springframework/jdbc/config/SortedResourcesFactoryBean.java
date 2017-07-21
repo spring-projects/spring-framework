@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -31,6 +30,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} implementation that takes a list of location Strings
@@ -76,15 +76,12 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 		for (String location : this.locations) {
 			List<Resource> resources = new ArrayList<>(
 					Arrays.asList(this.resourcePatternResolver.getResources(location)));
-			Collections.sort(resources, new Comparator<Resource>() {
-				@Override
-				public int compare(Resource r1, Resource r2) {
-					try {
-						return r1.getURL().toString().compareTo(r2.getURL().toString());
-					}
-					catch (IOException ex) {
-						return 0;
-					}
+			Collections.sort(resources, (r1, r2) -> {
+				try {
+					return r1.getURL().toString().compareTo(r2.getURL().toString());
+				}
+				catch (IOException ex) {
+					return 0;
 				}
 			});
 			for (Resource resource : resources) {

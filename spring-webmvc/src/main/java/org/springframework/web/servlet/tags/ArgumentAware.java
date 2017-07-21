@@ -18,6 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import javax.servlet.jsp.JspTagException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Allows implementing tag to utilize nested {@code spring:argument} tags.
  *
@@ -32,6 +34,6 @@ public interface ArgumentAware {
 	 * to the parent tag.
 	 * @param argument the result of the nested {@code spring:argument} tag
 	 */
-	void addArgument(Object argument) throws JspTagException;
+	void addArgument(@Nullable Object argument) throws JspTagException;
 
 }

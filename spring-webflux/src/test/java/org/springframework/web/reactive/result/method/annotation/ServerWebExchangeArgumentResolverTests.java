@@ -16,26 +16,25 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ServerWebExchangeArgumentResolver}.
@@ -43,48 +42,44 @@ import static org.mockito.Mockito.*;
  */
 public class ServerWebExchangeArgumentResolverTests {
 
-	private final ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
+	private final ServerWebExchangeArgumentResolver resolver =
+			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
 
-	private final ServerWebExchangeArgumentResolver resolver = new ServerWebExchangeArgumentResolver();
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
-	private ServerWebExchange exchange;
-
-
-	@Before
-	public void setup() throws Exception {
-		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		ServerHttpResponse response = new MockServerHttpResponse();
-
-		WebSessionManager sessionManager = new MockWebSessionManager(mock(WebSession.class));
-		this.exchange = new DefaultServerWebExchange(request, response, sessionManager);
-	}
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(parameter(ServerWebExchange.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpRequest.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpResponse.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(HttpMethod.class)));
-		assertFalse(this.resolver.supportsParameter(parameter(String.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
+		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		try {
+			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, ServerWebExchange.class));
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"ServerWebExchangeArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
 	public void resolveArgument() throws Exception {
-		testResolveArgument(parameter(ServerWebExchange.class), this.exchange);
-		testResolveArgument(parameter(ServerHttpRequest.class), this.exchange.getRequest());
-		testResolveArgument(parameter(ServerHttpResponse.class), this.exchange.getResponse());
-		testResolveArgument(parameter(HttpMethod.class), HttpMethod.GET);
+		testResolveArgument(this.testMethod.arg(ServerWebExchange.class), this.exchange);
+		testResolveArgument(this.testMethod.arg(ServerHttpRequest.class), this.exchange.getRequest());
+		testResolveArgument(this.testMethod.arg(ServerHttpResponse.class), this.exchange.getResponse());
+		testResolveArgument(this.testMethod.arg(HttpMethod.class), HttpMethod.GET);
 	}
 
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
 		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
 		assertSame(expected, mono.block());
-	}
-
-	private MethodParameter parameter(Class<?> parameterType) {
-		return this.testMethod.resolveParam(parameter -> parameterType.equals(parameter.getParameterType()));
 	}
 
 
@@ -95,7 +90,8 @@ public class ServerWebExchangeArgumentResolverTests {
 			ServerHttpResponse response,
 			WebSession session,
 			HttpMethod httpMethod,
-			String s) {
+			String s,
+			Mono<ServerWebExchange> monoExchange) {
 	}
 
 }

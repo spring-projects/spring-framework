@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,14 +102,6 @@ public class DispatcherServletTests {
 	}
 
 	@Test
-	public void dispatcherServletGetServletNameDoesNotFailWithoutConfig() {
-		DispatcherServlet ds = new DispatcherServlet();
-		assertNull(ds.getServletConfig());
-		assertNull(ds.getServletName());
-		assertNull(ds.getServletContext());
-	}
-
-	@Test
 	public void configuredDispatcherServlets() {
 		assertTrue("Correct namespace",
 				("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace()));
@@ -186,7 +178,7 @@ public class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
-		assertEquals("Wed, 01 Apr 2015 00:00:00 GMT", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 1 Apr 2015 00:00:00 GMT", response.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -216,7 +208,7 @@ public class DispatcherServletTests {
 		assertTrue(request.getAttribute("test3") != null);
 		assertTrue(request.getAttribute("test3x") != null);
 		assertTrue(request.getAttribute("test3y") != null);
-		assertEquals("Wed, 01 Apr 2015 00:00:01 GMT", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 1 Apr 2015 00:00:01 GMT", response.getHeader("Last-Modified"));
 	}
 
 	@Test

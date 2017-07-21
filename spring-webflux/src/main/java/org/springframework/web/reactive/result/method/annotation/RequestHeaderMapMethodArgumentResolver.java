@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -40,26 +41,33 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see RequestHeaderMethodArgumentResolver
  */
-public class RequestHeaderMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class RequestHeaderMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
 
-	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
-				Map.class.isAssignableFrom(parameter.getParameterType()));
+	public RequestHeaderMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
 	}
 
+
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::allParams);
+	}
+
+	private boolean allParams(RequestHeader annotation, Class<?> type) {
+		return Map.class.isAssignableFrom(type);
+	}
+
+
+	@Override
+	public Object resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
+
+		Class<?> paramType = methodParameter.getParameterType();
+		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(paramType);
 
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		Object value = (isMultiValueMap(parameter) ? headers : headers.toSingleValueMap());
-		return Optional.of(value);
-	}
-
-	private boolean isMultiValueMap(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return MultiValueMap.class.isAssignableFrom(paramType);
+		return isMultiValueMap ? headers : headers.toSingleValueMap();
 	}
 
 }

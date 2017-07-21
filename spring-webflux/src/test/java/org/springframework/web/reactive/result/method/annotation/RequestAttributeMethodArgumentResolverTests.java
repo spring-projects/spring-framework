@@ -28,20 +28,24 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
@@ -52,7 +56,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 	private RequestAttributeMethodArgumentResolver resolver;
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
 
 	private Method handleMethod;
 
@@ -61,11 +65,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory());
-
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
-
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithRequestAttribute", (Class<?>[]) null);
 	}
 
@@ -74,6 +75,15 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
 		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
+		try {
+			this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 5));
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestAttributeMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -119,7 +129,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		assertFalse(((Optional) mono.block()).isPresent());
+		assertFalse(((Optional<?>) mono.block()).isPresent());
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -131,7 +141,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		Optional optional = (Optional) mono.block();
+		Optional<?> optional = (Optional<?>) mono.block();
 		assertTrue(optional.isPresent());
 		assertSame(foo, optional.get());
 	}
@@ -151,7 +161,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 			@RequestAttribute("specialFoo") Foo namedFoo,
 			@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
 			@RequestAttribute(name="foo") Optional<Foo> optionalFoo,
-			String notSupported) {
+			String notSupported,
+			@RequestAttribute Mono<Foo> alsoNotSupported) {
 	}
 
 

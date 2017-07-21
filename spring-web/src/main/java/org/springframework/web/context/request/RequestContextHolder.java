@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -67,7 +68,7 @@ public abstract class RequestContextHolder  {
 	 * @param attributes the RequestAttributes to expose
 	 * @see #setRequestAttributes(RequestAttributes, boolean)
 	 */
-	public static void setRequestAttributes(RequestAttributes attributes) {
+	public static void setRequestAttributes(@Nullable RequestAttributes attributes) {
 		setRequestAttributes(attributes, false);
 	}
 
@@ -78,7 +79,7 @@ public abstract class RequestContextHolder  {
 	 * @param inheritable whether to expose the RequestAttributes as inheritable
 	 * for child threads (using an {@link InheritableThreadLocal})
 	 */
-	public static void setRequestAttributes(RequestAttributes attributes, boolean inheritable) {
+	public static void setRequestAttributes(@Nullable RequestAttributes attributes, boolean inheritable) {
 		if (attributes == null) {
 			resetRequestAttributes();
 		}
@@ -99,6 +100,7 @@ public abstract class RequestContextHolder  {
 	 * @return the RequestAttributes currently bound to the thread,
 	 * or {@code null} if none bound
 	 */
+	@Nullable
 	public static RequestAttributes getRequestAttributes() {
 		RequestAttributes attributes = requestAttributesHolder.get();
 		if (attributes == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Optional;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -32,16 +31,16 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import reactor.core.publisher.Flux;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
@@ -73,7 +72,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(initUri(request), initHeaders(request));
+		super(initUri(request), request.getContextPath(), initHeaders(request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
@@ -151,13 +150,8 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(getServletRequest().getMethod());
-	}
-
-	@Override
-	public String getContextPath() {
-		return getServletRequest().getContextPath();
+	public String getMethodValue() {
+		return getServletRequest().getMethod();
 	}
 
 	@Override
@@ -178,9 +172,8 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.of(new InetSocketAddress(
-				this.request.getRemoteHost(), this.request.getRemotePort()));
+	public InetSocketAddress getRemoteAddress() {
+		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
 	@Override
@@ -192,6 +185,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
 	 */
+	@Nullable
 	protected DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {
@@ -231,13 +225,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
+
 	private class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
 		private final ServletInputStream inputStream;
 
-
 		public RequestBodyPublisher(ServletInputStream inputStream) {
-
 			this.inputStream = inputStream;
 		}
 
@@ -259,6 +252,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 			return null;
 		}
+
 
 		private class RequestBodyPublisherReadListener implements ReadListener {
 

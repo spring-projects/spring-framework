@@ -20,12 +20,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -68,10 +68,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 
 	/**
-	 * Set if URL lookup should always use full path within current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * <p>Only relevant for the "cacheMappings" setting.
 	 * @see #setCacheMappings
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
@@ -81,11 +78,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * <p>Only relevant for the "cacheMappings" setting.
 	 * @see #setCacheMappings
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
@@ -214,6 +207,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the associated {@code CacheControl}, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
+	@Nullable
 	protected CacheControl lookupCacheControl(String urlPath) {
 		// Direct match?
 		CacheControl cacheControl = this.cacheControlMappings.get(urlPath);
@@ -238,6 +232,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the cacheSeconds integer value, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
+	@Nullable
 	protected Integer lookupCacheSeconds(String urlPath) {
 		// Direct match?
 		Integer cacheSeconds = this.cacheMappings.get(urlPath);
@@ -258,18 +253,16 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * This implementation is empty.
 	 */
 	@Override
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
-			throws Exception {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
 	}
 
 }

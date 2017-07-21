@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Represent a list in an expression, e.g. '{1,2,3}'
@@ -37,7 +38,8 @@ import org.springframework.expression.spel.SpelNode;
 public class InlineList extends SpelNodeImpl {
 
 	// If the list is purely literals, it is a constant value and can be computed and cached
-	private TypedValue constant = null;  // TODO must be immutable list
+	@Nullable
+	private TypedValue constant;  // TODO must be immutable list
 
 
 	public InlineList(int pos, SpelNodeImpl... args) {
@@ -121,7 +123,9 @@ public class InlineList extends SpelNodeImpl {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public List<Object> getConstantValue() {
+		Assert.state(this.constant != null, "No constant");
 		return (List<Object>) this.constant.getValue();
 	}
 	
@@ -135,17 +139,11 @@ public class InlineList extends SpelNodeImpl {
 		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
 		final String className = codeflow.getClassName();
 
-		codeflow.registerNewField(new CodeFlow.FieldAdder() {
-			public void generateField(ClassWriter cw, CodeFlow codeflow) {
-				cw.visitField(ACC_PRIVATE|ACC_STATIC|ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null);
-			}
-		});
-		
-		codeflow.registerNewClinit(new CodeFlow.ClinitAdder() {
-			public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-				generateClinitCode(className, constantFieldName, mv, codeflow, false);
-			}
-		});
+		codeflow.registerNewField((cw, cflow) ->
+				cw.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL, constantFieldName, "Ljava/util/List;", null, null));
+
+		codeflow.registerNewClinit((mVisitor, cflow) ->
+				generateClinitCode(className, constantFieldName, mVisitor, cflow, false));
 		
 		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");
@@ -174,8 +172,9 @@ public class InlineList extends SpelNodeImpl {
 			}
 			else {
 				children[c].generateCode(mv, codeflow);
-				if (CodeFlow.isPrimitive(codeflow.lastDescriptor())) {
-					CodeFlow.insertBoxIfNecessary(mv, codeflow.lastDescriptor().charAt(0));
+				String lastDesc = codeflow.lastDescriptor();
+				if (CodeFlow.isPrimitive(lastDesc)) {
+					CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 				}
 			}
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);

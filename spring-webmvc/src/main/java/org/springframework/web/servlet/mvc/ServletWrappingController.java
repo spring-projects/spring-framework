@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -83,14 +85,18 @@ import org.springframework.web.servlet.ModelAndView;
 public class ServletWrappingController extends AbstractController
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
+	@Nullable
 	private Class<? extends Servlet> servletClass;
 
+	@Nullable
 	private String servletName;
 
 	private Properties initParameters = new Properties();
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private Servlet servletInstance;
 
 
@@ -155,6 +161,7 @@ public class ServletWrappingController extends AbstractController
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		Assert.state(this.servletInstance != null, "No Servlet instance");
 		this.servletInstance.service(request, response);
 		return null;
 	}
@@ -166,7 +173,9 @@ public class ServletWrappingController extends AbstractController
 	 */
 	@Override
 	public void destroy() {
-		this.servletInstance.destroy();
+		if (this.servletInstance != null) {
+			this.servletInstance.destroy();
+		}
 	}
 
 
@@ -178,11 +187,13 @@ public class ServletWrappingController extends AbstractController
 	private class DelegatingServletConfig implements ServletConfig {
 
 		@Override
+		@Nullable
 		public String getServletName() {
 			return servletName;
 		}
 
 		@Override
+		@Nullable
 		public ServletContext getServletContext() {
 			return ServletWrappingController.this.getServletContext();
 		}

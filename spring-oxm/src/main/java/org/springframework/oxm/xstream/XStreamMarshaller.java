@@ -74,6 +74,7 @@ import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
@@ -121,40 +122,56 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
+	@Nullable
 	private ReflectionProvider reflectionProvider;
 
+	@Nullable
 	private HierarchicalStreamDriver streamDriver;
 
+	@Nullable
 	private HierarchicalStreamDriver defaultDriver;
 
+	@Nullable
 	private Mapper mapper;
 
+	@Nullable
 	private Class<? extends MapperWrapper>[] mapperWrappers;
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
 	private ConverterRegistry converterRegistry = (ConverterRegistry) this.converterLookup;
 
+	@Nullable
 	private ConverterMatcher[] converters;
 
+	@Nullable
 	private MarshallingStrategy marshallingStrategy;
 
+	@Nullable
 	private Integer mode;
 
+	@Nullable
 	private Map<String, ?> aliases;
 
+	@Nullable
 	private Map<String, ?> aliasesByType;
 
+	@Nullable
 	private Map<String, String> fieldAliases;
 
+	@Nullable
 	private Class<?>[] useAttributeForTypes;
 
+	@Nullable
 	private Map<?, ?> useAttributeFor;
 
+	@Nullable
 	private Map<Class<?>, String> implicitCollections;
 
+	@Nullable
 	private Map<Class<?>, String> omittedFields;
 
+	@Nullable
 	private Class<?>[] annotatedClasses;
 
 	private boolean autodetectAnnotations;
@@ -163,10 +180,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	private NameCoder nameCoder = new XmlFriendlyNameCoder();
 
+	@Nullable
 	private Class<?>[] supportedClasses;
 
 	private ClassLoader beanClassLoader = new CompositeClassLoader();
 
+	@Nullable
 	private XStream xstream;
 
 
@@ -468,15 +487,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		try {
 			if (this.aliases != null) {
 				Map<String, Class<?>> classMap = toClassMap(this.aliases);
-				for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-					xstream.alias(entry.getKey(), entry.getValue());
-				}
+				classMap.forEach(xstream::alias);
 			}
 			if (this.aliasesByType != null) {
 				Map<String, Class<?>> classMap = toClassMap(this.aliasesByType);
-				for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-					xstream.aliasType(entry.getKey(), entry.getValue());
-				}
+				classMap.forEach(xstream::aliasType);
 			}
 			if (this.fieldAliases != null) {
 				for (Map.Entry<String, String> entry : this.fieldAliases.entrySet()) {
@@ -542,20 +557,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		}
 
 		if (this.implicitCollections != null) {
-			for (Map.Entry<Class<?>, String> entry : this.implicitCollections.entrySet()) {
-				String[] collectionFields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
+			this.implicitCollections.forEach((key, fields) -> {
+				String[] collectionFields = StringUtils.commaDelimitedListToStringArray(fields);
 				for (String collectionField : collectionFields) {
-					xstream.addImplicitCollection(entry.getKey(), collectionField);
+					xstream.addImplicitCollection(key, collectionField);
 				}
-			}
+			});
 		}
 		if (this.omittedFields != null) {
-			for (Map.Entry<Class<?>, String> entry : this.omittedFields.entrySet()) {
-				String[] fields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
+			this.omittedFields.forEach((key, value) -> {
+				String[] fields = StringUtils.commaDelimitedListToStringArray(value);
 				for (String field : fields) {
-					xstream.omitField(entry.getKey(), field);
+					xstream.omitField(key, field);
 				}
-			}
+			});
 		}
 
 		if (this.annotatedClasses != null) {
@@ -663,7 +678,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	@Override
-	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)
 			throws XmlMappingException {
 
 		SaxWriter saxWriter = new SaxWriter(this.nameCoder);
@@ -676,7 +691,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		marshalOutputStream(graph, outputStream, null);
 	}
 
-	public void marshalOutputStream(Object graph, OutputStream outputStream, DataHolder dataHolder)
+	public void marshalOutputStream(Object graph, OutputStream outputStream, @Nullable DataHolder dataHolder)
 			throws XmlMappingException, IOException {
 
 		if (this.streamDriver != null) {
@@ -692,7 +707,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		marshalWriter(graph, writer, null);
 	}
 
-	public void marshalWriter(Object graph, Writer writer, DataHolder dataHolder)
+	public void marshalWriter(Object graph, Writer writer, @Nullable DataHolder dataHolder)
 			throws XmlMappingException, IOException {
 
 		if (this.streamDriver != null) {
@@ -707,7 +722,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	 * Marshals the given graph to the given XStream HierarchicalStreamWriter.
 	 * Converts exceptions using {@link #convertXStreamException}.
 	 */
-	private void doMarshal(Object graph, HierarchicalStreamWriter streamWriter, DataHolder dataHolder) {
+	private void doMarshal(Object graph, HierarchicalStreamWriter streamWriter, @Nullable DataHolder dataHolder) {
 		try {
 			getXStream().marshal(graph, streamWriter, dataHolder);
 		}
@@ -784,7 +799,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return unmarshalInputStream(inputStream, null);
 	}
 
-	public Object unmarshalInputStream(InputStream inputStream, DataHolder dataHolder) throws XmlMappingException, IOException {
+	public Object unmarshalInputStream(InputStream inputStream, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
         if (this.streamDriver != null) {
             return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
         }
@@ -798,7 +813,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		return unmarshalReader(reader, null);
 	}
 
-	public Object unmarshalReader(Reader reader, DataHolder dataHolder) throws XmlMappingException, IOException {
+	public Object unmarshalReader(Reader reader, @Nullable DataHolder dataHolder) throws XmlMappingException, IOException {
 		return doUnmarshal(getDefaultDriver().createReader(reader), dataHolder);
 	}
 
@@ -806,7 +821,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
      * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
      * Converts exceptions using {@link #convertXStreamException}.
      */
-    private Object doUnmarshal(HierarchicalStreamReader streamReader, DataHolder dataHolder) {
+    private Object doUnmarshal(HierarchicalStreamReader streamReader, @Nullable DataHolder dataHolder) {
         try {
             return getXStream().unmarshal(streamReader, null, dataHolder);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,10 @@ public class ContentRequestMatchers {
 	 * Assert the request content type as a {@link MediaType}.
 	 */
 	public RequestMatcher contentType(final MediaType expectedContentType) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MediaType actualContentType = request.getHeaders().getContentType();
-				assertTrue("Content type not set", actualContentType != null);
-				assertEquals("Content type", expectedContentType, actualContentType);
-			}
+		return request -> {
+			MediaType actualContentType = request.getHeaders().getContentType();
+			assertTrue("Content type not set", actualContentType != null);
+			assertEquals("Content type", expectedContentType, actualContentType);
 		};
 	}
 
@@ -93,11 +90,10 @@ public class ContentRequestMatchers {
 	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
 	 */
 	public RequestMatcher contentTypeCompatibleWith(final MediaType contentType) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MediaType actualContentType = request.getHeaders().getContentType();
-				assertTrue("Content type not set", actualContentType != null);
+		return request -> {
+			MediaType actualContentType = request.getHeaders().getContentType();
+			assertTrue("Content type not set", actualContentType != null);
+			if (actualContentType != null) {
 				assertTrue("Content type [" + actualContentType + "] is not compatible with [" + contentType + "]",
 						actualContentType.isCompatibleWith(contentType));
 			}
@@ -108,12 +104,9 @@ public class ContentRequestMatchers {
 	 * Get the body of the request as a UTF-8 string and appply the given {@link Matcher}.
 	 */
 	public RequestMatcher string(final Matcher<? super String> matcher) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertThat("Request content", mockRequest.getBodyAsString(), matcher);
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertThat("Request content", mockRequest.getBodyAsString(), matcher);
 		};
 	}
 
@@ -121,12 +114,9 @@ public class ContentRequestMatchers {
 	 * Get the body of the request as a UTF-8 string and compare it to the given String.
 	 */
 	public RequestMatcher string(final String expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
 		};
 	}
 
@@ -134,12 +124,9 @@ public class ContentRequestMatchers {
 	 * Compare the body of the request to the given byte array.
 	 */
 	public RequestMatcher bytes(final byte[] expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
-			}
+		return request -> {
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
 		};
 	}
 
@@ -148,23 +135,20 @@ public class ContentRequestMatchers {
 	 * @since 4.3
 	 */
 	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
-		return new RequestMatcher() {
-			@Override
-			public void match(final ClientHttpRequest request) throws IOException, AssertionError {
-				HttpInputMessage inputMessage = new HttpInputMessage() {
-					@Override
-					public InputStream getBody() throws IOException {
-						MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-						return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
-					}
-					@Override
-					public HttpHeaders getHeaders() {
-						return request.getHeaders();
-					}
-				};
-				FormHttpMessageConverter converter = new FormHttpMessageConverter();
-				assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
-			}
+		return request -> {
+			HttpInputMessage inputMessage = new HttpInputMessage() {
+				@Override
+				public InputStream getBody() throws IOException {
+					MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+					return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+				}
+				@Override
+				public HttpHeaders getHeaders() {
+					return request.getHeaders();
+				}
+			};
+			FormHttpMessageConverter converter = new FormHttpMessageConverter();
+			assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
 		};
 	}
 

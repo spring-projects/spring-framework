@@ -49,6 +49,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.BooleanTestBean;
@@ -461,7 +462,7 @@ public abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setConversionService(new GenericConversionService() {
 			@Override
-			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			public Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 				throw new ConversionFailedException(sourceType, targetType, source, null);
 			}
 		});

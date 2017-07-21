@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,9 +119,9 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
-		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
-		if (orderAttributes != null) {
-			beanDef.setAttribute(ORDER_ATTRIBUTE, orderAttributes.get(AnnotationUtils.VALUE));
+		Integer order = getOrder(metadata);
+		if (order != null) {
+			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
 		}
 
 		return true;
@@ -196,6 +196,18 @@ abstract class ConfigurationClassUtils {
 	 */
 	public static boolean isLiteConfigurationClass(BeanDefinition beanDef) {
 		return CONFIGURATION_CLASS_LITE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
+	}
+
+	/**
+	 * Determine the order for the given configuration class metadata.
+	 * @param metadata the metadata of the annotated class
+	 * @return the {@link @Order} annotation value on the configuration class,
+	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @since 5.0
+	 */
+	public static Integer getOrder(AnnotationMetadata metadata) {
+		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
+		return (orderAttributes != null ? ((Integer) orderAttributes.get(AnnotationUtils.VALUE)) : null);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,19 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URISyntaxException;
 import java.util.Collection;
 
 import org.junit.Test;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link ParamsRequestCondition}.
@@ -52,45 +48,36 @@ public class ParamsRequestConditionTests {
 	@Test
 	public void paramPresent() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-
-		assertNotNull(condition.getMatchingCondition(exchangeWithQuery("foo=")));
-		assertNotNull(condition.getMatchingCondition(exchangeWithFormData("foo=")));
+		assertNotNull(condition.getMatchingCondition(get("/path?foo=").toExchange()));
 	}
 
 	@Test
 	public void paramPresentNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
-
-		assertNull(condition.getMatchingCondition(exchangeWithQuery("bar=")));
-		assertNull(condition.getMatchingCondition(exchangeWithFormData("bar=")));
+		assertNull(condition.getMatchingCondition(get("/path?bar=").toExchange()));
 	}
 
 	@Test
 	public void paramNotPresent() throws Exception {
-		ServerWebExchange exchange = exchange();
+		MockServerWebExchange exchange = get("/").toExchange();
 		assertNotNull(new ParamsRequestCondition("!foo").getMatchingCondition(exchange));
 	}
 
 	@Test
 	public void paramValueMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-
-		assertNotNull(condition.getMatchingCondition(exchangeWithQuery("foo=bar")));
-		assertNotNull(condition.getMatchingCondition(exchangeWithFormData("foo=bar")));
+		assertNotNull(condition.getMatchingCondition(get("/path?foo=bar").toExchange()));
 	}
 
 	@Test
 	public void paramValueNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
-
-		assertNull(condition.getMatchingCondition(exchangeWithQuery("foo=bazz")));
-		assertNull(condition.getMatchingCondition(exchangeWithFormData("foo=bazz")));
+		assertNull(condition.getMatchingCondition(get("/path?foo=bazz").toExchange()));
 	}
 
 	@Test
 	public void compareTo() throws Exception {
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
+		ServerWebExchange exchange = get("/").toExchange();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
@@ -110,24 +97,6 @@ public class ParamsRequestConditionTests {
 		ParamsRequestCondition result = condition1.combine(condition2);
 		Collection<?> conditions = result.getContent();
 		assertEquals(2, conditions.size());
-	}
-
-
-	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
-		ServerHttpRequest request = MockServerHttpRequest.get("/path?" + query).build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
-
-	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
-		MockServerHttpRequest request = MockServerHttpRequest.post("/")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(formData);
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
-
-	private ServerWebExchange exchange() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

@@ -4,4 +4,7 @@
  * to the {@code org.springframework.jdbc} package, providing the same
  * levels of data access abstraction.
  */
+@NonNullApi
 package org.springframework.jca.cci;
+
+import org.springframework.lang.NonNullApi;

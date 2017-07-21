@@ -121,6 +121,7 @@ public class RequestMappingDataBindingIntegrationTests extends AbstractRequestMa
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private final Long id;

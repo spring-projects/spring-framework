@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.config;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,8 +31,9 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.AppCacheManifestTransformer;
@@ -44,10 +46,12 @@ import org.springframework.web.reactive.resource.ResourceTransformer;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -60,20 +64,12 @@ public class ResourceHandlerRegistryTests {
 
 	private ResourceHandlerRegistration registration;
 
-	private ServerWebExchange exchange;
-
-	private MockServerHttpResponse response;
-
 
 	@Before
 	public void setup() {
 		this.registry = new ResourceHandlerRegistry(new GenericApplicationContext());
 		this.registration = this.registry.addResourceHandler("/resources/**");
 		this.registration.addResourceLocations("classpath:org/springframework/web/reactive/config/");
-
-		MockServerHttpRequest request = MockServerHttpRequest.get("").build();
-		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response);
 	}
 
 
@@ -85,13 +81,14 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void mapPathToLocation() throws Exception {
-		this.exchange.getAttributes().put(
-				HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/testStylesheet.css");
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
+				PathContainer.parsePath("/testStylesheet.css"));
 
 		ResourceWebHandler handler = getHandler("/resources/**");
-		handler.handle(this.exchange).blockMillis(5000);
+		handler.handle(exchange).block(Duration.ofSeconds(5));
 
-		StepVerifier.create(this.response.getBody())
+		StepVerifier.create(exchange.getResponse().getBody())
 				.consumeNextWith(buf -> assertEquals("test stylesheet content",
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.core;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -102,11 +102,10 @@ public class ReactiveAdapter {
 	/**
 	 * Adapt the given instance to a Reactive Streams Publisher.
 	 * @param source the source object to adapt from
-	 * @return the Publisher repesenting the adaptation
+	 * @return the Publisher representing the adaptation
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Publisher<T> toPublisher(Object source) {
-		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+	public <T> Publisher<T> toPublisher(@Nullable Object source) {
 		if (source == null) {
 			source = getDescriptor().getEmptyValue();
 		}
@@ -119,7 +118,7 @@ public class ReactiveAdapter {
 	 * @return the reactive type instance representing the adapted publisher
 	 */
 	public Object fromPublisher(Publisher<?> publisher) {
-		return (publisher != null ? this.fromPublisherFunction.apply(publisher) : null);
+		return this.fromPublisherFunction.apply(publisher);
 	}
 
 }

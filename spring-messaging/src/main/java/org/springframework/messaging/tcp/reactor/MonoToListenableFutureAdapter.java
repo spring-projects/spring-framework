@@ -18,6 +18,8 @@ package org.springframework.messaging.tcp.reactor;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A Mono-to-ListenableFuture adapter where the source and the target from
  * the Promise and the ListenableFuture respectively are of the same type.
@@ -33,7 +35,7 @@ class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAda
 	}
 
 	@Override
-	protected T adapt(T result) {
+	protected T adapt(@Nullable T result) {
 		return result;
 	}
 

@@ -16,22 +16,22 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
-import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
@@ -44,10 +44,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
  * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
- * Reactor, RxNetty, or Undertow.
- * And it can {@linkplain #toHandlerMapping(RouterFunction, HandlerStrategies) transform} a
- * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
- * {@code DispatcherHandler}.
+ * Reactor, or Undertow.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -92,18 +89,7 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
-		return request -> {
-			if (predicate.test(request)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"",
-							predicate, request));
-				}
-				return Mono.just(handlerFunction);
-			}
-			else {
-				return Mono.empty();
-			}
-		};
+		return new DefaultRouterFunction<>(predicate, handlerFunction);
 	}
 
 	/**
@@ -135,19 +121,7 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 
-		return request -> {
-			if (predicate.test(request)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Nested predicate \"%s\" matches against \"%s\"",
-							predicate, request));
-				}
-				ServerRequest subRequest = predicate.nestRequest(request);
-				return routerFunction.route(subRequest);
-			}
-			else {
-				return Mono.empty();
-			}
-		};
+		return new DefaultNestedRouterFunction<>(predicate, routerFunction);
 	}
 
 	/**
@@ -155,7 +129,7 @@ public abstract class RouterFunctions {
 	 * For instance
 	 * <pre class="code">
 	 * Resource location = new FileSystemResource("public-resources/");
-	 * RoutingFunction&lt;Resource&gt; resources = RouterFunctions.resources("/resources/**", location);
+	 * RoutingFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
 	 * @param location the location directory relative to which resources should be resolved
@@ -188,8 +162,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
@@ -199,7 +171,7 @@ public abstract class RouterFunctions {
 	 * @param routerFunction the router function to convert
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction) {
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
@@ -212,67 +184,55 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
-	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler}, allowing
-	 * for additional filter and exception handler registration through
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return new HttpWebHandlerAdapter(exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies);
-			addAttributes(exchange, request);
-			return routerFunction.route(request)
-					.defaultIfEmpty(notFound())
-					.then(handlerFunction -> handlerFunction.handle(request))
-					.then(response -> response.writeTo(exchange, strategies));
-		});
+		WebHandler webHandler = toWebHandler(routerFunction, strategies);
+		return WebHttpHandlerBuilder.webHandler(webHandler)
+				.filters(filters -> filters.addAll(strategies.webFilters()))
+				.exceptionHandlers(handlers -> handlers.addAll(strategies.exceptionHandlers()))
+				.localeContextResolver(strategies.localeContextResolver())
+				.build();
 	}
 
 	/**
-	 * Convert the given {@code RouterFunction} into a {@code HandlerMapping}.
-	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
-	 * <p>The returned {@code HandlerMapping} can be run in a
-	 * {@link org.springframework.web.reactive.DispatcherHandler}.
-	 * @param routerFunction the router function to convert
-	 * @return an handler mapping that maps HTTP request to a handler using the given router function
-	 * @see HandlerFunctionAdapter
-	 * @see ServerResponseResultHandler
-	 */
-	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction) {
-		return toHandlerMapping(routerFunction, HandlerStrategies.withDefaults());
-	}
-
-	/**
-	 * Convert the given {@linkplain RouterFunction router function} into a {@link HandlerMapping},
+	 * Convert the given {@linkplain RouterFunction router function} into a {@link WebHandler},
 	 * using the given strategies.
-	 * <p>The returned {@code HandlerMapping} can be run in a
-	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an handler mapping that maps HTTP request to a handler using the given router function
-	 * @see HandlerFunctionAdapter
-	 * @see ServerResponseResultHandler
+	 * @return a web handler that handles web request using the given router function
 	 */
-	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static WebHandler toWebHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		return exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies);
+			ServerRequest request = new DefaultServerRequest(exchange, strategies.messageReaders());
 			addAttributes(exchange, request);
-			return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
+			return routerFunction.route(request)
+					.defaultIfEmpty(notFound())
+					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
+					.flatMap(response -> wrapException(() -> response.writeTo(exchange,
+							new HandlerStrategiesResponseContext(strategies))));
 		};
 	}
 
+	private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
+		try {
+			return supplier.get();
+		}
+		catch (Throwable t) {
+			return Mono.error(t);
+		}
+	}
 
 	private static void addAttributes(ServerWebExchange exchange, ServerRequest request) {
 		Map<String, Object> attributes = exchange.getAttributes();
@@ -289,4 +249,91 @@ public abstract class RouterFunctions {
 		return (HandlerFunction<T>) handlerFunction;
 	}
 
+	private static class DefaultRouterFunction<T extends ServerResponse>
+			implements RouterFunction<T> {
+
+		private final RequestPredicate predicate;
+
+		private final HandlerFunction<T> handlerFunction;
+
+		public DefaultRouterFunction(RequestPredicate predicate,
+				HandlerFunction<T> handlerFunction) {
+			this.predicate = predicate;
+			this.handlerFunction = handlerFunction;
+		}
+
+		@Override
+		public Mono<HandlerFunction<T>> route(ServerRequest request) {
+			if (this.predicate.test(request)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"",
+							this.predicate, request));
+				}
+				return Mono.just(this.handlerFunction);
+			}
+			else {
+				return Mono.empty();
+			}
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s -> %s", this.predicate, this.handlerFunction);
+		}
+	}
+
+	private static class DefaultNestedRouterFunction<T extends ServerResponse>
+			implements RouterFunction<T> {
+
+		private final RequestPredicate predicate;
+
+		private final RouterFunction<T> routerFunction;
+
+		public DefaultNestedRouterFunction(RequestPredicate predicate,
+				RouterFunction<T> routerFunction) {
+			this.predicate = predicate;
+			this.routerFunction = routerFunction;
+		}
+
+		@Override
+		public Mono<HandlerFunction<T>> route(ServerRequest serverRequest) {
+			return this.predicate.nest(serverRequest)
+					.map(nestedRequest -> {
+								if (logger.isDebugEnabled()) {
+									logger.debug(
+											String.format(
+													"Nested predicate \"%s\" matches against \"%s\"",
+													this.predicate, serverRequest));
+								}
+								return this.routerFunction.route(nestedRequest);
+							}
+					)
+					.orElseGet(Mono::empty);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s -> %s", this.predicate, this.routerFunction);
+		}
+
+	}
+
+	private static class HandlerStrategiesResponseContext implements ServerResponse.Context {
+
+		private final HandlerStrategies strategies;
+
+		public HandlerStrategiesResponseContext(HandlerStrategies strategies) {
+			this.strategies = strategies;
+		}
+
+		@Override
+		public List<HttpMessageWriter<?>> messageWriters() {
+			return this.strategies.messageWriters();
+		}
+
+		@Override
+		public List<ViewResolver> viewResolvers() {
+			return this.strategies.viewResolvers();
+		}
+	}
 }

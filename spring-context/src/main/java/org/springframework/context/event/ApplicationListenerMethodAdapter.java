@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -70,14 +72,17 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private final List<ResolvableType> declaredEventTypes;
 
+	@Nullable
 	private final String condition;
 
 	private final int order;
 
 	private final AnnotatedElementKey methodKey;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private EventExpressionEvaluator evaluator;
 
 
@@ -87,7 +92,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 
-		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
+		Method targetMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(targetMethod, EventListener.class);
+
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(method);
@@ -96,7 +103,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 
-	private List<ResolvableType> resolveDeclaredEventTypes(Method method, EventListener ann) {
+	private List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
 		int count = method.getParameterCount();
 		if (count > 1) {
 			throw new IllegalStateException(
@@ -143,7 +150,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			if (declaredEventType.isAssignableFrom(eventType)) {
 				return true;
 			}
-			else if (PayloadApplicationEvent.class.isAssignableFrom(eventType.getRawClass())) {
+			Class<?> eventClass = eventType.getRawClass();
+			if (eventClass != null && PayloadApplicationEvent.class.isAssignableFrom(eventClass)) {
 				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
 				if (declaredEventType.isAssignableFrom(payloadType)) {
 					return true;
@@ -154,7 +162,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
+	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
 		return true;
 	}
 
@@ -187,6 +195,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * return {@code null} to indicate that no suitable arguments could be resolved and
 	 * therefore the method should not be invoked at all for the specified event.
 	 */
+	@Nullable
 	protected Object[] resolveArguments(ApplicationEvent event) {
 		ResolvableType declaredEventType = getResolvableType(event);
 		if (declaredEventType == null) {
@@ -195,7 +204,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
-		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass()) &&
+		Class<?> eventClass = declaredEventType.getRawClass();
+		if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) &&
 				event instanceof PayloadApplicationEvent) {
 			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
 		}
@@ -222,14 +232,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 	}
 
-	private void publishEvent(Object event) {
+	private void publishEvent(@Nullable Object event) {
 		if (event != null) {
-			Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
+			Assert.notNull(this.applicationContext, "ApplicationContext must not be null");
 			this.applicationContext.publishEvent(event);
 		}
 	}
 
-	private boolean shouldHandle(ApplicationEvent event, Object[] args) {
+	private boolean shouldHandle(ApplicationEvent event, @Nullable Object[] args) {
 		if (args == null) {
 			return false;
 		}
@@ -246,6 +256,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	/**
 	 * Invoke the event listener method with the given argument values.
 	 */
+	@Nullable
 	protected Object doInvoke(Object... args) {
 		Object bean = getTargetBean();
 		ReflectionUtils.makeAccessible(this.bridgedMethod);
@@ -286,6 +297,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * annotation or any matching attribute on a composed annotation that
 	 * is meta-annotated with {@code @EventListener}.
 	 */
+	@Nullable
 	protected String getCondition() {
 		return this.condition;
 	}
@@ -338,15 +350,19 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return sb.toString();
 	}
 
-
+	@Nullable
 	private ResolvableType getResolvableType(ApplicationEvent event) {
 		ResolvableType payloadType = null;
 		if (event instanceof PayloadApplicationEvent) {
 			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
-			payloadType = payloadEvent.getResolvableType().as(PayloadApplicationEvent.class).getGeneric();
+			ResolvableType eventType = payloadEvent.getResolvableType();
+			if (eventType != null) {
+				payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
+			}
 		}
 		for (ResolvableType declaredEventType : this.declaredEventTypes) {
-			if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass()) && payloadType != null) {
+			Class<?> eventClass = declaredEventType.getRawClass();
+			if ((eventClass == null || !ApplicationEvent.class.isAssignableFrom(eventClass)) && payloadType != null) {
 				if (declaredEventType.isAssignableFrom(payloadType)) {
 					return declaredEventType;
 				}

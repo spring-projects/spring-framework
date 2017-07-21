@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface defining a generic contract for attaching and accessing metadata
  * to/from arbitrary objects.
@@ -34,7 +36,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @param value the attribute value to be attached
 	 */
-	void setAttribute(String name, Object value);
+	void setAttribute(String name, @Nullable Object value);
 
 	/**
 	 * Get the value of the attribute identified by {@code name}.
@@ -42,6 +44,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @return the current value of the attribute, if any
 	 */
+	@Nullable
 	Object getAttribute(String name);
 
 	/**
@@ -50,6 +53,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @return the last value of the attribute, if any
 	 */
+	@Nullable
 	Object removeAttribute(String name);
 
 	/**

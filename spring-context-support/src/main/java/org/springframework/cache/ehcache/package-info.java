@@ -9,4 +9,7 @@
  * Instead, consider using it through JCache (JSR-107), with
  * Spring's support in {@code org.springframework.cache.jcache}.
  */
+@NonNullApi
 package org.springframework.cache.ehcache;
+
+import org.springframework.lang.NonNullApi;

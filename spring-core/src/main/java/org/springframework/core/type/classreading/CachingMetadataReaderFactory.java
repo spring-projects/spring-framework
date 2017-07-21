@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
@@ -40,6 +41,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
 	/** MetadataReader cache: either local or shared at the ResourceLoader level */
+	@Nullable
 	private Map<Resource, MetadataReader> metadataReaderCache;
 
 
@@ -57,7 +59,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 * using a local resource cache.
 	 * @param classLoader the ClassLoader to use
 	 */
-	public CachingMetadataReaderFactory(ClassLoader classLoader) {
+	public CachingMetadataReaderFactory(@Nullable ClassLoader classLoader) {
 		super(classLoader);
 		setCacheLimit(DEFAULT_CACHE_LIMIT);
 	}
@@ -69,7 +71,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 * (also determines the ClassLoader to use)
 	 * @see DefaultResourceLoader#getResourceCache
 	 */
-	public CachingMetadataReaderFactory(ResourceLoader resourceLoader) {
+	public CachingMetadataReaderFactory(@Nullable ResourceLoader resourceLoader) {
 		super(resourceLoader);
 		if (resourceLoader instanceof DefaultResourceLoader) {
 			this.metadataReaderCache =

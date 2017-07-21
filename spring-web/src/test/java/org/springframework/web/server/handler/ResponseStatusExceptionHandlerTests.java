@@ -18,18 +18,17 @@ package org.springframework.web.server.handler;
 
 import java.time.Duration;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -38,38 +37,23 @@ import static org.junit.Assert.*;
  */
 public class ResponseStatusExceptionHandlerTests {
 
-	private ResponseStatusExceptionHandler handler;
+	private final ResponseStatusExceptionHandler handler = new ResponseStatusExceptionHandler();
 
-	private MockServerHttpRequest request;
-
-	private MockServerHttpResponse response;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.handler = new ResponseStatusExceptionHandler();
-		this.request = MockServerHttpRequest.get("/").build();
-		this.response = new MockServerHttpResponse();
-	}
+	private  final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 
 	@Test
 	public void handleException() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
-		this.handler.handle(createExchange(), ex).block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
+		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
+		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
 		Throwable expected = new IllegalStateException();
-		Mono<Void> mono = this.handler.handle(createExchange(), expected);
+		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
-	}
-
-
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, this.response);
 	}
 
 }

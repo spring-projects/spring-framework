@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -35,6 +36,7 @@ public class MailSendException extends MailException {
 
 	private transient final Map<Object, Exception> failedMessages;
 
+	@Nullable
 	private Exception[] messageExceptions;
 
 
@@ -51,7 +53,7 @@ public class MailSendException extends MailException {
 	 * @param msg the detail message
 	 * @param cause the root cause from the mail API in use
 	 */
-	public MailSendException(String msg, Throwable cause) {
+	public MailSendException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>();
 	}
@@ -66,7 +68,7 @@ public class MailSendException extends MailException {
 	 * @param failedMessages Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
-	public MailSendException(String msg, Throwable cause, Map<Object, Exception> failedMessages) {
+	public MailSendException(@Nullable String msg, @Nullable Throwable cause, Map<Object, Exception> failedMessages) {
 		super(msg, cause);
 		this.failedMessages = new LinkedHashMap<>(failedMessages);
 		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);

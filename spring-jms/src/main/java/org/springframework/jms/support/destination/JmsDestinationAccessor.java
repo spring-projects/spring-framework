@@ -23,6 +23,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsAccessor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -125,6 +126,7 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	 * @see #RECEIVE_TIMEOUT_NO_WAIT
 	 * @see #RECEIVE_TIMEOUT_INDEFINITE_WAIT
 	 */
+	@Nullable
 	protected Message receiveFromConsumer(MessageConsumer consumer, long timeout) throws JMSException {
 		if (timeout > 0) {
 			return consumer.receive(timeout);

@@ -19,8 +19,8 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
 import reactor.ipc.netty.http.server.HttpServerRequest;
@@ -29,7 +29,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,27 +47,47 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory) {
-		super(initUri(request), initHeaders(request));
+	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
+			throws URISyntaxException {
+
+		super(initUri(request), "", initHeaders(request));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
-	private static URI initUri(HttpServerRequest channel) {
-		Assert.notNull(channel, "'channel' must not be null");
-		InetSocketAddress address = channel.remoteAddress();
-		String requestUri = channel.uri();
-		return (address != null ? getBaseUrl(address).resolve(requestUri) : URI.create(requestUri));
+	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
+		Assert.notNull(request, "'request' must not be null");
+		URI baseUri = resolveBaseUrl(request);
+		String requestUri = request.uri();
+		return (baseUri != null ? new URI(baseUri.toString() + requestUri) : new URI(requestUri));
 	}
 
-	private static URI getBaseUrl(InetSocketAddress address) {
-		try {
-			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
+	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
+		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
+		if (header != null) {
+			final int portIndex;
+			if (header.startsWith("[")) {
+				portIndex = header.indexOf(':', header.indexOf(']'));
+			} else {
+				portIndex = header.indexOf(':');
+			}
+			if (portIndex != -1) {
+				try {
+					return new URI(null, null, header.substring(0, portIndex),
+							Integer.parseInt(header.substring(portIndex + 1)), null, null, null);
+				} catch (NumberFormatException ignore) {
+					throw new URISyntaxException(header, "Unable to parse port", portIndex);
+				}
+			}
+			else {
+				return new URI(null, header, null, null);
+			}
 		}
-		catch (URISyntaxException ex) {
-			// Should not happen...
-			throw new IllegalStateException(ex);
+		else {
+			InetSocketAddress localAddress = (InetSocketAddress) request.context().channel().localAddress();
+			return new URI(null, null, localAddress.getHostString(),
+					localAddress.getPort(), null, null, null);
 		}
 	}
 
@@ -86,8 +105,8 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.method().name());
+	public String getMethodValue() {
+		return this.request.method().name();
 	}
 
 	@Override
@@ -103,8 +122,8 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Optional<InetSocketAddress> getRemoteAddress() {
-		return Optional.ofNullable(this.request.remoteAddress());
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
 	}
 
 	@Override

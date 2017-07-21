@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link FactoryBean} for creating a Jackson 2.x {@link ObjectMapper} (default) or
@@ -144,6 +145,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	private final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 
+	@Nullable
 	private ObjectMapper objectMapper;
 
 

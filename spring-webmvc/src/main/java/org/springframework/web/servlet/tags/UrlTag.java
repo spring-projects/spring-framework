@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.JavaScriptUtils;
@@ -82,16 +85,20 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	private static final String URL_TYPE_ABSOLUTE = "://";
 
 
-	private List<Param> params;
+	private List<Param> params = Collections.emptyList();
 
-	private Set<String> templateParams;
+	private Set<String> templateParams = Collections.emptySet();
 
+	@Nullable
 	private UrlType type;
 
+	@Nullable
 	private String value;
 
+	@Nullable
 	private String context;
 
+	@Nullable
 	private String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
@@ -198,9 +205,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @return the URL value as a String
 	 * @throws JspException
 	 */
-	private String createUrl() throws JspException {
+	String createUrl() throws JspException {
+		Assert.state(this.value != null, "No value set");
 		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
 		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
+
 		StringBuilder url = new StringBuilder();
 		if (this.type == UrlType.CONTEXT_RELATIVE) {
 			// add application context to url
@@ -231,7 +240,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 		// HTML and/or JavaScript escape, if demanded.
 		urlStr = htmlEscape(urlStr);
-		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
+		urlStr = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr);
 
 		return urlStr;
 	}
@@ -292,8 +301,9 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
 				usedParams.add(param.getName());
+				String value = param.getValue();
 				try {
-					uri = uri.replace(template, UriUtils.encodePath(param.getValue(), encoding));
+					uri = uri.replace(template, (value != null ? UriUtils.encodePath(value, encoding) : ""));
 				}
 				catch (UnsupportedEncodingException ex) {
 					throw new JspException(ex);
@@ -303,8 +313,10 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				template = URL_TEMPLATE_DELIMITER_PREFIX + '/' + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 				if (uri.contains(template)) {
 					usedParams.add(param.getName());
+					String value = param.getValue();
 					try {
-						uri = uri.replace(template, UriUtils.encodePathSegment(param.getValue(), encoding));
+						uri = uri.replace(template,
+								(value != null ? UriUtils.encodePathSegment(param.getValue(), encoding) : ""));
 					}
 					catch (UnsupportedEncodingException ex) {
 						throw new JspException(ex);

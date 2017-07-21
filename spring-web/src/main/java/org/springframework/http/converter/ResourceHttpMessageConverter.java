@@ -27,16 +27,15 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.util.ClassUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
  * and supports byte range requests.
  *
- * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
- * if available - is used to determine the {@code Content-Type} of written resources.
- * If JAF is not available, {@code application/octet-stream} is used.
+ * <p>By default, this converter can read all media types. The {@link MediaTypeFactory} is used
+ * to determine the {@code Content-Type} of written resources.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -44,9 +43,6 @@ import org.springframework.util.StreamUtils;
  * @since 3.0.2
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
-
-	private static final boolean jafPresent = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
 	private final boolean supportsReadStreaming;
 
@@ -82,12 +78,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		final String filename = inputMessage.getHeaders().getContentDisposition().getFilename();
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
 				public String getFilename() {
-					return filename;
+					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
 			};
 		}
@@ -96,7 +91,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			return new ByteArrayResource(body) {
 				@Override
 				public String getFilename() {
-					return filename;
+					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
 			};
 		}
@@ -107,16 +102,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
-		if (jafPresent) {
-			return MediaTypeFactory.getMediaType(resource);
-		}
-		else {
-			return MediaType.APPLICATION_OCTET_STREAM;
-		}
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	@Override
-	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
+	protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
 		if (InputStreamResource.class == resource.getClass()) {

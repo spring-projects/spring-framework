@@ -15,19 +15,15 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
@@ -49,7 +45,8 @@ public class HeaderContentTypeResolverTests {
 
 	@Test
 	public void resolveMediaTypes() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
+		String header = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("accept", header).toExchange();
 		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(exchange);
 
 		assertEquals(4, mediaTypes.size());
@@ -61,18 +58,9 @@ public class HeaderContentTypeResolverTests {
 
 	@Test(expected = NotAcceptableStatusException.class)
 	public void resolveMediaTypesParseError() throws Exception {
-		ServerWebExchange exchange = createExchange("textplain; q=0.5");
+		String header = "textplain; q=0.5";
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").header("accept", header).toExchange();
 		this.resolver.resolveMediaTypes(exchange);
-	}
-
-
-	private ServerWebExchange createExchange(String accept) throws URISyntaxException {
-
-		ServerHttpRequest request = (accept != null ?
-				MockServerHttpRequest.get("/").header("accept", accept).build() :
-				MockServerHttpRequest.get("/").build());
-
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

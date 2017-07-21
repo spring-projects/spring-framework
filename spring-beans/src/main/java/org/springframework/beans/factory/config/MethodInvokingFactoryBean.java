@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} which returns a value which is the result of a static or instance
@@ -87,6 +88,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	private boolean initialized = false;
 
 	/** Method call result in the singleton case */
+	@Nullable
 	private Object singletonObject;
 
 

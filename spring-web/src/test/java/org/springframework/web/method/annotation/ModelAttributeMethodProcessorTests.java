@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class ModelAttributeMethodProcessorTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = new ServletWebRequest(new MockHttpServletRequest());
 		this.container = new ModelAndViewContainer();
 		this.processor = new ModelAttributeMethodProcessor(false);
@@ -145,7 +145,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test
-	public void resovleArgumentViaDefaultConstructor() throws Exception {
+	public void resolveArgumentViaDefaultConstructor() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
 		given(factory.createBinder(any(), notNull(), eq("attrName"))).willReturn(dataBinder);

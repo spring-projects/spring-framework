@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -90,12 +91,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ChannelRegistration clientInboundChannelRegistration;
 
+	@Nullable
 	private ChannelRegistration clientOutboundChannelRegistration;
 
+	@Nullable
 	private MessageBrokerRegistry brokerRegistry;
 
 
@@ -107,10 +112,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
+	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
@@ -234,6 +240,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Provide access to the configured PatchMatcher for access from other
 	 * configuration classes.
 	 */
+	@Nullable
 	public final PathMatcher getPathMatcher() {
 		return getBrokerRegistry().getPathMatcher();
 	}
@@ -307,7 +314,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
 				brokerChannel(), userDestinationResolver());
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
-		handler.setBroadcastDestination(destination);
+		if (destination != null) {
+			handler.setBroadcastDestination(destination);
+		}
 		return handler;
 	}
 
@@ -383,7 +392,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
-		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
+		resolver.setPathMatcher(getPathMatcher());
 		return resolver;
 	}
 
@@ -414,7 +423,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected Validator simpValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+			if (this.applicationContext != null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
 			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
@@ -435,7 +444,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 						return false;
 					}
 					@Override
-					public void validate(Object target, Errors errors) {
+					public void validate(@Nullable Object target, Errors errors) {
 					}
 				};
 			}
@@ -447,6 +456,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Override this method to provide a custom {@link Validator}.
 	 * @since 4.0.1
 	 */
+	@Nullable
 	public Validator getValidator() {
 		return null;
 	}

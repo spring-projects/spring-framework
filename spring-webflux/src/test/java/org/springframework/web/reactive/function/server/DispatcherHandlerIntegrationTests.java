@@ -17,17 +17,11 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,27 +29,23 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.HandlerAdapter;
-import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
-import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
-import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
-import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
- * {@link DispatcherHandler}.
+ * {@link DispatcherHandler}, combined with {@link Controller}s.
  *
  * @author Arjen Poutsma
  */
@@ -77,7 +67,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		return WebHttpHandlerBuilder.webHandler(webHandler).build();
 	}
-	
+
 
 	@Test
 	public void mono() throws Exception {
@@ -101,10 +91,20 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		assertEquals("John", body.get(0).getName());
 		assertEquals("Jane", body.get(1).getName());
 	}
-	
 
+	@Test
+	public void controller() throws Exception {
+		ResponseEntity<Person> result =
+				this.restTemplate.getForEntity("http://localhost:" + this.port + "/controller", Person.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("John", result.getBody().getName());
+	}
+
+
+	@EnableWebFlux
 	@Configuration
-	static class TestConfiguration extends WebFluxConfigurationSupport {
+	static class TestConfiguration {
 
 		@Bean
 		public PersonHandler personHandler() {
@@ -112,56 +112,28 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public HandlerAdapter handlerAdapter() {
-			return new HandlerFunctionAdapter();
+		public PersonController personController() {
+			return new PersonController();
 		}
 
 		@Bean
-		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
-				ApplicationContext applicationContext) {
-			return RouterFunctions.toHandlerMapping(routerFunction,
-					new HandlerStrategies() {
-						@Override
-						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-							return () -> getMessageReaders().stream();
-						}
-
-						@Override
-						public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-							return () -> getMessageWriters().stream();
-						}
-
-						@Override
-						public Supplier<Stream<ViewResolver>> viewResolvers() {
-							return Stream::empty;
-						}
-
-						@Override
-						public Function<ServerRequest, Optional<Locale>> localeResolver() {
-							return DefaultHandlerStrategiesBuilder.DEFAULT_LOCALE_RESOLVER;
-						}
-					});
+		public RouterFunction<EntityResponse<Person>> monoRouterFunction(PersonHandler personHandler) {
+			return route(RequestPredicates.GET("/mono"), personHandler::mono);
 		}
 
 		@Bean
-		public RouterFunction<?> routerFunction() {
-			PersonHandler personHandler = personHandler();
-			return route(RequestPredicates.GET("/mono"), personHandler::mono)
-					.and(route(RequestPredicates.GET("/flux"), personHandler::flux));
+		public RouterFunction<ServerResponse> fluxRouterFunction(PersonHandler personHandler) {
+			return route(RequestPredicates.GET("/flux"), personHandler::flux);
 		}
 
-		@Bean
-		public ServerResponseResultHandler responseResultHandler() {
-			return new ServerResponseResultHandler();
-		}
 	}
-	
+
 
 	private static class PersonHandler {
 
-		public Mono<ServerResponse> mono(ServerRequest request) {
+		public Mono<EntityResponse<Person>> mono(ServerRequest request) {
 			Person person = new Person("John");
-			return ServerResponse.ok().body(fromObject(person));
+			return EntityResponse.fromObject(person).build();
 		}
 
 		public Mono<ServerResponse> flux(ServerRequest request) {
@@ -171,10 +143,16 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 					fromPublisher(Flux.just(person1, person2), Person.class));
 		}
 
-		public Mono<ServerResponse> view() {
-			return ServerResponse.ok().render("foo", "bar");
-		}
+	}
 
+	@Controller
+	private static class PersonController {
+
+		@RequestMapping("/controller")
+		@ResponseBody
+		public Mono<Person> controller() {
+			return Mono.just(new Person("John"));
+		}
 	}
 
 	private static class Person {
@@ -193,6 +171,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return this.name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}
@@ -205,8 +184,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			if (o == null || getClass() != o.getClass()) {
 				return false;
 			}
-			Person
-					person = (Person) o;
+			Person person = (Person) o;
 			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
 		}
 
@@ -220,5 +198,5 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return "Person{" + "name='" + this.name + '\'' + '}';
 		}
 	}
-	
+
 }

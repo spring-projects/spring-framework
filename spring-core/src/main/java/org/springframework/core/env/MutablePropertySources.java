@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -154,6 +155,7 @@ public class MutablePropertySources implements PropertySources {
 	 * Remove and return the property source with the given name, {@code null} if not found.
 	 * @param name the name of the property source to find and remove
 	 */
+	@Nullable
 	public PropertySource<?> remove(String name) {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Removing [%s] PropertySource", name));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
@@ -48,8 +49,10 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  */
 public class EndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
 
+	@Nullable
 	private final Endpoint endpoint;
 
+	@Nullable
 	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
@@ -58,21 +61,22 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
+	@Nullable
 	private volatile Session session;
 
 
 	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		Assert.notNull(endpoint, "endpoint must not be null");
-		this.endpointProvider = null;
 		this.endpoint = endpoint;
+		this.endpointProvider = null;
 	}
 
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass must not be null");
-		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 	}
 
 
@@ -130,21 +134,22 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	@Override
 	protected void openConnection() {
-		this.taskExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Connecting to WebSocket at " + getUri());
-					}
-					Endpoint endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
-					ClientEndpointConfig endpointConfig = configBuilder.build();
-					session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
-					logger.info("Successfully connected to WebSocket");
+		this.taskExecutor.execute(() -> {
+			try {
+				if (logger.isInfoEnabled()) {
+					logger.info("Connecting to WebSocket at " + getUri());
 				}
-				catch (Throwable ex) {
-					logger.error("Failed to connect to WebSocket", ex);
+				Endpoint endpointToUse = endpoint;
+				if (endpointToUse == null) {
+					Assert.state(endpointProvider != null, "No endpoint set");
+					endpointToUse = endpointProvider.getHandler();
 				}
+				ClientEndpointConfig endpointConfig = configBuilder.build();
+				session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
+				logger.info("Successfully connected to WebSocket");
+			}
+			catch (Throwable ex) {
+				logger.error("Failed to connect to WebSocket", ex);
 			}
 		});
 	}
@@ -152,8 +157,9 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	@Override
 	protected void closeConnection() throws Exception {
 		try {
-			if (isConnected()) {
-				this.session.close();
+			Session session = this.session;
+			if (session != null && session.isOpen()) {
+				session.close();
 			}
 		}
 		finally {
@@ -163,7 +169,8 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	@Override
 	protected boolean isConnected() {
-		return (this.session != null && this.session.isOpen());
+		Session session = this.session;
+		return (session != null && session.isOpen());
 	}
 
 }

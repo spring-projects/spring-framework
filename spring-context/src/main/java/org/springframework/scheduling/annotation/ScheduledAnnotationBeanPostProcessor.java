@@ -53,6 +53,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
@@ -107,14 +108,19 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Object scheduler;
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
@@ -216,11 +222,12 @@ public class ScheduledAnnotationBeanPostProcessor
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
 			try {
 				// Search for TaskScheduler bean...
-				this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, false));
+				this.registrar.setTaskScheduler(resolveSchedulerBean(beanFactory, TaskScheduler.class, false));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
+				logger.debug("Could not find unique TaskScheduler bean", ex);
 				try {
-					this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, true));
+					this.registrar.setTaskScheduler(resolveSchedulerBean(beanFactory, TaskScheduler.class, true));
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
 					if (logger.isInfoEnabled()) {
@@ -236,11 +243,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				logger.debug("Could not find default TaskScheduler bean", ex);
 				// Search for ScheduledExecutorService bean next...
 				try {
-					this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, false));
+					this.registrar.setScheduler(resolveSchedulerBean(beanFactory, ScheduledExecutorService.class, false));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
+					logger.debug("Could not find unique ScheduledExecutorService bean", ex2);
 					try {
-						this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, true));
+						this.registrar.setScheduler(resolveSchedulerBean(beanFactory, ScheduledExecutorService.class, true));
 					}
 					catch (NoSuchBeanDefinitionException ex3) {
 						if (logger.isInfoEnabled()) {
@@ -263,25 +271,24 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.registrar.afterPropertiesSet();
 	}
 
-	private <T> T resolveSchedulerBean(Class<T> schedulerType, boolean byName) {
+	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
 		if (byName) {
-			T scheduler = this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
-			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			T scheduler = beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
+			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
 				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
 						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
 			}
 			return scheduler;
 		}
-		else if (this.beanFactory instanceof AutowireCapableBeanFactory) {
-			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) this.beanFactory).resolveNamedBean(schedulerType);
-			if (this.beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
-						holder.getBeanName(), this.beanName);
+		else if (beanFactory instanceof AutowireCapableBeanFactory) {
+			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) beanFactory).resolveNamedBean(schedulerType);
+			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) beanFactory).registerDependentBean(holder.getBeanName(), this.beanName);
 			}
 			return holder.getBeanInstance();
 		}
 		else {
-			return this.beanFactory.getBean(schedulerType);
+			return beanFactory.getBean(schedulerType);
 		}
 	}
 
@@ -300,13 +307,10 @@ public class ScheduledAnnotationBeanPostProcessor
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
-					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
-						@Override
-						public Set<Scheduled> inspect(Method method) {
-							Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
-									method, Scheduled.class, Schedules.class);
-							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
-						}
+					(MethodIntrospector.MetadataLookup<Set<Scheduled>>) method -> {
+						Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+								method, Scheduled.class, Schedules.class);
+						return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
 					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
@@ -316,12 +320,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			else {
 				// Non-empty set of methods
-				for (Map.Entry<Method, Set<Scheduled>> entry : annotatedMethods.entrySet()) {
-					Method method = entry.getKey();
-					for (Scheduled scheduled : entry.getValue()) {
-						processScheduled(scheduled, method, bean);
-					}
-				}
+				annotatedMethods.forEach((method, scheduledMethods) ->
+						scheduledMethods.forEach(scheduled -> processScheduled(scheduled, method, bean)));
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -352,33 +352,37 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
-				try {
-					initialDelay = Long.parseLong(initialDelayString);
-				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+				if (StringUtils.hasLength(initialDelayString)) {
+					try {
+						initialDelay = Long.parseLong(initialDelayString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+					}
 				}
 			}
 
 			// Check cron expression
 			String cron = scheduled.cron();
 			if (StringUtils.hasText(cron)) {
-				Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
-				processedSchedule = true;
 				String zone = scheduled.zone();
 				if (this.embeddedValueResolver != null) {
 					cron = this.embeddedValueResolver.resolveStringValue(cron);
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
-				TimeZone timeZone;
-				if (StringUtils.hasText(zone)) {
-					timeZone = StringUtils.parseTimeZoneString(zone);
+				if (StringUtils.hasLength(cron)) {
+					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
+					processedSchedule = true;
+					TimeZone timeZone;
+					if (StringUtils.hasText(zone)) {
+						timeZone = StringUtils.parseTimeZoneString(zone);
+					}
+					else {
+						timeZone = TimeZone.getDefault();
+					}
+					tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 				}
-				else {
-					timeZone = TimeZone.getDefault();
-				}
-				tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
@@ -395,19 +399,21 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
-				Assert.isTrue(!processedSchedule, errorMessage);
-				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
 					fixedDelayString = this.embeddedValueResolver.resolveStringValue(fixedDelayString);
 				}
-				try {
-					fixedDelay = Long.parseLong(fixedDelayString);
+				if (StringUtils.hasLength(fixedDelayString)) {
+					Assert.isTrue(!processedSchedule, errorMessage);
+					processedSchedule = true;
+					try {
+						fixedDelay = Long.parseLong(fixedDelayString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
+					}
+					tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into integer");
-				}
-				tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 			}
 
 			// Check fixed rate
@@ -419,19 +425,21 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
-				Assert.isTrue(!processedSchedule, errorMessage);
-				processedSchedule = true;
 				if (this.embeddedValueResolver != null) {
 					fixedRateString = this.embeddedValueResolver.resolveStringValue(fixedRateString);
 				}
-				try {
-					fixedRate = Long.parseLong(fixedRateString);
+				if (StringUtils.hasLength(fixedRateString)) {
+					Assert.isTrue(!processedSchedule, errorMessage);
+					processedSchedule = true;
+					try {
+						fixedRate = Long.parseLong(fixedRateString);
+					}
+					catch (NumberFormatException ex) {
+						throw new IllegalArgumentException(
+								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
+					}
+					tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 				}
-				catch (NumberFormatException ex) {
-					throw new IllegalArgumentException(
-							"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
-				}
-				tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 			}
 
 			// Check whether we had any attribute set

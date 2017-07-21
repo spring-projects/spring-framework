@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.web.client;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 
 /**
  * Common base class for exceptions that contain actual HTTP response data.
@@ -31,7 +33,7 @@ public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 
-	private static final String DEFAULT_CHARSET = "ISO-8859-1";
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
 
 	private final int rawStatusCode;
@@ -40,8 +42,10 @@ public class RestClientResponseException extends RestClientException {
 
 	private final byte[] responseBody;
 
+	@Nullable
 	private final HttpHeaders responseHeaders;
 
+	@Nullable
 	private final String responseCharset;
 
 
@@ -54,14 +58,14 @@ public class RestClientResponseException extends RestClientException {
 	 * @param responseCharset the response body charset (may be {@code null})
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
-			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
 		super(message);
 		this.rawStatusCode = statusCode;
 		this.statusText = statusText;
 		this.responseHeaders = responseHeaders;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
-		this.responseCharset = (responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET);
+		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
 	}
 
 
@@ -82,6 +86,7 @@ public class RestClientResponseException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
+	@Nullable
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}
@@ -97,6 +102,9 @@ public class RestClientResponseException extends RestClientException {
 	 * Return the response body as a string.
 	 */
 	public String getResponseBodyAsString() {
+		if (this.responseCharset == null) {
+			return new String(this.responseBody, DEFAULT_CHARSET);
+		}
 		try {
 			return new String(this.responseBody, this.responseCharset);
 		}

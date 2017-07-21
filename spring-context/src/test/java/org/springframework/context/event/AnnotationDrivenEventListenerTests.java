@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,6 +41,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -60,6 +63,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -488,10 +493,20 @@ public class AnnotationDrivenEventListenerTests {
 
 	@Test
 	public void conditionMatch() {
+		validateConditionMatch(ConditionalEventListener.class);
+	}
+
+	@Test
+	public void conditionMatchWithProxy() {
+		validateConditionMatch(ConditionalEventListener.class, MethodValidationPostProcessor.class);
+	}
+
+	private void validateConditionMatch(Class<?>... classes) {
 		long timestamp = System.currentTimeMillis();
-		load(ConditionalEventListener.class);
+		load(classes);
 		TestEvent event = new TestEvent(this, "OK");
-		TestEventListener listener = this.context.getBean(ConditionalEventListener.class);
+
+		ConditionalEventInterface listener = this.context.getBean(ConditionalEventInterface.class);
 		this.eventCollector.assertNoEventReceived(listener);
 
 		this.context.publishEvent(event);
@@ -500,6 +515,9 @@ public class AnnotationDrivenEventListenerTests {
 
 		this.context.publishEvent("OK");
 		this.eventCollector.assertEvent(listener, event, "OK");
+		this.eventCollector.assertTotalEventsCount(2);
+
+		this.context.publishEvent("NOT OK");
 		this.eventCollector.assertTotalEventsCount(2);
 
 		this.context.publishEvent(timestamp);
@@ -543,6 +561,14 @@ public class AnnotationDrivenEventListenerTests {
 
 		assertTrue(listener.order.isEmpty());
 		this.context.publishEvent("whatever");
+		assertThat(listener.order, contains("first", "second", "third"));
+	}
+
+	@Test @Ignore  // SPR-15122
+	public void listenersReceiveEarlyEvents() {
+		load(EventOnPostConstruct.class, OrderedTestListener.class);
+		OrderedTestListener listener = this.context.getBean(OrderedTestListener.class);
+
 		assertThat(listener.order, contains("first", "second", "third"));
 	}
 
@@ -885,8 +911,21 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
+	interface ConditionalEventInterface extends Identifiable {
+
+		void handle(TestEvent event);
+
+		void handleString(String payload);
+
+		void handleTimestamp(Long timestamp);
+
+		void handleRatio(Double ratio);
+	}
+
+
 	@Component
-	static class ConditionalEventListener extends TestEventListener {
+	@Validated
+	static class ConditionalEventListener extends TestEventListener implements ConditionalEventInterface {
 
 		@EventListener(condition = "'OK'.equals(#root.event.msg)")
 		@Override
@@ -932,6 +971,18 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		public void handleSecond(String payload) {
 			this.order.add("second");
+		}
+	}
+
+
+	static class EventOnPostConstruct {
+
+		@Autowired
+		ApplicationEventPublisher publisher;
+
+		@PostConstruct
+		public void init() {
+			this.publisher.publishEvent("earlyEvent");
 		}
 	}
 

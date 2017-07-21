@@ -39,8 +39,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -97,7 +97,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 					return request.getInputStream();
 				}
 			};
-			MultiValueMap<String, String> formParameters = formConverter.read(null, inputMessage);
+			MultiValueMap<String, String> formParameters = this.formConverter.read(null, inputMessage);
 			HttpServletRequest wrapper = new HttpPutFormContentRequestWrapper(request, formParameters);
 			filterChain.doFilter(wrapper, response);
 		}
@@ -129,10 +129,11 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {
 			super(request);
-			this.formParameters = (parameters != null ? parameters : new LinkedMultiValueMap<>());
+			this.formParameters = parameters;
 		}
 
 		@Override
+		@Nullable
 		public String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
 			String formValue = this.formParameters.getFirst(name);
@@ -159,19 +160,20 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		}
 
 		@Override
+		@Nullable
 		public String[] getParameterValues(String name) {
-			String[] queryStringValues = super.getParameterValues(name);
-			List<String> formValues = this.formParameters.get(name);
-			if (formValues == null) {
-				return queryStringValues;
+			String[] queryParam = (super.getQueryString() != null ? super.getParameterValues(name) : null);
+			List<String> formParam = this.formParameters.get(name);
+			if (formParam == null) {
+				return queryParam;
 			}
-			else if (queryStringValues == null) {
-				return formValues.toArray(new String[formValues.size()]);
+			else if (queryParam == null) {
+				return formParam.toArray(new String[formParam.size()]);
 			}
 			else {
-				List<String> result = new ArrayList<>(queryStringValues.length + formValues.size());
-				result.addAll(Arrays.asList(queryStringValues));
-				result.addAll(formValues);
+				List<String> result = new ArrayList<>(queryParam.length + formParam.size());
+				result.addAll(Arrays.asList(queryParam));
+				result.addAll(formParam);
 				return result.toArray(new String[result.size()]);
 			}
 		}

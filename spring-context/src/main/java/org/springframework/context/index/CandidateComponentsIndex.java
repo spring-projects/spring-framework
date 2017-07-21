@@ -18,7 +18,6 @@ package org.springframework.context.index;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,13 +74,12 @@ public class CandidateComponentsIndex {
 	private static MultiValueMap<String, String> parseIndex(List<Properties> content) {
 		MultiValueMap<String, String> index = new LinkedMultiValueMap<>();
 		for (Properties entry : content) {
-			for (Map.Entry<Object, Object> entries : entry.entrySet()) {
-				String type = (String) entries.getKey();
-				String[] stereotypes = ((String) entries.getValue()).split(",");
+			entry.forEach((type, values) -> {
+				String[] stereotypes = ((String) values).split(",");
 				for (String stereotype : stereotypes) {
-					index.add(stereotype, type);
+					index.add(stereotype, (String) type);
 				}
-			}
+			});
 		}
 		return index;
 	}

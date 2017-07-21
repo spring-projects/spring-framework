@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -73,13 +75,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
-	private static final UrlPathHelper DECODING_URL_PATH_HELPER = new UrlPathHelper();
 
-	private static final UrlPathHelper RAW_URL_PATH_HELPER = new UrlPathHelper();
+	private static final UrlPathHelper decodingUrlPathHelper = new UrlPathHelper();
+
+	private static final UrlPathHelper rawUrlPathHelper = new UrlPathHelper();
 
 	static {
-		RAW_URL_PATH_HELPER.setRemoveSemicolonContent(false);
-		RAW_URL_PATH_HELPER.setUrlDecode(false);
+		rawUrlPathHelper.setRemoveSemicolonContent(false);
+		rawUrlPathHelper.setUrlDecode(false);
 	}
 
 
@@ -94,14 +97,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * Constructor with list of converters only.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters) {
-		this(converters, null);
+		this(converters, null, null);
 	}
 
 	/**
 	 * Constructor with list of converters and ContentNegotiationManager.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
-			ContentNegotiationManager contentNegotiationManager) {
+			@Nullable ContentNegotiationManager contentNegotiationManager) {
 
 		this(converters, contentNegotiationManager, null);
 	}
@@ -111,9 +114,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * as request/response body advice instances.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
-			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
+			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
 
 		super(converters, requestResponseBodyAdvice);
+
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 		this.pathStrategy = initPathStrategy(this.contentNegotiationManager);
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
@@ -134,6 +138,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	protected ServletServerHttpResponse createOutputMessage(NativeWebRequest webRequest) {
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+		Assert.state(response != null, "No HttpServletResponse");
 		return new ServletServerHttpResponse(response);
 	}
 
@@ -156,11 +161,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * @param inputMessage the input messages. Used to inspect the {@code Accept} header.
 	 * @param outputMessage the output message to write to
 	 * @throws IOException thrown in case of I/O errors
-	 * @throws HttpMediaTypeNotAcceptableException thrown when the conditions indicated by {@code Accept} header on
-	 * the request cannot be met by the message converters
+	 * @throws HttpMediaTypeNotAcceptableException thrown when the conditions indicated
+	 * by the {@code Accept} header on the request cannot be met by the message converters
 	 */
-	@SuppressWarnings("unchecked")
-	protected <T> void writeWithMessageConverters(T value, MethodParameter returnType,
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	protected <T> void writeWithMessageConverters(@Nullable T value, MethodParameter returnType,
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
@@ -184,7 +189,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request, valueType, declaredType);
 
 		if (outputValue != null && producibleMediaTypes.isEmpty()) {
-			throw new IllegalArgumentException("No converter found for return value of type: " + valueType);
+			throw new HttpMessageNotWritableException("No converter found for return value of type: " + valueType);
 		}
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
@@ -219,35 +224,26 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
-			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
-					if (((GenericHttpMessageConverter) messageConverter).canWrite(
-							declaredType, valueType, selectedMediaType)) {
-						outputValue = (T) getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
-								(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
-								inputMessage, outputMessage);
-						if (outputValue != null) {
-							addContentDispositionHeader(inputMessage, outputMessage);
-							((GenericHttpMessageConverter) messageConverter).write(
-									outputValue, declaredType, selectedMediaType, outputMessage);
-							if (logger.isDebugEnabled()) {
-								logger.debug("Written [" + outputValue + "] as \"" + selectedMediaType +
-										"\" using [" + messageConverter + "]");
-							}
-						}
-						return;
-					}
-				}
-				else if (messageConverter.canWrite(valueType, selectedMediaType)) {
+			for (HttpMessageConverter<?> converter : this.messageConverters) {
+				GenericHttpMessageConverter genericConverter =
+						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
+				if (genericConverter != null ?
+						((GenericHttpMessageConverter) converter).canWrite(declaredType, valueType, selectedMediaType) :
+						converter.canWrite(valueType, selectedMediaType)) {
 					outputValue = (T) getAdvice().beforeBodyWrite(outputValue, returnType, selectedMediaType,
-							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
+							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);
 					if (outputValue != null) {
 						addContentDispositionHeader(inputMessage, outputMessage);
-						((HttpMessageConverter) messageConverter).write(outputValue, selectedMediaType, outputMessage);
+						if (genericConverter != null) {
+							genericConverter.write(outputValue, declaredType, selectedMediaType, outputMessage);
+						}
+						else {
+							((HttpMessageConverter) converter).write(outputValue, selectedMediaType, outputMessage);
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Written [" + outputValue + "] as \"" + selectedMediaType +
-									"\" using [" + messageConverter + "]");
+									"\" using [" + converter + "]");
 						}
 					}
 					return;
@@ -266,7 +262,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * return type needs to be examined possibly including generic type determination
 	 * (e.g. {@code ResponseEntity<T>}).
 	 */
-	protected Class<?> getReturnValueType(Object value, MethodParameter returnType) {
+	protected Class<?> getReturnValueType(@Nullable Object value, MethodParameter returnType) {
 		return (value != null ? value.getClass() : returnType.getParameterType());
 	}
 
@@ -276,7 +272,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	private Type getGenericType(MethodParameter returnType) {
 		if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			return ResolvableType.forType(returnType.getGenericParameterType()).getGeneric(0).getType();
+			return ResolvableType.forType(returnType.getGenericParameterType()).getGeneric().getType();
 		}
 		else {
 			return returnType.getGenericParameterType();
@@ -301,7 +297,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass, Type declaredType) {
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass,
+			@Nullable Type declaredType) {
+
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);
@@ -364,7 +362,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		HttpServletRequest servletRequest = request.getServletRequest();
-		String requestUri = RAW_URL_PATH_HELPER.getOriginatingRequestUri(servletRequest);
+		String requestUri = rawUrlPathHelper.getOriginatingRequestUri(servletRequest);
 
 		int index = requestUri.lastIndexOf('/') + 1;
 		String filename = requestUri.substring(index);
@@ -376,10 +374,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			filename = filename.substring(0, index);
 		}
 
-		filename = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, filename);
+		filename = decodingUrlPathHelper.decodeRequestString(servletRequest, filename);
 		String ext = StringUtils.getFilenameExtension(filename);
 
-		pathParams = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, pathParams);
+		pathParams = decodingUrlPathHelper.decodeRequestString(servletRequest, pathParams);
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
@@ -388,7 +386,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean safeExtension(HttpServletRequest request, String extension) {
+	private boolean safeExtension(HttpServletRequest request, @Nullable String extension) {
 		if (!StringUtils.hasText(extension)) {
 			return true;
 		}
@@ -407,13 +405,13 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				return true;
 			}
 		}
-		return safeMediaTypesForExtension(extension);
+		return safeMediaTypesForExtension(new ServletWebRequest(request), extension);
 	}
 
-	private boolean safeMediaTypesForExtension(String extension) {
+	private boolean safeMediaTypesForExtension(NativeWebRequest request, String extension) {
 		List<MediaType> mediaTypes = null;
 		try {
-			mediaTypes = this.pathStrategy.resolveMediaTypeKey(null, extension);
+			mediaTypes = this.pathStrategy.resolveMediaTypeKey(request, extension);
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
 			// Ignore

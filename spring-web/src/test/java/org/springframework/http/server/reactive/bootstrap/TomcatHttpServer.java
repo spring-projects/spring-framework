@@ -68,9 +68,7 @@ public class TomcatHttpServer extends AbstractHttpServer {
 	}
 
 	private ServletHttpHandlerAdapter initServletAdapter() {
-		return getHttpHandlerMap() != null ?
-				new TomcatHttpHandlerAdapter(getHttpHandlerMap()) :
-				new TomcatHttpHandlerAdapter(getHttpHandler());
+		return new TomcatHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 

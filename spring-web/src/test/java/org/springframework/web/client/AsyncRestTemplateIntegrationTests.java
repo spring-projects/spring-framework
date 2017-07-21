@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,19 +48,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
@@ -71,6 +65,16 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 	public void getEntity() throws Exception {
 		Future<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
 		ResponseEntity<String> entity = future.get();
+		assertEquals("Invalid content", helloWorld, entity.getBody());
+		assertFalse("No headers", entity.getHeaders().isEmpty());
+		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
+		assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
+	}
+
+	@Test
+	public void getEntityFromCompletable() throws Exception {
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
+		ResponseEntity<String> entity = future.completable().get();
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
 		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());

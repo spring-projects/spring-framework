@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,17 @@ package org.springframework.web.reactive.result.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for String templates running on Jython.
@@ -41,14 +37,6 @@ import org.springframework.web.server.session.WebSessionManager;
  * @author Sebastien Deleuze
  */
 public class JythonScriptTemplateTests {
-
-	private StaticApplicationContext context;
-
-
-	@Before
-	public void setup() {
-		this.context = new StaticApplicationContext();
-	}
 
 	@Test
 	public void renderTemplate() throws Exception {
@@ -62,12 +50,9 @@ public class JythonScriptTemplateTests {
 
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl);
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
-		return response;
+		return exchange.getResponse();
 	}
 
 	private ScriptTemplateView createViewWithUrl(String viewUrl) throws Exception {

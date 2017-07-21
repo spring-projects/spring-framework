@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Before
 	@SuppressWarnings("serial")
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
@@ -86,6 +86,35 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
+	public void contextPathWithForwardedPrefix() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix", actual);
+	}
+
+	@Test
+	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix", actual);
+	}
+
+	@Test
+	public void contextPathPreserveEncoding() throws Exception {
+		this.request.setContextPath("/app%20");
+		this.request.setRequestURI("/app%20/path/");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertEquals("/app%20", actual.getContextPath());
+		assertEquals("/app%20/path/", actual.getRequestURI());
+		assertEquals("http://localhost/app%20/path/", actual.getRequestURL().toString());
+	}
+
+	@Test
 	public void requestUri() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
@@ -106,6 +135,18 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("", actual.getContextPath());
 		assertEquals("/path/", actual.getRequestURI());
 	}
+
+	@Test
+	public void requestUriPreserveEncoding() throws Exception {
+		this.request.setContextPath("/app");
+		this.request.setRequestURI("/app/path%20with%20spaces/");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertEquals("/app", actual.getContextPath());
+		assertEquals("/app/path%20with%20spaces/", actual.getRequestURI());
+		assertEquals("http://localhost/app/path%20with%20spaces/", actual.getRequestURL().toString());
+	}
+
 	@Test
 	public void requestUriEqualsContextPath() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/");
@@ -126,6 +167,17 @@ public class ForwardedHeaderFilterTests {
 
 		assertEquals("", actual.getContextPath());
 		assertEquals("/", actual.getRequestURI());
+	}
+
+	@Test
+	public void requestUriPreserveSemicolonContent() throws Exception {
+		this.request.setContextPath("");
+		this.request.setRequestURI("/path;a=b/with/semicolon");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertEquals("", actual.getContextPath());
+		assertEquals("/path;a=b/with/semicolon", actual.getRequestURI());
+		assertEquals("http://localhost/path;a=b/with/semicolon", actual.getRequestURL().toString());
 	}
 
 	@Test
@@ -188,6 +240,30 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
+	public void forwardedRequestInRemoveOnlyMode() throws Exception {
+		this.request.setRequestURI("/mvc-showcase");
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader("foo", "bar");
+
+		this.filter.setRemoveOnly(true);
+		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
+
+		assertEquals("http://localhost/mvc-showcase", actual.getRequestURL().toString());
+		assertEquals("http", actual.getScheme());
+		assertEquals("localhost", actual.getServerName());
+		assertEquals(80, actual.getServerPort());
+		assertFalse(actual.isSecure());
+
+		assertNull(actual.getHeader(X_FORWARDED_PROTO));
+		assertNull(actual.getHeader(X_FORWARDED_HOST));
+		assertNull(actual.getHeader(X_FORWARDED_PORT));
+		assertEquals("bar", actual.getHeader("foo"));
+	}
+
+	@Test
 	public void requestUriWithForwardedPrefix() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 		this.request.setRequestURI("/mvc-showcase");
@@ -204,23 +280,15 @@ public class ForwardedHeaderFilterTests {
 		HttpServletRequest actual = filterAndGetWrappedRequest();
 		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
-
+	
 	@Test
-	public void contextPathWithForwardedPrefix() throws Exception {
-		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
-		this.request.setContextPath("/mvc-showcase");
-
-		String actual = filterAndGetContextPath();
-		assertEquals("/prefix", actual);
-	}
-
-	@Test
-	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
+	public void requestURLNewStringBuffer() throws Exception { 
 		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
-		this.request.setContextPath("/mvc-showcase");
+		this.request.setRequestURI("/mvc-showcase");
 
-		String actual = filterAndGetContextPath();
-		assertEquals("/prefix", actual);
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+		actual.getRequestURL().append("?key=value");
+		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
 
 	@Test
@@ -332,6 +400,26 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("../foo/bar", redirectedUrl);
 	}
 
+	@Test
+	public void sendRedirectWhenRequestOnlyAndXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.filter.setRelativeRedirects(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
+
+	@Test
+	public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
+		this.filter.setRelativeRedirects(true);
+
+		String location = sendRedirect("/a");
+
+		assertEquals("/a", location);
+	}
 
 	private String sendRedirect(final String location) throws ServletException, IOException {
 		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {

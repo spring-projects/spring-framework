@@ -39,6 +39,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -345,6 +346,18 @@ public class ConfigurationClassPostProcessorTests {
 			assertTrue(ex.getMessage().contains(Foo.class.getName()));
 			assertTrue(ex.getMessage().contains("InvalidOverridingSingletonBeanConfig"));
 		}
+	}
+
+	@Test
+	public void nestedConfigurationClassesProcessedInCorrectOrder() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedNestedClasses.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
 	}
 
 	@Test
@@ -779,6 +792,20 @@ public class ConfigurationClassPostProcessorTests {
 		assertSame(ctx.getBean(TestBean.class), bean.testBeans.get(0));
 	}
 
+	@Test
+	public void testBeanLookupFromSameConfigurationClass() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
+		BeanLookupConfiguration bean = ctx.getBean(BeanLookupConfiguration.class);
+		assertNotNull(bean.getTestBean());
+		assertSame(ctx.getBean(TestBean.class), bean.getTestBean());
+	}
+
+	@Test(expected = BeanDefinitionStoreException.class)
+	public void testNameClashBetweenConfigurationClassAndBean() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyTestBean.class);
+		ctx.getBean("myTestBean", TestBean.class);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -821,6 +848,36 @@ public class ConfigurationClassPostProcessorTests {
 
 		public @Bean Foo foo() {
 			return new Foo();
+		}
+	}
+
+	@Configuration
+	static class ConfigWithOrderedNestedClasses {
+
+		@Configuration
+		@Order(1)
+		static class SingletonBeanConfig {
+
+			public @Bean Foo foo() {
+				return new Foo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
+		}
+
+		@Configuration
+		@Order(2)
+		static class OverridingSingletonBeanConfig {
+
+			public @Bean ExtendedFoo foo() {
+				return new ExtendedFoo();
+			}
+
+			public @Bean Bar bar() {
+				return new Bar(foo());
+			}
 		}
 	}
 
@@ -1446,6 +1503,18 @@ public class ConfigurationClassPostProcessorTests {
 		public TestBean thing() {
 			return new TestBean();
 		}
+	}
+
+	@Configuration
+	static abstract class BeanLookupConfiguration {
+
+		@Bean
+		public TestBean thing() {
+			return new TestBean();
+		}
+
+		@Lookup
+		public abstract TestBean getTestBean();
 	}
 
 }

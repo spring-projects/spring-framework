@@ -50,6 +50,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.comparator.InstanceComparator;
@@ -75,25 +76,17 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
-				new Converter<Method, Annotation>() {
-					@Override
-					public Annotation convert(Method method) {
-						AspectJAnnotation<?> annotation =
-								AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
-						return (annotation != null ? annotation.getAnnotation() : null);
-					}
+				(Converter<Method, Annotation>) method -> {
+					AspectJAnnotation<?> annotation =
+						AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+					return (annotation != null ? annotation.getAnnotation() : null);
 				});
-		Comparator<Method> methodNameComparator = new ConvertingComparator<>(
-				new Converter<Method, String>() {
-					@Override
-					public String convert(Method method) {
-						return method.getName();
-					}
-				});
+		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
 		METHOD_COMPARATOR = adviceKindComparator.thenComparing(methodNameComparator);
 	}
 
 
+	@Nullable
 	private final BeanFactory beanFactory;
 
 
@@ -113,7 +106,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * @see AspectJExpressionPointcut#setBeanFactory
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getBeanClassLoader()
 	 */
-	public ReflectiveAspectJAdvisorFactory(BeanFactory beanFactory) {
+	public ReflectiveAspectJAdvisorFactory(@Nullable BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
@@ -156,13 +149,10 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new LinkedList<>();
-		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException {
-				// Exclude pointcuts
-				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
-					methods.add(method);
-				}
+		ReflectionUtils.doWithMethods(aspectClass, method -> {
+			// Exclude pointcuts
+			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+				methods.add(method);
 			}
 		});
 		Collections.sort(methods, METHOD_COMPARATOR);
@@ -176,6 +166,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * @param introductionField the field to introspect
 	 * @return {@code null} if not an Advisor
 	 */
+	@Nullable
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);
 		if (declareParents == null) {
@@ -208,6 +199,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
 
+	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation<?> aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
@@ -218,7 +210,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
-		ajexp.setBeanFactory(this.beanFactory);
+		if (this.beanFactory != null) {
+			ajexp.setBeanFactory(this.beanFactory);
+		}
 		return ajexp;
 	}
 
@@ -312,7 +306,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
 			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
 				@Override
-				public void before(Method method, Object[] args, Object target) {
+				public void before(Method method, Object[] args, @Nullable Object target) {
 					// Simply instantiate the aspect
 					aif.getAspectInstance();
 				}

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -45,7 +46,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * @param requestCondition the condition to hold, may be {@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	public RequestConditionHolder(RequestCondition<?> requestCondition) {
+	public RequestConditionHolder(@Nullable RequestCondition<?> requestCondition) {
 		this.condition = (RequestCondition<Object>) requestCondition;
 	}
 
@@ -53,6 +54,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	/**
 	 * Return the held request condition, or {@code null} if not holding one.
 	 */
+	@Nullable
 	public RequestCondition<?> getCondition() {
 		return this.condition;
 	}

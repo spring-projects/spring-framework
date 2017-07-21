@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import org.reactivestreams.Publisher;
@@ -52,7 +53,7 @@ class WiretapClientHttpRequest extends ClientHttpRequestDecorator {
 	/**
 	 * Return a "promise" with the request body content written to the server.
 	 */
-	public MonoProcessor<byte[]> getBodyContent() {
+	public MonoProcessor<byte[]> getRecordedContent() {
 		return this.body;
 	}
 

@@ -25,17 +25,20 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link RequestHeaderMapMethodArgumentResolver}.
@@ -46,24 +49,24 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	private RequestHeaderMapMethodArgumentResolver resolver;
 
-	private ServerHttpRequest request;
-
 	private MethodParameter paramMap;
 	private MethodParameter paramMultiValueMap;
 	private MethodParameter paramHttpHeaders;
 	private MethodParameter paramUnsupported;
+	private MethodParameter paramAlsoUnsupported;
 
 
 	@Before
 	public void setup() throws Exception {
-		resolver = new RequestHeaderMapMethodArgumentResolver();
-		request = MockServerHttpRequest.get("/").build();
+		resolver = new RequestHeaderMapMethodArgumentResolver(new ReactiveAdapterRegistry());
 
-		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
+		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		paramMap = new SynthesizingMethodParameter(method, 0);
 		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
 		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
 		paramUnsupported = new SynthesizingMethodParameter(method, 3);
+		paramUnsupported = new SynthesizingMethodParameter(method, 3);
+		paramAlsoUnsupported = new SynthesizingMethodParameter(method, 4);
 	}
 
 
@@ -73,6 +76,15 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(paramMultiValueMap));
 		assertTrue("HttpHeaders parameter not supported", resolver.supportsParameter(paramHttpHeaders));
 		assertFalse("non-@RequestParam map supported", resolver.supportsParameter(paramUnsupported));
+		try {
+			this.resolver.supportsParameter(this.paramAlsoUnsupported);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestHeaderMapMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -80,9 +92,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
-		request = MockServerHttpRequest.get("/").header(name, value).build();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value).toExchange();
 
-		Mono<Object> mono = resolver.resolveArgument(paramMap, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramMap, null, exchange);
 		Object result = mono.block();
 
 		assertTrue(result instanceof Map);
@@ -94,13 +106,13 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value1, value2).toExchange();
 
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = resolver.resolveArgument(paramMultiValueMap, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramMultiValueMap, null, exchange);
 		Object result = mono.block();
 
 		assertTrue(result instanceof MultiValueMap);
@@ -112,13 +124,13 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").header(name, value1, value2).toExchange();
 
 		HttpHeaders expected = new HttpHeaders();
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = resolver.resolveArgument(paramHttpHeaders, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramHttpHeaders, null, exchange);
 		Object result = mono.block();
 
 		assertTrue(result instanceof HttpHeaders);
@@ -126,16 +138,13 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	}
 
 
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
-
-
 	@SuppressWarnings("unused")
-	public void params(@RequestHeader Map<?, ?> param1,
-					   @RequestHeader MultiValueMap<?, ?> param2,
-					   @RequestHeader HttpHeaders param3,
-					   Map<?,?> unsupported) {
+	public void params(
+			@RequestHeader Map<?, ?> param1,
+			@RequestHeader MultiValueMap<?, ?> param2,
+			@RequestHeader HttpHeaders param3,
+			Map<?,?> unsupported,
+			@RequestHeader Mono<Map<?, ?>> alsoUnsupported) {
 	}
 
 }

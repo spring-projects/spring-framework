@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.lang.Nullable;
 
 /**
  * A specialization of {@link GenericConversionService} configured by default
@@ -39,6 +40,7 @@ import org.springframework.core.convert.converter.ConverterRegistry;
  */
 public class DefaultConversionService extends GenericConversionService {
 
+	@Nullable
 	private static volatile DefaultConversionService sharedInstance;
 
 
@@ -54,14 +56,17 @@ public class DefaultConversionService extends GenericConversionService {
 	 * @since 4.3.5
 	 */
 	public static ConversionService getSharedInstance() {
-		if (sharedInstance == null) {
+		DefaultConversionService cs = sharedInstance;
+		if (cs == null) {
 			synchronized (DefaultConversionService.class) {
-				if (sharedInstance == null) {
-					sharedInstance = new DefaultConversionService();
+				cs = sharedInstance;
+				if (cs == null) {
+					cs = new DefaultConversionService();
+					sharedInstance = cs;
 				}
 			}
 		}
-		return sharedInstance;
+		return cs;
 	}
 
 

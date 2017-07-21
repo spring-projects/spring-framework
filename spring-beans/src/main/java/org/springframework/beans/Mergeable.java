@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface representing an object whose value set can be merged with
  * that of a parent object.
@@ -44,6 +46,6 @@ public interface Mergeable {
 	 * @exception IllegalStateException if merging is not enabled for this instance
 	 * (i.e. {@code mergeEnabled} equals {@code false}).
 	 */
-	Object merge(Object parent);
+	Object merge(@Nullable Object parent);
 
 }

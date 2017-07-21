@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
@@ -42,7 +43,7 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 
 
 	public ClientHttpRequestDecorator(ClientHttpRequest delegate) {
-		Assert.notNull(delegate, "ClientHttpRequest delegate is required.");
+		Assert.notNull(delegate, "Delegate is required");
 		this.delegate = delegate;
 	}
 

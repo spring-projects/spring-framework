@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.Before;
@@ -24,11 +25,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -47,6 +45,9 @@ import static org.mockito.BDDMockito.verify;
  */
 public class WebJarsResourceResolverTests {
 
+	private static final Duration TIMEOUT = Duration.ofSeconds(1);
+
+	
 	private List<Resource> locations;
 
 	private WebJarsResourceResolver resolver;
@@ -62,10 +63,7 @@ public class WebJarsResourceResolverTests {
 		this.locations = singletonList(new ClassPathResource("/META-INF/resources/webjars"));
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
-
-		MockServerHttpRequest request = MockServerHttpRequest.get("").build();
-		ServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
+		this.exchange = MockServerHttpRequest.get("").toExchange();
 	}
 
 
@@ -75,7 +73,7 @@ public class WebJarsResourceResolverTests {
 		String file = "/foo/2.3/foo.txt";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.just(file));
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).blockMillis(5000);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertEquals(file, actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -87,7 +85,7 @@ public class WebJarsResourceResolverTests {
 		String file = "foo/foo.txt";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).blockMillis(5000);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -101,7 +99,7 @@ public class WebJarsResourceResolverTests {
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
 		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(Mono.just(expected));
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).blockMillis(5000);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertEquals(expected, actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -113,7 +111,7 @@ public class WebJarsResourceResolverTests {
 		String file = "something/something.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).blockMillis(5000);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -129,7 +127,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver
 				.resolveResource(this.exchange, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(TIMEOUT);
 
 		assertEquals(expected, actual);
 		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);
@@ -142,7 +140,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver
 				.resolveResource(this.exchange, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(TIMEOUT);
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);
@@ -164,7 +162,7 @@ public class WebJarsResourceResolverTests {
 
 		Resource actual = this.resolver
 				.resolveResource(this.exchange, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(TIMEOUT);
 
 		assertEquals(expected, actual);
 		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);

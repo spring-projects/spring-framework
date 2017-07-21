@@ -37,9 +37,7 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 	}
 
 	private RxNettyHttpHandlerAdapter createHttpHandlerAdapter() {
-		return (getHttpHandlerMap() != null ?
-				new RxNettyHttpHandlerAdapter(getHttpHandlerMap()) :
-				new RxNettyHttpHandlerAdapter(getHttpHandler()));
+		return new RxNettyHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 

@@ -18,12 +18,14 @@ package org.springframework.core.io.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
@@ -41,14 +43,17 @@ public abstract class PropertiesLoaderSupport {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	protected Properties[] localProperties;
 
 	protected boolean localOverride = false;
 
+	@Nullable
 	private Resource[] locations;
 
 	private boolean ignoreResourceNotFound = false;
 
+	@Nullable
 	private String fileEncoding;
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
@@ -128,7 +133,7 @@ public abstract class PropertiesLoaderSupport {
 	 * The default is DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
 				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
@@ -176,7 +181,7 @@ public abstract class PropertiesLoaderSupport {
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
 				}
-				catch (FileNotFoundException ex) {
+				catch (FileNotFoundException | UnknownHostException ex) {
 					if (this.ignoreResourceNotFound) {
 						if (logger.isInfoEnabled()) {
 							logger.info("Properties resource not found: " + ex.getMessage());

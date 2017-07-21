@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.security.Principal;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
@@ -35,23 +36,19 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			Optional<String> subProtocol) {
-
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
 		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
 		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		return response.getReactorResponse().sendWebsocket(subProtocol.orElse(null),
-				(in, out) -> handler.handle(
-						new ReactorNettyWebSocketSession(in, out, info, bufferFactory)));
+		return response.getReactorResponse().sendWebsocket(subProtocol,
+				(in, out) -> handler.handle(new ReactorNettyWebSocketSession(in, out, info, bufferFactory)));
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, @Nullable String protocol) {
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<Principal> principal = exchange.getPrincipal();
 		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -272,7 +274,7 @@ public class PathResourceTests {
 	@Test
 	public void outputStream() throws Exception {
 		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
-		FileCopyUtils.copy("test".getBytes(), resource.getOutputStream());
+		FileCopyUtils.copy("test".getBytes(StandardCharsets.UTF_8), resource.getOutputStream());
 		assertThat(resource.contentLength(), equalTo(4L));
 	}
 
@@ -326,6 +328,23 @@ public class PathResourceTests {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		thrown.expect(NoSuchFileException.class);
 		resource.readableChannel();
+	}
+
+	@Test
+	public void getWritableChannel() throws Exception {
+		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
+		ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
+		WritableByteChannel channel = null;
+		try {
+			channel = resource.writableChannel();
+			channel.write(buffer);
+		}
+		finally {
+			if (channel != null) {
+				channel.close();
+			}
+		}
+		assertThat(resource.contentLength(), equalTo(4L));
 	}
 
 }

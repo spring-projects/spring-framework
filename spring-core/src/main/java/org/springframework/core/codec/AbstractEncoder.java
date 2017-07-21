@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -30,13 +31,6 @@ import org.springframework.util.MimeType;
  * @since 5.0
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
-
-	/**
-	 * Hint key to use with a {@link FlushingStrategy} value.
-	 */
-	public static final String FLUSHING_STRATEGY_HINT = AbstractEncoder.class.getName() + ".flushingStrategy";
-
-	public enum FlushingStrategy { AUTO, AFTER_EACH_ELEMENT }
 
 	private final List<MimeType> encodableMimeTypes;
 
@@ -52,7 +46,7 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}

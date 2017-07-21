@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -42,8 +43,10 @@ import org.springframework.beans.PropertyAccessorFactory;
  */
 public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware {
 
+	@Nullable
 	private String[] ignoredUnknownProperties;
 
+	@Nullable
 	private SchedulerContext schedulerContext;
 
 

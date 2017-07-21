@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,34 +28,15 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.DataBufferDecoder;
-import org.springframework.core.codec.DataBufferEncoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.Jackson2ServerHttpMessageReader;
-import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -67,11 +46,14 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
+import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
+import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -81,9 +63,11 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
- * The main class for Spring Web Reactive configuration.
+ * The main class for Spring WebFlux configuration.
  *
  * <p>Import directly or extend and override protected methods to customize.
  *
@@ -92,33 +76,26 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebFluxConfigurationSupport.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebFluxConfigurationSupport.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", WebFluxConfigurationSupport.class.getClassLoader());
-
-
+	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
+	@Nullable
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private List<HttpMessageReader<?>> messageReaders;
+	@Nullable
+	private ViewResolverRegistry viewResolverRegistry;
 
-	private List<HttpMessageWriter<?>> messageWriters;
-
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
-	protected ApplicationContext getApplicationContext() {
+	@Nullable
+	public final ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -142,22 +119,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		if (configurer.isUseSuffixPatternMatch() != null) {
-			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+		if (useTrailingSlashMatch != null) {
+			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		if (useCaseSensitiveMatch != null) {
+			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-		if (configurer.isUseTrailingSlashMatch() != null) {
-			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
-		}
-		if (configurer.getPathMatcher() != null) {
-			mapping.setPathMatcher(configurer.getPathMatcher());
-		}
-		if (configurer.getPathHelper() != null) {
-			mapping.setPathHelper(configurer.getPathHelper());
-		}
-
 		return mapping;
 	}
 
@@ -169,23 +138,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public CompositeContentTypeResolver webFluxContentTypeResolver() {
+	public RequestedContentTypeResolver webFluxContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
-		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureContentTypeResolver(builder);
 		return builder.build();
-	}
-
-	/**
-	 * Override to configure media type mappings.
-	 * @see RequestedContentTypeResolverBuilder#mediaTypes(Map)
-	 */
-	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
-		Map<String, MediaType> map = new HashMap<>();
-		if (jackson2Present) {
-			map.put("json", MediaType.APPLICATION_JSON);
-		}
-		return map;
 	}
 
 	/**
@@ -232,6 +188,23 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public void configurePathMatching(PathMatchConfigurer configurer) {
 	}
 
+	@Bean
+	public RouterFunctionMapping routerFunctionMapping() {
+		RouterFunctionMapping mapping = createRouterFunctionMapping();
+		mapping.setOrder(-1); // go before RequestMappingHandlerMapping
+		mapping.setMessageCodecConfigurer(serverCodecConfigurer());
+		mapping.setCorsConfigurations(getCorsConfigurations());
+
+		return mapping;
+	}
+
+	/**
+	 * Override to plug a sub-class of {@link RouterFunctionMapping}.
+	 */
+	protected RouterFunctionMapping createRouterFunctionMapping() {
+		return new RouterFunctionMapping();
+	}
+
 	/**
 	 * Return a handler mapping ordered at Integer.MAX_VALUE-1 with mapped
 	 * resource handlers. To configure resource handling, override
@@ -239,18 +212,23 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, webFluxContentTypeResolver());
+		ResourceLoader resourceLoader = this.applicationContext;
+		if (resourceLoader == null) {
+			resourceLoader = new DefaultResourceLoader();
+		}
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(resourceLoader);
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
-			if (pathMatchConfigurer.getPathMatcher() != null) {
-				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
+			PathMatchConfigurer configurer = getPathMatchConfigurer();
+			Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+			Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
+			if (useTrailingSlashMatch != null) {
+				handlerMapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 			}
-			if (pathMatchConfigurer.getPathHelper() != null) {
-				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
+			if (useCaseSensitiveMatch != null) {
+				handlerMapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 			}
 		}
 		else {
@@ -269,15 +247,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageReaders(getMessageReaders());
+		adapter.setMessageCodecConfigurer(serverCodecConfigurer());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-		addArgumentResolvers(resolvers);
-		if (!resolvers.isEmpty()) {
-			adapter.setCustomArgumentResolvers(resolvers);
-		}
+		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
+		configureArgumentResolvers(configurer);
+		adapter.setArgumentResolverConfigurer(configurer);
 
 		return adapter;
 	}
@@ -290,65 +266,39 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Provide custom argument resolvers without overriding the built-in ones.
+	 * Configure resolvers for custom controller method arguments.
 	 */
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	protected void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 	}
 
 	/**
-	 * Main method to access message readers to use for decoding
-	 * controller method arguments with.
-	 * <p>Use {@link #configureMessageReaders} to configure the list or
-	 * {@link #extendMessageReaders} to add in addition to the default ones.
+	 * Return the configurer for HTTP message readers and writers.
+	 * <p>Use {@link #configureHttpMessageCodecs(ServerCodecConfigurer)} to
+	 * configure the readers and writers.
 	 */
-	protected final List<HttpMessageReader<?>> getMessageReaders() {
-		if (this.messageReaders == null) {
-			this.messageReaders = new ArrayList<>();
-			configureMessageReaders(this.messageReaders);
-			if (this.messageReaders.isEmpty()) {
-				addDefaultHttpMessageReaders(this.messageReaders);
-			}
-			extendMessageReaders(this.messageReaders);
-		}
-		return this.messageReaders;
+	@Bean
+	public ServerCodecConfigurer serverCodecConfigurer() {
+		ServerCodecConfigurer serverCodecConfigurer = ServerCodecConfigurer.create();
+		configureHttpMessageCodecs(serverCodecConfigurer);
+		return serverCodecConfigurer;
 	}
 
 	/**
-	 * Override to configure the message readers to use for decoding
-	 * controller method arguments.
-	 * <p>If no message readres are specified, default will be added via
-	 * {@link #addDefaultHttpMessageReaders}.
-	 * @param messageReaders a list to add message readers to, initially an empty
+	 * Override to plug a sub-class of {@link LocaleContextResolver}.
 	 */
-	protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected LocaleContextResolver createLocaleContextResolver() {
+		return new AcceptHeaderLocaleContextResolver();
+	}
+
+	@Bean
+	public LocaleContextResolver localeContextResolver() {
+		return createLocaleContextResolver();
 	}
 
 	/**
-	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageReaders(List)} for {@code byte[]},
-	 * {@code ByteBuffer}, {@code String}, {@code Resource}, JAXB2, and Jackson
-	 * (if present on the classpath).
+	 * Override to configure the HTTP message readers and writers to use.
 	 */
-	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
-		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
-		if (jaxb2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-		}
-		if (jackson2Present) {
-			readers.add(new Jackson2ServerHttpMessageReader(
-					new  DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
-		}
-	}
-
-	/**
-	 * Override this to modify the list of message readers after it has been
-	 * configured, for example to add some in addition to the default ones.
-	 */
-	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 	}
 
 	/**
@@ -359,7 +309,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(webFluxConversionService());
 		initializer.setValidator(webFluxValidator());
-		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		MessageCodesResolver messageCodesResolver = getMessageCodesResolver();
+		if (messageCodesResolver != null) {
+			initializer.setMessageCodesResolver(messageCodesResolver);
+		}
 		return initializer;
 	}
 
@@ -420,6 +373,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 */
+	@Nullable
 	protected Validator getValidator() {
 		return null;
 	}
@@ -427,8 +381,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link MessageCodesResolver}.
 	 */
+	@Nullable
 	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
+	}
+
+	@Bean
+	public HandlerFunctionAdapter handlerFunctionAdapter() {
+		return new HandlerFunctionAdapter();
 	}
 
 	@Bean
@@ -438,85 +398,50 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(
-				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
+		return new ResponseEntityResultHandler(serverCodecConfigurer().getWriters(),
+				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(
-				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
-	}
-
-	/**
-	 * Main method to access message writers to use for encoding return values.
-	 * <p>Use {@link #configureMessageWriters(List)} to configure the list or
-	 * {@link #extendMessageWriters(List)} to add in addition to the default ones.
-	 */
-	protected final List<HttpMessageWriter<?>> getMessageWriters() {
-		if (this.messageWriters == null) {
-			this.messageWriters = new ArrayList<>();
-			configureMessageWriters(this.messageWriters);
-			if (this.messageWriters.isEmpty()) {
-				addDefaultHttpMessageWriters(this.messageWriters);
-			}
-			extendMessageWriters(this.messageWriters);
-		}
-		return this.messageWriters;
-	}
-	/**
-	 * Override to configure the message writers to use for encoding
-	 * return values.
-	 * <p>If no message readers are specified, default will be added via
-	 * {@link #addDefaultHttpMessageWriters}.
-	 * @param messageWriters a list to add message writers to, initially an empty
-	 */
-	protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
-	}
-	/**
-	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageWriters(List)}.
-	 */
-	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> writers) {
-		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
-		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
-		writers.add(new ResourceHttpMessageWriter());
-		if (jaxb2Present) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		}
-		if (jackson2Present) {
-			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-			writers.add(new Jackson2ServerHttpMessageWriter(encoder));
-			sseDataEncoders.add(encoder);
-			HttpMessageWriter<Object> writer = new ServerSentEventHttpMessageWriter(sseDataEncoders);
-			writers.add(new Jackson2ServerHttpMessageWriter(writer));
-		}
-		else {
-			writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
-		}
-	}
-
-	/**
-	 * Override this to modify the list of message writers after it has been
-	 * configured, for example to add some in addition to the default ones.
-	 */
-	protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		return new ResponseBodyResultHandler(serverCodecConfigurer().getWriters(),
+				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
 	public ViewResolutionResultHandler viewResolutionResultHandler() {
-		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
-		configureViewResolvers(registry);
+		ViewResolverRegistry registry = getViewResolverRegistry();
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
 				resolvers, webFluxContentTypeResolver(), webFluxAdapterRegistry());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
+	}
 
+	@Bean
+	public ServerResponseResultHandler serverResponseResultHandler() {
+		ViewResolverRegistry registry = getViewResolverRegistry();
+		List<ViewResolver> resolvers = registry.getViewResolvers();
+
+		ServerResponseResultHandler handler = new ServerResponseResultHandler();
+		handler.setMessageCodecConfigurer(serverCodecConfigurer());
+		handler.setViewResolvers(resolvers);
+		handler.setOrder(registry.getOrder() + 1);
+
+		return handler;
+	}
+
+	/**
+	 * Callback for building the {@link ViewResolverRegistry}. This method is final,
+	 * use {@link #configureViewResolvers} to customize view resolvers.
+	 */
+	protected final ViewResolverRegistry getViewResolverRegistry() {
+		if (this.viewResolverRegistry == null) {
+			this.viewResolverRegistry = new ViewResolverRegistry(this.applicationContext);
+			configureViewResolvers(this.viewResolverRegistry);
+		}
+		return this.viewResolverRegistry;
 	}
 
 	/**
@@ -535,6 +460,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 	}
 
+
 	private static final class NoOpValidator implements Validator {
 
 		@Override
@@ -543,7 +469,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

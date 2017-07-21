@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -42,13 +42,14 @@ import static org.junit.Assert.assertSame;
  */
 public class CachingResourceResolverTests {
 
+	private static final Duration TIMEOUT = Duration.ofSeconds(5);
+
+			
 	private Cache cache;
 
 	private ResourceResolverChain chain;
 
 	private List<Resource> locations;
-
-	private MockServerHttpRequest request;
 
 
 	@Before
@@ -63,8 +64,6 @@ public class CachingResourceResolverTests {
 
 		this.locations = new ArrayList<>();
 		this.locations.add(new ClassPathResource("test/", getClass()));
-
-		this.request = MockServerHttpRequest.get("").build();
 	}
 
 
@@ -72,7 +71,8 @@ public class CachingResourceResolverTests {
 	public void resolveResourceInternal() {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		Resource actual = this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		Resource actual = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertEquals(expected, actual);
 	}
@@ -84,20 +84,22 @@ public class CachingResourceResolverTests {
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", expected);
 
 		String file = "bar.css";
-		Resource actual = this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		Resource actual = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
 		assertSame(expected, actual);
 	}
 
 	@Test
 	public void resolveResourceInternalNoMatch() {
-		assertNull(this.chain.resolveResource(createExchange(), "invalid.css", this.locations).blockMillis(5000));
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
+		assertNull(this.chain.resolveResource(exchange, "invalid.css", this.locations).block(TIMEOUT));
 	}
 
 	@Test
 	public void resolverUrlPath() {
 		String expected = "/foo.css";
-		String actual = this.chain.resolveUrlPath(expected, this.locations).blockMillis(5000);
+		String actual = this.chain.resolveUrlPath(expected, this.locations).block(TIMEOUT);
 
 		assertEquals(expected, actual);
 	}
@@ -106,22 +108,23 @@ public class CachingResourceResolverTests {
 	public void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
 		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
-		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations).blockMillis(5000);
+		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations).block(TIMEOUT);
 
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void resolverUrlPathNoMatch() {
-		assertNull(this.chain.resolveUrlPath("invalid.css", this.locations).blockMillis(5000));
+		assertNull(this.chain.resolveUrlPath("invalid.css", this.locations).block(TIMEOUT));
 	}
 
 	@Test
 	public void resolveResourceAcceptEncodingInCacheKey() {
 		String file = "bar.css";
-		this.request = MockServerHttpRequest.get(file).header("Accept-Encoding", "gzip").build();
+		MockServerWebExchange exchange = MockServerHttpRequest.get(file)
+				.header("Accept-Encoding", "gzip").toExchange();
 
-		Resource expected = this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
+		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file + "+encoding=gzip";
 
 		assertEquals(expected, this.cache.get(cacheKey).get());
@@ -130,9 +133,9 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolveResourceNoAcceptEncodingInCacheKey() {
 		String file = "bar.css";
-		this.request = MockServerHttpRequest.get(file).build();
+		MockServerWebExchange exchange = MockServerHttpRequest.get(file).toExchange();
 
-		Resource expected = this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
+		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file;
 
 		assertEquals(expected, this.cache.get(cacheKey).get());
@@ -146,16 +149,11 @@ public class CachingResourceResolverTests {
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css+encoding=gzip", gzResource);
 
 		String file = "bar.css";
-		this.request = MockServerHttpRequest.get(file).build();
-		assertSame(resource, this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000));
+		MockServerWebExchange exchange = MockServerHttpRequest.get(file).toExchange();
+		assertSame(resource, this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT));
 
-		this.request = MockServerHttpRequest.get(file).header("Accept-Encoding", "gzip").build();
-		assertSame(gzResource, this.chain.resolveResource(createExchange(), file, this.locations).blockMillis(5000));
-	}
-
-
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
+		exchange = MockServerHttpRequest.get(file).header("Accept-Encoding", "gzip").toExchange();
+		assertSame(gzResource, this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT));
 	}
 
 }

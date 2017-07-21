@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -67,10 +68,13 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private int concurrentConsumers = 1;
 
+	@Nullable
 	private Executor taskExecutor;
 
+	@Nullable
 	private Set<Session> sessions;
 
+	@Nullable
 	private Set<MessageConsumer> consumers;
 
 	private final Object consumersMonitor = new Object();
@@ -282,30 +286,17 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {
-			destination = resolveDestinationName(session, getDestinationName());
+			String destinationName = getDestinationName();
+			Assert.state(destinationName != null, "No destination set");
+			destination = resolveDestinationName(session, destinationName);
 		}
 		MessageConsumer consumer = createConsumer(session, destination);
 
 		if (this.taskExecutor != null) {
-			consumer.setMessageListener(new MessageListener() {
-				@Override
-				public void onMessage(final Message message) {
-					taskExecutor.execute(new Runnable() {
-						@Override
-						public void run() {
-							processMessage(message, session);
-						}
-					});
-				}
-			});
+			consumer.setMessageListener(message -> taskExecutor.execute(() -> processMessage(message, session)));
 		}
 		else {
-			consumer.setMessageListener(new MessageListener() {
-				@Override
-				public void onMessage(Message message) {
-					processMessage(message, session);
-				}
-			});
+			consumer.setMessageListener(message -> processMessage(message, session));
 		}
 
 		return consumer;
@@ -321,10 +312,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @see #setExposeListenerSession
 	 */
 	protected void processMessage(Message message, Session session) {
-		boolean exposeResource = isExposeListenerSession();
+		ConnectionFactory connectionFactory = getConnectionFactory();
+		boolean exposeResource = (connectionFactory != null && isExposeListenerSession());
 		if (exposeResource) {
 			TransactionSynchronizationManager.bindResource(
-					getConnectionFactory(), new LocallyExposedJmsResourceHolder(session));
+					connectionFactory, new LocallyExposedJmsResourceHolder(session));
 		}
 		try {
 			executeListener(session, message);
@@ -347,9 +339,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				for (MessageConsumer consumer : this.consumers) {
 					JmsUtils.closeMessageConsumer(consumer);
 				}
-				logger.debug("Closing JMS Sessions");
-				for (Session session : this.sessions) {
-					JmsUtils.closeSession(session);
+				if (this.sessions != null) {
+					logger.debug("Closing JMS Sessions");
+					for (Session session : this.sessions) {
+						JmsUtils.closeSession(session);
+					}
 				}
 			}
 		}

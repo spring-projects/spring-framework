@@ -19,6 +19,8 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -26,19 +28,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -55,23 +59,28 @@ import org.springframework.web.server.WebSession;
 class DefaultServerRequest implements ServerRequest {
 
 	private static final Function<UnsupportedMediaTypeException, UnsupportedMediaTypeStatusException> ERROR_MAPPER =
-			ex -> ex.getContentType()
-					.map(contentType -> new UnsupportedMediaTypeStatusException(contentType,
-							ex.getSupportedMediaTypes()))
-					.orElseGet(() -> new UnsupportedMediaTypeStatusException(ex.getMessage()));
+			ex -> (ex.getContentType() != null ?
+					new UnsupportedMediaTypeStatusException(ex.getContentType(), ex.getSupportedMediaTypes()) :
+					new UnsupportedMediaTypeStatusException(ex.getMessage()));
+
 
 	private final ServerWebExchange exchange;
 
 	private final Headers headers;
 
-	private final HandlerStrategies strategies;
+	private final List<HttpMessageReader<?>> messageReaders;
 
 
-	DefaultServerRequest(ServerWebExchange exchange, HandlerStrategies strategies) {
+	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		this.exchange = exchange;
-		this.strategies = strategies;
+		this.messageReaders = unmodifiableCopy(messageReaders);
 		this.headers = new DefaultHeaders();
 	}
+
+	private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
+		return Collections.unmodifiableList(new ArrayList<>(list));
+	}
+
 
 
 	@Override
@@ -85,8 +94,18 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public PathContainer pathContainer() {
+		return request().getPath();
+	}
+
+	@Override
 	public Headers headers() {
 		return this.headers;
+	}
+
+	@Override
+	public MultiValueMap<String, HttpCookie> cookies() {
+		return request().getCookies();
 	}
 
 	@Override
@@ -100,8 +119,12 @@ class DefaultServerRequest implements ServerRequest {
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
-					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-						return DefaultServerRequest.this.strategies.messageReaders();
+					public List<HttpMessageReader<?>> messageReaders() {
+						return messageReaders;
+					}
+					@Override
+					public Optional<ServerHttpResponse> serverResponse() {
+						return Optional.of(exchange().getResponse());
 					}
 					@Override
 					public Map<String, Object> hints() {
@@ -113,18 +136,13 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
 		Mono<T> mono = body(BodyExtractors.toMono(elementClass));
-		return mono.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
-		return flux.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
-	}
-
-	@Override
-	public <T> Optional<T> attribute(String name) {
-		return this.exchange.getAttribute(name);
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override
@@ -133,20 +151,24 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		List<String> queryParams = request().getQueryParams().get(name);
-		return queryParams != null ? queryParams : Collections.emptyList();
+	public MultiValueMap<String, String> queryParams() {
+		return request().getQueryParams();
 	}
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.exchange.<Map<String, String>>getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
-				orElseGet(Collections::emptyMap);
+		return this.exchange.getAttributeOrDefault(
+				RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
 	}
 
 	@Override
 	public Mono<WebSession> session() {
 		return this.exchange.getSession();
+	}
+
+	@Override
+	public Mono<? extends Principal> principal() {
+		return this.exchange.getPrincipal();
 	}
 
 	private ServerHttpRequest request() {

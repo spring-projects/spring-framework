@@ -32,6 +32,7 @@ import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -47,10 +48,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
- * @see org.springframework.stereotype.Repository
- * @see org.springframework.dao.DataAccessException
- * @see org.springframework.dao.support.PersistenceExceptionTranslator
+ * @see Async
+ * @see AnnotationAsyncExecutionInterceptor
  */
 @SuppressWarnings("serial")
 public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
@@ -78,7 +77,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
 	 */
 	@SuppressWarnings("unchecked")
-	public AsyncAnnotationAdvisor(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	public AsyncAnnotationAdvisor(@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<>(2);
 		asyncAnnotationTypes.add(Async.class);
 		try {
@@ -144,7 +143,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	}
 
 
-	protected Advice buildAdvice(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	protected Advice buildAdvice(@Nullable Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		return new AnnotationAsyncExecutionInterceptor(executor, exceptionHandler);
 	}
 
@@ -157,7 +156,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		ComposablePointcut result = null;
 		for (Class<? extends Annotation> asyncAnnotationType : asyncAnnotationTypes) {
 			Pointcut cpc = new AnnotationMatchingPointcut(asyncAnnotationType, true);
-			Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(asyncAnnotationType);
+			Pointcut mpc = new AnnotationMatchingPointcut(null, asyncAnnotationType, true);
 			if (result == null) {
 				result = new ComposablePointcut(cpc);
 			}
@@ -166,7 +165,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 			}
 			result = result.union(mpc);
 		}
-		return result;
+		return (result != null ? result : Pointcut.TRUE);
 	}
 
 }

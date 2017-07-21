@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import org.springframework.cache.Cache;
+import org.springframework.lang.Nullable;
 
 /**
  * A simple {@link CacheErrorHandler} that does not handle the
@@ -33,7 +34,7 @@ public class SimpleCacheErrorHandler implements CacheErrorHandler {
 	}
 
 	@Override
-	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
+	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
 		throw exception;
 	}
 

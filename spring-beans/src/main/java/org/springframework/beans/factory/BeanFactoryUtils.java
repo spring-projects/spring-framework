@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -57,7 +58,7 @@ public abstract class BeanFactoryUtils {
 	 * @return whether the given name is a factory dereference
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
-	public static boolean isFactoryDereference(String name) {
+	public static boolean isFactoryDereference(@Nullable String name) {
 		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
 	}
 
@@ -86,7 +87,7 @@ public abstract class BeanFactoryUtils {
 	 * @see org.springframework.beans.factory.support.BeanDefinitionReaderUtils#generateBeanName
 	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
 	 */
-	public static boolean isGeneratedBeanName(String name) {
+	public static boolean isGeneratedBeanName(@Nullable String name) {
 		return (name != null && name.contains(GENERATED_BEAN_NAME_SEPARATOR));
 	}
 
@@ -264,12 +265,11 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				for (Map.Entry<String, T> entry : parentResult.entrySet()) {
-					String beanName = entry.getKey();
+				parentResult.forEach((beanName, beanType) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, entry.getValue());
+						result.put(beanName, beanType);
 					}
-				}
+				});
 			}
 		}
 		return result;
@@ -313,12 +313,11 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map<String, T> parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				for (Map.Entry<String, T> entry : parentResult.entrySet()) {
-					String beanName = entry.getKey();
+				parentResult.forEach((beanName, beanType) -> {
 					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
-						result.put(beanName, entry.getValue());
+						result.put(beanName, beanType);
 					}
-				}
+				});
 			}
 		}
 		return result;

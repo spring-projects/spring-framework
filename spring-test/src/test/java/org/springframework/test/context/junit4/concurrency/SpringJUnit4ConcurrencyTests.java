@@ -55,7 +55,7 @@ import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
  * <p>The tests executed by this test class come from a hand-picked collection of test
  * classes within the test suite that is intended to cover most categories of tests
  * that are currently supported by the TestContext Framework on JUnit 4.
- * 
+ *
  * <p>The chosen test classes intentionally do <em>not</em> include any classes that
  * fall under the following categories.
  *

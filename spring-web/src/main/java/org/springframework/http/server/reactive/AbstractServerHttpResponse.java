@@ -34,10 +34,12 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class for {@link ServerHttpResponse} implementations.
@@ -61,12 +63,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final DataBufferFactory dataBufferFactory;
 
+	@Nullable
 	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
+	@Nullable
 	private Function<String, String> urlEncoder = url -> url;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
@@ -75,7 +79,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 		this.headers = new HttpHeaders();
 		this.cookies = new LinkedMultiValueMap<>();
@@ -88,11 +92,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode, "Status code must not be null");
+	public boolean setStatusCode(@Nullable HttpStatus statusCode) {
 		if (this.state.get() == State.COMMITTED) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + statusCode.toString() +
+				logger.debug("Can't set the status " + (statusCode != null ? statusCode.toString() : "null") +
 						" because the HTTP response has already been committed");
 			}
 			return false;
@@ -104,6 +107,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	@Nullable
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
@@ -121,6 +125,19 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	public void addCookie(ResponseCookie cookie) {
+		Assert.notNull(cookie, "'cookie' must not be null");
+
+		if (this.state.get() == State.COMMITTED) {
+			throw new IllegalStateException("Can't add the cookie " + cookie +
+					"because the HTTP response has already been committed");
+		}
+		else {
+			getCookies().add(cookie.getName(), cookie);
+		}
+	}
+
+	@Override
 	public String encodeUrl(String url) {
 		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
 	}
@@ -132,9 +149,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		if (action != null) {
-			this.commitActions.add(action);
-		}
+		this.commitActions.add(action);
 	}
 
 	@Override
@@ -170,10 +185,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * Apply {@link #beforeCommit(Supplier) beforeCommit} actions, apply the
 	 * response status and headers/cookies, and write the response body.
-	 * @param writeAction the action to write the response body or {@code null}
+	 * @param writeAction the action to write the response body (may be {@code null})
 	 * @return a completion publisher
 	 */
-	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
+	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Skipping doCommit (response already committed).");
@@ -201,33 +216,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 
 	/**
-	 * Implement this method to write to the underlying the response.
+	 * Write to the underlying the response.
 	 * @param body the publisher to write with
 	 */
 	protected abstract Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body);
 
 	/**
-	 * Implement this method to write to the underlying the response, and flush after
-	 * each {@code Publisher<DataBuffer>}.
+	 * Write to the underlying the response, and flush after each {@code Publisher<DataBuffer>}.
 	 * @param body the publisher to write and flush with
 	 */
 	protected abstract Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body);
 
 	/**
-	 * Implement this method to write the status code to the underlying response.
+	 * Write the status code to the underlying response.
 	 * This method is called once only.
 	 */
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is called once only.
+	 * Apply header changes from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyHeaders();
 
 	/**
-	 * Implement this method to add cookies from {@link #getHeaders()} to the
-	 * underlying response. This method is called once only.
+	 * Add cookies from {@link #getHeaders()} to the underlying response.
+	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
 

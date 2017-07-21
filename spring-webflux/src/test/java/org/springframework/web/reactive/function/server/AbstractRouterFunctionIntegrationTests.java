@@ -27,9 +27,13 @@ public abstract class AbstractRouterFunctionIntegrationTests extends AbstractHtt
 	@Override
 	protected final HttpHandler createHttpHandler() {
 		RouterFunction<?> routerFunction = routerFunction();
-		return RouterFunctions.toHttpHandler(routerFunction);
+		return RouterFunctions.toHttpHandler(routerFunction, handlerStrategies());
 	}
 
 	protected abstract RouterFunction<?> routerFunction();
+
+	protected HandlerStrategies handlerStrategies() {
+		return HandlerStrategies.withDefaults();
+	}
 
 }

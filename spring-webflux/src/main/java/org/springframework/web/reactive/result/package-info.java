@@ -4,4 +4,7 @@
  * including the handling of handler result values, e.g. @ResponseBody, view
  * resolution, and so on.
  */
+@NonNullApi
 package org.springframework.web.reactive.result;
+
+import org.springframework.lang.NonNullApi;

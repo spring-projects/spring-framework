@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.beans.ConstructorProperties;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
@@ -83,6 +84,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -283,15 +285,13 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}, NestedSetController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
-		request.addParameter("testBeanSet", new String[] {"1", "2"});
+		request.addParameter("testBeanSet", "1", "2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("[1, 2]-org.springframework.tests.sample.beans.TestBean", response.getContentAsString());
 	}
 
-	// SPR-12903
-
-	@Test
+	@Test  // SPR-12903
 	public void pathVariableWithCustomConverter() throws Exception {
 		initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
 			@Override
@@ -1244,9 +1244,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("myParam-42", response.getContentAsString());
 	}
 
-	// SPR-9062
-
-	@Test
+	@Test  // SPR-9062
 	public void ambiguousPathAndRequestMethod() throws Exception {
 		initServletWithControllers(AmbiguousPathAndRequestMethodController.class);
 
@@ -1498,9 +1496,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals(405, response.getStatus());
 	}
 
-	// SPR-8536
-
-	@Test
+	@Test  // SPR-8536
 	public void testHeadersCondition() throws Exception {
 		initServletWithControllers(HeadersConditionController.class);
 
@@ -1571,7 +1567,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
 	}
 
-	@Test // SPR-15176
+	@Test  // SPR-15176
 	public void flashAttributesWithResponseEntity() throws Exception {
 		initServletWithControllers(RedirectAttributesController.class);
 
@@ -1829,6 +1825,31 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals(200, response.getStatus());
 		assertEquals("GET,HEAD", response.getHeader("Allow"));
 		assertTrue(response.getContentAsByteArray().length == 0);
+	}
+
+	@Test
+	public void dataClassBinding() throws ServletException, IOException {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-2-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithAdditionalSetter() throws ServletException, IOException {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "2");
+		request.addParameter("param3", "3");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-2-3", response.getContentAsString());
 	}
 
 
@@ -2469,7 +2490,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 				@Override
 				@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
-				public void render(Map model, HttpServletRequest request, HttpServletResponse response)
+				public void render(@Nullable Map model, HttpServletRequest request, HttpServletResponse response)
 						throws Exception {
 					TestBean tb = (TestBean) model.get("testBean");
 					if (tb == null) {
@@ -2514,7 +2535,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 					return null;
 				}
 				@Override
-				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+				public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
 				}
@@ -2727,24 +2748,21 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@XmlRootElement
 	public static class A {
-
 	}
 
 	@XmlRootElement
 	public static class B {
-
 	}
-
 
 	public static class NotReadableMessageConverter implements HttpMessageConverter<Object> {
 
 		@Override
-		public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 			return true;
 		}
 
 		@Override
-		public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 			return true;
 		}
 
@@ -2760,7 +2778,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
+		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			throw new UnsupportedOperationException("Not implemented");
 		}
@@ -2775,12 +2793,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
 		@Override
-		public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
@@ -2796,7 +2814,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
+		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			outputMessage.getHeaders().setContentType(contentType);
 			outputMessage.getBody(); // force a header write
@@ -2907,7 +2925,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 						return "text/html";
 					}
 					@Override
-					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+					public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 							throws Exception {
 						response.getWriter().write("myValue");
 					}
@@ -3313,7 +3331,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public HttpHeaders createNoHeader() throws URISyntaxException {
 			return new HttpHeaders();
 		}
-
 	}
 
 	@RestController
@@ -3345,7 +3362,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping("/path")
 		public ModelAndView methodWithHttpStatus(MyEntity object) {
-			return new ModelAndView("view", new ModelMap(), HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 
 		@RequestMapping("/exception")
@@ -3355,11 +3372,39 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ExceptionHandler(TestException.class)
 		public ModelAndView handleException() {
-			return new ModelAndView("view", new ModelMap(), HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 
 		@SuppressWarnings("serial")
 		private static class TestException extends Exception {
+		}
+	}
+
+	public static class DataClass {
+
+		public final String param1;
+
+		public final int param2;
+
+		public int param3;
+
+		@ConstructorProperties({"param1", "param2"})
+		public DataClass(String param1, int p2) {
+			this.param1 = param1;
+			this.param2 = p2;
+		}
+
+		public void setParam3(int param3) {
+			this.param3 = param3;
+		}
+	}
+
+	@RestController
+	public static class DataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(DataClass data) {
+			return data.param1 + "-" + data.param2 + "-" + data.param3;
 		}
 	}
 

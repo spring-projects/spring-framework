@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying the API to be implemented by a class providing call metadata.
@@ -51,48 +52,53 @@ public interface CallMetaDataProvider {
 	 * @throws SQLException in case of initialization failure
 	 * @see	org.springframework.jdbc.core.simple.SimpleJdbcCall#withoutProcedureColumnMetaDataAccess()
 	 */
-	void initializeWithProcedureColumnMetaData(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName)
-			throws SQLException;
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
+			@Nullable String schemaName, @Nullable String procedureName) throws SQLException;
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
-	String procedureNameToUse(String procedureName);
+	@Nullable
+	String procedureNameToUse(@Nullable String procedureName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
-	String catalogNameToUse(String catalogName);
+	@Nullable
+	String catalogNameToUse(@Nullable String catalogName);
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 */
-	String schemaNameToUse(String schemaName);
+	@Nullable
+	String schemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
 	 * The returned value will be used for meta data lookups. This could include altering the case
 	 * used or providing a base catalog if none is provided.
 	 */
-	String metaDataCatalogNameToUse(String catalogName) ;
+	@Nullable
+	String metaDataCatalogNameToUse(@Nullable String catalogName) ;
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
 	 * The returned value will be used for meta data lookups. This could include altering the case
 	 * used or providing a base schema if none is provided.
 	 */
-	String metaDataSchemaNameToUse(String schemaName) ;
+	@Nullable
+	String metaDataSchemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the column name passed in to match the meta data currently used.
 	 * This could include altering the case.
 	 * @param parameterName name of the parameter of column
 	 */
-	String parameterNameToUse(String parameterName);
+	@Nullable
+	String parameterNameToUse(@Nullable String parameterName);
 
 	/**
 	 * Create a default out parameter based on the provided meta data.
@@ -125,6 +131,7 @@ public interface CallMetaDataProvider {
 	 * Get the name of the current user. Useful for meta data lookups etc.
 	 * @return current user name from database connection
 	 */
+	@Nullable
 	String getUserName();
 
 	/**

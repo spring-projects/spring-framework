@@ -44,6 +44,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.VfsResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -181,6 +182,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private static final Log logger = LogFactory.getLog(PathMatchingResourcePatternResolver.class);
 
+	@Nullable
 	private static Method equinoxResolveMethod;
 
 	static {
@@ -229,7 +231,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * at the time of actual resource access
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
-	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
+	public PathMatchingResourcePatternResolver(@Nullable ClassLoader classLoader) {
 		this.resourceLoader = new DefaultResourceLoader(classLoader);
 	}
 
@@ -284,9 +286,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 		else {
-			// Only look for a pattern after a prefix here
-			// (to not get fooled by a pattern symbol in a strange prefix).
-			int prefixEnd = locationPattern.indexOf(":") + 1;
+			// Generally only look for a pattern after a prefix here,
+			// and on Tomcat only after the "*/" separator for its "war:" protocol.
+			int prefixEnd = (locationPattern.startsWith("war:") ? locationPattern.indexOf("*/") + 1 :
+					locationPattern.indexOf(":") + 1);
 			if (getPathMatcher().isPattern(locationPattern.substring(prefixEnd))) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
@@ -361,7 +364,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param result the set of resources to add jar roots to
 	 * @since 4.1.1
 	 */
-	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
+	protected void addAllClassLoaderJarRoots(@Nullable ClassLoader classLoader, Set<Resource> result) {
 		if (classLoader instanceof URLClassLoader) {
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
@@ -460,18 +463,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set<Resource> result = new LinkedHashSet<>(16);
 		for (Resource rootDirResource : rootDirResources) {
 			rootDirResource = resolveRootDirResource(rootDirResource);
-			URL rootDirURL = rootDirResource.getURL();
+			URL rootDirUrl = rootDirResource.getURL();
 			if (equinoxResolveMethod != null) {
-				if (rootDirURL.getProtocol().startsWith("bundle")) {
-					rootDirURL = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirURL);
-					rootDirResource = new UrlResource(rootDirURL);
+				if (rootDirUrl.getProtocol().startsWith("bundle")) {
+					URL resolvedUrl = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirUrl);
+					if (resolvedUrl != null) {
+						rootDirUrl = resolvedUrl;
+					}
+					rootDirResource = new UrlResource(rootDirUrl);
 				}
 			}
-			if (rootDirURL.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirURL, subPattern, getPathMatcher()));
+			if (rootDirUrl.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirUrl, subPattern, getPathMatcher()));
 			}
-			else if (ResourceUtils.isJarURL(rootDirURL) || isJarResource(rootDirResource)) {
-				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirURL, subPattern));
+			else if (ResourceUtils.isJarURL(rootDirUrl) || isJarResource(rootDirResource)) {
+				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
 			}
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
@@ -575,10 +581,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We'll also handle paths with and without leading "file:" prefix.
 			String urlFile = rootDirURL.getFile();
 			try {
-				int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				int separatorIndex = urlFile.indexOf(ResourceUtils.WAR_URL_SEPARATOR);
+				if (separatorIndex == -1) {
+					separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				}
 				if (separatorIndex != -1) {
 					jarFileUrl = urlFile.substring(0, separatorIndex);
-					rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+					rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
 					jarFile = getJarFile(jarFileUrl);
 				}
 				else {
@@ -813,6 +822,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class == method.getDeclaringClass()) {
@@ -845,8 +855,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 
+		@Nullable
 		public Object getAttributes() {
-			return VfsPatternUtils.getVisitorAttribute();
+			return VfsPatternUtils.getVisitorAttributes();
 		}
 
 		public Set<Resource> getResources() {

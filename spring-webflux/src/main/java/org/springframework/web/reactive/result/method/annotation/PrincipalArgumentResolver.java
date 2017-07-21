@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -32,26 +34,26 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see ServerWebExchangeArgumentResolver
  */
-public class PrincipalArgumentResolver implements HandlerMethodArgumentResolver {
+public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupport {
+
+
+	public PrincipalArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (Principal.class.isAssignableFrom(parameter.getParameterType()));
+		return checkParameterType(parameter, Principal.class::isAssignableFrom);
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		Class<?> paramType = parameter.getParameterType();
-		if (Principal.class.isAssignableFrom(paramType)) {
-			return exchange.getPrincipal().cast(Object.class);
-		}
-		else {
-			// should never happen...
-			throw new IllegalArgumentException(
-					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
-		}
+		Mono<Principal> principal = exchange.getPrincipal();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
+		return adapter != null ? Mono.just(adapter.fromPublisher(principal)) : Mono.from(principal);
 	}
 
 }

@@ -19,9 +19,11 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -31,11 +33,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.AbstractJackson2Codec;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -64,10 +68,10 @@ public interface ServerResponse {
 	/**
 	 * Write this response to the given web exchange.
 	 * @param exchange the web exchange to write to
-	 * @param strategies the strategies to use when writing
+	 * @param context the context to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
 	 */
-	Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies);
+	Mono<Void> writeTo(ServerWebExchange exchange, Context context);
 
 
 	// Static builder methods
@@ -80,7 +84,7 @@ public interface ServerResponse {
 	static BodyBuilder from(ServerResponse other) {
 		Assert.notNull(other, "Other ServerResponse must not be null");
 		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode());
-		return builder.headers(other.headers());
+		return builder.headers(headers -> headers.addAll(other.headers()));
 	}
 
 	/**
@@ -126,6 +130,17 @@ public interface ServerResponse {
 	 */
 	static HeadersBuilder<?> noContent() {
 		return status(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Create a builder with a {@linkplain HttpStatus#SEE_OTHER 303 See Other}
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 */
+	static BodyBuilder seeOther(URI location) {
+		BodyBuilder builder = status(HttpStatus.SEE_OTHER);
+		return builder.location(location);
 	}
 
 	/**
@@ -193,12 +208,15 @@ public interface ServerResponse {
 		B header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing HttpHeaders to copy from
+		 * Manipulate this response's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
-		 * @see HttpHeaders#add(String, String)
 		 */
-		B headers(HttpHeaders headers);
+		B headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -287,7 +305,7 @@ public interface ServerResponse {
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
 		 * @return the built response
 		 */
-		Mono<ServerResponse> build(BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction);
+		Mono<ServerResponse> build(BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction);
 	}
 
 
@@ -315,7 +333,7 @@ public interface ServerResponse {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Add a serialization hint like {@link AbstractJackson2Codec#JSON_VIEW_HINT}
+		 * Add a serialization hint like {@link Jackson2CodecSupport#JSON_VIEW_HINT}
 		 * to customize how the body will be serialized.
 		 * @param key the hint key
 		 * @param value the hint value
@@ -323,24 +341,34 @@ public interface ServerResponse {
 		BodyBuilder hint(String key, Object value);
 
 		/**
-		 * Set the body of the response to the given {@code Publisher} and return it.
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
 		 * @param publisher the {@code Publisher} to write to the response
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
-		 * @return the built request
+		 * @return the built response
 		 */
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
 
 		/**
+		 * Set the body of the response to the given synchronous {@code Object} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object)}.
+		 * @param body the body of the response
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
+		 * {@link #body(Publisher, Class)} should be used.
+		 */
+		Mono<ServerResponse> syncBody(Object body);
+
+		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
 		 * @param inserter the {@code BodyInserter} that writes to the response
-		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter);
+		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
@@ -363,5 +391,25 @@ public interface ServerResponse {
 		 */
 		Mono<ServerResponse> render(String name, Map<String, ?> model);
 	}
+
+
+	/**
+	 * Defines the context used during the {@link #writeTo(ServerWebExchange, Context)}.
+	 */
+	interface Context {
+
+		/**
+		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+		 * @return the list of message writers
+		 */
+		List<HttpMessageWriter<?>> messageWriters();
+
+		/**
+		 * Return the  {@link ViewResolver}s to be used for view name resolution.
+		 * @return the list of view resolvers
+		 */
+		List<ViewResolver> viewResolvers();
+	}
+
 
 }

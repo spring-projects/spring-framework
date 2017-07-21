@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -30,18 +31,25 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ModelArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+	public ModelArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return Model.class.isAssignableFrom(parameter.getParameterType());
+		return checkParameterTypeNoReactiveWrapper(parameter, Model.class::isAssignableFrom);
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		return Optional.of(bindingContext.getModel());
+		Assert.isAssignable(Model.class, methodParameter.getParameterType());
+		return context.getModel();
 	}
 
 }

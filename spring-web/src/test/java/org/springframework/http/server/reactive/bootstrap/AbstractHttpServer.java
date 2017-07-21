@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive.bootstrap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.server.reactive.ContextPathCompositeHandler;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 
@@ -77,6 +78,11 @@ public abstract class AbstractHttpServer implements HttpServer {
 
 	public Map<String, HttpHandler> getHttpHandlerMap() {
 		return this.handlerMap;
+	}
+
+	protected HttpHandler resolveHttpHandler() {
+		return getHttpHandlerMap() != null ?
+				new ContextPathCompositeHandler(getHttpHandlerMap()) : getHttpHandler();
 	}
 
 

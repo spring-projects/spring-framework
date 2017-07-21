@@ -24,9 +24,7 @@ import org.junit.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,7 +34,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class RequestContextTests {
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/foo/path")
+			.contextPath("/foo").toExchange();
 
 	private GenericApplicationContext applicationContext;
 
@@ -45,9 +44,6 @@ public class RequestContextTests {
 
 	@Before
 	public void init() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").contextPath("foo/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
 		this.applicationContext = new GenericApplicationContext();
 		this.applicationContext.refresh();
 	}
@@ -55,7 +51,7 @@ public class RequestContextTests {
 	@Test
 	public void testGetContextUrl() throws Exception {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
-		assertEquals("foo/bar", context.getContextUrl("bar"));
+		assertEquals("/foo/bar", context.getContextUrl("bar"));
 	}
 
 	@Test
@@ -64,7 +60,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("spam", "bucket");
-		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
+		assertEquals("/foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
 	}
 
 	@Test
@@ -73,7 +69,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");
 		map.put("spam", "&bucket=");
-		assertEquals("foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
+		assertEquals("/foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
 	}
 
 }

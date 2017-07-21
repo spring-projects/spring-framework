@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.junit.Assert.*;
 
@@ -96,6 +96,17 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void pathEncoded() throws Exception {
+		URI uri = URI.create("http://localhost/foo%20bar");
+		RequestPredicate predicate = RequestPredicates.path("/foo bar");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
 	public void pathPredicates() throws Exception {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setCaseSensitive(false);
@@ -159,23 +170,6 @@ public class RequestPredicatesTests {
 		assertFalse(predicate.test(request));
 
 		uri = URI.create("http://localhost/file.foo");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertFalse(predicate.test(request));
-	}
-
-	@Test
-	public void pathPrefix() throws Exception {
-		RequestPredicate predicate = RequestPredicates.pathPrefix("/foo");
-
-		URI uri = URI.create("http://localhost/foo/bar");
-		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/foo");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/bar");
 		request = MockServerRequest.builder().uri(uri).build();
 		assertFalse(predicate.test(request));
 	}

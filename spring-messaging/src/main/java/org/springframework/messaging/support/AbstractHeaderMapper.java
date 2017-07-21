@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.StringUtils;
 
@@ -44,7 +45,7 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	 * user-defined property that is being mapped into the MessageHeaders.
 	 * The default is an empty String (no prefix).
 	 */
-	public void setInboundPrefix(String inboundPrefix) {
+	public void setInboundPrefix(@Nullable String inboundPrefix) {
 		this.inboundPrefix = (inboundPrefix != null ? inboundPrefix : "");
 	}
 
@@ -53,7 +54,7 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	 * user-defined message header that is being mapped into the protocol-specific
 	 * Message. The default is an empty String (no prefix).
 	 */
-	public void setOutboundPrefix(String outboundPrefix) {
+	public void setOutboundPrefix(@Nullable String outboundPrefix) {
 		this.outboundPrefix = (outboundPrefix != null ? outboundPrefix : "");
 	}
 
@@ -88,6 +89,7 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 	 * Return the header value, or {@code null} if it does not exist
 	 * or does not match the requested {@code type}.
 	 */
+	@Nullable
 	protected <V> V getHeaderIfAvailable(Map<String, Object> headers, String name, Class<V> type) {
 		Object value = headers.get(name);
 		if (value == null) {

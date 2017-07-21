@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.Before;
@@ -23,11 +24,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Bind to annotated controllers.
+ * Sample tests demonstrating "mock" server tests binding to an annotated
+ * controller.
  *
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("unused")
 public class ControllerTests {
 
 	private WebTestClient client;
@@ -44,7 +45,7 @@ public class ControllerTests {
 		this.client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("It works!");
+				.expectBody(String.class).isEqualTo("It works!");
 	}
 
 
@@ -56,4 +57,5 @@ public class ControllerTests {
 			return "It works!";
 		}
 	}
+
 }

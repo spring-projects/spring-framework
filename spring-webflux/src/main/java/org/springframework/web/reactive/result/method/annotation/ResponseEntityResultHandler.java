@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -54,81 +54,75 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 
 	/**
-	 * Constructor with {@link HttpMessageWriter}s and a
-	 * {@code RequestedContentTypeResolver}.
-	 *
-	 * @param messageWriters writers for serializing to the response body stream
-	 * @param contentTypeResolver for resolving the requested content type
+	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
+	 * @param writers writers for serializing to the response body
+	 * @param resolver to determine the requested content type
 	 */
-	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			RequestedContentTypeResolver contentTypeResolver) {
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
+			RequestedContentTypeResolver resolver) {
 
-		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(writers, resolver, new ReactiveAdapterRegistry());
 	}
 
 	/**
-	 * Constructor with an additional {@link ReactiveAdapterRegistry}.
-	 *
-	 * @param messageWriters writers for serializing to the response body stream
-	 * @param contentTypeResolver for resolving the requested content type
-	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
-	 * rx.Single, etc.) to Flux or Mono
+	 * Constructor with an {@link ReactiveAdapterRegistry} instance.
+	 * @param writers writers for serializing to the response body
+	 * @param resolver to determine the requested content type
+	 * @param registry for adaptation to reactive types
 	 */
-	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			RequestedContentTypeResolver contentTypeResolver,
-			ReactiveAdapterRegistry adapterRegistry) {
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
+			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
 
-		super(messageWriters, contentTypeResolver, adapterRegistry);
+		super(writers, resolver, registry);
 		setOrder(0);
 	}
 
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Class<?> returnType = result.getReturnType().getRawClass();
-		if (isSupportedType(returnType)) {
+		Class<?> valueType = resolveReturnValueType(result);
+		if (isSupportedType(valueType)) {
 			return true;
 		}
-		else {
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
-			if (adapter != null && !adapter.isMultiValue() && !adapter.isNoValue()) {
-				ResolvableType genericType = result.getReturnType().getGeneric(0);
-				return isSupportedType(genericType.getRawClass());
-			}
-		}
-		return false;
+		ReactiveAdapter adapter = getAdapter(result);
+		return adapter != null && !adapter.isNoValue() &&
+				isSupportedType(result.getReturnType().getGeneric().resolve(Object.class));
 	}
 
-	private boolean isSupportedType(Class<?> clazz) {
-		return (HttpEntity.class.isAssignableFrom(clazz) && !RequestEntity.class.isAssignableFrom(clazz));
+	@Nullable
+	private static Class<?> resolveReturnValueType(HandlerResult result) {
+		Class<?> valueType = result.getReturnType().getRawClass();
+		Object value = result.getReturnValue();
+		if ((valueType == null || valueType.equals(Object.class)) && value != null) {
+			valueType = value.getClass();
+		}
+		return valueType;
+	}
+
+	private boolean isSupportedType(@Nullable Class<?> clazz) {
+		return (clazz != null && HttpEntity.class.isAssignableFrom(clazz) &&
+				!RequestEntity.class.isAssignableFrom(clazz));
 	}
 
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		ResolvableType returnType = result.getReturnType();
-		MethodParameter bodyType;
 
 		Mono<?> returnValueMono;
-		Optional<Object> optionalValue = result.getReturnValue();
-
-		Class<?> rawClass = returnType.getRawClass();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(rawClass, optionalValue);
+		MethodParameter bodyParameter;
+		ReactiveAdapter adapter = getAdapter(result);
 
 		if (adapter != null) {
 			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported");
-			returnValueMono = Mono.from(adapter.toPublisher(optionalValue));
-			bodyType = new MethodParameter(result.getReturnTypeSource());
-			bodyType.increaseNestingLevel();
-			bodyType.increaseNestingLevel();
+			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
+			bodyParameter = result.getReturnTypeSource().nested().nested();
 		}
 		else {
-			returnValueMono = Mono.justOrEmpty(optionalValue);
-			bodyType = new MethodParameter(result.getReturnTypeSource());
-			bodyType.increaseNestingLevel();
+			returnValueMono = Mono.justOrEmpty(result.getReturnValue());
+			bodyParameter = result.getReturnTypeSource().nested();
 		}
 
-		return returnValueMono.then(returnValue -> {
+		return returnValueMono.flatMap(returnValue -> {
 			Assert.isInstanceOf(HttpEntity.class, returnValue, "HttpEntity expected");
 			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
 
@@ -156,7 +150,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				return exchange.getResponse().setComplete();
 			}
 
-			return writeBody(httpEntity.getBody(), bodyType, exchange);
+			return writeBody(httpEntity.getBody(), bodyParameter, exchange);
 		});
 	}
 

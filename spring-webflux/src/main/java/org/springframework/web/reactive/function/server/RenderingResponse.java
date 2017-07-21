@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,6 +46,20 @@ public interface RenderingResponse extends ServerResponse {
 
 
 	// Builder
+
+	/**
+	 * Create a builder with the template name, status code, headers and model of the given response.
+	 * @param other the response to copy the values from
+	 * @return the created builder
+	 */
+	static Builder from(RenderingResponse other) {
+		Assert.notNull(other, "'other' must not be null");
+		DefaultRenderingResponseBuilder builder = new DefaultRenderingResponseBuilder(other.name());
+		builder.status(other.statusCode());
+		builder.headers(other.headers());
+		builder.modelAttributes(other.model());
+		return builder;
+	}
 
 	/**
 	 * Create a builder with the given template name.
@@ -78,7 +93,7 @@ public interface RenderingResponse extends ServerResponse {
 		 * @param name the name of the model attribute (never {@code null})
 		 * @param value the model attribute value (can be {@code null})
 		 */
-		Builder modelAttribute(String name, Object value);
+		Builder modelAttribute(String name, @Nullable Object value);
 
 		/**
 		 * Copy all attributes in the supplied array into the model,

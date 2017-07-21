@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -78,6 +79,7 @@ abstract class AbstractXMLEventReader implements XMLEventReader {
 	}
 
 	@Override
+	@Nullable
 	public XMLEvent nextTag() throws XMLStreamException {
 		checkIfClosed();
 		while (true) {

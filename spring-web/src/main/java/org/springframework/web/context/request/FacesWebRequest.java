@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,7 +58,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getNativeRequest(Class<T> requiredType) {
+	public <T> T getNativeRequest(@Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			Object request = getExternalContext().getRequest();
 			if (requiredType.isInstance(request)) {
@@ -69,7 +70,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getNativeResponse(Class<T> requiredType) {
+	public <T> T getNativeResponse(@Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			Object response = getExternalContext().getResponse();
 			if (requiredType.isInstance(response)) {
@@ -151,12 +152,12 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
-	public boolean checkNotModified(String eTag) {
+	public boolean checkNotModified(@Nullable String eTag) {
 		return false;
 	}
 
 	@Override
-	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		return false;
 	}
 

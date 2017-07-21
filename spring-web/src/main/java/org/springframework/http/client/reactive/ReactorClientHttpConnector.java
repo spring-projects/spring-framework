@@ -21,20 +21,28 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientOptions;
-import reactor.ipc.netty.options.ClientOptions;
 import reactor.ipc.netty.http.client.HttpClient;
+import reactor.ipc.netty.http.client.HttpClientOptions;
+import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.ipc.netty.options.ClientOptions;
 
 import org.springframework.http.HttpMethod;
 
 /**
- * Reactor-Netty implementation of {@link ClientHttpConnector}
+ * Reactor-Netty implementation of {@link ClientHttpConnector}.
  *
  * @author Brian Clozel
- * @see HttpClient
  * @since 5.0
+ * @see reactor.ipc.netty.http.client.HttpClient
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
+
+	private static final Mono<ClientHttpResponse> NO_CLIENT_RESPONSE_ERROR = Mono.error(
+			new IllegalStateException("HttpClient completed without a response. " +
+					"As a temporary workaround try to disable connection pool. " +
+					"See https://github.com/reactor/reactor-netty/issues/138."));
+
 
 	private final HttpClient httpClient;
 
@@ -48,9 +56,10 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Create a Reactor Netty {@link ClientHttpConnector} with the given {@link ClientOptions}
+	 * Create a Reactor Netty {@link ClientHttpConnector} with the given
+	 * {@link HttpClientOptions.Builder}
 	 */
-	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions> clientOptions) {
+	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions.Builder> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);
 	}
 
@@ -59,12 +68,28 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		return httpClient
-				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
+		if (!uri.isAbsolute()) {
+			return Mono.error(new IllegalArgumentException("URI is not absolute: " + uri));
+		}
+
+		return this.httpClient
+				.request(adaptHttpMethod(method),
 						uri.toString(),
-						httpClientRequest -> requestCallback
-								.apply(new ReactorClientHttpRequest(method, uri, httpClientRequest)))
-				.map(ReactorClientHttpResponse::new);
+						request -> requestCallback.apply(adaptRequest(method, uri, request)))
+				.map(this::adaptResponse)
+				.switchIfEmpty(NO_CLIENT_RESPONSE_ERROR);
+	}
+
+	private io.netty.handler.codec.http.HttpMethod adaptHttpMethod(HttpMethod method) {
+		return io.netty.handler.codec.http.HttpMethod.valueOf(method.name());
+	}
+
+	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request) {
+		return new ReactorClientHttpRequest(method, uri, request);
+	}
+
+	private ClientHttpResponse adaptResponse(HttpClientResponse response) {
+		return new ReactorClientHttpResponse(response);
 	}
 
 }

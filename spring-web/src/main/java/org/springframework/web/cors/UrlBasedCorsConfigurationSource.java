@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.cors;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -57,10 +57,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	/**
-	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used if applicable
-	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
-	 * <p>Default is "false".
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -68,10 +65,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded. Both are returned
-	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 */
 	public void setUrlDecode(boolean urlDecode) {
@@ -79,8 +73,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	/**
-	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * <p>The default value is {@code true}.
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
@@ -99,7 +92,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	/**
 	 * Set CORS configuration based on URL patterns.
 	 */
-	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+	public void setCorsConfigurations(@Nullable Map<String, CorsConfiguration> corsConfigurations) {
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
 			this.corsConfigurations.putAll(corsConfigurations);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -61,12 +62,16 @@ import org.springframework.util.StringUtils;
  */
 public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
+	@Nullable
 	private String username;
 
+	@Nullable
 	private String password;
 
+	@Nullable
 	private String catalog;
 
+	@Nullable
 	private String schema;
 
 	private final ThreadLocal<JdbcUserCredentials> threadBoundCredentials =
@@ -183,7 +188,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * @see javax.sql.DataSource#getConnection(String, String)
 	 * @see javax.sql.DataSource#getConnection()
 	 */
-	protected Connection doGetConnection(String username, String password) throws SQLException {
+	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		Assert.state(getTargetDataSource() != null, "'targetDataSource' is required");
 		if (StringUtils.hasLength(username)) {
 			return getTargetDataSource().getConnection(username, password);

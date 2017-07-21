@@ -30,24 +30,26 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Internal utility class that can be used to obtain wrapped {@link Serializable} variants
- * of {@link java.lang.reflect.Type}s.
+ * Internal utility class that can be used to obtain wrapped {@link Serializable}
+ * variants of {@link java.lang.reflect.Type}s.
  *
  * <p>{@link #forField(Field) Fields} or {@link #forMethodParameter(MethodParameter)
- * MethodParameters} can be used as the root source for a serializable type. Alternatively
- * the {@link #forGenericSuperclass(Class) superclass},
+ * MethodParameters} can be used as the root source for a serializable type.
+ * Alternatively the {@link #forGenericSuperclass(Class) superclass},
  * {@link #forGenericInterfaces(Class) interfaces} or {@link #forTypeParameters(Class)
  * type parameters} or a regular {@link Class} can also be used as source.
  *
  * <p>The returned type will either be a {@link Class} or a serializable proxy of
  * {@link GenericArrayType}, {@link ParameterizedType}, {@link TypeVariable} or
- * {@link WildcardType}. With the exception of {@link Class} (which is final) calls to
- * methods that return further {@link Type}s (for example
+ * {@link WildcardType}. With the exception of {@link Class} (which is final) calls
+ * to methods that return further {@link Type}s (for example
  * {@link GenericArrayType#getGenericComponentType()}) will be automatically wrapped.
  *
  * @author Phillip Webb
@@ -59,13 +61,13 @@ abstract class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
-	private static final ConcurrentReferenceHashMap<Type, Type> cache =
-			new ConcurrentReferenceHashMap<>(256);
+	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
 	 * Return a {@link Serializable} variant of {@link Field#getGenericType()}.
 	 */
+	@Nullable
 	public static Type forField(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		return forTypeProvider(new FieldTypeProvider(field));
@@ -75,6 +77,7 @@ abstract class SerializableTypeWrapper {
 	 * Return a {@link Serializable} variant of
 	 * {@link MethodParameter#getGenericParameterType()}.
 	 */
+	@Nullable
 	public static Type forMethodParameter(MethodParameter methodParameter) {
 		return forTypeProvider(new MethodParameterTypeProvider(methodParameter));
 	}
@@ -83,13 +86,9 @@ abstract class SerializableTypeWrapper {
 	 * Return a {@link Serializable} variant of {@link Class#getGenericSuperclass()}.
 	 */
 	@SuppressWarnings("serial")
+	@Nullable
 	public static Type forGenericSuperclass(final Class<?> type) {
-		return forTypeProvider(new DefaultTypeProvider() {
-			@Override
-			public Type getType() {
-				return type.getGenericSuperclass();
-			}
-		});
+		return forTypeProvider(type::getGenericSuperclass);
 	}
 
 	/**
@@ -100,12 +99,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getGenericInterfaces().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
-				@Override
-				public Type getType() {
-					return type.getGenericInterfaces()[index];
-				}
-			});
+			result[i] = forTypeProvider(() -> type.getGenericInterfaces()[index]);
 		}
 		return result;
 	}
@@ -118,12 +112,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getTypeParameters().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
-				@Override
-				public Type getType() {
-					return type.getTypeParameters()[index];
-				}
-			});
+			result[i] = forTypeProvider(() -> type.getTypeParameters()[index]);
 		}
 		return result;
 	}
@@ -139,32 +128,37 @@ abstract class SerializableTypeWrapper {
 		while (unwrapped instanceof SerializableTypeProxy) {
 			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
 		}
-		return (T) unwrapped;
+		return (unwrapped != null ? (T) unwrapped : type);
 	}
 
 	/**
 	 * Return a {@link Serializable} {@link Type} backed by a {@link TypeProvider} .
 	 */
+	@Nullable
 	static Type forTypeProvider(final TypeProvider provider) {
 		Assert.notNull(provider, "Provider must not be null");
-		if (provider.getType() instanceof Serializable || provider.getType() == null) {
-			return provider.getType();
+		Type providedType = provider.getType();
+		if (providedType == null) {
+			return null;
 		}
-		Type cached = cache.get(provider.getType());
+		if (providedType instanceof Serializable) {
+			return providedType;
+		}
+		Type cached = cache.get(providedType);
 		if (cached != null) {
 			return cached;
 		}
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
-			if (type.isAssignableFrom(provider.getType().getClass())) {
+			if (type.isAssignableFrom(providedType.getClass())) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
 				Class<?>[] interfaces = new Class<?>[] {type, SerializableTypeProxy.class, Serializable.class};
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
 				cached = (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
-				cache.put(provider.getType(), cached);
+				cache.put(providedType, cached);
 				return cached;
 			}
 		}
-		throw new IllegalArgumentException("Unsupported Type class: " + provider.getType().getClass().getName());
+		throw new IllegalArgumentException("Unsupported Type class: " + providedType.getClass().getName());
 	}
 
 
@@ -183,28 +177,21 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * A {@link Serializable} interface providing access to a {@link Type}.
 	 */
+	@SuppressWarnings("serial")
 	interface TypeProvider extends Serializable {
 
 		/**
 		 * Return the (possibly non {@link Serializable}) {@link Type}.
 		 */
+		@Nullable
 		Type getType();
 
 		/**
-		 * Return the source of the type or {@code null}.
+		 * Return the source of the type, or {@code null} if not known.
+		 * <p>The default implementations returns {@code null}.
 		 */
-		Object getSource();
-	}
-
-
-	/**
-	 * Default implementation of {@link TypeProvider} with a {@code null} source.
-	 */
-	@SuppressWarnings("serial")
-	private static abstract class DefaultTypeProvider implements TypeProvider {
-
-		@Override
-		public Object getSource() {
+		@Nullable
+		default Object getSource() {
 			return null;
 		}
 	}
@@ -225,17 +212,18 @@ abstract class SerializableTypeWrapper {
 		}
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("equals")) {
+		@Nullable
+		public Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
+			if (method.getName().equals("equals") && args != null) {
 				Object other = args[0];
 				// Unwrap proxies for speed
 				if (other instanceof Type) {
 					other = unwrap((Type) other);
 				}
-				return this.provider.getType().equals(other);
+				return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
 			}
 			else if (method.getName().equals("hashCode")) {
-				return this.provider.getType().hashCode();
+				return ObjectUtils.nullSafeHashCode(this.provider.getType());
 			}
 			else if (method.getName().equals("getTypeProvider")) {
 				return this.provider;
@@ -245,7 +233,7 @@ abstract class SerializableTypeWrapper {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
 			else if (Type[].class == method.getReturnType() && args == null) {
-				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType(), args)).length];
+				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));
 				}
@@ -308,6 +296,7 @@ abstract class SerializableTypeWrapper {
 	@SuppressWarnings("serial")
 	static class MethodParameterTypeProvider implements TypeProvider {
 
+		@Nullable
 		private final String methodName;
 
 		private final Class<?>[] parameterTypes;
@@ -319,19 +308,12 @@ abstract class SerializableTypeWrapper {
 		private transient MethodParameter methodParameter;
 
 		public MethodParameterTypeProvider(MethodParameter methodParameter) {
-			if (methodParameter.getMethod() != null) {
-				this.methodName = methodParameter.getMethod().getName();
-				this.parameterTypes = methodParameter.getMethod().getParameterTypes();
-			}
-			else {
-				this.methodName = null;
-				this.parameterTypes = methodParameter.getConstructor().getParameterTypes();
-			}
+			this.methodName = (methodParameter.getMethod() != null ? methodParameter.getMethod().getName() : null);
+			this.parameterTypes = methodParameter.getExecutable().getParameterTypes();
 			this.declaringClass = methodParameter.getDeclaringClass();
 			this.parameterIndex = methodParameter.getParameterIndex();
 			this.methodParameter = methodParameter;
 		}
-
 
 		@Override
 		public Type getType() {
@@ -378,6 +360,7 @@ abstract class SerializableTypeWrapper {
 
 		private transient Method method;
 
+		@Nullable
 		private transient volatile Object result;
 
 		public MethodInvokeTypeProvider(TypeProvider provider, Method method, int index) {
@@ -407,11 +390,15 @@ abstract class SerializableTypeWrapper {
 
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
-			this.method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
-			if (this.method.getReturnType() != Type.class && this.method.getReturnType() != Type[].class) {
-				throw new IllegalStateException(
-						"Invalid return type on deserialized method - needs to be Type or Type[]: " + this.method);
+			Method method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
+			if (method == null) {
+				throw new IllegalStateException("Cannot find method on deserialization: " + this.methodName);
 			}
+			if (method.getReturnType() != Type.class && method.getReturnType() != Type[].class) {
+				throw new IllegalStateException(
+						"Invalid return type on deserialized method - needs to be Type or Type[]: " + method);
+			}
+			this.method = method;
 		}
 	}
 

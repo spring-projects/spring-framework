@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
@@ -58,13 +57,10 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Class<?> type = context.getTypeLocator().findType(typeName);
 			Constructor<?>[] ctors = type.getConstructors();
 
-			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
-				@Override
-				public int compare(Constructor<?> c1, Constructor<?> c2) {
-					int c1pl = c1.getParameterCount();
-					int c2pl = c2.getParameterCount();
-					return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
-				}
+			Arrays.sort(ctors, (c1, c2) -> {
+				int c1pl = c1.getParameterCount();
+				int c2pl = c2.getParameterCount();
+				return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
 			});
 
 			Constructor<?> closeMatch = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -134,10 +135,10 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
-		public void setValue(Object object, Object value) throws Exception {
+		public void setValue(@Nullable Object value) throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);
-				this.field.set(object, value);
+				this.field.set(getWrappedInstance(), value);
 			}
 			catch (IllegalAccessException ex) {
 				throw new InvalidPropertyException(getWrappedClass(), this.field.getName(),

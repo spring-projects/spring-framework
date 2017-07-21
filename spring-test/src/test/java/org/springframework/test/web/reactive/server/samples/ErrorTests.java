@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
@@ -27,17 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
  * Tests with error status codes or error conditions.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
-@SuppressWarnings("unused")
 public class ErrorTests {
 
-	private WebTestClient client;
-
-
-	@Before
-	public void setUp() throws Exception {
-		this.client = WebTestClient.bindToController(new TestController()).build();
-	}
+	private final WebTestClient client = WebTestClient.bindToController(new TestController()).build();
 
 
 	@Test

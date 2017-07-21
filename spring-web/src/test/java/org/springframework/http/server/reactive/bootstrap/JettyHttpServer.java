@@ -53,8 +53,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 	}
 
 	private ServletHttpHandlerAdapter createServletAdapter() {
-		return getHttpHandlerMap() != null ? new JettyHttpHandlerAdapter(getHttpHandlerMap()) :
-				new JettyHttpHandlerAdapter(getHttpHandler());
+		return new JettyHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override

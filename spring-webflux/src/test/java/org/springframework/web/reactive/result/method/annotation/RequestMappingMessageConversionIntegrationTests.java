@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personResponseBodyWithMonoDeclaredAsObject() throws Exception {
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/person-response/mono-declared-as-object", JSON, Person.class).getBody());
+	}
+
+	@Test
 	public void personResponseBodyWithSingle() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/person-response/single", JSON, Person.class).getBody());
@@ -181,7 +187,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertTrue(response.hasBody());
 		assertEquals(951, response.getHeaders().getContentLength());
 		assertEquals(951, response.getBody().length);
-		assertEquals(new MediaType("image", "x-png"), response.getHeaders().getContentType());
+		assertEquals(new MediaType("image", "png"), response.getHeaders().getContentType());
 	}
 
 	@Test
@@ -442,6 +448,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return Mono.just(new Person("Robert"));
 		}
 
+		@GetMapping("/mono-declared-as-object")
+		public Object getMonoDeclaredAsObject() {
+			return Mono.just(new Person("Robert"));
+		}
+
 		@GetMapping("/single")
 		public Single<Person> getSingle() {
 			return Single.just(new Person("Robert"));
@@ -601,12 +612,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 
 	@XmlRootElement
-	@SuppressWarnings("WeakerAccess")
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;
 
-		@SuppressWarnings("unused")
 		public Person() {
 		}
 

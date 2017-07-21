@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -165,6 +166,7 @@ public class RemoteInvocation implements Serializable {
 	 * @param key the attribute key
 	 * @return the attribute value, or {@code null} if not defined
 	 */
+	@Nullable
 	public Serializable getAttribute(String key) {
 		if (this.attributes == null) {
 			return null;
@@ -179,7 +181,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
-	public void setAttributes(Map<String, Serializable> attributes) {
+	public void setAttributes(@Nullable Map<String, Serializable> attributes) {
 		this.attributes = attributes;
 	}
 
@@ -190,6 +192,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */
+	@Nullable
 	public Map<String, Serializable> getAttributes() {
 		return this.attributes;
 	}

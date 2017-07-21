@@ -57,6 +57,7 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.TimeStamped;
@@ -1137,7 +1138,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		StaticMethodMatcherPointcutAdvisor advisor = new StaticMethodMatcherPointcutAdvisor(twoBirthdayInterceptor) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return "haveBirthday".equals(m.getName());
 			}
 		};
@@ -1216,7 +1217,7 @@ public abstract class AbstractAopProxyTests {
 		NopInterceptor overLoadVoids = new NopInterceptor();
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadVoids) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getName().equals("overload") && m.getParameterCount() == 0;
 			}
 		});
@@ -1224,7 +1225,7 @@ public abstract class AbstractAopProxyTests {
 		NopInterceptor overLoadInts = new NopInterceptor();
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadInts) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getName().equals("overload") && m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(int.class);
 			}
@@ -1313,7 +1314,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cba) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getParameterCount() == 0;
 			}
 		};
@@ -1394,7 +1395,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cca) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getParameterCount() == 0 || "exceptional".equals(m.getName());
 			}
 		};
@@ -1477,7 +1478,7 @@ public abstract class AbstractAopProxyTests {
 		class SummingAfterAdvice implements AfterReturningAdvice {
 			public int sum;
 			@Override
-			public void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable {
+			public void afterReturning(@Nullable Object returnValue, Method m, Object[] args, @Nullable Object target) throws Throwable {
 				sum += ((Integer) returnValue).intValue();
 			}
 		}
@@ -1485,7 +1486,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		Advisor matchesInt = new StaticMethodMatcherPointcutAdvisor(aa) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getReturnType() == int.class;
 			}
 		};
@@ -1543,7 +1544,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		Advisor matchesEchoInvocations = new StaticMethodMatcherPointcutAdvisor(th) {
 			@Override
-			public boolean matches(Method m, Class<?> targetClass) {
+			public boolean matches(Method m, @Nullable Class<?> targetClass) {
 				return m.getName().startsWith("echo");
 			}
 		};
@@ -1688,11 +1689,11 @@ public abstract class AbstractAopProxyTests {
 			super(cleaner);
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					return args[0] == null;
 				}
 				@Override
-				public boolean matches(Method m, Class<?> targetClass) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass) {
 					return m.getName().startsWith("set") &&
 						m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(String.class);
@@ -1711,7 +1712,7 @@ public abstract class AbstractAopProxyTests {
 			super(mi);
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					boolean run = m.getName().contains(pattern);
 					if (run) ++count;
 					return run;
@@ -1730,13 +1731,13 @@ public abstract class AbstractAopProxyTests {
 			super(mi);
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					boolean run = m.getName().contains(pattern);
 					if (run) ++count;
 					return run;
 				}
 				@Override
-				public boolean matches(Method m, Class<?> clazz) {
+				public boolean matches(Method m, @Nullable Class<?> clazz) {
 					return m.getName().startsWith("set");
 				}
 			});
@@ -1754,7 +1755,7 @@ public abstract class AbstractAopProxyTests {
 			this.pattern = pattern;
 		}
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().contains(pattern);
 		}
 	}
@@ -1947,12 +1948,12 @@ public abstract class AbstractAopProxyTests {
 			AfterReturningAdvice, ThrowsAdvice {
 
 		@Override
-		public void before(Method m, Object[] args, Object target) throws Throwable {
+		public void before(Method m, Object[] args, @Nullable Object target) throws Throwable {
 			count(m);
 		}
 
 		@Override
-		public void afterReturning(Object o, Method m, Object[] args, Object target)
+		public void afterReturning(@Nullable Object o, Method m, Object[] args, @Nullable Object target)
 				throws Throwable {
 			count(m);
 		}

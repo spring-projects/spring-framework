@@ -24,6 +24,8 @@ import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -42,6 +44,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Object enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
+	@Nullable
 	private CallableStatementCreatorFactory callableStatementFactory;
 
 	/**
@@ -62,6 +65,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * or {? = call get_invoice_count(?)} if isFunction is set to true
 	 * Updated after each parameter is added.
 	 */
+	@Nullable
 	private String callString;
 
 
@@ -151,10 +155,10 @@ public abstract class SqlCall extends RdbmsOperation {
 			this.callString += ")}";
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled stored procedure. Call string is [" + getCallString() + "]");
+			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
 		}
 
-		this.callableStatementFactory = new CallableStatementCreatorFactory(getCallString(), getDeclaredParameters());
+		this.callableStatementFactory = new CallableStatementCreatorFactory(this.callString, getDeclaredParameters());
 		this.callableStatementFactory.setResultSetType(getResultSetType());
 		this.callableStatementFactory.setUpdatableResults(isUpdatableResults());
 
@@ -171,6 +175,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Get the call string.
 	 */
+	@Nullable
 	public String getCallString() {
 		return this.callString;
 	}
@@ -180,7 +185,8 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with this parameters.
 	 * @param inParams parameters. May be {@code null}.
 	 */
-	protected CallableStatementCreator newCallableStatementCreator(Map<String, ?> inParams) {
+	protected CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> inParams) {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
 	}
 
@@ -190,6 +196,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @param inParamMapper parametermapper. May not be {@code null}.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);
 	}
 

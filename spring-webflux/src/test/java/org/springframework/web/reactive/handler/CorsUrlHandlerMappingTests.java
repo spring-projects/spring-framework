@@ -22,13 +22,10 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,7 +51,6 @@ public class CorsUrlHandlerMappingTests {
 	@Before
 	public void setup() {
 		this.handlerMapping = new AbstractUrlHandlerMapping() {};
-		this.handlerMapping.setUseTrailingSlashMatch(true);
 		this.handlerMapping.registerHandler("/welcome.html", this.welcomeController);
 		this.handlerMapping.registerHandler("/cors.html", this.corsController);
 	}
@@ -63,7 +59,7 @@ public class CorsUrlHandlerMappingTests {
 	@Test
 	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -73,7 +69,7 @@ public class CorsUrlHandlerMappingTests {
 	@Test
 	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -84,7 +80,7 @@ public class CorsUrlHandlerMappingTests {
 	@Test
 	public void actualRequestWithCorsAwareHandler() throws Exception {
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/cors.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/cors.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -95,7 +91,7 @@ public class CorsUrlHandlerMappingTests {
 	@Test
 	public void preFlightWithCorsAwareHandler() throws Exception {
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/cors.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/cors.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -110,7 +106,7 @@ public class CorsUrlHandlerMappingTests {
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -125,7 +121,7 @@ public class CorsUrlHandlerMappingTests {
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
 		String origin = "http://domain2.com";
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin, "GET");
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
@@ -134,15 +130,13 @@ public class CorsUrlHandlerMappingTests {
 	}
 
 
-	private ServerWebExchange createExchange(HttpMethod method, String path, String origin,
-			String accessControlRequestMethod) {
+	private ServerWebExchange createExchange(HttpMethod method, String path, String origin) {
 
-		ServerHttpRequest request = MockServerHttpRequest
+		return MockServerHttpRequest
 				.method(method, "http://localhost" + path)
 				.header("Origin", origin)
-				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, accessControlRequestMethod)
-				.build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+				.toExchange();
 	}
 
 

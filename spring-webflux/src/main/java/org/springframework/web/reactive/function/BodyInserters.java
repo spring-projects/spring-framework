@@ -17,13 +17,13 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -32,6 +32,8 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -53,6 +55,9 @@ public abstract class BodyInserters {
 
 	private static final ResolvableType FORM_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
+			MultiValueMap.class, String.class, Part.class);
 
 	private static final BodyInserter<Void, ReactiveHttpOutputMessage> EMPTY =
 					(response, context) -> response.setComplete();
@@ -96,17 +101,17 @@ public abstract class BodyInserters {
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@link Publisher}.
 	 * @param publisher the publisher to stream to the response body
-	 * @param elementType the type of elements contained in the publisher
+	 * @param typeReference the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the type of the {@code Publisher}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
-			P publisher, ResolvableType elementType) {
+			P publisher, ParameterizedTypeReference<T> typeReference) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementType, "'elementType' must not be null");
-		return bodyInserterFor(publisher, elementType);
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return bodyInserterFor(publisher, ResolvableType.forType(typeReference.getType()));
 	}
 
 	/**
@@ -120,14 +125,21 @@ public abstract class BodyInserters {
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
 		return (outputMessage, context) -> {
-					HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
-					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, null,
-							outputMessage, context.hints());
-				};
+			Mono<T> inputStream = Mono.just(resource);
+			HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
+			Optional<ServerHttpRequest> serverRequest = context.serverRequest();
+			if (serverRequest.isPresent() && outputMessage instanceof ServerHttpResponse) {
+				return messageWriter.write(inputStream, RESOURCE_TYPE, RESOURCE_TYPE, null,
+						serverRequest.get(), (ServerHttpResponse) outputMessage, context.hints());
+			}
+			else {
+				return messageWriter.write(inputStream, RESOURCE_TYPE, null, outputMessage, context.hints());
+			}
+		};
 	}
 
 	private static HttpMessageWriter<Resource> resourceHttpMessageWriter(BodyInserter.Context context) {
-		return context.messageWriters().get()
+		return context.messageWriters().stream()
 				.filter(messageWriter -> messageWriter.canWrite(RESOURCE_TYPE, null))
 				.findFirst()
 				.map(BodyInserters::<Resource>cast)
@@ -149,11 +161,15 @@ public abstract class BodyInserters {
 			S eventsPublisher) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		return (response, context) -> {
+		return (serverResponse, context) -> {
 			HttpMessageWriter<ServerSentEvent<T>> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
-					MediaType.TEXT_EVENT_STREAM, response, context.hints());
+			return context.serverRequest()
+					.map(serverRequest -> messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
+							SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM, serverRequest,
+							serverResponse, context.hints()))
+					.orElseGet(() -> messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
+							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
 		};
 	}
 
@@ -182,7 +198,7 @@ public abstract class BodyInserters {
 	 * Return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events.
 	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
-	 * @param eventType the type of event contained in the publisher
+	 * @param typeReference the type of event contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events
@@ -192,16 +208,28 @@ public abstract class BodyInserters {
 	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
 	// the server-side
 	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
+			ParameterizedTypeReference<T> typeReference) {
+
+		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return fromServerSentEvents(eventsPublisher,
+				ResolvableType.forType(typeReference.getType()));
+	}
+
+	static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
 			ResolvableType eventType) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
-		return (outputMessage, context) -> {
+		return (serverResponse, context) -> {
 			HttpMessageWriter<T> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return messageWriter.write(eventsPublisher, eventType,
-					MediaType.TEXT_EVENT_STREAM, outputMessage, context.hints());
-
+			return context.serverRequest()
+					.map(serverRequest -> messageWriter.write(eventsPublisher, eventType,
+							eventType, MediaType.TEXT_EVENT_STREAM, serverRequest,
+							serverResponse, context.hints()))
+					.orElseGet(() -> messageWriter.write(eventsPublisher, eventType,
+							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
 		};
 	}
 
@@ -211,6 +239,9 @@ public abstract class BodyInserters {
 	 * @param formData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes form data
 	 */
+	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
+	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
+	// on the server-side
 	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(
 			MultiValueMap<String, String> formData) {
 
@@ -220,6 +251,27 @@ public abstract class BodyInserters {
 					findMessageWriter(context, FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 			return messageWriter.write(Mono.just(formData), FORM_TYPE,
 					MediaType.APPLICATION_FORM_URLENCODED, outputMessage, context.hints());
+		};
+	}
+
+	/**
+	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as Multipart
+	 * data.
+	 * @param multipartData the form data to write to the output message
+	 * @return a {@code BodyInserter} that writes form data
+	 */
+	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
+	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
+	// on the server-side
+	public static BodyInserter<MultiValueMap<String, ?>, ClientHttpRequest> fromMultipartData(
+			MultiValueMap<String, ?> multipartData) {
+
+		Assert.notNull(multipartData, "'multipartData' must not be null");
+		return (outputMessage, context) -> {
+			HttpMessageWriter<MultiValueMap<String, ?>> messageWriter =
+					findMessageWriter(context, MULTIPART_VALUE_TYPE, MediaType.MULTIPART_FORM_DATA);
+			return messageWriter.write(Mono.just(multipartData), FORM_TYPE,
+					MediaType.MULTIPART_FORM_DATA, outputMessage, context.hints());
 		};
 	}
 
@@ -241,17 +293,26 @@ public abstract class BodyInserters {
 	private static <T, P extends Publisher<?>, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> bodyInserterFor(
 			P body, ResolvableType bodyType) {
 
-		return (m, context) -> {
-			MediaType contentType = m.getHeaders().getContentType();
-			Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
-			return messageWriters.get()
+		return (outputMessage, context) -> {
+			MediaType contentType = outputMessage.getHeaders().getContentType();
+			List<HttpMessageWriter<?>> messageWriters = context.messageWriters();
+			return messageWriters.stream()
 					.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
 					.findFirst()
 					.map(BodyInserters::cast)
-					.map(messageWriter -> messageWriter
-							.write(body, bodyType, contentType, m, context.hints()))
+					.map(messageWriter -> {
+						Optional<ServerHttpRequest> serverRequest = context.serverRequest();
+						if (serverRequest.isPresent() && outputMessage instanceof ServerHttpResponse) {
+							return messageWriter.write(body, bodyType, bodyType, contentType,
+									serverRequest.get(), (ServerHttpResponse) outputMessage,
+									context.hints());
+						} else {
+							return messageWriter.write(body, bodyType, contentType, outputMessage,
+											context.hints());
+						}
+					})
 					.orElseGet(() -> {
-						List<MediaType> supportedMediaTypes = messageWriters.get()
+						List<MediaType> supportedMediaTypes = messageWriters.stream()
 								.flatMap(reader -> reader.getWritableMediaTypes().stream())
 								.collect(Collectors.toList());
 						UnsupportedMediaTypeException error =
@@ -264,7 +325,7 @@ public abstract class BodyInserters {
 	private static <T> HttpMessageWriter<T> findMessageWriter(
 			BodyInserter.Context context, ResolvableType type, MediaType mediaType) {
 
-		return context.messageWriters().get()
+		return context.messageWriters().stream()
 				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
 				.findFirst()
 				.map(BodyInserters::<T>cast)

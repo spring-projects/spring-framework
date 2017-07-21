@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,6 +58,17 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Encode the given URI scheme with the given encoding.
+	 * @param scheme the scheme to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded scheme
+	 * @since 5.0
+	 */
+	public static String encodeScheme(String scheme, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(scheme, charset, HierarchicalUriComponents.Type.SCHEME);
+	}
+
+	/**
 	 * Encode the given URI authority with the given encoding.
 	 * @param authority the authority to be encoded
 	 * @param encoding the character encoding to encode to
@@ -65,6 +77,17 @@ public abstract class UriUtils {
 	 */
 	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents.encodeUriComponent(authority, encoding, HierarchicalUriComponents.Type.AUTHORITY);
+	}
+
+	/**
+	 * Encode the given URI authority with the given encoding.
+	 * @param authority the authority to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded authority
+	 * @since 5.0
+	 */
+	public static String encodeAuthority(String authority, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(authority, charset, HierarchicalUriComponents.Type.AUTHORITY);
 	}
 
 	/**
@@ -79,6 +102,17 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Encode the given URI user info with the given encoding.
+	 * @param userInfo the user info to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded user info
+	 * @since 5.0
+	 */
+	public static String encodeUserInfo(String userInfo, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(userInfo, charset, HierarchicalUriComponents.Type.USER_INFO);
+	}
+
+	/**
 	 * Encode the given URI host with the given encoding.
 	 * @param host the host to be encoded
 	 * @param encoding the character encoding to encode to
@@ -87,6 +121,17 @@ public abstract class UriUtils {
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents.encodeUriComponent(host, encoding, HierarchicalUriComponents.Type.HOST_IPV4);
+	}
+
+	/**
+	 * Encode the given URI host with the given encoding.
+	 * @param host the host to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded host
+	 * @since 5.0
+	 */
+	public static String encodeHost(String host, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(host, charset, HierarchicalUriComponents.Type.HOST_IPV4);
 	}
 
 	/**
@@ -101,6 +146,17 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Encode the given URI port with the given encoding.
+	 * @param port the port to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded port
+	 * @since 5.0
+	 */
+	public static String encodePort(String port, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(port, charset, HierarchicalUriComponents.Type.PORT);
+	}
+
+	/**
 	 * Encode the given URI path with the given encoding.
 	 * @param path the path to be encoded
 	 * @param encoding the character encoding to encode to
@@ -109,6 +165,17 @@ public abstract class UriUtils {
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents.encodeUriComponent(path, encoding, HierarchicalUriComponents.Type.PATH);
+	}
+
+	/**
+	 * Encode the given URI path with the given encoding.
+	 * @param path the path to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded path
+	 * @since 5.0
+	 */
+	public static String encodePath(String path, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(path, charset, HierarchicalUriComponents.Type.PATH);
 	}
 
 	/**
@@ -123,6 +190,17 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Encode the given URI path segment with the given encoding.
+	 * @param segment the segment to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded segment
+	 * @since 5.0
+	 */
+	public static String encodePathSegment(String segment, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(segment, charset, HierarchicalUriComponents.Type.PATH_SEGMENT);
+	}
+
+	/**
 	 * Encode the given URI query with the given encoding.
 	 * @param query the query to be encoded
 	 * @param encoding the character encoding to encode to
@@ -131,6 +209,17 @@ public abstract class UriUtils {
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents.encodeUriComponent(query, encoding, HierarchicalUriComponents.Type.QUERY);
+	}
+
+	/**
+	 * Encode the given URI query with the given encoding.
+	 * @param query the query to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded query
+	 * @since 5.0
+	 */
+	public static String encodeQuery(String query, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(query, charset, HierarchicalUriComponents.Type.QUERY);
 	}
 
 	/**
@@ -145,6 +234,17 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Encode the given URI query parameter with the given encoding.
+	 * @param queryParam the query parameter to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded query parameter
+	 * @since 5.0
+	 */
+	public static String encodeQueryParam(String queryParam, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
+	}
+
+	/**
 	 * Encode the given URI fragment with the given encoding.
 	 * @param fragment the fragment to be encoded
 	 * @param encoding the character encoding to encode to
@@ -154,6 +254,18 @@ public abstract class UriUtils {
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
 		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
 	}
+
+	/**
+	 * Encode the given URI fragment with the given encoding.
+	 * @param fragment the fragment to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded fragment
+	 * @since 5.0
+	 */
+	public static String encodeFragment(String fragment, Charset charset) {
+		return HierarchicalUriComponents.encodeUriComponent(fragment, charset, HierarchicalUriComponents.Type.FRAGMENT);
+	}
+
 
 	/**
 	 * Encode characters outside the unreserved character set as defined in
@@ -178,6 +290,7 @@ public abstract class UriUtils {
 	 * @param source the String to be encoded
 	 * @param charset the character encoding to encode to
 	 * @return the encoded String
+	 * @since 5.0
 	 */
 	public static String encode(String source, Charset charset) {
 		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
@@ -185,42 +298,10 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Apply {@link #encode(String, String)} to the values in the given URI
-	 * variables and return a new Map containing the encoded values.
-	 * @param uriVariables the URI variable values to be encoded
-	 * @return the encoded String
-	 * @since 5.0
-	 */
-	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
-		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
-		uriVariables.entrySet().stream().forEach(entry -> {
-			String stringValue = (entry.getValue() != null ? entry.getValue().toString() : "");
-			result.put(entry.getKey(), encode(stringValue, StandardCharsets.UTF_8));
-		});
-		return result;
-	}
-
-	/**
-	 * Apply {@link #encode(String, String)} to the values in the given URI
-	 * variables and return a new array containing the encoded values.
-	 * @param uriVariables the URI variable values to be encoded
-	 * @return the encoded String
-	 * @since 5.0
-	 */
-	public static Object[] encodeUriVariables(Object... uriVariables) {
-		return Arrays.stream(uriVariables)
-				.map(value -> {
-					String stringValue = (value != null ? value.toString() : "");
-					return encode(stringValue, StandardCharsets.UTF_8);
-				})
-				.collect(Collectors.toList()).toArray();
-	}
-
-	/**
 	 * Decode the given encoded URI component.
 	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
 	 * @param source the encoded String
-	 * @param encoding the encoding
+	 * @param encoding the character encoding to use
 	 * @return the decoded value
 	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
@@ -232,18 +313,35 @@ public abstract class UriUtils {
 	}
 
 	/**
+	 * Decode the given encoded URI component.
+	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
+	 * @param source the encoded String
+	 * @param charset the character encoding to use
+	 * @return the decoded value
+	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @since 5.0
+	 * @see StringUtils#uriDecode(String, Charset)
+	 * @see java.net.URLDecoder#decode(String, String)
+	 */
+	public static String decode(String source, Charset charset) {
+		return StringUtils.uriDecode(source, charset);
+	}
+
+	/**
 	 * Extract the file extension from the given URI path.
 	 * @param path the URI path (e.g. "/products/index.html")
 	 * @return the extracted file extension (e.g. "html")
 	 * @since 4.3.2
 	 */
+	@Nullable
 	public static String extractFileExtension(String path) {
 		int end = path.indexOf('?');
+		int fragmentIndex = path.indexOf('#');
+		if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {
+			end = fragmentIndex;
+		}
 		if (end == -1) {
-			end = path.indexOf('#');
-			if (end == -1) {
-				end = path.length();
-			}
+			end = path.length();
 		}
 		int begin = path.lastIndexOf('/', end) + 1;
 		int paramIndex = path.indexOf(';', begin);
@@ -253,6 +351,39 @@ public abstract class UriUtils {
 			return path.substring(extIndex + 1, end);
 		}
 		return null;
+	}
+
+
+	/**
+	 * Apply {@link #encode(String, String)} to the values in the given URI
+	 * variables and return a new Map containing the encoded values.
+	 * @param uriVariables the URI variable values to be encoded
+	 * @return the encoded String
+	 * @since 5.0
+	 */
+	static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
+		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
+		uriVariables.forEach((key, value) -> {
+			String stringValue = (value != null ? value.toString() : "");
+			result.put(key, encode(stringValue, StandardCharsets.UTF_8));
+		});
+		return result;
+	}
+
+	/**
+	 * Apply {@link #encode(String, String)} to the values in the given URI
+	 * variables and return a new array containing the encoded values.
+	 * @param uriVariables the URI variable values to be encoded
+	 * @return the encoded String
+	 * @since 5.0
+	 */
+	static Object[] encodeUriVariables(Object... uriVariables) {
+		return Arrays.stream(uriVariables)
+				.map(value -> {
+					String stringValue = (value != null ? value.toString() : "");
+					return encode(stringValue, StandardCharsets.UTF_8);
+				})
+				.collect(Collectors.toList()).toArray();
 	}
 
 }

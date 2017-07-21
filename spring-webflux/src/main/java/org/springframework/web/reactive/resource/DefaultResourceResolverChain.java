@@ -22,6 +22,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -39,7 +40,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	private int index = -1;
 
 
-	public DefaultResourceResolverChain(List<? extends ResourceResolver> resolvers) {
+	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {
 		if (resolvers != null) {
 			this.resolvers.addAll(resolvers);
 		}
@@ -47,12 +48,12 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	public Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+	public Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations) {
 
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
-			return null;
+			return Mono.empty();
 		}
 
 		try {
@@ -67,7 +68,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	public Mono<String> resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
-			return null;
+			return Mono.empty();
 		}
 
 		try {
@@ -78,6 +79,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		}
 	}
 
+	@Nullable
 	private ResourceResolver getNext() {
 		Assert.state(this.index <= this.resolvers.size(),
 				"Current index exceeds the number of configured ResourceResolvers");

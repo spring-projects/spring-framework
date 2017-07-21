@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
@@ -51,10 +52,12 @@ import org.springframework.util.Assert;
 public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		implements FactoryBean<EntityManager>, InitializingBean {
 
+	@Nullable
 	private Class<? extends EntityManager> entityManagerInterface;
 
 	private boolean synchronizedWithTransaction = true;
 
+	@Nullable
 	private EntityManager shared;
 
 

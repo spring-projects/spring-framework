@@ -33,6 +33,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.lang.Nullable;
 
 import static org.junit.Assert.*;
 
@@ -196,7 +197,7 @@ public class AspectJPrecedenceComparatorTests {
 	private Advisor createSpringAOPAfterAdvice(int order) {
 		AfterReturningAdvice advice = new AfterReturningAdvice() {
 			@Override
-			public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+			public void afterReturning(@Nullable Object returnValue, Method method, Object[] args, @Nullable Object target) throws Throwable {
 			}
 		};
 		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut, advice);

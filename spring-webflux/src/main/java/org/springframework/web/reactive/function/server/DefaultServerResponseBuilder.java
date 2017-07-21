@@ -23,11 +23,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -73,10 +75,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+	public ServerResponse.BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 
@@ -105,16 +106,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder eTag(String eTag) {
-		if (eTag != null) {
-			if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
-				eTag = "\"" + eTag;
-			}
-			if (!eTag.endsWith("\"")) {
-				eTag = eTag + "\"";
-			}
+	public ServerResponse.BodyBuilder eTag(String etag) {
+		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+			etag = "\"" + etag;
 		}
-		this.headers.setETag(eTag);
+		if (!etag.endsWith("\"")) {
+			etag = etag + "\"";
+		}
+		this.headers.setETag(etag);
 		return this;
 	}
 
@@ -126,9 +125,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
-		ZonedDateTime gmt = lastModified.withZoneSameInstant(ZoneId.of("GMT"));
-		String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
-		this.headers.set(HttpHeaders.LAST_MODIFIED, headerValue);
+		this.headers.setZonedDateTime(HttpHeaders.LAST_MODIFIED, lastModified);
 		return this;
 	}
 
@@ -167,7 +164,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public Mono<ServerResponse> build(
-			BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
+			BiFunction<ServerWebExchange, ServerResponse.Context, Mono<Void>> writeFunction) {
 
 		Assert.notNull(writeFunction, "'writeFunction' must not be null");
 		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers, writeFunction));
@@ -187,7 +184,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public <T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
+	public Mono<ServerResponse> syncBody(Object body) {
+		Assert.notNull(body, "'body' must not be null");
+		Assert.isTrue(!(body instanceof Publisher), "Please specify the element class by using " +
+				"body(Publisher, Class)");
+
+		return new DefaultEntityResponseBuilder<>(body,
+				BodyInserters.fromObject(body))
+				.headers(this.headers)
+				.status(this.statusCode)
+				.build()
+				.map(entityResponse -> entityResponse);
+	}
+
+	@Override
+	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
 		return Mono.just(new BodyInserterServerResponse<>(this.statusCode, this.headers, inserter, this.hints));
 	}
@@ -248,8 +259,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			response.setStatusCode(this.statusCode);
 			HttpHeaders responseHeaders = response.getHeaders();
 
-			if (!this.headers.isEmpty()) {
-				this.headers.entrySet().stream()
+			HttpHeaders headers = headers();
+			if (!headers.isEmpty()) {
+				headers.entrySet().stream()
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders
 								.put(entry.getKey(), entry.getValue()));
@@ -260,19 +272,19 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	private static final class WriterFunctionServerResponse extends AbstractServerResponse {
 
-		private final BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction;
+		private final BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction;
 
 		public WriterFunctionServerResponse(HttpStatus statusCode, HttpHeaders headers,
-				BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
+				BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction) {
 
 			super(statusCode, headers);
 			this.writeFunction = writeFunction;
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			writeStatusAndHeaders(exchange.getResponse());
-			return this.writeFunction.apply(exchange, strategies);
+			return this.writeFunction.apply(exchange, context);
 		}
 	}
 
@@ -292,14 +304,20 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			return this.inserter.insert(response, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-					return strategies.messageWriters();
+				public List<HttpMessageWriter<?>> messageWriters() {
+					return context.messageWriters();
 				}
+
+				@Override
+				public Optional<ServerHttpRequest> serverRequest() {
+					return Optional.of(exchange.getRequest());
+				}
+
 				@Override
 				public Map<String, Object> hints() {
 					return hints;

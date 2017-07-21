@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.lang.Nullable;
 
 /**
  * Helper class for easy access to messages from a MessageSource,
@@ -38,7 +39,9 @@ public class MessageSourceAccessor {
 
 	private final MessageSource messageSource;
 
+	@Nullable
 	private final Locale defaultLocale;
+
 
 	/**
 	 * Create a new MessageSourceAccessor, using LocaleContextHolder's locale
@@ -60,6 +63,7 @@ public class MessageSourceAccessor {
 		this.messageSource = messageSource;
 		this.defaultLocale = defaultLocale;
 	}
+
 
 	/**
 	 * Return the default locale to use if no explicit locale has been given.
@@ -101,7 +105,7 @@ public class MessageSourceAccessor {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
 		return this.messageSource.getMessage(code, args, defaultMessage, getDefaultLocale());
 	}
 
@@ -113,7 +117,7 @@ public class MessageSourceAccessor {
 	 * @param locale Locale in which to do lookup
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
@@ -145,7 +149,7 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, getDefaultLocale());
 	}
 
@@ -157,7 +161,7 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, @Nullable Object[] args, Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, locale);
 	}
 

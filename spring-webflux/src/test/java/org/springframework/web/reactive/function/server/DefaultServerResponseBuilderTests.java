@@ -35,9 +35,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -103,6 +102,17 @@ public class DefaultServerResponseBuilderTests {
 				.expectComplete()
 				.verify();
 
+	}
+
+	@Test
+	public void seeOther() throws Exception {
+		URI location = URI.create("http://example.com");
+		Mono<ServerResponse> result = ServerResponse.seeOther(location).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.SEE_OTHER.equals(response.statusCode()) &&
+						location.equals(response.headers().getLocation()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -243,10 +253,12 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void headers() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		Mono<ServerResponse> result = ServerResponse.ok().headers(headers).build();
+		HttpHeaders newHeaders = new HttpHeaders();
+		newHeaders.set("foo", "bar");
+		Mono<ServerResponse> result =
+				ServerResponse.ok().headers(headers -> headers.addAll(newHeaders)).build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> headers.equals(response.headers()))
+				.expectNextMatches(response -> newHeaders.equals(response.headers()))
 				.expectComplete()
 				.verify();
 
@@ -260,9 +272,9 @@ public class DefaultServerResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		HandlerStrategies strategies = mock(HandlerStrategies.class);
+		ServerResponse.Context context = mock(ServerResponse.Context.class);
 
-		result.then(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, context)).block();
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
@@ -277,11 +289,19 @@ public class DefaultServerResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		HandlerStrategies strategies = mock(HandlerStrategies.class);
+		ServerResponse.Context context = mock(ServerResponse.Context.class);
 
-		result.then(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, context)).block();
 
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void bodyObjectPublisher() throws Exception {
+		Mono<Void> mono = Mono.empty();
+
+		ServerResponse.ok().syncBody(mono);
+	}
+
 
 }

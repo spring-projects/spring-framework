@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.method.annotation;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -44,7 +46,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public AbstractCookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public AbstractCookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
@@ -57,6 +59,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
+		Assert.state(annotation != null, "No CookieValue annotation");
 		return new CookieValueNamedValueInfo(annotation);
 	}
 

@@ -20,6 +20,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link JndiLocatorSupport} subclass with public lookup methods,
@@ -59,7 +60,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	}
 
 	@Override
-	public <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+	public <T> T lookup(String jndiName, @Nullable Class<T> requiredType) throws NamingException {
 		return super.lookup(jndiName, requiredType);
 	}
 

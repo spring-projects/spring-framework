@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +30,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for reading
+ * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
  * from the request and writing to the response with {@link ByteBuffer}.
  *
  * @author Violeta Georgieva
@@ -40,13 +39,8 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 @WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
-
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
-	}
-
-	public TomcatHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
 	}
 
 

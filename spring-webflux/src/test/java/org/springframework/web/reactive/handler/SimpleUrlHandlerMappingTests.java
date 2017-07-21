@@ -16,7 +16,6 @@
 package org.springframework.web.reactive.handler;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.junit.Test;
 
@@ -25,12 +24,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,11 +52,11 @@ public class SimpleUrlHandlerMappingTests {
 		Object mainController = wac.getBean("mainController");
 		Object otherController = wac.getBean("otherController");
 
-		testUrl("/welcome.html", mainController, handlerMapping, "/welcome.html");
+		testUrl("/welcome.html", mainController, handlerMapping, "");
 		testUrl("/welcome.x", otherController, handlerMapping, "welcome.x");
 		testUrl("/welcome/", otherController, handlerMapping, "welcome");
-		testUrl("/show.html", mainController, handlerMapping, "/show.html");
-		testUrl("/bookseats.html", mainController, handlerMapping, "/bookseats.html");
+		testUrl("/show.html", mainController, handlerMapping, "");
+		testUrl("/bookseats.html", mainController, handlerMapping, "");
 	}
 
 	@Test
@@ -74,10 +71,10 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("welcome.html", null, handlerMapping, null);
 		testUrl("/pathmatchingAA.html", mainController, handlerMapping, "pathmatchingAA.html");
 		testUrl("/pathmatchingA.html", null, handlerMapping, null);
-		testUrl("/administrator/pathmatching.html", mainController, handlerMapping, "/administrator/pathmatching.html");
+		testUrl("/administrator/pathmatching.html", mainController, handlerMapping, "");
 		testUrl("/administrator/test/pathmatching.html", mainController, handlerMapping, "test/pathmatching.html");
 		testUrl("/administratort/pathmatching.html", null, handlerMapping, null);
-		testUrl("/administrator/another/bla.xml", mainController, handlerMapping, "/administrator/another/bla.xml");
+		testUrl("/administrator/another/bla.xml", mainController, handlerMapping, "");
 		testUrl("/administrator/another/bla.gif", null, handlerMapping, null);
 		testUrl("/administrator/test/testlastbit", mainController, handlerMapping, "test/testlastbit");
 		testUrl("/administrator/test/testla", null, handlerMapping, null);
@@ -89,7 +86,7 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("/XpathXXmatching.html", null, handlerMapping, null);
 		testUrl("/XXpathmatching.html", null, handlerMapping, null);
 		testUrl("/show12.html", mainController, handlerMapping, "show12.html");
-		testUrl("/show123.html", mainController, handlerMapping, "/show123.html");
+		testUrl("/show123.html", mainController, handlerMapping, "");
 		testUrl("/show1.html", mainController, handlerMapping, "show1.html");
 		testUrl("/reallyGood-test-is-this.jpeg", mainController, handlerMapping, "reallyGood-test-is-this.jpeg");
 		testUrl("/reallyGood-tst-is-this.jpeg", null, handlerMapping, null);
@@ -98,27 +95,22 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("/anotherTest", mainController, handlerMapping, "anotherTest");
 		testUrl("/stillAnotherTest", null, handlerMapping, null);
 		testUrl("outofpattern*ye", null, handlerMapping, null);
-		testUrl("/test%26t%20est/path%26m%20atching.html", null, handlerMapping, null);
-
 	}
 
 	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
-		ServerWebExchange exchange = createExchange(url);
+		ServerWebExchange exchange = MockServerHttpRequest.method(HttpMethod.GET, URI.create(url)).toExchange();
 		Object actual = handlerMapping.getHandler(exchange).block();
 		if (bean != null) {
 			assertNotNull(actual);
 			assertSame(bean, actual);
 			//noinspection OptionalGetWithoutIsPresent
-			assertEquals(pathWithinMapping, exchange.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).get());
+			PathContainer path = exchange.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+			assertNotNull(path);
+			assertEquals(pathWithinMapping, path.value());
 		}
 		else {
 			assertNull(actual);
 		}
-	}
-
-	private ServerWebExchange createExchange(String path) {
-		ServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, URI.create(path)).build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 
@@ -128,7 +120,6 @@ public class SimpleUrlHandlerMappingTests {
 		@Bean @SuppressWarnings("unused")
 		public SimpleUrlHandlerMapping handlerMapping() {
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUseTrailingSlashMatch(true);
 			hm.registerHandler("/welcome*", otherController());
 			hm.registerHandler("/welcome.html", mainController());
 			hm.registerHandler("/show.html", mainController());

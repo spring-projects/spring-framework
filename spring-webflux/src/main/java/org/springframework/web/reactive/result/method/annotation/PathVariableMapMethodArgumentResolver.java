@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -38,25 +39,30 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see PathVariableMethodArgumentResolver
  */
-public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+	public PathVariableMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
-		return (ann != null && (Map.class.isAssignableFrom(parameter.getParameterType()))
-				&& !StringUtils.hasText(ann.value()));
+		return checkAnnotatedParamNoReactiveWrapper(parameter, PathVariable.class, this::allVariables);
 	}
 
-	/**
-	 * Return a Map with all URI template variables or an empty map.
-	 */
+	private boolean allVariables(PathVariable pathVariable, Class<?> type) {
+		return Map.class.isAssignableFrom(type) && !StringUtils.hasText(pathVariable.value());
+	}
+
+
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+	public Object resolveArgumentValue(MethodParameter methodParameter, BindingContext context,
 			ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());
-		return Optional.of(value);
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 }

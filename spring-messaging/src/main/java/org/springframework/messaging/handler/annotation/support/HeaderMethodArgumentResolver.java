@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.Header;
@@ -76,6 +77,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 		return (headerValue != null ? headerValue : nativeHeaderValue);
 	}
 
+	@Nullable
 	private Object getNativeHeaderValue(Message<?> message, String name) {
 		Map<String, List<String>> nativeHeaders = getNativeHeaders(message);
 		if (name.startsWith("nativeHeaders.")) {

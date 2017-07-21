@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
@@ -42,7 +43,9 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link HttpHandlerConnector}.
+ *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpHandlerConnectorTests {
 
@@ -81,7 +84,7 @@ public class HttpHandlerConnectorTests {
 		TestHttpHandler handler = new TestHttpHandler(response -> {
 			response.setStatusCode(HttpStatus.OK);
 			response.getHeaders().put("custom-header", Arrays.asList("h0", "h1"));
-			response.getCookies().add(cookie.getName(), cookie);
+			response.addCookie(cookie);
 			return response.writeWith(Mono.just(toDataBuffer("Custom body")));
 		});
 

@@ -21,10 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -44,13 +45,21 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
+import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.codec.json.AbstractJackson2Codec.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -67,16 +76,27 @@ public class BodyExtractorsTests {
 	public void createContext() {
 		final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
+		messageReaders.add(new FormHttpMessageReader());
+		SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+		messageReaders.add(partReader);
+		messageReaders.add(new MultipartHttpMessageReader(partReader));
+
 		messageReaders.add(new FormHttpMessageReader());
 
 		this.context = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return messageReaders::stream;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return messageReaders;
 			}
+
+			@Override
+			public Optional<ServerHttpResponse> serverResponse() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return hints;
@@ -105,6 +125,28 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
+	public void toMonoParameterizedTypeReference() throws Exception {
+		ParameterizedTypeReference<Map<String, String>> typeReference = new ParameterizedTypeReference<Map<String, String>>() {};
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(typeReference);
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").contentType(MediaType.APPLICATION_JSON).body(body);
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		Map<String, String > expected = new LinkedHashMap<>();
+		expected.put("username", "foo");
+		expected.put("password", "bar");
+		StepVerifier.create(result)
+				.expectNext(expected)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void toMonoWithHints() throws Exception {
 		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
@@ -127,6 +169,17 @@ public class BodyExtractorsTests {
 				})
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-15758
+	public void toMonoWithEmptyBodyAndNoContentType() throws Exception {
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
+				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(Flux.empty());
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result).expectComplete().verify();
 	}
 
 	@Test
@@ -191,9 +244,15 @@ public class BodyExtractorsTests {
 
 		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
 			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return Stream::empty;
+			public List<HttpMessageReader<?>> messageReaders() {
+				return Collections.emptyList();
 			}
+
+			@Override
+			public Optional<ServerHttpResponse> serverResponse() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return Collections.emptyMap();
@@ -230,6 +289,64 @@ public class BodyExtractorsTests {
 					assertEquals("Invalid result", "value 2+1", values.get(0));
 					assertEquals("Invalid result", "value 2+2", values.get(1));
 					assertNull("Invalid result", form.getFirst("name 3"));
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void toParts() throws Exception {
+		BodyExtractor<Flux<Part>, ServerHttpRequest> extractor = BodyExtractors.toParts();
+
+		String bodyContents = "-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"text\"\r\n" +
+				"\r\n" +
+				"text default\r\n" +
+				"-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"file1\"; filename=\"a.txt\"\r\n" +
+				"Content-Type: text/plain\r\n" +
+				"\r\n" +
+				"Content of a.txt.\r\n" +
+				"\r\n" +
+				"-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"file2\"; filename=\"a.html\"\r\n" +
+				"Content-Type: text/html\r\n" +
+				"\r\n" +
+				"<!DOCTYPE html><title>Content of a.html.</title>\r\n" +
+				"\r\n" +
+				"-----------------------------9051914041544843365972754266--\r\n";
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap(bodyContents.getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.header("Content-Type", "multipart/form-data; boundary=---------------------------9051914041544843365972754266")
+				.body(body);
+
+		Flux<Part> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.consumeNextWith(part -> {
+					assertEquals("text", part.name());
+					assertTrue(part instanceof FormFieldPart);
+					FormFieldPart formFieldPart = (FormFieldPart) part;
+					assertEquals("text default", formFieldPart.value());
+				})
+				.consumeNextWith(part -> {
+					assertEquals("file1", part.name());
+					assertTrue(part instanceof FilePart);
+					FilePart filePart = (FilePart) part;
+					assertEquals("a.txt", filePart.filename());
+					assertEquals(MediaType.TEXT_PLAIN, filePart.headers().getContentType());
+				})
+				.consumeNextWith(part -> {
+					assertEquals("file2", part.name());
+					assertTrue(part instanceof FilePart);
+					FilePart filePart = (FilePart) part;
+					assertEquals("a.html", filePart.filename());
+					assertEquals(MediaType.TEXT_HTML, filePart.headers().getContentType());
 				})
 				.expectComplete()
 				.verify();

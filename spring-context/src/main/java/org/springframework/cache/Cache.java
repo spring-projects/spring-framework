@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.cache;
 
 import java.util.concurrent.Callable;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines common cache operations.
@@ -54,6 +56,7 @@ public interface Cache {
 	 * returned means that the cache contains no mapping for this key.
 	 * @see #get(Object, Class)
 	 */
+	@Nullable
 	ValueWrapper get(Object key);
 
 	/**
@@ -74,7 +77,8 @@ public interface Cache {
 	 * @since 4.0
 	 * @see #get(Object)
 	 */
-	<T> T get(Object key, Class<T> type);
+	@Nullable
+	<T> T get(Object key, @Nullable Class<T> type);
 
 	/**
 	 * Return the value to which this cache maps the specified key, obtaining
@@ -91,6 +95,7 @@ public interface Cache {
 	 * @throws ValueRetrievalException if the {@code valueLoader} throws an exception
 	 * @since 4.3
 	 */
+	@Nullable
 	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
@@ -100,7 +105,7 @@ public interface Cache {
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 */
-	void put(Object key, Object value);
+	void put(Object key, @Nullable Object value);
 
 	/**
 	 * Atomically associate the specified value with the specified key in this cache
@@ -128,7 +133,8 @@ public interface Cache {
 	 * an indicator that the given {@code value} has been associated with the key.
 	 * @since 4.1
 	 */
-	ValueWrapper putIfAbsent(Object key, Object value);
+	@Nullable
+	ValueWrapper putIfAbsent(Object key, @Nullable Object value);
 
 	/**
 	 * Evict the mapping for this key from this cache if it is present.
@@ -151,7 +157,7 @@ public interface Cache {
 		/**
 		 * Return the actual value in the cache.
 		 */
-		Object get();
+		@Nullable Object get();
 	}
 
 
@@ -163,13 +169,15 @@ public interface Cache {
 	@SuppressWarnings("serial")
 	class ValueRetrievalException extends RuntimeException {
 
+		@Nullable
 		private final Object key;
 
-		public ValueRetrievalException(Object key, Callable<?> loader, Throwable ex) {
+		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, Throwable ex) {
 			super(String.format("Value for key '%s' could not be loaded using '%s'", key, loader), ex);
 			this.key = key;
 		}
 
+		@Nullable
 		public Object getKey() {
 			return this.key;
 		}

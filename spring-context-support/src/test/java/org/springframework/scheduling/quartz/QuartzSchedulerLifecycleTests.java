@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,25 @@ import static org.junit.Assert.*;
  */
 public class QuartzSchedulerLifecycleTests {
 
-	@Test // SPR-6354
+	@Test  // SPR-6354
 	public void destroyLazyInitSchedulerWithDefaultShutdownOrderDoesNotHang() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", this.getClass());
 		assertNotNull(context.getBean("lazyInitSchedulerWithDefaultShutdownOrder"));
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");
-		context.destroy();
+		context.close();
 		sw.stop();
 		assertTrue("Quartz Scheduler with lazy-init is hanging on destruction: " +
 				sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
 	}
 
-	@Test // SPR-6354
+	@Test  // SPR-6354
 	public void destroyLazyInitSchedulerWithCustomShutdownOrderDoesNotHang() {
 		AbstractApplicationContext context = new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", this.getClass());
 		assertNotNull(context.getBean("lazyInitSchedulerWithCustomShutdownOrder"));
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");
-		context.destroy();
+		context.close();
 		sw.stop();
 		assertTrue("Quartz Scheduler with lazy-init is hanging on destruction: " +
 				sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);

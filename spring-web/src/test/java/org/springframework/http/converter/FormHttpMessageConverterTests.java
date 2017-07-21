@@ -43,11 +43,17 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -138,7 +144,6 @@ public class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(StandardCharsets.UTF_8);
 		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();

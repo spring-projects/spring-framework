@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
@@ -30,9 +30,10 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
- * Bind to a running server, making actual requests over a socket.
+ * Sample tests demonstrating live server integration tests.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpServerTests {
 
@@ -46,7 +47,7 @@ public class HttpServerTests {
 
 		HttpHandler httpHandler = RouterFunctions.toHttpHandler(
 				route(GET("/test"), request ->
-						ServerResponse.ok().body(Mono.just("It works!"), String.class)));
+						ServerResponse.ok().syncBody("It works!")));
 
 		this.server = new ReactorHttpServer();
 		this.server.setHandler(httpHandler);
@@ -69,7 +70,7 @@ public class HttpServerTests {
 		this.client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("It works!");
+				.expectBody(String.class).isEqualTo("It works!");
 	}
 
 }

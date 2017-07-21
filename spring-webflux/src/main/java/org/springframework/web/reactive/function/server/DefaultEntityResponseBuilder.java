@@ -23,10 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
@@ -36,6 +36,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -83,9 +84,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public EntityResponse.Builder<T> headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
@@ -114,16 +113,14 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
-	public EntityResponse.Builder<T> eTag(String eTag) {
-		if (eTag != null) {
-			if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
-				eTag = "\"" + eTag;
-			}
-			if (!eTag.endsWith("\"")) {
-				eTag = eTag + "\"";
-			}
+	public EntityResponse.Builder<T> eTag(String etag) {
+		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+			etag = "\"" + etag;
 		}
-		this.headers.setETag(eTag);
+		if (!etag.endsWith("\"")) {
+			etag = etag + "\"";
+		}
+		this.headers.setETag(etag);
 		return this;
 	}
 
@@ -201,14 +198,20 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.inserter.insert(response, new BodyInserter.Context() {
+			return inserter().insert(response, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-					return strategies.messageWriters();
+				public List<HttpMessageWriter<?>> messageWriters() {
+					return context.messageWriters();
 				}
+
+				@Override
+				public Optional<ServerHttpRequest> serverRequest() {
+					return Optional.of(exchange.getRequest());
+				}
+
 				@Override
 				public Map<String, Object> hints() {
 					return hints;

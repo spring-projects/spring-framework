@@ -16,14 +16,15 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
  * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.
@@ -52,11 +53,15 @@ public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 	interface Context {
 
 		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s
-		 * to be used for response body conversion.
+		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
 		 * @return the stream of message writers
 		 */
-		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+		List<HttpMessageWriter<?>> messageWriters();
+
+		/**
+		 * Optionally return the {@link ServerHttpRequest}, if present.
+		 */
+		Optional<ServerHttpRequest> serverRequest();
 
 		/**
 		 * Return the map of hints to use for response body conversion.

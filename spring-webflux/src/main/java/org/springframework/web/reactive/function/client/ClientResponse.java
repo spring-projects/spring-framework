@@ -23,10 +23,12 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -59,9 +61,7 @@ public interface ClientResponse {
 	MultiValueMap<String, ResponseCookie> cookies();
 
 	/**
-	 * Extract the body with the given {@code BodyExtractor}. Unlike {@link #bodyToMono(Class)} and
-	 * {@link #bodyToFlux(Class)}; this method does not check for a 4xx or 5xx  status code before
-	 * extracting the body.
+	 * Extract the body with the given {@code BodyExtractor}.
 	 * @param extractor the {@code BodyExtractor} that reads from the response
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
@@ -69,24 +69,68 @@ public interface ClientResponse {
 	<T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor);
 
 	/**
-	 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
-	 * {@code Mono} will contain a {@link WebClientException}.
+	 * Extract the body to a {@code Mono}.
 	 * @param elementClass the class of element in the {@code Mono}
 	 * @param <T> the element type
-	 * @return a mono containing the body, or a {@link WebClientException} if the status code is
-	 * 4xx or 5xx
+	 * @return a mono containing the body of the given type {@code T}
 	 */
 	<T> Mono<T> bodyToMono(Class<? extends T> elementClass);
 
 	/**
-	 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
-	 * {@code Flux} will contain a {@link WebClientException}.
+	 * Extract the body to a {@code Mono}.
+	 * @param typeReference a type reference describing the expected response body type
+	 * @param <T> the element type
+	 * @return a mono containing the body of the given type {@code T}
+	 */
+	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+
+	/**
+	 * Extract the body to a {@code Flux}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a flux containing the body, or a {@link WebClientException} if the status code is
-	 * 4xx or 5xx
+	 * @return a flux containing the body of the given type {@code T}
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
+
+	/**
+	 * Extract the body to a {@code Flux}.
+	 * @param typeReference a type reference describing the expected response body type
+	 * @param <T> the element type
+	 * @return a flux containing the body of the given type {@code T}
+	 */
+	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
+
+	/**
+	 * Return this response as a delayed {@code ResponseEntity}.
+	 * @param bodyType the expected response body type
+	 * @param <T> response body type
+	 * @return {@code Mono} with the {@code ResponseEntity}
+	 */
+	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
+
+	/**
+	 * Return this response as a delayed {@code ResponseEntity}.
+	 * @param typeReference a type reference describing the expected response body type
+	 * @param <T> response body type
+	 * @return {@code Mono} with the {@code ResponseEntity}
+	 */
+	<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference);
+
+	/**
+	 * Return this response as a delayed list of {@code ResponseEntity}s.
+	 * @param elementType the expected response body list element type
+	 * @param <T> the type of elements in the list
+	 * @return {@code Mono} with the list of {@code ResponseEntity}s
+	 */
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
+
+	/**
+	 * Return this response as a delayed list of {@code ResponseEntity}s.
+	 * @param typeReference a type reference describing the expected response body type
+	 * @param <T> the type of elements in the list
+	 * @return {@code Mono} with the list of {@code ResponseEntity}s
+	 */
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
 
 
 	/**

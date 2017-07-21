@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server.support;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,12 +29,15 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -85,8 +89,18 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public PathContainer pathContainer() {
+		return this.delegate.pathContainer();
+	}
+
+	@Override
 	public Headers headers() {
 		return this.delegate.headers();
+	}
+
+	@Override
+	public MultiValueMap<String, HttpCookie> cookies() {
+		return this.delegate.cookies();
 	}
 
 	@Override
@@ -110,7 +124,7 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
+	public Optional<Object> attribute(String name) {
 		return this.delegate.attribute(name);
 	}
 
@@ -125,8 +139,8 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return this.delegate.queryParams(name);
+	public MultiValueMap<String, String> queryParams() {
+		return this.delegate.queryParams();
 	}
 
 	@Override
@@ -144,6 +158,10 @@ public class ServerRequestWrapper implements ServerRequest {
 		return this.delegate.session();
 	}
 
+	@Override
+	public Mono<? extends Principal> principal() {
+		return this.delegate.principal();
+	}
 
 	/**
 	 * Implementation of the {@code Headers} interface that can be subclassed

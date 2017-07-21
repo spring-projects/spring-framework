@@ -18,7 +18,6 @@ package org.springframework.web.reactive.config;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,20 +29,15 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.doAnswer;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link DelegatingWebFluxConfiguration} tests.
@@ -58,7 +52,7 @@ public class DelegatingWebFluxConfigurationTests {
 	private WebFluxConfigurer webFluxConfigurer;
 
 	@Captor
-	private ArgumentCaptor<List<HttpMessageReader<?>>> readers;
+	private ArgumentCaptor<ServerCodecConfigurer> codecsConfigurer;
 
 	@Captor
 	private ArgumentCaptor<List<HttpMessageWriter<?>>> writers;
@@ -72,8 +66,8 @@ public class DelegatingWebFluxConfigurationTests {
 		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
-		given(webFluxConfigurer.getValidator()).willReturn(Optional.empty());
-		given(webFluxConfigurer.getMessageCodesResolver()).willReturn(Optional.empty());
+		given(webFluxConfigurer.getValidator()).willReturn(null);
+		given(webFluxConfigurer.getMessageCodesResolver()).willReturn(null);
 	}
 
 
@@ -96,15 +90,14 @@ public class DelegatingWebFluxConfigurationTests {
 		ConversionService initializerConversionService = initializer.getConversionService();
 		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 
-		verify(webFluxConfigurer).configureMessageReaders(readers.capture());
-		verify(webFluxConfigurer).extendMessageReaders(readers.capture());
+		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).getValidator();
 		verify(webFluxConfigurer).getMessageCodesResolver();
 		verify(webFluxConfigurer).addFormatters(formatterRegistry.capture());
-		verify(webFluxConfigurer).addArgumentResolvers(any());
+		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
 		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(7, readers.getValue().size());
+		assertEquals(12, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test
@@ -126,8 +119,7 @@ public class DelegatingWebFluxConfigurationTests {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.responseBodyResultHandler();
 
-		verify(webFluxConfigurer).configureMessageWriters(writers.capture());
-		verify(webFluxConfigurer).extendMessageWriters(writers.capture());
+		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 	}
 

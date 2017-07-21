@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,53 +31,68 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Provides access to request and response details from an exchange performed
- * through the {@link WebTestClient}.
+ * Container for request and response details for exchanges performed through
+ * {@link WebTestClient}.
  *
- * <p>When an {@code ExchangeResult} is first created it has the status and the
- * headers of the response ready. Later when the response body is extracted,
- * the {@code ExchangeResult} is re-created as {@link EntityExchangeResult} or
- * {@link FluxExchangeResult} also exposing the extracted entities.
- *
- * <p>Serialized request and response content may also be accessed through the
- * methods {@link #getRequestContent()} and {@link #getResponseContent()} after
- * that content has been fully read or written.
+ * <p>Note that a decoded response body is not exposed at this level since the
+ * body may not have been decoded and consumed yet. Sub-types
+ * {@link EntityExchangeResult} and {@link FluxExchangeResult} provide access
+ * to a decoded response entity and a decoded (but not consumed) response body
+ * respectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- *
  * @see EntityExchangeResult
  * @see FluxExchangeResult
  */
 public class ExchangeResult {
 
 	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
-			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.parseMediaType("text/*"),
-			MediaType.APPLICATION_FORM_URLENCODED);
+			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.parseMediaType("text/*"), MediaType.APPLICATION_FORM_URLENCODED);
 
 
 	private final WiretapClientHttpRequest request;
 
 	private final WiretapClientHttpResponse response;
 
+	@Nullable
+	private final String uriTemplate;
+
 
 	/**
-	 * Constructor used when the {@code ClientHttpResponse} becomes available.
+	 * Constructor to use after the server response is first received in the
+	 * {@link WiretapConnector} and the {@code ClientHttpResponse} created.
 	 */
-	protected ExchangeResult(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
+	ExchangeResult(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
 		this.request = request;
 		this.response = response;
+		this.uriTemplate = null;
 	}
 
 	/**
-	 * Copy constructor used when the body is decoded or consumed.
+	 * Constructor to copy the from the yet undecoded ExchangeResult with extra
+	 * information to expose such as the original URI template used, if any.
 	 */
-	protected ExchangeResult(ExchangeResult other) {
+	ExchangeResult(ExchangeResult other, @Nullable String uriTemplate) {
 		this.request = other.request;
 		this.response = other.response;
+		this.uriTemplate = uriTemplate;
+	}
+
+	/**
+	 * Copy constructor to use after body is decoded and/or consumed.
+	 */
+	ExchangeResult(ExchangeResult other) {
+		this.request = other.request;
+		this.response = other.response;
+		this.uriTemplate = other.uriTemplate;
 	}
 
 
@@ -87,10 +104,18 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return the request headers that were sent to the server.
+	 * Return the URI of the request.
 	 */
 	public URI getUrl() {
 		return this.request.getURI();
+	}
+
+	/**
+	 * Return the original URI template used to prepare the request, if any.
+	 */
+	@Nullable
+	public String getUriTemplate() {
+		return this.uriTemplate;
 	}
 
 	/**
@@ -101,11 +126,16 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return a "promise" for the raw request body content once completed.
+	 * Return the raw request body content written as a {@code byte[]}.
+	 * @throws IllegalStateException if the request body is not fully written yet.
 	 */
-	public MonoProcessor<byte[]> getRequestContent() {
-		return this.request.getBodyContent();
+	@Nullable
+	public byte[] getRequestBodyContent() {
+		MonoProcessor<byte[]> body = this.request.getRecordedContent();
+		Assert.isTrue(body.isTerminated(), "Request body incomplete.");
+		return body.block(Duration.ZERO);
 	}
+
 
 	/**
 	 * Return the status of the executed request.
@@ -125,14 +155,18 @@ public class ExchangeResult {
 	 * Return response cookies received from the server.
 	 */
 	public MultiValueMap<String, ResponseCookie> getResponseCookies() {
-		return this.getResponseCookies();
+		return this.response.getCookies();
 	}
 
 	/**
-	 * Return a "promise" for the raw response body content once completed.
+	 * Return the raw request body content written as a {@code byte[]}.
+	 * @throws IllegalStateException if the response is not fully read yet.
 	 */
-	public MonoProcessor<byte[]> getResponseContent() {
-		return this.response.getBodyContent();
+	@Nullable
+	public byte[] getResponseBodyContent() {
+		MonoProcessor<byte[]> body = this.response.getRecordedContent();
+		Assert.state(body.isTerminated(), "Response body incomplete");
+		return body.block(Duration.ZERO);
 	}
 
 
@@ -146,7 +180,7 @@ public class ExchangeResult {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
-			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
+			throw new AssertionError(ex.getMessage() + "\n" + this, ex);
 		}
 	}
 
@@ -157,20 +191,16 @@ public class ExchangeResult {
 				"> " + getMethod() + " " + getUrl() + "\n" +
 				"> " + formatHeaders(getRequestHeaders(), "\n> ") + "\n" +
 				"\n" +
-				formatBody(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
+				formatBody(getRequestHeaders().getContentType(), this.request.getRecordedContent()) + "\n" +
 				"\n" +
 				"< " + getStatus() + " " + getStatusReason() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
-				formatBody(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
+				formatBody(getResponseHeaders().getContentType(), this.response.getRecordedContent()) +"\n";
 	}
 
 	private String getStatusReason() {
-		String reason = "";
-		if (getStatus() != null && getStatus().getReasonPhrase() != null) {
-			reason = getStatus().getReasonPhrase();
-		}
-		return reason;
+		return getStatus().getReasonPhrase();
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {
@@ -179,30 +209,26 @@ public class ExchangeResult {
 				.collect(Collectors.joining(delimiter));
 	}
 
-	private String formatBody(MediaType contentType, MonoProcessor<byte[]> body) {
+	private String formatBody(@Nullable MediaType contentType, MonoProcessor<byte[]> body) {
 		if (body.isSuccess()) {
-			byte[] bytes = body.blockMillis(0);
-			if (bytes.length == 0) {
+			byte[] bytes = body.block(Duration.ZERO);
+			if (ObjectUtils.isEmpty(bytes)) {
 				return "No content";
 			}
-
 			if (contentType == null) {
 				return "Unknown content type (" + bytes.length + " bytes)";
 			}
-
 			Charset charset = contentType.getCharset();
 			if (charset != null) {
 				return new String(bytes, charset);
 			}
-
 			if (PRINTABLE_MEDIA_TYPES.stream().anyMatch(contentType::isCompatibleWith)) {
 				return new String(bytes, StandardCharsets.UTF_8);
 			}
-
 			return "Unknown charset (" + bytes.length + " bytes)";
 		}
 		else if (body.isError()) {
-			return "I/O failure: " + body.getError().getMessage();
+			return "I/O failure: " + body.getError();
 		}
 		else {
 			return "Content not available yet";

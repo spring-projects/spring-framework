@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import com.google.protobuf.ExtensionRegistry;
  * Google Protocol Messages can contain message extensions that can be parsed if
  * the appropriate configuration has been registered in the {@code ExtensionRegistry}.
  *
- * This interface provides a facility to populate the {@code ExtensionRegistry}.
+ * <p>This interface provides a facility to populate the {@code ExtensionRegistry}.
  *
  * @author Alex Antonov
  * @since 4.1
  * @see <a href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/ExtensionRegistry">
- *     com.google.protobuf.ExtensionRegistry</a>
+ * com.google.protobuf.ExtensionRegistry</a>
  */
 public interface ExtensionRegistryInitializer {
 

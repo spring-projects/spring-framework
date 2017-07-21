@@ -65,11 +65,9 @@ image/x-xbitmap				xbm
 # X-Windows pixelmap (8-bit color)
 image/x-xpixmap				xpm
 # Portable Network Graphics
-image/x-png				png
+image/png				png
 # Image Exchange Format (RFC 1314)
 image/ief				ief
-# JPEG
-image/jpeg				jpeg jpg jpe
 # RGB
 image/rgb				rgb
 # Group III Fax (RFC 1494)

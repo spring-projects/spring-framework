@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.util.PathMatcher;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
@@ -32,7 +33,8 @@ import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.condition.RequestConditionHolder;
 import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Encapsulates the following request mapping conditions:
@@ -51,6 +53,7 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
+	@Nullable
 	private final String name;
 
 	private final PatternsRequestCondition patternsCondition;
@@ -68,9 +71,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private final RequestConditionHolder customConditionHolder;
 
 
-	public RequestMappingInfo(String name, PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
-			ParamsRequestCondition params, HeadersRequestCondition headers, ConsumesRequestCondition consumes,
-			ProducesRequestCondition produces, RequestCondition<?> custom) {
+	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns, @Nullable RequestMethodsRequestCondition methods,
+			@Nullable ParamsRequestCondition params, @Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
+			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
 
 		this.name = (StringUtils.hasText(name) ? name : null);
 		this.patternsCondition = (patterns != null ? patterns : new PatternsRequestCondition());
@@ -85,9 +88,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Creates a new instance with the given request conditions.
 	 */
-	public RequestMappingInfo(PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
-			ParamsRequestCondition params, HeadersRequestCondition headers, ConsumesRequestCondition consumes,
-			ProducesRequestCondition produces, RequestCondition<?> custom) {
+	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns, @Nullable RequestMethodsRequestCondition methods,
+			@Nullable ParamsRequestCondition params, @Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
+			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
 
 		this(null, patterns, methods, params, headers, consumes, produces, custom);
 	}
@@ -95,7 +98,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Re-create a RequestMappingInfo with the given custom request condition.
 	 */
-	public RequestMappingInfo(RequestMappingInfo info, RequestCondition<?> customRequestCondition) {
+	public RequestMappingInfo(RequestMappingInfo info, @Nullable RequestCondition<?> customRequestCondition) {
 		this(info.name, info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
 				info.consumesCondition, info.producesCondition, customRequestCondition);
 	}
@@ -104,6 +107,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the name for this mapping, or {@code null}.
 	 */
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -159,6 +163,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Returns the "custom" condition of this {@link RequestMappingInfo}; or {@code null}.
 	 */
+	@Nullable
 	public RequestCondition<?> getCustomCondition() {
 		return this.customConditionHolder.getCondition();
 	}
@@ -393,18 +398,25 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private String[] paths;
 
+		@Nullable
 		private RequestMethod[] methods;
 
+		@Nullable
 		private String[] params;
 
+		@Nullable
 		private String[] headers;
 
+		@Nullable
 		private String[] consumes;
 
+		@Nullable
 		private String[] produces;
 
+		@Nullable
 		private String mappingName;
 
+		@Nullable
 		private RequestCondition<?> customCondition;
 
 		private BuilderConfiguration options = new BuilderConfiguration();
@@ -471,10 +483,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		public RequestMappingInfo build() {
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
-			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-					this.paths, this.options.getPathHelper(), this.options.getPathMatcher(),
-					this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
-					this.options.getFileExtensions());
+			PathPatternParser parser = this.options.getPatternParser() != null ?
+					this.options.getPatternParser() : new PathPatternParser();
+			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(parse(this.paths, parser));
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
 					new RequestMethodsRequestCondition(methods),
@@ -483,6 +494,18 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 					new ConsumesRequestCondition(this.consumes, this.headers),
 					new ProducesRequestCondition(this.produces, this.headers, contentTypeResolver),
 					this.customCondition);
+		}
+
+		private static List<PathPattern> parse(String[] paths, PathPatternParser parser) {
+			return Arrays
+					.stream(paths)
+					.map(path -> {
+						if (StringUtils.hasText(path) && !path.startsWith("/")) {
+							path = "/" + path;
+						}
+						return parser.parse(path);
+					})
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -495,96 +518,19 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
-		private HttpRequestPathHelper pathHelper;
+		@Nullable
+		private PathPatternParser patternParser;
 
-		private PathMatcher pathMatcher;
-
-		private boolean trailingSlashMatch = true;
-
-		private boolean suffixPatternMatch = true;
-
-		private boolean registeredSuffixPatternMatch = false;
-
+		@Nullable
 		private RequestedContentTypeResolver contentTypeResolver;
 
-		/**
-		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
-		 * <p>By default this is not set.
-		 */
-		public void setPathHelper(HttpRequestPathHelper pathHelper) {
-			this.pathHelper = pathHelper;
+		public void setPatternParser(PathPatternParser patternParser) {
+			this.patternParser = patternParser;
 		}
 
-		public HttpRequestPathHelper getPathHelper() {
-			return this.pathHelper;
-		}
-
-		/**
-		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
-		 * <p>By default this is not set.
-		 */
-		public void setPathMatcher(PathMatcher pathMatcher) {
-			this.pathMatcher = pathMatcher;
-		}
-
-		public PathMatcher getPathMatcher() {
-			return this.pathMatcher;
-		}
-
-		/**
-		 * Whether to apply trailing slash matching in PatternsRequestCondition.
-		 * <p>By default this is set to 'true'.
-		 */
-		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
-			this.trailingSlashMatch = trailingSlashMatch;
-		}
-
-		public boolean useTrailingSlashMatch() {
-			return this.trailingSlashMatch;
-		}
-
-		/**
-		 * Whether to apply suffix pattern matching in PatternsRequestCondition.
-		 * <p>By default this is set to 'true'.
-		 * @see #setRegisteredSuffixPatternMatch(boolean)
-		 */
-		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
-			this.suffixPatternMatch = suffixPatternMatch;
-		}
-
-		public boolean useSuffixPatternMatch() {
-			return this.suffixPatternMatch;
-		}
-
-		/**
-		 * Whether suffix pattern matching should be restricted to registered
-		 * file extensions only. Setting this property also sets
-		 * suffixPatternMatch=true and requires that a
-		 * {@link #setContentTypeResolver} is also configured in order to
-		 * obtain the registered file extensions.
-		 */
-		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
-			this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
-		}
-
-		public boolean useRegisteredSuffixPatternMatch() {
-			return this.registeredSuffixPatternMatch;
-		}
-
-		/**
-		 * Return the file extensions to use for suffix pattern matching. If
-		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
-		 * from the configured {@code contentTypeResolver}.
-		 */
-		public Set<String> getFileExtensions() {
-			RequestedContentTypeResolver resolver = getContentTypeResolver();
-			if (useRegisteredSuffixPatternMatch() && resolver != null) {
-				if (resolver instanceof MappingContentTypeResolver) {
-					return ((MappingContentTypeResolver) resolver).getKeys();
-				}
-			}
-			return null;
+		@Nullable
+		public PathPatternParser getPatternParser() {
+			return this.patternParser;
 		}
 
 		/**
@@ -595,6 +541,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.contentTypeResolver = resolver;
 		}
 
+		@Nullable
 		public RequestedContentTypeResolver getContentTypeResolver() {
 			return this.contentTypeResolver;
 		}

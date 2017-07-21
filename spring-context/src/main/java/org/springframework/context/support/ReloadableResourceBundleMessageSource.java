@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -91,6 +92,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	private static final String XML_SUFFIX = ".xml";
 
 
+	@Nullable
 	private Properties fileEncodings;
 
 	private boolean concurrentRefresh = true;
@@ -146,7 +148,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>The default is a DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
 				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
@@ -161,7 +163,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @see org.springframework.context.ResourceLoaderAware
 	 */
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
 
@@ -395,7 +397,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
 	 */
-	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
+	protected PropertiesHolder refreshProperties(String filename, @Nullable PropertiesHolder propHolder) {
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
 
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
@@ -463,7 +465,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		InputStream is = resource.getInputStream();
 		Properties props = newProperties();
 		try {
-			if (resource.getFilename().endsWith(XML_SUFFIX)) {
+			String resourceFilename = resource.getFilename();
+			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loading properties [" + resource.getFilename() + "]");
 				}
@@ -547,6 +550,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 */
 	protected class PropertiesHolder {
 
+		@Nullable
 		private final Properties properties;
 
 		private final long fileTimestamp;
@@ -569,6 +573,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			this.fileTimestamp = fileTimestamp;
 		}
 
+		@Nullable
 		public Properties getProperties() {
 			return this.properties;
 		}
@@ -585,6 +590,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return this.refreshTimestamp;
 		}
 
+		@Nullable
 		public String getProperty(String code) {
 			if (this.properties == null) {
 				return null;
@@ -592,6 +598,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return this.properties.getProperty(code);
 		}
 
+		@Nullable
 		public MessageFormat getMessageFormat(String code, Locale locale) {
 			if (this.properties == null) {
 				return null;

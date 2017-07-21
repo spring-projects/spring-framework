@@ -4,4 +4,7 @@
  * message headers, as well as various {@link org.springframework.messaging.MessageChannel}
  * implementations and channel interceptor support.
  */
+@NonNullApi
 package org.springframework.messaging.support;
+
+import org.springframework.lang.NonNullApi;

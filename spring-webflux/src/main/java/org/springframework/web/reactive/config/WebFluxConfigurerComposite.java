@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,17 @@ package org.springframework.web.reactive.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
  * A {@link WebFluxConfigurer} that delegates to one or more others.
@@ -52,77 +51,59 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 
 	@Override
 	public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-		this.delegates.stream().forEach(delegate -> delegate.configureContentTypeResolver(builder));
+		this.delegates.forEach(delegate -> delegate.configureContentTypeResolver(builder));
 	}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addCorsMappings(registry));
+		this.delegates.forEach(delegate -> delegate.addCorsMappings(registry));
 	}
 
 	@Override
 	public void configurePathMatching(PathMatchConfigurer configurer) {
-		this.delegates.stream().forEach(delegate -> delegate.configurePathMatching(configurer));
+		this.delegates.forEach(delegate -> delegate.configurePathMatching(configurer));
 	}
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addResourceHandlers(registry));
+		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
 	}
 
 	@Override
-	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.delegates.stream().forEach(delegate -> delegate.addArgumentResolvers(resolvers));
+	public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configureArgumentResolvers(configurer));
 	}
 
 	@Override
-	public void configureMessageReaders(List<HttpMessageReader<?>> readers) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageReaders(readers));
-	}
-
-	@Override
-	public void extendMessageReaders(List<HttpMessageReader<?>> readers) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageReaders(readers));
+	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configureHttpMessageCodecs(configurer));
 	}
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addFormatters(registry));
+		this.delegates.forEach(delegate -> delegate.addFormatters(registry));
 	}
 
 	@Override
-	public Optional<Validator> getValidator() {
+	public Validator getValidator() {
 		return createSingleBean(WebFluxConfigurer::getValidator, Validator.class);
 	}
 
 	@Override
-	public Optional<MessageCodesResolver> getMessageCodesResolver() {
+	public MessageCodesResolver getMessageCodesResolver() {
 		return createSingleBean(WebFluxConfigurer::getMessageCodesResolver, MessageCodesResolver.class);
 	}
 
 	@Override
-	public void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageWriters(writers));
-	}
-
-	@Override
-	public void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageWriters(writers));
-	}
-
-	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.configureViewResolvers(registry));
+		this.delegates.forEach(delegate -> delegate.configureViewResolvers(registry));
 	}
 
-	private <T> Optional<T> createSingleBean(Function<WebFluxConfigurer, Optional<T>> factory,
-			Class<T> beanType) {
-
-		List<Optional<T>> result = this.delegates.stream()
-				.map(factory).filter(Optional::isPresent).collect(Collectors.toList());
-
+	@Nullable
+	private <T> T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
+		List<T> result = this.delegates.stream().map(factory).filter(t -> t != null).collect(Collectors.toList());
 		if (result.isEmpty()) {
-			return Optional.empty();
+			return null;
 		}
 		else if (result.size() == 1) {
 			return result.get(0);

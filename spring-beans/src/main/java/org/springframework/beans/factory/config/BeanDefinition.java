@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * A BeanDefinition describes a bean instance, which has property values,
@@ -84,11 +85,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Set the name of the parent definition of this bean definition, if any.
 	 */
-	void setParentName(String parentName);
+	void setParentName(@Nullable String parentName);
 
 	/**
 	 * Return the name of the parent definition of this bean definition, if any.
 	 */
+	@Nullable
 	String getParentName();
 
 	/**
@@ -99,7 +101,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setFactoryBeanName
 	 * @see #setFactoryMethodName
 	 */
-	void setBeanClassName(String beanClassName);
+	void setBeanClassName(@Nullable String beanClassName);
 
 	/**
 	 * Return the current bean class name of this bean definition.
@@ -113,6 +115,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
 	 */
+	@Nullable
 	String getBeanClassName();
 
 	/**
@@ -120,12 +123,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
-	void setScope(String scope);
+	void setScope(@Nullable String scope);
 
 	/**
-	 * Return the name of the current target scope for this bean,
-	 * or {@code null} if not known yet.
+	 * Return the name of the current target scope for this bean.
 	 */
+	@Nullable
 	String getScope();
 
 	/**
@@ -145,11 +148,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized first.
 	 */
-	void setDependsOn(String... dependsOn);
+	void setDependsOn(@Nullable String... dependsOn);
 
 	/**
 	 * Return the bean names that this bean depends on.
 	 */
+	@Nullable
 	String[] getDependsOn();
 
 	/**
@@ -183,11 +187,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * This the name of the bean to call the specified factory method on.
 	 * @see #setFactoryMethodName
 	 */
-	void setFactoryBeanName(String factoryBeanName);
+	void setFactoryBeanName(@Nullable String factoryBeanName);
 
 	/**
 	 * Return the factory bean name, if any.
 	 */
+	@Nullable
 	String getFactoryBeanName();
 
 	/**
@@ -198,11 +203,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setFactoryBeanName
 	 * @see #setBeanClassName
 	 */
-	void setFactoryMethodName(String factoryMethodName);
+	void setFactoryMethodName(@Nullable String factoryMethodName);
 
 	/**
 	 * Return a factory method, if any.
 	 */
+	@Nullable
 	String getFactoryMethodName();
 
 	/**
@@ -254,12 +260,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return a human-readable description of this bean definition.
 	 */
+	@Nullable
 	String getDescription();
 
 	/**
 	 * Return a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
+	@Nullable
 	String getResourceDescription();
 
 	/**
@@ -268,6 +276,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
+	@Nullable
 	BeanDefinition getOriginatingBeanDefinition();
 
 }

@@ -35,6 +35,7 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
@@ -557,7 +558,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);

@@ -16,11 +16,14 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,14 +33,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 
 /**
@@ -63,28 +66,28 @@ public class ResourceUrlProviderTests {
 		this.handler.setLocations(locations);
 		this.handler.afterPropertiesSet();
 		this.handlerMap.put("/resources/**", this.handler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 	}
 
 
 	@Test
 	public void getStaticResourceUrl() {
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
-		assertEquals("/resources/foo.css", url);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String uriString = "/resources/foo.css";
+		String actual = this.urlProvider.getForUriString(uriString, exchange).block(Duration.ofSeconds(5));
+		assertEquals(uriString, actual);
 	}
 
 	@Test  // SPR-13374
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
-		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);
+		String resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
 		assertEquals(url, resolvedUrl);
 
 		url = "/resources/foo.css#hash";
-		resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);
+		resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
 		assertEquals(url, resolvedUrl);
 	}
 
@@ -100,7 +103,9 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String path = "/resources/foo.css";
+		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -119,9 +124,11 @@ public class ResourceUrlProviderTests {
 		otherHandler.setResourceResolvers(resolvers);
 
 		this.handlerMap.put("/resources/*.css", otherHandler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String path = "/resources/foo.css";
+		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -133,8 +140,7 @@ public class ResourceUrlProviderTests {
 		context.refresh();
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
-		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
-		assertFalse(urlProviderBean.isAutodetect());
+		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey(pattern("/resources/**")));
 	}
 
 
@@ -155,6 +161,32 @@ public class ResourceUrlProviderTests {
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {
 			return new ResourceUrlProvider();
+		}
+	}
+
+	private static PathPatternMatcher pattern(String pattern) {
+		return new PathPatternMatcher(pattern);
+	}
+
+	private static class PathPatternMatcher extends BaseMatcher<PathPattern> {
+
+		private final String pattern;
+
+		public PathPatternMatcher(String pattern) {
+			this.pattern = pattern;
+		}
+
+		@Override
+		public boolean matches(Object item) {
+			if (item != null && item instanceof PathPattern) {
+				return ((PathPattern) item).getPatternString().equals(pattern);
+			}
+			return false;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+
 		}
 	}
 

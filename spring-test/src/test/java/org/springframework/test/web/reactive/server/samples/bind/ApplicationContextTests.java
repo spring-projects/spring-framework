@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.Before;
@@ -27,11 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 /**
- * Binding to server infrastructure declared in a Spring ApplicationContext.
+ * Sample tests demonstrating "mock" server tests binding to server infrastructure
+ * declared in a Spring ApplicationContext.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
-@SuppressWarnings("unused")
 public class ApplicationContextTests {
 
 	private WebTestClient client;
@@ -52,7 +54,7 @@ public class ApplicationContextTests {
 		this.client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("It works!");
+				.expectBody(String.class).isEqualTo("It works!");
 	}
 
 

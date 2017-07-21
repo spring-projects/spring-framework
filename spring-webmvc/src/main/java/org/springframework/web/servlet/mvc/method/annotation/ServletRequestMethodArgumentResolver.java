@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -64,8 +65,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private static final Method getPushBuilderMethod =
-			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "getPushBuilder");
+	@Nullable
+	private static final Method newPushBuilderMethod =
+			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "newPushBuilder");
 
 
 	@Override
@@ -75,7 +77,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
-				(getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) ||
+				(newPushBuilderMethod != null && newPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) ||
 				Principal.class.isAssignableFrom(paramType) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
@@ -86,8 +88,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
@@ -118,6 +120,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		return nativeRequest;
 	}
 
+	@Nullable
 	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
 		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();
@@ -127,8 +130,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			}
 			return session;
 		}
-		else if (getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
-			Object pushBuilder = ReflectionUtils.invokeMethod(getPushBuilderMethod, request);
+		else if (newPushBuilderMethod != null && newPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
+			Object pushBuilder = ReflectionUtils.invokeMethod(newPushBuilderMethod, request);
 			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
 				throw new IllegalStateException(
 						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);

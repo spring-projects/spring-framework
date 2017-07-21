@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
@@ -36,20 +37,16 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- *
  * @see HttpHandlerConnector
  */
 class WiretapConnector implements ClientHttpConnector {
-
-	public static final String REQUEST_ID_HEADER_NAME = "request-id";
-
 
 	private final ClientHttpConnector delegate;
 
 	private final Map<String, ExchangeResult> exchanges = new ConcurrentHashMap<>();
 
 
-	public WiretapConnector(ClientHttpConnector delegate) {
+	WiretapConnector(ClientHttpConnector delegate) {
 		this.delegate = delegate;
 	}
 
@@ -68,8 +65,8 @@ class WiretapConnector implements ClientHttpConnector {
 				})
 				.map(response ->  {
 					WiretapClientHttpRequest wrappedRequest = requestRef.get();
-					String requestId = wrappedRequest.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
-					Assert.notNull(requestId, "No request-id header");
+					String requestId = wrappedRequest.getHeaders().getFirst(WebTestClient.WEBTESTCLIENT_REQUEST_ID);
+					Assert.state(requestId != null, () -> "No \"" + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "\" header");
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
 					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
 					this.exchanges.put(requestId, result);
@@ -81,8 +78,8 @@ class WiretapConnector implements ClientHttpConnector {
 	 * Retrieve the {@code ExchangeResult} for the given "request-id" header value.
 	 */
 	public ExchangeResult claimRequest(String requestId) {
-		ExchangeResult result = this.exchanges.get(requestId);
-		Assert.notNull(result, "No match for request with id [" + requestId + "]");
+		ExchangeResult result = this.exchanges.remove(requestId);
+		Assert.state(result != null, () -> "No match for " + WebTestClient.WEBTESTCLIENT_REQUEST_ID + "=" + requestId);
 		return result;
 	}
 

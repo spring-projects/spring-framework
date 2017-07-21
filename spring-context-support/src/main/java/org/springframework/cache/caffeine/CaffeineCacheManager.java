@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import com.github.benmanes.caffeine.cache.CaffeineSpec;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -60,6 +61,7 @@ public class CaffeineCacheManager implements CacheManager {
 
 	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
 
+	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
 
 	private boolean allowNullValues = true;
@@ -88,7 +90,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * <p>Calling this with a {@code null} collection argument resets the
 	 * mode to 'dynamic', allowing for further creation of caches again.
 	 */
-	public void setCacheNames(Collection<String> cacheNames) {
+	public void setCacheNames(@Nullable Collection<String> cacheNames) {
 		if (cacheNames != null) {
 			for (String name : cacheNames) {
 				this.cacheMap.put(name, createCaffeineCache(name));

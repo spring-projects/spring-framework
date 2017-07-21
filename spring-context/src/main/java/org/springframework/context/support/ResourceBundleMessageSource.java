@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -65,8 +67,10 @@ import org.springframework.util.ClassUtils;
  */
 public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
 
+	@Nullable
 	private ClassLoader bundleClassLoader;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
@@ -76,8 +80,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
-			new HashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new HashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -87,8 +90,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
-			new HashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new HashMap<>();
 
 
 	/**
@@ -108,13 +110,14 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * <p>Default is the containing BeanFactory's bean ClassLoader.
 	 * @see #setBundleClassLoader
 	 */
+	@Nullable
 	protected ClassLoader getBundleClassLoader() {
 		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
 	}
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -165,6 +168,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
+	@Nullable
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
 		if (getCacheMillis() >= 0) {
 			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
@@ -212,7 +216,9 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+		ClassLoader classLoader = getBundleClassLoader();
+		Assert.state(classLoader != null, "No bundle ClassLoader set");
+		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
 	}
 
 	/**
@@ -238,6 +244,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
+	@Nullable
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
@@ -287,6 +294,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @see ResourceBundle#getString(String)
 	 * @see ResourceBundle#containsKey(String)
 	 */
+	@Nullable
 	protected String getStringOrNull(ResourceBundle bundle, String key) {
 		if (bundle.containsKey(key)) {
 			try {
@@ -317,6 +325,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	private class MessageSourceControl extends ResourceBundle.Control {
 
 		@Override
+		@Nullable
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
 
@@ -328,27 +337,23 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				final boolean reloadFlag = reload;
 				InputStream stream;
 				try {
-					stream = AccessController.doPrivileged(
-							new PrivilegedExceptionAction<InputStream>() {
-								@Override
-								public InputStream run() throws IOException {
-									InputStream is = null;
-									if (reloadFlag) {
-										URL url = classLoader.getResource(resourceName);
-										if (url != null) {
-											URLConnection connection = url.openConnection();
-											if (connection != null) {
-												connection.setUseCaches(false);
-												is = connection.getInputStream();
-											}
-										}
-									}
-									else {
-										is = classLoader.getResourceAsStream(resourceName);
-									}
-									return is;
+					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+						InputStream is = null;
+						if (reloadFlag) {
+							URL url = classLoader.getResource(resourceName);
+							if (url != null) {
+								URLConnection connection = url.openConnection();
+								if (connection != null) {
+									connection.setUseCaches(false);
+									is = connection.getInputStream();
 								}
-							});
+							}
+						}
+						else {
+							is = classLoader.getResourceAsStream(resourceName);
+						}
+						return is;
+					});
 				}
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
@@ -376,6 +381,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 
 		@Override
+		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
 			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
 		}

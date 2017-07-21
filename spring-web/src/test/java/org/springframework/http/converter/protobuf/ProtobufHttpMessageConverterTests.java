@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.mockito.Mockito.*;
  * Test suite for {@link ProtobufHttpMessageConverter}.
  *
  * @author Alex Antonov
+ * @author Juergen Hoeller
  */
 public class ProtobufHttpMessageConverterTests {
 
@@ -46,7 +47,7 @@ public class ProtobufHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
 		this.converter = new ProtobufHttpMessageConverter(this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
@@ -60,12 +61,7 @@ public class ProtobufHttpMessageConverterTests {
 
 	@Test
 	public void extensionRegistryNull() {
-	     try {
-	     	new ProtobufHttpMessageConverter(null);
-	     }
-		 catch (Exception ex) {
-	     	fail("Unable to create ProtobufHttpMessageConverter with null extensionRegistry");
-	     }
+		new ProtobufHttpMessageConverter(null);
 	}
 
 	@Test

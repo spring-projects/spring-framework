@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient superclass for
@@ -196,6 +197,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * @param beanName the name of the bean
 	 * @return the AbstractPrototypeBasedTargetSource, or {@code null} if we don't match this
 	 */
+	@Nullable
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName);
 

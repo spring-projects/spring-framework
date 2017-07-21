@@ -42,19 +42,11 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willThrow;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -76,8 +68,9 @@ public class RestTemplateTests {
 	@SuppressWarnings("rawtypes")
 	private HttpMessageConverter converter;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		requestFactory = mock(ClientHttpRequestFactory.class);
 		request = mock(ClientHttpRequest.class);
 		response = mock(ClientHttpResponse.class);
@@ -87,6 +80,7 @@ public class RestTemplateTests {
 		template.setRequestFactory(requestFactory);
 		template.setErrorHandler(errorHandler);
 	}
+
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
@@ -153,7 +147,7 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
-	@Test // SPR-15201
+	@Test  // SPR-15201
 	public void uriTemplateWithTrailingSlash() throws Exception {
 		String url = "http://example.com/spring/";
 		given(requestFactory.createRequest(new URI(url), HttpMethod.GET)).willReturn(request);
@@ -170,12 +164,14 @@ public class RestTemplateTests {
 
 	@Test
 	public void errorHandling() throws Exception {
-		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET)).willReturn(request);
+		URI uri = new URI("http://example.com");
+		given(requestFactory.createRequest(uri, HttpMethod.GET)).willReturn(request);
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(true);
 		given(response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
 		given(response.getStatusText()).willReturn("Internal Server Error");
-		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)).given(errorHandler).handleError(response);
+		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
+				.given(errorHandler).handleError(uri, HttpMethod.GET, response);
 
 		try {
 			template.execute("http://example.com", HttpMethod.GET, null, null);
@@ -287,7 +283,6 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
-
 		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
 
@@ -300,7 +295,7 @@ public class RestTemplateTests {
 
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(new HttpHeaders());
-		given(response.getBody()).willReturn(null);
+		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 
 		Map<String, String> uriVariables = new HashMap<>(2);
 		uriVariables.put("hotel", "1");
@@ -312,7 +307,6 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
-
 
 	@Test
 	public void headForHeaders() throws Exception {
@@ -533,8 +527,9 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
 		given(converter.read(Integer.class, response)).willReturn(null);
 		HttpStatus status = HttpStatus.OK;
@@ -561,8 +556,9 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
 		given(converter.read(Integer.class, response)).willReturn(null);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
@@ -659,8 +655,9 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
 		given(converter.read(Integer.class, response)).willReturn(null);
 		HttpStatus status = HttpStatus.OK;
@@ -816,4 +813,5 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
+
 }

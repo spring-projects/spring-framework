@@ -38,6 +38,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -106,7 +107,7 @@ public class SqlQueryTests  {
 
 		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
 			@Override
-			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map<? ,?> context)
+			protected Integer mapRow(ResultSet rs, int rownum, @Nullable Object[] params, @Nullable Map<? ,?> context)
 					throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
@@ -729,7 +730,7 @@ public class SqlQueryTests  {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, Map<? ,?> context)
+			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context)
 					throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;

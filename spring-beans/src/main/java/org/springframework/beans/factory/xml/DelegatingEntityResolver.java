@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -57,7 +58,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 	 * @param classLoader the ClassLoader to use for loading
 	 * (can be {@code null}) to use the default ClassLoader)
 	 */
-	public DelegatingEntityResolver(ClassLoader classLoader) {
+	public DelegatingEntityResolver(@Nullable ClassLoader classLoader) {
 		this.dtdResolver = new BeansDtdResolver();
 		this.schemaResolver = new PluggableSchemaResolver(classLoader);
 	}
@@ -77,7 +78,8 @@ public class DelegatingEntityResolver implements EntityResolver {
 
 
 	@Override
-	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+	@Nullable
+	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
 		if (systemId != null) {
 			if (systemId.endsWith(DTD_SUFFIX)) {
 				return this.dtdResolver.resolveEntity(publicId, systemId);

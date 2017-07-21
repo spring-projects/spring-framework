@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -33,7 +32,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolver for method arguments annotated with @{@link RequestParam}.
+ * Resolver for method arguments annotated with @{@link RequestParam} from URI
+ * query string parameters.
  *
  * <p>This resolver can also be created in default resolution mode in which
  * simple types (int, long, etc.) not annotated with @{@link RequestParam} are
@@ -57,45 +57,38 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 
 	/**
-	 * Class constructor.
-	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
-	 * and #{...} SpEL expressions in default values, or {@code null} if default
-	 * values are not expected to contain expressions
-	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		this(beanFactory, false);
-	}
-
-	/**
 	 * Class constructor with a default resolution mode flag.
-	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
+	 * @param factory a bean factory used for resolving  ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
+	 * @param registry for checking reactive type wrappers
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
 	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-			boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(
+			@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry, boolean useDefaultResolution) {
 
-		super(beanFactory);
+		super(factory, registry);
 		this.useDefaultResolution = useDefaultResolution;
 	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		if (parameter.hasParameterAnnotation(RequestParam.class)) {
-			if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
-				return StringUtils.hasText(paramName);
-			}
-			else {
-				return true;
-			}
+	public boolean supportsParameter(MethodParameter param) {
+		if (checkAnnotatedParamNoReactiveWrapper(param, RequestParam.class, this::singleParam)) {
+			return true;
 		}
-		return (this.useDefaultResolution && BeanUtils.isSimpleProperty(parameter.getNestedParameterType()));
+		else if (this.useDefaultResolution) {
+			return checkParameterTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty) ||
+					BeanUtils.isSimpleProperty(param.nestedIfOptional().getNestedParameterType());
+		}
+		return false;
+	}
+
+	private boolean singleParam(RequestParam requestParam, Class<?> type) {
+		return !Map.class.isAssignableFrom(type) || StringUtils.hasText(requestParam.name());
 	}
 
 	@Override
@@ -105,21 +98,13 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
-		List<String> paramValues = getRequestParams(exchange).get(name);
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+		List<String> paramValues = exchange.getRequest().getQueryParams().get(name);
 		Object result = null;
 		if (paramValues != null) {
 			result = (paramValues.size() == 1 ? paramValues.get(0) : paramValues);
 		}
-		return Optional.ofNullable(result);
-	}
-
-	private MultiValueMap<String, String> getRequestParams(ServerWebExchange exchange) {
-		MultiValueMap<String, String> params = exchange.getRequestParams().subscribe().peek();
-		Assert.notNull(params, "Expected form data (if any) to be parsed.");
-		return params;
+		return result;
 	}
 
 	@Override
@@ -132,11 +117,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	private static class RequestParamNamedValueInfo extends NamedValueInfo {
 
-		public RequestParamNamedValueInfo() {
+		RequestParamNamedValueInfo() {
 			super("", false, ValueConstants.DEFAULT_NONE);
 		}
 
-		public RequestParamNamedValueInfo(RequestParam annotation) {
+		RequestParamNamedValueInfo(RequestParam annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}

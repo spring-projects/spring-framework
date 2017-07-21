@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
+import org.springframework.http.CacheControl;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -131,7 +132,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private void registerUrlProvider(ParserContext parserContext, Object source) {
+	private void registerUrlProvider(ParserContext parserContext, @Nullable Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(RESOURCE_URL_PROVIDER)) {
 			RootBeanDefinition urlProvider = new RootBeanDefinition(ResourceUrlProvider.class);
 			urlProvider.setSource(source);
@@ -153,7 +154,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {
+	private String registerResourceHandler(ParserContext parserContext, Element element, @Nullable Object source) {
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
 			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
@@ -199,7 +200,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	private void parseResourceChain(RootBeanDefinition resourceHandlerDef, ParserContext parserContext,
-			Element element, Object source) {
+			Element element, @Nullable Object source) {
 
 		String autoRegistration = element.getAttribute("auto-registration");
 		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
@@ -262,7 +263,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
-			ManagedList<? super Object> resourceTransformers, Element element, Object source) {
+			ManagedList<? super Object> resourceTransformers, Element element, @Nullable Object source) {
 
 		String resourceCache = element.getAttribute("resource-cache");
 		if ("true".equals(resourceCache)) {
@@ -302,7 +303,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	private void parseResourceResolversTransformers(boolean isAutoRegistration,
 			ManagedList<? super Object> resourceResolvers, ManagedList<? super Object> resourceTransformers,
-			ParserContext parserContext, Element element, Object source) {
+			ParserContext parserContext, Element element, @Nullable Object source) {
 
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
 		if (resolversElement != null) {
@@ -347,7 +348,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private RootBeanDefinition parseVersionResolver(ParserContext parserContext, Element element, Object source) {
+	private RootBeanDefinition parseVersionResolver(
+			ParserContext parserContext, Element element, @Nullable Object source) {
+
 		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<>();
 		strategyMap.setSource(source);
 		RootBeanDefinition versionResolverDef = new RootBeanDefinition(VersionResourceResolver.class);

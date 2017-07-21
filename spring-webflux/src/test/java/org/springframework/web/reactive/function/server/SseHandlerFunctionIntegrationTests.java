@@ -24,15 +24,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
@@ -63,7 +63,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(String.class)));
+				.flatMapMany(response -> response.body(toFlux(String.class)));
 
 		StepVerifier.create(result)
 				.expectNext("foo 0")
@@ -78,7 +78,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(Person.class)));
+				.flatMapMany(response -> response.body(toFlux(Person.class)));
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
@@ -93,23 +93,23 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(
-						forClassWithGenerics(ServerSentEvent.class, String.class))));
+				.flatMapMany(response -> response.body(toFlux(
+						new ParameterizedTypeReference<ServerSentEvent<String>>() {})));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("0", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id().get());
-					assertEquals("foo", event.data().get());
-					assertEquals("bar", event.comment().get());
-					assertFalse(event.event().isPresent());
-					assertFalse(event.retry().isPresent());
+					assertEquals("1", event.id());
+					assertEquals("foo", event.data());
+					assertEquals("bar", event.comment());
+					assertNull(event.event());
+					assertNull(event.retry());
 				})
 				.expectComplete()
 				.verify(Duration.ofSeconds(5L));
@@ -140,11 +140,11 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;
 
-		@SuppressWarnings("unused")
 		public Person() {
 		}
 

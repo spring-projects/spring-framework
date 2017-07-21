@@ -29,6 +29,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract base class for SAX {@code ContentHandler} and {@code LexicalHandler}
  * implementations that use StAX as a basis. All methods delegate to internal template
@@ -147,7 +149,7 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	}
 
 	@Override
-	public final void startDTD(String name, String publicId, String systemId) throws SAXException {
+	public final void startDTD(String name, @Nullable String publicId, String systemId) throws SAXException {
 		try {
 			StringBuilder builder = new StringBuilder("<!DOCTYPE ");
 			builder.append(name);

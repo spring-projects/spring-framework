@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for parsing known caching annotation types.
@@ -44,6 +45,7 @@ public interface CacheAnnotationParser {
 	 * or {@code null} if none was found
 	 * @see AnnotationCacheOperationSource#findCacheOperations(Class)
 	 */
+	@Nullable
 	Collection<CacheOperation> parseCacheAnnotations(Class<?> type);
 
 	/**
@@ -57,5 +59,6 @@ public interface CacheAnnotationParser {
 	 * or {@code null} if none was found
 	 * @see AnnotationCacheOperationSource#findCacheOperations(Method)
 	 */
+	@Nullable
 	Collection<CacheOperation> parseCacheAnnotations(Method method);
 }

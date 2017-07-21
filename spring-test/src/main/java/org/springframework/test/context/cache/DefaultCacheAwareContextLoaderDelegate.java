@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextLoader;
@@ -138,7 +139,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	@Override
-	public void closeContext(MergedContextConfiguration mergedContextConfiguration, HierarchyMode hierarchyMode) {
+	public void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode) {
 		synchronized (this.contextCache) {
 			this.contextCache.remove(mergedContextConfiguration, hierarchyMode);
 		}

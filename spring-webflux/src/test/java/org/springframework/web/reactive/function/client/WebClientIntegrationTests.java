@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -30,13 +32,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.Pojo;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -49,7 +52,6 @@ public class WebClientIntegrationTests {
 	private MockWebServer server;
 
 	private WebClient webClient;
-
 
 	@Before
 	public void setup() {
@@ -96,7 +98,7 @@ public class WebClientIntegrationTests {
 				.uri("/greeting?name=Spring")
 				.header("X-Test-Header", "testvalue")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -120,7 +122,156 @@ public class WebClientIntegrationTests {
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveMono() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveMonoTypeReference() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<String>() {});
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringExchangeEntity() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertEquals(HttpStatus.OK, entity.getStatusCode());
+					assertEquals(MediaType.APPLICATION_JSON, entity.getHeaders().getContentType());
+					assertEquals(31, entity.getHeaders().getContentLength());
+					assertEquals(content, entity.getBody());
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringExchangeEntityList() throws Exception {
+		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody(content));
+
+		Mono<ResponseEntity<List<Pojo>>> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.flatMap(response -> response.toEntityList(Pojo.class));
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertEquals(HttpStatus.OK, entity.getStatusCode());
+					assertEquals(MediaType.APPLICATION_JSON, entity.getHeaders().getContentType());
+					assertEquals(58, entity.getHeaders().getContentLength());
+					Pojo pojo1 = new Pojo("foo1", "bar1");
+					Pojo pojo2 = new Pojo("foo2", "bar2");
+					assertEquals(Arrays.asList(pojo1, pojo2), entity.getBody());
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveFlux() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveFluxTypeReference() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToFlux(new ParameterizedTypeReference<String>() {});
 
 		StepVerifier.create(result)
 				.expectNext(content)
@@ -142,7 +293,7 @@ public class WebClientIntegrationTests {
 				.uri("/pojo")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.then(response -> response.bodyToMono(Pojo.class));
+				.flatMap(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
@@ -164,7 +315,7 @@ public class WebClientIntegrationTests {
 				.uri("/pojos")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(Pojo.class));
+				.flatMapMany(response -> response.bodyToFlux(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
@@ -188,8 +339,9 @@ public class WebClientIntegrationTests {
 				.uri("/pojo/capitalize")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.exchange(fromObject(new Pojo("foofoo", "barbar")))
-				.then(response -> response.bodyToMono(Pojo.class));
+				.syncBody(new Pojo("foofoo", "barbar"))
+				.exchange()
+				.flatMap(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
@@ -214,7 +366,7 @@ public class WebClientIntegrationTests {
 				.uri("/test")
 				.cookie("testkey", "testvalue")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("test")
@@ -228,7 +380,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void notFound() throws Exception {
+	public void exchangeNotFound() throws Exception {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
@@ -246,19 +398,104 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void buildFilter() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+	public void retrieveBodyToMonoNotFound() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(404)
+				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
-		WebClient filteredClient = this.webClient.filter(
-				(request, next) -> {
-					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void retrieveBodyToMonoInternalServerError() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void retrieveBodyToCustomStatusHandler() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> new MyException("500 error!"))
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void exchangeToEntityNotFound() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(404)
+				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void filter() throws Exception {
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		WebClient filteredClient = this.webClient.mutate()
+				.filter((request, next) -> {
+					ClientRequest filteredRequest =
+							ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
-				});
+				})
+				.build();
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
-				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -271,28 +508,83 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void filter() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+	public void errorHandlingFilter() throws Exception {
 
-		WebClient filteredClient = this.webClient.filter(
-				(request, next) -> {
-					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
-					return next.exchange(filteredRequest);
-				});
+		ExchangeFilterFunction filter = ExchangeFilterFunction.ofResponseProcessor(
+						clientResponse -> {
+							List<String> headerValues = clientResponse.headers().header("Foo");
+							return headerValues.isEmpty() ? Mono.error(
+									new MyException("Response does not contain Foo header")) :
+									Mono.just(clientResponse);
+						}
+				);
+
+		WebClient filteredClient = this.webClient.mutate()
+				.filter(filter)
+				.build();
+
+		// header not present
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
-				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		// header present
+
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain")
+				.setHeader("Foo", "Bar")
+				.setBody("Hello Spring!"));
+
+		result = filteredClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 
-		RecordedRequest recordedRequest = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("bar", recordedRequest.getHeader("foo"));
+		Assert.assertEquals(2, server.getRequestCount());
+	}
+
+	@Test
+	public void exchangeNoContent() throws Exception  {
+		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/noContent")
+				.exchange();
+
+		StepVerifier.create(result).assertNext(r -> {
+			assertTrue(r.statusCode().is2xxSuccessful());
+			StepVerifier.create(r.bodyToMono(Void.class)).verifyComplete();
+		}).verifyComplete();
+	}
+
+	@Test // SPR-15782
+	public void absoluteUri() throws Exception {
+		String uri = "/api/v4/groups/1";
+		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
+
+		StepVerifier.create(responseMono)
+				.expectErrorMessage("URI is not absolute: " + uri)
+				.verify(Duration.ofSeconds(5));
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class MyException extends RuntimeException {
+
+		public MyException(String message) {
+			super(message);
+		}
 	}
 
 }

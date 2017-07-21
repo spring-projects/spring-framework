@@ -27,11 +27,13 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -50,7 +52,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	private final Map<String, Object> model = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> model = new LinkedHashMap<>();
 
 
 	public DefaultRenderingResponseBuilder(String name) {
@@ -75,7 +77,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	}
 
 	@Override
-	public RenderingResponse.Builder modelAttribute(String name, Object value) {
+	public RenderingResponse.Builder modelAttribute(String name, @Nullable Object value) {
 		Assert.notNull(name, "'name' must not be null");
 		this.model.put(name, value);
 		return this;
@@ -83,25 +85,19 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Object... attributes) {
-		if (attributes != null) {
-			modelAttributes(Arrays.asList(attributes));
-		}
+		modelAttributes(Arrays.asList(attributes));
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Collection<?> attributes) {
-		if (attributes != null) {
-			attributes.forEach(this::modelAttribute);
-		}
+		attributes.forEach(this::modelAttribute);
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder modelAttributes(Map<String, ?> attributes) {
-		if (attributes != null) {
-			this.model.putAll(attributes);
-		}
+		this.model.putAll(attributes);
 		return this;
 	}
 
@@ -115,9 +111,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	@Override
 	public RenderingResponse.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
-		}
+		this.headers.putAll(headers);
 		return this;
 	}
 
@@ -158,32 +152,21 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, Context context) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale locale = resolveLocale(exchange, strategies);
-			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
+			Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
+			Stream<ViewResolver> viewResolverStream = context.viewResolvers().stream();
 
 			return Flux.fromStream(viewResolverStream)
-					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
+					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))
 					.next()
-					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
-							this.name +"'")))
-					.then(view -> view.render(this.model, contentType, exchange));
+					.switchIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
+							name() +"'")))
+					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
-		private Locale resolveLocale(ServerWebExchange exchange, HandlerStrategies strategies) {
-			ServerRequest request =
-					exchange.<ServerRequest>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
-							.orElseThrow(() -> new IllegalStateException(
-									"Could not find ServerRequest in exchange attributes"));
-
-			return strategies.localeResolver()
-					.apply(request)
-					.orElse(Locale.getDefault());
-
-		}
 	}
 
 }

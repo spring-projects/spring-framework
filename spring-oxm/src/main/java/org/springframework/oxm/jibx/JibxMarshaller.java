@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.ValidationFailureException;
@@ -86,26 +87,35 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	private static final String DEFAULT_BINDING_NAME = "binding";
 
 
+	@Nullable
 	private Class<?> targetClass;
 
+	@Nullable
 	private String targetPackage;
 
+	@Nullable
 	private String bindingName;
 
 	private int indent = -1;
 
 	private String encoding = "UTF-8";
 
+	@Nullable
 	private Boolean standalone;
 
+	@Nullable
 	private String docTypeRootElementName;
 
+	@Nullable
 	private String docTypeSystemId;
 
+	@Nullable
 	private String docTypePublicId;
 
+	@Nullable
 	private String docTypeInternalSubset;
 
+	@Nullable
 	private IBindingFactory bindingFactory;
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -240,6 +250,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		if (this.targetClass != null) {
 			return (this.targetClass == clazz);
 		}
+		Assert.state(this.bindingFactory != null, "JibxMarshaller not initialized");
 		String[] mappedClasses = this.bindingFactory.getMappedClasses();
 		String className = clazz.getName();
 		for (String mappedClass : mappedClasses) {
@@ -321,7 +332,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	@Override
-	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, LexicalHandler lexicalHandler)
+	protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)
 			throws XmlMappingException {
 		try {
 			// JiBX does not support SAX natively, so we write to a buffer first, and transform that to the handlers
@@ -418,7 +429,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		return transformAndUnmarshal(new SAXSource(xmlReader, inputSource), inputSource.getEncoding());
 	}
 
-	private Object transformAndUnmarshal(Source source, String encoding) throws IOException {
+	private Object transformAndUnmarshal(Source source, @Nullable String encoding) throws IOException {
 		try {
 			Transformer transformer = this.transformerFactory.newTransformer();
 			if (encoding != null) {
@@ -442,6 +453,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	 * @throws JiBXException in case of errors
 	 */
 	protected IMarshallingContext createMarshallingContext() throws JiBXException {
+		Assert.state(this.bindingFactory != null, "JibxMarshaller not initialized");
 		IMarshallingContext marshallingContext = this.bindingFactory.createMarshallingContext();
 		marshallingContext.setIndent(this.indent);
 		return marshallingContext;
@@ -453,6 +465,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	 * @throws JiBXException in case of errors
 	 */
 	protected IUnmarshallingContext createUnmarshallingContext() throws JiBXException {
+		Assert.state(this.bindingFactory != null, "JibxMarshaller not initialized");
 		return this.bindingFactory.createUnmarshallingContext();
 	}
 

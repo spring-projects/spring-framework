@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,19 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.ParsingPathMatcher;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A central component to use to obtain the public URL path that clients should
@@ -52,103 +52,66 @@ import org.springframework.web.util.ParsingPathMatcher;
  */
 public class ResourceUrlProvider implements ApplicationListener<ContextRefreshedEvent> {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(ResourceUrlProvider.class);
 
-	private HttpRequestPathHelper urlPathHelper = new HttpRequestPathHelper();
 
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
+	private final PathPatternParser patternParser = new PathPatternParser();
 
-	private final Map<String, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
-
-	private boolean autodetect = true;
+	private final Map<PathPattern, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
 
 	/**
-	 * Configure a {@code UrlPathHelper} to use in
-	 * {@link #getForRequestUrl(ServerWebExchange, String)}
-	 * in order to derive the lookup path for a target request URL path.
+	 * Return a read-only view of the resource handler mappings either manually
+	 * configured or auto-detected from Spring configuration.
 	 */
-	public void setUrlPathHelper(HttpRequestPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
+	public Map<PathPattern, ResourceWebHandler> getHandlerMap() {
+		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
-	/**
-	 * Return the configured {@code UrlPathHelper}.
-	 */
-	public HttpRequestPathHelper getUrlPathHelper() {
-		return this.urlPathHelper;
-	}
 
 	/**
-	 * Configure a {@code PathMatcher} to use when comparing target lookup path
-	 * against resource mappings.
-	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
-	}
-
-	/**
-	 * Return the configured {@code PathMatcher}.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
-
-	/**
-	 * Manually configure the resource mappings.
+	 * Manually configure resource handler mappings.
 	 * <p><strong>Note:</strong> by default resource mappings are auto-detected
-	 * from the Spring {@code ApplicationContext}. However if this property is
-	 * used, the auto-detection is turned off.
+	 * from the Spring {@code ApplicationContext}. If this property is used,
+	 * auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<String, ResourceWebHandler> handlerMap) {
-		if (handlerMap != null) {
-			this.handlerMap.clear();
-			this.handlerMap.putAll(handlerMap);
-			this.autodetect = false;
+	public void registerHandlers(Map<String, ResourceWebHandler> handlerMap) {
+		this.handlerMap.clear();
+		handlerMap.forEach((rawPattern, resourceWebHandler) -> {
+			rawPattern = prependLeadingSlash(rawPattern);
+			PathPattern pattern = this.patternParser.parse(rawPattern);
+			this.handlerMap.put(pattern, resourceWebHandler);
+		});
+	}
+
+	private static String prependLeadingSlash(String pattern) {
+		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+			return "/" + pattern;
 		}
-	}
-
-	/**
-	 * Return the resource mappings, either manually configured or auto-detected
-	 * when the Spring {@code ApplicationContext} is refreshed.
-	 */
-	public Map<String, ResourceWebHandler> getHandlerMap() {
-		return this.handlerMap;
-	}
-
-	/**
-	 * Return {@code false} if resource mappings were manually configured,
-	 * {@code true} otherwise.
-	 */
-	public boolean isAutodetect() {
-		return this.autodetect;
+		else {
+			return pattern;
+		}
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (isAutodetect()) {
-			this.handlerMap.clear();
+		if (this.handlerMap.isEmpty()) {
 			detectResourceHandlers(event.getApplicationContext());
-			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
+			if(logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
-			}
-			if (!this.handlerMap.isEmpty()) {
-				this.autodetect = false;
 			}
 		}
 	}
 
-
-	protected void detectResourceHandlers(ApplicationContext appContext) {
+	private void detectResourceHandlers(ApplicationContext context) {
 		logger.debug("Looking for resource handler mappings");
 
-		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
-		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<>(map.values());
-		AnnotationAwareOrderComparator.sort(handlerMappings);
+		Map<String, SimpleUrlHandlerMapping> map = context.getBeansOfType(SimpleUrlHandlerMapping.class);
+		List<SimpleUrlHandlerMapping> mappings = new ArrayList<>(map.values());
+		AnnotationAwareOrderComparator.sort(mappings);
 
-		for (SimpleUrlHandlerMapping hm : handlerMappings) {
-			for (String pattern : hm.getHandlerMap().keySet()) {
-				Object handler = hm.getHandlerMap().get(pattern);
+		mappings.forEach(mapping -> {
+			mapping.getHandlerMap().forEach((pattern, handler) -> {
 				if (handler instanceof ResourceWebHandler) {
 					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
 					if (logger.isDebugEnabled()) {
@@ -158,98 +121,74 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					}
 					this.handlerMap.put(pattern, resourceHandler);
 				}
-			}
-		}
+			});
+		});
 	}
+
 
 	/**
-	 * A variation on {@link #getForLookupPath(String)} that accepts a full request
-	 * URL path and returns the full request URL path to expose for public use.
+	 * Get the public resource URL for the given URI string.
+	 * <p>The URI string is expected to be a path and if it contains a query or
+	 * fragment those will be preserved in the resulting public resource URL.
+	 * @param uriString the URI string to transform
 	 * @param exchange the current exchange
-	 * @param requestUrl the request URL path to resolve
-	 * @return the resolved public URL path, or {@code null} if unresolved
+	 * @return the resolved public resource URL path, or empty if unresolved
 	 */
-	public final Mono<String> getForRequestUrl(ServerWebExchange exchange, String requestUrl) {
+	public final Mono<String> getForUriString(String uriString, ServerWebExchange exchange) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
+			logger.trace("Getting resource URL for request URL \"" + uriString + "\"");
 		}
-		int prefixIndex = getLookupPathIndex(exchange);
-		int suffixIndex = getEndPathIndex(requestUrl);
-		String prefix = requestUrl.substring(0, prefixIndex);
-		String suffix = requestUrl.substring(suffixIndex);
-		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
-		return getForLookupPath(lookupPath).map(resolvedPath -> prefix + resolvedPath + suffix);
-	}
-
-	private int getLookupPathIndex(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
-		String requestPath = request.getURI().getPath();
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(exchange);
-		return requestPath.indexOf(lookupPath);
+		int queryIndex = getQueryIndex(uriString);
+		String lookupPath = uriString.substring(0, queryIndex);
+		String query = uriString.substring(queryIndex);
+		PathContainer parsedLookupPath = PathContainer.parseUrlPath(lookupPath);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
+		}
+		return resolveResourceUrl(parsedLookupPath).map(resolvedPath ->
+				request.getPath().contextPath().value() + resolvedPath + query);
 	}
 
-	private int getEndPathIndex(String lookupPath) {
-		int suffixIndex = lookupPath.length();
-		int queryIndex = lookupPath.indexOf("?");
-		if(queryIndex > 0) {
+	private int getQueryIndex(String path) {
+		int suffixIndex = path.length();
+		int queryIndex = path.indexOf("?");
+		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
-		int hashIndex = lookupPath.indexOf("#");
-		if(hashIndex > 0) {
+		int hashIndex = path.indexOf("#");
+		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
 		return suffixIndex;
 	}
 
-	/**
-	 * Compare the given path against configured resource handler mappings and
-	 * if a match is found use the {@code ResourceResolver} chain of the matched
-	 * {@code ResourceHttpRequestHandler} to resolve the URL path to expose for
-	 * public use.
-	 * <p>It is expected that the given path is what Spring uses for
-	 * request mapping purposes.
-	 * <p>If several handler mappings match, the handler used will be the one
-	 * configured with the most specific pattern.
-	 * @param lookupPath the lookup path to check
-	 * @return the resolved public URL path, or {@code null} if unresolved
-	 */
-	public final Mono<String> getForLookupPath(String lookupPath) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
-		}
-
-		List<String> matchingPatterns = new ArrayList<>();
-		for (String pattern : this.handlerMap.keySet()) {
-			if (getPathMatcher().match(pattern, lookupPath)) {
-				matchingPatterns.add(pattern);
-			}
-		}
-
-		if (matchingPatterns.isEmpty()) {
-			return Mono.empty();
-		}
-
-		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
-		Collections.sort(matchingPatterns, patternComparator);
-
-		return Flux.fromIterable(matchingPatterns)
-				.concatMap(pattern -> {
-					String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
-					String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
+	private Mono<String> resolveResourceUrl(PathContainer lookupPath) {
+		return this.handlerMap.entrySet().stream()
+				.filter(entry -> entry.getKey().matches(lookupPath))
+				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.findFirst()
+				.map(entry -> {
+					PathContainer path = entry.getKey().extractPathWithinPattern(lookupPath);
+					int endIndex = lookupPath.elements().size() - path.elements().size();
+					PathContainer mapping = lookupPath.subPath(0, endIndex);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + pattern + "\"");
+						logger.trace("Invoking ResourceResolverChain for URL pattern " +
+								"\"" + entry.getKey() + "\"");
 					}
-					ResourceWebHandler handler = this.handlerMap.get(pattern);
-					ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
-					return chain.resolveUrlPath(pathWithinMapping, handler.getLocations())
+					ResourceWebHandler handler = entry.getValue();
+					List<ResourceResolver> resolvers = handler.getResourceResolvers();
+					ResourceResolverChain chain = new DefaultResourceResolverChain(resolvers);
+					return chain.resolveUrlPath(path.value(), handler.getLocations())
 							.map(resolvedPath -> {
 								if (logger.isTraceEnabled()) {
 									logger.trace("Resolved public resource URL path \"" + resolvedPath + "\"");
 								}
-								return pathMapping + resolvedPath;
+								return mapping.value() + resolvedPath;
 							});
+
 				})
-				.next();
+				.orElse(Mono.empty());
 	}
 
 }

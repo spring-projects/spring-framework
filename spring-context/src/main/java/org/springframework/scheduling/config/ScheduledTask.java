@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.scheduling.config;
 
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A representation of a scheduled task,
  * used as a return value for scheduling methods.
@@ -29,6 +31,7 @@ import java.util.concurrent.ScheduledFuture;
  */
 public final class ScheduledTask {
 
+	@Nullable
 	volatile ScheduledFuture<?> future;
 
 

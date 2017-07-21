@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License; Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
@@ -47,25 +48,29 @@ public interface MvcResult {
 	 * Return the executed handler.
 	 * @return the handler, possibly {@code null} if none were executed
 	 */
+	@Nullable
 	Object getHandler();
 
 	/**
 	 * Return interceptors around the handler.
 	 * @return interceptors, or {@code null} if none were selected
 	 */
+	@Nullable
 	HandlerInterceptor[] getInterceptors();
 
 	/**
 	 * Return the {@code ModelAndView} prepared by the handler.
-	 * @return a {@code ModelAndView}, or {@code null}
+	 * @return a {@code ModelAndView}, or {@code null} if none
 	 */
+	@Nullable
 	ModelAndView getModelAndView();
 
 	/**
 	 * Return any exception raised by a handler and successfully resolved
 	 * through a {@link HandlerExceptionResolver}.
-	 * @return an exception, possibly {@code null}
+	 * @return an exception, or {@code null} if none
 	 */
+	@Nullable
  	Exception getResolvedException();
 
 	/**

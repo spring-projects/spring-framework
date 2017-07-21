@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-201/ the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -42,7 +43,7 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 
 
 	public DefaultResourceTransformerChain(ResourceResolverChain resolverChain,
-			List<ResourceTransformer> transformers) {
+			@Nullable List<ResourceTransformer> transformers) {
 
 		Assert.notNull(resolverChain, "ResourceResolverChain is required");
 		this.resolverChain = resolverChain;
@@ -71,6 +72,7 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 		}
 	}
 
+	@Nullable
 	private ResourceTransformer getNext() {
 		Assert.state(this.index <= this.transformers.size(),
 				"Current index exceeds the number of configured ResourceTransformer's");

@@ -12,4 +12,7 @@
  * <p>{@link org.springframework.web.accept.ContentNegotiationManager} is used to delegate to one
  * ore more of the above strategies in a specific order.
  */
+@NonNullApi
 package org.springframework.web.accept;
+
+import org.springframework.lang.NonNullApi;

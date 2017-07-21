@@ -19,9 +19,8 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,19 +33,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.reactive.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 
 /**
+ * Mock implementation of {@link ServerRequest}.
+ *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class MockServerRequest implements ServerRequest {
 
@@ -54,8 +61,13 @@ public class MockServerRequest implements ServerRequest {
 
 	private final URI uri;
 
+	private final RequestPath pathContainer;
+
 	private final MockHeaders headers;
 
+	private final MultiValueMap<String, HttpCookie> cookies;
+
+	@Nullable
 	private final Object body;
 
 	private final Map<String, Object> attributes;
@@ -64,22 +76,29 @@ public class MockServerRequest implements ServerRequest {
 
 	private final Map<String, String> pathVariables;
 
+	@Nullable
 	private final WebSession session;
 
+	@Nullable
+	private Principal principal;
 
-	private MockServerRequest(HttpMethod method, URI uri,
-			MockHeaders headers, Object body, Map<String, Object> attributes,
-			MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables, WebSession session) {
+
+	private MockServerRequest(HttpMethod method, URI uri, String contextPath, MockHeaders headers,
+			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
+			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
+			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal) {
 
 		this.method = method;
 		this.uri = uri;
+		this.pathContainer = RequestPath.parse(uri, contextPath);
 		this.headers = headers;
+		this.cookies = cookies;
 		this.body = body;
 		this.attributes = attributes;
 		this.queryParams = queryParams;
 		this.pathVariables = pathVariables;
 		this.session = session;
+		this.principal = principal;
 	}
 
 
@@ -94,37 +113,46 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public PathContainer pathContainer() {
+		return this.pathContainer;
+	}
+
+	@Override
 	public Headers headers() {
 		return this.headers;
 	}
 
 	@Override
+	public MultiValueMap<String, HttpCookie> cookies() {
+		return this.cookies;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
-	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor){
+	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor) {
+		Assert.state(this.body != null, "No body");
 		return (S) this.body;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+		Assert.state(this.body != null, "No body");
 		return (S) this.body;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S> Mono<S> bodyToMono(Class<? extends S> elementClass) {
+		Assert.state(this.body != null, "No body");
 		return (Mono<S>) this.body;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S> Flux<S> bodyToFlux(Class<? extends S> elementClass) {
+		Assert.state(this.body != null, "No body");
 		return (Flux<S>) this.body;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <S> Optional<S> attribute(String name) {
-		return Optional.ofNullable((S) this.attributes.get(name));
 	}
 
 	@Override
@@ -133,8 +161,8 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return Collections.unmodifiableList(this.queryParams.get(name));
+	public MultiValueMap<String, String> queryParams() {
+		return CollectionUtils.unmodifiableMultiValueMap(this.queryParams);
 	}
 
 	@Override
@@ -147,21 +175,33 @@ public class MockServerRequest implements ServerRequest {
 		return Mono.justOrEmpty(this.session);
 	}
 
+	@Override
+	public Mono<? extends Principal> principal() {
+		return Mono.justOrEmpty(this.principal);
+	}
 
 	public static Builder builder() {
 		return new BuilderImpl();
 	}
 
-
+	/**
+	 * Builder for {@link MockServerRequest}.
+	 */
 	public interface Builder {
 
 		Builder method(HttpMethod method);
 
 		Builder uri(URI uri);
 
+		Builder contextPath(String contextPath);
+
 		Builder header(String key, String value);
 
 		Builder headers(HttpHeaders headers);
+
+		Builder cookie(HttpCookie... cookies);
+
+		Builder cookies(MultiValueMap<String, HttpCookie> cookies);
 
 		Builder attribute(String name, Object value);
 
@@ -177,6 +217,8 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder session(WebSession session);
 
+		Builder session(Principal principal);
+
 		MockServerRequest body(Object body);
 
 		MockServerRequest build();
@@ -189,8 +231,13 @@ public class MockServerRequest implements ServerRequest {
 
 		private URI uri = URI.create("http://localhost");
 
+		private String contextPath = "";
+
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
+		private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+
+		@Nullable
 		private Object body;
 
 		private Map<String, Object> attributes = new ConcurrentHashMap<>();
@@ -199,7 +246,11 @@ public class MockServerRequest implements ServerRequest {
 
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
 
+		@Nullable
 		private WebSession session;
+
+		@Nullable
+		private Principal principal;
 
 		@Override
 		public Builder method(HttpMethod method) {
@@ -212,6 +263,27 @@ public class MockServerRequest implements ServerRequest {
 		public Builder uri(URI uri) {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
+			return this;
+		}
+
+		@Override
+		public Builder contextPath(String contextPath) {
+			Assert.notNull(contextPath, "'contextPath' must not be null");
+			this.contextPath = contextPath;
+			return this;
+
+		}
+
+		@Override
+		public Builder cookie(HttpCookie... cookies) {
+			Arrays.stream(cookies).forEach(cookie -> this.cookies.add(cookie.getName(), cookie));
+			return this;
+		}
+
+		@Override
+		public Builder cookies(MultiValueMap<String, HttpCookie> cookies) {
+			Assert.notNull(cookies, "'cookies' must not be null");
+			this.cookies = cookies;
 			return this;
 		}
 
@@ -283,16 +355,25 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		public Builder session(Principal principal) {
+			Assert.notNull(principal, "'principal' must not be null");
+			this.principal = principal;
+			return this;
+		}
+
+		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
-			return new MockServerRequest(this.method, this.uri, this.headers, this.body,
-					this.attributes, this.queryParams, this.pathVariables, this.session);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal);
 		}
 
 		@Override
 		public MockServerRequest build() {
-			return new MockServerRequest(this.method, this.uri, this.headers, null,
-					this.attributes, this.queryParams, this.pathVariables, this.session);
+			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
+					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
+					this.session, this.principal);
 		}
 	}
 
@@ -363,15 +444,6 @@ public class MockServerRequest implements ServerRequest {
 			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
 		}
 
-		private Optional<ZonedDateTime> toZonedDateTime(long date) {
-			if (date != -1) {
-				Instant instant = Instant.ofEpochMilli(date);
-				return Optional.of(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT")));
-			}
-			else {
-				return Optional.empty();
-			}
-		}
 	}
 
 }

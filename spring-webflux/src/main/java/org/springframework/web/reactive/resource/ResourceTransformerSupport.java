@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Collections;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -35,6 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
+	@Nullable
 	private ResourceUrlProvider resourceUrlProvider;
 
 
@@ -45,13 +46,14 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * relative links.
 	 * @param resourceUrlProvider the URL provider to use
 	 */
-	public void setResourceUrlProvider(ResourceUrlProvider resourceUrlProvider) {
+	public void setResourceUrlProvider(@Nullable ResourceUrlProvider resourceUrlProvider) {
 		this.resourceUrlProvider = resourceUrlProvider;
 	}
 
 	/**
-	 * @return the configured {@code ResourceUrlProvider}.
+	 * Return the configured {@code ResourceUrlProvider}.
 	 */
+	@Nullable
 	public ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
 	}
@@ -66,7 +68,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param exchange the current exchange
 	 * @param resource the resource being transformed
 	 * @param transformerChain the transformer chain
-	 * @return the resolved URL or null
+	 * @return the resolved URL or an empty {@link Mono}
 	 */
 	protected Mono<String> resolveUrlPath(String resourcePath, ServerWebExchange exchange,
 			Resource resource, ResourceTransformerChain transformerChain) {
@@ -74,7 +76,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 		if (resourcePath.startsWith("/")) {
 			// full resource path
 			ResourceUrlProvider urlProvider = getResourceUrlProvider();
-			return (urlProvider != null ? urlProvider.getForRequestUrl(exchange, resourcePath) : Mono.empty());
+			return (urlProvider != null ? urlProvider.getForUriString(resourcePath, exchange) : Mono.empty());
 		}
 		else {
 			// try resolving as relative path
@@ -89,11 +91,11 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * The resulting path is also cleaned from sequences like "path/..".
 	 *
 	 * @param path the relative path to transform
-	 * @param request the referer request
+	 * @param exchange the current exchange
 	 * @return the absolute request path for the given resource path
 	 */
-	protected String toAbsolutePath(String path, ServerHttpRequest request) {
-		String requestPath = request.getURI().getPath();
+	protected String toAbsolutePath(String path, ServerWebExchange exchange) {
+		String requestPath = exchange.getRequest().getURI().getPath();
 		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
 		return StringUtils.cleanPath(absolutePath);
 	}

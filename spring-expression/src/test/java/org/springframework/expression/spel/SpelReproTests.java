@@ -360,16 +360,16 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertFalse(propertyAccessor.canWrite(context, null, "abc"));
 		try {
 			propertyAccessor.read(context, null, "abc");
-			fail("Should have failed with an AccessException");
+			fail("Should have failed with an IllegalStateException");
 		}
-		catch (AccessException ae) {
+		catch (IllegalStateException ae) {
 			// success
 		}
 		try {
 			propertyAccessor.write(context, null, "abc", "foo");
-			fail("Should have failed with an AccessException");
+			fail("Should have failed with an AccessEIllegalStateExceptionxception");
 		}
-		catch (AccessException ae) {
+		catch (IllegalStateException ae) {
 			// success
 		}
 	}
@@ -1768,6 +1768,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 				};
 			}
 		});
+
 		result = spel.getValue(context);
 		assertNotNull(result);
 		assertTrue(result.getClass().isArray());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -63,6 +65,9 @@ public abstract class ResourceUtils {
 	/** URL protocol for an entry from a jar file: "jar" */
 	public static final String URL_PROTOCOL_JAR = "jar";
 
+	/** URL protocol for an entry from a war file: "war" */
+	public static final String URL_PROTOCOL_WAR = "war";
+
 	/** URL protocol for an entry from a zip file: "zip" */
 	public static final String URL_PROTOCOL_ZIP = "zip";
 
@@ -96,7 +101,7 @@ public abstract class ResourceUtils {
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see java.net.URL
 	 */
-	public static boolean isUrl(String resourceLocation) {
+	public static boolean isUrl(@Nullable String resourceLocation) {
 		if (resourceLocation == null) {
 			return false;
 		}
@@ -258,7 +263,7 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Determine whether the given URL points to a resource in the file system,
-	 * that is, has protocol "file", "vfsfile" or "vfs".
+	 * i.e. has protocol "file", "vfsfile" or "vfs".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a file system URL
 	 */
@@ -269,15 +274,16 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Determine whether the given URL points to a resource in a jar file,
-	 * that is, has protocol "jar", "zip", "vfszip" or "wsjar".
+	 * Determine whether the given URL points to a resource in a jar file.
+	 * i.e. has protocol "jar", "war, ""zip", "vfszip" or "wsjar".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
 		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
+		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_WAR.equals(protocol) ||
+				URL_PROTOCOL_ZIP.equals(protocol) || URL_PROTOCOL_VFSZIP.equals(protocol) ||
+				URL_PROTOCOL_WSJAR.equals(protocol));
 	}
 
 	/**
@@ -337,8 +343,11 @@ public abstract class ResourceUtils {
 
 		int endIndex = urlFile.indexOf(WAR_URL_SEPARATOR);
 		if (endIndex != -1) {
-			// Tomcat's "jar:war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
+			// Tomcat's "war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
 			String warFile = urlFile.substring(0, endIndex);
+			if (URL_PROTOCOL_WAR.equals(jarUrl.getProtocol())) {
+				return new URL(warFile);
+			}
 			int startIndex = warFile.indexOf(WAR_URL_PREFIX);
 			if (startIndex != -1) {
 				return new URL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
@@ -352,8 +361,6 @@ public abstract class ResourceUtils {
 	/**
 	 * Create a URI instance for the given URL,
 	 * replacing spaces with "%20" URI encoding first.
-	 * <p>Furthermore, this method works on JDK 1.4 as well,
-	 * in contrast to the {@code URL.toURI()} method.
 	 * @param url the URL to convert into a URI instance
 	 * @return the URI instance
 	 * @throws URISyntaxException if the URL wasn't a valid URI

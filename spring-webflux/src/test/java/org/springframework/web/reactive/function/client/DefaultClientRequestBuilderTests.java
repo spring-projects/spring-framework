@@ -34,10 +34,12 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
 
-import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 /**
  * @author Arjen Poutsma
@@ -49,11 +51,16 @@ public class DefaultClientRequestBuilderTests {
 		ClientRequest other = ClientRequest.method(GET, URI.create("http://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux").build();
-		ClientRequest result = ClientRequest.from(other).build();
+		ClientRequest result = ClientRequest.from(other)
+				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
+				.cookies(cookies -> cookies.set("baz", "quux"))
+		.build();
 		assertEquals(new URI("http://example.com"), result.url());
 		assertEquals(GET, result.method());
-		assertEquals("bar", result.headers().getFirst("foo"));
-		assertEquals("qux", result.cookies().getFirst("baz"));
+		assertEquals(1, result.headers().size());
+		assertEquals("baar", result.headers().getFirst("foo"));
+		assertEquals(1, result.cookies().size());
+		assertEquals("quux", result.cookies().getFirst("baz"));
 	}
 
 	@Test
@@ -104,10 +111,10 @@ public class DefaultClientRequestBuilderTests {
 				.body(inserter).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
 		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
-		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
+		when(strategies.messageWriters()).thenReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();

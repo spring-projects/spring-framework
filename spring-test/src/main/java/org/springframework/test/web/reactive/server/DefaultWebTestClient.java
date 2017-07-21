@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,24 +32,28 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.util.stream.Collectors.toList;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
 import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
@@ -66,21 +71,19 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final Duration timeout;
 
+	private final WebTestClient.Builder builder;
+
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector, Duration timeout) {
-		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
+	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector,
+			@Nullable Duration timeout, WebTestClient.Builder webTestClientBuilder) {
 
+		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
-		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
+		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
-	}
-
-	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
-		this.webClient = webTestClient.webClient.filter(filter);
-		this.timeout = webTestClient.timeout;
-		this.wiretapConnector = webTestClient.wiretapConnector;
+		this.builder = webTestClientBuilder;
 	}
 
 
@@ -90,230 +93,255 @@ class DefaultWebTestClient implements WebTestClient {
 
 
 	@Override
-	public UriSpec get() {
-		return toUriSpec(WebClient::get);
+	public RequestHeadersUriSpec<?> get() {
+		return methodInternal(HttpMethod.GET);
 	}
 
 	@Override
-	public UriSpec head() {
-		return toUriSpec(WebClient::head);
+	public RequestHeadersUriSpec<?> head() {
+		return methodInternal(HttpMethod.HEAD);
 	}
 
 	@Override
-	public UriSpec post() {
-		return toUriSpec(WebClient::post);
+	public RequestBodyUriSpec post() {
+		return methodInternal(HttpMethod.POST);
 	}
 
 	@Override
-	public UriSpec put() {
-		return toUriSpec(WebClient::put);
+	public RequestBodyUriSpec put() {
+		return methodInternal(HttpMethod.PUT);
 	}
 
 	@Override
-	public UriSpec patch() {
-		return toUriSpec(WebClient::patch);
+	public RequestBodyUriSpec patch() {
+		return methodInternal(HttpMethod.PATCH);
 	}
 
 	@Override
-	public UriSpec delete() {
-		return toUriSpec(WebClient::delete);
+	public RequestHeadersUriSpec<?> delete() {
+		return methodInternal(HttpMethod.DELETE);
 	}
 
 	@Override
-	public UriSpec options() {
-		return toUriSpec(WebClient::options);
+	public RequestHeadersUriSpec<?> options() {
+		return methodInternal(HttpMethod.OPTIONS);
 	}
-
-	private UriSpec toUriSpec(Function<WebClient, WebClient.UriSpec> function) {
-		return new DefaultUriSpec(function.apply(this.webClient));
-	}
-
 
 	@Override
-	public WebTestClient filter(ExchangeFilterFunction filter) {
-		return new DefaultWebTestClient(this, filter);
+	public RequestBodyUriSpec method(HttpMethod method) {
+		return methodInternal(method);
+	}
+
+	private RequestBodyUriSpec methodInternal(HttpMethod method) {
+		return new DefaultRequestBodyUriSpec(this.webClient.method(method));
+	}
+
+	@Override
+	public Builder mutate() {
+		return this.builder;
+	}
+
+	@Override
+	public WebTestClient mutateWith(WebTestClientConfigurer configurer) {
+		return mutate().apply(configurer).build();
 	}
 
 
-	private class DefaultUriSpec implements UriSpec {
+	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
-		private final WebClient.UriSpec uriSpec;
+		private final WebClient.RequestBodyUriSpec bodySpec;
 
-
-		DefaultUriSpec(WebClient.UriSpec spec) {
-			this.uriSpec = spec;
-		}
-
-		@Override
-		public HeaderSpec uri(URI uri) {
-			return new DefaultHeaderSpec(this.uriSpec.uri(uri));
-		}
-
-		@Override
-		public HeaderSpec uri(String uriTemplate, Object... uriVariables) {
-			return new DefaultHeaderSpec(this.uriSpec.uri(uriTemplate, uriVariables));
-		}
-
-		@Override
-		public HeaderSpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			return new DefaultHeaderSpec(this.uriSpec.uri(uriTemplate, uriVariables));
-		}
-
-		@Override
-		public HeaderSpec uri(Function<UriBuilder, URI> uriBuilder) {
-			return new DefaultHeaderSpec(this.uriSpec.uri(uriBuilder));
-		}
-	}
-
-	private class DefaultHeaderSpec implements WebTestClient.HeaderSpec {
-
-		private final WebClient.HeaderSpec headerSpec;
+		@Nullable
+		private String uriTemplate;
 
 		private final String requestId;
 
-
-		DefaultHeaderSpec(WebClient.HeaderSpec spec) {
-			this.headerSpec = spec;
+		DefaultRequestBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
+			this.bodySpec = spec;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.headerSpec.header(WiretapConnector.REQUEST_ID_HEADER_NAME, this.requestId);
+			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
 
-
 		@Override
-		public DefaultHeaderSpec header(String headerName, String... headerValues) {
-			this.headerSpec.header(headerName, headerValues);
+		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
+			this.bodySpec.uri(uriTemplate, uriVariables);
+			this.uriTemplate = uriTemplate;
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec headers(HttpHeaders headers) {
-			this.headerSpec.headers(headers);
+		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
+			this.bodySpec.uri(uriTemplate, uriVariables);
+			this.uriTemplate = uriTemplate;
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec accept(MediaType... acceptableMediaTypes) {
-			this.headerSpec.accept(acceptableMediaTypes);
+		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
+			this.bodySpec.uri(uriFunction);
+			this.uriTemplate = null;
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec acceptCharset(Charset... acceptableCharsets) {
-			this.headerSpec.acceptCharset(acceptableCharsets);
+		public RequestBodySpec uri(URI uri) {
+			this.bodySpec.uri(uri);
+			this.uriTemplate = null;
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec contentType(MediaType contentType) {
-			this.headerSpec.contentType(contentType);
+		public RequestBodySpec header(String headerName, String... headerValues) {
+			this.bodySpec.header(headerName, headerValues);
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec contentLength(long contentLength) {
-			this.headerSpec.contentLength(contentLength);
+		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
+			this.bodySpec.headers(headersConsumer);
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec cookie(String name, String value) {
-			this.headerSpec.cookie(name, value);
+		public RequestBodySpec attribute(String name, Object value) {
+			this.bodySpec.attribute(name, value);
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec cookies(MultiValueMap<String, String> cookies) {
-			this.headerSpec.cookies(cookies);
+		public RequestBodySpec attributes(
+				Consumer<Map<String, Object>> attributesConsumer) {
+			this.bodySpec.attributes(attributesConsumer);
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
-			this.headerSpec.ifModifiedSince(ifModifiedSince);
+		public RequestBodySpec accept(MediaType... acceptableMediaTypes) {
+			this.bodySpec.accept(acceptableMediaTypes);
 			return this;
 		}
 
 		@Override
-		public DefaultHeaderSpec ifNoneMatch(String... ifNoneMatches) {
-			this.headerSpec.ifNoneMatch(ifNoneMatches);
+		public RequestBodySpec acceptCharset(Charset... acceptableCharsets) {
+			this.bodySpec.acceptCharset(acceptableCharsets);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec contentType(MediaType contentType) {
+			this.bodySpec.contentType(contentType);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec contentLength(long contentLength) {
+			this.bodySpec.contentLength(contentLength);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec cookie(String name, String value) {
+			this.bodySpec.cookie(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec cookies(
+				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+			this.bodySpec.cookies(cookiesConsumer);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
+			this.bodySpec.ifModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec ifNoneMatch(String... ifNoneMatches) {
+			this.bodySpec.ifNoneMatch(ifNoneMatches);
 			return this;
 		}
 
 		@Override
 		public ResponseSpec exchange() {
-			return toResponseSpec(this.headerSpec.exchange());
+			return toResponseSpec(this.bodySpec.exchange());
 		}
 
 		@Override
-		public <T> ResponseSpec exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-			return toResponseSpec(this.headerSpec.exchange(inserter));
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
+			this.bodySpec.body(inserter);
+			return this;
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> ResponseSpec exchange(S publisher, Class<T> elementClass) {
-			return toResponseSpec(this.headerSpec.exchange(publisher, elementClass));
+		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass) {
+			this.bodySpec.body(publisher, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> syncBody(Object body) {
+			this.bodySpec.syncBody(body);
+			return this;
 		}
 
 		private DefaultResponseSpec toResponseSpec(Mono<ClientResponse> mono) {
 			ClientResponse clientResponse = mono.block(getTimeout());
+			Assert.state(clientResponse != null, "No ClientResponse");
 			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(exchangeResult, clientResponse);
+			return new DefaultResponseSpec(exchangeResult, clientResponse, this.uriTemplate, getTimeout());
 		}
 	}
 
-	/**
-	 * The {@code ExchangeResult} with live, undecoded {@link ClientResponse}.
-	 */
-	private class UndecodedExchangeResult extends ExchangeResult {
+
+	private static class UndecodedExchangeResult extends ExchangeResult {
 
 		private final ClientResponse response;
 
+		private final Duration timeout;
 
-		public UndecodedExchangeResult(ExchangeResult result, ClientResponse response) {
-			super(result);
+		UndecodedExchangeResult(ExchangeResult result, ClientResponse response,
+				@Nullable String uriTemplate, Duration timeout) {
+
+			super(result, uriTemplate);
 			this.response = response;
+			this.timeout = timeout;
 		}
 
-
-		public EntityExchangeResult<?> consumeSingle(ResolvableType elementType) {
-			Object body = this.response.body(toMono(elementType)).block(getTimeout());
+		public <T> EntityExchangeResult<T> decode(BodyExtractor<Mono<T>, ? super ClientHttpResponse> extractor) {
+			T body = this.response.body(extractor).block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public EntityExchangeResult<List<?>> consumeList(ResolvableType elementType, int count) {
-			Flux<?> flux = this.response.body(toFlux(elementType));
-			if (count >= 0) {
-				flux = flux.take(count);
-			}
-			List<?> body = flux.collectList().block(getTimeout());
+		public <T> EntityExchangeResult<List<T>> decodeToList(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> flux = this.response.body(extractor);
+			List<T> body = flux.collectList().block(this.timeout);
 			return new EntityExchangeResult<>(this, body);
 		}
 
-		public <T> FluxExchangeResult<T> decodeBody(ResolvableType elementType) {
-			Flux<T> body = this.response.body(toFlux(elementType));
-			return new FluxExchangeResult<>(this, body);
+		public <T> FluxExchangeResult<T> decodeToFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor) {
+			Flux<T> body = this.response.body(extractor);
+			return new FluxExchangeResult<>(this, body, this.timeout);
 		}
 
-		@SuppressWarnings("unchecked")
-		public EntityExchangeResult<Map<?, ?>> consumeMap(ResolvableType keyType, ResolvableType valueType) {
-			ResolvableType mapType = ResolvableType.forClassWithGenerics(Map.class, keyType, valueType);
-			return (EntityExchangeResult<Map<?, ?>>) consumeSingle(mapType);
-		}
-
-		public EntityExchangeResult<Void> consumeEmpty() {
-			DataBuffer buffer = this.response.body(toDataBuffers()).blockFirst(getTimeout());
-			assertWithDiagnostics(() -> assertTrue("Expected empty body", buffer == null));
-			return new EntityExchangeResult<>(this, null);
+		public EntityExchangeResult<byte[]> decodeToByteArray() {
+			ByteArrayResource resource = this.response.body(toMono(ByteArrayResource.class)).block(this.timeout);
+			byte[] body = (resource != null ? resource.getByteArray() : null);
+			return new EntityExchangeResult<>(this, body);
 		}
 	}
 
-	private class DefaultResponseSpec implements ResponseSpec {
+
+	private static class DefaultResponseSpec implements ResponseSpec {
 
 		private final UndecodedExchangeResult result;
 
+		DefaultResponseSpec(
+				ExchangeResult result, ClientResponse response, @Nullable String uriTemplate, Duration timeout) {
 
-		public DefaultResponseSpec(ExchangeResult result, ClientResponse response) {
-			this.result = new UndecodedExchangeResult(result, response);
+			this.result = new UndecodedExchangeResult(result, response, uriTemplate, timeout);
 		}
 
 		@Override
@@ -327,221 +355,175 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public TypeBodySpec expectBody(Class<?> elementType) {
-			return expectBody(ResolvableType.forClass(elementType));
+		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
-		public TypeBodySpec expectBody(ResolvableType elementType) {
-			return new DefaultTypeBodySpec(this.result, elementType);
+		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
+			return new DefaultBodySpec<>(this.result.decode(toMono(bodyType)));
 		}
 
 		@Override
-		public BodySpec expectBody() {
-			return new DefaultBodySpec(this.result);
+		public <E> ListBodySpec<E> expectBodyList(Class<E> elementType) {
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
 		}
 
 		@Override
-		public ResponseSpec consumeWith(Consumer<ExchangeResult> consumer) {
+		public <E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
+			return new DefaultListBodySpec<>(this.result.decodeToList(toFlux(elementType)));
+		}
+
+		@Override
+		public BodyContentSpec expectBody() {
+			return new DefaultBodyContentSpec(this.result.decodeToByteArray());
+		}
+
+		@Override
+		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
+			return this.result.decodeToFlux(toFlux(elementType));
+		}
+
+		@Override
+		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
+			return this.result.decodeToFlux(toFlux(elementType));
+		}
+	}
+
+
+	private static class DefaultBodySpec<B, S extends BodySpec<B, S>> implements BodySpec<B, S> {
+
+		private final EntityExchangeResult<B> result;
+
+		DefaultBodySpec(EntityExchangeResult<B> result) {
+			this.result = result;
+		}
+
+		protected EntityExchangeResult<B> getResult() {
+			return this.result;
+		}
+
+		@Override
+		public <T extends S> T isEqualTo(B expected) {
+			this.result.assertWithDiagnostics(() ->
+					assertEquals("Response body", expected, this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S> T consumeWith(Consumer<EntityExchangeResult<B>> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
+			return self();
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T extends S> T self() {
+			return (T) this;
+		}
+
+		@Override
+		public EntityExchangeResult<B> returnResult() {
+			return this.result;
+		}
+	}
+
+
+	private static class DefaultListBodySpec<E> extends DefaultBodySpec<List<E>, ListBodySpec<E>>
+			implements ListBodySpec<E> {
+
+		DefaultListBodySpec(EntityExchangeResult<List<E>> result) {
+			super(result);
+		}
+
+		@Override
+		public ListBodySpec<E> hasSize(int size) {
+			List<E> actual = getResult().getResponseBody();
+			String message = "Response body does not contain " + size + " elements";
+			getResult().assertWithDiagnostics(() -> assertEquals(message, size, (actual != null ? actual.size() : 0)));
+			return this;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public ListBodySpec<E> contains(E... elements) {
+			List<E> expected = Arrays.asList(elements);
+			List<E> actual = getResult().getResponseBody();
+			String message = "Response body does not contain " + expected;
+			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual != null && actual.containsAll(expected))));
+			return this;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public ListBodySpec<E> doesNotContain(E... elements) {
+			List<E> expected = Arrays.asList(elements);
+			List<E> actual = getResult().getResponseBody();
+			String message = "Response body should not have contained " + expected;
+			getResult().assertWithDiagnostics(() -> assertTrue(message, (actual == null || !actual.containsAll(expected))));
+			return this;
+		}
+
+		@Override
+		public EntityExchangeResult<List<E>> returnResult() {
+			return getResult();
+		}
+	}
+
+
+	private static class DefaultBodyContentSpec implements BodyContentSpec {
+
+		private final EntityExchangeResult<byte[]> result;
+
+		private final boolean isEmpty;
+
+		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
+			this.result = result;
+			this.isEmpty = (result.getResponseBody() == null);
+		}
+
+		@Override
+		public EntityExchangeResult<Void> isEmpty() {
+			this.result.assertWithDiagnostics(() -> assertTrue("Expected empty body", this.isEmpty));
+			return new EntityExchangeResult<>(this.result, null);
+		}
+
+		@Override
+		public BodyContentSpec json(String json) {
+			this.result.assertWithDiagnostics(() -> {
+				try {
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+				}
+				catch (Exception ex) {
+					throw new AssertionError("JSON parsing error", ex);
+				}
+			});
+			return this;
+		}
+
+		@Override
+		public JsonPathAssertions jsonPath(String expression, Object... args) {
+			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
+		}
+
+		private String getBodyAsString() {
+			byte[] body = this.result.getResponseBody();
+			if (body == null || body.length == 0) {
+				return "";
+			}
+			MediaType mediaType = this.result.getResponseHeaders().getContentType();
+			Charset charset = Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(UTF_8);
+			return new String(body, charset);
+		}
+
+		@Override
+		public BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
 			return this;
 		}
 
 		@Override
-		public ExchangeResult returnResult() {
+		public EntityExchangeResult<byte[]> returnResult() {
 			return this.result;
-		}
-	}
-
-	private class DefaultTypeBodySpec implements TypeBodySpec {
-
-		private final UndecodedExchangeResult result;
-
-		private final ResolvableType elementType;
-
-
-		public DefaultTypeBodySpec(UndecodedExchangeResult result, ResolvableType elementType) {
-			this.result = result;
-			this.elementType = elementType;
-		}
-
-
-		@Override
-		public SingleValueBodySpec value() {
-			return new DefaultSingleValueBodySpec(this.result.consumeSingle(this.elementType));
-		}
-
-		@Override
-		public ListBodySpec list() {
-			return list(-1);
-		}
-
-		@Override
-		public ListBodySpec list(int count) {
-			return new DefaultListBodySpec(this.result.consumeList(this.elementType, count));
-		}
-
-		@Override
-		public <T> FluxExchangeResult<T> returnResult() {
-			return this.result.decodeBody(this.elementType);
-		}
-	}
-
-	private class DefaultSingleValueBodySpec implements SingleValueBodySpec {
-
-		private final EntityExchangeResult<?> result;
-
-
-		public DefaultSingleValueBodySpec(EntityExchangeResult<?> result) {
-			this.result = result;
-		}
-
-
-		@Override
-		public <T> EntityExchangeResult<T> isEqualTo(T expected) {
-			Object actual = this.result.getResponseBody();
-			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
-			return returnResult();
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> EntityExchangeResult<T> returnResult() {
-			return new EntityExchangeResult<>(this.result, (T) this.result.getResponseBody());
-		}
-	}
-
-	private class DefaultListBodySpec implements ListBodySpec {
-
-		private final EntityExchangeResult<List<?>> result;
-
-
-		public DefaultListBodySpec(EntityExchangeResult<List<?>> result) {
-			this.result = result;
-		}
-
-
-		@Override
-		public <T> EntityExchangeResult<List<T>> isEqualTo(List<T> expected) {
-			List<?> actual = this.result.getResponseBody();
-			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
-			return returnResult();
-		}
-
-		@Override
-		public ListBodySpec hasSize(int size) {
-			List<?> actual = this.result.getResponseBody();
-			String message = "Response body does not contain " + size + " elements";
-			this.result.assertWithDiagnostics(() -> assertEquals(message, size, actual.size()));
-			return this;
-		}
-
-		@Override
-		public ListBodySpec contains(Object... elements) {
-			List<?> expected = Arrays.asList(elements);
-			List<?> actual = this.result.getResponseBody();
-			String message = "Response body does not contain " + expected;
-			this.result.assertWithDiagnostics(() -> assertTrue(message, actual.containsAll(expected)));
-			return this;
-		}
-
-		@Override
-		public ListBodySpec doesNotContain(Object... elements) {
-			List<?> expected = Arrays.asList(elements);
-			List<?> actual = this.result.getResponseBody();
-			String message = "Response body should have contained " + expected;
-			this.result.assertWithDiagnostics(() -> assertTrue(message, !actual.containsAll(expected)));
-			return this;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T> EntityExchangeResult<List<T>> returnResult() {
-			return new EntityExchangeResult<>(this.result,  (List<T>) this.result.getResponseBody());
-		}
-	}
-
-	private class DefaultBodySpec implements BodySpec {
-
-		private final UndecodedExchangeResult exchangeResult;
-
-
-		public DefaultBodySpec(UndecodedExchangeResult result) {
-			this.exchangeResult = result;
-		}
-
-
-		@Override
-		public EntityExchangeResult<Void> isEmpty() {
-			return this.exchangeResult.consumeEmpty();
-		}
-
-		@Override
-		public MapBodySpec map(Class<?> keyType, Class<?> valueType) {
-			return map(ResolvableType.forClass(keyType), ResolvableType.forClass(valueType));
-		}
-
-		@Override
-		public MapBodySpec map(ResolvableType keyType, ResolvableType valueType) {
-			return new DefaultMapBodySpec(this.exchangeResult.consumeMap(keyType, valueType));
-		}
-	}
-
-	private class DefaultMapBodySpec implements MapBodySpec {
-
-		private final EntityExchangeResult<Map<?, ?>> result;
-
-
-		public DefaultMapBodySpec(EntityExchangeResult<Map<?, ?>> result) {
-			this.result = result;
-		}
-
-
-		private Map<?, ?> getBody() {
-			return this.result.getResponseBody();
-		}
-
-		@Override
-		public <K, V> EntityExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected) {
-			String message = "Response body map";
-			this.result.assertWithDiagnostics(() -> assertEquals(message, expected, getBody()));
-			return returnResult();
-		}
-
-		@Override
-		public MapBodySpec hasSize(int size) {
-			String message = "Response body map size";
-			this.result.assertWithDiagnostics(() -> assertEquals(message, size, getBody().size()));
-			return this;
-		}
-
-		@Override
-		public MapBodySpec contains(Object key, Object value) {
-			String message = "Response body map value for key " + key;
-			this.result.assertWithDiagnostics(() -> assertEquals(message, value, getBody().get(key)));
-			return this;
-		}
-
-		@Override
-		public MapBodySpec containsKeys(Object... keys) {
-			List<?> missing = Arrays.stream(keys).filter(k -> !getBody().containsKey(k)).collect(toList());
-			String message = "Response body map does not contain keys " + missing;
-			this.result.assertWithDiagnostics(() -> assertTrue(message, missing.isEmpty()));
-			return this;
-		}
-
-		@Override
-		public MapBodySpec containsValues(Object... values) {
-			List<?> missing = Arrays.stream(values).filter(v -> !getBody().containsValue(v)).collect(toList());
-			String message = "Response body map does not contain values " + missing;
-			this.result.assertWithDiagnostics(() -> assertTrue(message, missing.isEmpty()));
-			return this;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <K, V> EntityExchangeResult<Map<K, V>> returnResult() {
-			return new EntityExchangeResult<>(this.result, (Map<K, V>) getBody());
 		}
 	}
 

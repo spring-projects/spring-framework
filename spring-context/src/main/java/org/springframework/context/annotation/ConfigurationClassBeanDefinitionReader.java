@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -183,10 +184,12 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		// Consider name and any aliases
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
+		Assert.state(bean != null, "No @Bean annotation attributes");
+
+		// Consider name and any aliases
 		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
-		String beanName = (names.size() > 0 ? names.remove(0) : methodName);
+		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 
 		// Register aliases even when overridden
 		for (String alias : names) {
@@ -195,6 +198,11 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Has this effectively been overridden before (e.g. via XML)?
 		if (isOverriddenByExistingDefinition(beanMethod, beanName)) {
+			if (beanName.equals(beanMethod.getConfigurationClass().getBeanName())) {
+				throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
+						beanName, "Bean name derived from @Bean method '" + beanMethod.getMetadata().getMethodName() +
+						"' clashes with bean name for containing configuration class; please make those names unique!");
+			}
 			return;
 		}
 
@@ -228,9 +236,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		String destroyMethodName = bean.getString("destroyMethod");
-		if (destroyMethodName != null) {
-			beanDef.setDestroyMethodName(destroyMethodName);
-		}
+		beanDef.setDestroyMethodName(destroyMethodName);
 
 		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
@@ -247,7 +253,8 @@ class ConfigurationClassBeanDefinitionReader {
 		BeanDefinition beanDefToRegister = beanDef;
 		if (proxyMode != ScopedProxyMode.NO) {
 			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
-					new BeanDefinitionHolder(beanDef, beanName), this.registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
+					new BeanDefinitionHolder(beanDef, beanName), this.registry,
+					proxyMode == ScopedProxyMode.TARGET_CLASS);
 			beanDefToRegister = new ConfigurationClassBeanDefinition(
 					(RootBeanDefinition) proxyDef.getBeanDefinition(), configClass, metadata);
 		}
@@ -272,7 +279,8 @@ class ConfigurationClassBeanDefinitionReader {
 		// preserve the existing bean definition.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition) {
 			ConfigurationClassBeanDefinition ccbd = (ConfigurationClassBeanDefinition) existingBeanDef;
-			return (ccbd.getMetadata().getClassName().equals(beanMethod.getConfigurationClass().getMetadata().getClassName()));
+			return ccbd.getMetadata().getClassName().equals(
+					beanMethod.getConfigurationClass().getMetadata().getClassName());
 		}
 
 		// A bean definition resulting from a component scan can be silently overridden
@@ -336,7 +344,7 @@ class ConfigurationClassBeanDefinitionReader {
 					}
 					readerInstanceCache.put(readerClass, reader);
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException(
 							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
 				}
@@ -348,9 +356,8 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
-		for (Map.Entry<ImportBeanDefinitionRegistrar, AnnotationMetadata> entry : registrars.entrySet()) {
-			entry.getKey().registerBeanDefinitions(entry.getValue(), this.registry);
-		}
+		registrars.forEach((registrar, metadata) ->
+				registrar.registerBeanDefinitions(metadata, this.registry));
 	}
 
 

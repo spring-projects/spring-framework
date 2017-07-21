@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,6 +156,11 @@ public class AnnotationConfigApplicationContextTests {
 		assertSame(context.getBean(BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(context.getBean(BeanC.class), context.getBean(BeanA.class).c);
 		assertSame(context, context.getBean(BeanB.class).applicationContext);
+
+		assertArrayEquals(new String[] {"annotationConfigApplicationContextTests.BeanA"},
+				context.getDefaultListableBeanFactory().getDependentBeans("annotationConfigApplicationContextTests.BeanB"));
+		assertArrayEquals(new String[] {"annotationConfigApplicationContextTests.BeanA"},
+				context.getDefaultListableBeanFactory().getDependentBeans("annotationConfigApplicationContextTests.BeanC"));
 	}
 
 	@Test

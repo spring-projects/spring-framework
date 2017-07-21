@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -24,10 +23,8 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition.ConsumeMediaTypeExpression;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -42,7 +39,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain");
+		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -50,7 +47,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void negatedConsumesMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain");
+		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -64,7 +61,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesWildcardMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain");
+		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/*");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -72,7 +69,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesMultipleMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain");
+		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
 
 		assertNotNull(condition.getMatchingCondition(exchange));
@@ -80,7 +77,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesSingleNoMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("application/xml");
+		MockServerWebExchange exchange = postExchange("application/xml");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -88,7 +85,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesParseError() throws Exception {
-		ServerWebExchange exchange = createExchange("01");
+		MockServerWebExchange exchange = postExchange("01");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -96,7 +93,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesParseErrorWithNegation() throws Exception {
-		ServerWebExchange exchange = createExchange("01");
+		MockServerWebExchange exchange = postExchange("01");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
@@ -104,7 +101,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToSingle() throws Exception {
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
@@ -118,7 +115,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void compareToMultiple() throws Exception {
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("*/*", "text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
@@ -160,7 +157,7 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void getMatchingCondition() throws Exception {
-		ServerWebExchange exchange = createExchange("text/plain");
+		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
 
 		ConsumesRequestCondition result = condition.getMatchingCondition(exchange);
@@ -190,17 +187,8 @@ public class ConsumesRequestConditionTests {
 		}
 	}
 
-	private ServerWebExchange createExchange() throws URISyntaxException {
-		return createExchange(null);
-	}
-
-	private ServerWebExchange createExchange(String contentType) {
-
-		MockServerHttpRequest request = (contentType != null ?
-				MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType).build() :
-				MockServerHttpRequest.get("/").build());
-
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+	private MockServerWebExchange postExchange(String contentType) {
+		return MockServerHttpRequest.post("/").header(HttpHeaders.CONTENT_TYPE, contentType).toExchange();
 	}
 
 }

@@ -57,6 +57,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.BeanWithObjectProperty;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -2167,7 +2168,7 @@ public class DataBinderTests {
 		}
 
 		@Override
-		public void validate(Object obj, Errors errors) {
+		public void validate(@Nullable Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getAge() < 32) {
 				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
@@ -2196,7 +2197,7 @@ public class DataBinderTests {
 		}
 
 		@Override
-		public void validate(Object obj, Errors errors) {
+		public void validate(@Nullable Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb == null || "XXX".equals(tb.getName())) {
 				errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");

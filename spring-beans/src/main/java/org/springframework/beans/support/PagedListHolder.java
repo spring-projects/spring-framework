@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.beans.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -55,12 +57,15 @@ public class PagedListHolder<E> implements Serializable {
 	public static final int DEFAULT_MAX_LINKED_PAGES = 10;
 
 
-	private List<E> source;
+	private List<E> source = Collections.emptyList();
 
+	@Nullable
 	private Date refreshDate;
 
+	@Nullable
 	private SortDefinition sort;
 
+	@Nullable
 	private SortDefinition sortUsed;
 
 	private int pageSize = DEFAULT_PAGE_SIZE;
@@ -122,6 +127,7 @@ public class PagedListHolder<E> implements Serializable {
 	/**
 	 * Return the last time the list has been fetched from the source provider.
 	 */
+	@Nullable
 	public Date getRefreshDate() {
 		return this.refreshDate;
 	}
@@ -131,13 +137,14 @@ public class PagedListHolder<E> implements Serializable {
 	 * Typically an instance of MutableSortDefinition.
 	 * @see org.springframework.beans.support.MutableSortDefinition
 	 */
-	public void setSort(SortDefinition sort) {
+	public void setSort(@Nullable SortDefinition sort) {
 		this.sort = sort;
 	}
 
 	/**
 	 * Return the sort definition for this holder.
 	 */
+	@Nullable
 	public SortDefinition getSort() {
 		return this.sort;
 	}

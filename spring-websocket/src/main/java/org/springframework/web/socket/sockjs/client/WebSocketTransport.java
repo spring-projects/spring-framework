@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -87,7 +88,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
 				new ListenableFutureCallback<WebSocketSession>() {
 					@Override
-					public void onSuccess(WebSocketSession webSocketSession) {
+					public void onSuccess(@Nullable WebSocketSession webSocketSession) {
 						// WebSocket session ready, SockJS Session not yet
 					}
 					@Override

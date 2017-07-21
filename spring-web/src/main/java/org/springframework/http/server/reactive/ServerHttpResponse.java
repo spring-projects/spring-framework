@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.function.Function;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -38,11 +39,12 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @return {@code false} if the status code has not been set because the HTTP response
 	 * is already committed, {@code true} if it has been set correctly.
 	 */
-	boolean setStatusCode(HttpStatus status);
+	boolean setStatusCode(@Nullable HttpStatus status);
 
 	/**
 	 * Return the HTTP status code or {@code null} if not set.
 	 */
+	@Nullable
 	HttpStatus getStatusCode();
 
 	/**
@@ -51,11 +53,18 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	MultiValueMap<String, ResponseCookie> getCookies();
 
 	/**
+	 * Add the given {@code ResponseCookie}.
+	 * @param cookie the cookie to add
+	 * @throws IllegalStateException if the response has already been committed
+	 */
+	void addCookie(ResponseCookie cookie);
+
+	/**
 	 * A mechanism for URL rewriting that applications and libraries such as
 	 * HTML template libraries to use consistently for all URLs emitted by
 	 * the application. Doing so enables the registration of URL encoders via
 	 * {@link #registerUrlEncoder} that can insert an id for authentication,
-	 * a nonce for CSRF protection, a version for a static resource, etc.
+	 * a nonce for CSRF protection, or other.
 	 * @param url the URL to encode
 	 * @return the encoded URL or the same
 	 */

@@ -16,15 +16,11 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,15 +34,7 @@ import static org.junit.Assert.assertSame;
  */
 public class RequestConditionHolderTests {
 
-	private ServerWebExchange exchange;
-
-
-	@Before
-	public void setup() throws Exception {
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
-	}
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 
 	@Test

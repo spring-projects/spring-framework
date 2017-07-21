@@ -26,18 +26,18 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link PathVariableMapMethodArgumentResolver}.
@@ -48,24 +48,23 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	private PathVariableMapMethodArgumentResolver resolver;
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
 
 	private MethodParameter paramMap;
 	private MethodParameter paramNamedMap;
 	private MethodParameter paramMapNoAnnot;
+	private MethodParameter paramMonoMap;
 
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PathVariableMapMethodArgumentResolver();
+		this.resolver = new PathVariableMapMethodArgumentResolver(new ReactiveAdapterRegistry());
 
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
-
-		Method method = getClass().getMethod("handle", Map.class, Map.class, Map.class);
+		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		this.paramMap = new MethodParameter(method, 0);
 		this.paramNamedMap = new MethodParameter(method, 1);
 		this.paramMapNoAnnot = new MethodParameter(method, 2);
+		this.paramMonoMap = new MethodParameter(method, 3);
 	}
 
 
@@ -74,6 +73,15 @@ public class PathVariableMapMethodArgumentResolverTests {
 		assertTrue(resolver.supportsParameter(paramMap));
 		assertFalse(resolver.supportsParameter(paramNamedMap));
 		assertFalse(resolver.supportsParameter(paramMapNoAnnot));
+		try {
+			this.resolver.supportsParameter(this.paramMonoMap);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"PathVariableMapMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -102,7 +110,8 @@ public class PathVariableMapMethodArgumentResolverTests {
 	public void handle(
 			@PathVariable Map<String, String> map,
 			@PathVariable(value = "name") Map<String, String> namedMap,
-			Map<String, String> mapWithoutAnnotat) {
+			Map<String, String> mapWithoutAnnotat,
+			@PathVariable Mono<Map<?, ?>> monoMap) {
 	}
 
 }

@@ -87,11 +87,13 @@ public class RouterFunctionTests {
 	@Test
 	public void filter() throws Exception {
 		Mono<String> stringMono = Mono.just("42");
-		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction = request -> EntityResponse.fromPublisher(stringMono, String.class).build();
-		RouterFunction<EntityResponse<Mono<String>>> routerFunction = request -> Mono.just(handlerFunction);
+		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction =
+				request -> EntityResponse.fromPublisher(stringMono, String.class).build();
+		RouterFunction<EntityResponse<Mono<String>>> routerFunction =
+				request -> Mono.just(handlerFunction);
 
 		HandlerFilterFunction<EntityResponse<Mono<String>>, EntityResponse<Mono<Integer>>> filterFunction =
-				(request, next) -> next.handle(request).then(
+				(request, next) -> next.handle(request).flatMap(
 						response -> {
 							Mono<Integer> intMono = response.entity()
 									.map(Integer::parseInt);
@@ -102,7 +104,7 @@ public class RouterFunctionTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<EntityResponse<Mono<Integer>>> responseMono =
-				result.route(request).then(hf -> hf.handle(request));
+				result.route(request).flatMap(hf -> hf.handle(request));
 
 		StepVerifier.create(responseMono)
 				.consumeNextWith(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -88,6 +89,7 @@ public class SubProtocolWebSocketHandler
 
 	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<>();
 
+	@Nullable
 	private SubProtocolHandler defaultProtocolHandler;
 
 	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();
@@ -170,7 +172,7 @@ public class SubProtocolWebSocketHandler
 	 * sub-protocol.
 	 * @param defaultProtocolHandler the default handler
 	 */
-	public void setDefaultProtocolHandler(SubProtocolHandler defaultProtocolHandler) {
+	public void setDefaultProtocolHandler(@Nullable SubProtocolHandler defaultProtocolHandler) {
 		this.defaultProtocolHandler = defaultProtocolHandler;
 		if (this.protocolHandlerLookup.isEmpty()) {
 			setProtocolHandlers(Collections.singletonList(defaultProtocolHandler));
@@ -180,6 +182,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return the default sub-protocol handler to use.
 	 */
+	@Nullable
 	public SubProtocolHandler getDefaultProtocolHandler() {
 		return this.defaultProtocolHandler;
 	}

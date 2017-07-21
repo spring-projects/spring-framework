@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -35,16 +35,11 @@ import org.springframework.util.MultiValueMap;
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 	/**
-	 * Returns the portion of the URL path that represents the context path for
-	 * the current {@link HttpHandler}. The context path is always at the
-	 * beginning of the request path. It starts with "/" but but does not end
-	 * with "/". This method may return an empty string if no context path is
-	 * configured.
-	 * @return the context path (not decoded) or an empty string
+	 * Returns a structured representation of the request path including the
+	 * context path + path within application portions, path segments with
+	 * encoded and decoded values, and path parameters.
 	 */
-	default String getContextPath() {
-		return "";
-	}
+	RequestPath getPath();
 
 	/**
 	 * Return a read-only map with parsed and decoded query parameter values.
@@ -57,10 +52,10 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	MultiValueMap<String, HttpCookie> getCookies();
 
 	/**
-	 * Returns the remote address where this request is connected to.
-	 * @return remote address if available
+	 * Return the remote address where this request is connected to, if available.
 	 */
-	Optional<InetSocketAddress> getRemoteAddress();
+	@Nullable
+	InetSocketAddress getRemoteAddress();
 
 
 	/**
@@ -84,12 +79,13 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder method(HttpMethod httpMethod);
 
 		/**
-		 * Set the request URI to return.
+		 * Set the path to use instead of the {@code "rawPath"} of
+		 * {@link ServerHttpRequest#getURI()}.
 		 */
 		Builder path(String path);
 
 		/**
-		 * Set the contextPath to return.
+		 * Set the contextPath to use.
 		 */
 		Builder contextPath(String contextPath);
 

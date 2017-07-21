@@ -31,6 +31,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -562,7 +563,7 @@ public class MessageBrokerConfigurationTests {
 		}
 
 		@Override
-		public void validate(Object target, Errors errors) {
+		public void validate(@Nullable Object target, Errors errors) {
 		}
 	}
 

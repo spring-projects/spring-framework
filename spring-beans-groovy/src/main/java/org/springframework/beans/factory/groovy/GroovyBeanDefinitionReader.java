@@ -257,7 +257,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		try {
-			GroovyShell shell = new GroovyShell(getResourceLoader().getClassLoader(), binding);
+			GroovyShell shell = new GroovyShell(getBeanClassLoader(), binding);
 			shell.evaluate(encodedResource.getReader(), "beans");
 		}
 		catch (Throwable ex) {

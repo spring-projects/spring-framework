@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,17 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.IHookCallBack;
+import org.testng.IHookable;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -32,14 +40,6 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.web.ServletTestExecutionListener;
-
-import org.testng.IHookCallBack;
-import org.testng.IHookable;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 
 /**
  * Abstract base test class which integrates the <em>Spring TestContext Framework</em>
@@ -95,10 +95,12 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * The {@link ApplicationContext} that was injected into this test instance
 	 * via {@link #setApplicationContext(ApplicationContext)}.
 	 */
+	@Nullable
 	protected ApplicationContext applicationContext;
 
 	private final TestContextManager testContextManager;
 
+	@Nullable
 	private Throwable testException;
 
 
@@ -239,6 +241,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		return testResultException;
 	}
 
+	@Nullable
 	private RuntimeException throwAsUncheckedException(Throwable t) {
 		throwAs(t);
 

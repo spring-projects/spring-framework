@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -52,7 +53,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 * of the supplied type; may be {@code null} if unknown
 	 */
 	MapAnnotationAttributeExtractor(Map<String, Object> attributes, Class<? extends Annotation> annotationType,
-			AnnotatedElement annotatedElement) {
+			@Nullable AnnotatedElement annotatedElement) {
 
 		super(annotationType, annotatedElement, enrichAndValidateAttributes(attributes, annotationType));
 	}

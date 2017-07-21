@@ -18,6 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -90,7 +91,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 
 	@Override
-	public int compare(T o1, T o2) {
+	public int compare(@Nullable T o1, @Nullable T o2) {
 		if (o1 == o2) {
 			return 0;
 		}

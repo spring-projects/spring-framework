@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -132,7 +131,10 @@ public abstract class TestPropertySourceUtils {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-			properties.addAll(0, Arrays.asList(attrs.getProperties()));
+			String[] attrProps = attrs.getProperties();
+			if (attrProps != null) {
+				properties.addAll(0, Arrays.asList(attrProps));
+			}
 			if (!attrs.isInheritProperties()) {
 				break;
 			}

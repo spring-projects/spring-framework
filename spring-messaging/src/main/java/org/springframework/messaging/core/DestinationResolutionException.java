@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessagingException;
 
 /**
@@ -32,7 +33,7 @@ public class DestinationResolutionException extends MessagingException {
 		super(description);
 	}
 
-	public DestinationResolutionException(String description, Throwable cause) {
+	public DestinationResolutionException(@Nullable String description, @Nullable Throwable cause) {
 		super(description, cause);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -33,22 +34,27 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgumentResolver {
 
+	/**
+	 * {@inheritDoc}
+	 * <p>By default this simply delegates to {@link #resolveArgumentValue} for
+	 * synchronous resolution.
+	 */
 	@Override
-	default Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	default Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
-		Optional<Object> value = resolveArgumentValue(parameter, context, exchange);
-		return Mono.justOrEmpty(value);
+		return Mono.justOrEmpty(resolveArgumentValue(parameter, bindingContext, exchange));
 	}
 
 	/**
-	 * Resolve the method argument value synchronously returning an optional value.
+	 * Resolve the value for the method parameter synchronously.
 	 * @param parameter the method parameter
 	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange
-	 * @return the resolved value if any
+	 * @return the resolved value, if any
 	 */
-	Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+	@Nullable
+	Object resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
 			ServerWebExchange exchange);
 
 }

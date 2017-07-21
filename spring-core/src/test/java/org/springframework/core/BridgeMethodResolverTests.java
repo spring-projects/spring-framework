@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.core;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Date;
@@ -107,26 +105,6 @@ public class BridgeMethodResolverTests {
 
 		assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class));
 		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class));
-	}
-
-	@Test
-	@Deprecated
-	public void testCreateTypeVariableMap() throws Exception {
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
-		TypeVariable<?> barT = findTypeVariable(InterBar.class, "T");
-		assertEquals(String.class, typeVariableMap.get(barT));
-
-		typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyFoo.class);
-		TypeVariable<?> fooT = findTypeVariable(Foo.class, "T");
-		assertEquals(String.class, typeVariableMap.get(fooT));
-
-		typeVariableMap = GenericTypeResolver.getTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
-		TypeVariable<?> r = findTypeVariable(Enclosing.Enclosed.ReallyDeepNow.class, "R");
-		TypeVariable<?> s = findTypeVariable(Enclosing.Enclosed.class, "S");
-		TypeVariable<?> t = findTypeVariable(Enclosing.class, "T");
-		assertEquals(Long.class, typeVariableMap.get(r));
-		assertEquals(Integer.class, typeVariableMap.get(s));
-		assertEquals(String.class, typeVariableMap.get(t));
 	}
 
 	@Test
@@ -226,14 +204,6 @@ public class BridgeMethodResolverTests {
 		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, MessageBroadcasterImpl.class));
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	@Deprecated
-	public void testSPR2454() throws Exception {
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
-		TypeVariable<?> variable = findTypeVariable(MyHomer.class, "L");
-		assertEquals(AbstractBounded.class, ((ParameterizedType) typeVariableMap.get(variable)).getRawType());
 	}
 
 	@Test

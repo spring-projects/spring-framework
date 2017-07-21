@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,7 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -132,18 +132,15 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 		return Mono.fromCallable(
 				() -> {
 					ConnectionBuilder builder = createConnectionBuilder(url);
-					String[] protocols = beforeHandshake(url, headers, handler);
+					List<String> protocols = beforeHandshake(url, headers, handler);
 					DefaultNegotiation negotiation = new DefaultNegotiation(protocols, headers, builder);
 					builder.setClientNegotiation(negotiation);
-
 					return builder.connect().addNotifier(
 							new IoFuture.HandlingNotifier<WebSocketChannel, Object>() {
-
 								@Override
 								public void handleDone(WebSocketChannel channel, Object attachment) {
 									handleChannel(url, handler, completion, negotiation, channel);
 								}
-
 								@Override
 								public void handleFailed(IOException ex, Object attachment) {
 									completion.onError(new IllegalStateException("Failed to connect", ex));
@@ -161,11 +158,9 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 * provided at construction time.
 	 */
 	protected ConnectionBuilder createConnectionBuilder(URI url) {
-
 		ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
 				.connectionBuilder(getXnioWorker(),
 						new DefaultByteBufferPool(false, getPoolBufferSize()), url);
-
 		this.builderConsumer.accept(builder);
 		return builder;
 	}
@@ -190,13 +185,13 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 		private final HttpHeaders responseHeaders = new HttpHeaders();
 
+		@Nullable
 		private final WebSocketClientNegotiation delegate;
 
-
-		public DefaultNegotiation(String[] protocols, HttpHeaders requestHeaders,
+		public DefaultNegotiation(List<String> protocols, HttpHeaders requestHeaders,
 				ConnectionBuilder connectionBuilder) {
 
-			super(Arrays.asList(protocols), Collections.emptyList());
+			super(protocols, Collections.emptyList());
 			this.requestHeaders = requestHeaders;
 			this.delegate = connectionBuilder.getClientNegotiation();
 		}

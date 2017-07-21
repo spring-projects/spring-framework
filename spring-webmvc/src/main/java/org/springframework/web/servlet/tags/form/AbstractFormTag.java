@@ -17,8 +17,10 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
+
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 
@@ -56,7 +58,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * or empty, no attribute is written.
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
-	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value)
+	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, @Nullable String value)
 			throws JspException {
 
 		if (value != null) {

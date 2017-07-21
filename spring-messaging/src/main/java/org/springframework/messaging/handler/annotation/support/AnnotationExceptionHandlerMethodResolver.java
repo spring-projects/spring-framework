@@ -49,12 +49,8 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 
 	private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
 		Map<Method, MessageExceptionHandler> methods = MethodIntrospector.selectMethods(handlerType,
-				new MethodIntrospector.MetadataLookup<MessageExceptionHandler>() {
-					@Override
-					public MessageExceptionHandler inspect(Method method) {
-						return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class);
-					}
-				});
+				(MethodIntrospector.MetadataLookup<MessageExceptionHandler>) method ->
+						AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class));
 
 		Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {

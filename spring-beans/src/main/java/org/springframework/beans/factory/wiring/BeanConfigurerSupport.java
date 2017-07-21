@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -51,8 +52,10 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
 
+	@Nullable
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
 
@@ -89,6 +92,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
 	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
+	@Nullable
 	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
 	}
@@ -128,31 +132,35 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 			return;
 		}
 
-		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
+		BeanWiringInfoResolver bwiResolver = this.beanWiringInfoResolver;
+		Assert.state(bwiResolver != null, "No BeanWiringInfoResolver available");
+		BeanWiringInfo bwi = bwiResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
 			return;
 		}
 
+
+		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
+		Assert.state(beanFactory != null, "No BeanFactory available");
 		try {
-			if (bwi.indicatesAutowiring() ||
-					(bwi.isDefaultBeanName() && !this.beanFactory.containsBean(bwi.getBeanName()))) {
+			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && bwi.getBeanName() != null &&
+					!beanFactory.containsBean(bwi.getBeanName()))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
-				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
+				beanFactory.initializeBean(beanInstance, bwi.getBeanName());
 			}
 			else {
 				// Perform explicit wiring based on the specified bean definition.
-				Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				beanFactory.configureBean(beanInstance, bwi.getBeanName());
 			}
 		}
 		catch (BeanCreationException ex) {
 			Throwable rootCause = ex.getMostSpecificCause();
 			if (rootCause instanceof BeanCurrentlyInCreationException) {
 				BeanCreationException bce = (BeanCreationException) rootCause;
-				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+				String bceBeanName = bce.getBeanName();
+				if (bceBeanName != null && beanFactory.isCurrentlyInCreation(bceBeanName)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Failed to create target bean '" + bce.getBeanName() +
 								"' while configuring object of type [" + beanInstance.getClass().getName() +
@@ -163,14 +171,6 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 				}
 			}
 			throw ex;
-		}
-	}
-
-	private void checkExposedObject(Object exposedObject, Object originalBeanInstance) {
-		if (exposedObject != originalBeanInstance) {
-			throw new IllegalStateException("Post-processor tried to replace bean instance of type [" +
-					originalBeanInstance.getClass().getName() + "] with (proxy) object of type [" +
-					exposedObject.getClass().getName() + "] - not supported for aspect-configured classes!");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -48,6 +49,13 @@ public interface View {
 	List<MediaType> getSupportedMediaTypes();
 
 	/**
+	 * Whether this View does rendering by performing a redirect.
+	 */
+	default boolean isRedirectView() {
+		return false;
+	}
+
+	/**
 	 * Render the view based on the given {@link HandlerResult}. Implementations
 	 * can access and use the model or only a specific attribute in it.
 	 * @param model Map with name Strings as keys and corresponding model
@@ -57,6 +65,6 @@ public interface View {
 	 * @param exchange the current exchange
 	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
-	Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange);
+	Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType, ServerWebExchange exchange);
 
 }

@@ -19,6 +19,7 @@ package org.springframework.aop.support;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient abstract superclass for dynamic method matchers,
@@ -36,7 +37,7 @@ public abstract class DynamicMethodMatcher implements MethodMatcher {
 	 * always returns true.
 	 */
 	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
+	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return true;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -84,9 +84,10 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * @param cs a ConversionService to use when method argument values
 	 * need to be formatted as Strings before being added to the URI
 	 */
-	public CompositeUriComponentsContributor(Collection<?> contributors, ConversionService cs) {
-		Assert.notNull(contributors, "'uriComponentsContributors' must not be null");
-		this.contributors.addAll(contributors);
+	public CompositeUriComponentsContributor(@Nullable Collection<?> contributors, @Nullable ConversionService cs) {
+		if (contributors != null) {
+			this.contributors.addAll(contributors);
+		}
 		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());
 	}
 

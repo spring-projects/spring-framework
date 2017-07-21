@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,9 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 	}
 
 	protected final Object getProxy() {
-		Assert.notNull(this.proxy, ClassUtils.getShortName(getClass()) + " has not been initialized");
+		if (this.proxy == null) {
+			throw new IllegalStateException(ClassUtils.getShortName(getClass()) + " has not been initialized");
+		}
 		return this.proxy;
 	}
 
@@ -142,7 +144,7 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocation)) {
 			throw new RemoteException("Deserialized object needs to be assignable to type [" +
-					RemoteInvocation.class.getName() + "]: " + obj);
+					RemoteInvocation.class.getName() + "]: " + ClassUtils.getDescriptiveType(obj));
 		}
 		return (RemoteInvocation) obj;
 	}

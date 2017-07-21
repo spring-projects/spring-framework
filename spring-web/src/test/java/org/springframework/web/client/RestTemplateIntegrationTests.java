@@ -71,22 +71,23 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Parameter
 	public ClientHttpRequestFactory clientHttpRequestFactory;
 
-	@Parameters
 	@SuppressWarnings("deprecation")
+	@Parameters
 	public static Iterable<? extends ClientHttpRequestFactory> data() {
 		return Arrays.asList(
 				new SimpleClientHttpRequestFactory(),
 				new HttpComponentsClientHttpRequestFactory(),
 				new Netty4ClientHttpRequestFactory(),
-				new OkHttp3ClientHttpRequestFactory(),
-				new org.springframework.http.client.OkHttpClientHttpRequestFactory()
+				new OkHttp3ClientHttpRequestFactory()
 		);
 	}
 
+
 	@Before
-	public void setUpClient() {
+	public void setupClient() {
 		 this.template = new RestTemplate(this.clientHttpRequestFactory);
 	}
+
 
 	@Test
 	public void getString() {

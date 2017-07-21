@@ -29,23 +29,22 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A subclass of {@link HandlerMethod} that can resolve method arguments from
- * a {@link ServerWebExchange} and use that to invoke the underlying method.
+ * Extension of {@link HandlerMethod} that invokes the underlying method with
+ * argument values resolved from the current HTTP request through a list of
+ * {@link HandlerMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -57,8 +56,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object NO_ARG_VALUE = new Object();
 
-	private HttpStatus responseStatus;
-
 
 	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
@@ -67,23 +64,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
-		initResponseStatus();
 	}
 
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
-		initResponseStatus();
 	}
 
-	private void initResponseStatus() {
-		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
-		if (annotation == null) {
-			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
-		}
-		if (annotation != null) {
-			this.responseStatus = annotation.code();
-		}
-	}
 
 	/**
 	 * Configure the argument resolvers to use to use for resolving method
@@ -95,12 +81,26 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
+	 * Return the configured argument resolvers.
+	 */
+	public List<HandlerMethodArgumentResolver> getResolvers() {
+		return this.resolvers;
+	}
+
+	/**
 	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
 	 * (e.g. default request attribute name).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {
 		this.parameterNameDiscoverer = nameDiscoverer;
+	}
+
+	/**
+	 * Return the configured parameter name discoverer.
+	 */
+	public ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 
@@ -114,12 +114,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
 			Object... providedArgs) {
 
-		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {
+		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
 			try {
 				Object value = doInvoke(args);
 				HandlerResult result = new HandlerResult(this, value, getReturnType(), bindingContext);
-				if (this.responseStatus != null) {
-					exchange.getResponse().setStatusCode(this.responseStatus);
+				HttpStatus status = getResponseStatus();
+				if (status != null) {
+					exchange.getResponse().setStatusCode(status);
 				}
 				return Mono.just(result);
 			}
@@ -194,7 +195,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private IllegalStateException getArgumentError(String text, MethodParameter parameter, Throwable ex) {
+	private IllegalStateException getArgumentError(String text, MethodParameter parameter, @Nullable Throwable ex) {
 		return new IllegalStateException(getDetailedErrorMessage(text, parameter), ex);
 	}
 

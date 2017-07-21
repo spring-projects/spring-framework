@@ -19,6 +19,8 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback interface for Hibernate code. To be used with {@link HibernateTemplate}'s
  * execution methods, often as anonymous classes within a method implementation.
@@ -46,6 +48,7 @@ public interface HibernateCallback<T> {
 	 * @throws HibernateException if thrown by the Hibernate API
 	 * @see HibernateTemplate#execute
 	 */
+	@Nullable
 	T doInHibernate(Session session) throws HibernateException;
 
 }

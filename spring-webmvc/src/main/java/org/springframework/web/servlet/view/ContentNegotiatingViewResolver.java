@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -87,27 +88,21 @@ import org.springframework.web.servlet.ViewResolver;
 public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		implements ViewResolver, Ordered, InitializingBean {
 
-	private int order = Ordered.HIGHEST_PRECEDENCE;
-
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
+	@Nullable
 	private List<View> defaultViews;
 
+	@Nullable
 	private List<ViewResolver> viewResolvers;
 
+	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
@@ -115,7 +110,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
 	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
@@ -123,6 +118,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * @since 4.1.9
 	 */
+	@Nullable
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
@@ -156,7 +152,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	}
 
 	public List<View> getDefaultViews() {
-		return Collections.unmodifiableList(this.defaultViews);
+		return (this.defaultViews != null ? Collections.unmodifiableList(this.defaultViews) :
+				Collections.emptyList());
 	}
 
 	/**
@@ -168,14 +165,24 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	}
 
 	public List<ViewResolver> getViewResolvers() {
-		return Collections.unmodifiableList(this.viewResolvers);
+		return (this.viewResolvers != null ? Collections.unmodifiableList(this.viewResolvers) :
+				Collections.emptyList());
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
 		Collection<ViewResolver> matchingBeans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class).values();
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(obtainApplicationContext(), ViewResolver.class).values();
 		if (this.viewResolvers == null) {
 			this.viewResolvers = new ArrayList<>(matchingBeans.size());
 			for (ViewResolver viewResolver : matchingBeans) {
@@ -185,12 +192,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			}
 		}
 		else {
-			for (int i = 0; i < viewResolvers.size(); i++) {
-				if (matchingBeans.contains(viewResolvers.get(i))) {
+			for (int i = 0; i < this.viewResolvers.size(); i++) {
+				ViewResolver vr = this.viewResolvers.get(i);
+				if (matchingBeans.contains(vr)) {
 					continue;
 				}
-				String name = viewResolvers.get(i).getClass().getName() + i;
-				getApplicationContext().getAutowireCapableBeanFactory().initializeBean(viewResolvers.get(i), name);
+				String name = vr.getClass().getName() + i;
+				obtainApplicationContext().getAutowireCapableBeanFactory().initializeBean(vr, name);
 			}
 
 		}
@@ -205,8 +213,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Override
 	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
-			this.cnmFactoryBean.afterPropertiesSet();
-			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
+			this.contentNegotiationManager = this.cnmFactoryBean.build();
 		}
 	}
 
@@ -240,7 +247,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */
+	@Nullable
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
+		Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
 
@@ -295,18 +304,21 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			throws Exception {
 
 		List<View> candidateViews = new ArrayList<>();
-		for (ViewResolver viewResolver : this.viewResolvers) {
-			View view = viewResolver.resolveViewName(viewName, locale);
-			if (view != null) {
-				candidateViews.add(view);
-			}
-			for (MediaType requestedMediaType : requestedMediaTypes) {
-				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
-				for (String extension : extensions) {
-					String viewNameWithExtension = viewName + '.' + extension;
-					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
-					if (view != null) {
-						candidateViews.add(view);
+		if (this.viewResolvers != null) {
+			Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
+			for (ViewResolver viewResolver : this.viewResolvers) {
+				View view = viewResolver.resolveViewName(viewName, locale);
+				if (view != null) {
+					candidateViews.add(view);
+				}
+				for (MediaType requestedMediaType : requestedMediaTypes) {
+					List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
+					for (String extension : extensions) {
+						String viewNameWithExtension = viewName + '.' + extension;
+						view = viewResolver.resolveViewName(viewNameWithExtension, locale);
+						if (view != null) {
+							candidateViews.add(view);
+						}
 					}
 				}
 			}
@@ -317,6 +329,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		return candidateViews;
 	}
 
+	@Nullable
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView) {
@@ -356,7 +369,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		}
 
 		@Override
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
 	};

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -43,21 +44,34 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  */
 public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSocketHandlerRegistration {
 
-	private final TaskScheduler sockJsTaskScheduler;
-
 	private final MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<>();
 
+	@Nullable
 	private HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
+	@Nullable
 	private SockJsServiceRegistration sockJsServiceRegistration;
 
+	@Nullable
+	private TaskScheduler scheduler;
 
+
+	public AbstractWebSocketHandlerRegistration() {
+	}
+
+	/**
+	 * Deprecated constructor with a TaskScheduler.
+	 *
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed, see {@link #getSockJsServiceRegistration()}.
+	 */
+	@Deprecated
 	public AbstractWebSocketHandlerRegistration(TaskScheduler defaultTaskScheduler) {
-		this.sockJsTaskScheduler = defaultTaskScheduler;
+		this.scheduler = defaultTaskScheduler;
 	}
 
 
@@ -70,11 +84,12 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
-	public WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
+	public WebSocketHandlerRegistration setHandshakeHandler(@Nullable HandshakeHandler handshakeHandler) {
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
 
+	@Nullable
 	protected HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
 	}
@@ -98,7 +113,10 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	@Override
 	public SockJsServiceRegistration withSockJS() {
-		this.sockJsServiceRegistration = new SockJsServiceRegistration(this.sockJsTaskScheduler);
+		this.sockJsServiceRegistration = new SockJsServiceRegistration();
+		if (this.scheduler != null) {
+			this.sockJsServiceRegistration.setTaskScheduler(this.scheduler);
+		}
 		HandshakeInterceptor[] interceptors = getInterceptors();
 		if (interceptors.length > 0) {
 			this.sockJsServiceRegistration.setInterceptors(interceptors);
@@ -119,6 +137,17 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
+	}
+
+	/**
+	 * Expose the {@code SockJsServiceRegistration} -- if SockJS is enabled or
+	 * {@code null} otherwise -- so that it can be configured with a TaskScheduler
+	 * if the application did not provide one. This should be done prior to
+	 * calling {@link #getMappings()}.
+	 */
+	@Nullable
+	protected SockJsServiceRegistration getSockJsServiceRegistration() {
+		return this.sockJsServiceRegistration;
 	}
 
 	protected final M getMappings() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
-import org.springframework.util.ClassUtils;
+import org.springframework.lang.Nullable;
 
-import static org.springframework.core.ReactiveTypeDescriptor.multiValue;
-import static org.springframework.core.ReactiveTypeDescriptor.noValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleOptionalValue;
-import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValue;
+import static org.springframework.core.ReactiveTypeDescriptor.*;
 
 /**
  * A registry of adapters to adapt a Reactive Streams {@link Publisher} to/from
@@ -49,18 +46,7 @@ import static org.springframework.core.ReactiveTypeDescriptor.singleRequiredValu
  */
 public class ReactiveAdapterRegistry {
 
-	private static final boolean reactorPresent =
-			ClassUtils.isPresent("reactor.core.publisher.Flux", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxJava1Present =
-			ClassUtils.isPresent("rx.Observable", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxJava1Adapter =
-			ClassUtils.isPresent("rx.RxReactiveStreams", ReactiveAdapterRegistry.class.getClassLoader());
-
-	private static final boolean rxJava2Present =
-			ClassUtils.isPresent("io.reactivex.Flowable", ReactiveAdapterRegistry.class.getClassLoader());
-
+	private final boolean reactorPresent;
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>(32);
 
@@ -70,17 +56,42 @@ public class ReactiveAdapterRegistry {
 	 */
 	public ReactiveAdapterRegistry() {
 
-		if (reactorPresent) {
+		// Reactor
+		boolean reactorRegistered = false;
+		try {
 			new ReactorRegistrar().registerAdapters(this);
+			reactorRegistered = true;
 		}
+		catch (Throwable ex) {
+			// Ignore
+		}
+		this.reactorPresent = reactorRegistered;
 
-		if (rxJava1Present && rxJava1Adapter) {
+		// RxJava1
+		try {
 			new RxJava1Registrar().registerAdapters(this);
 		}
+		catch (Throwable ex) {
+			// Ignore
+		}
 
-		if (rxJava2Present) {
+		// RxJava2
+		try {
 			new RxJava2Registrar().registerAdapters(this);
 		}
+		catch (Throwable ex) {
+			// Ignore
+		}
+	}
+
+
+	/**
+	 * Whether the registry has any adapters which would be the case if any of
+	 * Reactor, RxJava 2, or RxJava 1 (+ RxJava Reactive Streams bridge) are
+	 * present on the classpath.
+	 */
+	public boolean hasAdapters() {
+		return !this.adapters.isEmpty();
 	}
 
 
@@ -103,6 +114,7 @@ public class ReactiveAdapterRegistry {
 	/**
 	 * Get the adapter for the given reactive type.
 	 */
+	@Nullable
 	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
 		return getAdapter(reactiveType, null);
 	}
@@ -111,15 +123,20 @@ public class ReactiveAdapterRegistry {
 	 * Get the adapter for the given reactive type. Or if a "source" object is
 	 * provided, its actual type is used instead.
 	 * @param reactiveType the reactive type
-	 * @param source an instance of the reactive type (i.e. to adapt from)
+	 * (may be {@code null} if a concrete source object is given)
+	 * @param source an instance of the reactive type
+	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
 	 */
-	public ReactiveAdapter getAdapter(Class<?> reactiveType, Object source) {
-
-		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
-		Class<?> clazz = (source != null ? source.getClass() : reactiveType);
+	@Nullable
+	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
+		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
+		if (clazz == null) {
+			return null;
+		}
 
 		return this.adapters.stream()
-				.filter(adapter -> adapter.getReactiveType().equals(clazz))
+				.filter(adapter -> adapter.getReactiveType() == clazz)
 				.findFirst()
 				.orElseGet(() ->
 						this.adapters.stream()
@@ -132,7 +149,6 @@ public class ReactiveAdapterRegistry {
 	private static class ReactorRegistrar {
 
 		void registerAdapters(ReactiveAdapterRegistry registry) {
-
 			// Flux and Mono ahead of Publisher...
 
 			registry.registerReactiveType(
@@ -161,6 +177,7 @@ public class ReactiveAdapterRegistry {
 		}
 	}
 
+
 	private static class RxJava1Registrar {
 
 		void registerAdapters(ReactiveAdapterRegistry registry) {
@@ -181,6 +198,7 @@ public class ReactiveAdapterRegistry {
 			);
 		}
 	}
+
 
 	private static class RxJava2Registrar {
 
@@ -213,6 +231,7 @@ public class ReactiveAdapterRegistry {
 		}
 	}
 
+
 	/**
 	 * Extension of ReactiveAdapter that wraps adapted (raw) Publisher's as
 	 * {@link Flux} or {@link Mono} depending on the underlying reactive type's
@@ -228,7 +247,7 @@ public class ReactiveAdapterRegistry {
 		}
 
 		@Override
-		public <T> Publisher<T> toPublisher(Object source) {
+		public <T> Publisher<T> toPublisher(@Nullable Object source) {
 			Publisher<T> publisher = super.toPublisher(source);
 			return (isMultiValue() ? Flux.from(publisher) : Mono.from(publisher));
 		}

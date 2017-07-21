@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.beans.factory.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Factory for a {@code Map} that reads from a YAML source, preserving the
@@ -72,6 +72,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	private boolean singleton = true;
 
+	@Nullable
 	private Map<String, Object> map;
 
 
@@ -123,9 +124,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void merge(Map<String, Object> output, Map<String, Object> map) {
-		for (Entry<String, Object> entry : map.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
+		map.forEach((key, value) -> {
 			Object existing = output.get(key);
 			if (value instanceof Map && existing instanceof Map) {
 				// Inner cast required by Eclipse IDE.
@@ -136,7 +135,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 			else {
 				output.put(key, value);
 			}
-		}
+		});
 	}
 
 }

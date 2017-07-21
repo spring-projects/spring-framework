@@ -16,12 +16,13 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * A function that can extract data from a {@link ReactiveHttpInputMessage} body.
@@ -50,11 +51,15 @@ public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 	interface Context {
 
 		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s
-		 * to be used for body extraction.
+		 * Return the {@link HttpMessageReader}s to be used for body extraction.
 		 * @return the stream of message readers
 		 */
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+		List<HttpMessageReader<?>> messageReaders();
+
+		/**
+		 * Optionally return the {@link ServerHttpResponse}, if present.
+		 */
+		Optional<ServerHttpResponse> serverResponse();
 
 		/**
 		 * Return the map of hints to use to customize body extraction.

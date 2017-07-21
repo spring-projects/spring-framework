@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.io.IOException;
+
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -37,6 +39,7 @@ import static org.junit.Assert.*;
  * {@code @RequestMapping} integration tests with exception handling scenarios.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
@@ -53,6 +56,18 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	public void controllerThrowingException() throws Exception {
 		String expected = "Recovered from error: State";
 		assertEquals(expected, performGet("/thrown-exception", new HttpHeaders(), String.class).getBody());
+	}
+
+	@Test
+	public void controllerThrowingExceptionWithCause() throws Exception {
+		String expected = "Recovered from error: State";
+		assertEquals(expected, performGet("/thrown-exception-with-cause", new HttpHeaders(), String.class).getBody());
+	}
+
+	@Test
+	public void controllerThrowingExceptionWithCauseToHandle() throws Exception {
+		String expected = "Recovered from error: IO";
+		assertEquals(expected, performGet("/thrown-exception-with-cause-to-handle", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
@@ -79,9 +94,24 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 			throw new IllegalStateException("State");
 		}
 
+		@GetMapping("/thrown-exception-with-cause")
+		public Publisher<String> handleAndThrowExceptionWithCause() {
+			throw new IllegalStateException("State", new IOException("IO"));
+		}
+
+		@GetMapping("/thrown-exception-with-cause-to-handle")
+		public Publisher<String> handleAndThrowExceptionWithCauseToHandle() {
+			throw new RuntimeException("State", new IOException("IO"));
+		}
+
 		@GetMapping("/mono-error")
 		public Publisher<String> handleWithError() {
 			return Mono.error(new IllegalArgumentException("Argument"));
+		}
+
+		@ExceptionHandler
+		public Publisher<String> handleArgumentException(IOException ex) {
+			return Mono.just("Recovered from error: " + ex.getMessage());
 		}
 
 		@ExceptionHandler

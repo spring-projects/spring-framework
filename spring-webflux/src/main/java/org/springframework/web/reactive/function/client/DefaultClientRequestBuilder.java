@@ -18,9 +18,11 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -30,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -53,6 +56,8 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
 
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
+
 	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
 
 
@@ -71,30 +76,29 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
-	public ClientRequest.Builder headers(HttpHeaders headers) {
-		if (headers != null) {
-			this.headers.putAll(headers);
+	public ClientRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
+		headersConsumer.accept(this.headers);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder cookie(String name, String... values) {
+		for (String value : values) {
+			this.cookies.add(name, value);
 		}
 		return this;
 	}
 
 	@Override
-	public ClientRequest.Builder cookie(String name, String value) {
-		this.cookies.add(name, value);
+	public ClientRequest.Builder cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "'cookiesConsumer' must not be null");
+		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
 	@Override
-	public ClientRequest.Builder cookies(MultiValueMap<String, String> cookies) {
-		if (cookies != null) {
-			this.cookies.putAll(cookies);
-		}
-		return this;
-	}
-
-	@Override
-	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
-			Class<S> elementClass) {
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
@@ -103,15 +107,28 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
+	public ClientRequest.Builder attribute(String name, Object value) {
+		this.attributes.put(name, value);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
+		Assert.notNull(attributesConsumer, "'attributesConsumer' must not be null");
+		attributesConsumer.accept(this.attributes);
+		return this;
+	}
+
+	@Override
 	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-		this.inserter = inserter != null ? inserter : BodyInserters.empty();
+		this.inserter = inserter;
 		return this;
 	}
 
 	@Override
 	public ClientRequest build() {
 		return new BodyInserterRequest(this.method, this.url, this.headers, this.cookies,
-				this.inserter);
+				this.inserter, this.attributes);
 	}
 
 
@@ -127,14 +144,19 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final BodyInserter<?, ? super ClientHttpRequest> inserter;
 
+		private final Map<String, Object> attributes;
+
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
-				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> inserter) {
+				MultiValueMap<String, String> cookies,
+				BodyInserter<?, ? super ClientHttpRequest> inserter,
+				Map<String, Object> attributes) {
 
 			this.method = method;
 			this.url = url;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			this.inserter = inserter;
+			this.attributes = Collections.unmodifiableMap(attributes);
 		}
 
 		@Override
@@ -163,6 +185,11 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
+		public Map<String, Object> attributes() {
+			return this.attributes;
+		}
+
+		@Override
 		public Mono<Void> writeTo(ClientHttpRequest request, ExchangeStrategies strategies) {
 			HttpHeaders requestHeaders = request.getHeaders();
 			if (!this.headers.isEmpty()) {
@@ -174,20 +201,23 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();
 			if (!this.cookies.isEmpty()) {
-				this.cookies.entrySet().forEach(entry -> {
-					String name = entry.getKey();
-					entry.getValue().forEach(value -> {
-						HttpCookie cookie = new HttpCookie(name, value);
-						requestCookies.add(name, cookie);
-					});
-				});
+				this.cookies.forEach((name, values) -> values.forEach(value -> {
+					HttpCookie cookie = new HttpCookie(name, value);
+					requestCookies.add(name, cookie);
+				}));
 			}
 
 			return this.inserter.insert(request, new BodyInserter.Context() {
 				@Override
-				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				public List<HttpMessageWriter<?>> messageWriters() {
 					return strategies.messageWriters();
 				}
+
+				@Override
+				public Optional<ServerHttpRequest> serverRequest() {
+					return Optional.empty();
+				}
+
 				@Override
 				public Map<String, Object> hints() {
 					return Collections.emptyMap();

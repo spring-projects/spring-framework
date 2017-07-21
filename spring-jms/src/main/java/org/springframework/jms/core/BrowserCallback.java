@@ -20,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Callback for browsing the messages in a JMS queue.
  *
@@ -44,6 +46,7 @@ public interface BrowserCallback<T> {
 	 * (or {@code null} if none)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
+	@Nullable
 	T doInJms(Session session, QueueBrowser browser) throws JMSException;
 
 }

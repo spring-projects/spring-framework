@@ -56,6 +56,8 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -339,7 +341,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private RuntimeBeanReference getConversionService(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getConversionService(
+			Element element, @Nullable Object source, ParserContext parserContext) {
+
 		RuntimeBeanReference conversionServiceRef;
 		if (element.hasAttribute("conversion-service")) {
 			conversionServiceRef = new RuntimeBeanReference(element.getAttribute("conversion-service"));
@@ -355,7 +359,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return conversionServiceRef;
 	}
 
-	private RuntimeBeanReference getValidator(Element element, Object source, ParserContext parserContext) {
+	@Nullable
+	private RuntimeBeanReference getValidator(Element element, @Nullable Object source, ParserContext parserContext) {
 		if (element.hasAttribute("validator")) {
 			return new RuntimeBeanReference(element.getAttribute("validator"));
 		}
@@ -373,7 +378,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private RuntimeBeanReference getContentNegotiationManager(Element element, Object source,
+	private RuntimeBeanReference getContentNegotiationManager(Element element, @Nullable Object source,
 			ParserContext parserContext) {
 
 		RuntimeBeanReference beanRef;
@@ -450,6 +455,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return props;
 	}
 
+	@Nullable
 	private RuntimeBeanReference getMessageCodesResolver(Element element) {
 		if (element.hasAttribute("message-codes-resolver")) {
 			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
@@ -464,6 +470,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return (asyncElement != null) ? asyncElement.getAttribute("default-timeout") : null;
 	}
 
+	@Nullable
 	private RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
@@ -474,7 +481,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private ManagedList<?> getCallableInterceptors(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getCallableInterceptors(
+			Element element, @Nullable Object source, ParserContext parserContext) {
+
 		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
@@ -483,15 +492,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				interceptors.setSource(source);
 				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
 					BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
-					beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
-					interceptors.add(beanDef);
+					if (beanDef != null) {
+						beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
+						interceptors.add(beanDef);
+					}
 				}
 			}
 		}
 		return interceptors;
 	}
 
-	private ManagedList<?> getDeferredResultInterceptors(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getDeferredResultInterceptors(
+			Element element, @Nullable Object source, ParserContext parserContext) {
+
 		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
@@ -500,14 +513,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				interceptors.setSource(source);
 				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
 					BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
-					beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
-					interceptors.add(beanDef);
+					if (beanDef != null) {
+						beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
+						interceptors.add(beanDef);
+					}
 				}
 			}
 		}
 		return interceptors;
 	}
 
+	@Nullable
 	private ManagedList<?> getArgumentResolvers(Element element, ParserContext parserContext) {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
@@ -523,6 +539,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			if (object instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
 				String className = beanDef.getBeanDefinition().getBeanClassName();
+				Assert.notNull(className, "No resolver class");
 				Class<?> clazz = ClassUtils.resolveClassName(className, context.getReaderContext().getBeanClassLoader());
 				if (WebArgumentResolver.class.isAssignableFrom(clazz)) {
 					RootBeanDefinition adapter = new RootBeanDefinition(ServletWebArgumentResolverAdapter.class);
@@ -541,7 +558,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return (handlers != null ? extractBeanSubElements(handlers, parserContext) : null);
 	}
 
-	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
+	private ManagedList<?> getMessageConverters(Element element, @Nullable Object source, ParserContext parserContext) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
 		ManagedList<? super Object> messageConverters = new ManagedList<>();
 		if (convertersElement != null) {
@@ -608,7 +625,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return messageConverters;
 	}
 
-	private GenericBeanDefinition createObjectMapperFactoryDefinition(Object source) {
+	private GenericBeanDefinition createObjectMapperFactoryDefinition(@Nullable Object source) {
 		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(Jackson2ObjectMapperFactoryBean.class);
 		beanDefinition.setSource(source);
@@ -616,7 +633,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return beanDefinition;
 	}
 
-	private RootBeanDefinition createConverterDefinition(Class<?> converterClass, Object source) {
+	private RootBeanDefinition createConverterDefinition(Class<?> converterClass, @Nullable Object source) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(converterClass);
 		beanDefinition.setSource(source);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -664,10 +681,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	static class CompositeUriComponentsContributorFactoryBean
 			implements FactoryBean<CompositeUriComponentsContributor>, InitializingBean {
 
+		@Nullable
 		private RequestMappingHandlerAdapter handlerAdapter;
 
+		@Nullable
 		private ConversionService conversionService;
 
+		@Nullable
 		private CompositeUriComponentsContributor uriComponentsContributor;
 
 		public void setHandlerAdapter(RequestMappingHandlerAdapter handlerAdapter) {
@@ -680,6 +700,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		@Override
 		public void afterPropertiesSet() {
+			Assert.state(this.handlerAdapter != null, "No RequestMappingHandlerAdapter set");
 			this.uriComponentsContributor = new CompositeUriComponentsContributor(
 					this.handlerAdapter.getArgumentResolvers(), this.conversionService);
 		}

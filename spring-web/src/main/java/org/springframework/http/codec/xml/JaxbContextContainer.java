@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import javax.xml.bind.Unmarshaller;
 import org.springframework.util.Assert;
 
 /**
+ * Holder for {@link JAXBContext} isntances.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
 final class JaxbContextContainer {
 
-
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts =
-			new ConcurrentHashMap<>(64);
+	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
 
 	public Marshaller createMarshaller(Class<?> clazz) throws JAXBException {
@@ -47,7 +47,7 @@ final class JaxbContextContainer {
 	}
 
 	private JAXBContext getJaxbContext(Class<?> clazz) throws JAXBException {
-		Assert.notNull(clazz, "'clazz' must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
 		if (jaxbContext == null) {
 			jaxbContext = JAXBContext.newInstance(clazz);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import org.springframework.ui.ConcurrentModel;
 import org.springframework.validation.BindingResult;
 
 /**
- * Sub-class of {@link ConcurrentModel} that automatically removes
+ * Subclass of {@link ConcurrentModel} that automatically removes
  * the {@link BindingResult} object when its corresponding
  * target attribute is replaced through regular {@link Map} operations.
  *
- * <p>This is the class exposed to controller methods by Spring Web Reactive,
+ * <p>This is the class exposed to handler methods by Spring WebFlux,
  * typically consumed through a declaration of the
- * {@link org.springframework.ui.Model} interface. There is typically
- * no need to create it within user code. If necessary a controller method can
- * return a regular {@code java.util.Map}, or more likely a
- * {@code java.util.ConcurrentMap}.
+ * {@link org.springframework.ui.Model} interface as a parameter type.
+ * There is typically no need to create it within user code.
+ * If necessary a handler method can return a regular {@code java.util.Map},
+ * likely a {@code java.util.ConcurrentMap}, for a pre-determined model.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -48,7 +48,7 @@ public class BindingAwareConcurrentModel extends ConcurrentModel {
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		map.entrySet().forEach(e -> removeBindingResultIfNecessary(e.getKey(), e.getValue()));
+		map.forEach(this::removeBindingResultIfNecessary);
 		super.putAll(map);
 	}
 

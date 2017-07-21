@@ -28,9 +28,7 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -47,6 +45,9 @@ public class DataBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
 				MimeTypeUtils.APPLICATION_JSON));
+
+		// SPR-15464
+		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
 	@Test
@@ -60,6 +61,8 @@ public class DataBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 				null, Collections.emptyMap());
 
 		assertSame(source, output);
+
+		release(fooBuffer, barBuffer);
 	}
 
 }

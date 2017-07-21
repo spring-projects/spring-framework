@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,6 +33,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 	private final MetadataAwareAspectInstanceFactory maaif;
 
+	@Nullable
 	private volatile Object materialized;
 
 
@@ -47,20 +49,24 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 	@Override
 	public Object getAspectInstance() {
-		if (this.materialized == null) {
+		Object aspectInstance = this.materialized;
+		if (aspectInstance == null) {
 			Object mutex = this.maaif.getAspectCreationMutex();
 			if (mutex == null) {
-				this.materialized = this.maaif.getAspectInstance();
+				aspectInstance = this.maaif.getAspectInstance();
+				this.materialized = aspectInstance;
 			}
 			else {
 				synchronized (mutex) {
-					if (this.materialized == null) {
-						this.materialized = this.maaif.getAspectInstance();
+					aspectInstance = this.materialized;
+					if (aspectInstance == null) {
+						aspectInstance = this.maaif.getAspectInstance();
+						this.materialized = aspectInstance;
 					}
 				}
 			}
 		}
-		return this.materialized;
+		return aspectInstance;
 	}
 
 	public boolean isMaterialized() {

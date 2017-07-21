@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class XhrTransportTests {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		URI url = new URI("http://example.com");
-		transport.executeSendRequest(url, null, new TextMessage("payload"));
+		transport.executeSendRequest(url, new HttpHeaders(), new TextMessage("payload"));
 	}
 
 	@Test
@@ -86,6 +86,7 @@ public class XhrTransportTests {
 		TransportRequest request = mock(TransportRequest.class);
 		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(new URI("http://example.com")));
 		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
+		given(request.getHttpRequestHeaders()).willReturn(new HttpHeaders());
 
 		TestXhrTransport transport = new TestXhrTransport();
 		WebSocketHandler handler = mock(WebSocketHandler.class);

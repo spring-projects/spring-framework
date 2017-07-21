@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -100,14 +101,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
-	void setParent(ApplicationContext parent);
-
-	/**
-	 * Return the Environment for this application context in configurable form.
-	 * @since 3.1
-	 */
-	@Override
-	ConfigurableEnvironment getEnvironment();
+	void setParent(@Nullable ApplicationContext parent);
 
 	/**
 	 * Set the {@code Environment} for this application context.
@@ -115,6 +109,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @since 3.1
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
+
+	/**
+	 * Return the {@code Environment} for this application context in configurable
+	 * form, allowing for further customization.
+	 * @since 3.1
+	 */
+	@Override
+	ConfigurableEnvironment getEnvironment();
 
 	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal

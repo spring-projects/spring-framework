@@ -16,6 +16,8 @@
 
 package org.springframework.core.style;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy that encapsulates value String styling algorithms
  * according to Spring conventions.
@@ -30,6 +32,6 @@ public interface ValueStyler {
 	 * @param value the Object value to style
 	 * @return the styled String
 	 */
-	String style(Object value);
+	String style(@Nullable Object value);
 
 }

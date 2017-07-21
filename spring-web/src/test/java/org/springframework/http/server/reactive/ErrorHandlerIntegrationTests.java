@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.junit.Test;
@@ -45,33 +44,43 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 	}
 
 	@Test
-	public void response() throws Exception {
+	public void responseBodyError() throws Exception {
 		// TODO: fix Reactor
 		assumeFalse(server instanceof ReactorHttpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		ResponseEntity<String> response = restTemplate
-				.getForEntity(new URI("http://localhost:" + port + "/response"),
-						String.class);
+		URI url = new URI("http://localhost:" + port + "/response-body-error");
+		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 	}
 
 	@Test
-	public void returnValue() throws Exception {
+	public void handlingError() throws Exception {
 		// TODO: fix Reactor
 		assumeFalse(server instanceof ReactorHttpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		ResponseEntity<String> response = restTemplate
-				.getForEntity(new URI("http://localhost:" + port + "/returnValue"),
-						String.class);
+		URI url = new URI("http://localhost:" + port + "/handling-error");
+		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+	}
+
+	@Test // SPR-15560
+	public void emptyPathSegments() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
+
+		URI url = new URI("http://localhost:" + port + "//");
+		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	private static class ErrorHandler implements HttpHandler {
@@ -80,10 +89,10 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			Exception error = new UnsupportedOperationException();
 			String path = request.getURI().getPath();
-			if (path.endsWith("response")) {
+			if (path.endsWith("response-body-error")) {
 				return response.writeWith(Mono.error(error));
 			}
-			else if (path.endsWith("returnValue")) {
+			else if (path.endsWith("handling-error")) {
 				return Mono.error(error);
 			}
 			else {
@@ -92,17 +101,16 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		}
 	}
 
-	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER =
-			new ResponseErrorHandler() {
+	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER = new ResponseErrorHandler() {
 
-				@Override
-				public boolean hasError(ClientHttpResponse response) throws IOException {
-					return false;
-				}
+		@Override
+		public boolean hasError(ClientHttpResponse response) {
+			return false;
+		}
 
-				@Override
-				public void handleError(ClientHttpResponse response) throws IOException {
-				}
-			};
+		@Override
+		public void handleError(ClientHttpResponse response) {
+		}
+	};
 
 }

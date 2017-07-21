@@ -16,15 +16,13 @@
 
 package org.springframework.jdbc.core.support;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -48,6 +46,7 @@ public class JdbcBeanDefinitionReader {
 
 	private final PropertiesBeanDefinitionReader propReader;
 
+	@Nullable
 	private JdbcTemplate jdbcTemplate;
 
 
@@ -105,15 +104,12 @@ public class JdbcBeanDefinitionReader {
 	public void loadBeanDefinitions(String sql) {
 		Assert.notNull(this.jdbcTemplate, "Not fully configured - specify DataSource or JdbcTemplate");
 		final Properties props = new Properties();
-		this.jdbcTemplate.query(sql, new RowCallbackHandler() {
-			@Override
-			public void processRow(ResultSet rs) throws SQLException {
-				String beanName = rs.getString(1);
-				String property = rs.getString(2);
-				String value = rs.getString(3);
-				// Make a properties entry by combining bean name and property.
-				props.setProperty(beanName + '.' + property, value);
-			}
+		this.jdbcTemplate.query(sql, rs -> {
+			String beanName = rs.getString(1);
+			String property = rs.getString(2);
+			String value = rs.getString(3);
+			// Make a properties entry by combining bean name and property.
+			props.setProperty(beanName + '.' + property, value);
 		});
 		this.propReader.registerBeanDefinitions(props);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
@@ -88,6 +90,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean trimTokens = false;
 
+	@Nullable
 	private volatile Boolean cachePatterns;
 
 	private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<>(256);
@@ -119,7 +122,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * Set the path separator to use for pattern parsing.
 	 * <p>Default is "/", as in Ant.
 	 */
-	public void setPathSeparator(String pathSeparator) {
+	public void setPathSeparator(@Nullable String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(this.pathSeparator);
 	}
@@ -187,7 +190,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
+	protected boolean doMatch(String pattern, String path, boolean fullMatch,
+			@Nullable Map<String, String> uriTemplateVariables) {
+
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -220,8 +225,7 @@ public class AntPathMatcher implements PathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(this.pathSeparator) ? path.endsWith(this.pathSeparator) :
-						!path.endsWith(this.pathSeparator));
+				return (pattern.endsWith(this.pathSeparator) == path.endsWith(this.pathSeparator));
 			}
 			if (!fullMatch) {
 				return true;
@@ -318,17 +322,13 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean isPotentialMatch(String path, String[] pattDirs) {
 		if (!this.trimTokens) {
-			char[] pathChars = path.toCharArray();
 			int pos = 0;
 			for (String pattDir : pattDirs) {
 				int skipped = skipSeparator(path, pos, this.pathSeparator);
 				pos += skipped;
-				skipped = skipSegment(pathChars, pos, pattDir);
+				skipped = skipSegment(path, pos, pattDir);
 				if (skipped < pattDir.length()) {
-					if (skipped > 0) {
-						return true;
-					}
-					return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
+					return (skipped > 0 || (pattDir.length() > 0 && isWildcardChar(pattDir.charAt(0))));
 				}
 				pos += skipped;
 			}
@@ -336,16 +336,18 @@ public class AntPathMatcher implements PathMatcher {
 		return true;
 	}
 
-	private int skipSegment(char[] chars, int pos, String prefix) {
+	private int skipSegment(String path, int pos, String prefix) {
 		int skipped = 0;
-		for (char c : prefix.toCharArray()) {
+		for (int i = 0; i < prefix.length(); i++) {
+			char c = prefix.charAt(i);
 			if (isWildcardChar(c)) {
 				return skipped;
 			}
-			else if (pos + skipped >= chars.length) {
+			int currPos = pos + skipped;
+			if (currPos >= path.length()) {
 				return 0;
 			}
-			else if (chars[pos + skipped] == c) {
+			if (c == path.charAt(currPos)) {
 				skipped++;
 			}
 		}
@@ -413,7 +415,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * @param str the String which must be matched against the pattern (never {@code null})
 	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise
 	 */
-	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
+	private boolean matchStrings(String pattern, String str,
+			@Nullable Map<String, String> uriTemplateVariables) {
+
 		return getStringMatcher(pattern).matchStrings(str, uriTemplateVariables);
 	}
 
@@ -678,7 +682,7 @@ public class AntPathMatcher implements PathMatcher {
 		 * Main entry point.
 		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
-		public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
+		public boolean matchStrings(String str, @Nullable Map<String, String> uriTemplateVariables) {
 			Matcher matcher = this.pattern.matcher(str);
 			if (matcher.matches()) {
 				if (uriTemplateVariables != null) {
@@ -797,6 +801,7 @@ public class AntPathMatcher implements PathMatcher {
 		 */
 		private static class PatternInfo {
 
+			@Nullable
 			private final String pattern;
 
 			private int uriVars;
@@ -809,9 +814,10 @@ public class AntPathMatcher implements PathMatcher {
 
 			private boolean prefixPattern;
 
+			@Nullable
 			private Integer length;
 
-			public PatternInfo(String pattern) {
+			public PatternInfo(@Nullable String pattern) {
 				this.pattern = pattern;
 				if (this.pattern != null) {
 					initCounters();
@@ -825,26 +831,28 @@ public class AntPathMatcher implements PathMatcher {
 
 			protected void initCounters() {
 				int pos = 0;
-				while (pos < this.pattern.length()) {
-					if (this.pattern.charAt(pos) == '{') {
-						this.uriVars++;
-						pos++;
-					}
-					else if (this.pattern.charAt(pos) == '*') {
-						if (pos + 1 < this.pattern.length() && this.pattern.charAt(pos + 1) == '*') {
-							this.doubleWildcards++;
-							pos += 2;
-						}
-						else if (pos > 0 && !this.pattern.substring(pos - 1).equals(".*")) {
-							this.singleWildcards++;
+				if (this.pattern != null) {
+					while (pos < this.pattern.length()) {
+						if (this.pattern.charAt(pos) == '{') {
+							this.uriVars++;
 							pos++;
+						}
+						else if (this.pattern.charAt(pos) == '*') {
+							if (pos + 1 < this.pattern.length() && this.pattern.charAt(pos + 1) == '*') {
+								this.doubleWildcards++;
+								pos += 2;
+							}
+							else if (pos > 0 && !this.pattern.substring(pos - 1).equals(".*")) {
+								this.singleWildcards++;
+								pos++;
+							}
+							else {
+								pos++;
+							}
 						}
 						else {
 							pos++;
 						}
-					}
-					else {
-						pos++;
 					}
 				}
 			}
@@ -878,7 +886,8 @@ public class AntPathMatcher implements PathMatcher {
 			 */
 			public int getLength() {
 				if (this.length == null) {
-					this.length = VARIABLE_PATTERN.matcher(this.pattern).replaceAll("#").length();
+					this.length = (this.pattern != null ?
+							VARIABLE_PATTERN.matcher(this.pattern).replaceAll("#").length() : 0);
 				}
 				return this.length;
 			}

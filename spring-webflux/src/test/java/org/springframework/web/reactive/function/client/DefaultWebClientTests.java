@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -25,12 +26,15 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
@@ -114,6 +118,67 @@ public class DefaultWebClientTests {
 		assertEquals("application/xml", request.headers().getFirst("Accept"));
 		assertEquals("456", request.cookies().getFirst("id"));
 		verifyNoMoreInteractions(this.exchangeFunction);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void bodyObjectPublisher() throws Exception {
+		Mono<Void> mono = Mono.empty();
+		WebClient client = builder().build();
+
+		client.post().uri("http://example.com").syncBody(mono);
+	}
+
+	@Test
+	public void mutateDoesCopy() throws Exception {
+
+		WebClient.Builder builder = WebClient.builder();
+		builder.filter((request, next) -> next.exchange(request));
+		builder.defaultHeader("foo", "bar");
+		builder.defaultCookie("foo", "bar");
+		WebClient client1 = builder.build();
+		builder.filter((request, next) -> next.exchange(request));
+		builder.defaultHeader("baz", "qux");
+		builder.defaultCookie("baz", "qux");
+		WebClient client2 = builder.build();
+
+		client1.mutate().filters(filters -> assertEquals(1, filters.size()));
+		client1.mutate().defaultHeaders(headers -> assertEquals(1, headers.size()));
+		client1.mutate().defaultCookies(cookies -> assertEquals(1, cookies.size()));
+		client2.mutate().filters(filters -> assertEquals(2, filters.size()));
+		client2.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
+		client2.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+	}
+
+	@Test
+	public void attributes() {
+		ExchangeFilterFunction filter = (request, next) -> {
+			assertEquals("bar", request.attributes().get("foo"));
+			return next.exchange(request);
+		};
+
+		WebClient client = builder().filter(filter).build();
+
+		client.get().uri("/path").attribute("foo", "bar").exchange();
+	}
+
+	@Test
+	public void apply() {
+		WebClient client = builder()
+				.apply(builder -> builder.defaultHeader("Accept", "application/json").defaultCookie("id", "123"))
+				.build();
+		client.get().uri("/path").exchange();
+
+		ClientRequest request = verifyExchange();
+		assertEquals("application/json", request.headers().getFirst("Accept"));
+		assertEquals("123", request.cookies().getFirst("id"));
+		verifyNoMoreInteractions(this.exchangeFunction);
+	}
+
+	@Test
+	public void switchToErrorOnEmptyClientResponseMono() throws Exception {
+		StepVerifier.create(builder().build().get().uri("/path").exchange())
+				.expectErrorMessage("The underlying HTTP client completed without emitting a response.")
+				.verify(Duration.ofSeconds(5));
 	}
 
 

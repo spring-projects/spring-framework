@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Locale;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for URL-based views. Provides a consistent way of
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public abstract class AbstractUrlBasedView extends AbstractView implements InitializingBean {
 
+	@Nullable
 	private String url;
 
 
@@ -49,13 +52,14 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	 * Set the URL of the resource that this view wraps.
 	 * The URL must be appropriate for the concrete View implementation.
 	 */
-	public void setUrl(String url) {
+	public void setUrl(@Nullable String url) {
 		this.url = url;
 	}
 
 	/**
 	 * Return the URL of the resource that this view wraps.
 	 */
+	@Nullable
 	public String getUrl() {
 		return this.url;
 	}

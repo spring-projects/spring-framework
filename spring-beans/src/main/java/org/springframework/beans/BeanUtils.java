@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,14 +28,22 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -52,6 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 public abstract class BeanUtils {
 
@@ -60,6 +70,9 @@ public abstract class BeanUtils {
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
+	private static final boolean kotlinPresent =
+			ClassUtils.isPresent("kotlin.Unit", BeanUtils.class.getClassLoader());
+	
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -102,7 +115,12 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor());
+			Constructor<T> ctor = (kotlinPresent && isKotlinClass(clazz) ?
+					KotlinDelegate.findPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
+			if (ctor == null) {
+				throw new BeanInstantiationException(clazz, "No default constructor found");
+			}
+			return instantiateClass(ctor);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
@@ -131,9 +149,11 @@ public abstract class BeanUtils {
 	/**
 	 * Convenience method to instantiate a class using the given constructor.
 	 * <p>Note that this method tries to set the constructor accessible if given a
-	 * non-accessible (that is, non-public) constructor.
+	 * non-accessible (that is, non-public) constructor, and supports Kotlin classes
+	 * with optional parameters and default values.
 	 * @param ctor the constructor to instantiate
-	 * @param args the constructor arguments to apply
+	 * @param args the constructor arguments to apply (use null for unspecified parameter
+	 * if needed for Kotlin classes with optional parameters and default values)
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 * @see Constructor#newInstance
@@ -142,7 +162,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return ctor.newInstance(args);
+			return (kotlinPresent && isKotlinClass(ctor.getDeclaringClass()) ? KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
 			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
@@ -172,6 +192,7 @@ public abstract class BeanUtils {
 	 * @see Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
+	@Nullable
 	public static Method findMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
@@ -192,6 +213,7 @@ public abstract class BeanUtils {
 	 * @return the Method object, or {@code null} if not found
 	 * @see Class#getDeclaredMethod
 	 */
+	@Nullable
 	public static Method findDeclaredMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		try {
 			return clazz.getDeclaredMethod(methodName, paramTypes);
@@ -219,6 +241,7 @@ public abstract class BeanUtils {
 	 * @see Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
+	@Nullable
 	public static Method findMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
@@ -241,6 +264,7 @@ public abstract class BeanUtils {
 	 * could not be resolved to a unique method with minimal parameters
 	 * @see Class#getDeclaredMethods
 	 */
+	@Nullable
 	public static Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
@@ -260,6 +284,7 @@ public abstract class BeanUtils {
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
 	 */
+	@Nullable
 	public static Method findMethodWithMinimalParameters(Method[] methods, String methodName)
 			throws IllegalArgumentException {
 
@@ -294,6 +319,37 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * Return the primary constructor of the provided class (single or default constructor
+	 * for Java classes and primary constructor for Kotlin classes), if any.
+	 * @param clazz the {@link Class} of the Kotlin class
+	 * @since 5.0
+	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 */
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		Constructor<T> ctor = null;
+		if (kotlinPresent && isKotlinClass(clazz)) {
+			return KotlinDelegate.findPrimaryConstructor(clazz);
+		}
+		else {
+			Constructor<T>[] ctors = (Constructor<T>[]) clazz.getConstructors();
+			if (ctors.length == 1) {
+				return ctors[0];
+			}
+			else {
+				try {
+					return clazz.getDeclaredConstructor();
+				}
+				catch (NoSuchMethodException ex) {
+					return null;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Parse a method signature in the form {@code methodName[([arg_list])]},
 	 * where {@code arg_list} is an optional, comma-separated list of fully-qualified
 	 * type names, and attempts to resolve that signature against the supplied {@code Class}.
@@ -311,6 +367,7 @@ public abstract class BeanUtils {
 	 * @see #findMethod
 	 * @see #findMethodWithMinimalParameters
 	 */
+	@Nullable
 	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
@@ -365,6 +422,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
+	@Nullable
 	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
 			throws BeansException {
 
@@ -381,6 +439,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
+	@Nullable
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
 		return findPropertyForMethod(method, method.getDeclaringClass());
 	}
@@ -395,6 +454,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 * @since 3.2.13
 	 */
+	@Nullable
 	public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> clazz) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(clazz);
@@ -415,7 +475,8 @@ public abstract class BeanUtils {
 	 * @param targetType the type to find an editor for
 	 * @return the corresponding editor, or {@code null} if none found
 	 */
-	public static PropertyEditor findEditorByConvention(Class<?> targetType) {
+	@Nullable
+	public static PropertyEditor findEditorByConvention(@Nullable Class<?> targetType) {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.contains(targetType)) {
 			return null;
 		}
@@ -465,7 +526,7 @@ public abstract class BeanUtils {
 	 * @param beanClasses the classes to check against
 	 * @return the property type, or {@code Object.class} as fallback
 	 */
-	public static Class<?> findPropertyType(String propertyName, Class<?>... beanClasses) {
+	public static Class<?> findPropertyType(String propertyName, @Nullable Class<?>... beanClasses) {
 		if (beanClasses != null) {
 			for (Class<?> beanClass : beanClasses) {
 				PropertyDescriptor pd = getPropertyDescriptor(beanClass, propertyName);
@@ -488,7 +549,9 @@ public abstract class BeanUtils {
 			return new MethodParameter(((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
 		}
 		else {
-			return new MethodParameter(pd.getWriteMethod(), 0);
+			Method writeMethod = pd.getWriteMethod();
+			Assert.state(writeMethod != null, "No write method available");
+			return new MethodParameter(writeMethod, 0);
 		}
 	}
 
@@ -588,8 +651,8 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	private static void copyProperties(Object source, Object target, Class<?> editable, String... ignoreProperties)
-			throws BeansException {
+	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable,
+			@Nullable String... ignoreProperties) throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
@@ -631,6 +694,65 @@ public abstract class BeanUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Return true if the specified class is a Kotlin one.
+	 */
+	private static boolean isKotlinClass(Class<?> clazz) {
+		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+			if (annotation.annotationType().getName().equals("kotlin.Metadata")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		/**
+		 * Return the Java constructor corresponding to the Kotlin primary constructor if any.
+		 * @param clazz the {@link Class} of the Kotlin class
+		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">http://kotlinlang.org/docs/reference/classes.html#constructors</a>
+		 */
+		@Nullable
+		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+			KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+			if (primaryConstructor == null) {
+				return null;
+			}
+			Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
+			Assert.notNull(constructor, "Can't get the Java constructor corresponding to the Kotlin primary constructor of " + clazz.getName());
+			return constructor;
+		}
+
+		/**
+		 * Instantiate a Kotlin class using the provided constructor.
+		 * @param ctor the constructor of the Kotlin class to instantiate
+		 * @param args the constructor arguments to apply (use null for unspecified parameter if needed)
+		 * @throws BeanInstantiationException if no primary constructor can be found
+		 */
+		public static <T> T instantiateClass(Constructor<T> ctor, Object... args) {
+			KFunction<T> kotlinConstructor = ReflectJvmMapping.getKotlinFunction(ctor);
+			if (kotlinConstructor == null) {
+				throw new BeanInstantiationException(ctor.getDeclaringClass(), "No corresponding Kotlin constructor found");
+			}
+			List<KParameter> parameters = kotlinConstructor.getParameters();
+			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
+			Assert.isTrue(args.length <= parameters.size(), 
+					"The number of provided arguments should be less of equals than the number of constructor parameters");
+			for (int i = 0 ; i < args.length ; i++) {
+				if (!(parameters.get(i).isOptional() && (args[i] == null))) {
+					argParameters.put(parameters.get(i), args[i]);
+				}
+			}
+			return kotlinConstructor.callBy(argParameters);
+		}
+
 	}
 
 }

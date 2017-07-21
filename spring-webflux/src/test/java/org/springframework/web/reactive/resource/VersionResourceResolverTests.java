@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,9 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -80,7 +79,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertEquals(expected, actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -95,7 +94,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.emptyMap());
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -110,7 +109,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -130,7 +129,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.versionStrategy, times(1)).removeVersion(versionFile, version);
@@ -146,12 +145,12 @@ public class VersionResourceResolverTests {
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(Mono.just(expected));
 		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
 		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
-		given(this.versionStrategy.getResourceVersion(expected)).willReturn("newer-version");
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn(Mono.just("newer-version"));
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
@@ -163,19 +162,17 @@ public class VersionResourceResolverTests {
 		String version = "version";
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		MockServerHttpRequest request = MockServerHttpRequest.get("/resources/bar-version.css").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/resources/bar-version.css").toExchange();
 		given(this.chain.resolveResource(exchange, versionFile, this.locations)).willReturn(Mono.empty());
 		given(this.chain.resolveResource(exchange, file, this.locations)).willReturn(Mono.just(expected));
 		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
 		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
-		given(this.versionStrategy.getResourceVersion(expected)).willReturn(version);
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn(Mono.just(version));
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(exchange, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertEquals(expected.getFilename(), actual.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
@@ -216,6 +213,14 @@ public class VersionResourceResolverTests {
 
 		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"),
 				Matchers.instanceOf(FixedVersionStrategy.class));
+	}
+
+	@Test // SPR-15372
+	public void resolveUrlPathNoVersionStrategy() throws Exception {
+		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn(Mono.just("/foo.css"));
+		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain)
+				.block(Duration.ofMillis(1000));
+		assertThat(resolved, is("/foo.css"));
 	}
 
 

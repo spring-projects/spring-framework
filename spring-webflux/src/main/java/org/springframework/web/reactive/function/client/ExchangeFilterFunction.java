@@ -77,7 +77,7 @@ public interface ExchangeFilterFunction {
 			Mono<ClientRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
-		return (request, next) -> requestProcessor.apply(request).then(next::exchange);
+		return (request, next) -> requestProcessor.apply(request).flatMap(next::exchange);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public interface ExchangeFilterFunction {
 			Mono<ClientResponse>> responseProcessor) {
 
 		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
-		return (request, next) -> next.exchange(request).then(responseProcessor);
+		return (request, next) -> next.exchange(request).flatMap(responseProcessor);
 	}
 
 }

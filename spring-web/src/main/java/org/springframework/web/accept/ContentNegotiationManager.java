@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -43,7 +44,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
-	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.<MediaType>singletonList(MediaType.ALL);
+	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.singletonList(MediaType.ALL);
 
 
 	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
@@ -99,6 +100,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * @since 4.3
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T extends ContentNegotiationStrategy> T getStrategy(Class<T> strategyType) {
 		for (ContentNegotiationStrategy strategy : getStrategies()) {
 			if (strategyType.isInstance(strategy)) {
@@ -144,9 +146,10 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * either {@link PathExtensionContentNegotiationStrategy} or
 	 * {@link ParameterContentNegotiationStrategy}. At runtime if there is a
 	 * "path extension" strategy and its
-	 * {@link PathExtensionContentNegotiationStrategy#setUseJaf(boolean)
-	 * useJaf} property is set to "true", the list of extensions may
-	 * increase as file extensions are resolved via JAF and cached.
+	 * {@link PathExtensionContentNegotiationStrategy#setUseRegisteredExtensionsOnly(boolean)
+	 * useRegisteredExtensionsOnly} property is set to "false", the list of extensions may
+	 * increase as file extensions are resolved via
+	 * {@link org.springframework.http.MediaTypeFactory} and cached.
 	 */
 	@Override
 	public List<String> getAllFileExtensions() {

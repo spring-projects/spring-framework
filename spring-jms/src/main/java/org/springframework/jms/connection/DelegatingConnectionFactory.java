@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,6 +55,7 @@ import org.springframework.util.Assert;
 public class DelegatingConnectionFactory
 		implements SmartConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean {
 
+	@Nullable
 	private ConnectionFactory targetConnectionFactory;
 
 	private boolean shouldStopConnections = false;
@@ -62,16 +64,22 @@ public class DelegatingConnectionFactory
 	/**
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
-	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
-		Assert.notNull(targetConnectionFactory, "'targetConnectionFactory' must not be null");
+	public void setTargetConnectionFactory(@Nullable ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
 	/**
 	 * Return the target ConnectionFactory that this ConnectionFactory delegates to.
 	 */
+	@Nullable
 	public ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
+	}
+
+	private ConnectionFactory obtainTargetConnectionFactory() {
+		ConnectionFactory target = getTargetConnectionFactory();
+		Assert.state(target != null, "No 'targetConnectionFactory' set");
+		return target;
 	}
 
 	/**
@@ -182,12 +190,6 @@ public class DelegatingConnectionFactory
 	@Override
 	public JMSContext createContext(int sessionMode) {
 		return obtainTargetConnectionFactory().createContext(sessionMode);
-	}
-
-	private ConnectionFactory obtainTargetConnectionFactory() {
-		ConnectionFactory target = getTargetConnectionFactory();
-		Assert.state(target != null, "'targetConnectionFactory' is required");
-		return target;
 	}
 
 	@Override

@@ -38,9 +38,7 @@ public class UndertowHttpServer extends AbstractHttpServer {
 	}
 
 	private UndertowHttpHandlerAdapter initHttpHandlerAdapter() {
-		return getHttpHandlerMap() != null ?
-				new UndertowHttpHandlerAdapter(getHttpHandlerMap()) :
-				new UndertowHttpHandlerAdapter(getHttpHandler());
+		return new UndertowHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override

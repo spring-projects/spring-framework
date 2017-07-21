@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -30,6 +31,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
@@ -125,6 +127,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 	 * @return the resolved matcher, or {@code null}
 	 * @throws Exception if any of the HandlerMapping's raise an exception
 	 */
+	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {

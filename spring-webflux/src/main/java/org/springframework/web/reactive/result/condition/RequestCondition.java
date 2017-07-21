@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.condition;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -55,6 +56,7 @@ public interface RequestCondition<T> {
 	 * empty content thus not causing a failure to match.
 	 * @return a condition instance in case of a match or {@code null} otherwise.
 	 */
+	@Nullable
 	T getMatchingCondition(ServerWebExchange exchange);
 
 	/**

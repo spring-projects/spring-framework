@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -53,14 +54,18 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  */
 public class ViewResolverRegistry {
 
+	@Nullable
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
+	@Nullable
 	private Integer order;
 
+	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 
@@ -98,15 +103,14 @@ public class ViewResolverRegistry {
 	 * media types requested by the client (e.g. in the Accept header).
 	 * <p>If invoked multiple times the provided default views will be added to
 	 * any other default views that may have been configured already.
-	 *
 	 * @see ContentNegotiatingViewResolver#setDefaultViews
 	 */
 	public void enableContentNegotiation(boolean useNotAcceptableStatus, View... defaultViews) {
-		initContentNegotiatingViewResolver(defaultViews);
-		this.contentNegotiatingResolver.setUseNotAcceptableStatusCode(useNotAcceptableStatus);
+		ContentNegotiatingViewResolver vr = initContentNegotiatingViewResolver(defaultViews);
+		vr.setUseNotAcceptableStatusCode(useNotAcceptableStatus);
 	}
 
-	private void initContentNegotiatingViewResolver(View[] defaultViews) {
+	private ContentNegotiatingViewResolver initContentNegotiatingViewResolver(View[] defaultViews) {
 		// ContentNegotiatingResolver in the registry: elevate its precedence!
 		this.order = (this.order != null ? this.order : Ordered.HIGHEST_PRECEDENCE);
 
@@ -123,8 +127,11 @@ public class ViewResolverRegistry {
 			this.contentNegotiatingResolver = new ContentNegotiatingViewResolver();
 			this.contentNegotiatingResolver.setDefaultViews(Arrays.asList(defaultViews));
 			this.contentNegotiatingResolver.setViewResolvers(this.viewResolvers);
-			this.contentNegotiatingResolver.setContentNegotiationManager(this.contentNegotiationManager);
+			if (this.contentNegotiationManager != null) {
+				this.contentNegotiatingResolver.setContentNegotiationManager(this.contentNegotiationManager);
+			}
 		}
+		return this.contentNegotiatingResolver;
 	}
 
 	/**
@@ -162,7 +169,7 @@ public class ViewResolverRegistry {
 	 * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration tiles() {
-		if (this.applicationContext != null && !hasBeanOfType(TilesConfigurer.class)) {
+		if (!checkBeanOfType(TilesConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a Tiles view resolver " +
 					"there must also be a single TilesConfigurer bean in this web application context " +
 					"(or its parent).");
@@ -179,7 +186,7 @@ public class ViewResolverRegistry {
 	 * {@link org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration freeMarker() {
-		if (this.applicationContext != null && !hasBeanOfType(FreeMarkerConfigurer.class)) {
+		if (!checkBeanOfType(FreeMarkerConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a FreeMarker view resolver " +
 					"there must also be a single FreeMarkerConfig bean in this web application context " +
 					"(or its parent): FreeMarkerConfigurer is the usual implementation. " +
@@ -195,7 +202,7 @@ public class ViewResolverRegistry {
 	 * prefix and a default suffix of ".tpl".
 	 */
 	public UrlBasedViewResolverRegistration groovy() {
-		if (this.applicationContext != null && !hasBeanOfType(GroovyMarkupConfigurer.class)) {
+		if (!checkBeanOfType(GroovyMarkupConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a Groovy markup view resolver " +
 					"there must also be a single GroovyMarkupConfig bean in this web application context " +
 					"(or its parent): GroovyMarkupConfigurer is the usual implementation. " +
@@ -211,7 +218,7 @@ public class ViewResolverRegistry {
 	 * @since 4.2
 	 */
 	public UrlBasedViewResolverRegistration scriptTemplate() {
-		if (this.applicationContext != null && !hasBeanOfType(ScriptTemplateConfigurer.class)) {
+		if (!checkBeanOfType(ScriptTemplateConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a script template view resolver " +
 					"there must also be a single ScriptTemplateConfig bean in this web application context " +
 					"(or its parent): ScriptTemplateConfigurer is the usual implementation. " +
@@ -262,11 +269,12 @@ public class ViewResolverRegistry {
 		this.order = order;
 	}
 
-	protected boolean hasBeanOfType(Class<?> beanType) {
-		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-				this.applicationContext, beanType, false, false));
-	}
 
+	private boolean checkBeanOfType(Class<?> beanType) {
+		return (this.applicationContext == null ||
+				!ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+						this.applicationContext, beanType, false, false)));
+	}
 
 	protected int getOrder() {
 		return (this.order != null ? this.order : Ordered.LOWEST_PRECEDENCE);

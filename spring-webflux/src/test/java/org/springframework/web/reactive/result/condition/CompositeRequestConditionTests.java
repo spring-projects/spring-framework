@@ -19,14 +19,13 @@ package org.springframework.web.reactive.result.condition;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link CompositeRequestCondition}.
@@ -34,8 +33,6 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 public class CompositeRequestConditionTests {
-
-	private ServerHttpRequest request;
 
 	private ParamsRequestCondition param1;
 	private ParamsRequestCondition param2;
@@ -48,8 +45,6 @@ public class CompositeRequestConditionTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.request = MockServerHttpRequest.get("/").build();
-
 		this.param1 = new ParamsRequestCondition("param1");
 		this.param2 = new ParamsRequestCondition("param2");
 		this.param3 = this.param1.combine(this.param2);
@@ -88,7 +83,7 @@ public class CompositeRequestConditionTests {
 
 	@Test
 	public void match() {
-		this.request = MockServerHttpRequest.get("/path?param1=paramValue1").build();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/path?param1=paramValue1").toExchange();
 
 		RequestCondition<?> condition1 = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
 		RequestCondition<?> condition2 = new RequestMethodsRequestCondition(RequestMethod.GET);
@@ -96,26 +91,26 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition composite1 = new CompositeRequestCondition(this.param1, condition1);
 		CompositeRequestCondition composite2 = new CompositeRequestCondition(this.param1, condition2);
 
-		assertEquals(composite2, composite1.getMatchingCondition(createExchange()));
+		assertEquals(composite2, composite1.getMatchingCondition(exchange));
 	}
 
 	@Test
 	public void noMatch() {
 		CompositeRequestCondition cond = new CompositeRequestCondition(this.param1);
-		assertNull(cond.getMatchingCondition(createExchange()));
+		assertNull(cond.getMatchingCondition(MockServerHttpRequest.get("/").toExchange()));
 	}
 
 	@Test
 	public void matchEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
-		assertSame(empty, empty.getMatchingCondition(createExchange()));
+		assertSame(empty, empty.getMatchingCondition(MockServerHttpRequest.get("/").toExchange()));
 	}
 
 	@Test
 	public void compare() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3);
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		assertEquals(1, cond1.compareTo(cond3, exchange));
 		assertEquals(-1, cond3.compareTo(cond1, exchange));
@@ -125,7 +120,7 @@ public class CompositeRequestConditionTests {
 	public void compareEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		assertEquals(0, empty.compareTo(empty, exchange));
 		assertEquals(-1, notEmpty.compareTo(empty, exchange));
@@ -136,12 +131,8 @@ public class CompositeRequestConditionTests {
 	public void compareDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
-		cond1.compareTo(cond2, createExchange());
+		cond1.compareTo(cond2, MockServerHttpRequest.get("/").toExchange());
 	}
 
-
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-	}
 
 }

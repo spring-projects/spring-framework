@@ -19,64 +19,87 @@ package org.springframework.web.reactive.result.method;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.util.Assert;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * An extension of {@code InvocableHandlerMethod} for synchronous, non-blocking
- * method invocation via {@link #invokeForHandlerResult}. By allowing only
- * {@link SyncHandlerMethodArgumentResolver}s to be configured, the invocation
- * is guaranteed to be non-blocking.
+ * Extension of {@link HandlerMethod} that invokes the underlying method via
+ * {@link InvocableHandlerMethod} but uses sync argument resolvers only and
+ * thus can return directly a {@link HandlerResult} with no async wrappers.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
+public class SyncInvocableHandlerMethod extends HandlerMethod {
+
+	private final InvocableHandlerMethod delegate;
+
 
 	public SyncInvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
+		this.delegate = new InvocableHandlerMethod(handlerMethod);
 	}
 
 	public SyncInvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
+		this.delegate = new InvocableHandlerMethod(bean, method);
 	}
 
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Resolvers must be of type {@link SyncHandlerMethodArgumentResolver}.
-	 * @see #setSyncArgumentResolvers(List)
+	 * Configure the argument resolvers to use to use for resolving method
+	 * argument values against a {@code ServerWebExchange}.
 	 */
-	@Override
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.forEach(resolver ->
-				Assert.isInstanceOf(SyncHandlerMethodArgumentResolver.class, resolver,
-						"SyncHandlerMethodArgumentResolver requires SyncHandlerMethodArgumentResolver"));
-		super.setArgumentResolvers(resolvers);
+	public void setArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
+		this.delegate.setArgumentResolvers(new ArrayList<>(resolvers));
 	}
 
 	/**
-	 * Convenient alternative to {@link #setArgumentResolvers(List)} to configure
-	 * synchronous argument resolvers.
+	 * Return the configured argument resolvers.
 	 */
-	public void setSyncArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
-		setArgumentResolvers(new ArrayList<>(resolvers));
+	public List<SyncHandlerMethodArgumentResolver> getResolvers() {
+		return this.delegate.getResolvers().stream()
+				.map(resolver -> (SyncHandlerMethodArgumentResolver) resolver)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
+	 * (e.g. default request attribute name).
+	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {
+		this.delegate.setParameterNameDiscoverer(nameDiscoverer);
+	}
+
+	/**
+	 * Return the configured parameter name discoverer.
+	 */
+	public ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.delegate.getParameterNameDiscoverer();
 	}
 
 
 	/**
-	 * Delegate to the base class {@link #invoke} and also wait for the result.
-	 * Since all argument resolvers are synchronous this won't actually block.
+	 * Invoke the method for the given exchange.
+	 * @param exchange the current exchange
+	 * @param bindingContext the binding context to use
+	 * @param providedArgs optional list of argument values to match by type
+	 * @return Mono with a {@link HandlerResult}.
 	 */
+	@Nullable
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		// This will not block
-		return super.invoke(exchange, bindingContext, providedArgs).block();
+		// This will not block with only sync resolvers allowed
+		return this.delegate.invoke(exchange, bindingContext, providedArgs).block();
 	}
 
 }

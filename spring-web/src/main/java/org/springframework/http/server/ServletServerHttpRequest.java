@@ -40,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -60,8 +61,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 
+	@Nullable
 	private HttpHeaders headers;
 
+	@Nullable
 	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 
@@ -83,8 +86,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.servletRequest.getMethod());
+	public String getMethodValue() {
+		return this.servletRequest.getMethod();
 	}
 
 	@Override

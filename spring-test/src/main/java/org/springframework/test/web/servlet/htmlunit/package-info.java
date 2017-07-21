@@ -3,4 +3,7 @@
  * and HtmlUnit.
  * @see org.springframework.test.web.servlet.MockMvc
  */
+@NonNullApi
 package org.springframework.test.web.servlet.htmlunit;
+
+import org.springframework.lang.NonNullApi;

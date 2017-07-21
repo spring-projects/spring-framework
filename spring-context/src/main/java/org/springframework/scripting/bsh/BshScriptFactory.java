@@ -21,6 +21,7 @@ import java.io.IOException;
 import bsh.EvalError;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -46,10 +47,13 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 
+	@Nullable
 	private final Class<?>[] scriptInterfaces;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	@Nullable
 	private Class<?> scriptClass;
 
 	private final Object scriptClassMonitor = new Object();
@@ -81,7 +85,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement (may be {@code null})
 	 */
-	public BshScriptFactory(String scriptSourceLocator, Class<?>... scriptInterfaces) {
+	public BshScriptFactory(String scriptSourceLocator, @Nullable Class<?>... scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
@@ -100,6 +104,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 	@Override
+	@Nullable
 	public Class<?>[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
@@ -117,7 +122,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
 	@Override
-	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		Class<?> clazz;

@@ -18,6 +18,8 @@ package org.springframework.scripting;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Spring's strategy interface for evaluating a script.
  *
@@ -38,6 +40,7 @@ public interface ScriptEvaluator {
 	 * @throws ScriptCompilationException if the evaluator failed to read,
 	 * compile or evaluate the script
 	 */
+	@Nullable
 	Object evaluate(ScriptSource script) throws ScriptCompilationException;
 
 	/**
@@ -49,6 +52,7 @@ public interface ScriptEvaluator {
 	 * @throws ScriptCompilationException if the evaluator failed to read,
 	 * compile or evaluate the script
 	 */
-	Object evaluate(ScriptSource script, Map<String, Object> arguments) throws ScriptCompilationException;
+	@Nullable
+	Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) throws ScriptCompilationException;
 
 }

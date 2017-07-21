@@ -19,6 +19,7 @@ package org.springframework.core.env;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -305,6 +306,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * <li>if the option is not present, return {@code null}</li>
 	 * </ul>
 	 */
+	@Nullable
 	protected abstract List<String> getOptionValues(String name);
 
 	/**

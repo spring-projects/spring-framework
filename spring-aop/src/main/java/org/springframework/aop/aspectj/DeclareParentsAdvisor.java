@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,12 +76,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
 		// Excludes methods implemented.
-		ClassFilter exclusion = new ClassFilter() {
-			@Override
-			public boolean matches(Class<?> clazz) {
-				return !(introducedInterface.isAssignableFrom(clazz));
-			}
-		};
+		ClassFilter exclusion = clazz -> !(introducedInterface.isAssignableFrom(clazz));
 
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 		this.advice = advice;

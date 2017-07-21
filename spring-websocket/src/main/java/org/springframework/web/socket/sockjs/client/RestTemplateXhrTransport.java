@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
@@ -98,35 +99,32 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 			final URI receiveUrl, final HttpHeaders handshakeHeaders, final XhrClientSockJsSession session,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
-		getTaskExecutor().execute(new Runnable() {
-			@Override
-			public void run() {
-				HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
-				XhrRequestCallback requestCallback = new XhrRequestCallback(handshakeHeaders);
-				XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(httpHeaders);
-				XhrReceiveExtractor responseExtractor = new XhrReceiveExtractor(session);
-				while (true) {
-					if (session.isDisconnected()) {
-						session.afterTransportClosed(null);
-						break;
+		getTaskExecutor().execute(() -> {
+			HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
+			XhrRequestCallback requestCallback = new XhrRequestCallback(handshakeHeaders);
+			XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(httpHeaders);
+			XhrReceiveExtractor responseExtractor = new XhrReceiveExtractor(session);
+			while (true) {
+				if (session.isDisconnected()) {
+					session.afterTransportClosed(null);
+					break;
+				}
+				try {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Starting XHR receive request, url=" + receiveUrl);
 					}
-					try {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Starting XHR receive request, url=" + receiveUrl);
-						}
-						getRestTemplate().execute(receiveUrl, HttpMethod.POST, requestCallback, responseExtractor);
-						requestCallback = requestCallbackAfterHandshake;
+					getRestTemplate().execute(receiveUrl, HttpMethod.POST, requestCallback, responseExtractor);
+					requestCallback = requestCallbackAfterHandshake;
+				}
+				catch (Throwable ex) {
+					if (!connectFuture.isDone()) {
+						connectFuture.setException(ex);
 					}
-					catch (Throwable ex) {
-						if (!connectFuture.isDone()) {
-							connectFuture.setException(ex);
-						}
-						else {
-							session.handleTransportError(ex);
-							session.afterTransportClosed(new CloseStatus(1006, ex.getMessage()));
-						}
-						break;
+					else {
+						session.handleTransportError(ex);
+						session.afterTransportClosed(new CloseStatus(1006, ex.getMessage()));
 					}
+					break;
 				}
 			}
 		});
@@ -135,13 +133,18 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	@Override
 	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
 		RequestCallback requestCallback = new XhrRequestCallback(headers);
-		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor);
+		return nonNull(this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor));
 	}
 
 	@Override
 	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
 		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
-		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
+		return nonNull(this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor));
+	}
+
+	private static <T> T nonNull(@Nullable T result) {
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 
@@ -149,18 +152,11 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
 	private final static ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
-			new ResponseExtractor<ResponseEntity<String>>() {
-				@Override
-				public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
-					if (response.getBody() == null) {
-						return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
-					}
-					else {
-						String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
-						return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
-					}
-				}
+			response -> {
+				String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
+				return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
 			};
+
 
 	/**
 	 * A RequestCallback to add the headers and (optionally) String content.
@@ -169,22 +165,21 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		private final HttpHeaders headers;
 
+		@Nullable
 		private final String body;
 
 		public XhrRequestCallback(HttpHeaders headers) {
 			this(headers, null);
 		}
 
-		public XhrRequestCallback(HttpHeaders headers, String body) {
+		public XhrRequestCallback(HttpHeaders headers, @Nullable String body) {
 			this.headers = headers;
 			this.body = body;
 		}
 
 		@Override
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
-			if (this.headers != null) {
-				request.getHeaders().putAll(this.headers);
-			}
+			request.getHeaders().putAll(this.headers);
 			if (this.body != null) {
 				StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
 			}

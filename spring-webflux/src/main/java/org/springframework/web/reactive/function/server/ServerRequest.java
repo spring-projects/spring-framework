@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,13 +29,20 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.AbstractJackson2Codec;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 /**
@@ -51,6 +59,7 @@ public interface ServerRequest {
 	/**
 	 * Return the HTTP method.
 	 */
+	@Nullable
 	HttpMethod method();
 
 	/**
@@ -62,13 +71,25 @@ public interface ServerRequest {
 	 * Return the request path.
 	 */
 	default String path() {
-		return uri().getPath();
+		return uri().getRawPath();
+	}
+
+	/**
+	 * Return the request path as {@code PathContainer}.
+	 */
+	default PathContainer pathContainer() {
+		return PathContainer.parseUrlPath(path());
 	}
 
 	/**
 	 * Return the headers of this request.
 	 */
 	Headers headers();
+
+	/**
+	 * Return the cookies of this request.
+	 */
+	MultiValueMap<String, HttpCookie> cookies();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.
@@ -82,7 +103,7 @@ public interface ServerRequest {
 	/**
 	 * Extract the body with the given {@code BodyExtractor} and hints.
 	 * @param extractor the {@code BodyExtractor} that reads from the request
-	 * @param hints the map of hints like {@link AbstractJackson2Codec#JSON_VIEW_HINT}
+	 * @param hints the map of hints like {@link Jackson2CodecSupport#JSON_VIEW_HINT}
 	 * to use to customize body extraction
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
@@ -108,10 +129,17 @@ public interface ServerRequest {
 	/**
 	 * Return the request attribute value if present.
 	 * @param name the attribute name
-	 * @param <T> the attribute type
 	 * @return the attribute value
 	 */
-	<T> Optional<T> attribute(String name);
+	default Optional<Object> attribute(String name) {
+		Map<String, Object> attributes = attributes();
+		if (attributes.containsKey(name)) {
+			return Optional.of(attributes.get(name));
+		}
+		else {
+			return Optional.empty();
+		}
+	}
 
 	/**
 	 * Return a mutable map of request attributes.
@@ -125,17 +153,23 @@ public interface ServerRequest {
 	 * @return the parameter value
 	 */
 	default Optional<String> queryParam(String name) {
-		List<String> queryParams = this.queryParams(name);
-		return (!queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty());
+		List<String> queryParamValues = queryParams().get(name);
+		if (CollectionUtils.isEmpty(queryParamValues)) {
+			return Optional.empty();
+		}
+		else {
+			String value = queryParamValues.get(0);
+			if (value == null) {
+				value = "";
+			}
+			return Optional.of(value);
+		}
 	}
 
 	/**
-	 * Return all query parameter with the given name.
-	 * <p>Returns an empty list if no values could be found.
-	 * @param name the parameter name
-	 * @return the parameter values
+	 * Return all query parameters for this request.
 	 */
-	List<String> queryParams(String name);
+	MultiValueMap<String, String> queryParams();
 
 	/**
 	 * Return the path variable with the given name, if present.
@@ -154,13 +188,12 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all path variables for the current request.
-	 * @return a {@code Map} from path variable name to associated value
+	 * Return all path variables for this request.
 	 */
 	Map<String, String> pathVariables();
 
 	/**
-	 * Return the web session for the current request. Always guaranteed  to
+	 * Return the web session for this request. Always guaranteed to
 	 * return an instance either matching to the session id requested by the
 	 * client, or with a new session id either because the client did not
 	 * specify one or because the underlying session had expired. Use of this
@@ -168,6 +201,24 @@ public interface ServerRequest {
 	 */
 	Mono<WebSession> session();
 
+	/**
+	 * Return the authenticated user for the request, if any.
+	 */
+	Mono<? extends Principal> principal();
+
+
+	/**
+	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
+	 * message readers.
+	 * @param exchange the exchange
+	 * @param messageReaders the message readers
+	 * @return the created {@code ServerRequest}
+	 */
+	static ServerRequest create(ServerWebExchange exchange,
+			List<HttpMessageReader<?>> messageReaders) {
+
+		return new DefaultServerRequest(exchange, messageReaders);
+	}
 
 	/**
 	 * Represents the headers of the HTTP request.
@@ -211,6 +262,7 @@ public interface ServerRequest {
 		 * <p>If the header value does not contain a port, the returned
 		 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
 		 */
+		@Nullable
 		InetSocketAddress host();
 
 		/**

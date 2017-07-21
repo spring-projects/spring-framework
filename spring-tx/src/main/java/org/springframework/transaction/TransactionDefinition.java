@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.transaction;
 
 import java.sql.Connection;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines Spring-compliant transaction properties.
@@ -233,7 +235,7 @@ public interface TransactionDefinition {
 	 * ({@link #PROPAGATION_SUPPORTS}). In the latter case, the flag will
 	 * only apply to managed resources within the application, such as a
 	 * Hibernate {@code Session}.
-	 <<	 * <p>This just serves as a hint for the actual transaction subsystem;
+	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
@@ -253,6 +255,7 @@ public interface TransactionDefinition {
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
+	@Nullable
 	String getName();
 
 }

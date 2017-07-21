@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -46,37 +49,40 @@ import org.springframework.web.server.ServerWebInputException;
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...}
+	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
+	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+		super(factory, registry);
 	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
-				!Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::singleParam);
+	}
+
+	private boolean singleParam(RequestHeader annotation, Class<?> type) {
+		return !Map.class.isAssignableFrom(type);
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader annotation = parameter.getParameterAnnotation(RequestHeader.class);
-		return new RequestHeaderNamedValueInfo(annotation);
+		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		Assert.state(ann != null, "No RequestHeader annotation");
+		return new RequestHeaderNamedValueInfo(ann);
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
+	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		List<String> headerValues = exchange.getRequest().getHeaders().get(name);
 		Object result = null;
 		if (headerValues != null) {
 			result = (headerValues.size() == 1 ? headerValues.get(0) : headerValues);
 		}
-		return Optional.ofNullable(result);
+		return result;
 	}
 
 	@Override

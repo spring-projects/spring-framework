@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -75,8 +77,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private XmlReaderContext readerContext;
 
+	@Nullable
 	private BeanDefinitionParserDelegate delegate;
 
 
@@ -98,13 +102,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * Return the descriptor for the XML resource that this parser works on.
 	 */
 	protected final XmlReaderContext getReaderContext() {
+		Assert.state(this.readerContext != null, "No XmlReaderContext available");
 		return this.readerContext;
 	}
 
 	/**
-	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
-	 * source metadata from the supplied {@link Element}.
+	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor}
+	 * to pull the source metadata from the supplied {@link Element}.
 	 */
+	@Nullable
 	protected Object extractSource(Element ele) {
 		return getReaderContext().extractSource(ele);
 	}
@@ -146,7 +152,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	protected BeanDefinitionParserDelegate createDelegate(
-			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+			XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		delegate.initDefaults(root, parentDelegate);
