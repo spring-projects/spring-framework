@@ -53,7 +53,7 @@ import org.springframework.web.servlet.ViewResolver;
  */
 public class BeanNameViewResolver extends WebApplicationObjectSupport implements ViewResolver, Ordered {
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 
 	public void setOrder(int order) {
