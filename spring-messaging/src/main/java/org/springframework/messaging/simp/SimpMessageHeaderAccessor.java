@@ -130,7 +130,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(DESTINATION_HEADER);
 	}
 
-	public void setSubscriptionId(String subscriptionId) {
+	public void setSubscriptionId(@Nullable String subscriptionId) {
 		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
@@ -139,7 +139,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
-	public void setSessionId(String sessionId) {
+	public void setSessionId(@Nullable String sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 

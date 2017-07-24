@@ -28,32 +28,32 @@ class BeanUtilsKotlinTests {
 
 	@Test
 	fun `Instantiate immutable class`() {
-		val constructor = BeanUtils.findPrimaryConstructor(Foo::class.java)
-		val foo = BeanUtils.instantiateClass(constructor, "bar", 3) as Foo
+		val constructor = BeanUtils.findPrimaryConstructor(Foo::class.java)!!
+		val foo = BeanUtils.instantiateClass(constructor, "bar", 3)
 		assertEquals("bar", foo.param1)
 		assertEquals(3, foo.param2)
 	}
 
 	@Test
 	fun `Instantiate immutable class with optional parameter and all parameters specified`() {
-		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)
-		val bar = BeanUtils.instantiateClass(constructor, "baz", 8) as Bar
+		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)!!
+		val bar = BeanUtils.instantiateClass(constructor, "baz", 8)
 		assertEquals("baz", bar.param1)
 		assertEquals(8, bar.param2)
 	}
 
 	@Test
 	fun `Instantiate immutable class with optional parameter and only mandatory parameters specified by position`() {
-		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)
-		val bar = BeanUtils.instantiateClass(constructor, "baz") as Bar
+		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)!!
+		val bar = BeanUtils.instantiateClass(constructor, "baz")
 		assertEquals("baz", bar.param1)
 		assertEquals(12, bar.param2)
 	}
 
 	@Test
 	fun `Instantiate immutable class with optional parameter specified with null value`() {
-		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)
-		val bar = BeanUtils.instantiateClass(constructor, "baz", null) as Bar
+		val constructor = BeanUtils.findPrimaryConstructor(Bar::class.java)!!
+		val bar = BeanUtils.instantiateClass(constructor, "baz", null)
 		assertEquals("baz", bar.param1)
 		assertEquals(12, bar.param2)
 	}

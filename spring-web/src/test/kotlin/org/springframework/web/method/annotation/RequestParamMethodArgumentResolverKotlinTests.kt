@@ -76,7 +76,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		val method = ReflectionUtils.findMethod(javaClass, "handle", String::class.java,
 				String::class.java, String::class.java, String::class.java,
 				MultipartFile::class.java, MultipartFile::class.java,
-				MultipartFile::class.java, MultipartFile::class.java)
+				MultipartFile::class.java, MultipartFile::class.java)!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)
