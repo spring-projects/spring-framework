@@ -89,7 +89,7 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 									  isLazyInit: Boolean? = null,
 									  isPrimary: Boolean? = null,
 									  isAutowireCandidate: Boolean? = null,
-									  crossinline function: (BeanDefinitionContext) -> T) {
+									  crossinline function: BeanDefinitionContext.() -> T) {
 		
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.toLowerCase() }
@@ -122,7 +122,7 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 	 * Take in account bean definitions enclosed in the provided lambda only when the
 	 * specified environment-based predicate is true.
 	 */
-	fun environment(condition: (ConfigurableEnvironment) -> Boolean, init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
+	fun environment(condition: ConfigurableEnvironment.() -> Boolean, init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
 		val beans = BeanDefinitionDsl(condition::invoke)
 		beans.init()
 		children.add(beans)
