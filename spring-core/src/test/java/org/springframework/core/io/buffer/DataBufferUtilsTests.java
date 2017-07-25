@@ -207,7 +207,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	@Ignore  // SPR-15798
 	public void writeAsynchronousFileChannel() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");

@@ -517,7 +517,7 @@ public abstract class DataBufferUtils {
 
 		private final AtomicBoolean completed = new AtomicBoolean();
 
-		private long position;
+		private final AtomicLong position;
 
 		@Nullable
 		private DataBuffer dataBuffer;
@@ -526,7 +526,7 @@ public abstract class DataBufferUtils {
 				FluxSink<DataBuffer> sink, AsynchronousFileChannel channel, long position) {
 			this.sink = sink;
 			this.channel = channel;
-			this.position = position;
+			this.position = new AtomicLong(position);
 		}
 
 		@Override
@@ -539,7 +539,7 @@ public abstract class DataBufferUtils {
 			this.dataBuffer = value;
 			ByteBuffer byteBuffer = value.asByteBuffer();
 
-			this.channel.write(byteBuffer, this.position, byteBuffer, this);
+			this.channel.write(byteBuffer, this.position.get(), byteBuffer, this);
 		}
 
 		@Override
@@ -550,17 +550,23 @@ public abstract class DataBufferUtils {
 		@Override
 		protected void hookOnComplete() {
 			this.completed.set(true);
+
+			if (this.dataBuffer == null) {
+				this.sink.complete();
+			}
 		}
 
 		@Override
 		public void completed(Integer written, ByteBuffer byteBuffer) {
-			this.position += written;
+			this.position.addAndGet(written);
 			if (byteBuffer.hasRemaining()) {
-				this.channel.write(byteBuffer, this.position, byteBuffer, this);
+				this.channel.write(byteBuffer, this.position.get(), byteBuffer, this);
 				return;
 			}
-			else if (this.dataBuffer != null) {
+
+			if (this.dataBuffer != null) {
 				this.sink.next(this.dataBuffer);
+				this.dataBuffer = null;
 			}
 			if (this.completed.get()) {
 				this.sink.complete();
