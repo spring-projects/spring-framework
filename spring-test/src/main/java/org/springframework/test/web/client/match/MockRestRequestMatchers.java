@@ -87,6 +87,18 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
+	 * Assert the request URI string.
+	 * @param expectedUri the expected URI
+	 * @param uriVars zero or more URI variables to populate the expected URI
+	 * @return the request matcher
+	 */
+	public static RequestMatcher requestToUriTemplate(final String expectedUri, final Object... uriVars) {
+		Assert.notNull(expectedUri, "'uri' must not be null");
+		String uri = UriComponentsBuilder.fromUriString(expectedUri).buildAndExpand(uriVars).encode().toString();
+		return request -> assertEquals("Request URI", uri, request.getURI().toString());
+	}
+
+	/**
 	 * Expect a request to the given URI.
 	 * @param uri the expected URI
 	 * @return the request matcher
