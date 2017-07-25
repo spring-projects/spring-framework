@@ -337,4 +337,20 @@ public class MimeTypeTests {
 		assertEquals(m2, m1);
 	}
 
+	/**
+	 * SPR-15795
+	 */
+	@Test
+	public void includesAndIsCompatibleWithUseLastPlusSymbolForSyntaxSuffix() {
+		MimeType m1 = new MimeType("application", "*+json");
+		MimeType m2 = new MimeType("application", "x.y+z+json");
+
+		assertTrue(m1.includes(m2));
+		assertFalse(m2.includes(m1));
+
+		assertTrue(m1.isCompatibleWith(m2));
+		assertTrue(m2.isCompatibleWith(m1));
+	}
+
+
 }
