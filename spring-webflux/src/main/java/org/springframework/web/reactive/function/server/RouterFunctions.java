@@ -204,6 +204,16 @@ public abstract class RouterFunctions {
 	}
 
 	/**
+	 * Convert the given {@linkplain RouterFunction router function} into a {@link WebHandler}.
+	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
+	 * @param routerFunction the router function to convert
+	 * @return a web handler that handles web request using the given router function
+	 */
+	public static WebHandler toWebHandler(RouterFunction<?> routerFunction) {
+		return toWebHandler(routerFunction, HandlerStrategies.withDefaults());
+	}
+
+	/**
 	 * Convert the given {@linkplain RouterFunction router function} into a {@link WebHandler},
 	 * using the given strategies.
 	 * @param routerFunction the router function to convert
