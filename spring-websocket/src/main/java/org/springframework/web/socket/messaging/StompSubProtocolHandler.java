@@ -258,12 +258,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
-
-				Principal user = getUser(session);
-				if (user != null) {
-					headerAccessor.setUser(user);
-				}
-
+				headerAccessor.setUser(getUser(session));
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
@@ -287,11 +282,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 					if (sent) {
 						if (isConnect) {
+							Principal user = headerAccessor.getUser();
 							if (user != null && user != session.getPrincipal()) {
 								this.stompAuthentications.put(session.getId(), user);
 							}
 						}
 						if (this.eventPublisher != null) {
+							Principal user = getUser(session);
 							if (isConnect) {
 								publishEvent(this.eventPublisher, new SessionConnectEvent(this, message, user));
 							}
