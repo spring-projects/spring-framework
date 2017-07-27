@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,11 @@ public class OrderComparator implements Comparator<Object> {
 	}
 
 	@Override
-	public int compare(Object o1, Object o2) {
+	public int compare(@Nullable Object o1, @Nullable Object o2) {
 		return doCompare(o1, o2, null);
 	}
 
-	private int doCompare(Object o1, Object o2, @Nullable OrderSourceProvider sourceProvider) {
+	private int doCompare(@Nullable Object o1, @Nullable Object o2, @Nullable OrderSourceProvider sourceProvider) {
 		boolean p1 = (o1 instanceof PriorityOrdered);
 		boolean p2 = (o2 instanceof PriorityOrdered);
 		if (p1 && !p2) {
@@ -92,9 +92,9 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
-	private int getOrder(Object obj, @Nullable OrderSourceProvider sourceProvider) {
+	private int getOrder(@Nullable Object obj, @Nullable OrderSourceProvider sourceProvider) {
 		Integer order = null;
-		if (sourceProvider != null) {
+		if (obj != null && sourceProvider != null) {
 			Object orderSource = sourceProvider.getOrderSource(obj);
 			if (orderSource != null) {
 				if (orderSource.getClass().isArray()) {
@@ -121,9 +121,14 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
-	protected int getOrder(Object obj) {
-		Integer order = findOrder(obj);
-		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
+	protected int getOrder(@Nullable Object obj) {
+		if (obj != null) {
+			Integer order = findOrder(obj);
+			if (order != null) {
+				return order;
+			}
+		}
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 	/**
