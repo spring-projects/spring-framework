@@ -16,6 +16,7 @@
 
 package org.springframework.web.client
 
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
@@ -142,7 +143,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any)
  */
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod, requestEntity: HttpEntity<*>, vararg uriVariables: Any): ResponseEntity<T> =
-		exchange(url, method, requestEntity, T::class.java, *uriVariables)
+		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, *uriVariables)
 
 /**
  * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
@@ -153,7 +154,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  */
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod, requestEntity: HttpEntity<*>, uriVariables: Map<String, *>): ResponseEntity<T> =
-		exchange(url, method, requestEntity, T::class.java, uriVariables)
+		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, uriVariables)
 
 /**
  * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
@@ -164,7 +165,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  */
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod, requestEntity: HttpEntity<*>): ResponseEntity<T> =
-		exchange(url, method, requestEntity, T::class.java)
+		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Extension for [RestOperations.exchange] avoiding specifying the type parameter thanks to Kotlin reified type parameters.
@@ -175,4 +176,4 @@ inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod
  */
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.exchange(requestEntity: RequestEntity<*>): ResponseEntity<T> =
-		exchange(requestEntity, T::class.java)
+		exchange(requestEntity, object : ParameterizedTypeReference<T>() {})

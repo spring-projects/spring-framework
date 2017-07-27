@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.server
 
 import org.reactivestreams.Publisher
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
 /**
@@ -25,4 +27,14 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publisher<T>): Mono<ServerResponse> = body(publisher, T::class.java)
+inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publisher<T>): Mono<ServerResponse> =
+		body(publisher, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [ServerResponse.BodyBuilder.body] providing a `bodyToServerSentEvents(Publisher<T>)` variant.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0
+ */
+inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEvents(publisher: Publisher<T>): Mono<ServerResponse> =
+		contentType(MediaType.TEXT_EVENT_STREAM).body(publisher, object : ParameterizedTypeReference<T>() {})

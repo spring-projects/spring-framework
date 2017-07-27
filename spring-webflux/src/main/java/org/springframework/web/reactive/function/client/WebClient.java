@@ -524,6 +524,19 @@ public interface WebClient {
 		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
 		 * Publisher body inserter}.
 		 * @param publisher the {@code Publisher} to write to the request
+		 * @param typeReference the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
+		 * @return this builder
+		 */
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, ParameterizedTypeReference<T> typeReference);
+
+		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
+		 * Publisher body inserter}.
+		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}

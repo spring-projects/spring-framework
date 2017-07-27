@@ -24,6 +24,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import org.reactivestreams.Publisher
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType.*
 
 /**
  * Mock object based tests for [ServerResponse] Kotlin extensions
@@ -39,9 +41,16 @@ class ServerResponseExtensionsTests {
 
 	@Test
 	fun `BodyBuilder#body with Publisher and reified type parameters`() {
-		val body = mock<Publisher<Foo>>()
+		val body = mock<Publisher<List<Foo>>>()
 		bodyBuilder.body(body)
-		verify(bodyBuilder, times(1)).body(body, Foo::class.java)
+		verify(bodyBuilder, times(1)).body(body, object : ParameterizedTypeReference<List<Foo>>() {})
+	}
+
+	@Test
+	fun `BodyBuilder#bodyToServerSentEvents with Publisher and reified type parameters`() {
+		val body = mock<Publisher<List<Foo>>>()
+		bodyBuilder.bodyToServerSentEvents(body)
+		verify(bodyBuilder, times(1)).contentType(TEXT_EVENT_STREAM)
 	}
 
 	class Foo

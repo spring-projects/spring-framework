@@ -23,6 +23,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.core.ParameterizedTypeReference
 
 /**
  * Mock object based tests for [ClientResponse] Kotlin extensions
@@ -37,26 +38,26 @@ class ClientResponseExtensionsTests {
 
 	@Test
 	fun `bodyToMono with reified type parameters`() {
-		response.bodyToMono<Foo>()
-		verify(response, times(1)).bodyToMono(Foo::class.java)
+		response.bodyToMono<List<Foo>>()
+		verify(response, times(1)).bodyToMono(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	@Test
 	fun `bodyToFlux with reified type parameters`() {
-		response.bodyToFlux<Foo>()
-		verify(response, times(1)).bodyToFlux(Foo::class.java)
+		response.bodyToFlux<List<Foo>>()
+		verify(response, times(1)).bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	@Test
 	fun `toEntity with reified type parameters`() {
-		response.toEntity<Foo>()
-		verify(response, times(1)).toEntity(Foo::class.java)
+		response.toEntity<List<Foo>>()
+		verify(response, times(1)).toEntity(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	@Test
 	fun `ResponseSpec#toEntityList with reified type parameters`() {
-		response.toEntityList<Foo>()
-		verify(response, times(1)).toEntityList(Foo::class.java)
+		response.toEntityList<List<Foo>>()
+		verify(response, times(1)).toEntityList(object : ParameterizedTypeReference<List<Foo>>() {})
 	}
 
 	class Foo
