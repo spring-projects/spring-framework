@@ -180,7 +180,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
+			throw new IllegalStateException("Required key '" + key + "' not found");
 		}
 		return value;
 	}
@@ -189,7 +189,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public <T> T getRequiredProperty(String key, Class<T> valueType) throws IllegalStateException {
 		T value = getProperty(key, valueType);
 		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
+			throw new IllegalStateException("Required key '" + key + "' not found");
 		}
 		return value;
 	}
@@ -233,7 +233,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
-		return helper.replacePlaceholders(text, placeholderName -> getPropertyAsRawString(placeholderName));
+		return helper.replacePlaceholders(text, this::getPropertyAsRawString);
 	}
 
 	/**

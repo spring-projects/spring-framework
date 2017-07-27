@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,8 +119,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 	@Override
 	public String toString() {
-		return String.format("%s [name='%s', propertySources=%s]",
-				getClass().getSimpleName(), this.name, this.propertySources);
+		return getClass().getSimpleName() + " {name='" + this.name + "', propertySources=" + this.propertySources + "}";
 	}
 
 }
