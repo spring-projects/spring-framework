@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -516,8 +517,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToMono(typeReference);
+		}
+
+		@Override
 		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 			return this.request.bodyToFlux(elementClass);
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+			return this.request.bodyToFlux(typeReference);
 		}
 
 		@Override

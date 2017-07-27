@@ -17,9 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -33,6 +31,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -177,6 +176,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		return new DefaultEntityResponseBuilder<>(publisher,
 				BodyInserters.fromPublisher(publisher, elementClass))
+				.headers(this.headers)
+				.status(this.statusCode)
+				.build()
+				.map(entityResponse -> entityResponse);
+	}
+
+	@Override
+	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
+			ParameterizedTypeReference<T> typeReference) {
+
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+
+		return new DefaultEntityResponseBuilder<>(publisher,
+				BodyInserters.fromPublisher(publisher, typeReference))
 				.headers(this.headers)
 				.status(this.statusCode)
 				.build()

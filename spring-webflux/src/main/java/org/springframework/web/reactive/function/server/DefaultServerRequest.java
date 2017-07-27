@@ -32,6 +32,7 @@ import java.util.function.Function;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -140,8 +141,20 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+		Mono<T> mono = body(BodyExtractors.toMono(typeReference));
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+	}
+
+	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+		Flux<T> flux = body(BodyExtractors.toFlux(typeReference));
 		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 

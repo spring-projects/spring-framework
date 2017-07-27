@@ -29,6 +29,7 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -119,12 +120,28 @@ public interface ServerRequest {
 	<T> Mono<T> bodyToMono(Class<? extends T> elementClass);
 
 	/**
+	 * Extract the body to a {@code Mono}.
+	 * @param typeReference a type reference describing the expected response request type
+	 * @param <T> the element type
+	 * @return a mono containing the body of the given type {@code T}
+	 */
+	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+
+	/**
 	 * Extract the body to a {@code Flux}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
 	 * @return the body as a flux
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
+
+	/**
+	 * Extract the body to a {@code Flux}.
+	 * @param typeReference a type reference describing the expected request body type
+	 * @param <T> the element type
+	 * @return a flux containing the body of the given type {@code T}
+	 */
+	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
 	/**
 	 * Return the request attribute value if present.

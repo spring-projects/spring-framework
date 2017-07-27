@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -150,7 +151,21 @@ public class MockServerRequest implements ServerRequest {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	public <S> Mono<S> bodyToMono(ParameterizedTypeReference<S> typeReference) {
+		Assert.state(this.body != null, "No body");
+		return (Mono<S>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public <S> Flux<S> bodyToFlux(Class<? extends S> elementClass) {
+		Assert.state(this.body != null, "No body");
+		return (Flux<S>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S> Flux<S> bodyToFlux(ParameterizedTypeReference<S> typeReference) {
 		Assert.state(this.body != null, "No body");
 		return (Flux<S>) this.body;
 	}

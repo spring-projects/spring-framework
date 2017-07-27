@@ -17,14 +17,15 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -101,8 +102,7 @@ public class DefaultClientRequestBuilderTests {
 		BodyInserter<String, ClientHttpRequest> inserter =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
-					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+					DataBuffer buffer = new DefaultDataBufferFactory().wrap(bodyBytes);
 
 					return response.writeWith(Mono.just(buffer));
 				};
@@ -119,6 +119,55 @@ public class DefaultClientRequestBuilderTests {
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();
 		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
+	}
+
+	@Test
+	public void bodyClass() throws Exception {
+		String body = "foo";
+		Publisher<String> publisher = Mono.just(body);
+		ClientRequest result = ClientRequest.method(POST, URI.create("http://example.com"))
+				.body(publisher, String.class).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
+		result.writeTo(request, strategies).block();
+		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
+	}
+
+	@Test
+	public void bodyParameterizedTypeReference() throws Exception {
+		String body = "foo";
+		Publisher<String> publisher = Mono.just(body);
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ClientRequest result = ClientRequest.method(POST, URI.create("http://example.com"))
+				.body(publisher, typeReference).build();
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
+		result.writeTo(request, strategies).block();
+		assertNotNull(request.getBody());
+
+		StepVerifier.create(request.getBody())
+				.expectNextCount(1)
+				.verifyComplete();
 	}
 
 }
