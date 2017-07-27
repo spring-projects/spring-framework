@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -30,7 +29,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.stream.Collectors;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -291,18 +289,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		flux.subscribe(DataBufferUtils.releaseConsumer());
 
 		// AbstractDataBufferAllocatingTestCase.LeakDetector will assert the release of the buffers
-	}
-
-	public void foo() {
-		DataBuffer foo = stringBuffer("foo");
-		DataBuffer bar = stringBuffer("bar");
-		DataBuffer baz = stringBuffer("baz");
-		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataBufferUtils.write(flux, bos)
-				.subscribe(DataBufferUtils.releaseConsumer());
-
-
 	}
 
 }
