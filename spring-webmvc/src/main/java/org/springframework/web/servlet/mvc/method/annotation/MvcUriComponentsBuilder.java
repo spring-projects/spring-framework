@@ -753,6 +753,7 @@ public class MvcUriComponentsBuilder {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
 			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
 		}

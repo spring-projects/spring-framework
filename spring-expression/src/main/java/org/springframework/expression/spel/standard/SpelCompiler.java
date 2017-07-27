@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
@@ -241,40 +238,6 @@ public class SpelCompiler implements Opcodes {
 	public static void revertToInterpreted(Expression expression) {
 		if (expression instanceof SpelExpression) {
 			((SpelExpression) expression).revertToInterpreted();
-		}
-	}
-
-	/**
-	 * For debugging purposes, dump the specified byte code into a file on the disk.
-	 * Not yet hooked in, needs conditionally calling based on a sys prop.
-	 * @param expressionText the text of the expression compiled
-	 * @param name the name of the class being used for the compiled expression
-	 * @param bytecode the bytecode for the generated class
-	 */
-	@SuppressWarnings("unused")
-	private static void dump(String expressionText, String name, byte[] bytecode) {
-		String nameToUse = name.replace('.', '/');
-		String dir = (nameToUse.indexOf('/') != -1 ? nameToUse.substring(0, nameToUse.lastIndexOf('/')) : "");
-		String dumpLocation = null;
-		try {
-			File tempFile = File.createTempFile("tmp", null);
-			dumpLocation = tempFile + File.separator + nameToUse + ".class";
-			tempFile.delete();
-			File f = new File(tempFile, dir);
-			f.mkdirs();
-			// System.out.println("Expression '" + expressionText + "' compiled code dumped to " + dumpLocation);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Expression '" + expressionText + "' compiled code dumped to " + dumpLocation);
-			}
-			f = new File(dumpLocation);
-			FileOutputStream fos = new FileOutputStream(f);
-			fos.write(bytecode);
-			fos.flush();
-			fos.close();
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException(
-					"Unexpected problem dumping class '" + nameToUse + "' into " + dumpLocation, ex);
 		}
 	}
 

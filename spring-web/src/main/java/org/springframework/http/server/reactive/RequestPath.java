@@ -15,6 +15,10 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.net.URI;
+
+import org.springframework.lang.Nullable;
+
 /**
  * Represents the complete path for a request.
  *
@@ -37,5 +41,13 @@ public interface RequestPath extends PathContainer {
 	 * The portion of the request path after the context path.
 	 */
 	PathContainer pathWithinApplication();
+
+
+	/**
+	 * Create a new {@code RequestPath} with the given parameters.
+	 */
+	static RequestPath parse(URI uri, @Nullable String contextPath) {
+		return new DefaultRequestPath(uri, contextPath);
+	}
 
 }

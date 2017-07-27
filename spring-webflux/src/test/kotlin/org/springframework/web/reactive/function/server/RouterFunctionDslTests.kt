@@ -32,7 +32,7 @@ import java.net.URI
  *
  * @author Sebastien Deleuze
  */
-class RouterFunctionExtensionsTests {
+class RouterFunctionDslTests {
 
 	@Test
 	fun header() {

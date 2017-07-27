@@ -56,7 +56,9 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -167,6 +169,17 @@ public class BodyExtractorsTests {
 				})
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-15758
+	public void toMonoWithEmptyBodyAndNoContentType() throws Exception {
+		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
+				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(Flux.empty());
+		Mono<Map<String, String>> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result).expectComplete().verify();
 	}
 
 	@Test

@@ -548,6 +548,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
+		@Nullable
 		public String getReceiptId() {
 			return this.receiptId;
 		}

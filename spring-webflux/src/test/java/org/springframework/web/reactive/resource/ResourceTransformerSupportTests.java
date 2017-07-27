@@ -64,7 +64,7 @@ public class ResourceTransformerSupportTests {
 		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
-		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
+		urlProvider.registerHandlers(Collections.singletonMap("/resources/**", handler));
 		return urlProvider;
 	}
 

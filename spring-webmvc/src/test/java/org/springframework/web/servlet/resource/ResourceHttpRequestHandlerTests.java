@@ -17,13 +17,13 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hamcrest.Matchers;
@@ -45,6 +45,7 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static java.time.format.DateTimeFormatter.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
@@ -61,8 +62,6 @@ import static org.junit.Assert.fail;
  */
 public class ResourceHttpRequestHandlerTests {
 
-	private SimpleDateFormat dateFormat;
-
 	private ResourceHttpRequestHandler handler;
 
 	private MockHttpServletRequest request;
@@ -72,8 +71,6 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
@@ -623,7 +620,7 @@ public class ResourceHttpRequestHandlerTests {
 
 
 	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
-		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
+		return ZonedDateTime.parse(this.response.getHeader(responseHeaderName), RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {
@@ -632,7 +629,7 @@ public class ResourceHttpRequestHandlerTests {
 
 	private String resourceLastModifiedDate(String resourceName) throws IOException {
 		long lastModified = new ClassPathResource(resourceName, getClass()).getFile().lastModified();
-		return dateFormat.format(lastModified);
+		return RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(lastModified).atZone(ZoneId.of("GMT")));
 	}
 
 

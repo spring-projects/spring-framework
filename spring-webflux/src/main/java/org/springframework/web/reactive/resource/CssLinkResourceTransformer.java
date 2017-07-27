@@ -16,25 +16,28 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -68,87 +71,82 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 
 	@Override
-	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
 
-		return transformerChain.transform(exchange, resource)
-				.flatMap(newResource -> {
-					String filename = newResource.getFilename();
+		return transformerChain.transform(exchange, inputResource)
+				.flatMap(ouptputResource -> {
+					String filename = ouptputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
-							resource instanceof GzipResourceResolver.GzippedResource) {
-						return Mono.just(newResource);
+							inputResource instanceof GzipResourceResolver.GzippedResource) {
+						return Mono.just(ouptputResource);
 					}
 
 					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + newResource);
+						logger.trace("Transforming resource: " + ouptputResource);
 					}
 
-					byte[] bytes = new byte[0];
-					try {
-						bytes = FileCopyUtils.copyToByteArray(newResource.getInputStream());
-					}
-					catch (IOException ex) {
-						return Mono.error(Exceptions.propagate(ex));
-					}
-					String fullContent = new String(bytes, DEFAULT_CHARSET);
-					List<Segment> segments = parseContent(fullContent);
-
-					if (segments.isEmpty()) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("No links found.");
-						}
-						return Mono.just(newResource);
-					}
-
-					return Flux.fromIterable(segments)
-							.concatMap(segment -> {
-								String segmentContent = segment.getContent(fullContent);
-								if (segment.isLink() && !hasScheme(segmentContent)) {
-									String link = toAbsolutePath(segmentContent, exchange);
-									return resolveUrlPath(link, exchange, newResource, transformerChain)
-											.defaultIfEmpty(segmentContent);
-								}
-								else {
-									return Mono.just(segmentContent);
-								}
-							})
-							.reduce(new StringWriter(), (writer, chunk) -> {
-								writer.write(chunk);
-								return writer;
-							})
-							.flatMap(writer -> {
-								byte[] newContent = writer.toString().getBytes(DEFAULT_CHARSET);
-								return Mono.just(new TransformedResource(resource, newContent));
+					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+					return DataBufferUtils.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE)
+							.reduce(DataBuffer::write)
+							.flatMap(dataBuffer -> {
+								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
+								DataBufferUtils.release(dataBuffer);
+								String cssContent = charBuffer.toString();
+								return transformContent(cssContent, ouptputResource, transformerChain, exchange);
 							});
 				});
 	}
 
-	private List<Segment> parseContent(String fullContent) {
+	private Mono<? extends Resource> transformContent(String cssContent, Resource resource,
+			ResourceTransformerChain chain, ServerWebExchange exchange) {
 
-		List<Segment> links = new ArrayList<>();
-		for (LinkParser parser : this.linkParsers) {
-			links.addAll(parser.parseLinks(fullContent));
+		List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
+		if (contentChunkInfos.isEmpty()) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No links found.");
+			}
+			return Mono.just(resource);
 		}
 
+		return Flux.fromIterable(contentChunkInfos)
+				.concatMap(contentChunkInfo -> {
+					String contentChunk = contentChunkInfo.getContent(cssContent);
+					if (contentChunkInfo.isLink() && !hasScheme(contentChunk)) {
+						String link = toAbsolutePath(contentChunk, exchange);
+						return resolveUrlPath(link, exchange, resource, chain).defaultIfEmpty(contentChunk);
+					}
+					else {
+						return Mono.just(contentChunk);
+					}
+				})
+				.reduce(new StringWriter(), (writer, chunk) -> {
+					writer.write(chunk);
+					return writer;
+				})
+				.map(writer -> {
+					byte[] newContent = writer.toString().getBytes(DEFAULT_CHARSET);
+					return new TransformedResource(resource, newContent);
+				});
+	}
+
+	private List<ContentChunkInfo> parseContent(String cssContent) {
+		SortedSet<ContentChunkInfo> links = new TreeSet<>();
+		this.linkParsers.forEach(parser -> parser.parse(cssContent, links));
 		if (links.isEmpty()) {
 			return Collections.emptyList();
 		}
-
-		Collections.sort(links);
-
 		int index = 0;
-		List<Segment> allSegments = new ArrayList<>(links);
-		for (Segment link : links) {
-			allSegments.add(new Segment(index, link.getStart(), false));
+		List<ContentChunkInfo> result = new ArrayList<>();
+		for (ContentChunkInfo link : links) {
+			result.add(new ContentChunkInfo(index, link.getStart(), false));
+			result.add(link);
 			index = link.getEnd();
 		}
-		if (index < fullContent.length()) {
-			allSegments.add(new Segment(index, fullContent.length(), false));
+		if (index < cssContent.length()) {
+			result.add(new ContentChunkInfo(index, cssContent.length(), false));
 		}
-
-		Collections.sort(allSegments);
-
-		return allSegments;
+		return result;
 	}
 
 	private boolean hasScheme(String link) {
@@ -157,66 +155,60 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	/**
+	 * Extract content chunks that represent links.
+	 */
 	@FunctionalInterface
 	protected interface LinkParser {
 
-		Set<Segment> parseLinks(String fullContent);
+		void parse(String cssContent, SortedSet<ContentChunkInfo> result);
 
 	}
 
 
 	protected static abstract class AbstractLinkParser implements LinkParser {
 
-		/** Return the keyword to use to search for links. */
+		/** Return the keyword to use to search for links, e.g. "@import", "url(" */
 		protected abstract String getKeyword();
 
 		@Override
-		public Set<Segment> parseLinks(String fullContent) {
-			Set<Segment> linksToAdd = new HashSet<>(8);
-			int index = 0;
-			do {
-				index = fullContent.indexOf(getKeyword(), index);
-				if (index == -1) {
-					break;
+		public void parse(String content, SortedSet<ContentChunkInfo> result) {
+			int position = 0;
+			while (true) {
+				position = content.indexOf(getKeyword(), position);
+				if (position == -1) {
+					return;
 				}
-				index = skipWhitespace(fullContent, index + getKeyword().length());
-				if (fullContent.charAt(index) == '\'') {
-					index = addLink(index, "'", fullContent, linksToAdd);
+				position += getKeyword().length();
+				while (Character.isWhitespace(content.charAt(position))) {
+					position++;
 				}
-				else if (fullContent.charAt(index) == '"') {
-					index = addLink(index, "\"", fullContent, linksToAdd);
+				if (content.charAt(position) == '\'') {
+					position = extractLink(position, '\'', content, result);
+				}
+				else if (content.charAt(position) == '"') {
+					position = extractLink(position, '"', content, result);
 				}
 				else {
-					index = extractLink(index, fullContent, linksToAdd);
+					position = extractUnquotedLink(position, content, result);
 
 				}
 			}
-			while (true);
-			return linksToAdd;
 		}
 
-		private int skipWhitespace(String content, int index) {
-			while (true) {
-				if (Character.isWhitespace(content.charAt(index))) {
-					index++;
-					continue;
-				}
-				return index;
-			}
-		}
-
-		protected int addLink(int index, String endKey, String content, Set<Segment> linksToAdd) {
+		protected int extractLink(int index, char endChar, String content, Set<ContentChunkInfo> result) {
 			int start = index + 1;
-			int end = content.indexOf(endKey, start);
-			linksToAdd.add(new Segment(start, end, true));
-			return end + endKey.length();
+			int end = content.indexOf(endChar, start);
+			result.add(new ContentChunkInfo(start, end, true));
+			return end + 1;
 		}
 
 		/**
 		 * Invoked after a keyword match, after whitespaces removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
-		protected abstract int extractLink(int index, String content, Set<Segment> linksToAdd);
+		protected abstract int extractUnquotedLink(int position, String content,
+				Set<ContentChunkInfo> linksToAdd);
 
 	}
 
@@ -229,14 +221,14 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		protected int extractLink(int index, String content, Set<Segment> linksToAdd) {
-			if (content.substring(index, index + 4).equals("url(")) {
-				// Ignore, UrlLinkParser will take care
+		protected int extractUnquotedLink(int position, String content, Set<ContentChunkInfo> result) {
+			if (content.substring(position, position + 4).equals("url(")) {
+				// Ignore, UrlFunctionContentParser will take care
 			}
 			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + index);
+				logger.error("Unexpected syntax for @import link at index " + position);
 			}
-			return index;
+			return position;
 		}
 	}
 
@@ -249,26 +241,26 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		protected int extractLink(int index, String content, Set<Segment> linksToAdd) {
+		protected int extractUnquotedLink(int position, String content, Set<ContentChunkInfo> result) {
 			// A url() function without unquoted
-			return addLink(index - 1, ")", content, linksToAdd);
+			return extractLink(position - 1, ')', content, result);
 		}
 	}
 
 
-	private static class Segment implements Comparable<Segment> {
+	private static class ContentChunkInfo implements Comparable<ContentChunkInfo> {
 
 		private final int start;
 
 		private final int end;
 
-		private final boolean link;
+		private final boolean isLink;
 
 
-		public Segment(int start, int end, boolean isLink) {
+		ContentChunkInfo(int start, int end, boolean isLink) {
 			this.start = start;
 			this.end = end;
-			this.link = isLink;
+			this.isLink = isLink;
 		}
 
 
@@ -281,7 +273,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		public boolean isLink() {
-			return this.link;
+			return this.isLink;
 		}
 
 		public String getContent(String fullContent) {
@@ -289,7 +281,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		public int compareTo(Segment other) {
+		public int compareTo(ContentChunkInfo other) {
 			return (this.start < other.start ? -1 : (this.start == other.start ? 0 : 1));
 		}
 
@@ -298,8 +290,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (this == obj) {
 				return true;
 			}
-			if (obj != null && obj instanceof Segment) {
-				Segment other = (Segment) obj;
+			if (obj != null && obj instanceof ContentChunkInfo) {
+				ContentChunkInfo other = (ContentChunkInfo) obj;
 				return (this.start == other.start && this.end == other.end);
 			}
 			return false;

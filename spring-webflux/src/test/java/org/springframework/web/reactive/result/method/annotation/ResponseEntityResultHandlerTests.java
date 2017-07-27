@@ -120,6 +120,11 @@ public class ResponseEntityResultHandlerTests {
 
 		returnType = on(TestController.class).resolveReturnType(CompletableFuture.class, entity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, returnType)));
+
+		// SPR-15785
+		value = ResponseEntity.ok("testing");
+		returnType = on(TestController.class).resolveReturnType(Object.class);
+		assertTrue(this.resultHandler.supports(handlerResult(value, returnType)));
 	}
 
 	@Test
@@ -188,6 +193,9 @@ public class ResponseEntityResultHandlerTests {
 	public void handleReturnTypes() throws Exception {
 		Object returnValue = ok("abc");
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		testHandle(returnValue, returnType);
+
+		returnType = on(TestController.class).resolveReturnType(Object.class);
 		testHandle(returnValue, returnType);
 
 		returnValue = Mono.just(ok("abc"));
@@ -387,6 +395,9 @@ public class ResponseEntityResultHandlerTests {
 		Mono<ResponseEntity<?>> monoResponseEntityWildcard() { return null; }
 
 		Flux<?> fluxWildcard() { return null; }
+
+		Object object() { return null; }
+
 	}
 
 }

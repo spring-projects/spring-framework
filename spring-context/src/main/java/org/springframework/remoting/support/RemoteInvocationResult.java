@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Encapsulates a remote invocation result, holding a result value or an exception.
@@ -41,8 +42,10 @@ public class RemoteInvocationResult implements Serializable {
 	private static final long serialVersionUID = 2138555143707773549L;
 
 
+	@Nullable
 	private Object value;
 
+	@Nullable
 	private Throwable exception;
 
 
@@ -51,7 +54,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @param value the result value returned by a successful invocation
 	 * of the target method
 	 */
-	public RemoteInvocationResult(Object value) {
+	public RemoteInvocationResult(@Nullable Object value) {
 		this.value = value;
 	}
 
@@ -60,7 +63,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @param exception the exception thrown by an unsuccessful invocation
 	 * of the target method
 	 */
-	public RemoteInvocationResult(Throwable exception) {
+	public RemoteInvocationResult(@Nullable Throwable exception) {
 		this.exception = exception;
 	}
 
@@ -81,7 +84,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * Use {@link #RemoteInvocationResult(Object)} otherwise.
 	 * @see #RemoteInvocationResult()
 	 */
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		this.value = value;
 	}
 
@@ -102,7 +105,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * Use {@link #RemoteInvocationResult(Throwable)} otherwise.
 	 * @see #RemoteInvocationResult()
 	 */
-	public void setException(Throwable exception) {
+	public void setException(@Nullable Throwable exception) {
 		this.exception = exception;
 	}
 

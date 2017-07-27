@@ -40,7 +40,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 
@@ -67,14 +66,16 @@ public class ResourceUrlProviderTests {
 		this.handler.setLocations(locations);
 		this.handler.afterPropertiesSet();
 		this.handlerMap.put("/resources/**", this.handler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 	}
 
 
 	@Test
 	public void getStaticResourceUrl() {
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
-		assertEquals("/resources/foo.css", url);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String uriString = "/resources/foo.css";
+		String actual = this.urlProvider.getForUriString(uriString, exchange).block(Duration.ofSeconds(5));
+		assertEquals(uriString, actual);
 	}
 
 	@Test  // SPR-13374
@@ -82,11 +83,11 @@ public class ResourceUrlProviderTests {
 		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
-		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).block(Duration.ofSeconds(5));
+		String resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
 		assertEquals(url, resolvedUrl);
 
 		url = "/resources/foo.css#hash";
-		resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).block(Duration.ofSeconds(5));
+		resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
 		assertEquals(url, resolvedUrl);
 	}
 
@@ -102,7 +103,9 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String path = "/resources/foo.css";
+		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -121,9 +124,11 @@ public class ResourceUrlProviderTests {
 		otherHandler.setResourceResolvers(resolvers);
 
 		this.handlerMap.put("/resources/*.css", otherHandler);
-		this.urlProvider.setHandlerMap(this.handlerMap);
+		this.urlProvider.registerHandlers(this.handlerMap);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css").block(Duration.ofSeconds(5));
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		String path = "/resources/foo.css";
+		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -136,7 +141,6 @@ public class ResourceUrlProviderTests {
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
 		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey(pattern("/resources/**")));
-		assertFalse(urlProviderBean.isAutodetect());
 	}
 
 

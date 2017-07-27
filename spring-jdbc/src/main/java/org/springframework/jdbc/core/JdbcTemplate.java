@@ -515,6 +515,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
 
+			@Nullable
 			private String currSql;
 
 			@Override

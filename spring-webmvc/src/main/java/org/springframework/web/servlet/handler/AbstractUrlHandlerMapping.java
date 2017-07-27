@@ -54,6 +54,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
 
+	@Nullable
 	private Object rootHandler;
 
 	private boolean useTrailingSlashMatch = false;
@@ -68,7 +69,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * the handler to be registered for the root path ("/").
 	 * <p>Default is {@code null}, indicating no root handler.
 	 */
-	public void setRootHandler(Object rootHandler) {
+	public void setRootHandler(@Nullable Object rootHandler) {
 		this.rootHandler = rootHandler;
 	}
 

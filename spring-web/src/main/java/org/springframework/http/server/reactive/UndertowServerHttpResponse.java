@@ -17,10 +17,10 @@
 package org.springframework.http.server.reactive;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +85,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		return doCommit(() -> {
 			FileChannel source = null;
 			try {
-				source = new FileInputStream(file).getChannel();
+				source = FileChannel.open(file.toPath(), StandardOpenOption.READ);
 				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
 				Channels.transferBlocking(destination, source, position, count);
 				return Mono.empty();

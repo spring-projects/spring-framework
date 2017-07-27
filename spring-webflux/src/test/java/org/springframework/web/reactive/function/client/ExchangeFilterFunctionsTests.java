@@ -20,12 +20,14 @@ import java.net.URI;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
 
 /**
  * @author Arjen Poutsma
@@ -96,6 +98,83 @@ public class ExchangeFilterFunctionsTests {
 		assertFalse(request.headers().containsKey(HttpHeaders.AUTHORIZATION));
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertEquals(response, result);
+	}
+
+	@Test
+	public void basicAuthenticationAttributes() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com"))
+				.attribute(ExchangeFilterFunctions.USERNAME_ATTRIBUTE, "foo")
+				.attribute(ExchangeFilterFunctions.PASSWORD_ATTRIBUTE, "bar").build();
+		ClientResponse response = mock(ClientResponse.class);
+
+		ExchangeFunction exchange = r -> {
+			assertTrue(r.headers().containsKey(HttpHeaders.AUTHORIZATION));
+			assertTrue(r.headers().getFirst(HttpHeaders.AUTHORIZATION).startsWith("Basic "));
+			return Mono.just(response);
+		};
+
+		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
+		assertFalse(request.headers().containsKey(HttpHeaders.AUTHORIZATION));
+		ClientResponse result = auth.filter(request, exchange).block();
+		assertEquals(response, result);
+	}
+
+	@Test
+	public void basicAuthenticationAbsentAttributes() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+
+		ExchangeFunction exchange = r -> {
+			assertFalse(r.headers().containsKey(HttpHeaders.AUTHORIZATION));
+			return Mono.just(response);
+		};
+
+		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
+		assertFalse(request.headers().containsKey(HttpHeaders.AUTHORIZATION));
+		ClientResponse result = auth.filter(request, exchange).block();
+		assertEquals(response, result);
+	}
+
+	@Test
+	public void statusHandlerMatch() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
+				HttpStatus::is4xxClientError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify();
+	}
+
+	@Test
+	public void statusHandlerNoMatch() throws Exception {
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientResponse response = mock(ClientResponse.class);
+		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+
+		ExchangeFunction exchange = r -> Mono.just(response);
+
+		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
+				HttpStatus::is5xxServerError, r -> new MyException());
+
+		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
+
+		StepVerifier.create(result)
+				.expectNext(response)
+				.expectComplete()
+				.verify();
+	}
+
+	@SuppressWarnings("serial")
+	private static class MyException extends Exception {
+
 	}
 
 }

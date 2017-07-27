@@ -41,7 +41,9 @@ import org.springframework.util.Assert;
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
+ * @see FileSystemResource
  * @see java.nio.file.Path
+ * @see java.nio.file.Files
  */
 public class PathResource extends AbstractResource implements WritableResource {
 
@@ -52,8 +54,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root:
-	 * e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
 	 * @param path a Path handle
 	 */
 	public PathResource(Path path) {
@@ -65,8 +66,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root:
-	 * e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
 	 * @param path a path
 	 * @see java.nio.file.Paths#get(String, String...)
 	 */
@@ -79,8 +79,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root:
-	 * e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
 	 * @see java.nio.file.Paths#get(URI)
 	 * @param uri a path URI
 	 */
@@ -193,7 +192,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 		catch (UnsupportedOperationException ex) {
 			// Only paths on the default file system can be converted to a File:
 			// Do exception translation for cases where conversion is not possible.
-			throw new FileNotFoundException(this.path + " cannot be resolved to " + "absolute file path");
+			throw new FileNotFoundException(this.path + " cannot be resolved to absolute file path");
 		}
 	}
 
@@ -231,11 +230,11 @@ public class PathResource extends AbstractResource implements WritableResource {
 	public long lastModified() throws IOException {
 		// We can not use the superclass method since it uses conversion to a File and
 		// only a Path on the default file system can be converted to a File...
-		return Files.getLastModifiedTime(path).toMillis();
+		return Files.getLastModifiedTime(this.path).toMillis();
 	}
 
 	/**
-	 * This implementation creates a FileResource, applying the given path
+	 * This implementation creates a PathResource, applying the given path
 	 * relative to the path of the underlying file of this resource descriptor.
 	 * @see java.nio.file.Path#resolve(String)
 	 */

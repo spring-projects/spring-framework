@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -37,7 +39,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
@@ -45,6 +48,9 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+
+	private static final Log logger = LogFactory.getLog(WebSocketIntegrationTests.class);
+
 
 	@Override
 	protected Class<?> getWebConfigClass() {
@@ -59,14 +65,21 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
 		client.execute(getUrl("/echo"),
-				session -> session
-						.send(input.map(session::textMessage))
-						.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
-						.subscribeWith(output)
-						.then())
+				session -> {
+					logger.debug("Starting to send messages");
+					return session
+							.send(input.doOnNext(s -> logger.debug("outbound " + s)).map(session::textMessage))
+							.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
+							.subscribeWith(output)
+							.doOnNext(s -> logger.debug("inbound " + s))
+							.then()
+							.doOnTerminate((aVoid, ex) ->
+									logger.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
+				})
 				.block(Duration.ofMillis(5000));
 
-		assertEquals(input.collectList().block(Duration.ofMillis(5000)), output.collectList().block(Duration.ofMillis(5000)));
+		assertEquals(input.collectList().block(Duration.ofMillis(5000)),
+				output.collectList().block(Duration.ofMillis(5000)));
 	}
 
 	@Test

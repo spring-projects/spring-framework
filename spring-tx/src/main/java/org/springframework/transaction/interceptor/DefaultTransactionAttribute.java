@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * @since 3.0
 	 */
 	@Override
+	@Nullable
 	public String getQualifier() {
 		return this.qualifier;
 	}
@@ -100,7 +101,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * e.g. indicating where the attribute is applying.
 	 * @since 4.3.4
 	 */
-	public void setDescriptor(String descriptor) {
+	public void setDescriptor(@Nullable String descriptor) {
 		this.descriptor = descriptor;
 	}
 

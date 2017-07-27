@@ -74,13 +74,13 @@ public interface CodecConfigurer {
 		 * Override the default Jackson JSON {@code Decoder}.
 		 * @param decoder the decoder instance to use
 		 */
-		void jackson2Decoder(Jackson2JsonDecoder decoder);
+		void jackson2JsonDecoder(Jackson2JsonDecoder decoder);
 
 		/**
 		 * Override the default Jackson JSON {@code Encoder}.
 		 * @param encoder the encoder instance to use
 		 */
-		void jackson2Encoder(Jackson2JsonEncoder encoder);
+		void jackson2JsonEncoder(Jackson2JsonEncoder encoder);
 
 	}
 

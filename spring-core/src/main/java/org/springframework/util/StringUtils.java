@@ -532,7 +532,6 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to uncapitalize
 	 * @return the uncapitalized {@code String}
 	 */
-	@Nullable
 	public static String uncapitalize(String str) {
 		return changeFirstCharacterCase(str, false);
 	}

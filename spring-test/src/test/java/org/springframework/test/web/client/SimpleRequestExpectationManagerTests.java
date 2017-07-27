@@ -27,15 +27,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.test.web.client.ExpectedCount.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.web.client.ExpectedCount.max;
+import static org.springframework.test.web.client.ExpectedCount.min;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.ExpectedCount.times;
+import static org.springframework.test.web.client.ExpectedCount.twice;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link SimpleRequestExpectationManager}.
- *
  * @author Rossen Stoyanchev
  */
 public class SimpleRequestExpectationManagerTests {
@@ -168,8 +173,18 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 	}
 
+	@Test  // SPR-15719
+	public void repeatedRequestsInSequentialOrder() throws Exception {
+		this.manager.expectRequest(times(2), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
+		this.manager.expectRequest(times(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
-	@SuppressWarnings("deprecation")
+		this.manager.validateRequest(createRequest(GET, "/foo"));
+		this.manager.validateRequest(createRequest(GET, "/foo"));
+		this.manager.validateRequest(createRequest(GET, "/bar"));
+		this.manager.validateRequest(createRequest(GET, "/bar"));
+	}
+
+
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
 			return new MockClientHttpRequest(method, new URI(url));

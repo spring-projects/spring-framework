@@ -172,7 +172,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext context) {
+	public void setApplicationContext(@Nullable ApplicationContext context) {
 		super.setApplicationContext(context);
 
 		ScriptTemplateConfig viewConfig = autodetectViewConfig();

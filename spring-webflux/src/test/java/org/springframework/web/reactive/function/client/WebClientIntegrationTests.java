@@ -32,6 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -158,7 +159,30 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void jsonStringRetrieveEntity() throws Exception {
+	public void jsonStringRetrieveMonoTypeReference() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<String>() {});
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringExchangeEntity() throws Exception {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody(content));
@@ -166,8 +190,8 @@ public class WebClientIntegrationTests {
 		Mono<ResponseEntity<String>> result = this.webClient.get()
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.toEntity(String.class);
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -186,15 +210,15 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void jsonStringRetrieveEntityList() throws Exception {
+	public void jsonStringExchangeEntityList() throws Exception {
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody(content));
 
 		Mono<ResponseEntity<List<Pojo>>> result = this.webClient.get()
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.toEntityList(Pojo.class);
+				.exchange()
+				.flatMap(response -> response.toEntityList(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -225,6 +249,29 @@ public class WebClientIntegrationTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.bodyToFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveFluxTypeReference() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToFlux(new ParameterizedTypeReference<String>() {});
 
 		StepVerifier.create(result)
 				.expectNext(content)
@@ -371,14 +418,55 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void retrieveToEntityNotFound() throws Exception {
+	public void retrieveBodyToMonoInternalServerError() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void retrieveBodyToCustomStatusHandler() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> new MyException("500 error!"))
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void exchangeToEntityNotFound() throws Exception {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
 		Mono<ResponseEntity<String>> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
-				.retrieve()
-				.toEntity(String.class);
+				.exchange()
+				.flatMap(response -> response.toEntity(String.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()))
@@ -480,19 +568,14 @@ public class WebClientIntegrationTests {
 		}).verifyComplete();
 	}
 
-	@Test
-	public void retrieveNoContent() throws Exception  {
-		this.server.enqueue(new MockResponse().setHeader("Content-Length", "0"));
+	@Test // SPR-15782
+	public void absoluteUri() throws Exception {
+		String uri = "/api/v4/groups/1";
+		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
 
-		Mono<ResponseEntity<Void>> result = this.webClient.get()
-				.uri("/noContent")
-				.retrieve()
-				.toEntity(Void.class);
-
-		StepVerifier.create(result).assertNext(r -> {
-			assertFalse(r.hasBody());
-			assertTrue(r.getStatusCode().is2xxSuccessful());
-		}).verifyComplete();
+		StepVerifier.create(responseMono)
+				.expectErrorMessage("URI is not absolute: " + uri)
+				.verify(Duration.ofSeconds(5));
 	}
 
 

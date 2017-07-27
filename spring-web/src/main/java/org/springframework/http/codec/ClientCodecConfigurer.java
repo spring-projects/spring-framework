@@ -64,7 +64,7 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
 		 * <p>By default if this is not set, and Jackson is available, the
-		 * {@link #jackson2Decoder} override is used instead. Use this property
+		 * {@link #jackson2JsonDecoder} override is used instead. Use this property
 		 * if you want to further customize the SSE decoder.
 		 * @param decoder the decoder to use
 		 */

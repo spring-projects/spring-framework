@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -103,7 +104,9 @@ public class SimpleUrlHandlerMappingTests {
 			assertNotNull(actual);
 			assertSame(bean, actual);
 			//noinspection OptionalGetWithoutIsPresent
-			assertEquals(pathWithinMapping, exchange.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+			PathContainer path = exchange.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+			assertNotNull(path);
+			assertEquals(pathWithinMapping, path.value());
 		}
 		else {
 			assertNull(actual);

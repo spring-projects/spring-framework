@@ -25,10 +25,12 @@ import java.util.OptionalLong;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -99,8 +101,56 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+		return body(BodyExtractors.toMono(typeReference));
+	}
+
+	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		return body(BodyExtractors.toFlux(elementClass));
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+		return body(BodyExtractors.toFlux(typeReference));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
+		return toEntityInternal(bodyToMono(bodyType));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
+		return toEntityInternal(bodyToMono(typeReference));
+	}
+
+	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
+		HttpHeaders headers = headers().asHttpHeaders();
+		HttpStatus statusCode = statusCode();
+		return bodyMono
+				.map(body -> new ResponseEntity<>(body, headers, statusCode))
+				.switchIfEmpty(Mono.defer(
+						() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> responseType) {
+		return toEntityListInternal(bodyToFlux(responseType));
+	}
+
+	@Override
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(
+			ParameterizedTypeReference<T> typeReference) {
+		return toEntityListInternal(bodyToFlux(typeReference));
+	}
+
+	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {
+		HttpHeaders headers = headers().asHttpHeaders();
+		HttpStatus statusCode = statusCode();
+		return bodyFlux
+				.collectList()
+				.map(body -> new ResponseEntity<>(body, headers, statusCode));
 	}
 
 

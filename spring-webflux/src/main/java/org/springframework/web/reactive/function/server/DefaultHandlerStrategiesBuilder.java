@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
@@ -48,6 +49,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
+	@Nullable
 	private LocaleContextResolver localeContextResolver;
 
 
@@ -55,10 +57,11 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		this.codecConfigurer.registerDefaults(false);
 	}
 
+
 	public void defaultConfiguration() {
 		this.codecConfigurer.registerDefaults(true);
-		exceptionHandler(new ResponseStatusExceptionHandler());
-		localeContextResolver(new AcceptHeaderLocaleContextResolver());
+		this.exceptionHandlers.add(new ResponseStatusExceptionHandler());
+		this.localeContextResolver = new AcceptHeaderLocaleContextResolver();
 	}
 
 	@Override
@@ -116,8 +119,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<WebExceptionHandler> exceptionHandlers;
 
+		@Nullable
 		private final LocaleContextResolver localeContextResolver;
-
 
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
@@ -125,7 +128,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				List<ViewResolver> viewResolvers,
 				List<WebFilter> webFilters,
 				List<WebExceptionHandler> exceptionHandlers,
-				LocaleContextResolver localeContextResolver) {
+				@Nullable LocaleContextResolver localeContextResolver) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);

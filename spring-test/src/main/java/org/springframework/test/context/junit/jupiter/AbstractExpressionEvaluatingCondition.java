@@ -23,10 +23,10 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ContainerExecutionCondition;
+import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestExecutionCondition;
 
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -39,9 +39,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract base class for implementations of {@link ContainerExecutionCondition}
- * and {@link TestExecutionCondition} that evaluate expressions configured via
- * annotations to determine if a container or test is enabled.
+ * Abstract base class for implementations of {@link ExecutionCondition} that
+ * evaluate expressions configured via annotations to determine if a container
+ * or test is enabled.
  *
  * <p>Expressions can be any of the following.
  *
@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @see EnabledIf
  * @see DisabledIf
  */
-abstract class AbstractExpressionEvaluatingCondition implements ContainerExecutionCondition, TestExecutionCondition {
+abstract class AbstractExpressionEvaluatingCondition implements ExecutionCondition {
 
 	private static final Log logger = LogFactory.getLog(AbstractExpressionEvaluatingCondition.class);
 

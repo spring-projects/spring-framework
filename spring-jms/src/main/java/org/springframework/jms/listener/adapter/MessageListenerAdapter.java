@@ -144,7 +144,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @param delegate the delegate object
 	 */
 	public MessageListenerAdapter(Object delegate) {
-		setDelegate(delegate);
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
 	}
 
 
@@ -196,12 +197,13 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void onMessage(Message message, Session session) throws JMSException {
+	public void onMessage(Message message, @Nullable Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.
 		Object delegate = getDelegate();
 		if (delegate != this) {
 			if (delegate instanceof SessionAwareMessageListener) {
+				Assert.state(session != null, "Session is required for SessionAwareMessageListener");
 				((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
 				return;
 			}

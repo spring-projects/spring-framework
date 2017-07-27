@@ -35,6 +35,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -76,8 +77,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private XmlReaderContext readerContext;
 
+	@Nullable
 	private BeanDefinitionParserDelegate delegate;
 
 
@@ -99,6 +102,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * Return the descriptor for the XML resource that this parser works on.
 	 */
 	protected final XmlReaderContext getReaderContext() {
+		Assert.state(this.readerContext != null, "No XmlReaderContext available");
 		return this.readerContext;
 	}
 
@@ -148,7 +152,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	protected BeanDefinitionParserDelegate createDelegate(
-			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+			XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		delegate.initDefaults(root, parentDelegate);

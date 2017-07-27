@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Maybe;
@@ -101,6 +102,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	public void emptyBodyWithStringNotRequired() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
+		String body = resolveValueWithEmptyBody(param);
+
+		assertNull(body);
+	}
+
+	@Test // SPR-15758
+	public void emptyBodyWithoutContentType() throws Exception {
+		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
 		assertNull(body);
@@ -262,6 +271,7 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody(required = false) Observable<String> obsNotRequired,
 			@RequestBody(required = false) io.reactivex.Observable<String> rxjava2ObsNotRequired,
 			@RequestBody(required = false) CompletableFuture<String> futureNotRequired,
+			@RequestBody(required = false) Map<?, ?> mapNotRequired,
 			String notAnnotated) {}
 
 }

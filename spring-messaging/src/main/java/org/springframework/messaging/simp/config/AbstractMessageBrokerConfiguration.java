@@ -112,7 +112,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 

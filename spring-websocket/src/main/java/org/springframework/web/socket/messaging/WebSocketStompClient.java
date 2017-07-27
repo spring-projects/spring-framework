@@ -111,7 +111,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * property to "10000,10000" if it is currently set to "0,0".
 	 */
 	@Override
-	public void setTaskScheduler(TaskScheduler taskScheduler) {
+	public void setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
 		if (!isDefaultHeartbeatEnabled()) {
 			setDefaultHeartbeat(new long[] {10000, 10000});
 		}
@@ -296,6 +296,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
 
+		@Nullable
 		private volatile WebSocketSession session;
 
 		private volatile long lastReadTime = -1;
@@ -312,7 +313,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		// ListenableFutureCallback implementation: handshake outcome
 
 		@Override
-		public void onSuccess(WebSocketSession webSocketSession) {
+		public void onSuccess(@Nullable WebSocketSession webSocketSession) {
 		}
 
 		@Override
@@ -381,7 +382,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			updateLastWriteTime();
 			SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 			try {
-				this.session.sendMessage(this.codec.encode(message, this.session.getClass()));
+				WebSocketSession session = this.session;
+				Assert.state(session != null, "No WebSocketSession available");
+				session.sendMessage(this.codec.encode(message, session.getClass()));
 				future.set(null);
 			}
 			catch (Throwable ex) {
@@ -438,12 +441,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		@Override
 		public void close() {
-			try {
-				this.session.close();
-			}
-			catch (IOException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to close session: " + this.session.getId(), ex);
+			WebSocketSession session = this.session;
+			if (session != null) {
+				try {
+					session.close();
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to close session: " + session.getId(), ex);
+					}
 				}
 			}
 		}

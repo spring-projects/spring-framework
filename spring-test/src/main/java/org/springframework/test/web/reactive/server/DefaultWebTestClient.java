@@ -51,9 +51,11 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -91,38 +93,47 @@ class DefaultWebTestClient implements WebTestClient {
 
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> get() {
-		return toUriSpec(wc -> wc.method(HttpMethod.GET));
+	public RequestHeadersUriSpec<?> get() {
+		return methodInternal(HttpMethod.GET);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> head() {
-		return toUriSpec(wc -> wc.method(HttpMethod.HEAD));
+	public RequestHeadersUriSpec<?> head() {
+		return methodInternal(HttpMethod.HEAD);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> post() {
-		return toUriSpec(wc -> wc.method(HttpMethod.POST));
+	public RequestBodyUriSpec post() {
+		return methodInternal(HttpMethod.POST);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> put() {
-		return toUriSpec(wc -> wc.method(HttpMethod.PUT));
+	public RequestBodyUriSpec put() {
+		return methodInternal(HttpMethod.PUT);
 	}
 
 	@Override
-	public UriSpec<RequestBodySpec> patch() {
-		return toUriSpec(wc -> wc.method(HttpMethod.PATCH));
+	public RequestBodyUriSpec patch() {
+		return methodInternal(HttpMethod.PATCH);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> delete() {
-		return toUriSpec(wc -> wc.method(HttpMethod.DELETE));
+	public RequestHeadersUriSpec<?> delete() {
+		return methodInternal(HttpMethod.DELETE);
 	}
 
 	@Override
-	public UriSpec<RequestHeadersSpec<?>> options() {
-		return toUriSpec(wc -> wc.method(HttpMethod.OPTIONS));
+	public RequestHeadersUriSpec<?> options() {
+		return methodInternal(HttpMethod.OPTIONS);
+	}
+
+	@Override
+	public RequestBodyUriSpec method(HttpMethod method) {
+		return methodInternal(method);
+	}
+
+	private RequestBodyUriSpec methodInternal(HttpMethod method) {
+		return new DefaultRequestBodyUriSpec(this.webClient.method(method));
 	}
 
 	@Override
@@ -130,58 +141,53 @@ class DefaultWebTestClient implements WebTestClient {
 		return this.builder;
 	}
 
-	private <S extends RequestHeadersSpec<?>> UriSpec<S> toUriSpec(
-			Function<WebClient, WebClient.UriSpec<WebClient.RequestBodySpec>> function) {
-
-		return new DefaultUriSpec<>(function.apply(this.webClient));
+	@Override
+	public WebTestClient mutateWith(WebTestClientConfigurer configurer) {
+		return mutate().apply(configurer).build();
 	}
 
 
-	@SuppressWarnings("unchecked")
-	private class DefaultUriSpec<S extends RequestHeadersSpec<?>> implements UriSpec<S> {
+	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
-		private final WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec;
-
-
-		DefaultUriSpec(WebClient.UriSpec<WebClient.RequestBodySpec> spec) {
-			this.uriSpec = spec;
-		}
-
-		@Override
-		public S uri(URI uri) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uri), null);
-		}
-
-		@Override
-		public S uri(String uriTemplate, Object... uriVariables) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables), uriTemplate);
-		}
-
-		@Override
-		public S uri(String uriTemplate, Map<String, ?> uriVariables) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriTemplate, uriVariables), uriTemplate);
-		}
-
-		@Override
-		public S uri(Function<UriBuilder, URI> uriBuilder) {
-			return (S) new DefaultRequestBodySpec(this.uriSpec.uri(uriBuilder), null);
-		}
-	}
-
-	private class DefaultRequestBodySpec implements RequestBodySpec {
-
-		private final WebClient.RequestBodySpec bodySpec;
+		private final WebClient.RequestBodyUriSpec bodySpec;
 
 		@Nullable
-		private final String uriTemplate;
+		private String uriTemplate;
 
 		private final String requestId;
 
-		DefaultRequestBodySpec(WebClient.RequestBodySpec spec, @Nullable String uriTemplate) {
+		DefaultRequestBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
 			this.bodySpec = spec;
-			this.uriTemplate = uriTemplate;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
 			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
+		}
+
+		@Override
+		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
+			this.bodySpec.uri(uriTemplate, uriVariables);
+			this.uriTemplate = uriTemplate;
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
+			this.bodySpec.uri(uriTemplate, uriVariables);
+			this.uriTemplate = uriTemplate;
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
+			this.bodySpec.uri(uriFunction);
+			this.uriTemplate = null;
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec uri(URI uri) {
+			this.bodySpec.uri(uri);
+			this.uriTemplate = null;
+			return this;
 		}
 
 		@Override
@@ -193,6 +199,19 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
 			this.bodySpec.headers(headersConsumer);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			this.bodySpec.attribute(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(
+				Consumer<Map<String, Object>> attributesConsumer) {
+			this.bodySpec.attributes(attributesConsumer);
 			return this;
 		}
 

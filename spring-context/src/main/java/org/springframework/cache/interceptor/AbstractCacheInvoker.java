@@ -38,7 +38,7 @@ public abstract class AbstractCacheInvoker {
 	}
 
 	protected AbstractCacheInvoker(CacheErrorHandler errorHandler) {
-		setErrorHandler(errorHandler);
+		this.errorHandler = errorHandler;
 	}
 
 

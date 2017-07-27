@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLResolver;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -62,8 +60,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * A builder used to create {@link ObjectMapper} instances with a fluent API.
@@ -827,38 +825,27 @@ public class Jackson2ObjectMapperBuilder {
 	private static class XmlObjectMapperInitializer {
 
 		public ObjectMapper create() {
-			return new XmlMapper(xmlInputFactory());
+			return new XmlMapper(StaxUtils.createDefensiveInputFactory());
 		}
 
 		public ObjectMapper create(boolean defaultUseWrapper) {
 			JacksonXmlModule module = new JacksonXmlModule();
 			module.setDefaultUseWrapper(defaultUseWrapper);
-			return new XmlMapper(new XmlFactory(xmlInputFactory()), module);
+			return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
 		}
-
-		private static XMLInputFactory xmlInputFactory() {
-			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-			inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
-			return inputFactory;
-		}
-
-		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
-			@Override
-			public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-				return StreamUtils.emptyInput();
-			}
-		};
 	}
 
+
 	private static class SmileFactoryInitializer {
+
 		public JsonFactory create() {
 			return new SmileFactory();
 		}
 	}
 
+
 	private static class CborFactoryInitializer {
+
 		public JsonFactory create() {
 			return new CBORFactory();
 		}

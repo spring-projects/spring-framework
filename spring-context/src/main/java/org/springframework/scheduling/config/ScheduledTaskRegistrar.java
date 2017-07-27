@@ -92,9 +92,11 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * {@link java.util.concurrent.ScheduledExecutorService} to be wrapped as a
 	 * {@code TaskScheduler}.
 	 */
-	public void setScheduler(Object scheduler) {
-		Assert.notNull(scheduler, "Scheduler object must not be null");
-		if (scheduler instanceof TaskScheduler) {
+	public void setScheduler(@Nullable Object scheduler) {
+		if (scheduler == null) {
+			this.taskScheduler = null;
+		}
+		else if (scheduler instanceof TaskScheduler) {
 			this.taskScheduler = (TaskScheduler) scheduler;
 		}
 		else if (scheduler instanceof ScheduledExecutorService) {

@@ -131,7 +131,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
 		MediaType.sortBySpecificityAndQuality(result);
 
-		for (MediaType mediaType : compatibleMediaTypes) {
+		for (MediaType mediaType : result) {
 			if (mediaType.isConcrete()) {
 				return mediaType;
 			}

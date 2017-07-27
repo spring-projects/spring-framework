@@ -145,7 +145,7 @@ public class VersionResourceResolverTests {
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(Mono.just(expected));
 		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
 		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
-		given(this.versionStrategy.getResourceVersion(expected)).willReturn("newer-version");
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn(Mono.just("newer-version"));
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
@@ -167,7 +167,7 @@ public class VersionResourceResolverTests {
 		given(this.chain.resolveResource(exchange, file, this.locations)).willReturn(Mono.just(expected));
 		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
 		given(this.versionStrategy.removeVersion(versionFile, version)).willReturn(file);
-		given(this.versionStrategy.getResourceVersion(expected)).willReturn(version);
+		given(this.versionStrategy.getResourceVersion(expected)).willReturn(Mono.just(version));
 
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver

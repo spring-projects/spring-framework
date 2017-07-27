@@ -42,7 +42,9 @@ public class FixedThemeResolver extends AbstractThemeResolver {
 	}
 
 	@Override
-	public void setThemeName(HttpServletRequest request, HttpServletResponse response, @Nullable String themeName) {
+	public void setThemeName(
+			HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName) {
+
 		throw new UnsupportedOperationException("Cannot change theme - use a different theme resolution strategy");
 	}
 

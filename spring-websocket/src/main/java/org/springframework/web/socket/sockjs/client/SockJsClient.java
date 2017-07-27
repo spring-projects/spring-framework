@@ -134,7 +134,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 *
 	 * @param httpHeaderNames HTTP header names
 	 */
-	public void setHttpHeaderNames(String... httpHeaderNames) {
+	public void setHttpHeaderNames(@Nullable String... httpHeaderNames) {
 		this.httpHeaderNames = httpHeaderNames;
 	}
 

@@ -19,7 +19,6 @@ import java.net.URI;
 
 import org.junit.Test;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -54,7 +53,7 @@ public class DefaultRequestPathTests {
 	private void testRequestPath(String fullPath, String contextPath, String pathWithinApplication) {
 
 		URI uri = URI.create("http://localhost:8080" + fullPath);
-		RequestPath requestPath = new DefaultRequestPath(uri, contextPath, UTF_8);
+		RequestPath requestPath = RequestPath.parse(uri, contextPath);
 
 		assertEquals(contextPath.equals("/") ? "" : contextPath, requestPath.contextPath().value());
 		assertEquals(pathWithinApplication, requestPath.pathWithinApplication().value());

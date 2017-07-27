@@ -19,13 +19,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static java.time.Instant.*;
+import static java.time.format.DateTimeFormatter.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.web.servlet.HandlerMapping.*;
@@ -70,10 +70,11 @@ import static org.springframework.web.servlet.HandlerMapping.*;
  */
 public class HttpEntityMethodProcessorMockTests {
 
+	private static final ZoneId GMT = ZoneId.of("GMT");
+
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
-	private SimpleDateFormat dateFormat;
 
 	private HttpEntityMethodProcessor processor;
 
@@ -113,8 +114,6 @@ public class HttpEntityMethodProcessorMockTests {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		stringHttpMessageConverter = mock(HttpMessageConverter.class);
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -350,7 +349,7 @@ public class HttpEntityMethodProcessorMockTests {
 	public void shouldHandleLastModifiedWithHttp304() throws Exception {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo = currentTime - (1000 * 60);
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(ofEpochMilli(currentTime).atZone(GMT)));
 		ResponseEntity<String> returnValue = ResponseEntity.ok().lastModified(oneMinuteAgo).body("body");
 
 		initStringMessageConversion(MediaType.TEXT_PLAIN);
@@ -388,7 +387,7 @@ public class HttpEntityMethodProcessorMockTests {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(ofEpochMilli(currentTime).atZone(GMT)));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(etagValue).lastModified(oneMinuteAgo).body("body");
 
@@ -418,7 +417,7 @@ public class HttpEntityMethodProcessorMockTests {
 		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		String changedEtagValue = "\"changed-etag-value\"";
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(ofEpochMilli(currentTime).atZone(GMT)));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		ResponseEntity<String> returnValue = ResponseEntity.ok()
 				.eTag(changedEtagValue).lastModified(oneMinuteAgo).body("body");
@@ -473,7 +472,7 @@ public class HttpEntityMethodProcessorMockTests {
 	public void shouldHandleIfNoneMatchIfUnmodifiedSince() throws Exception {
 		String etagValue = "\"some-etag\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
-		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, dateFormat.format(new Date().getTime()));
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, RFC_1123_DATE_TIME.format(ofEpochMilli(new Date().getTime()).atZone(GMT)));
 		ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(etagValue).body("body");
 
 		initStringMessageConversion(MediaType.TEXT_PLAIN);
@@ -538,7 +537,7 @@ public class HttpEntityMethodProcessorMockTests {
 		}
 		if (lastModified != -1) {
 			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
-			assertEquals(dateFormat.format(lastModified), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+			assertEquals(RFC_1123_DATE_TIME.format(ofEpochMilli(lastModified).atZone(GMT)), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		}
 	}
 

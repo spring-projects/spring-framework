@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests which demonstrate support for {@link Autowired @Autowired}
- * test class constructors with the Spring TestContext Framework and JUnit 5.
+ * test class constructors with the Spring TestContext Framework and JUnit Jupiter.
  *
- * <p>To run these tests in an IDE, simply run {@link SpringJUnitJupiterTestSuite}
- * as a JUnit 4 test.
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0
  * @see SpringExtension
- * @see SpringJUnit5ConstructorInjectionTestCase
+ * @see SpringJUnitJupiterConstructorInjectionTestCase
  */
 @SpringJUnitConfig(TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-class SpringJUnit5AutowiredConstructorInjectionTestCase {
+class SpringJUnitJupiterAutowiredConstructorInjectionTestCase {
 
 	final ApplicationContext applicationContext;
 	final Person dilbert;
@@ -50,7 +50,7 @@ class SpringJUnit5AutowiredConstructorInjectionTestCase {
 	final Integer enigma;
 
 	@Autowired
-	SpringJUnit5AutowiredConstructorInjectionTestCase(ApplicationContext applicationContext, Person dilbert, Dog dog,
+	SpringJUnitJupiterAutowiredConstructorInjectionTestCase(ApplicationContext applicationContext, Person dilbert, Dog dog,
 			@Value("${enigma}") Integer enigma) {
 
 		this.applicationContext = applicationContext;

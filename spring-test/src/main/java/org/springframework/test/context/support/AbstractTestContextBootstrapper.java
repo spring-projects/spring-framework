@@ -80,22 +80,18 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private BootstrapContext bootstrapContext;
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setBootstrapContext(BootstrapContext bootstrapContext) {
 		this.bootstrapContext = bootstrapContext;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public BootstrapContext getBootstrapContext() {
+		Assert.state(this.bootstrapContext != null, "No BootstrapContext set");
 		return this.bootstrapContext;
 	}
 

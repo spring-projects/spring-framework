@@ -54,7 +54,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		bindingContext = BindingContext(initializer)
 
 		val method = ReflectionUtils.findMethod(javaClass, "handle", String::class.java,
-				String::class.java, String::class.java, String::class.java)
+				String::class.java, String::class.java, String::class.java)!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)

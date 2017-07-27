@@ -31,7 +31,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Result;
@@ -47,7 +46,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * An {@code HttpMessageConverter} that can read XML collections using JAXB2.
@@ -167,7 +166,8 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 			return result;
 		}
 		catch (UnmarshalException ex) {
-			throw new HttpMessageNotReadableException("Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException(
+					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex);
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
@@ -241,25 +241,15 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	}
 
 	/**
-	 * Create a {@code XMLInputFactory} that this converter will use to create {@link
-	 * javax.xml.stream.XMLStreamReader} and {@link javax.xml.stream.XMLEventReader} objects.
+	 * Create an {@code XMLInputFactory} that this converter will use to create
+	 * {@link javax.xml.stream.XMLStreamReader} and {@link javax.xml.stream.XMLEventReader}
+	 * objects.
 	 * <p>Can be overridden in subclasses, adding further initialization of the factory.
 	 * The resulting factory is cached, so this method will only be called once.
+	 * @see StaxUtils#createDefensiveInputFactory()
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
-		return inputFactory;
+		return StaxUtils.createDefensiveInputFactory();
 	}
-
-
-	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
-		@Override
-		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return StreamUtils.emptyInput();
-		}
-	};
 
 }

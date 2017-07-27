@@ -20,7 +20,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
 
 /**
@@ -44,6 +45,18 @@ class ClientResponseExtensionsTests {
 	fun `bodyToFlux with reified type parameters`() {
 		response.bodyToFlux<Foo>()
 		verify(response, times(1)).bodyToFlux(Foo::class.java)
+	}
+
+	@Test
+	fun `toEntity with reified type parameters`() {
+		response.toEntity<Foo>()
+		verify(response, times(1)).toEntity(Foo::class.java)
+	}
+
+	@Test
+	fun `ResponseSpec#toEntityList with reified type parameters`() {
+		response.toEntityList<Foo>()
+		verify(response, times(1)).toEntityList(Foo::class.java)
 	}
 
 	class Foo

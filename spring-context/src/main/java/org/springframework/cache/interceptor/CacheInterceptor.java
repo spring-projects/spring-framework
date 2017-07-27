@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
+
 /**
  * AOP Alliance MethodInterceptor for declarative cache
  * management using the common Spring caching infrastructure
@@ -42,6 +44,7 @@ import org.aopalliance.intercept.MethodInvocation;
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
 
 	@Override
+	@Nullable
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 

@@ -24,6 +24,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,15 +36,16 @@ public class TypeReference extends SpelNodeImpl {
 
 	private final int dimensions;
 
+	@Nullable
 	private transient Class<?> type;
 
 
 	public TypeReference(int pos, SpelNodeImpl qualifiedId) {
-		this(pos,qualifiedId,0);
+		this(pos, qualifiedId, 0);
 	}
 
 	public TypeReference(int pos, SpelNodeImpl qualifiedId, int dims) {
-		super(pos,qualifiedId);
+		super(pos, qualifiedId);
 		this.dimensions = dims;
 	}
 
@@ -99,6 +101,7 @@ public class TypeReference extends SpelNodeImpl {
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		// TODO Future optimization - if followed by a static method call, skip generating code here
+		Assert.state(this.type != null, "No type available");
 		if (this.type.isPrimitive()) {
 			if (this.type == Integer.TYPE) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");

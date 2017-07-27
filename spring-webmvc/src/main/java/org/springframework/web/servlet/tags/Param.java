@@ -41,7 +41,7 @@ public class Param {
 	/**
 	 * Set the raw name of the parameter
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 

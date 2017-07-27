@@ -37,33 +37,14 @@ import org.springframework.lang.Nullable;
  */
 public abstract class TemplateAwareExpressionParser implements ExpressionParser {
 
-	/**
-	 * Default ParserContext instance for non-template expressions.
-	 */
-	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-		@Override
-		public boolean isTemplate() {
-			return false;
-		}
-		@Override
-		public String getExpressionPrefix() {
-			return "";
-		}
-		@Override
-		public String getExpressionSuffix() {
-			return "";
-		}
-	};
-
-
 	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
-		return parseExpression(expressionString, NON_TEMPLATE_PARSER_CONTEXT);
+		return parseExpression(expressionString, null);
 	}
 
 	@Override
-	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
-		if (context.isTemplate()) {
+	public Expression parseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
+		if (context != null && context.isTemplate()) {
 			return parseTemplate(expressionString, context);
 		}
 		else {

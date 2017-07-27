@@ -48,7 +48,6 @@ import reactor.ipc.netty.resources.LoopResources;
 import reactor.ipc.netty.resources.PoolResources;
 import reactor.ipc.netty.tcp.TcpClient;
 import reactor.ipc.netty.tcp.TcpResources;
-import reactor.util.concurrent.QueueSupplier;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.ReconnectStrategy;
@@ -69,6 +68,9 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  */
 public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
+	private static final int PUBLISH_ON_BUFFER_SIZE = 16;
+
+
 	private final TcpClient tcpClient;
 
 	private final ReactorNettyCodec<P> codec;
@@ -88,22 +90,22 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * Basic constructor with a host and a port.
 	 */
 	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
-		this(opts -> opts.connect(host, port), codec);
+		this(opts -> opts.host(host).port(port), codec);
 	}
 
 	/**
-	 * Alternate constructor with a {@link ClientOptions} consumer providing
-	 * additional control beyond a host and a port.
+	 * Alternate constructor with a {@link ClientOptions.Builder<?>} consumer
+	 * providing additional control beyond a host and a port.
 	 */
-	public ReactorNettyTcpClient(Consumer<ClientOptions> optionsConsumer, ReactorNettyCodec<P> codec) {
-		Assert.notNull(optionsConsumer, "Consumer<ClientOptions> is required");
+	public ReactorNettyTcpClient(Consumer<ClientOptions.Builder<?>> optionsConsumer, ReactorNettyCodec<P> codec) {
+		Assert.notNull(optionsConsumer, "Consumer<ClientOptions.Builder<?> is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("reactor-netty-tcp-client");
 		this.poolResources = PoolResources.fixed("reactor-netty-tcp-pool");
 
-		Consumer<ClientOptions> builtInConsumer = opts -> opts
+		Consumer<ClientOptions.Builder<?>> builtInConsumer = opts -> opts
 				.channelGroup(this.channelGroup)
 				.loopResources(this.loopResources)
 				.poolResources(this.poolResources)
@@ -246,7 +248,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 			inbound.receiveObject()
 					.cast(Message.class)
-					.publishOn(scheduler, QueueSupplier.SMALL_BUFFER_SIZE)
+					.publishOn(scheduler, PUBLISH_ON_BUFFER_SIZE)
 					.subscribe(
 							connectionHandler::handleMessage,
 							connectionHandler::handleFailure,

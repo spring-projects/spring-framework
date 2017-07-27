@@ -92,8 +92,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
 
+	@Nullable
 	private Object defaultDestination;
 
+	@Nullable
 	private MessageConverter messageConverter;
 
 
@@ -161,7 +163,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #convertAndSend(Object, MessagePostProcessor)
 	 * @see #setDefaultDestinationName(String)
 	 */
-	public void setDefaultDestination(Destination destination) {
+	public void setDefaultDestination(@Nullable Destination destination) {
 		this.defaultDestination = destination;
 	}
 
@@ -195,7 +197,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #setDestinationResolver
 	 * @see #setDefaultDestination(javax.jms.Destination)
 	 */
-	public void setDefaultDestinationName(String destinationName) {
+	public void setDefaultDestinationName(@Nullable String destinationName) {
 		this.defaultDestination = destinationName;
 	}
 
@@ -227,7 +229,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #receiveAndConvert
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 

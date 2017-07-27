@@ -89,6 +89,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
+	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**

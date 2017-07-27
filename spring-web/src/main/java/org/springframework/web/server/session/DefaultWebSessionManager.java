@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,29 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
+import org.springframework.util.JdkIdGenerator;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 
 /**
- * Default implementation of {@link WebSessionManager} with a cookie-based web
- * session id resolution strategy and simple in-memory session persistence.
+ * Default implementation of {@link WebSessionManager} delegating to a
+ * {@link WebSessionIdResolver} for session id resolution and to a
+ * {@link WebSessionStore}
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class DefaultWebSessionManager implements WebSessionManager {
+
+	private static final IdGenerator idGenerator = new JdkIdGenerator();
+
 
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -46,12 +51,12 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 
 	/**
-	 * Configure the session id resolution strategy to use.
-	 * <p>By default {@link CookieWebSessionIdResolver} is used.
-	 * @param sessionIdResolver the resolver
+	 * Configure the id resolution strategy.
+	 * <p>By default an instance of {@link CookieWebSessionIdResolver}.
+	 * @param sessionIdResolver the resolver to use
 	 */
 	public void setSessionIdResolver(WebSessionIdResolver sessionIdResolver) {
-		Assert.notNull(sessionIdResolver, "'sessionIdResolver' is required.");
+		Assert.notNull(sessionIdResolver, "WebSessionIdResolver is required.");
 		this.sessionIdResolver = sessionIdResolver;
 	}
 
@@ -63,12 +68,12 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	/**
-	 * Configure the session persistence strategy to use.
-	 * <p>By default {@link InMemoryWebSessionStore} is used.
-	 * @param sessionStore the persistence strategy
+	 * Configure the persistence strategy.
+	 * <p>By default an instance of {@link InMemoryWebSessionStore}.
+	 * @param sessionStore the persistence strategy to use
 	 */
 	public void setSessionStore(WebSessionStore sessionStore) {
-		Assert.notNull(sessionStore, "'sessionStore' is required.");
+		Assert.notNull(sessionStore, "WebSessionStore is required.");
 		this.sessionStore = sessionStore;
 	}
 
@@ -80,10 +85,12 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	/**
-	 * Configure the {@link Clock} for access to current time. During tests you
-	 * may use {code Clock.offset(clock, Duration.ofMinutes(-31))} to set the
-	 * clock back for example to test changes after sessions expire.
-	 * <p>By default {@code Clock.system(ZoneId.of("GMT"))} is used.
+	 * Configure the {@link Clock} to use to set lastAccessTime on every created
+	 * session and to calculate if it is expired.
+	 * <p>This may be useful to align to different timezone or to set the clock
+	 * back in a test, e.g. {@code Clock.offset(clock, Duration.ofMinutes(-31))}
+	 * in order to simulate session expiration.
+	 * <p>By default this is {@code Clock.system(ZoneId.of("GMT"))}.
 	 * @param clock the clock to use
 	 */
 	public void setClock(Clock clock) {
@@ -92,7 +99,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	/**
-	 * Return the configured clock for access to current time.
+	 * Return the configured clock for session lastAccessTime calculations.
 	 */
 	public Clock getClock() {
 		return this.clock;
@@ -102,48 +109,38 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.defer(() ->
-				Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
-						.concatMap(this.sessionStore::retrieveSession)
-						.next()
-						.flatMap(session -> validateSession(exchange, session))
+				retrieveSession(exchange)
+						.flatMap(session -> removeSessionIfExpired(exchange, session))
+						.map(session -> {
+							Instant lastAccessTime = Instant.now(getClock());
+							return new DefaultWebSession(session, lastAccessTime, s -> saveSession(exchange, s));
+						})
 						.switchIfEmpty(createSession(exchange))
-						.map(session -> extendSession(exchange, session)));
+						.doOnNext(session -> exchange.getResponse().beforeCommit(session::save)));
 	}
 
-	protected Mono<WebSession> validateSession(ServerWebExchange exchange, WebSession session) {
+	private Mono<DefaultWebSession> retrieveSession(ServerWebExchange exchange) {
+		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
+				.concatMap(this.sessionStore::retrieveSession)
+				.cast(DefaultWebSession.class)
+				.next();
+	}
+
+	private Mono<DefaultWebSession> removeSessionIfExpired(ServerWebExchange exchange, DefaultWebSession session) {
 		if (session.isExpired()) {
-			this.sessionIdResolver.setSessionId(exchange, "");
-			return this.sessionStore.removeSession(session.getId()).cast(WebSession.class);
+			this.sessionIdResolver.expireSession(exchange);
+			return this.sessionStore.removeSession(session.getId()).then(Mono.empty());
 		}
-		else {
-			return Mono.just(session);
-		}
-	}
-
-	protected Mono<WebSession> createSession(ServerWebExchange exchange) {
-		String sessionId = UUID.randomUUID().toString();
-		WebSession session = new DefaultWebSession(sessionId, getClock());
 		return Mono.just(session);
 	}
 
-	protected WebSession extendSession(ServerWebExchange exchange, WebSession session) {
-		if (session instanceof ConfigurableWebSession) {
-			ConfigurableWebSession managed = (ConfigurableWebSession) session;
-			managed.setSaveOperation(() -> saveSession(exchange, session));
-			managed.setLastAccessTime(Instant.now(getClock()));
-		}
-		exchange.getResponse().beforeCommit(session::save);
-		return session;
-	}
-
-	protected Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
-
+	private Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
 			return Mono.error(new IllegalStateException(
 					"Sessions are checked for expiration and have their " +
-					"access time updated when first accessed during request processing. " +
+					"lastAccessTime updated when first accessed during request processing. " +
 					"However this session is expired meaning that maxIdleTime elapsed " +
-					"since then and before the call to session.save()."));
+					"before the call to session.save()."));
 		}
 
 		if (!session.isStarted()) {
@@ -153,11 +150,23 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		// Force explicit start
 		session.start();
 
-		List<String> requestedIds = getSessionIdResolver().resolveSessionIds(exchange);
-		if (requestedIds.isEmpty() || !session.getId().equals(requestedIds.get(0))) {
+		if (hasNewSessionId(exchange, session)) {
 			this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}
-		return this.sessionStore.storeSession(session);
+
+ 		return this.sessionStore.storeSession(session);
+	}
+
+	private boolean hasNewSessionId(ServerWebExchange exchange, WebSession session) {
+		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
+		return ids.isEmpty() || !session.getId().equals(ids.get(0));
+	}
+
+	private Mono<DefaultWebSession> createSession(ServerWebExchange exchange) {
+		return Mono.fromSupplier(() ->
+				new DefaultWebSession(idGenerator, getClock(),
+						(oldId, session) -> this.sessionStore.changeSessionId(oldId, session),
+						session -> saveSession(exchange, session)));
 	}
 
 }

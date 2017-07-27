@@ -109,7 +109,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * PathMatcher implementations that support mapping metadata other than the
 	 * Ant-style path patterns supported by default.
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
@@ -136,26 +136,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 		return this.interceptor;
 	}
 
-	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		return this.interceptor.preHandle(request, response, handler);
-	}
-
-	@Override
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView)
-			throws Exception {
-
-		this.interceptor.postHandle(request, response, handler, modelAndView);
-	}
-
-	@Override
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex)
-			throws Exception {
-
-		this.interceptor.afterCompletion(request, response, handler, ex);
-	}
 
 	/**
 	 * Returns {@code true} if the interceptor applies to the given request path.
@@ -183,4 +163,26 @@ public final class MappedInterceptor implements HandlerInterceptor {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+
+		return this.interceptor.preHandle(request, response, handler);
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
+
+		this.interceptor.postHandle(request, response, handler, modelAndView);
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
+
+		this.interceptor.afterCompletion(request, response, handler, ex);
+	}
+
 }

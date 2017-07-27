@@ -90,7 +90,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * or {@link org.springframework.jms.support.destination.BeanFactoryDestinationResolver}
 	 * but not {@link org.springframework.jms.support.destination.DynamicDestinationResolver}.
 	 */
-	public void setDestinationResolver(DestinationResolver destinationResolver) {
+	public void setDestinationResolver(@Nullable DestinationResolver destinationResolver) {
 		this.destinationResolver = destinationResolver;
 	}
 

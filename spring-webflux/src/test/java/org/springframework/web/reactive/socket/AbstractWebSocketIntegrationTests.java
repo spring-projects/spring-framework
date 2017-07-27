@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.tomcat.websocket.WsContainerProvider;
+import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.After;
 import org.junit.Before;
@@ -93,7 +95,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	public static Object[][] arguments() throws IOException {
 
 		Flux<? extends WebSocketClient> clients = Flux.concat(
-				Flux.just(new TomcatWebSocketClient()).repeat(5),
+				Flux.just(new TomcatWebSocketClient(new WsWebSocketContainer())).repeat(5),
 				Flux.just(new JettyWebSocketClient()).repeat(5),
 				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
 				Flux.just(new RxNettyWebSocketClient()).repeat(5),

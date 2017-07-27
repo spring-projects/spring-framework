@@ -83,14 +83,16 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void missingContentType() throws Exception {
 		ServerWebExchange exchange = post("/path").body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}").toExchange();
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
+		Mono<TestBean> value = (Mono<TestBean>) result.block(Duration.ofSeconds(1));
 
-		StepVerifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
+		StepVerifier.create(value).expectError(UnsupportedMediaTypeStatusException.class).verify();
 	}
 
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests

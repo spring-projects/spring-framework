@@ -86,7 +86,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	/**
 	 * Set the origin to use.
 	 */
-	public void setOrigin(String origin) {
+	public void setOrigin(@Nullable String origin) {
 		this.headers.setOrigin(origin);
 	}
 

@@ -101,7 +101,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
 	 */
-	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
+	public final static String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
@@ -124,6 +124,48 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 4.3
 	 */
 	public final static String APPLICATION_PDF_VALUE = "application/pdf";
+
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_JSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
+
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_JSON_UTF8;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
+
+	/**
+	 * Public constant media type for {@code application/problem+xml}.
+	 * @since 5.0
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">
+	 *     Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_XML;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
 	 * Public constant media type for {@code application/rss+xml}.
@@ -264,32 +306,6 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
-	/**
-	 * Public constant media type for {@code application/problem+json}.
-	 * @since 5.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">Problem Details for HTTP APIs, 6.1. application/problem+json</a>
-	 */
-	public final static MediaType APPLICATION_PROBLEM_JSON;
-
-	/**
-	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
-	 * @since 5.0
-	 */
-	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
-
-	/**
-	 * Public constant media type for {@code application/problem+xml}.
-	 * @since 5.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
-	 */
-	public final static MediaType APPLICATION_PROBLEM_XML;
-
-	/**
-	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
-	 * @since 5.0
-	 */
-	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
-
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
 
@@ -302,6 +318,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
 		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
 		APPLICATION_PROBLEM_JSON = valueOf(APPLICATION_PROBLEM_JSON_VALUE);
+		APPLICATION_PROBLEM_JSON_UTF8 = valueOf(APPLICATION_PROBLEM_JSON_UTF8_VALUE);
 		APPLICATION_PROBLEM_XML = valueOf(APPLICATION_PROBLEM_XML_VALUE);
 		APPLICATION_RSS_XML = valueOf(APPLICATION_RSS_XML_VALUE);
 		APPLICATION_STREAM_JSON = valueOf(APPLICATION_STREAM_JSON_VALUE);

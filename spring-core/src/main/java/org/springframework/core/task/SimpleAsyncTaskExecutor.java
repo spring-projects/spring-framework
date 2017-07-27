@@ -103,7 +103,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * @see #setThreadNamePrefix
 	 * @see #setThreadPriority
 	 */
-	public void setThreadFactory(ThreadFactory threadFactory) {
+	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {
 		this.threadFactory = threadFactory;
 	}
 

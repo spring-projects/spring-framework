@@ -18,8 +18,10 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
@@ -32,6 +34,8 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -61,6 +65,10 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @since 5.0
  */
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
+
+	private static final Set<HttpMethod> SUPPORTED_METHODS =
+			EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
@@ -111,10 +119,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		MediaType mediaType = request.getHeaders().getContentType();
-		if (mediaType == null) {
-			mediaType = MediaType.APPLICATION_OCTET_STREAM;
-		}
+
+		MediaType contentType = request.getHeaders().getContentType();
+		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
@@ -133,6 +140,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
+					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = reader.readMono(bodyType, elementType, request, response, readHints);
 					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
 					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
@@ -151,6 +159,20 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					}
 				}
 			}
+		}
+
+		// No compatible reader but body may be empty..
+
+		HttpMethod method = request.getMethod();
+		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
+			Flux<DataBuffer> body = request.getBody().doOnNext(o -> {
+				// Body not empty, back to 415..
+				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes);
+			});
+			if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
+				body = body.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
+			}
+			return (adapter != null ? Mono.just(adapter.fromPublisher(body)) : Mono.from(body));
 		}
 
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));

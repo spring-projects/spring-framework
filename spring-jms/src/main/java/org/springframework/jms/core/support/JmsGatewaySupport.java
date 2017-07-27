@@ -84,7 +84,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Set the JmsTemplate for the gateway.
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
-	public final void setJmsTemplate(JmsTemplate jmsTemplate) {
+	public final void setJmsTemplate(@Nullable JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 

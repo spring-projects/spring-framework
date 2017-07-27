@@ -101,7 +101,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	@Override
-	public void set(K key, V value) {
+	public void set(K key, @Nullable V value) {
 		List<V> values = new LinkedList<>();
 		values.add(value);
 		this.targetMap.put(key, values);

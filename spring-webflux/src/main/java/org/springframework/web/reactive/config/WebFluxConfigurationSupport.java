@@ -90,7 +90,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -192,7 +192,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public RouterFunctionMapping routerFunctionMapping() {
 		RouterFunctionMapping mapping = createRouterFunctionMapping();
 		mapping.setOrder(-1); // go before RequestMappingHandlerMapping
-		mapping.setMessageCodecConfigurer(serverCodecConfigurer());
+		mapping.setMessageReaders(serverCodecConfigurer().getReaders());
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		return mapping;
@@ -247,7 +247,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageCodecConfigurer(serverCodecConfigurer());
+		adapter.setMessageReaders(serverCodecConfigurer().getReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
@@ -425,7 +425,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 
 		ServerResponseResultHandler handler = new ServerResponseResultHandler();
-		handler.setMessageCodecConfigurer(serverCodecConfigurer());
+		handler.setMessageWriters(serverCodecConfigurer().getWriters());
 		handler.setViewResolvers(resolvers);
 		handler.setOrder(registry.getOrder() + 1);
 

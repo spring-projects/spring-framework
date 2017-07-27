@@ -39,10 +39,13 @@ public class MappingJacksonValue {
 
 	private Object value;
 
+	@Nullable
 	private Class<?> serializationView;
 
+	@Nullable
 	private FilterProvider filters;
 
+	@Nullable
 	private String jsonpFunction;
 
 
@@ -74,7 +77,7 @@ public class MappingJacksonValue {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
 	 * @see com.fasterxml.jackson.annotation.JsonView
 	 */
-	public void setSerializationView(Class<?> serializationView) {
+	public void setSerializationView(@Nullable Class<?> serializationView) {
 		this.serializationView = serializationView;
 	}
 
@@ -95,7 +98,7 @@ public class MappingJacksonValue {
 	 * @see com.fasterxml.jackson.annotation.JsonFilter
 	 * @see Jackson2ObjectMapperBuilder#filters(FilterProvider)
 	 */
-	public void setFilters(FilterProvider filters) {
+	public void setFilters(@Nullable FilterProvider filters) {
 		this.filters = filters;
 	}
 
@@ -113,7 +116,7 @@ public class MappingJacksonValue {
 	/**
 	 * Set the name of the JSONP function name.
 	 */
-	public void setJsonpFunction(String functionName) {
+	public void setJsonpFunction(@Nullable String functionName) {
 		this.jsonpFunction = functionName;
 	}
 

@@ -126,8 +126,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	/**
 	 * Specify the type to convert to.
 	 */
-	public void setTargetTypeName(String targetTypeName) {
-		Assert.notNull(targetTypeName, "'targetTypeName' must not be null");
+	public void setTargetTypeName(@Nullable String targetTypeName) {
 		this.targetType = targetTypeName;
 	}
 

@@ -38,8 +38,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ParameterizableViewController extends AbstractController {
 
+	@Nullable
 	private Object view;
 
+	@Nullable
 	private HttpStatus statusCode;
 
 	private boolean statusOnly;
@@ -55,7 +57,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * DispatcherServlet via a ViewResolver. Will override any pre-existing
 	 * view name or View.
 	 */
-	public void setViewName(String viewName) {
+	public void setViewName(@Nullable String viewName) {
 		this.view = viewName;
 	}
 
@@ -98,7 +100,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * fully handled within the controller.
 	 * @since 4.1
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
+	public void setStatusCode(@Nullable HttpStatus statusCode) {
 		this.statusCode = statusCode;
 	}
 

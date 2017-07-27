@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -56,13 +57,16 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*
  * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
  * {@code @BeforeTransaction} and {@code @AfterTransaction} methods can fail
- * tests run via the {@link SpringExtension} in a JUnit 5 (Jupiter) environment.
+ * tests run via the {@link SpringExtension} in a JUnit Jupiter environment.
  *
  * <p>See: <a href="https://jira.spring.io/browse/SPR-3960" target="_blank">SPR-3960</a>
  * and <a href="https://jira.spring.io/browse/SPR-4365" target="_blank">SPR-4365</a>.
  *
  * <p>Indirectly, this class also verifies that all {@code TestExecutionListener}
  * lifecycle callbacks are called.
+ *
+ * <p>To run these tests in an IDE that does not have built-in support for the JUnit
+ * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0
@@ -89,7 +93,6 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		return testClasses().map(clazz -> dynamicTest(clazz.getSimpleName(), () -> runTestAndAssertCounters(clazz)));
 	}
 
-	@SuppressWarnings("deprecation")
 	private void runTestAndAssertCounters(Class<?> testClass) {
 		Launcher launcher = LauncherFactory.create();
 		ExceptionTrackingListener listener = new ExceptionTrackingListener();

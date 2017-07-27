@@ -81,10 +81,10 @@ public abstract class AbstractJdbcInsert {
 	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
-	private String insertString;
+	private String insertString = "";
 
 	/** The SQL type information for the insert columns */
-	private int[] insertTypes;
+	private int[] insertTypes = new int[0];
 
 
 	/**
@@ -119,7 +119,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the table for this insert.
 	 */
-	public void setTableName(String tableName) {
+	public void setTableName(@Nullable String tableName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setTableName(tableName);
 	}
@@ -135,7 +135,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the schema for this insert.
 	 */
-	public void setSchemaName(String schemaName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setSchemaName(schemaName);
 	}
@@ -151,7 +151,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Set the name of the catalog for this insert.
 	 */
-	public void setCatalogName(String catalogName) {
+	public void setCatalogName(@Nullable String catalogName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.tableMetaDataContext.setCatalogName(catalogName);
 	}
@@ -276,7 +276,7 @@ public abstract class AbstractJdbcInsert {
 		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
 		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled insert object: insert string is [" + getInsertString() + "]");
+			logger.debug("Compiled insert object: insert string is [" + this.insertString + "]");
 		}
 		onCompileInternal();
 	}

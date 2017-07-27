@@ -41,6 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -94,8 +95,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	@Nullable
 	private CacheControl cacheControl;
 
+	@Nullable
 	private ResourceHttpMessageWriter resourceHttpMessageWriter;
 
 
@@ -159,7 +162,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
-	public void setCacheControl(CacheControl cacheControl) {
+	public void setCacheControl(@Nullable CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
@@ -176,7 +179,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Configure the {@link ResourceHttpMessageWriter} to use.
 	 * <p>By default a {@link ResourceHttpMessageWriter} will be configured.
 	 */
-	public void setResourceHttpMessageWriter(ResourceHttpMessageWriter httpMessageWriter) {
+	public void setResourceHttpMessageWriter(@Nullable ResourceHttpMessageWriter httpMessageWriter) {
 		this.resourceHttpMessageWriter = httpMessageWriter;
 	}
 
@@ -311,8 +314,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	protected Mono<Resource> getResource(ServerWebExchange exchange) {
 
 		String name = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
-		String pathWithinHandler = exchange.getRequiredAttribute(name);
-		String path = processPath(pathWithinHandler);
+		PathContainer pathWithinHandler = exchange.getRequiredAttribute(name);
+		String path = processPath(pathWithinHandler.value());
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Ignoring invalid resource path [" + path + "]");

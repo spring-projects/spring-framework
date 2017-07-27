@@ -66,7 +66,7 @@ public class RouterFunctionMappingTests {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
-		mapping.setMessageCodecConfigurer(this.codecConfigurer);
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
 		Mono<Object> result = mapping.getHandler(this.exchange);
 
@@ -80,7 +80,7 @@ public class RouterFunctionMappingTests {
 	public void noMatch() {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.empty();
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
-		mapping.setMessageCodecConfigurer(this.codecConfigurer);
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
 		Mono<Object> result = mapping.getHandler(this.exchange);
 

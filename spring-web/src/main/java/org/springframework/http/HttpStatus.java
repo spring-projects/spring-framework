@@ -466,6 +466,16 @@ public enum HttpStatus {
 	}
 
 	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean isError() {
+		return is4xxClientError() || is5xxServerError();
+	}
+
+	/**
 	 * Returns the HTTP status series of this status code.
 	 * @see HttpStatus.Series
 	 */

@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +55,8 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
+
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
 
@@ -104,6 +107,19 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
+	public ClientRequest.Builder attribute(String name, Object value) {
+		this.attributes.put(name, value);
+		return this;
+	}
+
+	@Override
+	public ClientRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
+		Assert.notNull(attributesConsumer, "'attributesConsumer' must not be null");
+		attributesConsumer.accept(this.attributes);
+		return this;
+	}
+
+	@Override
 	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
 		this.inserter = inserter;
 		return this;
@@ -112,7 +128,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	@Override
 	public ClientRequest build() {
 		return new BodyInserterRequest(this.method, this.url, this.headers, this.cookies,
-				this.inserter);
+				this.inserter, this.attributes);
 	}
 
 
@@ -128,14 +144,19 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final BodyInserter<?, ? super ClientHttpRequest> inserter;
 
+		private final Map<String, Object> attributes;
+
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
-				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> inserter) {
+				MultiValueMap<String, String> cookies,
+				BodyInserter<?, ? super ClientHttpRequest> inserter,
+				Map<String, Object> attributes) {
 
 			this.method = method;
 			this.url = url;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			this.inserter = inserter;
+			this.attributes = Collections.unmodifiableMap(attributes);
 		}
 
 		@Override
@@ -161,6 +182,11 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		@Override
 		public BodyInserter<?, ? super ClientHttpRequest> body() {
 			return this.inserter;
+		}
+
+		@Override
+		public Map<String, Object> attributes() {
+			return this.attributes;
 		}
 
 		@Override

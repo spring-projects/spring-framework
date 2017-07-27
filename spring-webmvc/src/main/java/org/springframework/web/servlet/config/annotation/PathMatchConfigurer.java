@@ -39,14 +39,19 @@ import org.springframework.web.util.pattern.ParsingPathMatcher;
  */
 public class PathMatchConfigurer {
 
+	@Nullable
 	private Boolean suffixPatternMatch;
 
+	@Nullable
 	private Boolean trailingSlashMatch;
 
+	@Nullable
 	private Boolean registeredSuffixPatternMatch;
 
+	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	@Nullable
 	private PathMatcher pathMatcher;
 
 
@@ -131,7 +136,8 @@ public class PathMatchConfigurer {
 
 	@Nullable
 	public PathMatcher getPathMatcher() {
-		if (this.pathMatcher instanceof ParsingPathMatcher && (this.trailingSlashMatch || this.suffixPatternMatch)) {
+		if (this.pathMatcher instanceof ParsingPathMatcher &&
+				(Boolean.TRUE.equals(this.trailingSlashMatch) || Boolean.TRUE.equals(this.suffixPatternMatch))) {
 			throw new IllegalStateException("When using a ParsingPathMatcher, useTrailingSlashMatch" +
 					" and useSuffixPatternMatch should be set to 'false'.");
 		}

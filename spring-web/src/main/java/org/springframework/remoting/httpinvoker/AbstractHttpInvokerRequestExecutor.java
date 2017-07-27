@@ -76,6 +76,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 	private boolean acceptGzipEncoding = true;
 
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 
@@ -121,6 +122,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	/**
 	 * Return the bean ClassLoader that this executor is supposed to use.
 	 */
+	@Nullable
 	protected ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}

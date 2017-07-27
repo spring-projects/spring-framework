@@ -38,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -93,6 +94,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public PathContainer pathContainer() {
+		return request().getPath();
+	}
+
+	@Override
 	public Headers headers() {
 		return this.headers;
 	}
@@ -140,19 +146,13 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
-		return Optional.ofNullable(this.exchange.getAttribute(name));
-	}
-
-	@Override
 	public Map<String, Object> attributes() {
 		return this.exchange.getAttributes();
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		List<String> queryParams = request().getQueryParams().get(name);
-		return queryParams != null ? queryParams : Collections.emptyList();
+	public MultiValueMap<String, String> queryParams() {
+		return request().getQueryParams();
 	}
 
 	@Override

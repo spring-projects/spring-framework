@@ -16,12 +16,12 @@
 
 package org.springframework.cache.interceptor;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link CacheResolver} that forces the resolution to a configurable
@@ -32,6 +32,7 @@ import org.springframework.cache.CacheManager;
  */
 public class NamedCacheResolver extends AbstractCacheResolver {
 
+	@Nullable
 	private Collection<String> cacheNames;
 
 

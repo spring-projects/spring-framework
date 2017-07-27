@@ -58,14 +58,14 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	 * called after the setting of all configuration properties.
 	 * @see #refresh()
 	 */
-	void setServletContext(ServletContext servletContext);
+	void setServletContext(@Nullable ServletContext servletContext);
 
 	/**
 	 * Set the ServletConfig for this web application context.
 	 * Only called for a WebApplicationContext that belongs to a specific Servlet.
 	 * @see #refresh()
 	 */
-	void setServletConfig(ServletConfig servletConfig);
+	void setServletConfig(@Nullable ServletConfig servletConfig);
 
 	/**
 	 * Return the ServletConfig for this web application context, if any.
@@ -78,7 +78,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	 * to be used for building a default context config location.
 	 * The root web application context does not have a namespace.
 	 */
-	void setNamespace(String namespace);
+	void setNamespace(@Nullable String namespace);
 
 	/**
 	 * Return the namespace for this web application context, if any.

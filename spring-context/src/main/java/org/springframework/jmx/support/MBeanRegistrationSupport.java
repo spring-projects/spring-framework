@@ -96,7 +96,7 @@ public class MBeanRegistrationSupport {
 	 * be registered. The {@code MBeanExporter} will attempt to locate an
 	 * existing {@code MBeanServer} if none is supplied.
 	 */
-	public void setServer(MBeanServer server) {
+	public void setServer(@Nullable MBeanServer server) {
 		this.server = server;
 	}
 

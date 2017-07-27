@@ -54,7 +54,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Set the JDBC DataSource to obtain connections from.
 	 */
-	public void setDataSource(DataSource dataSource) {
+	public void setDataSource(@Nullable DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 

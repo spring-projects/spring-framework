@@ -37,6 +37,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -58,15 +59,15 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
+	@Nullable
 	private final InetSocketAddress remoteAddress;
 
 	private final Flux<DataBuffer> body;
 
 
-	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, String contextPath,
+	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			InetSocketAddress remoteAddress,
-			Publisher<? extends DataBuffer> body) {
+			@Nullable InetSocketAddress remoteAddress, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
@@ -87,6 +88,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
@@ -351,19 +353,19 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
 
-
 		private final HttpMethod method;
 
 		private final URI url;
 
+		@Nullable
 		private String contextPath;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
+		@Nullable
 		private InetSocketAddress remoteAddress;
-
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;

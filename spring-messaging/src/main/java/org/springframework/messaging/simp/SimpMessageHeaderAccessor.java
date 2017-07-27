@@ -121,8 +121,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
 
-	public void setDestination(String destination) {
-		Assert.notNull(destination, "Destination must not be null");
+	public void setDestination(@Nullable String destination) {
 		setHeader(DESTINATION_HEADER, destination);
 	}
 
@@ -131,7 +130,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(DESTINATION_HEADER);
 	}
 
-	public void setSubscriptionId(String subscriptionId) {
+	public void setSubscriptionId(@Nullable String subscriptionId) {
 		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
@@ -140,7 +139,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
-	public void setSessionId(String sessionId) {
+	public void setSessionId(@Nullable String sessionId) {
 		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
@@ -155,7 +154,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	/**
 	 * A static alternative for access to the session attributes header.
 	 */
-	public void setSessionAttributes(Map<String, Object> attributes) {
+	public void setSessionAttributes(@Nullable Map<String, Object> attributes) {
 		setHeader(SESSION_ATTRIBUTES, attributes);
 	}
 
@@ -168,7 +167,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return (Map<String, Object>) getHeader(SESSION_ATTRIBUTES);
 	}
 
-	public void setUser(Principal principal) {
+	public void setUser(@Nullable Principal principal) {
 		setHeader(USER_HEADER, principal);
 	}
 

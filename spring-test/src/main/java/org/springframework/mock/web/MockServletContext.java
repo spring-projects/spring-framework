@@ -582,7 +582,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	// @Override - but only against Servlet 4.0
-	public void setRequestCharacterEncoding(String requestCharacterEncoding) {
+	public void setRequestCharacterEncoding(@Nullable String requestCharacterEncoding) {
 		this.requestCharacterEncoding = requestCharacterEncoding;
 	}
 
@@ -593,7 +593,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	// @Override - but only against Servlet 4.0
-	public void setResponseCharacterEncoding(String responseCharacterEncoding) {
+	public void setResponseCharacterEncoding(@Nullable String responseCharacterEncoding) {
 		this.responseCharacterEncoding = responseCharacterEncoding;
 	}
 

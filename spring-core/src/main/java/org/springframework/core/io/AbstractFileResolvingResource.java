@@ -17,7 +17,6 @@
 package org.springframework.core.io;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +24,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.ResourceUtils;
 
@@ -127,7 +128,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
 		if (isFile()) {
-			return new FileInputStream(getFile()).getChannel();
+			return FileChannel.open(getFile().toPath(), StandardOpenOption.READ);
 		}
 		else {
 			return super.readableChannel();

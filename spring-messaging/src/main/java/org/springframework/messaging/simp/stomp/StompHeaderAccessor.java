@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,7 +246,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return (rawValue != null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.emptySet());
 	}
 
-	public void setHost(String host) {
+	public void setHost(@Nullable String host) {
 		setNativeHeader(STOMP_HOST_HEADER, host);
 	}
 
@@ -256,7 +256,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	@Override
-	public void setDestination(String destination) {
+	public void setDestination(@Nullable String destination) {
 		super.setDestination(destination);
 		setNativeHeader(STOMP_DESTINATION_HEADER, destination);
 	}
@@ -302,7 +302,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_HEARTBEAT_HEADER, cx + "," + cy);
 	}
 
-	public void setAck(String ack) {
+	public void setAck(@Nullable String ack) {
 		setNativeHeader(STOMP_ACK_HEADER, ack);
 	}
 
@@ -311,7 +311,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_ACK_HEADER);
 	}
 
-	public void setNack(String nack) {
+	public void setNack(@Nullable String nack) {
 		setNativeHeader(STOMP_NACK_HEADER, nack);
 	}
 
@@ -320,7 +320,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_NACK_HEADER);
 	}
 
-	public void setLogin(String login) {
+	public void setLogin(@Nullable String login) {
 		setNativeHeader(STOMP_LOGIN_HEADER, login);
 	}
 
@@ -329,7 +329,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_LOGIN_HEADER);
 	}
 
-	public void setPasscode(String passcode) {
+	public void setPasscode(@Nullable String passcode) {
 		setNativeHeader(STOMP_PASSCODE_HEADER, passcode);
 		protectPasscode();
 	}
@@ -351,7 +351,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return (credentials != null ? credentials.passcode : null);
 	}
 
-	public void setReceiptId(String receiptId) {
+	public void setReceiptId(@Nullable String receiptId) {
 		setNativeHeader(STOMP_RECEIPT_ID_HEADER, receiptId);
 	}
 
@@ -360,7 +360,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_RECEIPT_ID_HEADER);
 	}
 
-	public void setReceipt(String receiptId) {
+	public void setReceipt(@Nullable String receiptId) {
 		setNativeHeader(STOMP_RECEIPT_HEADER, receiptId);
 	}
 
@@ -374,7 +374,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_MESSAGE_HEADER);
 	}
 
-	public void setMessage(String content) {
+	public void setMessage(@Nullable String content) {
 		setNativeHeader(STOMP_MESSAGE_HEADER, content);
 	}
 
@@ -383,7 +383,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_MESSAGE_ID_HEADER);
 	}
 
-	public void setMessageId(String id) {
+	public void setMessageId(@Nullable String id) {
 		setNativeHeader(STOMP_MESSAGE_ID_HEADER, id);
 	}
 
@@ -392,7 +392,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return getFirstNativeHeader(STOMP_VERSION_HEADER);
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(@Nullable String version) {
 		setNativeHeader(STOMP_VERSION_HEADER, version);
 	}
 

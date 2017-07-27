@@ -34,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -88,6 +89,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public PathContainer pathContainer() {
+		return this.delegate.pathContainer();
+	}
+
+	@Override
 	public Headers headers() {
 		return this.delegate.headers();
 	}
@@ -118,7 +124,7 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public <T> Optional<T> attribute(String name) {
+	public Optional<Object> attribute(String name) {
 		return this.delegate.attribute(name);
 	}
 
@@ -133,8 +139,8 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public List<String> queryParams(String name) {
-		return this.delegate.queryParams(name);
+	public MultiValueMap<String, String> queryParams() {
+		return this.delegate.queryParams();
 	}
 
 	@Override

@@ -68,7 +68,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 	/**
 	 * Set the default element type name (class name) to be used for this set.
 	 */
-	public void setElementTypeName(String elementTypeName) {
+	public void setElementTypeName(@Nullable String elementTypeName) {
 		this.elementTypeName = elementTypeName;
 	}
 

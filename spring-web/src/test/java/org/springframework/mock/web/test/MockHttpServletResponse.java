@@ -23,16 +23,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +43,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
+
+import static java.time.format.DateTimeFormatter.*;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
@@ -58,9 +60,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
-	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-
-	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final ZoneId GMT = ZoneId.of("GMT");
 
 
 	//---------------------------------------------------------------------
@@ -508,12 +508,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public long getDateHeader(String name) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		dateFormat.setTimeZone(GMT);
 		try {
-			return dateFormat.parse(getHeader(name)).getTime();
+			return ZonedDateTime.parse(getHeader(name), RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 		}
-		catch (ParseException ex) {
+		catch (DateTimeParseException ex) {
 			throw new IllegalArgumentException(
 					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
 		}
@@ -525,9 +523,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private String formatDate(long date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		dateFormat.setTimeZone(GMT);
-		return dateFormat.format(new Date(date));
+		Instant instant = Instant.ofEpochMilli(date);
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, GMT);
+		return RFC_1123_DATE_TIME.format(zonedDateTime);
 	}
 
 	@Override

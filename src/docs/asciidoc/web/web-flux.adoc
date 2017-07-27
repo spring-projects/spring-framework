@@ -292,10 +292,6 @@ By default the starter runs with Reactor Netty but the dependencies can be chang
 with Spring Boot to switch to a different runtime.
 See the Spring Boot reference documentation page for more details and instruction.
 
-This starter also supports the functional web API and will detect automatically `RouterFunction`
-beans. Your Spring Boot WebFlux application should use the `RouterFunction` *or* the
-`RequestMapping` approach, it is not possible to mix them in the same application.
-
 [[web-reactive-getting-started-manual]]
 === Manual Bootstrapping
 

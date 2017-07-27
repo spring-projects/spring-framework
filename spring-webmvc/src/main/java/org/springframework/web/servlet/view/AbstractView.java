@@ -83,6 +83,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	@Nullable
 	private Set<String> exposedContextBeanNames;
+	
 	@Nullable
 	private String beanName;
 
@@ -102,6 +103,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the content type for this view.
 	 */
 	@Override
+	@Nullable
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -278,7 +280,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Framework code must call this when constructing views.
 	 */
 	@Override
-	public void setBeanName(String beanName) {
+	public void setBeanName(@Nullable String beanName) {
 		this.beanName = beanName;
 	}
 

@@ -142,7 +142,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Set the attributes in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
 	 */
-	public void setModelKeys(Set<String> modelKeys) {
+	public void setModelKeys(@Nullable Set<String> modelKeys) {
 		this.modelKeys = modelKeys;
 	}
 

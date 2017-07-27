@@ -34,7 +34,7 @@ public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdv
 	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 
 
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.pointcut.setExpression(expression);
 	}
 
@@ -43,7 +43,7 @@ public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdv
 		return this.pointcut.getExpression();
 	}
 
-	public void setLocation(String location) {
+	public void setLocation(@Nullable String location) {
 		this.pointcut.setLocation(location);
 	}
 

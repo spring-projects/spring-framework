@@ -55,7 +55,7 @@ public class AppCacheManifestTransformerTests {
 		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+		resourceUrlProvider.registerHandlers(Collections.singletonMap("/static/**", resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -134,7 +134,7 @@ public class AppCacheManifestTransformerTests {
 				Matchers.containsString("http://example.org/image.png"));
 
 		assertThat("should generate fingerprint", content,
-				Matchers.containsString("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d"));
+				Matchers.containsString("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb"));
 	}
 
 }

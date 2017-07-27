@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent}s.
@@ -77,7 +78,7 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
-	private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
 	private static final boolean aaltoPresent = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());

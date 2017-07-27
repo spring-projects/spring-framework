@@ -31,8 +31,17 @@ import org.aopalliance.aop.Advice;
  * implemented using interception.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public interface Advisor {
+
+	/**
+	 * Common placeholder for an empty {@code Advice} to be returned from
+	 * {@link #getAdvice()} if no proper advice has been configured (yet).
+	 * @since 5.0
+	 */
+	Advice EMPTY_ADVICE = new Advice() {};
+
 
 	/**
 	 * Return the advice part of this aspect. An advice may be an

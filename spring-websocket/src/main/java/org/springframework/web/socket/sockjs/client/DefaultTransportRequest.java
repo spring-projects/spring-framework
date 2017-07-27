@@ -117,6 +117,7 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 	@Override
+	@Nullable
 	public Principal getUser() {
 		return this.user;
 	}

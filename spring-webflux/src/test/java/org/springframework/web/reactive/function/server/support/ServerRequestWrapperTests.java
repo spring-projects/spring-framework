@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.server.support;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,12 +25,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -105,11 +104,11 @@ public class ServerRequestWrapperTests {
 
 	@Test
 	public void queryParams() throws Exception {
-		String name = "foo";
-		List<String> value = Collections.singletonList("bar");
-		when(mockRequest.queryParams(name)).thenReturn(value);
+		MultiValueMap<String, String> value = new LinkedMultiValueMap<>();
+		value.add("foo", "bar");
+		when(mockRequest.queryParams()).thenReturn(value);
 
-		assertSame(value, wrapper.queryParams(name));
+		assertSame(value, wrapper.queryParams());
 	}
 
 	@Test

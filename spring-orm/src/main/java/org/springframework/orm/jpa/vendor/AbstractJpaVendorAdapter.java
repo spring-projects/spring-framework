@@ -36,6 +36,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private Database database = Database.DEFAULT;
 
+	@Nullable
 	private String databasePlatform;
 
 	private boolean generateDdl = false;
@@ -54,7 +55,6 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	/**
 	 * Return the target database to operate on.
 	 */
-	@Nullable
 	protected Database getDatabase() {
 		return this.database;
 	}
@@ -63,7 +63,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Specify the name of the target database to operate on.
 	 * The supported values are vendor-dependent platform identifiers.
 	 */
-	public void setDatabasePlatform(String databasePlatform) {
+	public void setDatabasePlatform(@Nullable String databasePlatform) {
 		this.databasePlatform = databasePlatform;
 	}
 

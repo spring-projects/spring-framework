@@ -132,7 +132,7 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * added callbacks with the given result.
 	 * @param result the result to trigger the callbacks with
 	 */
-	public void success(T result) {
+	public void success(@Nullable T result) {
 		synchronized (this.mutex) {
 			this.state = State.SUCCESS;
 			this.result = result;

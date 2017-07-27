@@ -65,6 +65,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
+	@Nullable
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
@@ -142,7 +143,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * {@link javax.jms.TextMessage TextMessages} and
 	 * {@link javax.jms.ObjectMessage ObjectMessages}.
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 

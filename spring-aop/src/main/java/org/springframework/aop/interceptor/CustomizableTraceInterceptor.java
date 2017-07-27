@@ -129,20 +129,20 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The default message used for writing method entry messages.
 	 */
-	private static final String DEFAULT_ENTER_MESSAGE =
-			"Entering method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_ENTER_MESSAGE = "Entering method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The default message used for writing method exit messages.
 	 */
-	private static final String DEFAULT_EXIT_MESSAGE =
-			"Exiting method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_EXIT_MESSAGE = "Exiting method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The default message used for writing exception messages.
 	 */
-	private static final String DEFAULT_EXCEPTION_MESSAGE =
-			"Exception thrown in method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
+	private static final String DEFAULT_EXCEPTION_MESSAGE = "Exception thrown in method '" +
+			PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
 	 * The {@code Pattern} used to match placeholders.
@@ -183,14 +183,14 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
-		Assert.hasText(enterMessage, "'enterMessage' must not be empty");
+		Assert.hasText(enterMessage, "enterMessage must not be empty");
 		checkForInvalidPlaceholders(enterMessage);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_RETURN_VALUE);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_EXCEPTION,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_EXCEPTION);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_INVOCATION_TIME,
-				"enterMessage cannot contain placeholder [" + PLACEHOLDER_INVOCATION_TIME + "]");
+				"enterMessage cannot contain placeholder " + PLACEHOLDER_INVOCATION_TIME);
 		this.enterMessage = enterMessage;
 	}
 
@@ -207,10 +207,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setExitMessage(String exitMessage) {
-		Assert.hasText(exitMessage, "'exitMessage' must not be empty");
+		Assert.hasText(exitMessage, "exitMessage must not be empty");
 		checkForInvalidPlaceholders(exitMessage);
 		Assert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,
-				"exitMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
+				"exitMessage cannot contain placeholder" + PLACEHOLDER_EXCEPTION);
 		this.exitMessage = exitMessage;
 	}
 
@@ -226,12 +226,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * </ul>
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
-		Assert.hasText(exceptionMessage, "'exceptionMessage' must not be empty");
+		Assert.hasText(exceptionMessage, "exceptionMessage must not be empty");
 		checkForInvalidPlaceholders(exceptionMessage);
 		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,
-				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
-		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_INVOCATION_TIME,
-				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_INVOCATION_TIME + "]");
+				"exceptionMessage cannot contain placeholder " + PLACEHOLDER_RETURN_VALUE);
 		this.exceptionMessage = exceptionMessage;
 	}
 
@@ -263,8 +261,8 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				stopWatch.stop();
 			}
 			exitThroughException = true;
-			writeToLog(logger,
-					replacePlaceholders(this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
+			writeToLog(logger, replacePlaceholders(
+					this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
 			throw ex;
 		}
 		finally {
@@ -272,32 +270,9 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				if (stopWatch.isRunning()) {
 					stopWatch.stop();
 				}
-				writeToLog(logger,
-						replacePlaceholders(this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
+				writeToLog(logger, replacePlaceholders(
+						this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
 			}
-		}
-	}
-
-	/**
-	 * Writes the supplied message to the supplied {@code Log} instance.
-	 * @see #writeToLog(org.apache.commons.logging.Log, String, Throwable)
-	 */
-	protected void writeToLog(Log logger, String message) {
-		writeToLog(logger, message, null);
-	}
-
-	/**
-	 * Writes the supplied message and {@link Throwable} to the
-	 * supplied {@code Log} instance. By default messages are written
-	 * at {@code TRACE} level. Sub-classes can override this method
-	 * to control which level the message is written at.
-	 */
-	protected void writeToLog(Log logger, String message, @Nullable Throwable ex) {
-		if (ex != null) {
-			logger.trace(message, ex);
-		}
-		else {
-			logger.trace(message);
 		}
 	}
 

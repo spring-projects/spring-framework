@@ -57,7 +57,7 @@ public class SessionHolder extends ResourceHolderSupport {
 		return this.session;
 	}
 
-	public void setTransaction(Transaction transaction) {
+	public void setTransaction(@Nullable Transaction transaction) {
 		this.transaction = transaction;
 	}
 
@@ -66,7 +66,7 @@ public class SessionHolder extends ResourceHolderSupport {
 		return this.transaction;
 	}
 
-	public void setPreviousFlushMode(FlushMode previousFlushMode) {
+	public void setPreviousFlushMode(@Nullable FlushMode previousFlushMode) {
 		this.previousFlushMode = previousFlushMode;
 	}
 

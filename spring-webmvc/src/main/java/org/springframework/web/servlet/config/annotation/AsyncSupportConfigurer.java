@@ -37,8 +37,10 @@ import org.springframework.web.context.request.async.WebAsyncTask;
  */
 public class AsyncSupportConfigurer {
 
+	@Nullable
 	private AsyncTaskExecutor taskExecutor;
 
+	@Nullable
 	private Long timeout;
 
 	private final List<CallableProcessingInterceptor> callableInterceptors = new ArrayList<>();

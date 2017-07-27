@@ -255,15 +255,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up handler method for path " + lookupPath);
+			logger.debug("Looking up handler method for path " +
+					exchange.getRequest().getPath().value());
 		}
 		this.mappingRegistry.acquireReadLock();
 		try {
 			HandlerMethod handlerMethod;
 			try {
-				handlerMethod = lookupHandlerMethod(lookupPath, exchange);
+				handlerMethod = lookupHandlerMethod(exchange);
 			}
 			catch (Exception ex) {
 				return Mono.error(ex);
@@ -273,7 +273,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					logger.debug("Returning handler method [" + handlerMethod + "]");
 				}
 				else {
-					logger.debug("Did not find handler method for [" + lookupPath + "]");
+					logger.debug("Did not find handler method for " +
+							"[" + exchange.getRequest().getPath().value() + "]");
 				}
 			}
 			if (handlerMethod != null) {
@@ -289,14 +290,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Look up the best-matching handler method for the current request.
 	 * If multiple matches are found, the best match is selected.
-	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * @see #handleMatch(Object, HandlerMethod, String, ServerWebExchange)
-	 * @see #handleNoMatch(Set, String, ServerWebExchange)
+	 * @see #handleMatch(T, HandlerMethod, ServerWebExchange)
+	 * @see #handleNoMatch(Set, ServerWebExchange)
 	 */
 	@Nullable
-	protected HandlerMethod lookupHandlerMethod(String lookupPath, ServerWebExchange exchange)
+	protected HandlerMethod lookupHandlerMethod(ServerWebExchange exchange)
 			throws Exception {
 
 		List<Match> matches = new ArrayList<>();
@@ -307,7 +307,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			Collections.sort(matches, comparator);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found " + matches.size() + " matching mapping(s) for [" +
-						lookupPath + "] : " + matches);
+						exchange.getRequest().getPath() + "] : " + matches);
 			}
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
@@ -319,14 +319,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					Method m1 = bestMatch.handlerMethod.getMethod();
 					Method m2 = secondBestMatch.handlerMethod.getMethod();
 					throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
-							lookupPath + "': {" + m1 + ", " + m2 + "}");
+							exchange.getRequest().getPath() + "': {" + m1 + ", " + m2 + "}");
 				}
 			}
-			handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupPath, exchange);
+			handleMatch(bestMatch.mapping, bestMatch.handlerMethod, exchange);
 			return bestMatch.handlerMethod;
 		}
 		else {
-			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, exchange);
+			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), exchange);
 		}
 	}
 
@@ -343,25 +343,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Invoked when a matching mapping is found.
 	 * @param mapping the matching mapping
 	 * @param handlerMethod the matching method
-	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 */
-	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupPath,
-			ServerWebExchange exchange) {
+	protected void handleMatch(T mapping, HandlerMethod handlerMethod, ServerWebExchange exchange) {
 	}
 
 	/**
 	 * Invoked when no matching mapping is not found.
 	 * @param mappings all registered mappings
-	 * @param lookupPath the lookup path within the current mapping
 	 * @param exchange the current exchange
 	 * @return an alternative HandlerMethod or {@code null}
 	 * @throws Exception provides details that can be translated into an error status code
 	 */
 	@Nullable
-	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, ServerWebExchange exchange)
-			throws Exception {
-
+	protected HandlerMethod handleNoMatch(Set<T> mappings, ServerWebExchange exchange) throws Exception {
 		return null;
 	}
 
