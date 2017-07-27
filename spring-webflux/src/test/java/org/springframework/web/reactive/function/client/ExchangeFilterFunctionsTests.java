@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.Credentials.basicAuthenticationCredentials;
 
 /**
  * @author Arjen Poutsma
@@ -84,7 +85,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void basicAuthentication() throws Exception {
+	public void basicAuthenticationUsernamePassword() throws Exception {
 		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 
@@ -100,11 +101,17 @@ public class ExchangeFilterFunctionsTests {
 		assertEquals(response, result);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void basicAuthenticationInvalidCharacters() throws Exception {
+
+		ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9");
+	}
+
 	@Test
 	public void basicAuthenticationAttributes() throws Exception {
 		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com"))
-				.attribute(ExchangeFilterFunctions.USERNAME_ATTRIBUTE, "foo")
-				.attribute(ExchangeFilterFunctions.PASSWORD_ATTRIBUTE, "bar").build();
+				.attributes(basicAuthenticationCredentials("foo", "bar"))
+				.build();
 		ClientResponse response = mock(ClientResponse.class);
 
 		ExchangeFunction exchange = r -> {
