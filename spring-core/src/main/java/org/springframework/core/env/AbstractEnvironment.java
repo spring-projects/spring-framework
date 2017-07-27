@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,9 +120,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public AbstractEnvironment() {
 		customizePropertySources(this.propertySources);
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(String.format(
-					"Initialized %s with PropertySources %s", getClass().getSimpleName(), this.propertySources));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initialized " + getClass().getSimpleName() + " with PropertySources " + this.propertySources);
 		}
 	}
 
@@ -261,8 +260,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@Override
 	public void addActiveProfile(String profile) {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug(String.format("Activating profile '%s'", profile));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Activating profile '" + profile + "'");
 		}
 		validateProfile(profile);
 		doGetActiveProfiles();
@@ -392,9 +391,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(String.format("Caught AccessControlException when accessing system " +
-									"environment variable [%s]; its value will be returned [null]. Reason: %s",
-									attributeName, ex.getMessage()));
+							logger.info("Caught AccessControlException when accessing system environment variable '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
 						}
 						return null;
 					}
@@ -433,9 +431,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(String.format("Caught AccessControlException when accessing system " +
-									"property [%s]; its value will be returned [null]. Reason: %s",
-									attributeName, ex.getMessage()));
+							logger.info("Caught AccessControlException when accessing system property '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
 						}
 						return null;
 					}
@@ -574,9 +571,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@Override
 	public String toString() {
-		return String.format("%s {activeProfiles=%s, defaultProfiles=%s, propertySources=%s}",
-				getClass().getSimpleName(), this.activeProfiles, this.defaultProfiles,
-				this.propertySources);
+		return getClass().getSimpleName() + " {activeProfiles=" + this.activeProfiles +
+				", defaultProfiles=" + this.defaultProfiles + ", propertySources=" + this.propertySources + "}";
 	}
 
 }

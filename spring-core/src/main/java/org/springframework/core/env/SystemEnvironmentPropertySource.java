@@ -90,8 +90,8 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	public Object getProperty(String name) {
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
-			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
-					getName(), name, actualName));
+			logger.debug("PropertySource '" + getName() + "' does not contain property '" + name +
+					"', but found equivalent '" + actualName + "'");
 		}
 		return super.getProperty(actualName);
 	}

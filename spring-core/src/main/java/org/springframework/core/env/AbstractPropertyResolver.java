@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
+			throw new IllegalStateException("Required key '" + key + "' not found");
 		}
 		return value;
 	}
@@ -189,7 +189,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public <T> T getRequiredProperty(String key, Class<T> valueType) throws IllegalStateException {
 		T value = getProperty(key, valueType);
 		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
+			throw new IllegalStateException("Required key '" + key + "' not found");
 		}
 		return value;
 	}

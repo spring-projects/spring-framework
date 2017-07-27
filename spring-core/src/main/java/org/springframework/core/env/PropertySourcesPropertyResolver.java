@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,8 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		if (this.propertySources != null) {
 			for (PropertySource<?> propertySource : this.propertySources) {
 				if (logger.isTraceEnabled()) {
-					logger.trace(String.format("Searching for key '%s' in [%s]", key, propertySource.getName()));
+					logger.trace("Searching for key '" + key + "' in PropertySource '" +
+							propertySource.getName() + "'");
 				}
 				Object value = propertySource.getProperty(key);
 				if (value != null) {
@@ -88,7 +89,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Could not find key '%s' in any property source", key));
+			logger.debug("Could not find key '" + key + "' in any property source");
 		}
 		return null;
 	}
@@ -148,8 +149,8 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	 */
 	protected void logKeyFound(String key, PropertySource<?> propertySource, Object value) {
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Found key '%s' in [%s] with type [%s]",
-					key, propertySource.getName(), value.getClass().getSimpleName()));
+			logger.debug("Found key '" + key + "' in PropertySource '" + propertySource.getName() +
+					"' with value of type " + value.getClass().getSimpleName());
 		}
 	}
 
