@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.samples.spr;
 
 import org.junit.Test;
@@ -29,10 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Test for issues related to form content.
+ *
  * @author Rossen Stoyanchev
  */
 public class FormContentTests {
-
 
 	@Test // SPR-15753
 	public void formContentIsNotDuplicated() throws Exception {
@@ -55,6 +56,7 @@ public class FormContentTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Data {
 
 		private String d1;
@@ -80,4 +82,5 @@ public class FormContentTests {
 			this.d2 = d2;
 		}
 	}
+
 }
