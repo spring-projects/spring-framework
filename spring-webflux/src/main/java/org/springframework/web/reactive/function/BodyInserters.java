@@ -149,6 +149,9 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@code ServerSentEvent} publisher.
+	 * <p>Note that a SSE {@code BodyInserter} can also be obtained by passing a stream of strings
+	 * or POJOs (to be encoded as JSON) to {@link #fromPublisher(Publisher, Class)}, and specifying a
+	 * {@link MediaType#TEXT_EVENT_STREAM text/event-stream} Content-Type.
 	 * @param eventsPublisher the {@code ServerSentEvent} publisher to write to the response body
 	 * @param <T> the type of the elements contained in the {@link ServerSentEvent}
 	 * @return a {@code BodyInserter} that writes a {@code ServerSentEvent} publisher
@@ -174,66 +177,6 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events.
-	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
-	 * @param eventClass the class of event contained in the publisher
-	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events
-	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-	 */
-	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
-	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
-	// the server-side
-	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			Class<T> eventClass) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(eventClass, "'eventClass' must not be null");
-		return fromServerSentEvents(eventsPublisher, ResolvableType.forClass(eventClass));
-	}
-
-	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events.
-	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
-	 * @param typeReference the type of event contained in the publisher
-	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyInserter} that writes the given {@code Publisher} publisher as
-	 * Server-Sent Events
-	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-	 */
-	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
-	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
-	// the server-side
-	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			ParameterizedTypeReference<T> typeReference) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
-		return fromServerSentEvents(eventsPublisher,
-				ResolvableType.forType(typeReference.getType()));
-	}
-
-	static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
-			ResolvableType eventType) {
-
-		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		Assert.notNull(eventType, "'eventType' must not be null");
-		return (serverResponse, context) -> {
-			HttpMessageWriter<T> messageWriter =
-					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return context.serverRequest()
-					.map(serverRequest -> messageWriter.write(eventsPublisher, eventType,
-							eventType, MediaType.TEXT_EVENT_STREAM, serverRequest,
-							serverResponse, context.hints()))
-					.orElseGet(() -> messageWriter.write(eventsPublisher, eventType,
-							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
-		};
-	}
-
-	/**
 	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as URL-encoded
 	 * form data.
 	 * @param formData the form data to write to the output message
@@ -241,7 +184,7 @@ public abstract class BodyInserters {
 	 */
 	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
 	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
-	// on the server-side
+	// on the client-side
 	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(
 			MultiValueMap<String, String> formData) {
 
@@ -262,7 +205,7 @@ public abstract class BodyInserters {
 	 */
 	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
 	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
-	// on the server-side
+	// on the client-side
 	public static BodyInserter<MultiValueMap<String, ?>, ClientHttpRequest> fromMultipartData(
 			MultiValueMap<String, ?> multipartData) {
 

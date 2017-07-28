@@ -248,17 +248,6 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofServerSentEventClass() throws Exception {
-		Flux<String> body = Flux.just("foo");
-		BodyInserter<Flux<String>, ServerHttpResponse> inserter =
-				BodyInserters.fromServerSentEvents(body, String.class);
-
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, this.context);
-		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
-	}
-
-	@Test
 	public void ofFormData() throws Exception {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
