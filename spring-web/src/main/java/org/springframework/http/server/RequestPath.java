@@ -46,7 +46,7 @@ public interface RequestPath extends PathContainer {
 
 	/**
 	 * Return a new {@code RequestPath} instance with a modified context path.
-	 * The new context path must match the beginning of this request path.
+	 * The new context path must match 0 or more path segments at the start.
 	 * @param contextPath the new context path
 	 * @return a new {@code RequestPath} instance
 	 */
