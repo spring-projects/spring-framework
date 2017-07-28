@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.http.server;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.UrlPathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 

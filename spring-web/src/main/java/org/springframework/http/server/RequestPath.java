@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.http.server;
 
 import java.net.URI;
 
@@ -32,8 +32,10 @@ public interface RequestPath extends PathContainer {
 	 * The context path is always at the beginning of the path and starts but
 	 * does not end with "/". It is shared for URLs of the same application.
 	 * <p>The context path may come from the underlying runtime API such as
-	 * when deploying as a WAR to a Servlet container or it may also be assigned
-	 * through the use of {@link ContextPathCompositeHandler} or both.
+	 * when deploying as a WAR to a Servlet container or it may be assigned in
+	 * a WebFlux application through the use of
+	 * {@link org.springframework.http.server.reactive.ContextPathCompositeHandler
+	 * ContextPathCompositeHandler}.
 	 */
 	PathContainer contextPath();
 
@@ -41,6 +43,14 @@ public interface RequestPath extends PathContainer {
 	 * The portion of the request path after the context path.
 	 */
 	PathContainer pathWithinApplication();
+
+	/**
+	 * Return a new {@code RequestPath} instance with a modified context path.
+	 * The new context path must match the beginning of this request path.
+	 * @param contextPath the new context path
+	 * @return a new {@code RequestPath} instance
+	 */
+	RequestPath modifyContextPath(String contextPath);
 
 
 	/**

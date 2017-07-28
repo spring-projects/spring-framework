@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -110,7 +111,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return null;
 		}
 		else if (uriToUse == null) {
-			return new DefaultRequestPath(this.delegate.getPath(), this.contextPath);
+			return this.delegate.getPath().modifyContextPath(this.contextPath);
 		}
 		else {
 			return RequestPath.parse(uriToUse, this.contextPath);

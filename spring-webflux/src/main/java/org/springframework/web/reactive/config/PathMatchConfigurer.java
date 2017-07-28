@@ -30,6 +30,7 @@ public class PathMatchConfigurer {
 	@Nullable
 	private Boolean trailingSlashMatch;
 
+
 	@Nullable
 	private Boolean caseSensitiveMatch;
 

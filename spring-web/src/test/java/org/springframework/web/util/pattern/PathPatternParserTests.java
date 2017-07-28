@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 

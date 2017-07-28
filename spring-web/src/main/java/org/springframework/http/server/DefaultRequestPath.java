@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.server;
 
 import java.net.URI;
 import java.util.List;
@@ -44,7 +44,7 @@ class DefaultRequestPath implements RequestPath {
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
 
-	DefaultRequestPath(RequestPath requestPath, @Nullable String contextPath) {
+	private DefaultRequestPath(RequestPath requestPath, String contextPath) {
 		this.fullPath = requestPath;
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
@@ -102,6 +102,11 @@ class DefaultRequestPath implements RequestPath {
 	@Override
 	public PathContainer pathWithinApplication() {
 		return this.pathWithinApplication;
+	}
+
+	@Override
+	public RequestPath modifyContextPath(String contextPath) {
+		return new DefaultRequestPath(this, contextPath);
 	}
 
 

@@ -29,8 +29,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.http.server.reactive.PathContainer;
-import org.springframework.http.server.reactive.PathContainer.Element;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.PathContainer.Element;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.UrlPathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**

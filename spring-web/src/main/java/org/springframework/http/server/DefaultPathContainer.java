@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.server;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

@@ -18,8 +18,8 @@ package org.springframework.web.util.pattern;
 
 import java.util.List;
 
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.UrlPathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;

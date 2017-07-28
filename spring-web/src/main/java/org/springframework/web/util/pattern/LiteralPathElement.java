@@ -16,9 +16,9 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.reactive.PathContainer;
-import org.springframework.http.server.reactive.PathContainer.Element;
-import org.springframework.http.server.reactive.PathContainer.PathSegment;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**

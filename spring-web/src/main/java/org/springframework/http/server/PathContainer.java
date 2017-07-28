@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.server;
 
 import java.util.List;
 
@@ -25,8 +25,7 @@ import org.springframework.util.MultiValueMap;
  * of {@link Separator Separator} and {@link PathSegment PathSegment} elements.
  *
  * <p>An instance of this class can be created via {@link #parsePath(String)} or
- * {@link #parseUrlPath(String)}. For an HTTP request the path can be
- * accessed via {@link ServerHttpRequest#getPath()}.
+ * {@link #parseUrlPath(String)}.
  *
  * <p>For a URL path each {@link UrlPathSegment UrlPathSegment} exposes its
  * structure decoded safely without the risk of encoded reserved characters

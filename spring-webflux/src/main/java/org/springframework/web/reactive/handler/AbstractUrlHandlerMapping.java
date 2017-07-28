@@ -24,7 +24,7 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
-import org.springframework.http.server.reactive.PathContainer;
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
