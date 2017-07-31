@@ -98,12 +98,14 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 				}
 			};
 			MultiValueMap<String, String> formParameters = this.formConverter.read(null, inputMessage);
-			HttpServletRequest wrapper = new HttpPutFormContentRequestWrapper(request, formParameters);
-			filterChain.doFilter(wrapper, response);
+			if (!formParameters.isEmpty()) {
+				HttpServletRequest wrapper = new HttpPutFormContentRequestWrapper(request, formParameters);
+				filterChain.doFilter(wrapper, response);
+				return;
+			}
 		}
-		else {
-			filterChain.doFilter(request, response);
-		}
+
+		filterChain.doFilter(request, response);
 	}
 
 	private boolean isFormContentType(HttpServletRequest request) {
@@ -162,17 +164,17 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		@Override
 		@Nullable
 		public String[] getParameterValues(String name) {
-			String[] queryParam = (super.getQueryString() != null ? super.getParameterValues(name) : null);
+			String[] parameterValues = super.getParameterValues(name);
 			List<String> formParam = this.formParameters.get(name);
 			if (formParam == null) {
-				return queryParam;
+				return parameterValues;
 			}
-			else if (queryParam == null) {
+			if (parameterValues == null || getQueryString() == null) {
 				return formParam.toArray(new String[formParam.size()]);
 			}
 			else {
-				List<String> result = new ArrayList<>(queryParam.length + formParam.size());
-				result.addAll(Arrays.asList(queryParam));
+				List<String> result = new ArrayList<>(parameterValues.length + formParam.size());
+				result.addAll(Arrays.asList(parameterValues));
 				result.addAll(formParam);
 				return result.toArray(new String[result.size()]);
 			}
