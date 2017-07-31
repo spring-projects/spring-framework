@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,7 +38,7 @@ class DefaultRequestPath implements RequestPath {
 
 
 	DefaultRequestPath(URI uri, @Nullable String contextPath) {
-		this.fullPath = PathContainer.parseUrlPath(uri.getRawPath());
+		this.fullPath = PathContainer.parsePath(uri.getRawPath());
 		this.contextPath = initContextPath(this.fullPath, contextPath);
 		this.pathWithinApplication = extractPathWithinApplication(this.fullPath, this.contextPath);
 	}
@@ -52,7 +51,7 @@ class DefaultRequestPath implements RequestPath {
 
 	private static PathContainer initContextPath(PathContainer path, @Nullable String contextPath) {
 		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
-			return PathContainer.parseUrlPath("");
+			return PathContainer.parsePath("");
 		}
 
 		validateContextPath(path.value(), contextPath);

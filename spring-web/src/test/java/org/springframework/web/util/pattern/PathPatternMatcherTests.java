@@ -1316,7 +1316,7 @@ public class PathPatternMatcherTests {
 		if (path == null) {
 			return null;
 		}
-		return PathContainer.parseUrlPath(path);
+		return PathContainer.parsePath(path);
 	}
 	
 	private void checkMatches(String uriTemplate, String path) {

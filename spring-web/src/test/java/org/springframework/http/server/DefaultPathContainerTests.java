@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import org.springframework.http.server.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -76,7 +76,7 @@ public class DefaultPathContainerTests {
 
 	private void testPathSegment(String rawValue, String valueToMatch, MultiValueMap<String, String> params) {
 
-		PathContainer container = PathContainer.parseUrlPath(rawValue);
+		PathContainer container = PathContainer.parsePath(rawValue);
 
 		if ("".equals(rawValue)) {
 			assertEquals(0, container.elements().size());
@@ -84,7 +84,7 @@ public class DefaultPathContainerTests {
 		}
 
 		assertEquals(1, container.elements().size());
-		UrlPathSegment segment = (UrlPathSegment) container.elements().get(0);
+		PathSegment segment = (PathSegment) container.elements().get(0);
 
 		assertEquals("value: '" + rawValue + "'", rawValue, segment.value());
 		assertEquals("valueToMatch: '" + rawValue + "'", valueToMatch, segment.valueToMatch());
@@ -114,7 +114,7 @@ public class DefaultPathContainerTests {
 
 	private void testPath(String input, String value, List<String> expectedElements) {
 
-		PathContainer path = PathContainer.parseUrlPath(input);
+		PathContainer path = PathContainer.parsePath(input);
 
 		assertEquals("value: '" + input + "'", value, path.value());
 		assertEquals("elements: " + input, expectedElements, path.elements().stream()
@@ -124,17 +124,17 @@ public class DefaultPathContainerTests {
 	@Test
 	public void subPath() throws Exception {
 		// basic
-		PathContainer path = PathContainer.parseUrlPath("/a/b/c");
+		PathContainer path = PathContainer.parsePath("/a/b/c");
 		assertSame(path, path.subPath(0));
 		assertEquals("/b/c", path.subPath(2).value());
 		assertEquals("/c", path.subPath(4).value());
 
 		// root path
-		path = PathContainer.parseUrlPath("/");
+		path = PathContainer.parsePath("/");
 		assertEquals("/", path.subPath(0).value());
 
 		// trailing slash
-		path = PathContainer.parseUrlPath("/a/b/");
+		path = PathContainer.parsePath("/a/b/");
 		assertEquals("/b/", path.subPath(2).value());
 	}
 

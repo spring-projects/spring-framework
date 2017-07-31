@@ -142,7 +142,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		int queryIndex = getQueryIndex(uriString);
 		String lookupPath = uriString.substring(0, queryIndex);
 		String query = uriString.substring(queryIndex);
-		PathContainer parsedLookupPath = PathContainer.parseUrlPath(lookupPath);
+		PathContainer parsedLookupPath = PathContainer.parsePath(lookupPath);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}

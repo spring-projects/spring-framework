@@ -60,26 +60,26 @@ public class ParsingPathMatcher implements PathMatcher {
 	@Override
 	public boolean match(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matches(PathContainer.parseUrlPath(path));
+		return pathPattern.matches(PathContainer.parsePath(path));
 	}
 
 	@Override
 	public boolean matchStart(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		return pathPattern.matchStart(PathContainer.parseUrlPath(path));
+		return pathPattern.matchStart(PathContainer.parsePath(path));
 	}
 
 	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		PathContainer pathContainer = PathContainer.parseUrlPath(path);
+		PathContainer pathContainer = PathContainer.parsePath(path);
 		return pathPattern.extractPathWithinPattern(pathContainer).value();
 	}
 
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		PathPattern pathPattern = getPathPattern(pattern);
-		PathContainer pathContainer = PathContainer.parseUrlPath(path);
+		PathContainer pathContainer = PathContainer.parsePath(path);
 		PathMatchResult results = pathPattern.matchAndExtract(pathContainer);
 		// Collapse PathMatchResults to simple value results
 		// TODO: (path parameters are lost in this translation)

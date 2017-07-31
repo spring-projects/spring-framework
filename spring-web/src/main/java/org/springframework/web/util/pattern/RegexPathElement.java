@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.server.PathContainer.UrlPathSegment;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -173,7 +173,7 @@ class RegexPathElement extends PathElement {
 				String value = matcher.group(i);
 				matchingContext.set(name, value,
 						(i == this.variableNames.size())?
-								((UrlPathSegment)matchingContext.pathElements.get(pathIndex)).parameters():
+								((PathSegment)matchingContext.pathElements.get(pathIndex)).parameters():
 								NO_PARAMETERS);
 			}
 		}

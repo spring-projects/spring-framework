@@ -79,7 +79,7 @@ public interface ServerRequest {
 	 * Return the request path as {@code PathContainer}.
 	 */
 	default PathContainer pathContainer() {
-		return PathContainer.parseUrlPath(path());
+		return PathContainer.parsePath(path());
 	}
 
 	/**

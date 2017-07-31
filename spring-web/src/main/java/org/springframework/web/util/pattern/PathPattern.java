@@ -261,7 +261,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	public PathContainer extractPathWithinPattern(PathContainer path) {
 		// TODO: implement extractPathWithinPattern for PathContainer
 		String result = extractPathWithinPattern(path.value());
-		return PathContainer.parseUrlPath(result);
+		return PathContainer.parsePath(result);
 	}
 
 	private String extractPathWithinPattern(String path) {
@@ -403,7 +403,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		// /usr + /user => /usr/user 
 		// /{foo} + /bar => /{foo}/bar
 		if (!this.patternString.equals(pattern2string.patternString) && this.capturedVariableCount == 0 && 
-				matches(PathContainer.parseUrlPath(pattern2string.patternString))) {
+				matches(PathContainer.parsePath(pattern2string.patternString))) {
 			return pattern2string;
 		}
 
