@@ -151,33 +151,37 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * @param event the current event to propagate
 	 * @since 4.1
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	protected void invokeListener(ApplicationListener listener, ApplicationEvent event) {
+	protected void invokeListener(ApplicationListener<?> listener, ApplicationEvent event) {
 		ErrorHandler errorHandler = getErrorHandler();
 		if (errorHandler != null) {
 			try {
-				listener.onApplicationEvent(event);
+				doInvokeListener(listener, event);
 			}
 			catch (Throwable err) {
 				errorHandler.handleError(err);
 			}
 		}
 		else {
-			try {
-				listener.onApplicationEvent(event);
+			doInvokeListener(listener, event);
+		}
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
+		try {
+			listener.onApplicationEvent(event);
+		}
+		catch (ClassCastException ex) {
+			String msg = ex.getMessage();
+			if (msg == null || msg.startsWith(event.getClass().getName())) {
+				// Possibly a lambda-defined listener which we could not resolve the generic event type for
+				Log logger = LogFactory.getLog(getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Non-matching event type for listener: " + listener, ex);
+				}
 			}
-			catch (ClassCastException ex) {
-				String msg = ex.getMessage();
-				if (msg == null || msg.startsWith(event.getClass().getName())) {
-					// Possibly a lambda-defined listener which we could not resolve the generic event type for
-					Log logger = LogFactory.getLog(getClass());
-					if (logger.isDebugEnabled()) {
-						logger.debug("Non-matching event type for listener: " + listener, ex);
-					}
-				}
-				else {
-					throw ex;
-				}
+			else {
+				throw ex;
 			}
 		}
 	}
