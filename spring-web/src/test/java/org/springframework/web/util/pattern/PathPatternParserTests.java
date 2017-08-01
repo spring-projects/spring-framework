@@ -464,19 +464,19 @@ public class PathPatternParserTests {
 	}
 
 	private void assertMatches(PathPattern pp, String path) {
-		assertTrue(pp.matches(PathPatternMatcherTests.toPathContainer(path)));
+		assertTrue(pp.matches(PathPatternTests.toPathContainer(path)));
 	}
 
 	private void assertNoMatch(PathPattern pp, String path) {
-		assertFalse(pp.matches(PathPatternMatcherTests.toPathContainer(path)));
+		assertFalse(pp.matches(PathPatternTests.toPathContainer(path)));
 	}
 	
 	private PathMatchResult matchAndExtract(PathPattern pp, String path) {
-		 return pp.matchAndExtract(PathPatternMatcherTests.toPathContainer(path));
+		 return pp.matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 
 	private PathContainer toPSC(String path) {
-		return PathPatternMatcherTests.toPathContainer(path);
+		return PathPatternTests.toPathContainer(path);
 	}
 
 }
