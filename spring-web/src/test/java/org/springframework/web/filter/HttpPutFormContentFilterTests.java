@@ -58,7 +58,7 @@ public class HttpPutFormContentFilterTests {
 
 	@Test
 	public void wrapPutAndPatchOnly() throws Exception {
-		request.setContent("".getBytes("ISO-8859-1"));
+		request.setContent("foo=bar".getBytes("ISO-8859-1"));
 		for (HttpMethod method : HttpMethod.values()) {
 			request.setMethod(method.name());
 			filterChain = new MockFilterChain();
@@ -202,6 +202,15 @@ public class HttpPutFormContentFilterTests {
 		assertEquals(2, parameters.size());
 		assertArrayEquals(new String[] {"value1", "value2", "value3"}, parameters.get("name"));
 		assertArrayEquals(new String[] {"value4"}, parameters.get("name4"));
+	}
+
+	@Test // SPR-15835
+	public void hiddenHttpMethodFilterFollowedByHttpPutFormContentFilter() throws Exception {
+		request.addParameter("_method", "PUT");
+		request.addParameter("hiddenField", "testHidden");
+		filter.doFilter(request, response, filterChain);
+
+		assertArrayEquals(new String[]{"testHidden"}, filterChain.getRequest().getParameterValues("hiddenField"));
 	}
 
 }
