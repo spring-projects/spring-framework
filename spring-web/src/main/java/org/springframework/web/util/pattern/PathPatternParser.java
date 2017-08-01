@@ -32,32 +32,9 @@ package org.springframework.web.util.pattern;
  */
 public class PathPatternParser {
 
-	public final static char DEFAULT_SEPARATOR = '/';
-
-
-	private char separator = DEFAULT_SEPARATOR;
-
 	private boolean matchOptionalTrailingSlash = true;
 
 	private boolean caseSensitive = true;
-
-
-	/**
-	 * Create a path pattern parser that will use the default separator '/'
-	 * when parsing patterns.
-	 * @see #DEFAULT_SEPARATOR
-	 */
-	public PathPatternParser() {
-	}
-
-	/**
-	 * Create a path pattern parser that will use the supplied separator when
-	 * parsing patterns.
-	 * @param separator the separator expected to divide pattern elements
-	 */
-	public PathPatternParser(char separator) {
-		this.separator = separator;
-	}
 
 
 	/**
@@ -76,11 +53,25 @@ public class PathPatternParser {
 	}
 
 	/**
+	 * Whether optional trailing slashing match is enabled.
+	 */
+	public boolean isMatchOptionalTrailingSlash() {
+		return this.matchOptionalTrailingSlash;
+	}
+
+	/**
 	 * Whether path pattern matching should be case-sensitive.
 	 * <p>The default is {@code true}.
 	 */
 	public void setCaseSensitive(boolean caseSensitive) {
 		this.caseSensitive = caseSensitive;
+	}
+
+	/**
+	 * Whether case-sensitive pattern matching is enabled.
+	 */
+	public boolean isCaseSensitive() {
+		return this.caseSensitive;
 	}
 
 
@@ -95,12 +86,7 @@ public class PathPatternParser {
 	 * @throws PatternParseException in case of parse errors
 	 */
 	public PathPattern parse(String pathPattern) throws PatternParseException {
-		return createDelegate().parse(pathPattern);
-	}
-
-	private InternalPathPatternParser createDelegate() {
-		return new InternalPathPatternParser(
-				this.separator, this.caseSensitive, this.matchOptionalTrailingSlash);
+		return new InternalPathPatternParser(this).parse(pathPattern);
 	}
 
 }

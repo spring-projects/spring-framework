@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -50,9 +49,6 @@ import static org.junit.Assert.fail;
  * @author Andy Clement
  */
 public class PathPatternTests {
-
-	private char separator = PathPatternParser.DEFAULT_SEPARATOR;
-
 
 	@Test
 	public void pathContainer() {
@@ -770,69 +766,6 @@ public class PathPatternTests {
 		assertMatches(p,"bAb");
 	}
 
-	@Ignore
-	@Test
-	public void alternativeDelimiter() {
-		try {
-			this.separator = '.';
-
-			// test exact matching
-//			checkMatches("test", "test");
-//			checkMatches(".test", ".test");
-//			checkNoMatch(".test/jpg", "test/jpg");
-//			checkNoMatch("test", ".test");
-//			checkNoMatch(".test", "test");
-
-			// test matching with ?'s
-			checkMatches("t?st", "test");
-			checkMatches("??st", "test");
-			checkMatches("tes?", "test");
-			checkMatches("te??", "test");
-			checkMatches("?es?", "test");
-			checkNoMatch("tes?", "tes");
-			checkNoMatch("tes?", "testt");
-			checkNoMatch("tes?", "tsst");
-
-			// test matching with *'s
-			checkMatches("*", "test");
-			checkMatches("test*", "test");
-			checkMatches("test*", "testTest");
-			checkMatches("*test*", "AnothertestTest");
-			checkMatches("*test", "Anothertest");
-			checkMatches("*/*", "test/");
-			checkMatches("*/*", "test/test");
-			checkMatches("*/*", "test/test/test");
-			checkMatches("test*aaa", "testblaaaa");
-			checkNoMatch("test*", "tst");
-			checkNoMatch("test*", "tsttest");
-			checkNoMatch("*test*", "tsttst");
-			checkNoMatch("*test", "tsttst");
-			checkNoMatch("*/*", "tsttst");
-			checkNoMatch("test*aaa", "test");
-			checkNoMatch("test*aaa", "testblaaab");
-
-			// test matching with ?'s and .'s
-			checkMatches(".?", ".a");
-			checkMatches(".?.a", ".a.a");
-			checkMatches(".a.?", ".a.b");
-			checkMatches(".??.a", ".aa.a");
-			checkMatches(".a.??", ".a.bb");
-			checkMatches(".?", ".a");
-
-			// test matching with **'s
-			checkMatches(".**", ".testing.testing");
-			checkMatches(".*.**", ".testing.testing");
-			checkMatches(".bla*bla.test", ".blaXXXbla.test");
-			checkMatches(".*bla.test", ".XXXbla.test");
-			checkNoMatch(".bla*bla.test", ".blaXXXbl.test");
-			checkNoMatch(".*bla.test", "XXXblab.test");
-			checkNoMatch(".*bla.test", "XXXbl.test");
-		}
-		finally {
-			this.separator = PathPatternParser.DEFAULT_SEPARATOR;
-		}
-	}
-
 	@Test
 	public void extractPathWithinPattern_spr15259() { 
 		checkExtractPathWithinPattern("/**","//","/");
@@ -1319,7 +1252,7 @@ public class PathPatternTests {
 	}
 	
 	private void checkMatches(String uriTemplate, String path) {
-		PathPatternParser parser = new PathPatternParser(this.separator);
+		PathPatternParser parser = new PathPatternParser();
 		parser.setMatchOptionalTrailingSlash(true);
 		PathPattern p = parser.parse(uriTemplate);
 		PathContainer pc = toPathContainer(path);
