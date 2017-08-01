@@ -43,6 +43,9 @@ import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -794,6 +797,12 @@ public class ConfigurationClassPostProcessorTests {
 		ctx.getBean("myTestBean", TestBean.class);
 	}
 
+	@Test
+	public void testBeanDefinitionRegistryPostProcessorConfig() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionRegistryPostProcessorConfig.class);
+		assertTrue(ctx.getBean("myTestBean") instanceof TestBean);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -860,8 +869,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class UnloadedConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 	}
@@ -869,8 +877,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class LoadedConfig {
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(new Foo());
 		}
 	}
@@ -884,9 +891,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class ScopedProxyConfigurationClass {
 
-		@Bean
-		@Lazy
-		@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+		@Bean @Lazy @Scope(proxyMode = ScopedProxyMode.INTERFACES)
 		public ITestBean scopedClass() {
 			return new TestBean();
 		}
@@ -1473,6 +1478,23 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Lookup
 		public abstract TestBean getTestBean();
+	}
+
+	@Configuration
+	static class BeanDefinitionRegistryPostProcessorConfig {
+
+		@Bean
+		public static BeanDefinitionRegistryPostProcessor bdrpp() {
+			return new BeanDefinitionRegistryPostProcessor() {
+				@Override
+				public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+					registry.registerBeanDefinition("myTestBean", new RootBeanDefinition(TestBean.class));
+				}
+				@Override
+				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+				}
+			};
+		}
 	}
 
 }
