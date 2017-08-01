@@ -16,10 +16,17 @@
 
 package org.springframework.web.util.pattern;
 
-/** 
- * Parser for URI template patterns. It breaks the path pattern into a number
- * of {@link PathElement}s in a linked list.
- * 
+/**
+ * Parser for URI path patterns producing {@link PathPattern} instances that can
+ * then be matched to requests.
+ *
+ * <p>The {@link PathPatternParser} and {@link PathPattern} are specifically
+ * designed for use with HTTP URL paths in web applications where a large number
+ * of URI path patterns continuously matched against incoming requests motivates
+ * the need for pre-parsing and fast matching.
+ *
+ * <p>For details of the path pattern syntax see {@link PathPattern}.
+ *
  * @author Andy Clement
  * @since 5.0
  */
@@ -28,14 +35,10 @@ public class PathPatternParser {
 	public final static char DEFAULT_SEPARATOR = '/';
 
 
-	// The expected path separator to split path elements during parsing.
 	private char separator = DEFAULT_SEPARATOR;
-	
-	// Whether the PathPatterns produced by the parser will allow patterns that don't
-	// have a trailing slash to match paths that may or may not have a trailing slash.
+
 	private boolean matchOptionalTrailingSlash = true;
 
-	// If the parser produces case-sensitive PathPattern matchers.
 	private boolean caseSensitive = true;
 
 
@@ -58,17 +61,22 @@ public class PathPatternParser {
 
 
 	/**
-	 * Control behavior of the path patterns produced by this parser: if {@code true}
-	 * then PathPatterns without a trailing slash will match paths with or without
+	 * Whether a {@link PathPattern} produced by this parser should should
+	 * automatically match request paths with a trailing slash.
+	 *
+	 * <p>If set to {@code true} a {@code PathPattern} without a trailing slash
+	 * will also match request paths with a trailing slash. If set to
+	 * {@code false} a {@code PathPattern} will only match request paths with
 	 * a trailing slash.
-	 * <p>The default is {@code true} but here this flag can be set to {@code false}.
+	 *
+	 * <p>The default is {@code true}.
 	 */
 	public void setMatchOptionalTrailingSlash(boolean matchOptionalTrailingSlash) {
 		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
 	}
 
 	/**
-	 * Set whether path patterns are case-sensitive.
+	 * Whether path pattern matching should be case-sensitive.
 	 * <p>The default is {@code true}.
 	 */
 	public void setCaseSensitive(boolean caseSensitive) {
@@ -83,13 +91,16 @@ public class PathPatternParser {
 	 * against paths. Each invocation of this method delegates to a new instance of
 	 * the {@link InternalPathPatternParser} because that class is not thread-safe.
 	 * @param pathPattern the input path pattern, e.g. /foo/{bar}
-	 * @return a PathPattern for quickly matching paths against the specified path pattern
+	 * @return a PathPattern for quickly matching paths against request paths
 	 * @throws PatternParseException in case of parse errors
 	 */
 	public PathPattern parse(String pathPattern) throws PatternParseException {
-		InternalPathPatternParser parserDelegate =
-				new InternalPathPatternParser(this.separator, this.caseSensitive, this.matchOptionalTrailingSlash);
-		return parserDelegate.parse(pathPattern);
+		return createDelegate().parse(pathPattern);
+	}
+
+	private InternalPathPatternParser createDelegate() {
+		return new InternalPathPatternParser(
+				this.separator, this.caseSensitive, this.matchOptionalTrailingSlash);
 	}
 
 }
