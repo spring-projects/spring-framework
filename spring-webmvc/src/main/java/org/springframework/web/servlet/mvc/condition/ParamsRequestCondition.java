@@ -142,7 +142,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return WebUtils.hasSubmitParameter(request, this.name);
+			return WebUtils.hasSubmitParameter(request, this.name) ||
+					request.getParameterMap().containsKey(this.name);
 		}
 
 		@Override

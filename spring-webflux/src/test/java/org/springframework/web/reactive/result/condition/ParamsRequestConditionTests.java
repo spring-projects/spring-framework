@@ -51,6 +51,12 @@ public class ParamsRequestConditionTests {
 		assertNotNull(condition.getMatchingCondition(get("/path?foo=").toExchange()));
 	}
 
+	@Test // SPR-15831
+	public void paramPresentNullValue() throws Exception {
+		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
+		assertNotNull(condition.getMatchingCondition(get("/path?foo").toExchange()));
+	}
+
 	@Test
 	public void paramPresentNoMatch() throws Exception {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
