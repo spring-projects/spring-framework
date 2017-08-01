@@ -79,7 +79,7 @@ abstract class ConfigurationClassUtils {
 	 */
 	public static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 		String className = beanDef.getBeanClassName();
-		if (className == null) {
+		if (className == null || beanDef.getFactoryMethodName() != null) {
 			return false;
 		}
 
