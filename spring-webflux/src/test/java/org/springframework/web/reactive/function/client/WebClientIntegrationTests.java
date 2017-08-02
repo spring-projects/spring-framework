@@ -419,8 +419,9 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void retrieveBodyToMonoInternalServerError() throws Exception {
+		String errorMessage = "Internal Server error";
 		this.server.enqueue(new MockResponse().setResponseCode(500)
-				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
@@ -428,7 +429,14 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof WebClientResponseException);
+					WebClientResponseException ex = (WebClientResponseException) throwable;
+
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
+					assertEquals(errorMessage, ex.getResponseBodyAsString());
+				})
 				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
@@ -445,7 +453,7 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
 				.retrieve()
-				.onStatus(HttpStatus::is5xxServerError, response -> new MyException("500 error!"))
+				.onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)

@@ -562,15 +562,15 @@ public interface WebClient {
 		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
 		 * predicate applies. The exception returned from the function will be returned from
 		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is register that throws a {@link WebClientException}
-		 * when the response status code is 4xx or 5xx.
+		 * <p>By default, an error handler is register that throws a
+		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
 		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
 		 * applies
 		 * @param exceptionFunction the function that returns the exception
 		 * @return this builder
 		 */
 		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
-				Function<ClientResponse, ? extends Throwable> exceptionFunction);
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
 		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
@@ -578,8 +578,8 @@ public interface WebClient {
 		 * with {@link #onStatus(Predicate, Function)}.
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
-		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Mono<T> bodyToMono(Class<T> bodyType);
 
@@ -589,8 +589,8 @@ public interface WebClient {
 		 * with {@link #onStatus(Predicate, Function)}.
 		 * @param typeReference a type reference describing the expected response body type
 		 * @param <T> response body type
-		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
 
@@ -600,8 +600,8 @@ public interface WebClient {
          * with {@link #onStatus(Predicate, Function)}.
 		 * @param elementType the type of element in the response
 		 * @param <T> the type of elements in the response
-		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(Class<T> elementType);
 
@@ -611,8 +611,8 @@ public interface WebClient {
          * with {@link #onStatus(Predicate, Function)}.
 		 * @param typeReference a type reference describing the expected response body type
 		 * @param <T> the type of elements in the response
-		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
-		 * 4xx or 5xx
+		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
+		 * status code is 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
