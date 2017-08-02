@@ -17,6 +17,7 @@
 package org.springframework.web.util.pattern;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * @author Andy Clement
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see PathContainer
  */
@@ -342,38 +344,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	@Override
 	public int compareTo(@Nullable PathPattern otherPattern) {
-		// 1) null is sorted last
-		if (otherPattern == null) {
-			return -1;
-		}
-
-		// 2) catchall patterns are sorted last. If both catchall then the
-		// length is considered
-		if (isCatchAll()) {
-			if (otherPattern.isCatchAll()) {
-				int lenDifference = getNormalizedLength() - otherPattern.getNormalizedLength();
-				if (lenDifference != 0) {
-					return (lenDifference < 0) ? +1 : -1;
-				}
-			}
-			else {
-				return +1;
-			}
-		}
-		else if (otherPattern.isCatchAll()) {
-			return -1;
-		}
-
-		// 3) This will sort such that if they differ in terms of wildcards or
-		// captured variable counts, the one with the most will be sorted last
-		int score = getScore() - otherPattern.getScore();
-		if (score != 0) {
-			return (score < 0) ? -1 : +1;
-		}
-
-		// 4) longer is better
-		int lenDifference = getNormalizedLength() - otherPattern.getNormalizedLength();
-		return (lenDifference < 0) ? +1 : (lenDifference == 0 ? 0 : -1);
+		int result = SPECIFICITY_COMPARATOR.compare(this, otherPattern);
+		return (result == 0 && otherPattern != null ?
+				this.patternString.compareTo(otherPattern.patternString) : result);
 	}
 
 	/**
@@ -717,5 +690,41 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean hasLength(@Nullable PathContainer container) {
 		return container != null && container.elements().size() > 0;
 	}
+
+
+	public static final Comparator<PathPattern> SPECIFICITY_COMPARATOR = (p1, p2) -> {
+		// 1) null is sorted last
+		if (p2 == null) {
+			return -1;
+		}
+
+		// 2) catchall patterns are sorted last. If both catchall then the
+		// length is considered
+		if (p1.isCatchAll()) {
+			if (p2.isCatchAll()) {
+				int lenDifference = p1.getNormalizedLength() - p2.getNormalizedLength();
+				if (lenDifference != 0) {
+					return (lenDifference < 0) ? +1 : -1;
+				}
+			}
+			else {
+				return +1;
+			}
+		}
+		else if (p2.isCatchAll()) {
+			return -1;
+		}
+
+		// 3) This will sort such that if they differ in terms of wildcards or
+		// captured variable counts, the one with the most will be sorted last
+		int score = p1.getScore() - p2.getScore();
+		if (score != 0) {
+			return (score < 0) ? -1 : +1;
+		}
+
+		// 4) longer is better
+		int lenDifference = p1.getNormalizedLength() - p2.getNormalizedLength();
+		return Integer.compare(0, lenDifference);
+	};
 
 }

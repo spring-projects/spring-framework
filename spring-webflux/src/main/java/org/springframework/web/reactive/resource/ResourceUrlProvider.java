@@ -166,7 +166,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private Mono<String> resolveResourceUrl(PathContainer lookupPath) {
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.sorted((entry1, entry2) ->
+						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
 				.findFirst()
 				.map(entry -> {
 					PathContainer path = entry.getKey().extractPathWithinPattern(lookupPath);

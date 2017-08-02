@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.condition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -61,20 +60,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	private static SortedSet<PathPattern> toSortedSet(Collection<PathPattern> patterns) {
-		TreeSet<PathPattern> sorted = new TreeSet<>(getPatternComparator());
+		TreeSet<PathPattern> sorted = new TreeSet<>();
 		sorted.addAll(patterns);
 		return sorted;
 	}
 
 	private PatternsRequestCondition(SortedSet<PathPattern> patterns) {
 		this.patterns = patterns;
-	}
-
-	private static Comparator<PathPattern> getPatternComparator() {
-		return (p1, p2) -> {
-			int index = p1.compareTo(p2);
-			return (index != 0 ? index : p1.getPatternString().compareTo(p2.getPatternString()));
-		};
 	}
 
 	public Set<PathPattern> getPatterns() {
@@ -170,7 +162,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		Iterator<PathPattern> iterator = this.patterns.iterator();
 		Iterator<PathPattern> iteratorOther = other.getPatterns().iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
-			int result = iterator.next().compareTo(iteratorOther.next());
+			int result = PathPattern.SPECIFICITY_COMPARATOR.compare(iterator.next(), iteratorOther.next());
 			if (result != 0) {
 				return result;
 			}

@@ -387,7 +387,7 @@ public class PathPatternParserTests {
 		// Based purely on catchAll
 		p1 = parse("{*foobar}");
 		p2 = parse("{*goo}");
-		assertEquals(0, p1.compareTo(p2));
+		assertTrue(p1.compareTo(p2) != 0);
 
 		p1 = parse("/{*foobar}");
 		p2 = parse("/abc/{*ww}");

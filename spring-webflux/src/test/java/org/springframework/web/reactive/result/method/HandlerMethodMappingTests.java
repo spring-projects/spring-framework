@@ -160,7 +160,7 @@ public class HandlerMethodMappingTests {
 
 		@Override
 		protected Comparator<String> getMappingComparator(ServerWebExchange exchange) {
-			return Comparator.comparing(o -> parser.parse(o));
+			return (o1, o2) -> PathPattern.SPECIFICITY_COMPARATOR.compare(parser.parse(o1), parser.parse(o2));
 		}
 
 	}

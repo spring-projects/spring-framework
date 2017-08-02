@@ -118,7 +118,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> entry.getKey().matches(lookupPath))
-				.sorted(Comparator.comparing(Map.Entry::getKey))
+				.sorted((entry1, entry2) ->
+						PathPattern.SPECIFICITY_COMPARATOR.compare(entry1.getKey(), entry2.getKey()))
 				.findFirst()
 				.map(entry -> {
 					PathPattern pattern = entry.getKey();
