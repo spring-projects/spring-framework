@@ -33,6 +33,7 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
@@ -113,6 +114,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		else {
 			bestPattern = patterns.iterator().next();
 			PathPattern.PathMatchInfo result = bestPattern.matchAndExtract(lookupPath);
+			Assert.notNull(result, () ->
+					"Expected bestPattern: " + bestPattern + " to match lookupPath " + lookupPath);
 			uriVariables = result.getUriVariables();
 			matrixVariables = result.getMatrixVariables();
 		}

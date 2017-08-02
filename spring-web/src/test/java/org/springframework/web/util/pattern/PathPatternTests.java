@@ -320,40 +320,40 @@ public class PathPatternTests {
 	@Test
 	public void pathRemainingCornerCases_spr15336() {
 		// No match when the literal path element is a longer form of the segment in the pattern
-		assertNull(parse("/foo").getPathRemaining(toPathContainer("/footastic/bar")));
-		assertNull(parse("/f?o").getPathRemaining(toPathContainer("/footastic/bar")));
-		assertNull(parse("/f*o*p").getPathRemaining(toPathContainer("/flooptastic/bar")));
-		assertNull(parse("/{abc}abc").getPathRemaining(toPathContainer("/xyzabcbar/bar")));
+		assertNull(parse("/foo").matchStartOfPath(toPathContainer("/footastic/bar")));
+		assertNull(parse("/f?o").matchStartOfPath(toPathContainer("/footastic/bar")));
+		assertNull(parse("/f*o*p").matchStartOfPath(toPathContainer("/flooptastic/bar")));
+		assertNull(parse("/{abc}abc").matchStartOfPath(toPathContainer("/xyzabcbar/bar")));
 
 		// With a /** on the end have to check if there is any more data post
 		// 'the match' it starts with a separator
-		assertNull(parse("/resource/**").getPathRemaining(toPathContainer("/resourceX")));
-		assertEquals("",parse("/resource/**").getPathRemaining(toPathContainer("/resource")).getPathRemaining().value());
+		assertNull(parse("/resource/**").matchStartOfPath(toPathContainer("/resourceX")));
+		assertEquals("",parse("/resource/**").matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
 
 		// Similar to above for the capture-the-rest variant
-		assertNull(parse("/resource/{*foo}").getPathRemaining(toPathContainer("/resourceX")));
-		assertEquals("",parse("/resource/{*foo}").getPathRemaining(toPathContainer("/resource")).getPathRemaining().value());
+		assertNull(parse("/resource/{*foo}").matchStartOfPath(toPathContainer("/resourceX")));
+		assertEquals("",parse("/resource/{*foo}").matchStartOfPath(toPathContainer("/resource")).getPathRemaining().value());
 
-		PathPattern.PathRemainingMatchInfo pri = parse("/aaa/{bbb}/c?d/e*f/*/g").getPathRemaining(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
+		PathPattern.PathRemainingMatchInfo pri = parse("/aaa/{bbb}/c?d/e*f/*/g").matchStartOfPath(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
 		assertNotNull(pri);
 		assertEquals("/i",pri.getPathRemaining().value());
 		assertEquals("b",pri.getUriVariables().get("bbb"));
 
-		pri = parse("/aaa/{bbb}/c?d/e*f/*/g/").getPathRemaining(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
+		pri = parse("/aaa/{bbb}/c?d/e*f/*/g/").matchStartOfPath(toPathContainer("/aaa/b/ccd/ef/x/g/i"));
 		assertNotNull(pri);
 		assertEquals("i",pri.getPathRemaining().value());
 		assertEquals("b",pri.getUriVariables().get("bbb"));
 		
-		pri = parse("/{aaa}_{bbb}/e*f/{x}/g").getPathRemaining(toPathContainer("/aa_bb/ef/x/g/i"));
+		pri = parse("/{aaa}_{bbb}/e*f/{x}/g").matchStartOfPath(toPathContainer("/aa_bb/ef/x/g/i"));
 		assertNotNull(pri);
 		assertEquals("/i",pri.getPathRemaining().value());
 		assertEquals("aa",pri.getUriVariables().get("aaa"));
 		assertEquals("bb",pri.getUriVariables().get("bbb"));
 		assertEquals("x",pri.getUriVariables().get("x"));
 
-		assertNull(parse("/a/b").getPathRemaining(toPathContainer("")));
-		assertEquals("/a/b",parse("").getPathRemaining(toPathContainer("/a/b")).getPathRemaining().value());
-		assertEquals("",parse("").getPathRemaining(toPathContainer("")).getPathRemaining().value());
+		assertNull(parse("/a/b").matchStartOfPath(toPathContainer("")));
+		assertEquals("/a/b",parse("").matchStartOfPath(toPathContainer("/a/b")).getPathRemaining().value());
+		assertEquals("",parse("").matchStartOfPath(toPathContainer("")).getPathRemaining().value());
 	}
 
 	@Test
@@ -576,114 +576,6 @@ public class PathPatternTests {
 		assertEquals("def",pri.getUriVariables().get("foo"));
 	}
 	
-	@Test
-	public void matchStart() {
-		PathPatternParser ppp = new PathPatternParser();
-		ppp.setMatchOptionalTrailingSeparator(false);
-		PathPattern pp = ppp.parse("test");
-		assertFalse(pp.matchStart(PathContainer.parsePath("test/")));
-		
-		checkStartNoMatch("test/*/","test//");
-		checkStartMatches("test/*","test/abc");
-		checkStartMatches("test/*/def","test/abc/def");
-		checkStartNoMatch("test/*/def","test//");
-		checkStartNoMatch("test/*/def","test//def");
-		
-		checkStartMatches("test/{a}_{b}/foo", "test/a_b");
-		checkStartMatches("test/?/abc", "test/a");
-		checkStartMatches("test/{*foobar}", "test/");
-		checkStartMatches("test/*/bar", "test/a");
-		checkStartMatches("test/{foo}/bar", "test/abc");
-		checkStartMatches("test//foo", "test//");
-		checkStartMatches("test/foo", "test/");
-		checkStartMatches("test/*", "test/");
-		checkStartMatches("test", "test");
-		checkStartNoMatch("test", "tes");
-		checkStartMatches("test/", "test");
-
-		// test exact matching
-		checkStartMatches("test", "test");
-		checkStartMatches("/test", "/test");
-		checkStartNoMatch("/test.jpg", "test.jpg");
-		checkStartNoMatch("test", "/test");
-		checkStartNoMatch("/test", "test");
-
-		// test matching with ?'s
-		checkStartMatches("t?st", "test");
-		checkStartMatches("??st", "test");
-		checkStartMatches("tes?", "test");
-		checkStartMatches("te??", "test");
-		checkStartMatches("?es?", "test");
-		checkStartNoMatch("tes?", "tes");
-		checkStartNoMatch("tes?", "testt");
-		checkStartNoMatch("tes?", "tsst");
-
-		// test matching with *'s
-		checkStartMatches("*", "test");
-		checkStartMatches("test*", "test");
-		checkStartMatches("test*", "testTest");
-		checkStartMatches("test/*", "test/Test");
-		checkStartMatches("test/*", "test/t");
-		checkStartMatches("test/*", "test/");
-		checkStartMatches("*test*", "AnothertestTest");
-		checkStartMatches("*test", "Anothertest");
-		checkStartMatches("*.*", "test.");
-		checkStartMatches("*.*", "test.test");
-		checkStartMatches("*.*", "test.test.test");
-		checkStartMatches("test*aaa", "testblaaaa");
-		checkStartNoMatch("test*", "tst");
-		checkStartMatches("test*", "test/"); // trailing slash is optional
-		checkStartMatches("test*", "test");
-		checkStartNoMatch("test*", "tsttest");
-		checkStartNoMatch("test*", "test/t");
-		checkStartMatches("test/*", "test");
-		checkStartMatches("test/t*.txt", "test");
-		checkStartNoMatch("*test*", "tsttst");
-		checkStartNoMatch("*test", "tsttst");
-		checkStartNoMatch("*.*", "tsttst");
-		checkStartNoMatch("test*aaa", "test");
-		checkStartNoMatch("test*aaa", "testblaaab");
-
-		// test matching with ?'s and /'s
-		checkStartMatches("/?", "/a");
-		checkStartMatches("/?/a", "/a/a");
-		checkStartMatches("/a/?", "/a/b");
-		checkStartMatches("/??/a", "/aa/a");
-		checkStartMatches("/a/??", "/a/bb");
-		checkStartMatches("/?", "/a");
-
-		checkStartMatches("/**", "/testing/testing");
-		checkStartMatches("/*/**", "/testing/testing");
-		checkStartMatches("test*/**", "test/");
-		checkStartMatches("test*/**", "test/t");
-		checkStartMatches("/bla*bla/test", "/blaXXXbla/test");
-		checkStartMatches("/*bla/test", "/XXXbla/test");
-		checkStartNoMatch("/bla*bla/test", "/blaXXXbl/test");
-		checkStartNoMatch("/*bla/test", "XXXblab/test");
-		checkStartNoMatch("/*bla/test", "XXXbl/test");
-
-		checkStartNoMatch("/????", "/bala/bla");
-
-		checkStartMatches("/*bla*/*/bla/**",
-				"/XXXblaXXXX/testing/bla/testing/testing/");
-		checkStartMatches("/*bla*/*/bla/*",
-				"/XXXblaXXXX/testing/bla/testing");
-		checkStartMatches("/*bla*/*/bla/**",
-				"/XXXblaXXXX/testing/bla/testing/testing");
-		checkStartMatches("/*bla*/*/bla/**",
-				"/XXXblaXXXX/testing/bla/testing/testing.jpg");
-
-		checkStartMatches("/abc/{foo}", "/abc/def");
-		checkStartMatches("/abc/{foo}", "/abc/def/"); // trailing slash is optional
-		checkStartMatches("/abc/{foo}/", "/abc/def/");
-		checkStartNoMatch("/abc/{foo}/", "/abc/def/ghi");
-		checkStartMatches("/abc/{foo}/", "/abc/def");
-
-		checkStartMatches("", "");
-		checkStartMatches("", null);
-		checkStartMatches("/abc", null);
-	}
-
 	@Test
 	public void caseSensitivity() {
 		PathPatternParser pp = new PathPatternParser();
@@ -1258,20 +1150,6 @@ public class PathPatternTests {
 		assertTrue(p.matches(pc));
 	}
 
-	private void checkStartNoMatch(String uriTemplate, String path) {
-		PathPatternParser p = new PathPatternParser();
-		p.setMatchOptionalTrailingSeparator(true);
-		PathPattern pattern = p.parse(uriTemplate);
-		assertFalse(pattern.matchStart(toPathContainer(path)));
-	}
-
-	private void checkStartMatches(String uriTemplate, String path) {
-		PathPatternParser p = new PathPatternParser();
-		p.setMatchOptionalTrailingSeparator(true);
-		PathPattern pattern = p.parse(uriTemplate);
-		assertTrue(pattern.matchStart(toPathContainer(path)));
-	}
-
 	private void checkNoMatch(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
 		PathPattern pattern = p.parse(uriTemplate);
@@ -1309,11 +1187,11 @@ public class PathPatternTests {
 	}
 
 	private PathRemainingMatchInfo getPathRemaining(String pattern, String path) {
-		return parse(pattern).getPathRemaining(toPathContainer(path));
+		return parse(pattern).matchStartOfPath(toPathContainer(path));
 	}
 	
 	private PathRemainingMatchInfo getPathRemaining(PathPattern pattern, String path) {
-		return pattern.getPathRemaining(toPathContainer(path));
+		return pattern.matchStartOfPath(toPathContainer(path));
 	}
 	
 	private PathPattern.PathMatchInfo matchAndExtract(PathPattern p, String path) {

@@ -356,7 +356,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.getPathRemaining(request.pathContainer()))
+			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
 					.map(info -> {
 						mergeTemplateVariables(request, info.getUriVariables());
 						return new SubPathServerRequestWrapper(request, info);

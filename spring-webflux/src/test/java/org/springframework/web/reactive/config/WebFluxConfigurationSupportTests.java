@@ -86,7 +86,7 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
 		ApplicationContext context = loadConfig(WebFluxConfig.class);
-		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSlash");
+		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
 		ReflectionUtils.makeAccessible(trailingSlashField);
 
 		String name = "requestMappingHandlerMapping";
@@ -111,7 +111,7 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void customPathMatchConfig() throws Exception {
 		ApplicationContext context = loadConfig(CustomPatchMatchConfig.class);
-		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSlash");
+		final Field trailingSlashField = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
 		ReflectionUtils.makeAccessible(trailingSlashField);
 
 		String name = "requestMappingHandlerMapping";

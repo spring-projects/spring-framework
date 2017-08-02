@@ -177,14 +177,35 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 	
 	/**
-	 * Match the beginning of the given path and return the remaining portion of
-	 * the path not covered by this pattern. This is useful for matching through
-	 * nested routes where the path is matched incrementally at each level.
+	 * Match this pattern to the given URI path and return extracted URI template
+	 * variables as well as path parameters (matrix variables).
+	 * @param pathContainer the candidate path to attempt to match against
+	 * @return info object with the extracted variables
+	 * @throws IllegalStateException if the path does not match the pattern
+	 */
+	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
+		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
+		if (this.head != null && this.head.matches(0, matchingContext)) {
+			return matchingContext.getPathMatchResult();
+		}
+		else if (!hasLength(pathContainer)) {
+			return PathMatchInfo.EMPTY;
+		}
+		else {
+			throw new IllegalStateException(
+					"Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
+		}
+	}
+
+	/**
+	 * Match the beginning of the given path and return the remaining portion
+	 * not covered by this pattern. This is useful for matching nested routes
+	 * where the path is matched incrementally at each level.
 	 * @param pathContainer the candidate path to attempt to match against
 	 * @return info object with the match result or {@code null} for no match
 	 */
 	@Nullable
-	public PathRemainingMatchInfo getPathRemaining(PathContainer pathContainer) {
+	public PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
 		if (this.head == null) {
 			return new PathRemainingMatchInfo(pathContainer);
 		}
@@ -205,46 +226,9 @@ public class PathPattern implements Comparable<PathPattern> {
 			}
 			else {
 				info = new PathRemainingMatchInfo(pathContainer.subPath(matchingContext.remainingPathIndex),
-						 matchingContext.getPathMatchResult());
+						matchingContext.getPathMatchResult());
 			}
 			return info;
-		}
-	}
-
-	/**
-	 * @param pathContainer the path to check against the pattern
-	 * @return true if the pattern matches as much of the path as is supplied
-	 */
-	public boolean matchStart(PathContainer pathContainer) {
-		if (this.head == null) {
-			return !hasLength(pathContainer);
-		}
-		else if (!hasLength(pathContainer)) {
-			return true;
-		}
-		MatchingContext matchingContext = new MatchingContext(pathContainer, false);
-		matchingContext.setMatchStartMatching(true);
-		return this.head.matches(0, matchingContext);
-	}
-
-	/**
-	 * Match this pattern to the given URI path and extract URI template
-	 * variables as well as path parameters (matrix variables).
-	 * @param pathContainer the candidate path to attempt to match against
-	 * @return info object with the extracted variables
-	 * @throws IllegalStateException if the path does not match the pattern
-	 */
-	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
-		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
-		if (this.head != null && this.head.matches(0, matchingContext)) {
-			return matchingContext.getPathMatchResult();
-		}
-		else if (!hasLength(pathContainer)) {
-			return PathMatchInfo.EMPTY;
-		}
-		else {
-			throw new IllegalStateException(
-					"Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
 		}
 	}
 
@@ -266,7 +250,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		// TODO: implement extractPathWithinPattern for PathContainer
 
-		// TODO: also see this from PathPattern javadoc + align behavior with getPathRemaining instead:
+		// TODO: align behavior with matchStartOfPath with regards to this:
 		// As per the contract on {@link PathMatcher}, this method will trim leading/trailing
 		// separators. It will also remove duplicate separators in the returned path.
 
