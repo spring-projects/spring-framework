@@ -545,7 +545,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				else {
 					for (int i = 0; i < sql.length; i++) {
 						this.currSql = sql[i];
-						if (!stmt.execute(sql[i])) {
+						if (stmt.execute(sql[i])) {
 							rowsAffected[i] = stmt.getUpdateCount();
 						}
 						else {
