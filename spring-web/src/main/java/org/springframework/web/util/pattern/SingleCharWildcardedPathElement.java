@@ -104,7 +104,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 					return true;
 				}
 				else {
-					return (matchingContext.isAllowOptionalTrailingSlash() &&
+					return (matchingContext.isMatchOptionalTrailingSeparator() &&
 							(pathIndex + 1) == matchingContext.pathLength &&
 							matchingContext.isSeparator(pathIndex));
 				}

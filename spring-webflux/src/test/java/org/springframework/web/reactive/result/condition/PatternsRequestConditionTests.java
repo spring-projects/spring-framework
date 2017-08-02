@@ -121,7 +121,7 @@ public class PatternsRequestConditionTests {
 				"/foo", match.getPatterns().iterator().next().getPatternString());
 
 		PathPatternParser parser = new PathPatternParser();
-		parser.setMatchOptionalTrailingSlash(false);
+		parser.setMatchOptionalTrailingSeparator(false);
 		condition = new PatternsRequestCondition(parser.parse("/foo"));
 		match = condition.getMatchingCondition(get("/foo/").toExchange());
 

@@ -23,7 +23,6 @@ import java.util.List;
 import org.junit.Test;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
 import static org.junit.Assert.assertEquals;
@@ -135,7 +134,7 @@ public class PathPatternParserTests {
 
 		pathPattern = checkStructure("/{var:[^\\/]*}");
 		assertEquals(CaptureVariablePathElement.class.getName(), pathPattern.getHeadSection().next.getClass().getName());
-		PathMatchResult result = matchAndExtract(pathPattern,"/foo");
+		PathPattern.PathMatchInfo result = matchAndExtract(pathPattern,"/foo");
 		assertEquals("foo", result.getUriVariables().get("var"));
 
 		pathPattern = checkStructure("/{var:\\[*}");
@@ -465,7 +464,7 @@ public class PathPatternParserTests {
 		assertFalse(pp.matches(PathPatternTests.toPathContainer(path)));
 	}
 	
-	private PathMatchResult matchAndExtract(PathPattern pp, String path) {
+	private PathPattern.PathMatchInfo matchAndExtract(PathPattern pp, String path) {
 		 return pp.matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 

@@ -22,8 +22,8 @@ package org.springframework.web.util.pattern;
  *
  * <p>The {@link PathPatternParser} and {@link PathPattern} are specifically
  * designed for use with HTTP URL paths in web applications where a large number
- * of URI path patterns continuously matched against incoming requests motivates
- * the need for pre-parsing and fast matching.
+ * of URI path patterns, continuously matched against incoming requests,
+ * motivates the need for efficient matching.
  *
  * <p>For details of the path pattern syntax see {@link PathPattern}.
  *
@@ -32,7 +32,7 @@ package org.springframework.web.util.pattern;
  */
 public class PathPatternParser {
 
-	private boolean matchOptionalTrailingSlash = true;
+	private boolean matchOptionalTrailingSeparator = true;
 
 	private boolean caseSensitive = true;
 
@@ -48,15 +48,15 @@ public class PathPatternParser {
 	 *
 	 * <p>The default is {@code true}.
 	 */
-	public void setMatchOptionalTrailingSlash(boolean matchOptionalTrailingSlash) {
-		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
+	public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
+		this.matchOptionalTrailingSeparator = matchOptionalTrailingSeparator;
 	}
 
 	/**
 	 * Whether optional trailing slashing match is enabled.
 	 */
-	public boolean isMatchOptionalTrailingSlash() {
-		return this.matchOptionalTrailingSlash;
+	public boolean isMatchOptionalTrailingSeparator() {
+		return this.matchOptionalTrailingSeparator;
 	}
 
 	/**
@@ -74,9 +74,20 @@ public class PathPatternParser {
 		return this.caseSensitive;
 	}
 
+	/**
+	 * Accessor used for the separator to use.
+	 * <p>Currently not exposed for configuration with URI path patterns and
+	 * mainly for use in InternalPathPatternParser and PathPattern. If required
+	 * in the future, a similar option would also need to be exposed in
+	 * {@link org.springframework.http.server.PathContainer PathContainer}.
+	 */
+	char getSeparator() {
+		return '/';
+	}
+
 
 	/**
-	 * Process the path pattern data, a character at a time, breaking it into
+	 * Process the path pattern content, a character at a time, breaking it into
 	 * path elements around separator boundaries and verifying the structure at each
 	 * stage. Produces a PathPattern object that can be used for fast matching
 	 * against paths. Each invocation of this method delegates to a new instance of

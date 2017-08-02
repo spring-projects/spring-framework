@@ -27,7 +27,6 @@ import org.springframework.http.server.PathContainer.Separator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,29 +65,31 @@ import org.springframework.util.StringUtils;
  *
  * @author Andy Clement
  * @since 5.0
+ * @see PathContainer
  */
 public class PathPattern implements Comparable<PathPattern> {
 
 	private final static PathContainer EMPTY_PATH = PathContainer.parsePath("");
 
+
+	/** The text of the parsed pattern */
+	private final String patternString;
+
 	/** The parser used to construct this pattern */
 	private final PathPatternParser parser;
+
+	/** The separator used when parsing the pattern */
+	private final char separator;
+
+	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully */
+	private final boolean matchOptionalTrailingSeparator;
+
+	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time) */
+	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern */
 	@Nullable
 	private final PathElement head;
-
-	/** The text of the parsed pattern */
-	private String patternString;
-
-	/** The separator used when parsing the pattern */
-	private char separator;
-
-	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time) */
-	private boolean caseSensitive;
-
-	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully */
-	private boolean allowOptionalTrailingSlash;
 
 	/** How many variables are captured in this pattern */
 	private int capturedVariableCount;
@@ -120,15 +121,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
-	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head,
-			char separator, boolean caseSensitive, boolean allowOptionalTrailingSlash) {
-
+	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head) {
 		this.patternString = patternText;
 		this.parser = parser;
+		this.separator = parser.getSeparator();
+		this.matchOptionalTrailingSeparator = parser.isMatchOptionalTrailingSeparator();
+		this.caseSensitive = parser.isCaseSensitive();
 		this.head = head;
-		this.separator = separator;
-		this.caseSensitive = caseSensitive;
-		this.allowOptionalTrailingSlash = allowOptionalTrailingSlash;
 
 		// Compute fields for fast comparison
 		PathElement elem = head;
@@ -149,7 +148,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 
 	/**
-	 * @return the original pattern string that was parsed to create this PathPattern.
+	 * Return the original String that was parsed to create this PathPattern.
 	 */
 	public String getPatternString() {
 		return this.patternString;
@@ -157,8 +156,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 
 	/**
-	 * @param pathContainer the candidate path container to attempt to match against this pattern
-	 * @return true if the path matches this pattern
+	 * Whether this pattern matches the given path.
+	 * @param pathContainer the candidate path to attempt to match against
+	 * @return {@code true} if the path matches this pattern
 	 */
 	public boolean matches(PathContainer pathContainer) {
 		if (this.head == null) {
@@ -177,10 +177,11 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 	
 	/**
-	 * For a given path return the remaining piece that is not covered by this PathPattern.
-	 * @param pathContainer a path that may or may not match this path pattern
-	 * @return a {@link PathRemainingMatchInfo} describing the match result,
-	 * or {@code null} if the path does not match this pattern
+	 * Match the beginning of the given path and return the remaining portion of
+	 * the path not covered by this pattern. This is useful for matching through
+	 * nested routes where the path is matched incrementally at each level.
+	 * @param pathContainer the candidate path to attempt to match against
+	 * @return info object with the match result or {@code null} for no match
 	 */
 	@Nullable
 	public PathRemainingMatchInfo getPathRemaining(PathContainer pathContainer) {
@@ -227,39 +228,48 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	/**
-	 * @param pathContainer a path that matches this pattern from which to extract variables
-	 * @return a map of extracted variables - an empty map if no variables extracted. 
+	 * Match this pattern to the given URI path and extract URI template
+	 * variables as well as path parameters (matrix variables).
+	 * @param pathContainer the candidate path to attempt to match against
+	 * @return info object with the extracted variables
 	 * @throws IllegalStateException if the path does not match the pattern
 	 */
-	public PathMatchResult matchAndExtract(PathContainer pathContainer) {
+	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
 		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
 		if (this.head != null && this.head.matches(0, matchingContext)) {
 			return matchingContext.getPathMatchResult();
 		}
 		else if (!hasLength(pathContainer)) {
-			return PathMatchResult.EMPTY;
+			return PathMatchInfo.EMPTY;
 		}
 		else {
-			throw new IllegalStateException("Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
+			throw new IllegalStateException(
+					"Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
 		}
 	}
 
 	/**
-	 * Given a full path, determine the pattern-mapped part. <p>For example: <ul>
+	 * Determine the pattern-mapped part for the given path.
+	 * <p>For example: <ul>
 	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
-	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit}' -> '{@code cvs/commit}'</li>
 	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
 	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
 	 * </ul>
-	 * <p><b>Note:</b> Assumes that {@link #matches} returns {@code true} for '{@code pattern}' and '{@code path}', but
-	 * does <strong>not</strong> enforce this. As per the contract on {@link PathMatcher}, this
-	 * method will trim leading/trailing separators. It will also remove duplicate separators in
-	 * the returned path.
+	 * <p><b>Note:</b> Assumes that {@link #matches} returns {@code true} for
+	 * the same path but does <strong>not</strong> enforce this.
 	 * @param path a path that matches this pattern
-	 * @return the subset of the path that is matched by pattern or "" if none of it is matched by pattern elements
+	 * @return the subset of the path that is matched by pattern or "" if none
+	 * of it is matched by pattern elements
 	 */
 	public PathContainer extractPathWithinPattern(PathContainer path) {
+
 		// TODO: implement extractPathWithinPattern for PathContainer
+
+		// TODO: also see this from PathPattern javadoc + align behavior with getPathRemaining instead:
+		// As per the contract on {@link PathMatcher}, this method will trim leading/trailing
+		// separators. It will also remove duplicate separators in the returned path.
+
 		String result = extractPathWithinPattern(path.value());
 		return PathContainer.parsePath(result);
 	}
@@ -456,16 +466,13 @@ public class PathPattern implements Comparable<PathPattern> {
 
 
 	/**
-	 * Represents the result of a successful path match. This holds the keys that matched, the
-	 * values that were found for each key and, if any, the path parameters (matrix variables)
-	 * attached to that path element.
-	 * For example: "/{var}" against "/foo;a=b" will return a PathMathResult with 'foo=bar'
-	 * for URI variables and 'a=b' as path parameters for 'foo'.
+	 * Holder for URI variables and path parameters (matrix variables) extracted
+	 * based on the pattern for a given matched path.
 	 */
-	public static class PathMatchResult {
+	public static class PathMatchInfo {
 
-		private static final PathMatchResult EMPTY =
-				new PathMatchResult(Collections.emptyMap(), Collections.emptyMap());
+		private static final PathMatchInfo EMPTY =
+				new PathMatchInfo(Collections.emptyMap(), Collections.emptyMap());
 
 
 		private final Map<String, String> uriVariables;
@@ -473,7 +480,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		private final Map<String, MultiValueMap<String, String>> matrixVariables;
 
 
-		PathMatchResult(Map<String, String> uriVars,
+		PathMatchInfo(Map<String, String> uriVars,
 				@Nullable Map<String, MultiValueMap<String, String>> matrixVars) {
 
 			this.uriVariables = Collections.unmodifiableMap(uriVars);
@@ -482,39 +489,47 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 
 
+		/**
+		 * Return the extracted URI variables.
+		 */
 		public Map<String, String> getUriVariables() {
 			return this.uriVariables;
 		}
 
+		/**
+		 * Return maps of matrix variables per path segment, keyed off by URI
+		 * variable name.
+		 */
 		public Map<String, MultiValueMap<String, String>> getMatrixVariables() {
 			return this.matrixVariables;
 		}
 
 		@Override
 		public String toString() {
-			return "PathMatchResult[uriVariables=" + this.uriVariables + ", " +
+			return "PathMatchInfo[uriVariables=" + this.uriVariables + ", " +
 					"matrixVariables=" + this.matrixVariables + "]";
 		}
 	}
 
 	/**
-	 * A holder for the result of a {@link PathPattern#getPathRemaining} call.Holds
-	 * information on the path left after the first part has successfully matched a pattern
-	 * and any variables bound in that first part that matched.
+	 * Holder for the result of a match on the start of a pattern.
+	 * Provides access to the remaining path not matched to the pattern as well
+	 * as any variables bound in that first part that was matched.
 	 */
 	public static class PathRemainingMatchInfo {
 
 		private final PathContainer pathRemaining;
 
-		private final PathMatchResult pathMatchResult;
+		private final PathMatchInfo pathMatchInfo;
+
 
 		PathRemainingMatchInfo(PathContainer pathRemaining) {
-			this(pathRemaining, PathMatchResult.EMPTY);
+			this(pathRemaining, PathMatchInfo.EMPTY);
 		}
 
-		PathRemainingMatchInfo(PathContainer pathRemaining, PathMatchResult pathMatchResult) {
+		PathRemainingMatchInfo(PathContainer pathRemaining, PathMatchInfo pathMatchInfo) {
 			this.pathRemaining = pathRemaining;
-			this.pathMatchResult = pathMatchResult;
+			this.pathMatchInfo = pathMatchInfo;
 		}
 
 		/**
@@ -525,18 +540,18 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 
 		/**
-		 * Return variables that were bound in the part of the path that was successfully matched.
-		 * Will be an empty map if no variables were bound
+		 * Return variables that were bound in the part of the path that was
+		 * successfully matched or an empty map.
 		 */
 		public Map<String, String> getUriVariables() {
-			return this.pathMatchResult.getUriVariables();
+			return this.pathMatchInfo.getUriVariables();
 		}
 
 		/**
 		 * Return the path parameters for each bound variable.
 		 */
 		public Map<String, MultiValueMap<String, String>> getMatrixVariables() {
-			return this.pathMatchResult.getMatrixVariables();
+			return this.pathMatchInfo.getMatrixVariables();
 		}
 	}
 
@@ -635,8 +650,8 @@ public class PathPattern implements Comparable<PathPattern> {
 			determineRemainingPath = true;
 		}
 
-		public boolean isAllowOptionalTrailingSlash() {
-			return allowOptionalTrailingSlash;
+		public boolean isMatchOptionalTrailingSeparator() {
+			return matchOptionalTrailingSeparator;
 		}
 
 		public void setMatchStartMatching(boolean b) {
@@ -657,12 +672,12 @@ public class PathPattern implements Comparable<PathPattern> {
 			}
 		}
 
-		public PathMatchResult getPathMatchResult() {
+		public PathMatchInfo getPathMatchResult() {
 			if (this.extractedUriVariables == null) {
-				return PathMatchResult.EMPTY;
+				return PathMatchInfo.EMPTY;
 			}
 			else {
-				return new PathMatchResult(this.extractedUriVariables, this.extractedMatrixVariables);
+				return new PathMatchInfo(this.extractedUriVariables, this.extractedMatrixVariables);
 			}
 		}
 

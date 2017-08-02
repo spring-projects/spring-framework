@@ -103,7 +103,7 @@ class CaptureVariablePathElement extends PathElement {
 			else {
 				// Needs to be at least one character #SPR15264
 				match = (pathIndex == matchingContext.pathLength);
-				if (!match && matchingContext.isAllowOptionalTrailingSlash()) {
+				if (!match && matchingContext.isMatchOptionalTrailingSeparator()) {
 					match = //(nextPos > candidateIndex) &&
 						    (pathIndex + 1) == matchingContext.pathLength && 
 						    matchingContext.isSeparator(pathIndex);

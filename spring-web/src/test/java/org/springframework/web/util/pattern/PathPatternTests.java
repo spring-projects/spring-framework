@@ -31,7 +31,6 @@ import org.junit.rules.ExpectedException;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.util.pattern.PathPattern.PathMatchResult;
 import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -186,7 +185,7 @@ public class PathPatternTests {
 
 		// Now with trailing matching turned OFF
 		PathPatternParser parser = new PathPatternParser();
-		parser.setMatchOptionalTrailingSlash(false);
+		parser.setMatchOptionalTrailingSeparator(false);
 		// LiteralPathElement
 		pp = parser.parse("/resource");
 		assertMatches(pp,"/resource");
@@ -451,7 +450,7 @@ public class PathPatternTests {
 		checkNoMatch("a/*", "a//"); // no data for *
 		checkMatches("a/*", "a/a/"); // trailing slash, so is allowed
 		PathPatternParser ppp = new PathPatternParser();
-		ppp.setMatchOptionalTrailingSlash(false);
+		ppp.setMatchOptionalTrailingSeparator(false);
 		assertFalse(ppp.parse("a/*").matches(toPathContainer("a//")));
 		checkMatches("a/*", "a/a");
 		checkMatches("a/*", "a/a/"); // trailing slash is optional
@@ -580,7 +579,7 @@ public class PathPatternTests {
 	@Test
 	public void matchStart() {
 		PathPatternParser ppp = new PathPatternParser();
-		ppp.setMatchOptionalTrailingSlash(false);
+		ppp.setMatchOptionalTrailingSeparator(false);
 		PathPattern pp = ppp.parse("test");
 		assertFalse(pp.matchStart(PathContainer.parsePath("test/")));
 		
@@ -845,7 +844,7 @@ public class PathPatternTests {
 		
 		// Only patterns not capturing variables cannot match against just /
 		PathPatternParser ppp = new PathPatternParser();
-		ppp.setMatchOptionalTrailingSlash(true);
+		ppp.setMatchOptionalTrailingSeparator(true);
 		pp = ppp.parse("/****");
 		assertMatches(pp,"/abcdef");
 		assertMatches(pp,"/");
@@ -900,7 +899,7 @@ public class PathPatternTests {
 		checkCapture("/foo/{bar}/boo/{baz}", "/foo/plum/boo/apple", "bar", "plum", "baz",
 				"apple");
 		checkCapture("/{bla}.*", "/testing.html", "bla", "testing");
-		PathMatchResult extracted = checkCapture("/abc", "/abc");
+		PathPattern.PathMatchInfo extracted = checkCapture("/abc", "/abc");
 		assertEquals(0, extracted.getUriVariables().size());
 		checkCapture("/{bla}/foo","/a/foo");
 	}
@@ -911,7 +910,7 @@ public class PathPatternTests {
 		PathPattern p = null;
 
 		p = pp.parse("{symbolicName:[\\w\\.]+}-{version:[\\w\\.]+}.jar");
-		PathMatchResult result = matchAndExtract(p, "com.example-1.0.0.jar");
+		PathPattern.PathMatchInfo result = matchAndExtract(p, "com.example-1.0.0.jar");
 		assertEquals("com.example", result.getUriVariables().get("symbolicName"));
 		assertEquals("1.0.0", result.getUriVariables().get("version"));
 
@@ -926,7 +925,7 @@ public class PathPatternTests {
 		PathPatternParser pp = new PathPatternParser();
 
 		PathPattern p = pp.parse("{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.]+}.jar");
-		PathMatchResult result = p.matchAndExtract(toPathContainer("com.example-sources-1.0.0.jar"));
+		PathPattern.PathMatchInfo result = p.matchAndExtract(toPathContainer("com.example-sources-1.0.0.jar"));
 		assertEquals("com.example", result.getUriVariables().get("symbolicName"));
 		assertEquals("1.0.0", result.getUriVariables().get("version"));
 
@@ -1074,8 +1073,8 @@ public class PathPatternTests {
 		PathPatternParser parser = new PathPatternParser();
 		PathPattern p1 = parser.parse("/{foo}");
 		PathPattern p2 = parser.parse("/{foo}.*");
-		PathMatchResult r1 = matchAndExtract(p1, "/file.txt");
-		PathMatchResult r2 = matchAndExtract(p2, "/file.txt");
+		PathPattern.PathMatchInfo r1 = matchAndExtract(p1, "/file.txt");
+		PathPattern.PathMatchInfo r2 = matchAndExtract(p2, "/file.txt");
 		 
 		// works fine
 		assertEquals("file.txt", r1.getUriVariables().get("foo"));
@@ -1204,7 +1203,7 @@ public class PathPatternTests {
 	@Test
 	public void parameters() {
 		// CaptureVariablePathElement
-		PathMatchResult result = matchAndExtract("/abc/{var}","/abc/one;two=three;four=five");
+		PathPattern.PathMatchInfo result = matchAndExtract("/abc/{var}","/abc/one;two=three;four=five");
 		assertEquals("one",result.getUriVariables().get("var"));
 		assertEquals("three",result.getMatrixVariables().get("var").getFirst("two"));
 		assertEquals("five",result.getMatrixVariables().get("var").getFirst("four"));
@@ -1234,13 +1233,13 @@ public class PathPatternTests {
 	}
 
 
-	private PathMatchResult matchAndExtract(String pattern, String path) {
+	private PathPattern.PathMatchInfo matchAndExtract(String pattern, String path) {
 		 return parse(pattern).matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 	
 	private PathPattern parse(String path) {
 		PathPatternParser pp = new PathPatternParser();
-		pp.setMatchOptionalTrailingSlash(true);
+		pp.setMatchOptionalTrailingSeparator(true);
 		return pp.parse(path);
 	}
 	
@@ -1253,7 +1252,7 @@ public class PathPatternTests {
 	
 	private void checkMatches(String uriTemplate, String path) {
 		PathPatternParser parser = new PathPatternParser();
-		parser.setMatchOptionalTrailingSlash(true);
+		parser.setMatchOptionalTrailingSeparator(true);
 		PathPattern p = parser.parse(uriTemplate);
 		PathContainer pc = toPathContainer(path);
 		assertTrue(p.matches(pc));
@@ -1261,14 +1260,14 @@ public class PathPatternTests {
 
 	private void checkStartNoMatch(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
-		p.setMatchOptionalTrailingSlash(true);
+		p.setMatchOptionalTrailingSeparator(true);
 		PathPattern pattern = p.parse(uriTemplate);
 		assertFalse(pattern.matchStart(toPathContainer(path)));
 	}
 
 	private void checkStartMatches(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
-		p.setMatchOptionalTrailingSlash(true);
+		p.setMatchOptionalTrailingSeparator(true);
 		PathPattern pattern = p.parse(uriTemplate);
 		assertTrue(pattern.matchStart(toPathContainer(path)));
 	}
@@ -1280,10 +1279,10 @@ public class PathPatternTests {
 		assertFalse(pattern.matches(PathContainer));
 	}
 
-	private PathMatchResult checkCapture(String uriTemplate, String path, String... keyValues) {
+	private PathPattern.PathMatchInfo checkCapture(String uriTemplate, String path, String... keyValues) {
 		PathPatternParser parser = new PathPatternParser();
 		PathPattern pattern = parser.parse(uriTemplate);
-		PathMatchResult matchResult = pattern.matchAndExtract(toPathContainer(path));
+		PathPattern.PathMatchInfo matchResult = pattern.matchAndExtract(toPathContainer(path));
 		Map<String, String> expectedKeyValues = new HashMap<>();
 		for (int i = 0; i < keyValues.length; i += 2) {
 			expectedKeyValues.put(keyValues[i], keyValues[i + 1]);
@@ -1317,7 +1316,7 @@ public class PathPatternTests {
 		return pattern.getPathRemaining(toPathContainer(path));
 	}
 	
-	private PathMatchResult matchAndExtract(PathPattern p, String path) {
+	private PathPattern.PathMatchInfo matchAndExtract(PathPattern p, String path) {
 		return p.matchAndExtract(toPathContainer(path));
 	}
 

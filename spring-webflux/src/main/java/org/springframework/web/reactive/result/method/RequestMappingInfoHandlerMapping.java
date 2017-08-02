@@ -112,7 +112,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		else {
 			bestPattern = patterns.iterator().next();
-			PathPattern.PathMatchResult result = bestPattern.matchAndExtract(lookupPath);
+			PathPattern.PathMatchInfo result = bestPattern.matchAndExtract(lookupPath);
 			uriVariables = result.getUriVariables();
 			matrixVariables = result.getMatrixVariables();
 		}
