@@ -175,26 +175,28 @@ public class PathPattern implements Comparable<PathPattern> {
 		MatchingContext matchingContext = new MatchingContext(pathContainer, false);
 		return this.head.matches(0, matchingContext);
 	}
-	
+
 	/**
 	 * Match this pattern to the given URI path and return extracted URI template
 	 * variables as well as path parameters (matrix variables).
 	 * @param pathContainer the candidate path to attempt to match against
-	 * @return info object with the extracted variables
-	 * @throws IllegalStateException if the path does not match the pattern
+	 * @return info object with the extracted variables, or {@code null} for no match
 	 */
+	@Nullable
 	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
-		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
-		if (this.head != null && this.head.matches(0, matchingContext)) {
-			return matchingContext.getPathMatchResult();
+		if (this.head == null) {
+			return hasLength(pathContainer) ? null : PathMatchInfo.EMPTY;
 		}
 		else if (!hasLength(pathContainer)) {
-			return PathMatchInfo.EMPTY;
+			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
+				pathContainer = EMPTY_PATH; // Will allow CaptureTheRest to bind the variable to empty
+			}
+			else {
+				return null;
+			}
 		}
-		else {
-			throw new IllegalStateException(
-					"Pattern \"" + this + "\" is not a match for \"" + pathContainer.value() + "\"");
-		}
+		MatchingContext matchingContext = new MatchingContext(pathContainer, true);
+		return this.head.matches(0, matchingContext) ? matchingContext.getPathMatchResult() : null;
 	}
 
 	/**

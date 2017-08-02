@@ -768,20 +768,10 @@ public class PathPatternTests {
 		checkCapture("/{page}.*", "/42.html", "page", "42");
 		checkCapture("/A-{B}-C", "/A-b-C", "B", "b");
 		checkCapture("/{name}.{extension}", "/test.html", "name", "test", "extension", "html");
-		try {
-			checkCapture("/{one}/", "//", "one", "");
-			fail("Expected exception");
-		}
-		catch (IllegalStateException e) {
-			assertEquals("Pattern \"/{one}/\" is not a match for \"//\"", e.getMessage());
-		}
-		try {
-			checkCapture("", "/abc");
-			fail("Expected exception");
-		}
-		catch (IllegalStateException e) {
-			assertEquals("Pattern \"\" is not a match for \"/abc\"", e.getMessage());
-		}
+
+		assertNull(checkCapture("/{one}/", "//"));
+		assertNull(checkCapture("", "/abc"));
+
 		assertEquals(0, checkCapture("", "").getUriVariables().size());
 		checkCapture("{id}", "99", "id", "99");
 		checkCapture("/customer/{customerId}", "/customer/78", "customerId", "78");
