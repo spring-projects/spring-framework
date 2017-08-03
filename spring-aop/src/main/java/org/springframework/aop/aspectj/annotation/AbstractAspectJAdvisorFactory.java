@@ -200,7 +200,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 					.keySet()
 					.stream()
 					.filter(type -> type.isInstance(annotation))
-					.map(type -> annotationTypes.get(type))
+					.map(annotationTypes::get)
 					.findAny()
 					.orElseThrow(() -> new IllegalStateException("Unknown annotation type: " + annotation.toString()));
 		}
