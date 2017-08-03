@@ -150,7 +150,7 @@ class WriteResultPublisher implements Publisher<Void> {
 		SUBSCRIBED {
 			@Override
 			void request(WriteResultPublisher publisher, long n) {
-				Operators.checkRequest(n, publisher.subscriber);
+				Operators.validate(n);
 			}
 			@Override
 			void publishComplete(WriteResultPublisher publisher) {
