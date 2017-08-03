@@ -1243,16 +1243,26 @@ public class AnnotatedElementUtils {
 
 		for (Class<?> iface : ifcs) {
 			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
-				try {
-					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
-					T result = searchWithFindSemantics(equivalentMethod, annotationType, annotationName, containerType,
-							processor, visited, metaDepth);
-					if (result != null) {
-						return result;
+				Method equivalentMethod = null;
+				T result = null;
+				for (Method iMethod : iface.getMethods()) {
+					boolean areNamesEqual = iMethod.getName().equals(method.getName());
+					boolean areParamsEqual = iMethod.getParameterTypes().equals(method.getParameterTypes());
+					if(areNamesEqual && areParamsEqual) {
+						try {
+							equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+							result = searchWithFindSemantics(equivalentMethod, annotationType, annotationName, containerType,
+									processor, visited, metaDepth);
+						}
+						catch (NoSuchMethodException ex) {
+							// Skip this interface - it doesn't have the method...
+							// or method name is "<init>" or "<clinit>"...
+						}
+						break;
 					}
 				}
-				catch (NoSuchMethodException ex) {
-					// Skip this interface - it doesn't have the method...
+				if (result != null) {
+					return result;
 				}
 			}
 		}
