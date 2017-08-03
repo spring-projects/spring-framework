@@ -22,6 +22,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import org.springframework.lang.Nullable;
@@ -51,15 +52,16 @@ public abstract class FileSystemUtils {
 	 * otherwise {@code false}
 	 */
 	public static boolean deleteRecursively(@Nullable File root) {
-		if (root != null) {
-			try {
-				return deleteRecursively(root.toPath());
-			}
-			catch (IOException ex) {
-				return false;
-			}
+		if (root == null) {
+			return false;
 		}
-		return false;
+
+		try {
+			return deleteRecursively(root.toPath());
+		}
+		catch (IOException ex) {
+			return false;
+		}
 	}
 
 	/**
@@ -72,22 +74,26 @@ public abstract class FileSystemUtils {
 	 * @since 5.0
 	 */
 	public static boolean deleteRecursively(@Nullable Path root) throws IOException {
-		if (root != null) {
-			Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					Files.delete(file);
-					return FileVisitResult.CONTINUE;
-				}
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-					Files.delete(dir);
-					return FileVisitResult.CONTINUE;
-				}
-			});
-			return Files.deleteIfExists(root);
+		if (root == null) {
+			return false;
 		}
-		return false;
+		if (!Files.exists(root)) {
+			return false;
+		}
+
+		Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return true;
 	}
 
 	/**
@@ -125,7 +131,7 @@ public abstract class FileSystemUtils {
 				}
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					Files.copy(file, dest.resolve(src.relativize(file)));
+					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 					return FileVisitResult.CONTINUE;
 				}
 			});
