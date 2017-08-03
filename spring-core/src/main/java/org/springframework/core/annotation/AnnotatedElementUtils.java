@@ -1247,7 +1247,7 @@ public class AnnotatedElementUtils {
 				T result = null;
 				for (Method iMethod : iface.getMethods()) {
 					boolean areNamesEqual = iMethod.getName().equals(method.getName());
-					boolean areParamsEqual = iMethod.getParameterTypes().equals(method.getParameterTypes());
+					boolean areParamsEqual = iMethod.getParameterTypes() == method.getParameterTypes();
 					if(areNamesEqual && areParamsEqual) {
 						try {
 							equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
