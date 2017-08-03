@@ -45,8 +45,9 @@ import org.springframework.util.Assert;
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
  * into JUnit 5's <em>Jupiter</em> programming model.
  *
- * <p>To use this class, simply annotate a JUnit Jupiter based test class with
- * {@code @ExtendWith(SpringExtension.class)}.
+ * <p>To use this extension, simply annotate a JUnit Jupiter based test class with
+ * {@code @ExtendWith(SpringExtension.class)}, {@code @SpringJUnitConfig}, or
+ * {@code @SpringJUnitWebConfig}.
  *
  * @author Sam Brannen
  * @since 5.0
