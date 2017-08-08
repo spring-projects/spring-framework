@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.beanvalidation2;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
 
 import static org.junit.Assert.*;
 

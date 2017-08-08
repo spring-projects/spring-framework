@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.beanvalidation2;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,6 +31,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.junit.Assert.*;
 
