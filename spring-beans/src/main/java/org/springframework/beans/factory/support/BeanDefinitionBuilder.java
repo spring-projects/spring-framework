@@ -194,7 +194,7 @@ public class BeanDefinitionBuilder {
 	 * Add an indexed constructor arg value. The current index is tracked internally
 	 * and all additions are at the present point.
 	 */
-	public BeanDefinitionBuilder addConstructorArgValue(Object value) {
+	public BeanDefinitionBuilder addConstructorArgValue(@Nullable Object value) {
 		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(
 				this.constructorArgIndex++, value);
 		return this;
@@ -213,7 +213,7 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Add the supplied property value under the given name.
 	 */
-	public BeanDefinitionBuilder addPropertyValue(String name, Object value) {
+	public BeanDefinitionBuilder addPropertyValue(String name, @Nullable Object value) {
 		this.beanDefinition.getPropertyValues().add(name, value);
 		return this;
 	}
@@ -231,7 +231,7 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Set the init method for this definition.
 	 */
-	public BeanDefinitionBuilder setInitMethodName(String methodName) {
+	public BeanDefinitionBuilder setInitMethodName(@Nullable String methodName) {
 		this.beanDefinition.setInitMethodName(methodName);
 		return this;
 	}
@@ -239,7 +239,7 @@ public class BeanDefinitionBuilder {
 	/**
 	 * Set the destroy method for this definition.
 	 */
-	public BeanDefinitionBuilder setDestroyMethodName(String methodName) {
+	public BeanDefinitionBuilder setDestroyMethodName(@Nullable String methodName) {
 		this.beanDefinition.setDestroyMethodName(methodName);
 		return this;
 	}
@@ -250,7 +250,7 @@ public class BeanDefinitionBuilder {
 	 * @see org.springframework.beans.factory.config.BeanDefinition#SCOPE_SINGLETON
 	 * @see org.springframework.beans.factory.config.BeanDefinition#SCOPE_PROTOTYPE
 	 */
-	public BeanDefinitionBuilder setScope(String scope) {
+	public BeanDefinitionBuilder setScope(@Nullable String scope) {
 		this.beanDefinition.setScope(scope);
 		return this;
 	}
