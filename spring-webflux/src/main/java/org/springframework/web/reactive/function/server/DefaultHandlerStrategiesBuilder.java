@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.WebExceptionHandler;
@@ -49,8 +48,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
-	@Nullable
-	private LocaleContextResolver localeContextResolver;
+	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
 
 	public DefaultHandlerStrategiesBuilder() {
@@ -119,7 +117,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<WebExceptionHandler> exceptionHandlers;
 
-		@Nullable
 		private final LocaleContextResolver localeContextResolver;
 
 		public DefaultHandlerStrategies(
@@ -128,7 +125,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				List<ViewResolver> viewResolvers,
 				List<WebFilter> webFilters,
 				List<WebExceptionHandler> exceptionHandlers,
-				@Nullable LocaleContextResolver localeContextResolver) {
+				LocaleContextResolver localeContextResolver) {
 
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);

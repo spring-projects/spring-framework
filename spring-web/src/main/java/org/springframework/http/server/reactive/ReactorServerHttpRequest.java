@@ -58,9 +58,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "'request' must not be null");
-		URI baseUri = resolveBaseUrl(request);
-		String requestUri = request.uri();
-		return (baseUri != null ? new URI(baseUri.toString() + requestUri) : new URI(requestUri));
+		return new URI(resolveBaseUrl(request).toString() + request.uri());
 	}
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
@@ -69,14 +67,16 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			final int portIndex;
 			if (header.startsWith("[")) {
 				portIndex = header.indexOf(':', header.indexOf(']'));
-			} else {
+			}
+			else {
 				portIndex = header.indexOf(':');
 			}
 			if (portIndex != -1) {
 				try {
 					return new URI(null, null, header.substring(0, portIndex),
 							Integer.parseInt(header.substring(portIndex + 1)), null, null, null);
-				} catch (NumberFormatException ignore) {
+				}
+				catch (NumberFormatException ex) {
 					throw new URISyntaxException(header, "Unable to parse port", portIndex);
 				}
 			}

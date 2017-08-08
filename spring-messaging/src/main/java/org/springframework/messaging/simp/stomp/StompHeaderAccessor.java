@@ -268,7 +268,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	@Override
-	public void setSubscriptionId(String subscriptionId) {
+	public void setSubscriptionId(@Nullable String subscriptionId) {
 		super.setSubscriptionId(subscriptionId);
 		trySetStompHeaderForSubscriptionId();
 	}

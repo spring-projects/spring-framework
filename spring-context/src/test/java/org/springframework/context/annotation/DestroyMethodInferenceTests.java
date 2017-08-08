@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ public class DestroyMethodInferenceTests {
 
 	@Test
 	public void beanMethods() {
-		ConfigurableApplicationContext ctx =
-				new AnnotationConfigApplicationContext(Config.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
 		WithExplicitDestroyMethod c0 = ctx.getBean(WithExplicitDestroyMethod.class);
 		WithLocalCloseMethod c1 = ctx.getBean("c1", WithLocalCloseMethod.class);
 		WithLocalCloseMethod c2 = ctx.getBean("c2", WithLocalCloseMethod.class);
@@ -91,9 +90,11 @@ public class DestroyMethodInferenceTests {
 		assertThat(x8.closed, is(false));
 	}
 
+
 	@Configuration
 	static class Config {
-		@Bean(destroyMethod="explicitClose")
+
+		@Bean(destroyMethod = "explicitClose")
 		public WithExplicitDestroyMethod c0() {
 			return new WithExplicitDestroyMethod();
 		}
@@ -118,12 +119,12 @@ public class DestroyMethodInferenceTests {
 			return new WithInheritedCloseMethod();
 		}
 
-		@Bean(destroyMethod="other")
+		@Bean(destroyMethod = "other")
 		public WithInheritedCloseMethod c5() {
 			return new WithInheritedCloseMethod() {
 				@Override
 				public void close() throws IOException {
-					throw new RuntimeException("close() should not be called");
+					throw new IllegalStateException("close() should not be called");
 				}
 				@SuppressWarnings("unused")
 				public void other() {
@@ -150,33 +151,46 @@ public class DestroyMethodInferenceTests {
 
 
 	static class WithExplicitDestroyMethod {
+
 		boolean closed = false;
+
 		public void explicitClose() {
 			closed = true;
 		}
 	}
 
+
 	static class WithLocalCloseMethod {
+
 		boolean closed = false;
+
 		public void close() {
 			closed = true;
 		}
 	}
 
+
 	static class WithInheritedCloseMethod implements Closeable {
+
 		boolean closed = false;
+
 		@Override
 		public void close() throws IOException {
 			closed = true;
 		}
 	}
 
+
 	static class WithNoCloseMethod {
+
 		boolean closed = false;
 	}
 
+
 	static class WithLocalShutdownMethod {
+
 		boolean closed = false;
+
 		public void shutdown() {
 			closed = true;
 		}
