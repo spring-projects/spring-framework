@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.groovy;
+package org.springframework.web.reactive.result.view.groovy;
 
-import java.util.Locale;
-
-import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
+import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 
 /**
- * Convenience subclass of {@link AbstractTemplateViewResolver} that supports
+ * Convenience subclass of {@link UrlBasedViewResolver} that supports
  * {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates) and
  * custom subclasses of it.
  *
@@ -32,11 +30,11 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
  * existence of the specified template resources and only return a non-null
  * View object if a template is actually found.
  *
- * @author Brian Clozel
- * @since 4.1
+ * @author Jason Yu
+ * @since 5.0
  * @see GroovyMarkupConfigurer
  */
-public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
+public class GroovyMarkupViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Sets the default {@link #setViewClass view class} to {@link #requiredViewClass}:
@@ -51,26 +49,16 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	 * and {@link #setSuffix suffix} as constructor arguments.
 	 * @param prefix the prefix that gets prepended to view names when building a URL
 	 * @param suffix the suffix that gets appended to view names when building a URL
-	 * @since 4.3
+	 * @since 5.0
 	 */
 	public GroovyMarkupViewResolver(String prefix, String suffix) {
-		this();
+		setViewClass(requiredViewClass());
 		setPrefix(prefix);
 		setSuffix(suffix);
 	}
-
 
 	@Override
 	protected Class<?> requiredViewClass() {
 		return GroovyMarkupView.class;
 	}
-
-	/**
-	 * This resolver supports i18n, so cache keys should contain the locale.
-	 */
-	@Override
-	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName + '_' + locale;
-	}
-
 }

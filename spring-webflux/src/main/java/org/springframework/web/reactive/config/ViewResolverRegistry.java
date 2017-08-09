@@ -32,6 +32,8 @@ import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.reactive.result.view.groovy.GroovyMarkupConfigurer;
+import org.springframework.web.reactive.result.view.groovy.GroovyMarkupViewResolver;
 
 /**
  * Assist with the configuration of a chain of {@link ViewResolver}'s supporting
@@ -42,6 +44,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
  * JSON, XML, etc.
  *
  * @author Rossen Stoyanchev
+ * @author Jason Yu
  * @since 5.0
  */
 public class ViewResolverRegistry {
@@ -75,6 +78,27 @@ public class ViewResolverRegistry {
 					"This bean may be given any name.");
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
+		UrlBasedViewResolver resolver = registration.getViewResolver();
+		if (this.applicationContext != null) {
+			resolver.setApplicationContext(this.applicationContext);
+		}
+		this.viewResolvers.add(resolver);
+		return registration;
+	}
+
+	/**
+	 * Register a {@code GroovyMarkupViewResolver} with a ".tpl" suffix.
+	 * <p><strong>Note</strong> that you must also configure GroovyTemplate by
+	 * adding a {@link GroovyMarkupConfigurer} bean.
+	 */
+	public UrlBasedViewResolverRegistration groovyMarkup() {
+		if (!checkBeanOfType(GroovyMarkupConfigurer.class)) {
+			throw new BeanInitializationException("In addition to a GroovyMarker view resolver " +
+					"there must also be a single GroovyMarkupConfig bean in this web application context " +
+					"(or its parent): GroovyMarkupConfigurer is the usual implementation. " +
+					"This bean may be given any name.");
+		}
+		GroovyMarkupRegistration registration = new GroovyMarkupRegistration();
 		UrlBasedViewResolver resolver = registration.getViewResolver();
 		if (this.applicationContext != null) {
 			resolver.setApplicationContext(this.applicationContext);
@@ -147,6 +171,14 @@ public class ViewResolverRegistry {
 		public FreeMarkerRegistration() {
 			super(new FreeMarkerViewResolver());
 			getViewResolver().setSuffix(".ftl");
+		}
+	}
+
+	private static class GroovyMarkupRegistration extends UrlBasedViewResolverRegistration {
+
+		public GroovyMarkupRegistration() {
+			super(new GroovyMarkupViewResolver());
+			getViewResolver().setSuffix(".tpl");
 		}
 	}
 

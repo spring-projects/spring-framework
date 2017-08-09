@@ -25,6 +25,7 @@ import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.reactive.result.view.groovy.GroovyMarkupConfigurer;
 
 import static org.junit.Assert.*;
 
@@ -32,6 +33,7 @@ import static org.junit.Assert.*;
  * Unit tests for {@link ViewResolverRegistry}.
  *
  * @author Rossen Stoyanchev
+ * @author Jason Yu
  */
 public class ViewResolverRegistryTests {
 
@@ -42,6 +44,7 @@ public class ViewResolverRegistryTests {
 	public void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
+		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
 		this.registry = new ViewResolverRegistry(context);
 	}
 
@@ -56,6 +59,14 @@ public class ViewResolverRegistryTests {
 		assertFalse(this.registry.hasRegistrations());
 
 		this.registry.freeMarker();
+		assertTrue(this.registry.hasRegistrations());
+	}
+
+	@Test
+	public void hasGroovyMarkupRegistrations() {
+		assertFalse(this.registry.hasRegistrations());
+
+		this.registry.groovyMarkup();
 		assertTrue(this.registry.hasRegistrations());
 	}
 

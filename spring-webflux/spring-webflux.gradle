@@ -25,6 +25,7 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
+	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
