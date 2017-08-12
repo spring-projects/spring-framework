@@ -3355,7 +3355,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private MapBean(Map<EnumMapping,EnumMappedBean> beanMap) {this.beanMap = beanMap;}
 
-		Map<EnumMapping,EnumMappedBean> getBeanMap() {
+		public Map<EnumMapping,EnumMappedBean> getBeanMap() {
 			return beanMap;
 		}
 	}
