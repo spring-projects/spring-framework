@@ -1218,6 +1218,46 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testMapConstructorWithAutowiringCanResolveEnumKeys() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("oneMappedBean", new OneMappedBean());
+		bf.registerSingleton("twoMappedBean", new TwoMappedBean());
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MapBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("mapBean", rbd);
+		MapBean mb = (MapBean) bf.getBean("mapBean");
+
+		assertNotNull(mb.getBeanMap());
+		assertEquals(2, mb.getBeanMap().size());
+		assertEquals(OneMappedBean.class, mb.getBeanMap().get(EnumMapping.ONE).getClass());
+		assertEquals(TwoMappedBean.class, mb.getBeanMap().get(EnumMapping.TWO).getClass());
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void testMapConstructorWithAutowiringDoesNotAllowAmbiguousGetter() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("ambiguousMappedBean", new AmbiguousKeyGetterBean());
+
+		RootBeanDefinition rbd = new RootBeanDefinition(AmbiguousMapBean.class);
+		rbd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("mapBean", rbd);
+		bf.getBean("mapBean");
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void testMapConstructorWithAutowiringDoesNotAllowDuplicateBeansForKey() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("oneMappedBean", new OneMappedBean());
+		bf.registerSingleton("duplicate", new DuplicateMappedBean());
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MapBean.class);
+		rbd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("mapBean", rbd);
+		bf.getBean("mapBean");
+	}
+
+	@Test
 	public void testExpressionInStringArray() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		BeanExpressionResolver beanExpressionResolver = mock(BeanExpressionResolver.class);
@@ -2277,8 +2317,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	/**
-	 * @Test
-	 * public void testPrototypeCreationIsFastEnough2() throws Exception {
+	 * @Test public void testPrototypeCreationIsFastEnough2() throws Exception {
 	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
 	 * // Skip this test: Trace logging blows the time limit.
 	 * return;
@@ -2495,10 +2534,10 @@ public class DefaultListableBeanFactoryTests {
 
 	/**
 	 * @param singleton whether the bean created from the factory method on
-	 * the bean instance should be a singleton or prototype. This flag is
-	 * used to allow checking of the new ability in 1.2.4 to determine the type
-	 * of a prototype created from invoking a factory method on a bean instance
-	 * in the factory.
+	 *                  the bean instance should be a singleton or prototype. This flag is
+	 *                  used to allow checking of the new ability in 1.2.4 to determine the type
+	 *                  of a prototype created from invoking a factory method on a bean instance
+	 *                  in the factory.
 	 */
 	private void findTypeOfPrototypeFactoryMethodOnBeanInstance(boolean singleton) {
 		String expectedNameFromProperties = "tony";
@@ -3263,4 +3302,73 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
+	private enum EnumMapping {
+		ONE, TWO
+	}
+
+	private interface EnumMappedBean {
+		EnumMapping getMapping();
+	}
+
+	private interface AmbiguousEnumMappedBean {
+		EnumMapping getMapping();
+
+		EnumMapping ambiguousGetter();
+	}
+
+	private static class OneMappedBean implements EnumMappedBean {
+		@Override
+		public EnumMapping getMapping() {
+			return EnumMapping.ONE;
+		}
+	}
+
+	private static class TwoMappedBean implements EnumMappedBean {
+		@Override
+		public EnumMapping getMapping() {
+			return EnumMapping.TWO;
+		}
+	}
+
+	private static class DuplicateMappedBean implements EnumMappedBean {
+		@Override
+		public EnumMapping getMapping() {
+			return EnumMapping.ONE;
+		}
+	}
+
+	private static class AmbiguousKeyGetterBean implements AmbiguousEnumMappedBean {
+
+		@Override
+		public EnumMapping getMapping() {
+			return EnumMapping.ONE;
+		}
+
+		@Override
+		public EnumMapping ambiguousGetter() {
+			return EnumMapping.TWO;
+		}
+	}
+
+	private static class MapBean {
+		private final Map<EnumMapping,EnumMappedBean> beanMap;
+
+		private MapBean(Map<EnumMapping,EnumMappedBean> beanMap) {this.beanMap = beanMap;}
+
+		Map<EnumMapping,EnumMappedBean> getBeanMap() {
+			return beanMap;
+		}
+	}
+
+	private static class AmbiguousMapBean {
+		private final Map<EnumMapping,AmbiguousEnumMappedBean> beanMap;
+
+		private AmbiguousMapBean(Map<EnumMapping,AmbiguousEnumMappedBean> beanMap) {
+			this.beanMap = beanMap;
+		}
+
+		public Map<EnumMapping,AmbiguousEnumMappedBean> getBeanMap() {
+			return beanMap;
+		}
+	}
 }

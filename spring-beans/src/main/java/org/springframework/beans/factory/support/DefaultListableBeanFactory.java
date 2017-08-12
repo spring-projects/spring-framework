@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
 import javax.inject.Provider;
 
 import org.springframework.beans.BeanUtils;
@@ -77,6 +79,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CompositeIterator;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -1195,6 +1198,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (valueType == null) {
 				return null;
 			}
+
+			Method enumGetter = null;
+			if (keyType.isEnum()) {
+				// verify unambiguous getter for the key type is available on the valueType
+				for (Method method : Arrays.asList(valueType.getDeclaredMethods())) {
+					if (method.getReturnType().isAssignableFrom(keyType) && method.getParameterCount() == 0) {
+						if (enumGetter != null) {
+							throw new BeanCreationException("Ambiguous key type (" + keyType + ") getter on type " +
+									valueType + " while resolving a map of dependencies.");
+						}
+						enumGetter = method;
+					}
+				}
+			}
+
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType,
 					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
@@ -1202,6 +1220,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+
+			if (keyType.isEnum()) {
+				Map<Object,Object> result = new LinkedHashMap<>();
+				for (Object bean : matchingBeans.values()) {
+					AtomicReference<Object> keyRef = new AtomicReference<>();
+					ReflectionUtils.doWithMethods(bean.getClass(), method -> {
+						method.setAccessible(true);
+						keyRef.set(ReflectionUtils.invokeMethod(method, bean));
+					}, method -> method.getReturnType().equals(keyType));
+					Object old = result.put(keyRef.get(), bean);
+					if (old != null) {
+						throw new BeanCreationException("Failed to resolve a map of bean dependencies. " +
+								"Multiple beans match the given key " + keyRef.get() + ", expected a unique match.");
+					}
+				}
+				return result;
 			}
 			return matchingBeans;
 		}
