@@ -967,10 +967,10 @@ public class PathPatternTests {
 	}
 
 	@Test
-	public void patternCompareToNull() {
-		PathPatternParser p = new PathPatternParser();
-		PathPattern pp = p.parse("/abc");
-		assertEquals(-1, pp.compareTo(null));
+	public void patternCompareWithNull() {
+		assertTrue(PathPattern.SPECIFICITY_COMPARATOR.compare(null, null) == 0);
+		assertTrue(PathPattern.SPECIFICITY_COMPARATOR.compare(parse("/abc"), null) < 0);
+		assertTrue(PathPattern.SPECIFICITY_COMPARATOR.compare(null, parse("/abc")) > 0);
 	}
 
 	@Test
