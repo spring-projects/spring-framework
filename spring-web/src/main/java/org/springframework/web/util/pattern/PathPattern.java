@@ -706,8 +706,13 @@ public class PathPattern implements Comparable<PathPattern> {
 			Comparator.nullsLast(
 					Comparator.<PathPattern>
 							comparingInt(p -> p.isCatchAll() ? 1 : 0)
-							.thenComparingInt(p -> p.isCatchAll() ? -1 * p.getNormalizedLength() : 0)
-							.thenComparing(PathPattern::getScore)
-							.thenComparingInt(p -> -1 * p.getNormalizedLength())
+							.thenComparingInt(p -> p.isCatchAll() ? scoreByNormalizedLength(p) : 0)
+							.thenComparingInt(PathPattern::getScore)
+							.thenComparingInt(PathPattern::scoreByNormalizedLength)
 			);
+
+	private static int scoreByNormalizedLength(PathPattern pattern) {
+		return -pattern.getNormalizedLength();
+	}
+
 }
