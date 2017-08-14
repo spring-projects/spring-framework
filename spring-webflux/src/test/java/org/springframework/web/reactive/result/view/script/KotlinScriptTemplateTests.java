@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  *
  * @author Sebastien Deleuze
  */
-@Ignore  // for JDK 9 compatibility
+@Ignore  // for JDK 9 compatibility, see KT-18833
 public class KotlinScriptTemplateTests {
 
 	@Test

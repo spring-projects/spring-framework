@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Sebastien Deleuze
  */
-@Ignore  // for JDK 9 compatibility
+@Ignore  // for JDK 9 compatibility, see KT-18833
 public class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;
