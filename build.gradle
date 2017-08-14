@@ -1,5 +1,5 @@
 buildscript {
-	ext.kotlinVersion = '1.1.4-eap-33'
+	ext.kotlinVersion = '1.1.4-eap-77'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 		maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1" }
@@ -113,12 +113,12 @@ configure(allprojects) { project ->
 	apply plugin: "kotlin"
 	compileKotlin {
 		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xload-jsr305-annotations"]
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xjsr305-annotations=enable"]
 
 	}
 	compileTestKotlin {
 		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xload-jsr305-annotations"]
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check", "-Xjsr305-annotations=enable"]
 	}
 
 	configurations.all {
