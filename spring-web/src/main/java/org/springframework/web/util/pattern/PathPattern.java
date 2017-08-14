@@ -693,12 +693,17 @@ public class PathPattern implements Comparable<PathPattern> {
 
 
 	public static final Comparator<PathPattern> SPECIFICITY_COMPARATOR = (p1, p2) -> {
-		// 1) null is sorted last
+		// Same object or null == null?
+		if (p1 == p2) {
+			return 0;
+		}
+
+		// null is sorted last
 		if (p2 == null) {
 			return -1;
 		}
 
-		// 2) catchall patterns are sorted last. If both catchall then the
+		// catchall patterns are sorted last. If both catchall then the
 		// length is considered
 		if (p1.isCatchAll()) {
 			if (p2.isCatchAll()) {
@@ -715,14 +720,14 @@ public class PathPattern implements Comparable<PathPattern> {
 			return -1;
 		}
 
-		// 3) This will sort such that if they differ in terms of wildcards or
+		// This will sort such that if they differ in terms of wildcards or
 		// captured variable counts, the one with the most will be sorted last
 		int score = p1.getScore() - p2.getScore();
 		if (score != 0) {
 			return (score < 0) ? -1 : +1;
 		}
 
-		// 4) longer is better
+		// longer is better
 		int lenDifference = p1.getNormalizedLength() - p2.getNormalizedLength();
 		return Integer.compare(0, lenDifference);
 	};

@@ -886,10 +886,7 @@ public class PathPatternTests {
 
 	@Test
 	public void patternComparator() {
-		Comparator<PathPattern> comparator = (p1, p2) -> {
-			int index = p1.compareTo(p2);
-			return (index != 0 ? index : p1.getPatternString().compareTo(p2.getPatternString()));
-		};
+		Comparator<PathPattern> comparator = PathPattern.SPECIFICITY_COMPARATOR;
 
 		assertEquals(0, comparator.compare(parse("/hotels/new"), parse("/hotels/new")));
 
@@ -970,7 +967,7 @@ public class PathPatternTests {
 	}
 
 	@Test
-	public void patternCompareTo() {
+	public void patternCompareToNull() {
 		PathPatternParser p = new PathPatternParser();
 		PathPattern pp = p.parse("/abc");
 		assertEquals(-1, pp.compareTo(null));
@@ -978,58 +975,62 @@ public class PathPatternTests {
 
 	@Test
 	public void patternComparatorSort() {
-		Comparator<PathPattern> comparator = (p1, p2) -> {
-			int index = p1.compareTo(p2);
-			return (index != 0 ? index : p1.getPatternString().compareTo(p2.getPatternString()));
-		};
+		Comparator<PathPattern> comparator = PathPattern.SPECIFICITY_COMPARATOR;
 
 		List<PathPattern> paths = new ArrayList<>(3);
 		PathPatternParser pp = new PathPatternParser();
 		paths.add(null);
+		paths.add(null);
+		paths.sort(comparator);
+		assertNull(paths.get(0));
+		assertNull(paths.get(1));
+		paths.clear();
+
+		paths.add(null);
 		paths.add(pp.parse("/hotels/new"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertNull(paths.get(1));
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/*"));
 		paths.add(pp.parse("/hotels/new"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertEquals("/hotels/*", paths.get(1).getPatternString());
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/new"));
 		paths.add(pp.parse("/hotels/*"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertEquals("/hotels/*", paths.get(1).getPatternString());
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/**"));
 		paths.add(pp.parse("/hotels/*"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/*", paths.get(0).getPatternString());
 		assertEquals("/hotels/**", paths.get(1).getPatternString());
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/*"));
 		paths.add(pp.parse("/hotels/**"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/*", paths.get(0).getPatternString());
 		assertEquals("/hotels/**", paths.get(1).getPatternString());
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/{hotel}"));
 		paths.add(pp.parse("/hotels/new"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertEquals("/hotels/{hotel}", paths.get(1).getPatternString());
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/new"));
 		paths.add(pp.parse("/hotels/{hotel}"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertEquals("/hotels/{hotel}", paths.get(1).getPatternString());
 		paths.clear();
@@ -1037,7 +1038,7 @@ public class PathPatternTests {
 		paths.add(pp.parse("/hotels/*"));
 		paths.add(pp.parse("/hotels/{hotel}"));
 		paths.add(pp.parse("/hotels/new"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/new", paths.get(0).getPatternString());
 		assertEquals("/hotels/{hotel}", paths.get(1).getPatternString());
 		assertEquals("/hotels/*", paths.get(2).getPatternString());
@@ -1046,7 +1047,7 @@ public class PathPatternTests {
 		paths.add(pp.parse("/hotels/ne*"));
 		paths.add(pp.parse("/hotels/n*"));
 		Collections.shuffle(paths);
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/hotels/ne*", paths.get(0).getPatternString());
 		assertEquals("/hotels/n*", paths.get(1).getPatternString());
 		paths.clear();
@@ -1066,7 +1067,7 @@ public class PathPatternTests {
 		};
 		paths.add(pp.parse("/*/login.*"));
 		paths.add(pp.parse("/*/endUser/action/login.*"));
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertEquals("/*/endUser/action/login.*", paths.get(0).getPatternString());
 		assertEquals("/*/login.*", paths.get(1).getPatternString());
 		paths.clear();
