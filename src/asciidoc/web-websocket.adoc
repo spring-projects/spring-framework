@@ -1763,7 +1763,7 @@ user and associate it with subsequent STOMP messages on the same session:
                   MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
               if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                  Principal user = ... ; // access authentication header(s)
+                  Authentication user = ... ; // access authentication header(s)
                   accessor.setUser(user);
               }
 
