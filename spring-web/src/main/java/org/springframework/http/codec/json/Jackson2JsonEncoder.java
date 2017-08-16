@@ -73,6 +73,6 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 
 	@Override
 	public List<MimeType> getEncodableMimeTypes() {
-		return JSON_MIME_TYPES;
+		return getMimeTypes();
 	}
 }
