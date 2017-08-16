@@ -42,6 +42,6 @@ public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
-		return JSON_MIME_TYPES;
+		return getMimeTypes();
 	}
 }
