@@ -17,12 +17,12 @@
 package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,11 +33,15 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.Pojo;
+import org.springframework.util.MimeType;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
@@ -64,19 +68,20 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_XML));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test // SPR-15866
 	public void canDecodeWithProvidedMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
-		assertEquals(1, decoder.getDecodableMimeTypes().size());
-		assertTrue(decoder.getDecodableMimeTypes().contains(textJavascript));
 
-		assertTrue(decoder.canDecode(forClass(Pojo.class), textJavascript));
-		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
+		assertEquals(Collections.singletonList(textJavascript), decoder.getDecodableMimeTypes());
+	}
 
-		// Validate immutability of mime types list
+	@Test(expected = UnsupportedOperationException.class)
+	public void decodableMimeTypesIsImmutable() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
+
 		decoder.getMimeTypes().add(new MimeType("text", "ecmascript"));
-		assertEquals(1, decoder.getDecodableMimeTypes().size());
 	}
 
 	@Test

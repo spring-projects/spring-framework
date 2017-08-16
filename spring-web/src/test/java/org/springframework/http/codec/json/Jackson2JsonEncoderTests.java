@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -62,19 +63,20 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test // SPR-15866
 	public void canEncodeWithCustomMimeType() {
-		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
-		assertEquals(1, encoder.getEncodableMimeTypes().size());
-		assertTrue(encoder.getEncodableMimeTypes().contains(textJavascript));
 
-		assertTrue(encoder.canEncode(pojoType, textJavascript));
+		assertEquals(Collections.singletonList(textJavascript), encoder.getEncodableMimeTypes());
+	}
 
-		// Validate immutability of mime types list
+	@Test(expected = UnsupportedOperationException.class)
+	public void encodableMimeTypesIsImmutable() {
+		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
+
 		encoder.getMimeTypes().add(new MimeType("text", "ecmascript"));
-		assertEquals(1, encoder.getEncodableMimeTypes().size());
 	}
 
 	@Test

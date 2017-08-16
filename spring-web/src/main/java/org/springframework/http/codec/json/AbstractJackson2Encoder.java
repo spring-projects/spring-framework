@@ -81,7 +81,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		Class<?> clazz = elementType.resolve(Object.class);
 		return (Object.class == clazz) ||
 				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
-						objectMapper().canSerialize(clazz) && supportsMimeType(mimeType);
+						getObjectMapper().canSerialize(clazz) && supportsMimeType(mimeType);
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		JavaType javaType = getJavaType(elementType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
-				objectMapper().writerWithView(jsonView) : objectMapper().writer());
+				getObjectMapper().writerWithView(jsonView) : getObjectMapper().writer());
 
 		if (javaType.isContainerType()) {
 			writer = writer.forType(javaType);
