@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -307,7 +308,7 @@ public final class WebAsyncManager {
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, callable);
 		startAsyncProcessing(processingContext);
 		try {
-			this.taskExecutor.submit(new Runnable() {
+			Future<?> future = this.taskExecutor.submit(new Runnable() {
 				@Override
 				public void run() {
 					Object result = null;
@@ -324,6 +325,7 @@ public final class WebAsyncManager {
 					setConcurrentResultAndDispatch(result);
 				}
 			});
+			interceptorChain.setTaskFuture(future);
 		}
 		catch (RejectedExecutionException ex) {
 			Object result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, ex);
