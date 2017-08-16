@@ -21,9 +21,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,12 +89,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
 		// annotation-style aspects. Therefore there is no 'clean' way to tell them apart. Here we rely on
 		// an implementation detail of the AspectJ compiler.
-		for (Field field : clazz.getDeclaredFields()) {
-			if (field.getName().startsWith(AJC_MAGIC)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(clazz.getDeclaredFields())
+				.map(Field::getName)
+				.anyMatch(fieldName -> fieldName.startsWith(AJC_MAGIC));
 	}
 
 	@Override
@@ -130,13 +126,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
 		Class<?>[] classesToLookFor = new Class<?>[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
-		for (Class<?> c : classesToLookFor) {
-			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) c);
-			if (foundAnnotation != null) {
-				return foundAnnotation;
-			}
-		}
-		return null;
+		return Arrays.stream(classesToLookFor).map(clazz -> findAnnotation(method, (Class<Annotation>) clazz))
+				.filter(Objects::nonNull)
+				.findAny()
+				.orElse(null);
+
 	}
 
 	@Nullable
@@ -145,9 +139,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		if (result != null) {
 			return new AspectJAnnotation<>(result);
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 
@@ -204,12 +196,13 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class<?> type : annotationTypes.keySet()) {
-				if (type.isInstance(annotation)) {
-					return annotationTypes.get(type);
-				}
-			}
-			throw new IllegalStateException("Unknown annotation type: " + annotation.toString());
+			return annotationTypes
+					.keySet()
+					.stream()
+					.filter(type -> type.isInstance(annotation))
+					.map(annotationTypes::get)
+					.findAny()
+					.orElseThrow(() -> new IllegalStateException("Unknown annotation type: " + annotation.toString()));
 		}
 
 		private String resolveExpression(A annotation) throws Exception {
@@ -272,14 +265,14 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			StringTokenizer strTok = new StringTokenizer(annotation.getArgumentNames(), ",");
 			if (strTok.countTokens() > 0) {
 				String[] names = new String[strTok.countTokens()];
-				for (int i = 0; i < names.length; i++) {
-					names[i] = strTok.nextToken();
-				}
+
+				IntStream
+						.range(0, names.length)
+						.forEach(i -> names[i] = strTok.nextToken());
+				
 				return names;
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 		@Override
