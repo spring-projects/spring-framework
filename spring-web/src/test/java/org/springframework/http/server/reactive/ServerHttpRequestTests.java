@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ServerHttpRequestTests {
 	public void queryParamsWithEncodedValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
 		assertEquals(1, params.size());
-		assertEquals(Collections.singletonList(" ++\u00e0"), params.get("a"));
+		assertEquals(Collections.singletonList(" + \u00e0"), params.get("a"));
 	}
 
 	@Test
