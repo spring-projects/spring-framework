@@ -315,7 +315,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
 			getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
-			if (StringUtils.hasLength(otherAbd.getInitMethodName())) {
+			if (otherAbd.getInitMethodName() != null) {
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
 			}
