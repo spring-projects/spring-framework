@@ -1,5 +1,5 @@
-[[web-reactive]]
-= WebFlux framework
+[[webflux]]
+= Spring WebFlux framework
 
 This section provides basic information on the reactive programming
 support for Web applications in Spring Framework 5.

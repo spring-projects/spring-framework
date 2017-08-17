@@ -13,7 +13,7 @@ IoC container, with any web framework on top, but you can also use only the
 transaction management, remote access to your logic through RMI or web services, and various
 options for persisting your data.
 It offers full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
-and <<web.adoc#web-reactive, Spring WebFlux>>; and it enables you to
+and <<web.adoc#webflux, Spring WebFlux>>; and it enables you to
 integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
 
 This document is a reference guide to Spring Framework features. Questions on the

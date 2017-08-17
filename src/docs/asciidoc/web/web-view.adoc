@@ -1,5 +1,5 @@
 [[view]]
-= View technologies
+= Spring Web MVC View Technologies
 
 
 [[view-introduction]]

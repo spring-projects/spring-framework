@@ -1,5 +1,5 @@
 [[websocket]]
-= WebSocket Support
+= Servlet Stack WebSocket Support
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 

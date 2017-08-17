@@ -5,17 +5,13 @@
 :toc: left
 :toclevels: 2
 
-This part of the reference documentation covers Spring Framework's support for the
-presentation tier (and specifically web-based presentation tiers) including support
-for WebSocket-style messaging in web applications.
-
-Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the
-first couple of chapters. Subsequent chapters are concerned with Spring Framework's
-integration with other web technologies, such as <<jsf,JSF>>.
-
-The section then concludes with comprehensive coverage of the Spring Framework
-<<websocket>> (including <<websocket-stomp>>).
-
+This part of the documentation covers support for web applications. As of Spring Framework 5.0
+web applications can run on a traditional Servlet stack (Servlet API + Servlet container)
+or on a reactive stack (Reactive Streams API + non-blocking runtime).
+The first few chapters cover the Servlet-based <<mvc,Spring MVC>> web framework
+including <<view,Views>>, <<cors,CORS>>, and <<websocket,WebSocket>> support.
+Subsequent chapters cover the <<webflux,Spring WebFlux>> reactive web framework
+including its <<webflux-fn,WebFlux.fn>> functional programming model.
 
 include::web/web-mvc.adoc[leveloffset=+1]
 
@@ -23,8 +19,10 @@ include::web/web-view.adoc[leveloffset=+1]
 
 include::web/web-cors.adoc[leveloffset=+1]
 
-include::web/web-integration.adoc[leveloffset=+1]
-
 include::web/web-websocket.adoc[leveloffset=+1]
 
 include::web/web-flux.adoc[leveloffset=+1]
+
+include::web/web-flux-functional.adoc[leveloffset=+1]
+
+include::web/web-integration.adoc[leveloffset=+1]

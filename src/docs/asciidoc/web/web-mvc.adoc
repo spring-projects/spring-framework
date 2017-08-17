@@ -1,5 +1,5 @@
 [[mvc]]
-= Web MVC framework
+= Spring Web MVC framework
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 [[mvc-introduction]]
