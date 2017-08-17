@@ -20,11 +20,13 @@ import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -32,7 +34,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -110,9 +114,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
 
 		String name = ModelFactory.getNameForParameter(parameter);
-		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
-				createAttribute(name, parameter, binderFactory, webRequest));
-
 		if (!mavContainer.isBindingDisabled(name)) {
 			ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
 			if (ann != null && !ann.binding()) {
@@ -120,50 +121,112 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
-		WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
-		if (binder.getTarget() != null) {
-			if (!mavContainer.isBindingDisabled(name)) {
-				bindRequestParameters(binder, webRequest);
+		Object attribute = null;
+		BindingResult bindingResult = null;
+
+		if (mavContainer.containsAttribute(name)) {
+			attribute = mavContainer.getModel().get(name);
+		}
+		else {
+			// Create attribute instance
+			try {
+				attribute = createAttribute(name, parameter, binderFactory, webRequest);
 			}
-			validateIfApplicable(binder, parameter);
-			if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-				throw new BindException(binder.getBindingResult());
+			catch (BindException ex) {
+				if (isBindExceptionRequired(parameter)) {
+					// No BindingResult parameter -> fail with BindException
+					throw ex;
+				}
+				// Otherwise, expose null/empty value and associated BindingResult
+				if (parameter.getParameterType() == Optional.class) {
+					attribute = Optional.empty();
+				}
+				bindingResult = ex.getBindingResult();
 			}
 		}
 
+		if (bindingResult == null) {
+			// Bean property binding and validation;
+			// skipped in case of binding failure on construction.
+			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
+			if (binder.getTarget() != null) {
+				if (!mavContainer.isBindingDisabled(name)) {
+					bindRequestParameters(binder, webRequest);
+				}
+				validateIfApplicable(binder, parameter);
+				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+					throw new BindException(binder.getBindingResult());
+				}
+			}
+			// Value type adaptation, also covering java.util.Optional
+			if (!parameter.getParameterType().isInstance(attribute)) {
+				attribute = binder.convertIfNecessary(binder.getTarget(), parameter.getParameterType(), parameter);
+			}
+			bindingResult = binder.getBindingResult();
+		}
+
 		// Add resolved attribute and BindingResult at the end of the model
-		Map<String, Object> bindingResultModel = binder.getBindingResult().getModel();
+		Map<String, Object> bindingResultModel = bindingResult.getModel();
 		mavContainer.removeAttributes(bindingResultModel);
 		mavContainer.addAllAttributes(bindingResultModel);
 
-		return (parameter.getParameterType().isInstance(attribute) ? attribute :
-				binder.convertIfNecessary(binder.getTarget(), parameter.getParameterType(), parameter));
+		return attribute;
 	}
 
 	/**
 	 * Extension point to create the model attribute if not found in the model,
 	 * with subsequent parameter binding through bean properties (unless suppressed).
-	 * <p>The default implementation uses the unique public no-arg constructor, if any,
-	 * which may have arguments: It understands the JavaBeans {@link ConstructorProperties}
-	 * annotation as well as runtime-retained parameter names in the bytecode,
-	 * associating request parameters with constructor arguments by name. If no such
-	 * constructor is found, the default constructor will be used (even if not public),
-	 * assuming subsequent bean property bindings through setter methods.
+	 * <p>The default implementation typically uses the unique public no-arg constructor
+	 * if available but also handles a "primary constructor" approach for data classes:
+	 * It understands the JavaBeans {@link ConstructorProperties} annotation as well as
+	 * runtime-retained parameter names in the bytecode, associating request parameters
+	 * with constructor arguments by name. If no such constructor is found, the default
+	 * constructor will be used (even if not public), assuming subsequent bean property
+	 * bindings through setter methods.
 	 * @param attributeName the name of the attribute (never {@code null})
 	 * @param parameter the method parameter declaration
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param webRequest the current request
 	 * @return the created model attribute (never {@code null})
+	 * @throws BindException in case of constructor argument binding failure
+	 * @throws Exception in case of constructor invocation failure
+	 * @see #constructAttribute(Constructor, String, WebDataBinderFactory, NativeWebRequest)
+	 * @see BeanUtils#findPrimaryConstructor(Class)
 	 */
 	protected Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
-		Class<?> type = parameter.getParameterType();
-		
+		MethodParameter nestedParameter = parameter.nestedIfOptional();
+		Class<?> type = nestedParameter.getNestedParameterType();
+
 		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(type);
 		if (ctor == null) {
 			throw new IllegalStateException("No primary constructor found for " + type.getName());
 		}
+
+		Object attribute = constructAttribute(ctor, attributeName, binderFactory, webRequest);
+		if (parameter != nestedParameter) {
+			attribute = Optional.of(attribute);
+		}
+		return attribute;
+	}
+
+	/**
+	 * Construct a new attribute instance with the given constructor.
+	 * <p>Called from
+	 * {@link #createAttribute(String, MethodParameter, WebDataBinderFactory, NativeWebRequest)}
+	 * after constructor resolution.
+	 * @param ctor the constructor to use
+	 * @param attributeName the name of the attribute (never {@code null})
+	 * @param binderFactory for creating WebDataBinder instance
+	 * @param webRequest the current request
+	 * @return the created model attribute (never {@code null})
+	 * @throws BindException in case of constructor argument binding failure
+	 * @throws Exception in case of constructor invocation failure
+	 * @since 5.0
+	 */
+	protected Object constructAttribute(Constructor<?> ctor, String attributeName,
+			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
 		if (ctor.getParameterCount() == 0) {
 			// A single default constructor -> clearly a standard JavaBeans arrangement.
@@ -179,10 +242,22 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 		Object[] args = new Object[paramTypes.length];
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName);
+		boolean bindingFailure = false;
 		for (int i = 0; i < paramNames.length; i++) {
-			String[] parameterValues = webRequest.getParameterValues(paramNames[i]);
-			args[i] = (parameterValues != null ? binder.convertIfNecessary(parameterValues, paramTypes[i],
-					new MethodParameter(ctor, i)) : null);
+			String[] paramValues = webRequest.getParameterValues(paramNames[i]);
+			try {
+				args[i] = (paramValues != null ?
+						binder.convertIfNecessary(paramValues, paramTypes[i], new MethodParameter(ctor, i)) : null);
+			}
+			catch (TypeMismatchException ex) {
+				bindingFailure = true;
+				binder.getBindingResult().addError(new FieldError(
+						binder.getObjectName(), paramNames[i], ex.getValue(), true,
+						new String[] {ex.getErrorCode()}, null, ex.getLocalizedMessage()));
+			}
+		}
+		if (bindingFailure) {
+			throw new BindException(binder.getBindingResult());
 		}
 		return BeanUtils.instantiateClass(ctor, args);
 	}
@@ -219,11 +294,23 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Whether to raise a fatal bind exception on validation errors.
+	 * <p>The default implementation delegates to {@link #isBindExceptionRequired(MethodParameter)}.
 	 * @param binder the data binder used to perform data binding
 	 * @param parameter the method parameter declaration
-	 * @return {@code true} if the next method argument is not of type {@link Errors}
+	 * @return {@code true} if the next method parameter is not of type {@link Errors}
+	 * @see #isBindExceptionRequired(MethodParameter)
 	 */
 	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
+		return isBindExceptionRequired(parameter);
+	}
+
+	/**
+	 * Whether to raise a fatal bind exception on validation errors.
+	 * @param parameter the method parameter declaration
+	 * @return {@code true} if the next method parameter is not of type {@link Errors}
+	 * @since 5.0
+	 */
+	protected boolean isBindExceptionRequired(MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
 		Class<?>[] paramTypes = parameter.getExecutable().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
