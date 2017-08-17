@@ -1139,7 +1139,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		public <T> void preProcess(NativeWebRequest webRequest, Callable<T> task) {
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
-				HttpServletResponse response = webRequest.getNativeRequest(HttpServletResponse.class);
+				HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 				initContextHolders(request, buildLocaleContext(request),
 						buildRequestAttributes(request, response, null));
 			}
