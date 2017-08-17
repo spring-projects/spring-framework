@@ -3,336 +3,198 @@
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 [[mvc-introduction]]
-== Introduction to Spring Web MVC framework
-The Spring Web model-view-controller (MVC) framework is designed around a
-`DispatcherServlet` that dispatches requests to handlers, with configurable handler
-mappings, view resolution, locale, time zone and theme resolution as well as support for
-uploading files. The default handler is based on the `@Controller` and `@RequestMapping`
-annotations, offering a wide range of flexible handling methods. With the introduction
-of Spring 3.0, the `@Controller` mechanism also allows you to create RESTful Web sites
-and applications, through the `@PathVariable` annotation and other features.
+== Introduction to Spring Web MVC
+Spring Web MVC is the Servlet-based, web framework included in the Spring Framework.
+Its name is based on the name of the module, "spring-webmvc", but most people call
+it simply Spring MVC.
 
-****
-"Open for extension..."
-A key design principle in Spring Web MVC and in Spring in general is the "__Open for
-extension, closed for modification__" principle.
-
-Some methods in the core classes of Spring Web MVC are marked `final`. As a developer
-you cannot override these methods to supply your own behavior. This has not been done
-arbitrarily, but specifically with this principle in mind.
-
-For an explanation of this principle, refer to __Expert Spring Web MVC and Web Flow__ by
-Seth Ladd and others; specifically see the section "A Look At Design," on page 117 of
-the first edition. Alternatively, see
-
-* https://www.cs.duke.edu/courses/fall07/cps108/papers/ocp.pdf[Bob Martin, The Open-Closed
-  Principle (PDF)]
-
-You cannot add advice to final methods when you use Spring MVC. For example, you cannot
-add advice to the `AbstractController.setSynchronizeOnSession()` method. Refer to
-<<core.adoc#aop-understanding-aop-proxies, Understanding AOP proxies>>
-for more information on AOP proxies and why you cannot add advice to final methods.
-****
-
-In Spring Web MVC you can use any object as a command or form-backing object; you do not
-need to implement a framework-specific interface or base class. Spring's data binding is
-highly flexible: for example, it treats type mismatches as validation errors that can be
-evaluated by the application, not as system errors. Thus you do not need to duplicate your
-business objects' properties as simple, untyped strings in your form objects simply to
-handle invalid submissions, or to convert the Strings properly. Instead, it is often
-preferable to bind directly to your business objects.
-
-Spring's view resolution is extremely flexible. A `Controller` is typically responsible
-for preparing a model `Map` with data and selecting a view name but it can also write
-directly to the response stream and complete the request. View name resolution is highly
-configurable through file extension or Accept header content type negotiation, through
-bean names, a properties file, or even a custom `ViewResolver` implementation. The model
-(the M in MVC) is a `Map` interface, which allows for the complete abstraction of the
-view technology. You can integrate directly with template based rendering technologies
-such as JSP and FreeMarker, or directly generate XML, JSON, Atom, and many other types
-of content. The model `Map` is simply transformed into an appropriate format, such as
-JSP request attributes or a FreeMarker template model.
-
-
-
-[[mvc-features]]
-=== Features of Spring Web MVC
-
-.Spring Web Flow
-****
-Spring Web Flow (SWF) aims to be the best solution for the management of web application
-page flow.
-
-SWF integrates with existing frameworks like Spring MVC and JSF, in both Servlet and
-Portlet environments. If you have a business process (or processes) that would benefit
-from a conversational model as opposed to a purely request model, then SWF may be the
-solution.
-
-SWF allows you to capture logical page flows as self-contained modules that are reusable
-in different situations, and as such is ideal for building web application modules that
-guide the user through controlled navigations that drive business processes.
-
-For more information about SWF, consult the
-http://projects.spring.io/spring-webflow/[Spring Web Flow website].
-****
-
-Spring's web module includes many unique web support features:
-
-* __Clear separation of roles__. Each role -- controller, validator, command object,
-  form object, model object, `DispatcherServlet`, handler mapping, view resolver, and so
-  on -- can be fulfilled by a specialized object.
-* __Powerful and straightforward configuration of both framework and application classes
-  as JavaBeans__. This configuration capability includes easy referencing across
-  contexts, such as from web controllers to business objects and validators.
-* __Adaptability, non-intrusiveness, and flexibility.__ Define any controller method
-  signature you need, possibly using one of the parameter annotations (such as
-  @RequestParam, @RequestHeader, @PathVariable, and more) for a given scenario.
-* __Reusable business code, no need for duplication__. Use existing business objects
-  as command or form objects instead of mirroring them to extend a particular framework
-  base class.
-* __Customizable binding and validation__. Type mismatches as application-level
-  validation errors that keep the offending value, localized date and number binding,
-  and so on instead of String-only form objects with manual parsing and conversion to
-  business objects.
-* __Customizable handler mapping and view resolution__. Handler mapping and view
-  resolution strategies range from simple URL-based configuration, to sophisticated,
-  purpose-built resolution strategies. Spring is more flexible than web MVC frameworks
-  that mandate a particular technique.
-* __Flexible model transfer__. Model transfer with a name/value `Map` supports easy
-  integration with any view technology.
-* __Customizable locale, time zone and theme resolution, support for JSPs with or without
-  Spring tag library, support for JSTL, support for FreeMarker without the need for extra
-  bridges, and so on.__
-* __A simple yet powerful JSP tag library known as the Spring tag library that provides
-  support for features such as data binding and themes__. The custom tags allow for
-  maximum flexibility in terms of markup code. For information on the tag library
-  descriptor, see the appendix entitled <<appendix.adoc#spring-tld, Spring TLD>>
-* __A JSP form tag library, introduced in Spring 2.0, that makes writing forms in JSP
-  pages much easier.__ For information on the tag library descriptor, see the appendix
-  entitled <<appendix.adoc#spring-form-tld, Spring Form TLD>>
-* __Beans whose lifecycle is scoped to the current HTTP request or HTTP `Session`.__
-  This is not a specific feature of Spring MVC itself, but rather of the
-  `WebApplicationContext` container(s) that Spring MVC uses. These bean scopes are
-  described in <<core.adoc#beans-factory-scopes-other, Request, session, application,
-  and WebSocket scopes>>
-
-
-
-[[mvc-introduction-pluggability]]
-=== Pluggability of other MVC implementations
-Non-Spring MVC implementations are preferable for some projects. Many teams expect to
-leverage their existing investment in skills and tools, for example with JSF.
-
-If you do not want to use Spring's Web MVC, but intend to leverage other solutions that
-Spring offers, you can integrate the web MVC framework of your choice with Spring
-easily. Simply start up a Spring root application context through its
-`ContextLoaderListener`, and access it through its `ServletContext` attribute (or
-Spring's respective helper method) from within any action object. No "plug-ins"
-are involved, so no dedicated integration is necessary. From the web layer's point of
-view, you simply use Spring as a library, with the root application context instance as
-the entry point.
-
-Your registered beans and Spring's services can be at your fingertips even without
-Spring's Web MVC. Spring does not compete with other web frameworks in this scenario.
-It simply addresses the many areas that the pure web MVC frameworks do not, from bean
-configuration to data access and transaction handling. So you can enrich your
-application with a Spring middle tier and/or data access tier, even if you just want
-to use, for example, the transaction abstraction with JDBC or Hibernate.
-
+The Spring Framework also includes the reactive, <<webflux,Spring WebFlux>>
+web framework that runs on on Servlet containers via Servlet 3.1 non-blocking I/O
+as well as on other non-blocking runtimes such as Netty and Undertow.
 
 
 
 [[mvc-servlet]]
 == The DispatcherServlet
 
-Spring's web MVC framework is, like many other web MVC frameworks, request-driven,
-designed around a central Servlet that dispatches requests to controllers and offers
-other functionality that facilitates the development of web applications. Spring's
-`DispatcherServlet` however, does more than just that. It is completely integrated with
-the Spring IoC container and as such allows you to use every other feature that Spring
-has.
+Spring MVC, like many other web frameworks, is designed around the front controller
+pattern with a central `Servlet`, the `DispatcherServlet`, dispatching incoming
+requests to registered handlers for processing requests, providing convenient mapping
+and exception handling facilities.
 
-The request processing workflow of the Spring Web MVC `DispatcherServlet` is illustrated
-in the following diagram. The pattern-savvy reader will recognize that the
-`DispatcherServlet` is an expression of the "Front Controller" design pattern (this is a
-pattern that Spring Web MVC shares with many other leading web frameworks).
+The `DispatcherServlet` provides the shared algorithm for processing requests while
+actual work is performed by configurable, delegate components. This model is very
+flexible and it can be used with just about any workflow, with the installation of the
+appropriate delegate components
+(see <<mvc-servlet-special-bean-types,Special Bean Types>>).
 
-.The request processing workflow in Spring Web MVC (high level)
-image::images/mvc.png[]
+The `DispatcherServlet` uses Spring configuration to discover the delegate components
+it needs to perform handler mapping, view resolution, and much more. As an actual
+`Servlet` it needs to be declared and mapped according to the Servlet specification.
+This can be done through code configuration or in`web.xml`.
 
-The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
-class), and as such is declared in your web application. You need to map requests that
-you want the `DispatcherServlet` to handle, by using a URL mapping. Here is a standard
-Java EE Servlet configuration in a Servlet 3.0+ environment:
+Below is an example of code-based configuration where `WebApplicationInitializer` is an
+interface provided by Spring MVC that ensures this Java-based configuration is
+auto-detected by the Servlet container (see
+<<mvc-container-config,Code-based Servlet container initialization>> for more details):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class MyWebApplicationInitializer implements WebApplicationInitializer {
+public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
-		@Override
-		public void onStartup(ServletContext container) {
-			ServletRegistration.Dynamic registration = container.addServlet("example", new DispatcherServlet());
-			registration.setLoadOnStartup(1);
-			registration.addMapping("/example/*");
-		}
+  @Override
+  public void onStartup(ServletContext servletCxt) {
 
-	}
+    // Load Spring web application configuration
+    AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+    cxt.register(AppConfig.class);
+    cxt.refresh();
+
+    // Create DispatcherServlet
+    DispatcherServlet servlet = new DispatcherServlet(cxt);
+
+    // Register and map the Servlet
+    ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
+    registration.setLoadOnStartup(1);
+    registration.addMapping("/app/*");
+  }
+
+}
 ----
 
-In the preceding example, all requests starting with `/example` will be handled by the
-`DispatcherServlet` instance named `example`.
+In addition to using the ServletContext API directly as shown above, you can also extend
+the convenient base class `AbstractAnnotationConfigDispatcherServletInitializer` and
+override specific methods to customize it (an example is shown later under
+<<mvc-servlet-context-hierarchy,WebApplicationContext Hierarchy>>).
 
-`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
-code-based configuration is detected and automatically used to initialize any Servlet 3
-container. An abstract base class implementation of this interface named
-`AbstractAnnotationConfigDispatcherServletInitializer` makes it even easier to register the
-`DispatcherServlet` by simply specifying its servlet mapping and listing configuration
-classes - it's even the recommended way to set up your Spring MVC application.
-See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
-
-The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
-class), and as such is declared in the `web.xml` of your web application. You need to
-map requests that you want the `DispatcherServlet` to handle, by using a URL mapping in
-the same `web.xml` file. This is standard Java EE Servlet configuration; the following
-example shows such a `DispatcherServlet` declaration and mapping:
-
-Below is the `web.xml` equivalent of the above code based example:
+Below is the `web.xml` equivalent of the above code-based example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<web-app>
-		<servlet>
-			<servlet-name>example</servlet-name>
-			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-			<load-on-startup>1</load-on-startup>
-		</servlet>
+<web-app>
 
-		<servlet-mapping>
-			<servlet-name>example</servlet-name>
-			<url-pattern>/example/*</url-pattern>
-		</servlet-mapping>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
 
-	</web-app>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/app-context.xml</param-value>
+  </context-param>
+
+  <servlet>
+    <servlet-name>app</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value></param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>app</servlet-name>
+    <url-pattern>/app/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
 ----
 
 
-As detailed in <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>,
-`ApplicationContext` instances in Spring can be scoped.
-In the Web MVC framework, each `DispatcherServlet` has its own `WebApplicationContext`,
-which inherits all the beans already defined in the root `WebApplicationContext`.
-The root `WebApplicationContext` should contain all the
-infrastructure beans that should be shared between your other contexts and Servlet
-instances. These inherited beans can be overridden in the servlet-specific
-scope, and you can define new scope-specific beans local to a given Servlet instance.
+[[mvc-servlet-context-hierarchy]]
+=== WebApplicationContext Hierarchy
 
-.Typical context hierarchy in Spring Web MVC
+For many applications, a single `WebApplicationContext` is simple and sufficient.
+It is also possible to set up a context hierarchy where one root `WebApplicationContext`
+is shared across multiple `DispatcherServlet` (or other `Servlet`) instances each with
+its own `WebApplicationContext` configuration
+(see <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>
+for more details).
+
+The root `WebApplicationContext` contains infrastructure beans (e.g. data repositories,
+business services) that need to be shared across multiple Servlet instances. These beans
+are effectively inherited and can be overridden (re-declared) in the Servlet-specific
+context, which also contains beans local to the given `Servlet`.
+
 image::images/mvc-context-hierarchy.png[]
 
-Upon initialization of a `DispatcherServlet`, Spring MVC looks for a file named
-__[servlet-name]-servlet.xml__ in the `WEB-INF` directory of your web application and
-creates the beans defined there, overriding the definitions of any beans defined with
-the same name in the global scope.
-
-Consider the following `DispatcherServlet` Servlet configuration (in the `web.xml` file):
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<web-app>
-		<servlet>
-			<servlet-name>**golfing**</servlet-name>
-			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-			<load-on-startup>1</load-on-startup>
-		</servlet>
-		<servlet-mapping>
-			<servlet-name>**golfing**</servlet-name>
-			<url-pattern>/golfing/*</url-pattern>
-		</servlet-mapping>
-	</web-app>
-----
-
-With the above Servlet configuration in place, you will need to have a file called
-`/WEB-INF/golfing-servlet.xml` in your application; this file will contain all of your
-Spring Web MVC-specific components (beans). You can change the exact location of this
-configuration file through a Servlet initialization parameter (see below for details).
-
-It is also possible to have just one root context for single DispatcherServlet scenarios.
-
-.Single root context in Spring Web MVC
-image::images/mvc-root-context.png[]
-
-This can be configured by setting an empty contextConfigLocation servlet init parameter,
-as shown below:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<web-app>
-		<context-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/root-context.xml</param-value>
-		</context-param>
-		<servlet>
-			<servlet-name>dispatcher</servlet-name>
-			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-			<init-param>
-				<param-name>contextConfigLocation</param-name>
-				<param-value></param-value>
-			</init-param>
-			<load-on-startup>1</load-on-startup>
-		</servlet>
-		<servlet-mapping>
-			<servlet-name>dispatcher</servlet-name>
-			<url-pattern>/*</url-pattern>
-		</servlet-mapping>
-		<listener>
-			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-		</listener>
-	</web-app>
-----
-
-
-The `WebApplicationContext` is an extension of the plain `ApplicationContext` that has
+[NOTE]
+====
+`WebApplicationContext` is an extension of the plain `ApplicationContext` that has
 some extra features necessary for web applications. It differs from a normal
 `ApplicationContext` in that it is capable of resolving themes (see
 <<mvc-themeresolver>>), and that it knows which Servlet it is associated with (by having
-a link to the `ServletContext`). The `WebApplicationContext` is bound in the
-`ServletContext`, and by using static methods on the `RequestContextUtils` class you can
+a link to the `ServletContext`). `WebApplicationContext` is bound to the
+`ServletContext` and by using static methods on the `RequestContextUtils` class you can
 always look up the `WebApplicationContext` if you need access to it.
+====
 
-Note that we can achieve the same with java-based configurations:
+Below is an example of configuration that sets up a `WebApplicationContext` hierarchy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class GolfingWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+  public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
-		@Override
-		protected Class<?>[] getRootConfigClasses() {
-			// GolfingAppConfig defines beans that would be in root-context.xml
-			return new Class[] { GolfingAppConfig.class };
-		}
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+      return new Class[] { RootConfig.class };
+    }
 
-		@Override
-		protected Class<?>[] getServletConfigClasses() {
-			// GolfingWebConfig defines beans that would be in golfing-servlet.xml
-			return new Class[] { GolfingWebConfig.class };
-		}
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+      return new Class[] { App1Config.class };
+    }
 
-		@Override
-		protected String[] getServletMappings() {
-			return new String[] { "/golfing/*" };
-		}
-
-	}
+    @Override
+    protected String[] getServletMappings() {
+      return new String[] { "/app1/*" };
+    }
+  }
 ----
+
+Below is the `web.xml` equivalent:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+<web-app>
+
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/root-context.xml</param-value>
+  </context-param>
+
+  <servlet>
+    <servlet-name>app1</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>/WEB-INF/app1-context.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>app1</servlet-name>
+    <url-pattern>/app1/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
+----
+
+
 
 [[mvc-servlet-special-bean-types]]
 === Special Bean Types In the WebApplicationContext
 
-The Spring `DispatcherServlet` uses special beans to process requests and render the
+The `DispatcherServlet` uses special beans to process requests and render the
 appropriate views. These beans are part of Spring MVC. You can choose which special
 beans to use by simply configuring one or more of them in the `WebApplicationContext`.
 However, you don't need to do that initially since Spring MVC maintains a list of

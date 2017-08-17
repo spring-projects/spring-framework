@@ -11,7 +11,7 @@ or on a reactive stack (Reactive Streams API + non-blocking runtime).
 The first few chapters cover the Servlet-based <<mvc,Spring MVC>> web framework
 including <<view,Views>>, <<cors,CORS>>, and <<websocket,WebSocket>> support.
 Subsequent chapters cover the <<webflux,Spring WebFlux>> reactive web framework
-including its <<webflux-fn,WebFlux.fn>> functional programming model.
+including its <<webflux-fn,functional programming model>>.
 
 include::web/web-mvc.adoc[leveloffset=+1]
 

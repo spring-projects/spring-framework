@@ -29,7 +29,7 @@ This reference document provides the following sections:
 
 * <<data-access.adoc#spring-data-tier,Data access and transaction management>>
 
-* <<web.adoc#spring-web,Web frameworks>>
+* <<web.adoc#spring-web,The Web>>
 
 * <<integration.adoc#spring-integration,Integration with other technologies>>
 
