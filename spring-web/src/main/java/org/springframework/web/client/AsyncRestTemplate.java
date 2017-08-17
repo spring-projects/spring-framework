@@ -297,6 +297,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 	private static ListenableFuture<URI> adaptToLocationHeader(ListenableFuture<HttpHeaders> future) {
 		return new ListenableFutureAdapter<URI, HttpHeaders>(future) {
 			@Override
+			@Nullable
 			protected URI adapt(HttpHeaders headers) throws ExecutionException {
 				return headers.getLocation();
 			}
@@ -607,6 +608,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		}
 
 		@Override
+		@Nullable
 		protected final T adapt(ClientHttpResponse response) throws ExecutionException {
 			try {
 				if (!getErrorHandler().hasError(response)) {
@@ -660,6 +662,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 					return request.getBody();
 				}
 				@Override
+				@Nullable
 				public HttpMethod getMethod() {
 					return request.getMethod();
 				}

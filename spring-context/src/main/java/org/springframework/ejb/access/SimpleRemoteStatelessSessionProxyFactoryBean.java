@@ -112,6 +112,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.proxy;
 	}

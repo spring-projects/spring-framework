@@ -247,6 +247,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	@Override
+	@Nullable
 	public Object getObject() throws BeansException {
 		initializeAdvisorChain();
 		if (isSingleton()) {

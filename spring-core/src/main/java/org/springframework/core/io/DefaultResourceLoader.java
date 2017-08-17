@@ -91,6 +91,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @see ClassPathResource
 	 */
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
 	}

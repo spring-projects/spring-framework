@@ -35,6 +35,7 @@ class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAda
 	}
 
 	@Override
+	@Nullable
 	protected T adapt(@Nullable T result) {
 		return result;
 	}

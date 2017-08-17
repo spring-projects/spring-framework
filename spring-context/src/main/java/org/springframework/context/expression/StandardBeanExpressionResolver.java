@@ -132,6 +132,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 
 	@Override
+	@Nullable
 	public Object evaluate(@Nullable String value, BeanExpressionContext evalContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;

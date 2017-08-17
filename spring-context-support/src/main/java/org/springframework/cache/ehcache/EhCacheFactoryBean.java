@@ -287,6 +287,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 
 	@Override
+	@Nullable
 	public Ehcache getObject() {
 		return this.cache;
 	}

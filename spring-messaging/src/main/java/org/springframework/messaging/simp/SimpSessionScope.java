@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,6 +52,7 @@ public class SimpSessionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
 		synchronized (simpAttributes.getSessionMutex()) {
@@ -71,6 +73,7 @@ public class SimpSessionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}

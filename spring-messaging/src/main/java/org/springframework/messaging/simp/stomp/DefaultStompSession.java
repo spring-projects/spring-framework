@@ -632,6 +632,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
+		@Nullable
 		public String getSubscriptionId() {
 			return this.headers.getId();
 		}

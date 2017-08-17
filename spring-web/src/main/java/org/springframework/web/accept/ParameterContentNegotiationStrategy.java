@@ -19,6 +19,7 @@ package org.springframework.web.accept;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -62,6 +63,7 @@ public class ParameterContentNegotiationStrategy extends AbstractMappingContentN
 
 
 	@Override
+	@Nullable
 	protected String getMediaTypeKey(NativeWebRequest request) {
 		return request.getParameter(getParameterName());
 	}

@@ -168,6 +168,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		for (ObjectError objectError : this.errors) {
 			if (!(objectError instanceof FieldError)) {
@@ -189,6 +190,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		for (ObjectError objectError : this.errors) {
 			if (objectError instanceof FieldError) {
@@ -211,6 +213,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
@@ -225,6 +228,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		FieldError fieldError = getFieldError(field);
 		// Use rejected value in case of error, current bean property value else.
@@ -244,6 +248,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see #getActualFieldValue
 	 */
 	@Override
+	@Nullable
 	public Class<?> getFieldType(@Nullable String field) {
 		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
@@ -280,6 +285,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return getActualFieldValue(fixedField(field));
 	}
@@ -290,6 +296,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * editor lookup facility, if available.
 	 */
 	@Override
+	@Nullable
 	public PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
 		if (editorRegistry != null) {
@@ -308,6 +315,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * This implementation returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return null;
 	}
@@ -363,6 +371,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * Return the wrapped target object.
 	 */
 	@Override
+	@Nullable
 	public abstract Object getTarget();
 
 	/**

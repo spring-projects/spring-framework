@@ -448,6 +448,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (txAttr != null && txAttr.getName() == null) {
 			txAttr = new DelegatingTransactionAttribute(txAttr) {
 				@Override
+				@Nullable
 				public String getName() {
 					return joinpointIdentification;
 				}

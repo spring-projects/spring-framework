@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -47,6 +48,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 	}
 
 	@Override
+	@Nullable
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		String key = code + '_' + locale.toString();
 		String msg = this.messages.get(key);

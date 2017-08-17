@@ -33,7 +33,7 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T? = qu
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T =
+fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T? =
 		queryForObject(sql, RowMapper { resultSet, i -> function(resultSet, i) }, *args)
 
 /**

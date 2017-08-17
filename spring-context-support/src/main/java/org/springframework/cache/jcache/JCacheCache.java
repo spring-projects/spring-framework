@@ -76,6 +76,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		try {
 			return this.cache.invoke(key, new ValueLoaderEntryProcessor<T>(), valueLoader);
@@ -91,6 +92,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
 		return (set ? null : get(key));

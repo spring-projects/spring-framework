@@ -79,6 +79,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	@Override
+	@Nullable
 	public PropertySource<?> get(String name) {
 		int index = this.propertySourceList.indexOf(PropertySource.named(name));
 		return (index != -1 ? this.propertySourceList.get(index) : null);

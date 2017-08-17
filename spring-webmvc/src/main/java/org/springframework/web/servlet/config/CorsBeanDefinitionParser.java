@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.cors.CorsConfiguration;
@@ -42,6 +43,7 @@ import org.springframework.web.cors.CorsConfiguration;
 public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
 		Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();

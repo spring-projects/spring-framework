@@ -246,6 +246,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		@Nullable
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
 				return readFromInputStream();

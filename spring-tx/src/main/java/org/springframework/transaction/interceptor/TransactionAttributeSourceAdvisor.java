@@ -45,6 +45,7 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
 		@Override
+		@Nullable
 		protected TransactionAttributeSource getTransactionAttributeSource() {
 			return (transactionInterceptor != null ? transactionInterceptor.getTransactionAttributeSource() : null);
 		}

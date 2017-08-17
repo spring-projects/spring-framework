@@ -70,6 +70,7 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor im
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

@@ -72,6 +72,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 
 	@Override
+	@Nullable
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 

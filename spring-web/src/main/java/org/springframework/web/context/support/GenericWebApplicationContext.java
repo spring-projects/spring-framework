@@ -197,6 +197,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
@@ -213,6 +214,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
@@ -224,6 +226,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");

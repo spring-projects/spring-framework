@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -60,6 +61,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 
 	@Override
+	@Nullable
 	public Object lookupVariable(String name) {
 		Object variable = super.lookupVariable(name);
 		if (variable != null) {

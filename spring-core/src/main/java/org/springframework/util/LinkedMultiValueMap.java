@@ -76,6 +76,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	// MultiValueMap implementation
 
 	@Override
+	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
 		return (values != null ? values.get(0) : null);

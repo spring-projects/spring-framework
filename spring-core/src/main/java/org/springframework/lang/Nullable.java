@@ -29,8 +29,9 @@ import javax.annotation.meta.When;
  * A common Spring annotation to declare that the annotated parameter,
  * return value or field could be {@code null} under some circumstances.
  *
- * <p>Should be used at parameters and return values level in association
- * with {@link NonNullApi} package-level annotations.
+ * <p>Should be used at parameters, return values and optionally field level in association
+ * with {@link NonNullApi} package-level annotations. Methods overrides should repeat parent
+ * parameter or return value {@code @Nullable} annotations unless they behave differently.
  *
  * <p>Leverages JSR-305 meta-annotations to indicate its semantics to
  * common tools with JSR-305 support.

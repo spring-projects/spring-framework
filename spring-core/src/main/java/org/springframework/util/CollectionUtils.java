@@ -405,6 +405,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
+		@Nullable
 		public V getFirst(K key) {
 			List<V> values = this.map.get(key);
 			return (values != null ? values.get(0) : null);

@@ -218,6 +218,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 
 	@Override
+	@Nullable
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		if (this.proxyTypes.isEmpty()) {
 			return null;
@@ -227,6 +228,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	@Override
+	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}

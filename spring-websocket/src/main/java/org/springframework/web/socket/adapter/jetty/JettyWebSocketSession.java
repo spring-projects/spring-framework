@@ -102,6 +102,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		checkNativeSessionInitialized();
 		return this.uri;

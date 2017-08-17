@@ -31,6 +31,7 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -74,6 +75,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 
 	@Override
+	@Nullable
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
 

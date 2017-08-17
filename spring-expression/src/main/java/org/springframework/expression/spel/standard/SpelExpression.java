@@ -114,6 +114,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue() throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
@@ -143,6 +144,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
@@ -179,6 +181,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(Object rootObject) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
@@ -206,6 +209,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T getValue(Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		if (this.compiledAst != null) {
 			try {
@@ -240,6 +244,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 
@@ -269,6 +274,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 
@@ -303,6 +309,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 
@@ -331,6 +338,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
@@ -366,16 +374,19 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getValueType() throws EvaluationException {
 		return getValueType(getEvaluationContext());
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getValueType(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
@@ -384,6 +395,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
@@ -391,11 +403,13 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
 		return getValueTypeDescriptor(getEvaluationContext());
 	}
 
 	@Override
+	@Nullable
 	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
@@ -403,6 +417,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext is required");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
@@ -410,6 +425,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject)
 			throws EvaluationException {
 

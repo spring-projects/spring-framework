@@ -488,6 +488,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		if (!this.suppressCors && CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration config = new CorsConfiguration();

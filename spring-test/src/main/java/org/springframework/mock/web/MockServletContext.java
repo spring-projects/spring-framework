@@ -266,6 +266,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getMimeType(String filePath) {
 		String extension = StringUtils.getFilenameExtension(filePath);
 		if (this.mimeTypes.containsKey(extension)) {

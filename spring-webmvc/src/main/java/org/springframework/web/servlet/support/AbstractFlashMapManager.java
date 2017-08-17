@@ -88,6 +88,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 
 	@Override
+	@Nullable
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
 		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(allFlashMaps)) {

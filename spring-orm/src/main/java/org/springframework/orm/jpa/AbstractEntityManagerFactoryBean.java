@@ -495,6 +495,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
@@ -522,11 +523,13 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	@Override
+	@Nullable
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public DataSource getDataSource() {
 		return null;
 	}
@@ -536,6 +539,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Return the singleton EntityManagerFactory.
 	 */
 	@Override
+	@Nullable
 	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}

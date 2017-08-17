@@ -84,6 +84,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
 	@Override
+	@Nullable
 	public Class<?>[] getSpecificTargetClasses() {
 		return null;
 	}
@@ -590,6 +591,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
+		@Nullable
 		public Class<?>[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}

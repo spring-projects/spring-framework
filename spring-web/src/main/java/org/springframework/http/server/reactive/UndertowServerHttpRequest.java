@@ -143,6 +143,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		@Nullable
 		protected DataBuffer read() throws IOException {
 			if (this.pooledByteBuffer == null) {
 				this.pooledByteBuffer = this.byteBufferPool.allocate();

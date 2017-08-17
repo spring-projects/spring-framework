@@ -206,6 +206,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	@Override
+	@Nullable
 	public abstract Class<?> getObjectType();
 
 	/**

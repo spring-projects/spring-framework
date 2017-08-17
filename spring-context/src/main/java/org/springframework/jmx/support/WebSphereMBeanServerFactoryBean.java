@@ -84,6 +84,7 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 
 
 	@Override
+	@Nullable
 	public MBeanServer getObject() {
 		return this.mbeanServer;
 	}

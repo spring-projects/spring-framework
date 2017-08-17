@@ -168,6 +168,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		@Override
+		@Nullable
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}

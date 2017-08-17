@@ -358,6 +358,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return the current bean class name of this bean definition.
 	 */
 	@Override
+	@Nullable
 	public String getBeanClassName() {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject instanceof Class) {
@@ -971,6 +972,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * came from (for the purpose of showing context in case of errors).
 	 */
 	@Override
+	@Nullable
 	public String getResourceDescription() {
 		return (this.resource != null ? this.resource.getDescription() : null);
 	}
@@ -989,6 +991,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
 	@Override
+	@Nullable
 	public BeanDefinition getOriginatingBeanDefinition() {
 		return (this.resource instanceof BeanDefinitionResource ?
 				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);

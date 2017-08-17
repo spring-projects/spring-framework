@@ -104,6 +104,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		return getValueInternal(expressionState).getValue();
 	}
@@ -136,6 +137,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;

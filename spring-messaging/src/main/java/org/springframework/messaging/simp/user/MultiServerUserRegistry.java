@@ -115,6 +115,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	// SimpUserRegistry methods
 
 	@Override
+	@Nullable
 	public SimpUser getUser(String userName) {
 		// Prefer remote registries due to cross-server SessionLookup
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
@@ -321,6 +322,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
+		@Nullable
 		public SimpSession getSession(String sessionId) {
 			if (this.sessionLookup != null) {
 				return this.sessionLookup.findSessions(getName()).get(sessionId);

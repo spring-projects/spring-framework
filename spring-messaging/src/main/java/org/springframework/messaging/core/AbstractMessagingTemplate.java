@@ -34,11 +34,13 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 		implements MessageRequestReplyOperations<D> {
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(Message<?> requestMessage) {
 		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
+	@Nullable
 	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
 		return doSendAndReceive(destination, requestMessage);
 	}
@@ -48,16 +50,19 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
 		return convertSendAndReceive(destination, request, null, targetClass);
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(
 			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
 
@@ -65,6 +70,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(
 			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 
@@ -72,6 +78,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
 			@Nullable MessagePostProcessor postProcessor) {
 
@@ -80,6 +87,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
 			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
 

@@ -48,12 +48,14 @@ import org.springframework.util.StringUtils;
 public class SpringCacheAnnotationParser implements CacheAnnotationParser, Serializable {
 
 	@Override
+	@Nullable
 	public Collection<CacheOperation> parseCacheAnnotations(Class<?> type) {
 		DefaultCacheConfig defaultConfig = getDefaultCacheConfig(type);
 		return parseCacheAnnotations(defaultConfig, type);
 	}
 
 	@Override
+	@Nullable
 	public Collection<CacheOperation> parseCacheAnnotations(Method method) {
 		DefaultCacheConfig defaultConfig = getDefaultCacheConfig(method.getDeclaringClass());
 		return parseCacheAnnotations(defaultConfig, method);

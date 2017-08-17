@@ -38,6 +38,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 
 
 	@Override
+	@Nullable
 	public Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
@@ -48,6 +49,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	}
 
 	@Override
+	@Nullable
 	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 

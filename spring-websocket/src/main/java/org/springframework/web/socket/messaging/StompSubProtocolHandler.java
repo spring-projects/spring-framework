@@ -583,6 +583,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	@Override
+	@Nullable
 	public String resolveSessionId(Message<?> message) {
 		return SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
 	}

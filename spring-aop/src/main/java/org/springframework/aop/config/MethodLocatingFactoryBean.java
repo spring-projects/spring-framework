@@ -84,6 +84,7 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 
 
 	@Override
+	@Nullable
 	public Method getObject() throws Exception {
 		return this.method;
 	}

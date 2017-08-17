@@ -162,6 +162,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
+		@Nullable
 		public HttpMethod getMethod() {
 			return (this.httpMethod != null ? this.httpMethod : super.getMethod());
 		}

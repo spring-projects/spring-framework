@@ -244,6 +244,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return getResourceLoader().getClassLoader();
 	}

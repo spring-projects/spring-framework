@@ -60,6 +60,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
@@ -71,6 +72,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(rootObject);
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
@@ -82,6 +84,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
@@ -95,6 +98,7 @@ public class LiteralExpression implements Expression {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getValue(EvaluationContext context, Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException {
 

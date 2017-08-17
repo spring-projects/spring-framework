@@ -126,6 +126,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 
 	@Override
+	@Nullable
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 

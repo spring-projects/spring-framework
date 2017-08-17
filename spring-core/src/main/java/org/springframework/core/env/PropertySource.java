@@ -210,6 +210,7 @@ public abstract class PropertySource<T> {
 		 * Always returns {@code null}.
 		 */
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			return null;
 		}
@@ -239,6 +240,7 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}

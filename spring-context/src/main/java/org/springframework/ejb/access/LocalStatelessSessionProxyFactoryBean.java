@@ -98,6 +98,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.proxy;
 	}

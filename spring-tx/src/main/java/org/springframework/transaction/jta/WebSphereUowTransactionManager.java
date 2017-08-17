@@ -229,6 +229,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 
 	@Override
+	@Nullable
 	public <T> T execute(@Nullable TransactionDefinition definition, TransactionCallback<T> callback)
 			throws TransactionException {
 

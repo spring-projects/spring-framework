@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -60,6 +61,7 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects != null) {
@@ -80,11 +82,13 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getConversationId() {
 		return TransactionSynchronizationManager.getCurrentTransactionName();
 	}

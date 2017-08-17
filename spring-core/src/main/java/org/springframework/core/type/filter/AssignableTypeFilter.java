@@ -55,11 +55,13 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {
 		return matchTargetType(superClassName);
 	}
 
 	@Override
+	@Nullable
 	protected Boolean matchInterface(String interfaceName) {
 		return matchTargetType(interfaceName);
 	}

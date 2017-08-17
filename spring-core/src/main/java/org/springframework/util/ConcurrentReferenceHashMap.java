@@ -1005,6 +1005,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
+		@Nullable
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}
@@ -1041,6 +1042,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
+		@Nullable
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}

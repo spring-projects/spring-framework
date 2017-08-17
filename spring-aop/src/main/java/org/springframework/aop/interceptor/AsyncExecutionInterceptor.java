@@ -138,6 +138,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	 * @see #determineAsyncExecutor(Method)
 	 */
 	@Override
+	@Nullable
 	protected String getExecutorQualifier(Method method) {
 		return null;
 	}
@@ -151,6 +152,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
 	@Override
+	@Nullable
 	protected Executor getDefaultExecutor(@Nullable BeanFactory beanFactory) {
 		Executor defaultExecutor = super.getDefaultExecutor(beanFactory);
 		return (defaultExecutor != null ? defaultExecutor : new SimpleAsyncTaskExecutor());

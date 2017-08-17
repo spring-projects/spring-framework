@@ -132,6 +132,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean {
 	 * Return the created Gson instance.
 	 */
 	@Override
+	@Nullable
 	public Gson getObject() {
 		return this.gson;
 	}

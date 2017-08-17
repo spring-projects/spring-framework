@@ -69,6 +69,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();

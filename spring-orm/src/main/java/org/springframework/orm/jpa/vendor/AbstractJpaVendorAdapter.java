@@ -118,16 +118,19 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 
 	@Override
+	@Nullable
 	public String getPersistenceProviderRootPackage() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public Map<String, ?> getJpaPropertyMap() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public JpaDialect getJpaDialect() {
 		return null;
 	}

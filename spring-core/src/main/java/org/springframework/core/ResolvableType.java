@@ -1419,6 +1419,7 @@ public class ResolvableType implements Serializable {
 	private class DefaultVariableResolver implements VariableResolver {
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			return ResolvableType.this.resolveVariable(variable);
 		}
@@ -1443,6 +1444,7 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
 			for (int i = 0; i < this.variables.length; i++) {
 				if (ObjectUtils.nullSafeEquals(SerializableTypeWrapper.unwrap(this.variables[i]),

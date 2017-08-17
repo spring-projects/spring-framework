@@ -216,6 +216,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);

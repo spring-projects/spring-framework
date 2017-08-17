@@ -105,6 +105,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	// Component getters
 
 	@Override
+	@Nullable
 	public String getSchemeSpecificPart() {
 		return null;
 	}
@@ -144,6 +145,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
+	@Nullable
 	public String getQuery() {
 		if (!this.queryParams.isEmpty()) {
 			StringBuilder queryBuilder = new StringBuilder();

@@ -244,6 +244,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the specified CORS configuration.
 	 */
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		return this.corsConfiguration;
 	}

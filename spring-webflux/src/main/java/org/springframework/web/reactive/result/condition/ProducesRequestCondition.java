@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
@@ -181,6 +182,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * or {@code null} if no expressions match.
 	 */
 	@Override
+	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return PRE_FLIGHT_MATCH;

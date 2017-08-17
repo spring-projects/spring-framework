@@ -49,6 +49,7 @@ public class EmbeddedValueResolver implements StringValueResolver {
 
 
 	@Override
+	@Nullable
 	public String resolveStringValue(String strVal) {
 		String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
 		if (this.exprResolver != null && value != null) {

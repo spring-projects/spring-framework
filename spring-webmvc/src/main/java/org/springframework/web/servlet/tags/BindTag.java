@@ -184,6 +184,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	}
 
 	@Override
+	@Nullable
 	public final PropertyEditor getEditor() {
 		return getStatus().getEditor();
 	}

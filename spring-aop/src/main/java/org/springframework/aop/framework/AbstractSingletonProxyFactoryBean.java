@@ -221,6 +221,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();

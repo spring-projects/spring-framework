@@ -179,6 +179,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
 	 */
 	@Override
+	@Nullable
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) {
 

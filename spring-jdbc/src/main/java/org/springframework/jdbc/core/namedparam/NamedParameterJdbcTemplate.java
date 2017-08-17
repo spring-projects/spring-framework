@@ -130,6 +130,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -137,6 +138,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
@@ -144,11 +146,13 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(sql, EmptySqlParameterSource.INSTANCE, action);
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -156,6 +160,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -163,6 +168,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rse);
 	}
@@ -206,6 +212,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -214,6 +221,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
@@ -221,6 +229,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -228,6 +237,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 

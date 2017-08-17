@@ -160,6 +160,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	@Override
+	@Nullable
 	public String getProperty(String key) {
 		return getProperty(key, String.class);
 	}

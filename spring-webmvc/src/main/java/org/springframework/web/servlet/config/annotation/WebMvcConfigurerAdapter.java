@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -172,6 +173,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public Validator getValidator() {
 		return null;
 	}
@@ -181,6 +183,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}

@@ -189,6 +189,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	@Override
+	@Nullable
 	protected final Message<?> doReceive(MessageChannel channel) {
 		return doReceive(channel, this.receiveTimeout);
 	}
@@ -209,6 +210,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	@Override
+	@Nullable
 	protected final Message<?> doSendAndReceive(MessageChannel channel, Message<?> requestMessage) {
 		Assert.notNull(channel, "'channel' is required");
 		Object originalReplyChannelHeader = requestMessage.getHeaders().getReplyChannel();
@@ -294,11 +296,13 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 
 		@Override
+		@Nullable
 		public Message<?> receive() {
 			return this.receive(-1);
 		}
 
 		@Override
+		@Nullable
 		public Message<?> receive(long timeout) {
 			try {
 				if (timeout < 0) {

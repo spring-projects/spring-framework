@@ -195,6 +195,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * @return {@code null} always
 	 */
 	@Override
+	@Nullable
 	public Class<?>[] getScriptInterfaces() {
 		return null;
 	}
@@ -214,6 +215,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * @see groovy.lang.GroovyClassLoader
 	 */
 	@Override
+	@Nullable
 	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
@@ -257,6 +259,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 

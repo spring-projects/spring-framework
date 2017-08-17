@@ -23,6 +23,8 @@ import java.util.List;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
  *
@@ -94,6 +96,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	}
 
 	@Override
+	@Nullable
 	public List<String> getOptionValues(String name) {
 		List<?> argValues = this.source.valuesOf(name);
 		List<String> stringArgValues = new ArrayList<>();

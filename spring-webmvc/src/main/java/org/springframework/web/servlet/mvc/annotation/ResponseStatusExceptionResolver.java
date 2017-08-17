@@ -66,6 +66,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 
 	@Override
+	@Nullable
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) {
 

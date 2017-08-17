@@ -344,6 +344,7 @@ public class ContentNegotiationManagerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ContentNegotiationManager getObject() {
 		return this.contentNegotiationManager;
 	}

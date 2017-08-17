@@ -117,11 +117,13 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 		}
 
 		@Override
+		@Nullable
 		public TypeDescriptor nested(int level) {
 			return TypeDescriptor.nested(this.field, level);
 		}
 
 		@Override
+		@Nullable
 		public Object getValue() throws Exception {
 			try {
 				ReflectionUtils.makeAccessible(this.field);

@@ -64,6 +64,7 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper get(Object key) {
 		Element element = lookup(key);
 		return toValueWrapper(element);
@@ -125,6 +126,7 @@ public class EhCacheCache implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
 		return toValueWrapper(existingElement);

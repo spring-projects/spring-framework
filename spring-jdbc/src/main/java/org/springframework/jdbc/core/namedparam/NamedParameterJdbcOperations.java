@@ -239,6 +239,7 @@ public interface NamedParameterJdbcOperations {
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -256,6 +257,7 @@ public interface NamedParameterJdbcOperations {
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 

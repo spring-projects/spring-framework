@@ -466,6 +466,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * Return the singleton ObjectMapper.
 	 */
 	@Override
+	@Nullable
 	public ObjectMapper getObject() {
 		return this.objectMapper;
 	}

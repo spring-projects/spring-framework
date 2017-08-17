@@ -106,6 +106,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);

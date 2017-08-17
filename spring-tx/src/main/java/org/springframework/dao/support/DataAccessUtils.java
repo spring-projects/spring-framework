@@ -67,6 +67,7 @@ public abstract class DataAccessUtils {
 	 * @throws EmptyResultDataAccessException if no element at all
 	 * has been found in the given Collection
 	 */
+	@Nullable
 	public static <T> T requiredSingleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
 		if (size == 0) {

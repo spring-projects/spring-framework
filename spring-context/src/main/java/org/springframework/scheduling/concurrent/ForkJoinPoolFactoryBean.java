@@ -134,6 +134,7 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 
 
 	@Override
+	@Nullable
 	public ForkJoinPool getObject() {
 		return this.forkJoinPool;
 	}

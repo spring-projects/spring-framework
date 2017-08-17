@@ -539,6 +539,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 
 		@Override
+		@Nullable
 		public View resolveViewName(String viewName, Locale locale) throws Exception {
 			return this.view;
 		}

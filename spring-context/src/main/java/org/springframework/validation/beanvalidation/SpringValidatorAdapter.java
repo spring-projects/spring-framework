@@ -367,6 +367,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		}
 
 		@Override
+		@Nullable
 		public Object[] getArguments() {
 			return null;
 		}

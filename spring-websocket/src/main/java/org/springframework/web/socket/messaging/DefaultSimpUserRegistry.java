@@ -143,6 +143,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	// SimpUserRegistry methods
 
 	@Override
+	@Nullable
 	public SimpUser getUser(String userName) {
 		return this.users.get(userName);
 	}
@@ -198,6 +199,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
+		@Nullable
 		public SimpSession getSession(@Nullable String sessionId) {
 			return (sessionId != null ? this.userSessions.get(sessionId) : null);
 		}

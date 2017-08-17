@@ -144,6 +144,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {

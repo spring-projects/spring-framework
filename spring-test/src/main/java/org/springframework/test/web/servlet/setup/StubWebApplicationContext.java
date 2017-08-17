@@ -275,6 +275,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -322,6 +323,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -399,11 +401,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
+		@Nullable
 		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
+		@Nullable
 		public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 				@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");

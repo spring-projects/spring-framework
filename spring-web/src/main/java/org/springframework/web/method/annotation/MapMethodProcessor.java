@@ -46,6 +46,7 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 

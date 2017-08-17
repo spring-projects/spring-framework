@@ -708,6 +708,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	@Override
+	@Nullable
 	public Scheduler getObject() {
 		return this.scheduler;
 	}

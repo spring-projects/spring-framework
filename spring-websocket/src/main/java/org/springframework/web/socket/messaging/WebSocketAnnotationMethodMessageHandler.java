@@ -103,6 +103,7 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		}
 
 		@Override
+		@Nullable
 		public Class<?> getBeanType() {
 			return this.adviceBean.getBeanType();
 		}

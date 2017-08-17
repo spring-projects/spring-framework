@@ -330,6 +330,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * @see Value
 	 */
 	@Override
+	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {

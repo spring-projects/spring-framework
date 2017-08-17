@@ -80,6 +80,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	 * This implementation expects the handler to be an {@link HandlerMethod}.
 	 */
 	@Override
+	@Nullable
 	public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 

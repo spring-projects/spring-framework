@@ -79,6 +79,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 				return locale;
 			}
 			@Override
+			@Nullable
 			public TimeZone getTimeZone() {
 				return timeZone;
 			}

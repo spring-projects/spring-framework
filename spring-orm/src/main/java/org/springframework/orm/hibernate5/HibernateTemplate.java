@@ -328,6 +328,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 
 	@Override
+	@Nullable
 	public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
 		return doExecute(action, false);
 	}
@@ -453,11 +454,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	//-------------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public <T> T get(Class<T> entityClass, Serializable id) throws DataAccessException {
 		return get(entityClass, id, null);
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(final Class<T> entityClass, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 
@@ -472,11 +475,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
+	@Nullable
 	public Object get(String entityName, Serializable id) throws DataAccessException {
 		return get(entityName, id, null);
 	}
 
 	@Override
+	@Nullable
 	public Object get(final String entityName, final Serializable id, @Nullable final LockMode lockMode)
 			throws DataAccessException {
 

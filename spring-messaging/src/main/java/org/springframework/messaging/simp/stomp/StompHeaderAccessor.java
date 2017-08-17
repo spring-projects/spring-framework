@@ -181,6 +181,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	// Redeclared for visibility within simp.stomp
+	@Override
+	@Nullable
 	protected Map<String, List<String>> getNativeHeaders() {
 		return super.getNativeHeaders();
 	}

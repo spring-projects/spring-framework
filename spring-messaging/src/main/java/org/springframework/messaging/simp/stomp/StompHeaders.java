@@ -399,6 +399,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
+	@Nullable
 	public String getFirst(String headerName) {
 		List<String> headerValues = headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;

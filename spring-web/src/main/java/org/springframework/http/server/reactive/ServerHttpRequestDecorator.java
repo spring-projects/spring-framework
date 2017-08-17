@@ -26,6 +26,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -55,6 +56,7 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	// ServerHttpRequest delegation methods...
 
 	@Override
+	@Nullable
 	public HttpMethod getMethod() {
 		return getDelegate().getMethod();
 	}

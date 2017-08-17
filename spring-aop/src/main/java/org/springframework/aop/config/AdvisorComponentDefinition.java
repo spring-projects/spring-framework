@@ -110,6 +110,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.advisorDefinition.getSource();
 	}

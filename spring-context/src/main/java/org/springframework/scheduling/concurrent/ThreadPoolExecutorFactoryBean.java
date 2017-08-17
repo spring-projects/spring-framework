@@ -192,6 +192,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 
 	@Override
+	@Nullable
 	public ExecutorService getObject() {
 		return this.exposedExecutor;
 	}

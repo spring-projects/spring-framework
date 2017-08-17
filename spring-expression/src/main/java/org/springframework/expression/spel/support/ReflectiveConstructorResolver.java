@@ -29,6 +29,7 @@ import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * A constructor resolver that uses reflection to locate the constructor that should be invoked.
@@ -49,6 +50,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 * </ol>
 	 */
 	@Override
+	@Nullable
 	public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 

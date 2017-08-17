@@ -161,6 +161,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * or {@code null} if no expressions match.
 	 */
 	@Override
+	@Nullable
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return PRE_FLIGHT_MATCH;

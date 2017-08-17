@@ -83,6 +83,7 @@ public class ProxyFactoryBean implements FactoryBean<Proxy>, InitializingBean {
 
 
 	@Override
+	@Nullable
 	public Proxy getObject() {
 		return this.proxy;
 	}

@@ -302,6 +302,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
+		@Nullable
 		public String getFilename() {
 			return this.original.getFilename();
 		}

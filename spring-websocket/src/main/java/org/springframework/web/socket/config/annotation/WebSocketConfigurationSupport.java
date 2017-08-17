@@ -103,6 +103,7 @@ public class WebSocketConfigurationSupport {
 	private static class NoOpScheduler implements TaskScheduler {
 
 		@Override
+		@Nullable
 		public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 			throw new IllegalStateException("Unexpected use of scheduler.");
 		}

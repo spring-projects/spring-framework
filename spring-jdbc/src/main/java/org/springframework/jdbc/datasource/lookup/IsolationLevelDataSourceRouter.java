@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource.lookup;
 
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -119,6 +120,7 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 	}
 
 	@Override
+	@Nullable
 	protected Object determineCurrentLookupKey() {
 		return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 	}

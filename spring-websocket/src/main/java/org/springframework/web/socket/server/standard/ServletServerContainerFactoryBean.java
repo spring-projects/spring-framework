@@ -133,6 +133,7 @@ public class ServletServerContainerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ServerContainer getObject() {
 		return this.serverContainer;
 	}

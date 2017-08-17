@@ -83,6 +83,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	}
 
 	@Override
+	@Nullable
 	protected String getMediaTypeKey(NativeWebRequest webRequest) {
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (request == null) {

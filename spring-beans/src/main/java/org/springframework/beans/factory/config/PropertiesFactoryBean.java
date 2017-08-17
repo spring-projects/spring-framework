@@ -75,6 +75,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	}
 
 	@Override
+	@Nullable
 	public final Properties getObject() throws IOException {
 		if (this.singleton) {
 			return this.singletonInstance;

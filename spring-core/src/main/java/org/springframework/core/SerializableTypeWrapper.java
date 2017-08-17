@@ -372,6 +372,7 @@ abstract class SerializableTypeWrapper {
 		}
 
 		@Override
+		@Nullable
 		public Type getType() {
 			Object result = this.result;
 			if (result == null) {
@@ -384,6 +385,7 @@ abstract class SerializableTypeWrapper {
 		}
 
 		@Override
+		@Nullable
 		public Object getSource() {
 			return null;
 		}

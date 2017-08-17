@@ -222,6 +222,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
+	@Nullable
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
 	}

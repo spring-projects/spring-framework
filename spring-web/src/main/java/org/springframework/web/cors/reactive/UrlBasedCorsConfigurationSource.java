@@ -66,6 +66,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	@Override
+	@Nullable
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
 		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 		return this.corsConfigurations.entrySet().stream()

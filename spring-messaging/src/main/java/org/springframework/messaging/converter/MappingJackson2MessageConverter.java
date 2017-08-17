@@ -205,6 +205,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		JavaType javaType = this.objectMapper.constructType(targetClass);
 		Object payload = message.getPayload();

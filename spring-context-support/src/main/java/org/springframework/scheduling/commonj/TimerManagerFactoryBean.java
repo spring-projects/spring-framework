@@ -110,6 +110,7 @@ public class TimerManagerFactoryBean extends TimerManagerAccessor
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public TimerManager getObject() {
 		return getTimerManager();
 	}

@@ -22,6 +22,7 @@ import org.hibernate.HibernateException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
@@ -44,6 +45,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);

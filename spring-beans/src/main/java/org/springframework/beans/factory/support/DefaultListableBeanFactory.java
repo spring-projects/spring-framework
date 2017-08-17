@@ -570,6 +570,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * if not found on the exposed bean reference (e.g. in case of a proxy).
 	 */
 	@Override
+	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException{
 
@@ -1037,6 +1038,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	@Nullable
 	public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
@@ -1613,6 +1615,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
+		@Nullable
 		public Object getObject() throws BeansException {
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName);
@@ -1623,6 +1626,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
+		@Nullable
 		public Object getObject(final Object... args) throws BeansException {
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName, args);
@@ -1639,6 +1643,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
+		@Nullable
 		public Object getIfAvailable() throws BeansException {
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName);
@@ -1655,6 +1660,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
+		@Nullable
 		public Object getIfUnique() throws BeansException {
 			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
 				@Override
@@ -1662,6 +1668,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					return false;
 				}
 				@Override
+				@Nullable
 				public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) {
 					return null;
 				}
@@ -1720,6 +1727,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
+		@Nullable
 		public Object getOrderSource(Object obj) {
 			RootBeanDefinition beanDefinition = getRootBeanDefinition(this.instancesToBeanNames.get(obj));
 			if (beanDefinition == null) {

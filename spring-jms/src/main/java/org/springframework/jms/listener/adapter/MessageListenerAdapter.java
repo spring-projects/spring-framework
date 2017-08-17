@@ -256,7 +256,6 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setDefaultListenerMethod
 	 */
-	@Nullable
 	protected String getListenerMethodName(Message originalMessage, Object extractedMessage) throws JMSException {
 		return getDefaultListenerMethod();
 	}

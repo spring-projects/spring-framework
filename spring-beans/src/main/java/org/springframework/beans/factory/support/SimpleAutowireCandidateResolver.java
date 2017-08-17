@@ -41,11 +41,13 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	}
 
 	@Override
+	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
 	}

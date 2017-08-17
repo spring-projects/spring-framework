@@ -69,6 +69,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		String[] headerValues = request.getHeaderValues(name);
 		if (headerValues != null) {

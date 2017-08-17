@@ -18,6 +18,7 @@ package org.springframework.web.context.request;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,6 +59,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
@@ -77,6 +79,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		return attributes.resolveReference(key);

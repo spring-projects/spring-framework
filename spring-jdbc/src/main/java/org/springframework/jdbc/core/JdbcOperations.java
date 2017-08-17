@@ -147,6 +147,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, Object[], RowMapper)
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -531,6 +532,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
@@ -549,6 +551,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -566,6 +569,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
+	@Nullable
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException;
 
 	/**

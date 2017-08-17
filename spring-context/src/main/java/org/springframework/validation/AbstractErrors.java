@@ -162,6 +162,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		List<ObjectError> globalErrors = getGlobalErrors();
 		return (!globalErrors.isEmpty() ? globalErrors.get(0) : null);
@@ -178,6 +179,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		List<FieldError> fieldErrors = getFieldErrors();
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
@@ -207,13 +209,14 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		List<FieldError> fieldErrors = getFieldErrors(field);
 		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
 	}
 
-
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
 		return (value != null ? value.getClass() : null);

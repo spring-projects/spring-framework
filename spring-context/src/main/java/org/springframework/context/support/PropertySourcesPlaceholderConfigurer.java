@@ -132,6 +132,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				this.propertySources.addLast(
 					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
+						@Nullable
 						public String getProperty(String key) {
 							return this.source.getProperty(key);
 						}

@@ -266,6 +266,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	 * Return the singleton JNDI object.
 	 */
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.jndiObject;
 	}

@@ -386,6 +386,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
+				@Nullable
 				protected String getSystemAttribute(String attributeName) {
 					try {
 						return System.getenv(attributeName);
@@ -426,6 +427,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		catch (AccessControlException ex) {
 			return (Map) new ReadOnlySystemAttributesMap() {
 				@Override
+				@Nullable
 				protected String getSystemAttribute(String attributeName) {
 					try {
 						return System.getProperty(attributeName);
@@ -524,6 +526,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Nullable
 	public String getProperty(String key) {
 		return this.propertyResolver.getProperty(key);
 	}
@@ -534,6 +537,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getProperty(String key, Class<T> targetType) {
 		return this.propertyResolver.getProperty(key, targetType);
 	}

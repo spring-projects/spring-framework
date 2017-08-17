@@ -59,6 +59,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception {
 

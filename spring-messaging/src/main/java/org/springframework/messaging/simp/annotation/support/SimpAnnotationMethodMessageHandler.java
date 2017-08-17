@@ -366,6 +366,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		MessageMapping messageAnn = AnnotatedElementUtils.findMergedAnnotation(method, MessageMapping.class);
 		if (messageAnn != null) {
@@ -438,6 +439,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected String getDestination(Message<?> message) {
 		return SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 	}
@@ -464,6 +466,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected SimpMessageMappingInfo getMatchingMapping(SimpMessageMappingInfo mapping, Message<?> message) {
 		return mapping.getMatchingCondition(message);
 

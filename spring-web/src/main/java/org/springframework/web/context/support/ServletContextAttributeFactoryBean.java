@@ -71,6 +71,7 @@ public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, 
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws Exception {
 		return this.attribute;
 	}

@@ -151,6 +151,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return escapeObjectError(this.source.getGlobalError());
 	}
@@ -171,6 +172,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.source.getFieldError();
 	}
@@ -191,17 +193,20 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return escapeObjectError(this.source.getFieldError(field));
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
 		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.source.getFieldType(field);
 	}

@@ -128,6 +128,7 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.connectionFactory;
 	}

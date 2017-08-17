@@ -72,16 +72,19 @@ public class SimpleTriggerContext implements TriggerContext {
 
 
 	@Override
+	@Nullable
 	public Date lastScheduledExecutionTime() {
 		return this.lastScheduledExecutionTime;
 	}
 
 	@Override
+	@Nullable
 	public Date lastActualExecutionTime() {
 		return this.lastActualExecutionTime;
 	}
 
 	@Override
+	@Nullable
 	public Date lastCompletionTime() {
 		return this.lastCompletionTime;
 	}

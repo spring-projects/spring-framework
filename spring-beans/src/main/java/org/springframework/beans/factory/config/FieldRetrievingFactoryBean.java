@@ -208,6 +208,7 @@ public class FieldRetrievingFactoryBean
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();

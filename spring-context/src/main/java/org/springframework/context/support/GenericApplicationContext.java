@@ -245,6 +245,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getClassLoader() {
 		if (this.resourceLoader != null && !this.customClassLoader) {
 			return this.resourceLoader.getClassLoader();

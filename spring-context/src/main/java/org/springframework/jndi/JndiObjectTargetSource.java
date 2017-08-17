@@ -109,6 +109,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 
 
 	@Override
+	@Nullable
 	public Class<?> getTargetClass() {
 		if (this.cachedObject != null) {
 			return this.cachedObject.getClass();
@@ -127,6 +128,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 	}
 
 	@Override
+	@Nullable
 	public Object getTarget() {
 		try {
 			if (this.lookupOnStartup || !this.cache) {

@@ -70,6 +70,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getUri();
@@ -143,7 +144,8 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	}
 
 	@Override
-	public <T> T getNativeSession(Class<T> requiredType) {
+	@Nullable
+	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
 		return (this.webSocketSession instanceof NativeWebSocketSession ?
 				((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType) : null);
 	}

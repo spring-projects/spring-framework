@@ -294,6 +294,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	@Override
+	@Nullable
 	public RequestMatchResult match(HttpServletRequest request, String pattern) {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		if (getPathMatcher().match(pattern, lookupPath)) {

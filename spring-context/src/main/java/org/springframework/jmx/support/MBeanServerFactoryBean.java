@@ -185,6 +185,7 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 
 
 	@Override
+	@Nullable
 	public MBeanServer getObject() {
 		return this.server;
 	}

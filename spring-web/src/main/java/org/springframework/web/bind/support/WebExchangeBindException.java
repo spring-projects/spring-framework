@@ -157,6 +157,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return this.bindingResult.getGlobalError();
 	}
@@ -177,6 +178,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.bindingResult.getFieldError();
 	}
@@ -197,16 +199,19 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return this.bindingResult.getFieldError(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		return this.bindingResult.getFieldValue(field);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
@@ -222,17 +227,20 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return this.bindingResult.getRawFieldValue(field);
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	public PropertyEditor findEditor(@Nullable String field, @Nullable Class valueType) {
 		return this.bindingResult.findEditor(field, valueType);
 	}
 
 	@Override
+	@Nullable
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return this.bindingResult.getPropertyEditorRegistry();
 	}

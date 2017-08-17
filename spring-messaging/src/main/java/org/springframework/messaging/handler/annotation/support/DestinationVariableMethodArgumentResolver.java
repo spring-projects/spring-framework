@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -55,6 +56,7 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception {
 

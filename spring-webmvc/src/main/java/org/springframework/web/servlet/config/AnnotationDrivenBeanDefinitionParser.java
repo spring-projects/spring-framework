@@ -188,6 +188,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 		XmlReaderContext readerContext = parserContext.getReaderContext();
@@ -706,6 +707,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		@Override
+		@Nullable
 		public CompositeUriComponentsContributor getObject() throws Exception {
 			return this.uriComponentsContributor;
 		}

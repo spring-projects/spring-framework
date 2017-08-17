@@ -62,6 +62,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * for example to hold a single shared EJB instance.
 	 */
 	@Override
+	@Nullable
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {

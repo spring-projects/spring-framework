@@ -117,6 +117,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 		}
 
 		@Override
+		@Nullable
 		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return MappingSqlQueryWithParameters.this.mapRow(rs, rowNum, this.params, this.context);
 		}

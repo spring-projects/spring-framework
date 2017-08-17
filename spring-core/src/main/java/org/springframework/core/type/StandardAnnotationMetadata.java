@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -115,17 +116,20 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
+	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return (this.annotations.length > 0 ? AnnotatedElementUtils.getMergedAnnotationAttributes(
 				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap) : null);
 	}
 
 	@Override
+	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
 		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
+	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return (this.annotations.length > 0 ? AnnotatedElementUtils.getAllAnnotationAttributes(
 				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap) : null);

@@ -171,6 +171,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public ObjectError getGlobalError() {
 		return this.bindingResult.getGlobalError();
 	}
@@ -191,6 +192,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError() {
 		return this.bindingResult.getFieldError();
 	}
@@ -211,16 +213,19 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public FieldError getFieldError(String field) {
 		return this.bindingResult.getFieldError(field);
 	}
 
 	@Override
+	@Nullable
 	public Object getFieldValue(String field) {
 		return this.bindingResult.getFieldValue(field);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
@@ -236,6 +241,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public Object getRawFieldValue(String field) {
 		return this.bindingResult.getRawFieldValue(field);
 	}

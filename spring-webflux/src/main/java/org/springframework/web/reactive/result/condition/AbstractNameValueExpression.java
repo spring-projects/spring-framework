@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.condition;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -30,6 +31,7 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 
 	protected final String name;
 
+	@Nullable
 	protected final T value;
 
 	protected final boolean isNegated;
@@ -54,6 +56,7 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 	}
 
 	@Override
+	@Nullable
 	public T getValue() {
 		return this.value;
 	}

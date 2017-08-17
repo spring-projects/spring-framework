@@ -19,6 +19,7 @@ package org.springframework.messaging.converter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -57,6 +58,7 @@ public class GenericMessageConverter extends SimpleMessageConverter {
 
 
 	@Override
+	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
 		if (this.conversionService.canConvert(payload.getClass(), targetClass)) {

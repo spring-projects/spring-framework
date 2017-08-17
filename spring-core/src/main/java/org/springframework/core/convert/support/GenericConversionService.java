@@ -168,12 +168,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T> T convert(@Nullable Object source, Class<T> targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
 	@Override
+	@Nullable
 	public Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		if (sourceType == null) {
@@ -426,6 +428,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
+		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return convertNullSource(sourceType, targetType);
@@ -694,6 +697,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
+		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source;
 		}

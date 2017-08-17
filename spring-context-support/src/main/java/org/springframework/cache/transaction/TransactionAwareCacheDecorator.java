@@ -72,6 +72,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper get(Object key) {
 		return this.targetCache.get(key);
 	}
@@ -82,6 +83,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		return this.targetCache.get(key, valueLoader);
 	}
@@ -102,6 +104,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		return this.targetCache.putIfAbsent(key, value);
 	}

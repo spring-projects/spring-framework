@@ -58,16 +58,19 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper get(Object key) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(Object key, @Nullable Class<T> type) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		try {
 			return valueLoader.call();

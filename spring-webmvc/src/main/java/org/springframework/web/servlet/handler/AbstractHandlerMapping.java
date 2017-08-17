@@ -346,6 +346,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getHandlerInternal
 	 */
 	@Override
+	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
@@ -488,6 +489,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		@Override
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
 		}
@@ -511,6 +513,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		@Override
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
 		}

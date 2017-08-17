@@ -52,12 +52,14 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
 	@Override
+	@Nullable
 	public Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);

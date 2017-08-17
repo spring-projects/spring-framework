@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -175,6 +176,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	@Nullable
 	public MessageCodesResolver getMessageCodesResolver() {
 		MessageCodesResolver selected = null;
 		for (WebMvcConfigurer configurer : this.delegates) {

@@ -23,6 +23,8 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link org.springframework.aop.TargetSource} implementation that holds
  * objects in a configurable Apache Commons2 Pool.
@@ -78,6 +80,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	/**
 	 * The Apache Commons {@code ObjectPool} used to pool target objects
 	 */
+	@Nullable
 	private ObjectPool pool;
 
 

@@ -115,6 +115,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	@Override
+	@Nullable
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.state(handler instanceof AsyncHandlerMethodReturnValueHandler,

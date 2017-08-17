@@ -60,7 +60,6 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return Optional.empty();

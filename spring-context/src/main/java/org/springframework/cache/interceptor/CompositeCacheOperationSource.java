@@ -55,6 +55,7 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	@Override
+	@Nullable
 	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		Collection<CacheOperation> ops = null;
 

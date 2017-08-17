@@ -90,6 +90,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 			return new ByteArrayResource(body) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}

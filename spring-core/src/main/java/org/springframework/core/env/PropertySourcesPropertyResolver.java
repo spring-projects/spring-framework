@@ -57,16 +57,19 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	}
 
 	@Override
+	@Nullable
 	public String getProperty(String key) {
 		return getProperty(key, String.class, true);
 	}
 
 	@Override
+	@Nullable
 	public <T> T getProperty(String key, Class<T> targetValueType) {
 		return getProperty(key, targetValueType, true);
 	}
 
 	@Override
+	@Nullable
 	protected String getPropertyAsRawString(String key) {
 		return getProperty(key, String.class, false);
 	}

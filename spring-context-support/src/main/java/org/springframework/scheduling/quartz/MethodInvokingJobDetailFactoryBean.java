@@ -223,6 +223,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 
 	@Override
+	@Nullable
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}

@@ -132,11 +132,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
@@ -148,11 +150,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
@@ -178,11 +182,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
+	@Nullable
 	public String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
 	@Override
+	@Nullable
 	public Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}

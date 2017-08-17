@@ -61,6 +61,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
+	@Nullable
 	protected Object convertToInternal(
 			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 

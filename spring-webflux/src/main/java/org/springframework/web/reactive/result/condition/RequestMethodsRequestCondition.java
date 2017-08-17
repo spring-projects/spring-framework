@@ -103,6 +103,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
+	@Nullable
 	public RequestMethodsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return matchPreFlight(exchange.getRequest());
@@ -129,6 +130,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
+	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(@Nullable HttpMethod httpMethod) {
 		if (httpMethod != null) {
 			for (RequestMethod method : getMethods()) {

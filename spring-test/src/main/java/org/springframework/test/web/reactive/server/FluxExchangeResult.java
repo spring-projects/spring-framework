@@ -21,6 +21,8 @@ import java.time.Duration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@code ExchangeResult} variant with the response body decoded as
  * {@code Flux<T>} but not yet consumed.
@@ -87,6 +89,7 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 * via {@code getResponseBody.ignoreElements()}.
 	 */
 	@Override
+	@Nullable
 	public byte[] getResponseBodyContent() {
 		return this.body.ignoreElements()
 				.timeout(this.timeout, Mono.error(TIMEOUT_ERROR))

@@ -98,6 +98,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
+	@Nullable
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return matchPreFlight(request);

@@ -144,6 +144,7 @@ public class TaskExecutorFactoryBean implements
 
 
 	@Override
+	@Nullable
 	public TaskExecutor getObject() {
 		return this.target;
 	}

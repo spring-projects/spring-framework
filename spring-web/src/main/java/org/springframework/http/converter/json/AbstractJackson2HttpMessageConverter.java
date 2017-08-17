@@ -343,6 +343,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
+	@Nullable
 	protected MediaType getDefaultContentType(Object object) throws IOException {
 		if (object instanceof MappingJacksonValue) {
 			object = ((MappingJacksonValue) object).getValue();

@@ -201,6 +201,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
+	@Nullable
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {

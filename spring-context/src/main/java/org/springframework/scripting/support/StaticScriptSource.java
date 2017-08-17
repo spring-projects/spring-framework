@@ -82,6 +82,7 @@ public class StaticScriptSource implements ScriptSource {
 	}
 
 	@Override
+	@Nullable
 	public String suggestedClassName() {
 		return this.className;
 	}

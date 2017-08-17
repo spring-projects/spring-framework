@@ -285,6 +285,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 
 		@Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			return (this.vars != null ? this.vars.get(placeholderName) : null);
 		}
