@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,12 +159,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 
 		@Override
 		protected boolean matchName(ServerWebExchange exchange) {
-			return exchange.getRequest().getHeaders().get(name) != null;
+			return (exchange.getRequest().getHeaders().get(this.name) != null);
 		}
 
 		@Override
 		protected boolean matchValue(ServerWebExchange exchange) {
-			return value.equals(exchange.getRequest().getHeaders().getFirst(name));
+			return (this.value != null && this.value.equals(exchange.getRequest().getHeaders().getFirst(this.name)));
 		}
 	}
 

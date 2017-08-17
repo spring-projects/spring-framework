@@ -446,14 +446,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-		List<T> result = query(sql, new RowMapperResultSetExtractor<>(rowMapper));
-		Assert.state(result != null, "No result list");
-		return result;
+		return nonNull(query(sql, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
-		return queryForObject(sql, getColumnMapRowMapper());
+		return nonNull(queryForObject(sql, getColumnMapRowMapper()));
 	}
 
 	@Override
@@ -481,9 +479,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql) throws DataAccessException {
-		SqlRowSet result = query(sql, new SqlRowSetResultSetExtractor());
-		Assert.state(result != null, "No SqlRowSet");
-		return result;
+		return nonNull(query(sql, new SqlRowSetResultSetExtractor()));
 	}
 
 	@Override
@@ -798,12 +794,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return queryForObject(sql, args, argTypes, getColumnMapRowMapper());
+		return nonNull(queryForObject(sql, args, argTypes, getColumnMapRowMapper()));
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, @Nullable Object... args) throws DataAccessException {
-		return queryForObject(sql, args, getColumnMapRowMapper());
+		return nonNull(queryForObject(sql, args, getColumnMapRowMapper()));
 	}
 
 	@Override

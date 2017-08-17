@@ -246,12 +246,16 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
+		Map<String, Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
+		Assert.state(result != null, "No result map");
+		return result;
 	}
 
 	@Override
 	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
+		Map<String, Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
+		Assert.state(result != null, "No result map");
+		return result;
 	}
 
 	@Override

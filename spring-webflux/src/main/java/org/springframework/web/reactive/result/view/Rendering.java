@@ -46,6 +46,7 @@ public interface Rendering {
 	/**
 	 * Return the selected {@link String} view name or {@link View} object.
 	 */
+	@Nullable
 	Object view();
 
 	/**
