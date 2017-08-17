@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.sample.beans;
+package org.springframework.aop.support.annotation;
 
-import org.springframework.aop.support.annotation.NopAnnotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- *
- * @author Rod Johnson
+ * @author Laszlo Csontos
  */
-public interface Person {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface NopAnnotation {
 
-	String getName();
+	int value() default 1;
 
-	@NopAnnotation
-	void setName(String name);
 
-	int getAge();
-
-	@NopAnnotation
-	void setAge(int i);
-
-	/**
-	 * Test for non-property method matching. If the parameter is a Throwable, it will be
-	 * thrown rather than returned.
-	 */
-	Object echo(Object o) throws Throwable;
 }
