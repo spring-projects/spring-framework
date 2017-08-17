@@ -14,38 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.support;
+package org.springframework.beans.factory.support;
 
-import java.io.Serializable;
-
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 
 /**
- * Simple serializable class that serves as a {@code null} replacement
- * for cache stores which otherwise do not support {@code null} values.
+ * Internal representation of a null bean instance, e.g. for a {@code null} value
+ * returned from {@link FactoryBean#getObject()} or from a factory method.
+ *
+ * <p>Each such null bean is represented by a dedicated {@code NullBean} instance
+ * which are not equal to each other, uniquely differentiating each bean as returned
+ * from all variants of {@link org.springframework.beans.factory.BeanFactory#getBean}.
+ * However, each such instance will return {@code true} for {@code #equals(null)}
+ * and returns "null" from {@code #toString()}, which is how they can be tested
+ * externally (since this class itself is not public).
  *
  * @author Juergen Hoeller
- * @since 4.2.2
- * @see AbstractValueAdaptingCache
+ * @since 5.0
  */
-public final class NullValue implements Serializable {
+final class NullBean {
 
-	/**
-	 * The canonical representation of a {@code null} replacement, as used by the
-	 * default implementation of {@link AbstractValueAdaptingCache#toStoreValue}/
-	 * {@link AbstractValueAdaptingCache#fromStoreValue}.
-	 * @since 4.3.10
-	 */
-	public static final Object INSTANCE = new NullValue();
-
-	private static final long serialVersionUID = 1L;
-
-
-	private NullValue() {
-	}
-
-	private Object readResolve() {
-		return INSTANCE;
+	NullBean() {
 	}
 
 
@@ -56,7 +46,7 @@ public final class NullValue implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return NullValue.class.hashCode();
+		return NullBean.class.hashCode();
 	}
 
 	@Override

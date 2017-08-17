@@ -72,7 +72,6 @@ public class SimpleThreadScope implements Scope {
 		Object scopedObject = scope.get(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			scope.put(name, scopedObject);
 		}
 		return scopedObject;

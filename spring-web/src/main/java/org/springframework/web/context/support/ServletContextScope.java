@@ -68,7 +68,6 @@ public class ServletContextScope implements Scope, DisposableBean {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			this.servletContext.setAttribute(name, scopedObject);
 		}
 		return scopedObject;

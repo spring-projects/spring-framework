@@ -54,7 +54,6 @@ public class SimpleTransactionScope implements Scope {
 		Object scopedObject = scopedObjects.scopedInstances.get(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			Assert.state(scopedObject != null, "Scoped object resolved to null");
 			scopedObjects.scopedInstances.put(name, scopedObject);
 		}
 		return scopedObject;

@@ -725,7 +725,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		public Object resolveShortcut(BeanFactory beanFactory) {
-			return resolveCandidate(this.shortcut, this.requiredType, beanFactory);
+			return beanFactory.getBean(this.shortcut, this.requiredType);
 		}
 	}
 

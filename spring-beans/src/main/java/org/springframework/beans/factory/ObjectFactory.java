@@ -45,7 +45,6 @@ public interface ObjectFactory<T> {
 	 * @return the resulting instance
 	 * @throws BeansException in case of creation errors
 	 */
-	@Nullable
 	T getObject() throws BeansException;
 
 }

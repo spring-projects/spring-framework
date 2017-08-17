@@ -348,7 +348,6 @@ class ConstructorResolver {
 	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	@Nullable
 	public BeanWrapper instantiateUsingFactoryMethod(
 			final String beanName, final RootBeanDefinition mbd, @Nullable final Object[] explicitArgs) {
 
@@ -576,9 +575,6 @@ class ConstructorResolver {
 						mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 			}
 
-			if (beanInstance == null) {
-				return null;
-			}
 			bw.setBeanInstance(beanInstance);
 			return bw;
 		}
