@@ -18,6 +18,11 @@ package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
@@ -83,6 +88,16 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			public Object getTarget() {
 				Object target = beanFactory.doResolveDependency(descriptor, beanName, null, null);
 				if (target == null) {
+					Class<?> type = getTargetClass();
+					if (Map.class == type) {
+						return Collections.EMPTY_MAP;
+					}
+					else if (List.class == type) {
+						return Collections.EMPTY_LIST;
+					}
+					else if (Set.class == type || Collection.class == type) {
+						return Collections.EMPTY_SET;
+					}
 					throw new NoSuchBeanDefinitionException(descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");
 				}
