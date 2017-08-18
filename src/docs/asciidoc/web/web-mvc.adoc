@@ -196,12 +196,15 @@ And the `web.xml` equivalent:
 [[mvc-servlet-special-bean-types]]
 === Special Bean Types In the WebApplicationContext
 
-The `DispatcherServlet` uses special beans to process requests and render the
-appropriate views. These beans are part of Spring MVC. You can choose which special
-beans to use by simply configuring one or more of them in the `WebApplicationContext`.
-However, you don't need to do that initially since Spring MVC maintains a list of
-default beans to use if you don't configure any. More on that in the next section. First
-see the table below listing the special bean types the `DispatcherServlet` relies on.
+The `DispatcherServlet` delegates to special beans to process requests and render the
+appropriate responses. By "special beans" we mean Spring-managed Object instances that
+implement specific framework contracts listed in the table further below in this section.
+Spring MVC provides built-in implementations of these contracts so all you
+need to do is configure them in your Spring configuration. It is however possible to
+customize, extend, or completely replace those built-in implementations.
+
+The table below lists special bean types the `DispatcherServlet` depends on
+and delegates to.
 
 [[mvc-webappctx-special-beans-tbl]]
 .Special bean types in the WebApplicationContext
@@ -209,33 +212,35 @@ see the table below listing the special bean types the `DispatcherServlet` relie
 | Bean type| Explanation
 
 | <<mvc-handlermapping,HandlerMapping>>
-| Maps incoming requests to handlers and a list of pre- and post-processors (handler
-  interceptors) based on some criteria the details of which vary by `HandlerMapping`
-  implementation. The most popular implementation supports annotated controllers but
-  other implementations exists as well.
+| Map a request to a handler along with a list of `HandlerInterceptor`s for
+  pre- and post-processing. The mapping is based on some criteria the details of
+  which vary by `HandlerMapping` implementation. The most popular implementation
+  supports annotated controllers but other implementations exists as well.
 
 | HandlerAdapter
 | Helps the `DispatcherServlet` to invoke a handler mapped to a request regardless of
-  the handler is actually invoked. For example, invoking an annotated controller
-  requires resolving various annotations. Thus the main purpose of a `HandlerAdapter` is
+  how the handler is actually invoked. For example, invoking an annotated controller
+  requires resolving various annotations. The main purpose of a `HandlerAdapter` is
   to shield the `DispatcherServlet` from such details.
 
 | <<mvc-exceptionhandlers,HandlerExceptionResolver>>
-| Maps exceptions to views also allowing for more complex exception handling code.
+| Strategy to resolve exceptions possibly mapping them to handlers, or to HTML error
+  views, or other.
 
 | <<mvc-viewresolver,ViewResolver>>
-| Resolves logical String-based view names to actual `View` types.
+| Resolves logical String-based view names returned from a handler to an actual `View`
+  to render to the response with.
 
 | <<mvc-localeresolver,LocaleResolver>> & <<mvc-timezone,LocaleContextResolver>>
-| Resolves the locale a client is using and possibly their time zone, in order to be able
+| Resolves the `Locale` a client is using and possibly their time zone, in order to be able
   to offer internationalized views
 
 | <<mvc-themeresolver,ThemeResolver>>
 | Resolves themes your web application can use, for example, to offer personalized layouts
 
 | <<mvc-multipart,MultipartResolver>>
-| Parses multi-part requests for example to support processing file uploads from HTML
-  forms.
+| Abstraction for parsing a multi-part request (e.g. browser form file upload) with
+  the help of some multipart parsing library.
 
 | <<mvc-flash-attributes,FlashMapManager>>
 | Stores and retrieves the "input" and the "output" `FlashMap` that can be used to pass
@@ -245,35 +250,31 @@ see the table below listing the special bean types the `DispatcherServlet` relie
 
 
 [[mvc-servlet-config]]
-=== Default DispatcherServlet Configuration
-As mentioned in the previous section for each special bean the `DispatcherServlet`
-maintains a list of implementations to use by default. This information is kept in the
-file `DispatcherServlet.properties` in the package `org.springframework.web.servlet`.
+=== `DispatcherServlet` Configuration
+There are more than one ways to actually configure the `DispatcherServlet` with the special
+bean types listed in the previous section.
 
-All special beans have some reasonable defaults of their own. Sooner or later though
-you'll need to customize one or more of the properties these beans provide. For example
-it's quite common to configure an `InternalResourceViewResolver` settings its `prefix`
-property to the parent location of view files.
+If there are no beans of a given type in the `WebApplicationContext` by default the
+`DispatcherServlet` will refer to a list of default implementations to use in the file
+https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[DispatcherServlet.properties].
 
-Regardless of the details, the important concept to understand here is that once
-you	configure a special bean such as an `InternalResourceViewResolver` in your
-`WebApplicationContext`, you effectively override the list of default implementations
-that would have been used otherwise for that special bean type. For example if you
-configure an `InternalResourceViewResolver`, the default list of `ViewResolver`
-implementations is ignored.
+Applications can explicitly declare the special beans to use to take over the defaults.
+However for most applications the MVC Java config or the MVC XML namespace are the
+best starting point. Each creates the necessary Spring configuration for the
+`DispatcherServlet` and also provide a higher-level API to configure Spring MVC without
+having to understand all the details. See <<mvc-config>> for more details.
 
-In <<mvc-config>> you'll learn about other options for configuring Spring MVC including
-MVC Java config and the MVC XML namespace both of which provide a simple starting point
-and assume little knowledge of how Spring MVC works. Regardless of how you choose to
-configure your application, the concepts explained in this section are fundamental and
-should be of help to you.
+[NOTE]
+====
+Spring Boot uses the MVC Java config to configure Spring MVC and provides many
+extra options and conveniences on top.
+====
 
 
 
 [[mvc-servlet-sequence]]
 === DispatcherServlet Processing Sequence
-After you set up a `DispatcherServlet`, and a request comes in for that specific
-`DispatcherServlet`, the `DispatcherServlet` starts processing the request as follows:
+The `DispatcherServlet` processes requests as follows:
 
 * The `WebApplicationContext` is searched for and bound in the request as an attribute
   that the controller and other elements in the process can use. It is bound by default
@@ -289,14 +290,16 @@ After you set up a `DispatcherServlet`, and a request comes in for that specific
   information about multipart handling.
 * An appropriate handler is searched for. If a handler is found, the execution chain
   associated with the handler (preprocessors, postprocessors, and controllers) is
-  executed in order to prepare a model or rendering.
+  executed in order to prepare a model or rendering. Or alternatively for annotated
+  controllers, the response may be rendered (within the `HandlerAdapter`) instead of
+  returning a view.
 * If a model is returned, the view is rendered. If no model is returned, (may be due to
   a preprocessor or postprocessor intercepting the request, perhaps for security
   reasons), no view is rendered, because the request could already have been fulfilled.
 
-Handler exception resolvers that are declared in the `WebApplicationContext` pick up
-exceptions that are thrown during processing of the request. Using these exception
-resolvers allows you to define custom behaviors to address exceptions.
+The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are used to
+resolve exceptions thrown during request processing. Those exception resolvers allow
+customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
 The Spring `DispatcherServlet` also supports the return of the
 __last-modification-date__, as specified by the Servlet API. The process of determining
