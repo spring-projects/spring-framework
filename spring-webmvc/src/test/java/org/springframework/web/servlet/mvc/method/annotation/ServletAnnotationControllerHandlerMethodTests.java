@@ -1729,10 +1729,10 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("param1", "value1");
-		request.addParameter("param2", "2");
+		request.addParameter("param2", "true");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-2-0", response.getContentAsString());
+		assertEquals("value1-true-0", response.getContentAsString());
 	}
 
 	@Test
@@ -1741,11 +1741,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("param1", "value1");
-		request.addParameter("param2", "2");
+		request.addParameter("param2", "true");
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-2-3", response.getContentAsString());
+		assertEquals("value1-true-3", response.getContentAsString());
 	}
 
 	@Test
@@ -1754,11 +1754,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("param1", "value1");
-		request.addParameter("param2", "2");
+		request.addParameter("param2", "true");
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-2-3", response.getContentAsString());
+		assertEquals("value1-true-3", response.getContentAsString());
 	}
 
 	@Test
@@ -1777,7 +1777,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		initServletWithControllers(ValidatedDataClassController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
-		request.addParameter("param2", "2");
+		request.addParameter("param2", "true");
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
@@ -1790,11 +1790,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("param1", "value1");
-		request.addParameter("param2", "2");
+		request.addParameter("param2", "true");
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-2-3", response.getContentAsString());
+		assertEquals("value1-true-3", response.getContentAsString());
 	}
 
 	@Test
@@ -1806,6 +1806,56 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertTrue(response.getContentAsString().contains("field 'param2'"));
+	}
+
+	@Test
+	public void dataClassBindingWithFieldMarker() throws Exception {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("_param2", "on");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-true-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithFieldMarkerFallback() throws Exception {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("_param2", "on");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-false-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithFieldDefault() throws Exception {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("!param2", "false");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-true-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithFieldDefaultFallback() throws Exception {
+		initServletWithControllers(DataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("!param2", "false");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-false-0", response.getContentAsString());
 	}
 
 
@@ -3336,12 +3386,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@NotNull
 		public final String param1;
 
-		public final int param2;
+		public final boolean param2;
 
 		public int param3;
 
 		@ConstructorProperties({"param1", "param2"})
-		public DataClass(String param1, int p2) {
+		public DataClass(String param1, boolean p2) {
 			this.param1 = param1;
 			this.param2 = p2;
 		}

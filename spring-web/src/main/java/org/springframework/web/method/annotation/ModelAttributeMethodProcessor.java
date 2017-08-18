@@ -241,14 +241,30 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Class<?>[] paramTypes = ctor.getParameterTypes();
 		Assert.state(paramNames.length == paramTypes.length,
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
+
 		Object[] args = new Object[paramTypes.length];
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName);
+		String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
+		String fieldMarkerPrefix = binder.getFieldMarkerPrefix();
 		boolean bindingFailure = false;
+
 		for (int i = 0; i < paramNames.length; i++) {
-			String[] paramValues = webRequest.getParameterValues(paramNames[i]);
+			String paramName = paramNames[i];
+			Class<?> paramType = paramTypes[i];
+			Object value = webRequest.getParameterValues(paramName);
+			if (value == null) {
+				if (fieldDefaultPrefix != null) {
+					value = webRequest.getParameter(fieldDefaultPrefix + paramName);
+				}
+				if (value == null && fieldMarkerPrefix != null) {
+					if (webRequest.getParameter(fieldMarkerPrefix + paramName) != null) {
+						value = binder.getEmptyValue(paramType);
+					}
+				}
+			}
 			try {
-				args[i] = (paramValues != null ?
-						binder.convertIfNecessary(paramValues, paramTypes[i], new MethodParameter(ctor, i)) : null);
+				args[i] = (value != null ?
+						binder.convertIfNecessary(value, paramType, new MethodParameter(ctor, i)) : null);
 			}
 			catch (TypeMismatchException ex) {
 				bindingFailure = true;
@@ -257,6 +273,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 						new String[] {ex.getErrorCode()}, null, ex.getLocalizedMessage()));
 			}
 		}
+
 		if (bindingFailure) {
 			throw new BindException(binder.getBindingResult());
 		}
