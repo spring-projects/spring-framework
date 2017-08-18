@@ -1,5 +1,5 @@
 [[cors]]
-= Spring Web MVC CORS Support
+= Spring MVC CORS Support
 
 == Introduction
 

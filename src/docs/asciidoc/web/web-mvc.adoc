@@ -3,14 +3,15 @@
 :doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 [[mvc-introduction]]
-== Introduction to Spring Web MVC
+== Introduction
 Spring Web MVC is the Servlet-based, web framework included in the Spring Framework.
 Its name is based on the name of the module, "spring-webmvc", but most people call
 it simply Spring MVC.
 
 The Spring Framework also includes the reactive, <<webflux,Spring WebFlux>>
-web framework that runs on on Servlet containers via Servlet 3.1 non-blocking I/O
-as well as on other non-blocking runtimes such as Netty and Undertow.
+web framework that does not depend on the Servlet API but can run on Servlet containers
+(via Servlet 3.1 non-blocking I/O) or on other non-blocking runtimes such as
+Netty or Undertow.
 
 
 
@@ -25,18 +26,18 @@ and exception handling facilities.
 The `DispatcherServlet` provides the shared algorithm for processing requests while
 actual work is performed by configurable, delegate components. This model is very
 flexible and it can be used with just about any workflow, with the installation of the
-appropriate delegate components
-(see <<mvc-servlet-special-bean-types,Special Bean Types>>).
+appropriate delegate components.
 
 The `DispatcherServlet` uses Spring configuration to discover the delegate components
-it needs to perform handler mapping, view resolution, and much more. As an actual
-`Servlet` it needs to be declared and mapped according to the Servlet specification.
-This can be done through code configuration or in`web.xml`.
+it needs to perform handler mapping, view resolution, and much more
+(see <<mvc-servlet-special-bean-types,Special Bean Types>>). As an actual
+`Servlet` it also needs to be declared and mapped according to the Servlet specification.
+This can be done through code-based configuration or in `web.xml`.
 
-Below is an example of code-based configuration where `WebApplicationInitializer` is an
-interface provided by Spring MVC that ensures this Java-based configuration is
-auto-detected by the Servlet container (see
-<<mvc-container-config,Code-based Servlet container initialization>> for more details):
+Below is an example of code-based configuration. Note that `WebApplicationInitializer` is
+an interface provided by Spring MVC that ensures it is auto-detected by the Servlet
+container (see <<mvc-container-config,Code-based, Servlet container initialization>>
+for more details):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -65,8 +66,8 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
 In addition to using the ServletContext API directly as shown above, you can also extend
 the convenient base class `AbstractAnnotationConfigDispatcherServletInitializer` and
-override specific methods to customize it (an example is shown later under
-<<mvc-servlet-context-hierarchy,WebApplicationContext Hierarchy>>).
+override specific methods to customize it. An example of that is shown in the next
+section <<mvc-servlet-context-hierarchy,WebApplicationContext Hierarchy>>.
 
 Below is the `web.xml` equivalent of the above code-based example:
 
@@ -106,20 +107,6 @@ Below is the `web.xml` equivalent of the above code-based example:
 [[mvc-servlet-context-hierarchy]]
 === WebApplicationContext Hierarchy
 
-For many applications, a single `WebApplicationContext` is simple and sufficient.
-It is also possible to set up a context hierarchy where one root `WebApplicationContext`
-is shared across multiple `DispatcherServlet` (or other `Servlet`) instances each with
-its own `WebApplicationContext` configuration
-(see <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>
-for more details).
-
-The root `WebApplicationContext` contains infrastructure beans (e.g. data repositories,
-business services) that need to be shared across multiple Servlet instances. These beans
-are effectively inherited and can be overridden (re-declared) in the Servlet-specific
-context, which also contains beans local to the given `Servlet`.
-
-image::images/mvc-context-hierarchy.png[]
-
 [NOTE]
 ====
 `WebApplicationContext` is an extension of the plain `ApplicationContext` that has
@@ -131,7 +118,22 @@ a link to the `ServletContext`). `WebApplicationContext` is bound to the
 always look up the `WebApplicationContext` if you need access to it.
 ====
 
-Below is an example of configuration that sets up a `WebApplicationContext` hierarchy:
+For many applications, a single `WebApplicationContext` is simple and sufficient.
+However it is also possible to set up a context hierarchy where one root `WebApplicationContext`
+is shared across multiple `DispatcherServlet` instances, or other `Servlet`, each with
+its own `WebApplicationContext` configuration --
+see <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>
+for more on the context hierarchy feature of Spring.
+
+The root `WebApplicationContext` should contain infrastructure beans, e.g. data repositories or
+business services, that need to be shared across multiple `Servlet` instances. These beans
+are effectively inherited and could be overridden, or rather re-declared, in the Servlet-specific
+`WebApplicationContext` which for the most part contains beans local to the given `Servlet`
+as shown in the below diagram:
+
+image::images/mvc-context-hierarchy.png[]
+
+Below is example configuration of how to set up a `WebApplicationContext` hierarchy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -155,7 +157,7 @@ Below is an example of configuration that sets up a `WebApplicationContext` hier
   }
 ----
 
-Below is the `web.xml` equivalent:
+And the `web.xml` equivalent:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3624,7 +3626,7 @@ request with a simple request parameter.
 
 
 [[mvc-multipart]]
-== Spring's multipart (file upload) support
+== Multipart (file upload) support
 
 
 
