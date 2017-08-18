@@ -947,7 +947,7 @@ All matrix variables may be obtained in a Map:
 			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
-		// petMatrixVars: ["q" : 11, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
 
 	}
 ----
