@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Encapsulates a remote invocation result, holding a result value or an exception.

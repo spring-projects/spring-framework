@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;

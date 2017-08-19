@@ -18,8 +18,6 @@ package org.springframework.messaging.simp.user;
 
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Represents a session of connected user.
  *

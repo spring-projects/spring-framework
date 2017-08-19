@@ -32,7 +32,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
