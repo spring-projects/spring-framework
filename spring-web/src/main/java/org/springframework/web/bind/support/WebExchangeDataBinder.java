@@ -81,12 +81,16 @@ public class WebExchangeDataBinder extends WebDataBinder {
 		return extractValuesToBind(exchange);
 	}
 
+
 	/**
 	 * Combine query params and form data for multipart form data from the body
 	 * of the request into a {@code Map<String, Object>} of values to use for
 	 * data binding purposes.
 	 * @param exchange the current exchange
 	 * @return a {@code Mono} with the values to bind
+	 * @see org.springframework.http.server.reactive.ServerHttpRequest#getQueryParams()
+	 * @see ServerWebExchange#getFormData()
+	 * @see ServerWebExchange#getMultipartData()
 	 */
 	public static Mono<Map<String, Object>> extractValuesToBind(ServerWebExchange exchange) {
 		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();

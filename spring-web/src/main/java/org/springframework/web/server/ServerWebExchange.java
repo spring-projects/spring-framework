@@ -30,7 +30,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.i18n.LocaleContextResolver;
 
 /**
  * Contract for an HTTP request-response interaction. Provides access to the HTTP
@@ -131,7 +130,8 @@ public interface ServerWebExchange {
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
-	 * Return the {@link LocaleContext} using the configured {@link LocaleContextResolver}.
+	 * Return the {@link LocaleContext} using the configured
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
 	 */
 	LocaleContext getLocaleContext();
 
