@@ -59,7 +59,7 @@ import org.springframework.util.ClassUtils;
 public class MethodParameter {
 
 	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
+			ClassUtils.isPresent("kotlin.Metadata", MethodParameter.class.getClassLoader());
 
 
 	private final Executable executable;

@@ -70,9 +70,19 @@ public abstract class BeanUtils {
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", BeanUtils.class.getClassLoader());
-	
+	@Nullable
+	private static Class<?> kotlinMetadata;
+
+	static {
+		try {
+			kotlinMetadata = ClassUtils.forName("kotlin.Metadata", BeanUtils.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Kotlin API not available - no special support for Kotlin class instantiation
+			kotlinMetadata = null;
+		}
+	}
+
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -115,7 +125,7 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			Constructor<T> ctor = (kotlinPresent && isKotlinClass(clazz) ?
+			Constructor<T> ctor = (isKotlinClass(clazz) ?
 					KotlinDelegate.findPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
 			if (ctor == null) {
 				throw new BeanInstantiationException(clazz, "No default constructor found");
@@ -152,8 +162,8 @@ public abstract class BeanUtils {
 	 * non-accessible (that is, non-public) constructor, and supports Kotlin classes
 	 * with optional parameters and default values.
 	 * @param ctor the constructor to instantiate
-	 * @param args the constructor arguments to apply (use null for unspecified parameter
-	 * if needed for Kotlin classes with optional parameters and default values)
+	 * @param args the constructor arguments to apply (use {@code null} for an unspecified
+	 * parameter if needed for Kotlin classes with optional parameters and default values)
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 * @see Constructor#newInstance
@@ -162,7 +172,8 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return (kotlinPresent && isKotlinClass(ctor.getDeclaringClass()) ? KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
+			return (isKotlinClass(ctor.getDeclaringClass()) ?
+					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
 			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
@@ -329,8 +340,7 @@ public abstract class BeanUtils {
 	@Nullable
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		Constructor<T> ctor = null;
-		if (kotlinPresent && isKotlinClass(clazz)) {
+		if (isKotlinClass(clazz)) {
 			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		else {
@@ -699,13 +709,10 @@ public abstract class BeanUtils {
 	/**
 	 * Return true if the specified class is a Kotlin one.
 	 */
+	@SuppressWarnings("unchecked")
 	private static boolean isKotlinClass(Class<?> clazz) {
-		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-			if (annotation.annotationType().getName().equals("kotlin.Metadata")) {
-				return true;
-			}
-		}
-		return false;
+		return (kotlinMetadata != null &&
+				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
 	
 
@@ -717,7 +724,8 @@ public abstract class BeanUtils {
 		/**
 		 * Return the Java constructor corresponding to the Kotlin primary constructor if any.
 		 * @param clazz the {@link Class} of the Kotlin class
-		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">http://kotlinlang.org/docs/reference/classes.html#constructors</a>
+		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">
+		 *     http://kotlinlang.org/docs/reference/classes.html#constructors</a>
 		 */
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
@@ -726,7 +734,8 @@ public abstract class BeanUtils {
 				return null;
 			}
 			Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
-			Assert.notNull(constructor, "Can't get the Java constructor corresponding to the Kotlin primary constructor of " + clazz.getName());
+			Assert.notNull(constructor,
+					() -> "Failed to find Java constructor corresponding to Kotlin primary constructor: " + clazz.getName());
 			return constructor;
 		}
 
@@ -735,14 +744,16 @@ public abstract class BeanUtils {
 		 * @param ctor the constructor of the Kotlin class to instantiate
 		 * @param args the constructor arguments to apply (use null for unspecified parameter if needed)
 		 */
-		public static <T> T instantiateClass(Constructor<T> ctor, Object... args) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+		public static <T> T instantiateClass(Constructor<T> ctor, Object... args)
+				throws IllegalAccessException, InvocationTargetException, InstantiationException {
+
 			KFunction<T> kotlinConstructor = ReflectJvmMapping.getKotlinFunction(ctor);
 			if (kotlinConstructor == null) {
 				return ctor.newInstance(args);
 			}
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
-			Assert.isTrue(args.length <= parameters.size(), 
+			Assert.isTrue(args.length <= parameters.size(),
 					"The number of provided arguments should be less of equals than the number of constructor parameters");
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && (args[i] == null))) {

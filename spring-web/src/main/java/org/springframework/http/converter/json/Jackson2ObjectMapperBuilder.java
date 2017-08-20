@@ -772,7 +772,7 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		// Kotlin present?
-		if (ClassUtils.isPresent("kotlin.Unit", this.moduleClassLoader)) {
+		if (ClassUtils.isPresent("kotlin.Metadata", this.moduleClassLoader)) {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);

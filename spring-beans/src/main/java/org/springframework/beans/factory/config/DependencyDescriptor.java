@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
 
 	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Unit", DependencyDescriptor.class.getClassLoader());
+			ClassUtils.isPresent("kotlin.Metadata", DependencyDescriptor.class.getClassLoader());
 
 
 	private final Class<?> declaringClass;
