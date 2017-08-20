@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.validation.Valid;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +45,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
 import static org.junit.Assert.*;
 
@@ -219,7 +219,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 			invocations.put("simpleString", true);
 		}
 
-		public void payloadValidation(@Payload @Valid String value) {
+		public void payloadValidation(@Payload @Validated String value) {
 			invocations.put("payloadValidation", true);
 		}
 

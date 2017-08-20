@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import javax.cache.spi.CachingProvider;
  * Just here to be run against EHCache 3, whereas the original JCacheEhCacheAnnotationTests
  * runs against EhCache 2.x with the EhCache-JCache add-on.
  *
- * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
-public class JCacheEhCache3ApiTests extends JCacheEhCacheApiTests {
+public class JCacheEhCache3AnnotationTests extends JCacheEhCacheAnnotationTests {
 
 	@Override
 	protected CachingProvider getCachingProvider() {
