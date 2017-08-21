@@ -15,7 +15,13 @@ buildscript {
 }
 
 plugins {
+	id "com.gradle.build-scan" version "1.8"
 	id "org.sonarqube" version "2.5"
+}
+
+buildScan {
+	licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+	licenseAgree = 'yes'
 }
 
 ext {
