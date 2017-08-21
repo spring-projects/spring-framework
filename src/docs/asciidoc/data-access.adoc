@@ -1572,10 +1572,10 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 		<!-- this is the aspect -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			<property name="order" __value="1"__/>
+			<property name="order" value="1"/>
 		</bean>
 
-		<tx:annotation-driven transaction-manager="txManager" __order="200"__/>
+		<tx:annotation-driven transaction-manager="txManager" order="200"/>
 
 		<aop:config>
 				<!-- this advice will execute around the transactional advice -->
@@ -1628,14 +1628,14 @@ declarative approach.
 		<!-- the profiling advice -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
 			<!-- execute before the transactional advice (hence the lower order number) -->
-			__<property name="order" value="1__"/>
+			<property name="order" value="1"/>
 		</bean>
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
 			<!-- will execute after the profiling advice (c.f. the order attribute) -->
 
-			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" __order="2__"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
 
 			<aop:aspect id="profilingAspect" ref="profiler">
