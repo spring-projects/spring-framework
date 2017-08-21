@@ -54,7 +54,11 @@ asciidoctor {
 		include '*.adoc'
 	}
 	logDocuments = true
-	backends = ["html5", "pdf"]
+	backends = ["html5"]
+	// only ouput PDF documentation for non-SNAPSHOT builds
+	if(!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
+		backends += "pdf"
+	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes  'icons': 'font',
 			'idprefix': '',
