@@ -1,0 +1,21 @@
+description = "Spring Framework (Bill of Materials)"
+
+dependencyManagement {
+	generatedPomCustomization {
+		enabled = false
+	}
+}
+
+configurations.archives.artifacts.clear()
+artifacts {
+	// work around GRADLE-2406 by attaching text artifact
+	archives(file("spring-framework-bom.txt"))
+}
+
+install {
+	repositories.mavenInstaller {
+		pom.whenConfigured {
+			packaging = "pom"
+		}
+	}
+}
