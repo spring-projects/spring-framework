@@ -44,7 +44,7 @@ task sniff {
 	dependsOn compileJava
 	dependsOn copyJavaApiSignature
 
-	inputs.dir sourceSets.main.output.classesDir
+	sourceSets.main.output.classesDirs.each { inputs.dir it }
 	inputs.dir copyJavaApiSignature.to
 
 	doLast {

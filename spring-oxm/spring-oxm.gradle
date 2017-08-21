@@ -95,28 +95,6 @@ task genJaxb {
 	}
 }
 
-// JiBX compiler is currently not compatible with JDK 9
-if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
-	compileTestJava {
-		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
-
-		doLast() {
-			project.ant {
-				taskdef(name: "jibx",
-						classname: "org.jibx.binding.ant.CompileTask",
-						classpath: configurations.jibx.asPath)
-
-				jibx(verbose: true, load: true, binding: bindingXml) {
-					classpathset(dir: sourceSets.test.output.classesDir) {
-						include(name: "**/jibx/**/*")
-					}
-				}
-			}
-		}
-	}
-}
-
-
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
@@ -142,4 +120,25 @@ dependencies {
 	testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
 	testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 	testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
+}
+
+// JiBX compiler is currently not compatible with JDK 9
+if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+	compileTestJava {
+		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+
+		doLast() {
+			project.ant {
+				taskdef(name: "jibx",
+						classname: "org.jibx.binding.ant.CompileTask",
+						classpath: configurations.jibx.asPath)
+
+				jibx(verbose: true, load: true, binding: bindingXml) {
+					classpathset(dir: sourceSets.test.java.outputDir) {
+						include(name: "**/jibx/**/*")
+					}
+				}
+			}
+		}
+	}
 }

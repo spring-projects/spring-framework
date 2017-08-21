@@ -18,7 +18,7 @@ compileJava  {
 	actions = []
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
 
-	def outputDir = project.sourceSets.main.output.classesDir
+	def outputDir = project.sourceSets.main.java.outputDir
 
 	inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
 	outputs.dir outputDir
@@ -54,7 +54,7 @@ compileTestJava  {
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
 	dependsOn jar
 
-	def outputDir = project.sourceSets.test.output.classesDir
+	def outputDir = project.sourceSets.test.java.outputDir
 
 	inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
 	outputs.dir outputDir
