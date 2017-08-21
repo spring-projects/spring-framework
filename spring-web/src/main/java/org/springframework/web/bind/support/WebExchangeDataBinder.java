@@ -97,7 +97,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 		Mono<MultiValueMap<String, String>> formData = exchange.getFormData();
 		Mono<MultiValueMap<String, Part>> multipartData = exchange.getMultipartData();
 
-		return Mono.when(Mono.just(queryParams), formData, multipartData)
+		return Mono.zip(Mono.just(queryParams), formData, multipartData)
 				.map(tuple -> {
 					Map<String, Object> result = new TreeMap<>();
 					tuple.getT1().forEach((key, values) -> addBindValue(result, key, values));

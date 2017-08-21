@@ -154,7 +154,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					.collect(Collectors.toList());
 
 			// Create Mono with array of resolved values...
-			return Mono.when(argMonos, argValues ->
+			return Mono.zip(argMonos, argValues ->
 					Stream.of(argValues).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
 		}
 		catch (Throwable ex) {

@@ -73,7 +73,7 @@ class ModelInitializer {
 		List<Mono<HandlerResult>> resultList = new ArrayList<>();
 		attributeMethods.forEach(invocable -> resultList.add(invocable.invoke(exchange, bindingContext)));
 
-		return Mono.when(resultList, objectArray -> {
+		return Mono.zip(resultList, objectArray -> {
 			return Arrays.stream(objectArray)
 					.map(object -> (HandlerResult) object)
 					.map(handlerResult -> handleResult(handlerResult, bindingContext))
