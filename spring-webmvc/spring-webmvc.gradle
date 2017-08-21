@@ -1,5 +1,17 @@
 description = "Spring Web MVC"
 
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+	}
+	resolutionStrategy {
+		cacheChangingModulesFor 0, 'seconds'
+	}
+	applyMavenExclusions = false
+}
+
 dependencies {
 	provided("javax.servlet:javax.servlet-api:4.0.0")
 	compile(project(":spring-aop"))

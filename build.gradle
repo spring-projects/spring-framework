@@ -90,13 +90,6 @@ configure(allprojects) { project ->
 	configurations.all {
 		// Check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-
-		// Consistent netty version (e.g. clashes between netty-all vs netty-common)
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.group == 'io.netty') {
-				details.useVersion nettyVersion
-			}
-		}
 	}
 
 	compileJava.options*.compilerArgs = [
@@ -185,18 +178,6 @@ configure(allprojects) { project ->
 
 configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
-	apply plugin: "io.spring.dependency-management"
-
-	dependencyManagement {
-		imports {
-			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
-			mavenBom "io.netty:netty-bom:${nettyVersion}"
-		}
-		resolutionStrategy {
-			cacheChangingModulesFor 0, 'seconds'
-		}
-		applyMavenExclusions = false
-	}
 
 	configurations {
 		jacoco
