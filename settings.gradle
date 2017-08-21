@@ -12,7 +12,6 @@ pluginManagement {
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"
-include "spring-beans-groovy"
 include "spring-context"
 include "spring-context-support"
 include "spring-context-indexer"

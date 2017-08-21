@@ -184,7 +184,6 @@ configure(allprojects) { project ->
 }
 
 configure(subprojects - project(":spring-build-src")) { subproject ->
-	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 	apply plugin: "io.spring.dependency-management"
 
@@ -376,47 +375,6 @@ project("spring-core") {
 		from(zipTree(objenesisRepackJar.archivePath)) {
 			include "org/springframework/objenesis/**"
 		}
-	}
-}
-
-project("spring-beans") {
-	description = "Spring Beans"
-
-	dependencies {
-		compile(project(":spring-core"))
-		compile(files(project(":spring-core").cglibRepackJar))
-		optional("javax.inject:javax.inject:1")
-		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		optional("org.yaml:snakeyaml:1.18")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	}
-}
-
-project("spring-beans-groovy") {
-	description "Groovy Bean Definitions"
-
-	merge.into = project(":spring-beans")
-	apply plugin: "groovy"
-
-	dependencies {
-		compile(project(":spring-core"))
-		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
-	}
-
-	// This module's Java and Groovy sources need to be compiled together.
-	compileJava.enabled = false
-	sourceSets {
-		main {
-			groovy {
-				srcDir "src/main/java"
-			}
-		}
-	}
-
-	compileGroovy {
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
 	}
 }
 
@@ -1110,23 +1068,6 @@ project("spring-framework-bom") {
 		repositories.mavenInstaller {
 			pom.whenConfigured {
 				packaging = "pom"
-				withXml {
-					asNode().children().last() + {
-						delegate.dependencyManagement {
-							delegate.dependencies {
-								parent.subprojects.sort { "$it.name" }.each { p ->
-									if (p.hasProperty("merge") && p.merge.into == null && p != project) {
-										delegate.dependency {
-											delegate.groupId(p.group)
-											delegate.artifactId(p.name)
-											delegate.version(p.version)
-										}
-									}
-								}
-							}
-						}
-					}
-				}
 			}
 		}
 	}
@@ -1151,7 +1092,6 @@ configure(rootProject) {
 
 	apply plugin: "groovy"
 	apply plugin: "io.spring.dependency-management"
-	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 	apply from: "${gradleScriptDir}/docs.gradle"
 
