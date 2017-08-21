@@ -14,27 +14,6 @@
  *  limitations under the License.
  */
 
-asciidoctor {
-	sources {
-		include '*.adoc'
-	}
-	logDocuments = true
-	backends = ["html5", "pdf"]
-	options doctype: 'book', eruby: 'erubis'
-	attributes  'icons': 'font',
-				'idprefix': '',
-				'idseparator': '-',
-				docinfo: '',
-				revnumber: project.version,
-				sectanchors: '',
-				sectnums: '',
-				'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
-				stylesdir: 'stylesheets/',
-				stylesheet: 'spring.css',
-				'spring-version': project.version
-
-}
-
 task api(type: Javadoc) {
 	group = "Documentation"
 	description = "Generates aggregated Javadoc API documentation."
@@ -70,7 +49,28 @@ task api(type: Javadoc) {
 	}
 }
 
-task docsZip(type: Zip, dependsOn: 'asciidoctor') {
+asciidoctor {
+	sources {
+		include '*.adoc'
+	}
+	logDocuments = true
+	backends = ["html5", "pdf"]
+	options doctype: 'book', eruby: 'erubis'
+	attributes  'icons': 'font',
+			'idprefix': '',
+			'idseparator': '-',
+			docinfo: '',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
+			stylesdir: 'stylesheets/',
+			stylesheet: 'spring.css',
+			'spring-version': project.version
+
+}
+
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor']) {
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "docs"
@@ -119,6 +119,7 @@ task schemaZip(type: Zip) {
 }
 
 task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "dist"
@@ -155,6 +156,8 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		}
 	}
 }
+
+distZip.mustRunAfter subprojects.test
 
 // Create a distribution that contains all dependencies (required and optional).
 // Not published by default; only for use when building from source.
