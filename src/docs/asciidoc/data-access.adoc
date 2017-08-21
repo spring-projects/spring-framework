@@ -1552,7 +1552,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 ----
 
 [source,xml,indent=0]
-[subs="verbatim"]
+[subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1608,7 +1608,7 @@ The following example effects the same setup as above, but uses the purely XML
 declarative approach.
 
 [source,xml,indent=0]
-[subs="verbatim"]
+[subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
