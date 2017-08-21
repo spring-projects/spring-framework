@@ -14,8 +14,6 @@
  *  limitations under the License.
  */
 
-apply plugin: "org.asciidoctor.convert"
-
 asciidoctor {
 	sources {
 		include '*.adoc'

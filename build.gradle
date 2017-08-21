@@ -1,21 +1,21 @@
 buildscript {
-	ext.kotlinVersion = '1.1.4'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
-		classpath("io.spring.gradle:dependency-management-plugin:1.0.0.RELEASE")
 		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
 		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.14")
 		classpath("org.asciidoctor:asciidoctorj-epub3:1.5.0-alpha.6")
 	}
 }
 
+// 3rd party plugin repositories can be configured in settings.gradle
 plugins {
 	id "com.gradle.build-scan" version "1.8"
+	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.1.4" apply false
+	id "org.asciidoctor.convert" version "1.5.3"
 	id "org.sonarqube" version "2.5"
 }
 
@@ -55,6 +55,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion  = '5.0.0-RC2'
 	ext.junitPlatformVersion = '1.0.0-RC2'
 	ext.junitVintageVersion  = "4.12.0-RC2"
+	ext.kotlinVersion        = '1.1.4'
 	ext.log4jVersion         = '2.8.2'
 	ext.nettyVersion         = "4.1.14.Final"
 	ext.okhttp3Version       = "3.8.1"
