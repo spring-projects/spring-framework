@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.ConstructorProperties;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -31,6 +32,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
@@ -65,6 +71,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Mark Fisher
  * @author Costin Leau
+ * @author Sebastien Deleuze
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
@@ -74,6 +81,22 @@ class ConstructorResolver {
 
 	private static final NamedThreadLocal<InjectionPoint> currentInjectionPoint =
 			new NamedThreadLocal<>("Current injection point");
+
+	@Nullable
+	private static final Class<?> kotlinMetadata;
+
+	static {
+		Class<?> metadata;
+		try {
+			metadata = ClassUtils.forName("kotlin.Metadata", ConstructorResolver.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Kotlin API not available - no Kotlin support
+			metadata = null;
+		}
+		kotlinMetadata = metadata;
+	}
+
 
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
@@ -805,10 +828,19 @@ class ConstructorResolver {
 			}
 			return injectionPoint;
 		}
+		boolean required = !(useKotlinSupport(param.getContainingClass()) && KotlinDelegate.isOptional(param));
 		return this.beanFactory.resolveDependency(
-				new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
+				new DependencyDescriptor(param, required), beanName, autowiredBeanNames, typeConverter);
 	}
 
+	/**
+	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
+	 */
+	@SuppressWarnings("unchecked")
+	private static boolean useKotlinSupport(Class<?> clazz) {
+		return (kotlinMetadata != null &&
+				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
+	}
 
 	static InjectionPoint setCurrentInjectionPoint(@Nullable InjectionPoint injectionPoint) {
 		InjectionPoint old = currentInjectionPoint.get();
@@ -913,6 +945,39 @@ class ConstructorResolver {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		/**
+		 * Check whether the specified {@link MethodParameter} represents an optional Kotlin parameter or not.
+		 */
+		public static boolean isOptional(MethodParameter param) {
+			Method method = param.getMethod();
+			Constructor<?> ctor = param.getConstructor();
+			int index = param.getParameterIndex();
+			KFunction<?> function = null;
+			if (method != null) {
+				function = ReflectJvmMapping.getKotlinFunction(method);
+			}
+			else if (ctor != null) {
+				function = ReflectJvmMapping.getKotlinFunction(ctor);
+			}
+			if (function != null) {
+				List<KParameter> parameters = function.getParameters();
+				return parameters
+						.stream()
+						.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+						.collect(Collectors.toList())
+						.get(index)
+						.isOptional();
+			}
+			return false;
+		}
+
 	}
 
 }
