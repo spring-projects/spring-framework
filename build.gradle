@@ -90,17 +90,19 @@ configure(allprojects) { project ->
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 	}
 
-	def compilerArgs = [
-			"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
-			"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
-			"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
-			"-Xlint:try", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
-			"-Xlint:unchecked", "-Xlint:-options"
+	def commonCompilerArgs = [
+			"-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
+			"-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
+			"-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options"
 			]
 
-	compileJava.options*.compilerArgs = compilerArgs + "-Werror"
+	compileJava.options*.compilerArgs = commonCompilerArgs +
+			["-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes",
+			 "-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
 
-	compileTestJava.options*.compilerArgs = compilerArgs
+	compileTestJava.options*.compilerArgs = commonCompilerArgs +
+			["-Xlint:-varargs", "-Xlint:-fallthrough","-Xlint:-rawtypes",
+			 "-Xlint:-deprecation", "-Xlint:-unchecked"]
 
 	compileJava {
 		sourceCompatibility = 1.8
