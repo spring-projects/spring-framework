@@ -42,8 +42,8 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.jetbrains.kotlin:kotlin-reflect")
-	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.hibernate:hibernate-validator:6.0.1.Final")
@@ -58,9 +58,9 @@ dependencies {
 	}
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
 	testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
-	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
-	testRuntime("org.jetbrains.kotlin:kotlin-script-util")
-	testRuntime("org.jetbrains.kotlin:kotlin-compiler")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
 	testRuntime("org.jruby:jruby:9.1.12.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
