@@ -16,6 +16,23 @@ install {
 	repositories.mavenInstaller {
 		pom.whenConfigured {
 			packaging = "pom"
+			withXml {
+				asNode().children().last() + {
+					delegate.dependencyManagement {
+						delegate.dependencies {
+							parent.subprojects.sort { "$it.name" }.each { p ->
+								if (p != project) {
+									delegate.dependency {
+										delegate.groupId(p.group)
+										delegate.artifactId(p.name)
+										delegate.version(p.version)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
