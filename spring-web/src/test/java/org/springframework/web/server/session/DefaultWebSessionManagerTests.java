@@ -123,6 +123,19 @@ public class DefaultWebSessionManagerTests {
 	}
 
 	@Test
+	public void exchangeWhenResponseSetCompleteThenSavesAndSetsId() throws Exception {
+		when(this.idResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.emptyList());
+		when(this.store.storeSession(any())).thenReturn(Mono.empty());
+		WebSession session = this.manager.getSession(this.exchange).block();
+		String id = session.getId();
+		session.getAttributes().put("foo", "bar");
+		this.exchange.getResponse().setComplete().block();
+
+		verify(this.idResolver).setSessionId(any(), eq(id));
+		verify(this.store).storeSession(any());
+	}
+
+	@Test
 	public void existingSession() throws Exception {
 		DefaultWebSession existing = createDefaultWebSession();
 		String id = existing.getId();
