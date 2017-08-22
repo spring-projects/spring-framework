@@ -108,6 +108,11 @@ abstract class AbstractContextConfigurationUtilsTests {
 		assertEquals(expectedInitializerClasses, mergedConfig.getContextInitializerClasses());
 	}
 
+	@SafeVarargs
+	static <T> T[] array(T... objects) {
+		return objects;
+	}
+
 
 	static class Enigma {
 	}

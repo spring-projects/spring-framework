@@ -74,7 +74,7 @@ class NestedTestsWithSpringAndJUnitJupiterTestCase {
 	// -------------------------------------------------------------------------
 
 	@Configuration
-	public static class TopLevelConfig {
+	static class TopLevelConfig {
 
 		@Bean
 		String foo() {
