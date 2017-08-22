@@ -39,8 +39,8 @@ dependencies {
 	}
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
 	testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 	testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	testRuntime("javax.activation:activation:${activationVersion}")

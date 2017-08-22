@@ -53,8 +53,8 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-web"
 	}
 	optional('org.webjars:webjars-locator:0.32-1')
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
 	testCompile("javax.servlet:javax.servlet-api:4.0.0")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
@@ -83,9 +83,9 @@ dependencies {
 	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
-	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntime("org.jetbrains.kotlin:kotlin-script-util")
+	testRuntime("org.jetbrains.kotlin:kotlin-compiler")
 	testRuntime("org.jruby:jruby:9.1.12.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.webjars:underscorejs:1.8.3")
