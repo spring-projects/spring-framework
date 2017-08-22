@@ -26,7 +26,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 
-import kotlin.Metadata;
 import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
@@ -52,8 +51,20 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
 
-	private static final boolean kotlinPresent =
-			ClassUtils.isPresent("kotlin.Metadata", DependencyDescriptor.class.getClassLoader());
+	@Nullable
+	private static final Class<?> kotlinMetadata;
+
+	static {
+		Class<?> metadata;
+		try {
+			metadata = ClassUtils.forName("kotlin.Metadata", DependencyDescriptor.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Kotlin API not available - no Kotlin support
+			metadata = null;
+		}
+		kotlinMetadata = metadata;
+	}
 
 
 	private final Class<?> declaringClass;
@@ -172,11 +183,20 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		if (this.field != null) {
 			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
-					(kotlinPresent && KotlinDelegate.isNullable(this.field)));
+					(useKotlinSupport(this.field.getDeclaringClass()) && KotlinDelegate.isNullable(this.field)));
 		}
 		else {
 			return !obtainMethodParameter().isOptional();
 		}
+	}
+
+	/**
+	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
+	 */
+	@SuppressWarnings("unchecked")
+	private static boolean useKotlinSupport(Class<?> clazz) {
+		return (kotlinMetadata != null &&
+				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
 
 	/**
@@ -435,11 +455,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		 * Check whether the specified {@link Field} represents a nullable Kotlin type or not.
 		 */
 		public static boolean isNullable(Field field) {
-			if (field.getDeclaringClass().isAnnotationPresent(Metadata.class)) {
-				KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
-				return (property != null && property.getReturnType().isMarkedNullable());
-			}
-			return false;
+			KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
+			return (property != null && property.getReturnType().isMarkedNullable());
 		}
 	}
 

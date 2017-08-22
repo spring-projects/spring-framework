@@ -71,16 +71,18 @@ public abstract class BeanUtils {
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
 	@Nullable
-	private static Class<?> kotlinMetadata;
+	private static final Class<?> kotlinMetadata;
 
 	static {
+		Class<?> metadata;
 		try {
-			kotlinMetadata = ClassUtils.forName("kotlin.Metadata", BeanUtils.class.getClassLoader());
+			metadata = ClassUtils.forName("kotlin.Metadata", BeanUtils.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// Kotlin API not available - no special support for Kotlin class instantiation
-			kotlinMetadata = null;
+			metadata = null;
 		}
+		kotlinMetadata = metadata;
 	}
 
 
@@ -125,7 +127,7 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			Constructor<T> ctor = (isKotlinClass(clazz) ?
+			Constructor<T> ctor = (useKotlinSupport(clazz) ?
 					KotlinDelegate.findPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
 			if (ctor == null) {
 				throw new BeanInstantiationException(clazz, "No default constructor found");
@@ -172,7 +174,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return (isKotlinClass(ctor.getDeclaringClass()) ?
+			return (useKotlinSupport(ctor.getDeclaringClass()) ?
 					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
@@ -340,7 +342,7 @@ public abstract class BeanUtils {
 	@Nullable
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (isKotlinClass(clazz)) {
+		if (useKotlinSupport(clazz)) {
 			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		else {
@@ -707,10 +709,10 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Return true if the specified class is a Kotlin one.
+	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
 	 */
 	@SuppressWarnings("unchecked")
-	private static boolean isKotlinClass(Class<?> clazz) {
+	private static boolean useKotlinSupport(Class<?> clazz) {
 		return (kotlinMetadata != null &&
 				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
