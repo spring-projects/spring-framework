@@ -49,6 +49,7 @@ import static org.junit.Assert.assertSame;
 /**
  * Unit tests for {@link DefaultWebSessionManager}.
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  */
 public class DefaultWebSessionManagerTests {
 
@@ -81,7 +82,7 @@ public class DefaultWebSessionManagerTests {
 	public void getSessionWithoutStarting() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).block();
-		session.save();
+		session.save().block();
 
 		assertFalse(session.isStarted());
 		assertFalse(session.isExpired());
@@ -94,7 +95,7 @@ public class DefaultWebSessionManagerTests {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).block();
 		session.start();
-		session.save();
+		session.save().block();
 
 		String id = session.getId();
 		assertNotNull(this.idResolver.getSavedId());
@@ -107,7 +108,7 @@ public class DefaultWebSessionManagerTests {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).block();
 		session.getAttributes().put("foo", "bar");
-		session.save();
+		session.save().block();
 
 		assertNotNull(this.idResolver.getSavedId());
 	}
