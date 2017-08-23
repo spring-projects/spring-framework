@@ -1,5 +1,5 @@
 [[webflux-fn]]
-= Spring WebFlux Functional Programming Model
+= Functional Programming Model
 
 [[webflux-fn-handler-functions]]
 == HandlerFunctions

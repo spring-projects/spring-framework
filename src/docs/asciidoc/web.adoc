@@ -23,6 +23,4 @@ include::web/web-websocket.adoc[leveloffset=+1]
 
 include::web/web-flux.adoc[leveloffset=+1]
 
-include::web/web-flux-functional.adoc[leveloffset=+1]
-
 include::web/web-integration.adoc[leveloffset=+1]
