@@ -1,66 +1,12 @@
 [[webflux]]
-= Spring WebFlux framework
-
-This section provides basic information on the reactive programming
-support for Web applications in Spring Framework 5.
-
-
-[[webflux-intro]]
-== Introduction
-
-
-[[webflux-intro-reactive-programming]]
-=== What is Reactive Programming?
-
-In plain terms reactive programming is about non-blocking applications that are asynchronous
-and event-driven and require a small number of threads to scale vertically (i.e. within the
-JVM) rather than horizontally (i.e. through clustering).
-
-A key aspect of reactive applications is the concept of backpressure which is
-a mechanism to ensure producers don't overwhelm consumers. For example in a pipeline
-of reactive components extending from the database to the HTTP response when the
-HTTP connection is too slow the data repository can also slow down or stop completely
-until network capacity frees up.
-
-Reactive programming also leads to a major shift from imperative to declarative async
-composition of logic. It is comparable to writing blocking code vs using the
-`CompletableFuture` from Java 8 to compose follow-up actions via lambda expressions.
-
-For a longer introduction check the blog series
-https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape["Notes on Reactive Programming"]
-by Dave Syer.
-
-
-[[webflux-intro-reactive-api]]
-=== Reactive API and Building Blocks
-
-Spring Framework 5 embraces
-https://github.com/reactive-streams/reactive-streams-jvm#reactive-streams[Reactive Streams]
-as the contract for communicating backpressure across async components and
-libraries. Reactive Streams is a specification created through industry collaboration that
-has also been adopted in Java 9 as `java.util.concurrent.Flow`.
-
-The Spring Framework uses https://projectreactor.io/[Reactor] internally for its own
-reactive support. Reactor is a Reactive Streams implementation that further extends the
-basic Reactive Streams `Publisher` contract with the `Flux` and `Mono` composable API
-types to provide declarative operations on data sequences of `0..N` and `0..1`.
-
-The Spring Framework exposes `Flux` and `Mono` in many of its own reactive APIs.
-At the application level however, as always, Spring provides choice and fully supports
-the use of RxJava. For more on reactive types check the post
-https://spring.io/blog/2016/04/19/understanding-reactive-types["Understanding Reactive Types"]
-by Sebastien Deleuze.
-
-
-[[webflux-feature-overview]]
-== Spring WebFlux Module
+= Spring WebFlux
 
 Spring Framework 5 includes a new `spring-webflux` module. The module contains support
 for reactive HTTP and WebSocket clients as well as for reactive server web applications
 including REST, HTML browser, and WebSocket style interactions.
 
 [[webflux-server]]
-=== Server Side
+== Server Side
 
 On the server-side WebFlux supports 2 distinct programming models:
 
@@ -85,7 +31,7 @@ REST-style JSON and XML serialization and deserialization is supported on top
 as a `Flux<Object>`, and so is HTML view rendering and Server-Sent Events.
 
 [[webflux-server-annotation]]
-==== Annotation-based Programming Model
+=== Annotation-based Programming Model
 
 The same `@Controller` programming model and the same annotations used in Spring MVC
 are also supported in WebFlux. The main difference is that the underlying core,
@@ -123,11 +69,11 @@ public class PersonController {
 }
 ----
 
-include::web-flux-functional.adoc[leveloffset=+3]
+include::webflux-functional.adoc[leveloffset=+2]
 
 
 [[webflux-client]]
-=== Client Side
+== Client Side
 
 WebFlux includes a functional, reactive `WebClient` that offers a fully
 non-blocking and reactive alternative to the `RestTemplate`. It exposes network
@@ -161,7 +107,7 @@ still based and relies on `InputStream` and `OutputStream`.
 
 
 [[webflux-http-body]]
-=== Request and Response Body Conversion
+== Request and Response Body Conversion
 
 The `spring-core` module provides reactive `Encoder` and `Decoder` contracts
 that enable the serialization of a `Flux` of bytes to and from typed objects.
@@ -216,7 +162,7 @@ default as following:
 
 
 [[webflux-websocket-support]]
-=== Reactive WebSocket Support
+== Reactive WebSocket Support
 
 WebFlux includes reactive WebSocket client and server support.
 Both client and server are supported on the Java WebSocket API
@@ -257,7 +203,7 @@ client.execute("ws://localhost:8080/echo"), session -> {... }).blockMillis(5000)
 ----
 
 [[webflux-tests]]
-=== Testing
+== Testing
 
 The `spring-test` module includes a `WebTestClient` that can be used to test
 WebFlux server endpoints with or without a running server.
@@ -274,11 +220,11 @@ in the framework.
 
 
 [[webflux-getting-started]]
-== Getting Started
+= Getting Started
 
 
 [[webflux-getting-started-boot]]
-=== Spring Boot Starter
+== Spring Boot Starter
 
 The
 Spring Boot WebFlux starter available via http://start.spring.io is the fastest way to get started.
@@ -290,7 +236,7 @@ with Spring Boot to switch to a different runtime.
 See the Spring Boot reference documentation page for more details and instruction.
 
 [[webflux-getting-started-manual]]
-=== Manual Bootstrapping
+== Manual Bootstrapping
 
 This section outlines the steps to get up and running manually.
 
@@ -365,7 +311,7 @@ Spring configuration.
 ====
 
 [[webflux-getting-started-examples]]
-=== Examples
+== Examples
 
 You will find code examples useful to build reactive Web application in the following projects:
 

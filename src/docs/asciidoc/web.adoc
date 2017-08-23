@@ -1,26 +1,25 @@
 [[spring-web]]
-= The Web
+= Web
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
 
-This part of the documentation covers support for web applications. As of Spring Framework 5.0
-web applications can run on a traditional Servlet stack (Servlet API + Servlet container)
-or on a reactive stack (Reactive Streams API + non-blocking runtime).
-The first few chapters cover the Servlet-based <<mvc,Spring MVC>> web framework
-including <<view,Views>>, <<cors,CORS>>, and <<websocket,WebSocket>> support.
-Subsequent chapters cover the <<webflux,Spring WebFlux>> reactive web framework
-including its <<webflux-fn,functional programming model>>.
+This part of the documentation covers support for web applications designed to run on a
+traditional Servlet stack (Servlet API + Servlet container).
 
-include::web/web-mvc.adoc[leveloffset=+1]
+Chapters cover the Servlet-based <<mvc,Spring MVC>> web framework including <<mvc-view,Views>>,
+<<mvc-cors,CORS>>, and <<websocket,WebSocket>> support.
 
-include::web/web-view.adoc[leveloffset=+1]
+Note that as of Spring Framework 5.0 web applications can also run on a
+<<spring-web-reactive, reactive web stack>> (Reactive Streams API + non-blocking runtime).
 
-include::web/web-cors.adoc[leveloffset=+1]
+include::web/webmvc.adoc[leveloffset=+1]
 
-include::web/web-websocket.adoc[leveloffset=+1]
+include::web/webmvc-view.adoc[leveloffset=+1]
 
-include::web/web-flux.adoc[leveloffset=+1]
+include::web/webmvc-cors.adoc[leveloffset=+1]
 
-include::web/web-integration.adoc[leveloffset=+1]
+include::web/websocket.adoc[leveloffset=+1]
+
+

@@ -2689,7 +2689,7 @@ directly on `RequestMappingHandlerAdapter`.
 All MVC frameworks for web applications provide a way to address views. Spring provides
 view resolvers, which enable you to render models in a browser without tying you to a
 specific view technology. Out of the box, Spring enables you to use JSPs, FreeMarker
-templates and XSLT views, for example. See <<view>> for a discussion of how to integrate
+templates and XSLT views, for example. See <<mvc-view>> for a discussion of how to integrate
 and use a number of disparate view technologies.
 
 The two interfaces that are important to the way Spring handles views are `ViewResolver`
