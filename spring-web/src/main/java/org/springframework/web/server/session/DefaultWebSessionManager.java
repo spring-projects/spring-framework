@@ -107,22 +107,20 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return Mono.defer(() ->
 				retrieveSession(exchange)
 						.flatMap(session -> removeSessionIfExpired(exchange, session))
-						.map(session -> {
-							Instant lastAccessTime = Instant.now(getClock());
-							return new DefaultWebSession(session, lastAccessTime, s -> saveSession(exchange, s));
-						})
+						.flatMap(this.getSessionStore()::updateLastAccessTime)
 						.switchIfEmpty(createSession(exchange))
+						.cast(DefaultWebSession.class)
+						.map(session -> new DefaultWebSession(session, session.getLastAccessTime(), s -> saveSession(exchange, s)))
 						.doOnNext(session -> exchange.getResponse().beforeCommit(session::save)));
 	}
 
-	private Mono<DefaultWebSession> retrieveSession(ServerWebExchange exchange) {
+	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
 		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
 				.concatMap(this.sessionStore::retrieveSession)
-				.cast(DefaultWebSession.class)
 				.next();
 	}
 
-	private Mono<DefaultWebSession> removeSessionIfExpired(ServerWebExchange exchange, DefaultWebSession session) {
+	private Mono<WebSession> removeSessionIfExpired(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
 			this.sessionIdResolver.expireSession(exchange);
 			return this.sessionStore.removeSession(session.getId()).then(Mono.empty());
@@ -158,9 +156,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return ids.isEmpty() || !session.getId().equals(ids.get(0));
 	}
 
-	private Mono<DefaultWebSession> createSession(ServerWebExchange exchange) {
-		return this.sessionStore.createWebSession()
-				.cast(DefaultWebSession.class)
-				.map(session -> new DefaultWebSession(session, session.getLastAccessTime(), s -> saveSession(exchange, s)));
+	private Mono<WebSession> createSession(ServerWebExchange exchange) {
+		return this.sessionStore.createWebSession();
 	}
 }

@@ -75,6 +75,7 @@ public class DefaultWebSessionManagerTests {
 	@Before
 	public void setUp() throws Exception {
 		when(this.store.createWebSession()).thenReturn(Mono.just(createDefaultWebSession()));
+		when(this.store.updateLastAccessTime(any())).thenAnswer( invocation -> Mono.just(invocation.getArgument(0)));
 
 		this.manager = new DefaultWebSessionManager();
 		this.manager.setSessionIdResolver(this.idResolver);

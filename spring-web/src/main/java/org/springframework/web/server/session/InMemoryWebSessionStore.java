@@ -16,6 +16,7 @@
 package org.springframework.web.server.session;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,6 +68,13 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 						this::storeSession));
 	}
 
+	public Mono<WebSession> updateLastAccessTime(WebSession webSession) {
+		return Mono.fromSupplier(() -> {
+			DefaultWebSession session = (DefaultWebSession) webSession;
+			Instant lastAccessTime = Instant.now(getClock());
+			return new DefaultWebSession(session, lastAccessTime);
+		});
+	}
 
 	/**
 	 * Configure the {@link Clock} to use to set lastAccessTime on every created

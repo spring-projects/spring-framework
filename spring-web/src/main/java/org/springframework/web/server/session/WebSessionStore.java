@@ -19,6 +19,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.WebSession;
 
+import java.time.Instant;
+
 /**
  * Strategy for {@link WebSession} persistence.
  *
@@ -55,4 +57,10 @@ public interface WebSessionStore {
 	 */
 	Mono<Void> removeSession(String sessionId);
 
+	/**
+	 * Update the last accessed time to now.
+	 * @param webSession the session to update
+	 * @return the session with the updated last access time
+	 */
+	Mono<WebSession> updateLastAccessTime(WebSession webSession);
 }
