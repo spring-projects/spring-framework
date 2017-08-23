@@ -115,7 +115,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNotNull(session);
 		Instant lastAccessTime = Clock.offset(this.sessionManager.getClock(), Duration.ofMinutes(-31)).instant();
 		session = new DefaultWebSession(session, lastAccessTime);
-		store.storeSession(session);
+		session.save().block();
 
 		// Third request: expired session, new session created
 		request = RequestEntity.get(createUri()).header("Cookie", "SESSION=" + id).build();

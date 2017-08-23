@@ -74,6 +74,9 @@ public class DefaultWebSessionManagerTests {
 
 	@Before
 	public void setUp() throws Exception {
+		when(this.store.createWebSession()).thenReturn(Mono.just(createDefaultWebSession()));
+		when(this.store.updateLastAccessTime(any())).thenAnswer( invocation -> Mono.just(invocation.getArgument(0)));
+
 		this.manager = new DefaultWebSessionManager();
 		this.manager.setSessionIdResolver(this.idResolver);
 		this.manager.setSessionStore(this.store);
@@ -106,6 +109,7 @@ public class DefaultWebSessionManagerTests {
 		session.save().block();
 
 		String id = session.getId();
+		verify(this.store).createWebSession();
 		verify(this.store).storeSession(any());
 		verify(this.idResolver).setSessionId(any(), eq(id));
 	}
@@ -118,6 +122,7 @@ public class DefaultWebSessionManagerTests {
 		session.getAttributes().put("foo", "bar");
 		session.save().block();
 
+		verify(this.store).createWebSession();
 		verify(this.idResolver).setSessionId(any(), any());
 		verify(this.store).storeSession(any());
 	}
