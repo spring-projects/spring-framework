@@ -132,7 +132,7 @@ public class DefaultWebSessionManagerTests {
 		Instant lastAccessTime = Instant.now(CLOCK).minus(Duration.ofMinutes(31));
 		existing = new DefaultWebSession(existing, lastAccessTime, s -> Mono.empty());
 		this.manager.getSessionStore().storeSession(existing);
-		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
+		this.idResolver.setIdsToResolve(Collections.singletonList(existing.getId()));
 
 		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertNotSame(existing, actual);
