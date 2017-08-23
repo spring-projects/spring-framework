@@ -661,7 +661,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		catch (IOException ex) {
 			String resource = url.toString();
 			String query = url.getRawQuery();
-			resource = (query != null ? resource.substring(0, resource.indexOf(query) - 1) : resource);
+			resource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);
 			throw new ResourceAccessException("I/O error on " + method.name() +
 					" request for \"" + resource + "\": " + ex.getMessage(), ex);
 		}

@@ -44,8 +44,18 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.http.MediaType.parseMediaType;
 
 /**
  * @author Arjen Poutsma
@@ -701,9 +711,7 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
-	// Issue: SPR-9325, SPR-13860
-
-	@Test
+	@Test // Issue: SPR-9325, SPR-13860
 	public void ioException() throws Exception {
 		String url = "http://example.com/resource?access_token=123";
 
@@ -716,6 +724,29 @@ public class RestTemplateTests {
 
 		try {
 			template.getForObject(url, String.class);
+			fail("RestClientException expected");
+		}
+		catch (ResourceAccessException ex) {
+			assertEquals("I/O error on GET request for \"http://example.com/resource\": " +
+					"Socket failure; nested exception is java.io.IOException: Socket failure",
+					ex.getMessage());
+		}
+	}
+
+	@Test // SPR-15900
+	public void ioExceptionWithEmptyQueryString() throws Exception {
+
+		// http://example.com/resource?
+		URI uri = new URI("http", "example.com", "/resource", "", null);
+
+		given(converter.canRead(String.class, null)).willReturn(true);
+		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(parseMediaType("foo/bar")));
+		given(requestFactory.createRequest(uri, HttpMethod.GET)).willReturn(request);
+		given(request.getHeaders()).willReturn(new HttpHeaders());
+		given(request.execute()).willThrow(new IOException("Socket failure"));
+
+		try {
+			template.getForObject(uri, String.class);
 			fail("RestClientException expected");
 		}
 		catch (ResourceAccessException ex) {
