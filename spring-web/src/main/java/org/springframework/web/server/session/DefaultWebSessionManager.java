@@ -24,8 +24,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
-import org.springframework.util.IdGenerator;
-import org.springframework.util.JdkIdGenerator;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
@@ -36,12 +34,10 @@ import org.springframework.web.server.WebSession;
  * {@link WebSessionStore}
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 5.0
  */
 public class DefaultWebSessionManager implements WebSessionManager {
-
-	private static final IdGenerator idGenerator = new JdkIdGenerator();
-
 
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -163,10 +159,8 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	}
 
 	private Mono<DefaultWebSession> createSession(ServerWebExchange exchange) {
-		return Mono.fromSupplier(() ->
-				new DefaultWebSession(idGenerator, getClock(),
-						(oldId, session) -> this.sessionStore.changeSessionId(oldId, session),
-						session -> saveSession(exchange, session)));
+		return this.sessionStore.createWebSession()
+				.cast(DefaultWebSession.class)
+				.map(session -> new DefaultWebSession(session, session.getLastAccessTime(), s -> saveSession(exchange, s)));
 	}
-
 }

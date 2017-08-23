@@ -23,9 +23,16 @@ import org.springframework.web.server.WebSession;
  * Strategy for {@link WebSession} persistence.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 5.0
  */
 public interface WebSessionStore {
+
+	/**
+	 * Creates the WebSession that can be stored by this WebSessionStore.
+	 * @return the session
+	 */
+	Mono<WebSession> createWebSession();
 
 	/**
 	 * Store the given WebSession.
