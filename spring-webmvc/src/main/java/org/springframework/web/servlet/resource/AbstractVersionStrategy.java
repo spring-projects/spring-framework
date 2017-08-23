@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Abstract base class for {@link VersionStrategy} implementations.
@@ -110,6 +109,79 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 				return (this.prefix.endsWith("/") || path.startsWith("/") ?
 						this.prefix + path : this.prefix + '/' + path);
 			}
+		}
+	}
+
+	/**
+	 * An url parameter based {@code VersionPathStrategy},
+	 * e.g. {@code "/path/foo.js?v={version}"}.
+	 */
+	protected static class UrlParameterVersionStrategy implements VersionPathStrategy {
+
+		private String attributeSearch = "v=";
+
+		public UrlParameterVersionStrategy() {
+
+		}
+
+		public UrlParameterVersionStrategy(String attributeName) {
+			Assert.hasText(attributeName, "'attributeName' must not be empty");
+			this.attributeSearch = attributeName + "=";
+		}
+
+		@Override
+		public String extractVersion(String requestPath) {
+			int startIndex = requestPath.indexOf(attributeSearch);
+			if (startIndex > -1) {
+				int endIndex = requestPath.contains(";") ? requestPath.indexOf(";") : requestPath.length();
+				String versionTemp = requestPath.substring(startIndex, endIndex);
+				endIndex = versionTemp.contains("&") ? versionTemp.indexOf("&") : versionTemp.length();
+				return StringUtils.delete(versionTemp.substring(attributeSearch.length(), endIndex), attributeSearch);
+			} else {
+				return null;
+			}
+
+		}
+
+		@Override
+		public String removeVersion(String requestPath, String version) {
+			String result = requestPath;
+			String search = attributeSearch + version;
+			int startIndex = requestPath.indexOf(search);
+			if(startIndex > -1) {
+				result = StringUtils.delete(requestPath, search);
+				if(result.endsWith("?") || result.endsWith("&")) {
+					result = result.substring(0, result.length() - 1);
+				} else if(result.contains("?;") || result.contains("&;")) {
+					result = result.replaceFirst("([?]|[&])[;]", ";");
+				} else if(result.contains("?&")) {
+					result = result.replaceFirst("[?][&]", "?");
+				} else if(result.contains("&&")) {
+					result = result.replaceFirst("[&]{2}", "&");
+				}
+				return result;
+			}
+			return result;
+		}
+
+		@Override
+		public String addVersion(String path, String version) {
+			String result;
+
+			String addVersion = attributeSearch + version;
+			if(path.contains("?")) {
+				addVersion = "&" + addVersion;
+			} else {
+				addVersion = "?" + addVersion;
+			}
+
+			if (path.contains(";"))// ;jsessionid=.. added
+			{
+				result = path.substring(0, path.indexOf(";")) + addVersion + path.substring(path.indexOf(";"));
+			} else {
+				result = (path + addVersion);
+			}
+			return result;
 		}
 	}
 
