@@ -55,13 +55,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	}
 
 	@Override
-	public Mono<Void> changeSessionId(String oldId, WebSession session) {
-		this.sessions.remove(oldId);
-		this.sessions.put(session.getId(), session);
-		return Mono.empty();
-	}
-
-	@Override
 	public Mono<Void> removeSession(String id) {
 		this.sessions.remove(id);
 		return Mono.empty();
@@ -94,5 +87,11 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 */
 	public Clock getClock() {
 		return this.clock;
+	}
+
+	private Mono<Void> changeSessionId(String oldId, WebSession session) {
+		this.sessions.remove(oldId);
+		this.sessions.put(session.getId(), session);
+		return Mono.empty();
 	}
 }
