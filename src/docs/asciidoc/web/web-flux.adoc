@@ -374,6 +374,7 @@ You will find code examples useful to build reactive Web application in the foll
 * https://github.com/reactor/projectreactor.io/tree/spring-functional[Reactor website]: the `spring-functional` branch is a Spring 5 functional, Java 8 lambda-style application
 * https://github.com/bclozel/spring-reactive-university[Spring Reactive University session]: live-coded project from https://www.youtube.com/watch?v=Cj4foJzPF80[this Devoxx BE 2106 university talk]
 * https://github.com/thymeleaf/thymeleafsandbox-biglist-reactive[Reactive Thymeleaf Sandbox]
-* https://github.com/mix-it/mixit/[Mix-it 2017 website]: Kotlin + Reactive + Functional web and bean registration API application
+* https://github.com/mixitconf/mixit/[MiXiT website]: Boot + Kotlin + Reactive + Functional web registration API application
+* https://github.com/sdeleuze/spring-kotlin-functional[Spring Kotlin Functional]: Standalone WebFlux application with functional web and bean DSLs
 * https://github.com/simonbasle/reactor-by-example[Reactor by example]: code snippets coming from this https://www.infoq.com/articles/reactor-by-example[InfoQ article]
 * https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]
