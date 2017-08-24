@@ -37,13 +37,6 @@ public interface WebSessionStore {
 	Mono<WebSession> createWebSession();
 
 	/**
-	 * Store the given WebSession.
-	 * @param session the session to store
-	 * @return a completion notification (success or error)
-	 */
-	Mono<Void> storeSession(WebSession session);
-
-	/**
 	 * Return the WebSession for the given id.
 	 * @param sessionId the session to load
 	 * @return the session, or an empty {@code Mono}.
