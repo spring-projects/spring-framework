@@ -15,9 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
@@ -42,9 +39,6 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	private WebSessionIdResolver sessionIdResolver = new CookieWebSessionIdResolver();
 
 	private WebSessionStore sessionStore = new InMemoryWebSessionStore();
-
-	private Clock clock = Clock.system(ZoneId.of("GMT"));
-
 
 	/**
 	 * Configure the id resolution strategy.
@@ -80,38 +74,14 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return this.sessionStore;
 	}
 
-	/**
-	 * Configure the {@link Clock} to use to set lastAccessTime on every created
-	 * session and to calculate if it is expired.
-	 * <p>This may be useful to align to different timezone or to set the clock
-	 * back in a test, e.g. {@code Clock.offset(clock, Duration.ofMinutes(-31))}
-	 * in order to simulate session expiration.
-	 * <p>By default this is {@code Clock.system(ZoneId.of("GMT"))}.
-	 * @param clock the clock to use
-	 */
-	public void setClock(Clock clock) {
-		Assert.notNull(clock, "'clock' is required.");
-		this.clock = clock;
-	}
-
-	/**
-	 * Return the configured clock for session lastAccessTime calculations.
-	 */
-	public Clock getClock() {
-		return this.clock;
-	}
-
-
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.defer(() ->
 				retrieveSession(exchange)
 						.flatMap(session -> removeSessionIfExpired(exchange, session))
 						.flatMap(this.getSessionStore()::updateLastAccessTime)
-						.switchIfEmpty(createSession(exchange))
-						.cast(DefaultWebSession.class)
-						.map(session -> new DefaultWebSession(session, session.getLastAccessTime(), s -> saveSession(exchange, s)))
-						.doOnNext(session -> exchange.getResponse().beforeCommit(session::save)));
+						.switchIfEmpty(this.sessionStore.createWebSession())
+						.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
@@ -128,35 +98,28 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return Mono.just(session);
 	}
 
-	private Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
+	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
 			return Mono.error(new IllegalStateException(
 					"Sessions are checked for expiration and have their " +
-					"lastAccessTime updated when first accessed during request processing. " +
-					"However this session is expired meaning that maxIdleTime elapsed " +
-					"before the call to session.save()."));
+							"lastAccessTime updated when first accessed during request processing. " +
+							"However this session is expired meaning that maxIdleTime elapsed " +
+							"before the call to session.save()."));
 		}
 
 		if (!session.isStarted()) {
 			return Mono.empty();
 		}
 
-		// Force explicit start
-		session.start();
-
 		if (hasNewSessionId(exchange, session)) {
-			this.sessionIdResolver.setSessionId(exchange, session.getId());
+			DefaultWebSessionManager.this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}
 
- 		return this.sessionStore.storeSession(session);
+		return session.save();
 	}
 
 	private boolean hasNewSessionId(ServerWebExchange exchange, WebSession session) {
 		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
 		return ids.isEmpty() || !session.getId().equals(ids.get(0));
-	}
-
-	private Mono<WebSession> createSession(ServerWebExchange exchange) {
-		return this.sessionStore.createWebSession();
 	}
 }
