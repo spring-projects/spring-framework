@@ -20,10 +20,9 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -82,6 +81,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 	private HttpMessageConverter<Resource> resourceMessageConverter;
 
+	private HttpMessageConverter<Object> resourceRegionMessageConverter;
+
 	private MethodParameter paramHttpEntity;
 
 	private MethodParameter paramRequestEntity;
@@ -119,12 +120,11 @@ public class HttpEntityMethodProcessorMockTests {
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		resourceMessageConverter = mock(HttpMessageConverter.class);
 		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(stringHttpMessageConverter);
-		converters.add(resourceMessageConverter);
-		processor = new HttpEntityMethodProcessor(converters);
-		reset(stringHttpMessageConverter);
-		reset(resourceMessageConverter);
+		resourceRegionMessageConverter = mock(HttpMessageConverter.class);
+		given(resourceRegionMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+
+		processor = new HttpEntityMethodProcessor(
+				Arrays.asList(stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter));
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class,
 				Integer.TYPE, RequestEntity.class);
@@ -495,6 +495,39 @@ public class HttpEntityMethodProcessorMockTests {
 		then(resourceMessageConverter).should(times(1)).write(any(ByteArrayResource.class),
 				eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
 		assertEquals(200, servletResponse.getStatus());
+	}
+
+	@Test
+	public void shouldHandleResourceByteRange() throws Exception {
+		ResponseEntity<Resource> returnValue = ResponseEntity
+				.ok(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
+		servletRequest.addHeader("Range", "bytes=0-5");
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(MediaType.APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(times(1)).write(
+				anyCollection(), eq(MediaType.APPLICATION_OCTET_STREAM),
+				argThat(outputMessage -> outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES) == "bytes"));
+		assertEquals(206, servletResponse.getStatus());
+	}
+
+	@Test
+	public void handleReturnTypeResourceIllegalByteRange() throws Exception {
+		ResponseEntity<Resource> returnValue = ResponseEntity
+				.ok(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
+		servletRequest.addHeader("Range", "illegal");
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(MediaType.APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(never()).write(
+				anyCollection(), eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
+		assertEquals(416, servletResponse.getStatus());
 	}
 
 	@Test  //SPR-14767

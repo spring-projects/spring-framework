@@ -30,10 +30,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -74,6 +79,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			Arrays.asList("audio", "image", "video"));
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
+
+	private static final Type RESOURCE_REGION_LIST_TYPE =
+			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
 
 
 	private static final UrlPathHelper decodingUrlPathHelper = new UrlPathHelper();
@@ -183,6 +191,24 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			valueType = getReturnValueType(outputValue, returnType);
 			declaredType = getGenericType(returnType);
 		}
+		
+		if (isResourceType(value, returnType)) {
+			outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+			if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null) {
+				Resource resource = (Resource) value;
+				try {
+					List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
+					outputMessage.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
+					outputValue = HttpRange.toResourceRegions(httpRanges, resource);
+					valueType = outputValue.getClass();
+					declaredType = RESOURCE_REGION_LIST_TYPE;
+				}
+				catch (IllegalArgumentException ex) {
+					outputMessage.getHeaders().set(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
+					outputMessage.getServletResponse().setStatus(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value());
+				}
+			}
+		}
 
 		HttpServletRequest request = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
@@ -264,6 +290,13 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	protected Class<?> getReturnValueType(@Nullable Object value, MethodParameter returnType) {
 		return (value != null ? value.getClass() : returnType.getParameterType());
+	}
+
+	/**
+	 * Return whether the returned value or the declared return type extend {@link Resource}
+	 */
+	protected boolean isResourceType(@Nullable Object value, MethodParameter returnType) {
+		return Resource.class.isAssignableFrom(value != null ? value.getClass() : returnType.getParameterType());
 	}
 
 	/**

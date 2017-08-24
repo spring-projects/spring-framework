@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -71,6 +73,8 @@ public class RequestResponseBodyMethodProcessorMockTests {
 
 	private HttpMessageConverter<Resource> resourceMessageConverter;
 
+	private HttpMessageConverter<Object> resourceRegionMessageConverter;
+
 	private RequestResponseBodyMethodProcessor processor;
 
 	private ModelAndViewContainer mavContainer;
@@ -97,11 +101,13 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	public void setup() throws Exception {
 		stringMessageConverter = mock(HttpMessageConverter.class);
 		given(stringMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-
 		resourceMessageConverter = mock(HttpMessageConverter.class);
 		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		resourceRegionMessageConverter = mock(HttpMessageConverter.class);
+		given(resourceRegionMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
 
-		processor = new RequestResponseBodyMethodProcessor(Arrays.asList(stringMessageConverter, resourceMessageConverter));
+		processor = new RequestResponseBodyMethodProcessor(
+				Arrays.asList(stringMessageConverter, resourceMessageConverter, resourceRegionMessageConverter));
 
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest();
@@ -362,6 +368,37 @@ public class RequestResponseBodyMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		verify(stringMessageConverter).write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
+	}
+
+	@Test
+	public void handleReturnTypeResourceByteRange() throws Exception {
+		Resource returnValue = new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8));
+		servletRequest.addHeader("Range", "bytes=0-5");
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(MediaType.APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(times(1)).write(
+				anyCollection(), eq(MediaType.APPLICATION_OCTET_STREAM),
+				argThat(outputMessage -> outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES) == "bytes"));
+		assertEquals(206, servletResponse.getStatus());
+	}
+
+	@Test
+	public void handleReturnTypeResourceIllegalByteRange() throws Exception {
+		Resource returnValue = new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8));
+		servletRequest.addHeader("Range", "illegal");
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(MediaType.APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(never()).write(
+				anyCollection(), eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
+		assertEquals(416, servletResponse.getStatus());
 	}
 
 

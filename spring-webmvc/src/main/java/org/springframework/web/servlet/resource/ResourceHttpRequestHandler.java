@@ -387,14 +387,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-				if (httpRanges.size() == 1) {
-					ResourceRegion resourceRegion = httpRanges.get(0).toResourceRegion(resource);
-					this.resourceRegionHttpMessageConverter.write(resourceRegion, mediaType, outputMessage);
-				}
-				else {
 					this.resourceRegionHttpMessageConverter.write(
 							HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
-				}
 			}
 			catch (IllegalArgumentException ex) {
 				response.setHeader("Content-Range", "bytes */" + resource.contentLength());
