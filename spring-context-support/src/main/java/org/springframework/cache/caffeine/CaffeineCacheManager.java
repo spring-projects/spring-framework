@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -47,9 +48,10 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Requires Caffeine 2.1 or higher.
  *
- * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Ben Manes
+ * @author Igor Stepanov
  * @since 4.3
  * @see CaffeineCache
  */
@@ -60,6 +62,9 @@ public class CaffeineCacheManager implements CacheManager {
 	private boolean dynamic = true;
 
 	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
+
+	@Nullable
+	private Function<String, Caffeine<Object, Object>> cacheBuilderSupplier;
 
 	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
@@ -100,6 +105,17 @@ public class CaffeineCacheManager implements CacheManager {
 		else {
 			this.dynamic = true;
 		}
+	}
+
+	/**
+	 * Set the {@link Function} to produce {@link CaffeineSpec} to use for building each individual
+	 * {@link CaffeineCache} instance.
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
+	 */
+	public void setCaffeineSupplier(Function<String, Caffeine<Object, Object>> supplier) {
+		this.cacheBuilderSupplier = supplier;
+		refreshKnownCaches();
 	}
 
 	/**
@@ -180,13 +196,7 @@ public class CaffeineCacheManager implements CacheManager {
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = createCaffeineCache(name);
-					this.cacheMap.put(name, cache);
-				}
-			}
+			return this.cacheMap.computeIfAbsent(name, this::createCaffeineCache);
 		}
 		return cache;
 	}
@@ -201,16 +211,33 @@ public class CaffeineCacheManager implements CacheManager {
 	}
 
 	/**
+	 * Return native Caffeine Cache builder instance for the specified cache name.
+	 * @param name the name of the cache
+	 * @return the native Caffeine cache builder
+	 */
+	protected Caffeine<Object, Object> getNativeCacheBuilder(String name) {
+		Caffeine<Object, Object> cacheBuilder = null;
+		if (this.cacheBuilderSupplier != null) {
+			cacheBuilder = this.cacheBuilderSupplier.apply(name);
+		}
+		if (cacheBuilder == null) {
+			cacheBuilder = this.cacheBuilder;
+		}
+		return cacheBuilder;
+	}
+
+	/**
 	 * Create a native Caffeine Cache instance for the specified cache name.
 	 * @param name the name of the cache
 	 * @return the native Caffeine Cache instance
 	 */
 	protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
+		Caffeine<Object, Object> cacheBuilder = getNativeCacheBuilder(name);
 		if (this.cacheLoader != null) {
-			return this.cacheBuilder.build(this.cacheLoader);
+			return cacheBuilder.build(this.cacheLoader);
 		}
 		else {
-			return this.cacheBuilder.build();
+			return cacheBuilder.build();
 		}
 	}
 
@@ -224,7 +251,7 @@ public class CaffeineCacheManager implements CacheManager {
 	/**
 	 * Create the known caches again with the current state of this manager.
 	 */
-	private void refreshKnownCaches() {
+	protected void refreshKnownCaches() {
 		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
 			entry.setValue(createCaffeineCache(entry.getKey()));
 		}

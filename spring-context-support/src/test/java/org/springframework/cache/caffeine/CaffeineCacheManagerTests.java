@@ -25,14 +25,16 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.mock.env.MockEnvironment;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Ben Manes
+ * @author Igor Stepanov
  */
 public class CaffeineCacheManagerTests {
 
@@ -134,7 +136,7 @@ public class CaffeineCacheManagerTests {
 
 		cm.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10"));
 		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x != cache1);
+		assertNotSame(cache1x, cache1);
 	}
 
 	@Test
@@ -144,7 +146,36 @@ public class CaffeineCacheManagerTests {
 
 		cm.setCacheSpecification("maximumSize=10");
 		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x != cache1);
+		assertNotSame(cache1x, cache1);
+	}
+
+	@Test
+	public void setCaffeineSupplierRecreateCache() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		Cache cache1 = cm.getCache("c1");
+
+		String [] keys = {"1", "2"};
+		Object [] values = {new Object(), new Object()};
+		cache1.put(keys[0], values[0]);
+		cache1.put(keys[1], values[1]);
+		((com.github.benmanes.caffeine.cache.Cache) cache1.getNativeCache()).cleanUp();
+		assertEquals(values[0], cache1.get(keys[0], Object.class));
+
+		CaffeineSupplier cs = new CaffeineSupplier();
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("spring.cache.caffeine.spec.c1", "maximumSize=1");
+		cs.setEnvironment(environment);
+		cm.setCaffeineSupplier(cs);
+		assertNotNull(cs.apply("c1"));
+		assertNull(cs.apply("c2"));
+
+		Cache cache1x = cm.getCache("c1");
+		assertNotSame(cache1x, cache1);
+
+		cache1x.put(keys[0], values[0]);
+		cache1x.put(keys[1], values[1]);
+		((com.github.benmanes.caffeine.cache.Cache) cache1x.getNativeCache()).cleanUp();
+		assertNull(cache1x.get(keys[0], Object.class));
 	}
 
 	@Test
@@ -155,7 +186,7 @@ public class CaffeineCacheManagerTests {
 		CacheLoader<Object, Object> loader = mockCacheLoader();
 		cm.setCacheLoader(loader);
 		Cache cache1x = cm.getCache("c1");
-		assertTrue(cache1x != cache1);
+		assertNotSame(cache1x, cache1);
 
 		cm.setCacheLoader(loader); // Set same instance
 		Cache cache1xx = cm.getCache("c1");
@@ -173,14 +204,11 @@ public class CaffeineCacheManagerTests {
 	@Test
 	public void cacheLoaderUseLoadingCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
-		cm.setCacheLoader(new CacheLoader<Object, Object>() {
-			@Override
-			public Object load(Object key) throws Exception {
-				if ("ping".equals(key)) {
-					return "pong";
-				}
-				throw new IllegalArgumentException("I only know ping");
+		cm.setCacheLoader(key -> {
+			if ("ping".equals(key)) {
+				return "pong";
 			}
+			throw new IllegalArgumentException("I only know ping");
 		});
 		Cache cache1 = cm.getCache("c1");
 		Cache.ValueWrapper value = cache1.get("ping");
