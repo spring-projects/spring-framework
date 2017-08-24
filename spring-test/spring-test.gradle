@@ -27,7 +27,7 @@ dependencies {
 	optional(project(":spring-websocket"))
 	optional("junit:junit:4.12")
 	optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-	optional("org.testng:testng:6.11")
+	optional("org.testng:testng:6.12")
 	optional("javax.inject:javax.inject:1")
 	optional("javax.servlet:javax.servlet-api:4.0.0")
 	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
