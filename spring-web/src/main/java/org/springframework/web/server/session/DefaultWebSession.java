@@ -86,27 +86,6 @@ class DefaultWebSession implements WebSession {
 	}
 
 	/**
-	 * Constructor to refresh an existing session for a new request.
-	 * @param existingSession the session to recreate
-	 * @param lastAccessTime the last access time
-	 * @param saveOperation save operation for the current request
-	 */
-	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime,
-			Function<WebSession, Mono<Void>> saveOperation) {
-
-		this.id = existingSession.id;
-		this.idGenerator = existingSession.idGenerator;
-		this.attributes = existingSession.attributes;
-		this.clock = existingSession.clock;
-		this.changeIdOperation = existingSession.changeIdOperation;
-		this.saveOperation = saveOperation;
-		this.creationTime = existingSession.creationTime;
-		this.lastAccessTime = lastAccessTime;
-		this.maxIdleTime = existingSession.maxIdleTime;
-		this.state = existingSession.state;
-	}
-
-	/**
 	 * For testing purposes.
 	 */
 	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime) {
