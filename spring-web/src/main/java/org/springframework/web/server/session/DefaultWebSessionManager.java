@@ -166,9 +166,6 @@ public class DefaultWebSessionManager implements WebSessionManager {
 				return Mono.empty();
 			}
 
-			// Force explicit start
-			start();
-
 			if (hasNewSessionId()) {
 				DefaultWebSessionManager.this.sessionIdResolver.setSessionId(this.exchange, this.getId());
 			}

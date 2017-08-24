@@ -98,7 +98,7 @@ class DefaultWebSession implements WebSession {
 		this.creationTime = existingSession.creationTime;
 		this.lastAccessTime = lastAccessTime;
 		this.maxIdleTime = existingSession.maxIdleTime;
-		this.state = existingSession.state;
+		this.state = existingSession.isStarted() ? State.STARTED : State.NEW;
 	}
 
 

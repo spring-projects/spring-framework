@@ -35,6 +35,26 @@ public class DefaultWebSessionTests {
 	private static final IdGenerator idGenerator = new JdkIdGenerator();
 
 	@Test
+	public void constructorWhenImplicitStartCopiedThenCopyIsStarted() {
+		DefaultWebSession original = createDefaultWebSession();
+		original.getAttributes().put("foo", "bar");
+
+		DefaultWebSession copy = new DefaultWebSession(original, CLOCK.instant());
+
+		assertTrue(copy.isStarted());
+	}
+
+	@Test
+	public void constructorWhenExplicitStartCopiedThenCopyIsStarted() {
+		DefaultWebSession original = createDefaultWebSession();
+		original.start();
+
+		DefaultWebSession copy = new DefaultWebSession(original, CLOCK.instant());
+
+		assertTrue(copy.isStarted());
+	}
+
+	@Test
 	public void startsSessionExplicitly() {
 		DefaultWebSession session = createDefaultWebSession();
 		session.start();
