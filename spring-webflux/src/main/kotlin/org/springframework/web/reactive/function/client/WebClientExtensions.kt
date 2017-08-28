@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono
 
 
 /**
- * Extension for [WebClient.RequestBodySpec.body] providing a `body<Foo>() variant
+ * Extension for [WebClient.RequestBodySpec.body] providing a `body<Foo>()` variant
  * leveraging Kotlin reified type parameters.
  *
  * @author Sebastien Deleuze

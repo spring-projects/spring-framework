@@ -21,25 +21,98 @@ import org.springframework.core.env.ConfigurableEnvironment
 import java.util.function.Supplier
 
 /**
+ * Functional bean definition Kotlin DSL.
+ *
+ * Example:
+ *
+ * ```
+ * beans {
+ * 	bean<UserHandler>()
+ * 	bean {
+ * 		Routes(ref(), ref())
+ * 	}
+ * 	bean<WebHandler>("webHandler") {
+ * 	RouterFunctions.toWebHandler(
+ * 		ref<Routes>().router(),
+ * 		HandlerStrategies.builder().viewResolver(ref()).build())
+ * 	}
+ * 	bean("messageSource") {
+ * 		ReloadableResourceBundleMessageSource().apply {
+ * 			setBasename("messages")
+ * 			setDefaultEncoding("UTF-8")
+ * 		}
+ * 	}
+ * 	bean {
+ * 		val prefix = "classpath:/templates/"
+ * 		val suffix = ".mustache"
+ * 		val loader = MustacheResourceTemplateLoader(prefix, suffix)
+ * 		MustacheViewResolver(Mustache.compiler().withLoader(loader)).apply {
+ * 			setPrefix(prefix)
+ * 			setSuffix(suffix)
+ * 		}
+ * 	}
+ * 	profile("foo") {
+ * 		bean<Foo>()
+ * 	}
+ * }
+ * ```
+ *
+ * @author Sebastien Deleuze
+ * @see BeanDefinitionDsl
+ * @since 5.0
+ */
+fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
+	val beans = BeanDefinitionDsl()
+	beans.init()
+	return beans
+}
+
+/**
  * Class implementing functional bean definition Kotlin DSL.
  *
+ * @constructor Create a new bean definition DSL.
+ * @param condition the predicate to fulfill in order to take in account the inner bean definition block
  * @author Sebastien Deleuze
  * @since 5.0
  */
-open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean = { true }) : (GenericApplicationContext) -> Unit {
+class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : (GenericApplicationContext) -> Unit {
 
-	protected val registrations = arrayListOf<(GenericApplicationContext) -> Unit>()
-	
-	protected val children = arrayListOf<BeanDefinitionDsl>()
-	
+	@PublishedApi
+	internal val registrations = arrayListOf<(GenericApplicationContext) -> Unit>()
+
+	@PublishedApi
+	internal val children = arrayListOf<BeanDefinitionDsl>()
+
+	/**
+	 * Scope enum constants.
+	 */
 	enum class Scope {
+		/**
+		 * Scope constant for the standard singleton scope
+		 * @see org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
+		 */
 		SINGLETON,
+		/**
+		 * Scope constant for the standard singleton scope
+		 * @see org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
+		 */
 		PROTOTYPE
 	}
 
-	class BeanDefinitionContext(val context: GenericApplicationContext) {
+	/**
+	 * Provide read access to some application context facilities.
+	 * @constructor Create a new bean definition context.
+	 * @param context the `ApplicationContext` instance to use for retrieving bean references, `Environment`, etc.
+	 */
+	inner class BeanDefinitionContext(@PublishedApi internal val context: GenericApplicationContext) {
 
-		
+		/**
+		 * Get a reference to the bean by type or type + name with the syntax
+		 * `ref<Foo>()` or `ref<Foo>("foo")`. When leveraging Kotlin type inference
+		 * it could be as short as `ref()` or `ref("foo")`.
+		 * @param name the name of the bean to retrieve
+		 * @param T type the bean must match, can be an interface or superclass
+		 */
 		inline fun <reified T : Any> ref(name: String? = null) : T = when (name) {
 			null -> context.getBean(T::class.java)
 			else -> context.getBean(name, T::class.java)
@@ -55,8 +128,14 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 
 	/**
 	 * Declare a bean definition from the given bean class which can be inferred when possible.
-	 * 
-	 * @See GenericApplicationContext.registerBean
+	 *
+	 * @param name the name of the bean
+	 * @param scope Override the target scope of this bean, specifying a new scope name.
+	 * @param isLazyInit Set whether this bean should be lazily initialized.
+	 * @param isPrimary Set whether this bean is a primary autowire candidate.
+	 * @param isAutowireCandidate Set whether this bean is a candidate for getting autowired into some other bean.
+	 * @see GenericApplicationContext.registerBean
+	 * @see org.springframework.beans.factory.config.BeanDefinition
 	 */
 	inline fun <reified T : Any> bean(name: String? = null,
 									  scope: Scope? = null,
@@ -82,7 +161,7 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 	/**
 	 * Declare a bean definition using the given supplier for obtaining a new instance.
 	 *
-	 * @See GenericApplicationContext.registerBean
+	 * @see GenericApplicationContext.registerBean
 	 */
 	inline fun <reified T : Any> bean(name: String? = null,
 									  scope: Scope? = null,
@@ -97,7 +176,7 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 			isPrimary?.let { bd.isPrimary = isPrimary }
 			isAutowireCandidate?.let { bd.isAutowireCandidate = isAutowireCandidate }
 		}
-		
+
 		registrations.add {
 			val beanContext = BeanDefinitionContext(it)
 			when (name) {
@@ -121,6 +200,7 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
 	 * specified environment-based predicate is true.
+	 * @param condition the predicate to fulfill in order to take in account the inner bean definition block
 	 */
 	fun environment(condition: ConfigurableEnvironment.() -> Boolean, init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
 		val beans = BeanDefinitionDsl(condition::invoke)
@@ -129,6 +209,10 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 		return beans
 	}
 
+	/**
+	 * Register the bean defined via the DSL on thAh pe provided application context.
+	 * @param context The `ApplicationContext` to use for registering the beans
+	 */
 	override fun invoke(context: GenericApplicationContext) {
 		for (registration in registrations) {
 			if (condition.invoke(context.environment)) {
@@ -139,16 +223,4 @@ open class BeanDefinitionDsl(val condition: (ConfigurableEnvironment) -> Boolean
 			child.invoke(context)
 		}
 	}
-}
-
-/**
- * Functional bean definition Kotlin DSL.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
-	val beans = BeanDefinitionDsl()
-	beans.init()
-	return beans
 }
