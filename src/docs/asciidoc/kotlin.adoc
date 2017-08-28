@@ -1,0 +1,427 @@
+[[kotlin]]
+= Kotlin support
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:toc: left
+:toclevels: 2
+
+== Introduction
+
+https://kotlinlang.org[Kotlin] is a statically-typed language targeting the JVM which allows to write concise and elegant
+code while providing a very good https://kotlinlang.org/docs/reference/java-interop.html[interoperability] with libraries
+written in Java.
+
+Spring Framework 5 introduces first-class support for Kotlin in order to allow developers to write Spring + Kotlin
+application almost like if Spring Framework was a native Kotlin framework.
+
+== Requirements ==
+
+Spring Framework 5 supports Kotlin 1.1+ and requires both `kotlin-stdlib` (or one of its variants
+`kotlin-stdlib-jre7` or `kotlin-stdlib-jre8`) and `kotlin-reflects` to be present on the classpath.
+They are provided by default if you bootstrap a Kotlin project on
+https://start.spring.io/#!language=kotlin[start.spring.io].
+
+== Kotlin extensions for Spring API
+
+Thanks to its great https://kotlinlang.org/docs/reference/java-interop.html[Java interoperability]
+and https://kotlinlang.org/docs/reference/extensions.html[Kotlin extensions], Spring
+Framework 5 Kotlin API is leveraging the Java's one, completed by a few Kotlin specific API
+available out of the box from Spring Framework JARs.
+
+{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/[Spring Framework KDoc API] lists
+and documents all Kotlin extensions and DSL available.
+
+[NOTE]
+====
+Keep in mind that Kotlin extensions need to be imported to be use. That means for example that
+`GenericApplicationContext.registerBean` Kotlin extensions will be available only if you write
+`import org.springframework.context.support.registerBean`. That said, like with static imports,
+IDEs should automatically suggest them in most cases.
+====
+
+For example, https://kotlinlang.org/docs/reference/inline-functions.html#reified-type-parameters[Kotlin reified type parameters]
+provide a workaround for JVM https://docs.oracle.com/javase/tutorial/java/generics/erasure.html[generics type erasure],
+so Spring Framework 5 introduces some extensions to take advantage of this feature to provide a better API when possible.
+That allows to provide convenient API for `RestTemplate`, for the new `WebClient` from Spring WebFlux
+and for various other API.
+
+To retrieve a list of `Foo` objects in Java you have to write:
+
+[source,java]
+----
+Flux<User> users  = client.get().retrieve().bodyToFlux(User.class)
+----
+
+While in Kotlin with Spring Framework extensions, you are able to write:
+
+[source,kotlin]
+----
+val users = client.get().retrieve().bodyToFlux<User>()
+// or (both are equivalent)
+val users : Flux<User> = client.get().retrieve().bodyToFlux()
+----
+
+Like in Java, `users` in Kotlin is strongly typed but Kotlin clever type inference allows shorter syntax.
+
+
+[NOTE]
+====
+Other libraries like Reactor or Spring Data also provide Kotlin extensions for their API
+in order to allow a better Kotlin development experience.
+====
+
+== Null-safety of Spring API
+
+One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety] which allows to deal with
+`null` values at compile time rather than bumping into the famous `NullPointerException` at runtime. This makes your applications
+safer through clean nullability declarations, expressing "value or no value" semantics without paying the cost of wrapper like `Optional`.
+(Kotlin allows using functional constructs with nullable values; check out this
+http://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
+
+Although Java does not allow to express null-safety in its type-system, Spring Framework 5 introduces
+https://jira.spring.io/browse/SPR-15540[null-safety of the whole Spring Framework APIs] via tooling-friendly annotations:
+ * `@NonNullApi` annotations at package level declare that non-null is the default behavior
+ * `@Nullable` annotations where specific parameters or return values can be `null`.
+
+Both annotations are meta-annotated with https://jcp.org/en/jsr/detail?id=305[JSR 305] meta-annotations (a dormant JSR but supported by tools
+like IDEA, Eclipse, Findbugs, etc.) to provide useful warnings to Java developers.
+
+On the Kotlin side - as of the https://blog.jetbrains.com/kotlin/2017/08/kotlin-1-1-4-is-out/[Kotlin 1.1.4 release] -
+these annotations https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[are recognized by Kotlin]
+in order to provide null-safety for the whole Spring API. That means you should never have `NullPointerException` in your code when
+using Spring 5 and Kotlin because the compiler will not allow it.
+
+For now, you need to use a `-Xjsr305-annotations=enable` flag (specified via the `freeCompilerArgs` peroperty with Maven or Gradle Kotlin
+plugin), but that will became the default behavior in an upcoming release of Kotlin.
+
+Make sure to https://github.com/sdeleuze/spring-kotlin-functional/blob/2d6ac07adfc2b8f25e91681dbb2b58a1c6cdf9a7/build.gradle.kts#L57[include JSR-305 JAR]
+until Kotlin 1.1.5 is released (it will include https://youtrack.jetbrains.com/issue/KT-19419[KT-19419] fix).
+
+Currently null-safety does not apply to generic type parameters, but that could change in the future, the related issue is
+https://youtrack.jetbrains.com/issue/KT-19592[KT-19592].
+
+[NOTE]
+====
+Other libraries like Reactor or Spring Data leverage these annotations to provide
+null-safe APIs for Kotlin developers.
+====
+
+== Support for Kotlin classes
+
+Spring Framework 5 now supports various Kotlin constructs like instantiating Kotlin classes
+via primary constructors, immutable classes data binding and optional parameters with default values.
+
+== Leveraging Kotlin nullable information in Spring annotations
+
+Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety support]
+to determine if an HTTP parameter is required without having to define explicitly the `required` attribute.
+That means `@RequestParam name: String?` with be treated as not required and `@RequestParam name: String` as required.
+
+This is also supported on Spring Messaging `@Header` annotation.
+
+In a similar fashion, Spring bean injection with `@Autowired` or `@Inject` uses this information to know if a bean is required or not.
+`@Autowired lateinit var foo: Foo` implies that a bean of type `Foo` must be registered in the application context while
+`@Autowired lateinit var foo: Foo?` won’t raise an error if such bean does not exist.
+
+== Spring WebFlux functional DSL
+
+Spring Framework 5.0 comes with a {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL] that allows you to leverage the
+<<webflux-fn,WebFlux functional API] with clean and idiomatic Kotlin code:
+
+[source,kotlin]
+----
+router {
+  accept(TEXT_HTML).nest {
+    GET("/") { ok().render("index") }
+    GET("/sse") { ok().render("sse") }
+    GET("/users", userHandler::findAllView)
+  }
+  "/api".nest {
+    accept(APPLICATION_JSON).nest {
+      GET("/users", userHandler::findAll)
+    }
+    accept(TEXT_EVENT_STREAM).nest {
+      GET("/users", userHandler::stream)
+    }
+  }
+  resources("/**", ClassPathResource("static/"))
+}
+----
+
+[NOTE]
+====
+This DSL is programmatic, thus also allows custom registration logic of beans via `if` expression,
+`for` loop or any other Kotlin constructs. That can be useful when routes need to be registered
+depending on dynamic data, for example created via the backoffice.
+====
+
+
+== Functional bean declaration DSL
+
+Spring Framework 5.0 introduces a new way to register beans using lambda as an alternative
+to XML or JavaConfig with `@Configuration` and `@Bean`. In a nutshell, it makes it possible
+to register beans with a `Supplier` lambda that acts as a `FactoryBean`.  It is very efficient
+and does not require any reflection or CGLIB proxies.
+
+In Java you will for example write:
+
+[source,java]
+----
+GenericApplicationContext context = new GenericApplicationContext();
+context.registerBean(Foo.class);
+context.registerBean(Bar.class, () -> new
+	Bar(context.getBean(Foo.class))
+);
+----
+
+While in Kotlin, reified type parameters and `GenericApplicationContext` Kotlin extensions allows to simply write:
+
+[source,kotlin]
+----
+val context = GenericApplicationContext().apply {
+    registerBean<Foo>()
+    registerBean { Bar(it.getBean<Foo>()) }
+}
+----
+
+A {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[dedicated DSL]
+is provided in order to allow an fully idiomatic syntax. It conceptually declares a
+`Consumer&lt;GenericApplicationContext&gt;` via a clean declarative API which allows you
+to deal with profile and `Environment` for customizing how your beans are registered.
+
+[source,kotlin]
+----
+beans {
+  bean<UserHandler>()
+  bean {
+    Routes(ref(), ref())
+  }
+  bean<WebHandler>("webHandler") {
+    RouterFunctions.toWebHandler(
+      ref<Routes>().router(),
+      HandlerStrategies.builder().viewResolver(ref()).build()
+    )
+  }
+  bean("messageSource") {
+    ReloadableResourceBundleMessageSource().apply {
+      setBasename("messages")
+      setDefaultEncoding("UTF-8")
+    }
+  }
+  bean {
+    val prefix = "classpath:/templates/"
+    val suffix = ".mustache"
+    val loader = MustacheResourceTemplateLoader(prefix, suffix)
+    MustacheViewResolver(Mustache.compiler().withLoader(loader)).apply {
+      setPrefix(prefix)
+      setSuffix(suffix)
+    }
+  }
+  profile("foo") {
+    bean<Foo>()
+  }
+}
+----
+
+`Routes(ref(), ref())` is the equivalent of `Routes(ref&lt;UserHandler&gt;(), ref&lt;MessageSource&gt;())`
+(types are not required thanks to Kotlin type inference) where `ref&lt;UserHandler&gt;()`
+is a shortcut for `applicationContext.getBean(UserHandler::class.java)`.
+
+[NOTE]
+====
+This DSL is programmatic, thus also allows custom registration logic of beans via `if` expression,
+`for` loop or any other Kotlin constructs.
+====
+
+== Kotlin Script based templates
+
+As of version 4.3, Spring Framework provides a
+http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[ScriptTemplateView]
+to render templates using script engines that supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223]
+and Spring Framework 5.0 go even further by extending this feature to WebFlux and supporting
+https://jira.spring.io/browse/SPR-15064[i18n and nested templates].
+
+Kotlin 1.1 provides such support and allows to render Kotlin based templates, see
+https://github.com/spring-projects/spring-framework/commit/badde3a479a53e1dd0777dd1bd5b55cb1021cf9e[this commit] for details.
+
+This enables some interesting use cases like writing type-safe templates using
+https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or simply Kotlin multiline `String` with interpolation,
+see https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] project for more details.
+
+This can allow you to write this kind of templates with full autocompletion and refactoring support in your IDE:
+
+[source,kotlin]
+----
+import io.spring.demo.*
+
+"""
+${include("header")}
+<h1>${i18n("title")}</h1>
+<ul>
+    ${users.joinToLine{ "<li>${i18n("user")} ${it.firstname} ${it.lastname}</li>" }}
+</ul>
+${include("footer")}
+"""
+----
+
+[NOTE]
+====
+This feature is still experimental since it requires caching to reach production-level
+performances, subscribe to https://github.com/sdeleuze/kotlin-script-templating/issues/5[this issue]
+to follow progresses.
+====
+
+== Getting started
+
+The easiest way to start a new Spring Framework 5 project in Kotlin is to create a new Spring
+Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
+
+It is also possible to create a standalone WebFlux project as described in
+https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
+
+=== Choose you web flavor
+
+Spring Framework now comes with 2 different web stacks: Spring MVC and WebFlux.
+
+Spring WebFlux is recommended if you want to create applications that will deal with latency,
+long-lived connections, streaming scenarios or simply if you want to use the web functional
+Kotlin DSL.
+
+For other use cases, Spring MVC and its annotation-based programming model is a perfectly
+valid and fully supported choice.
+
+=== Classes and member functions final by default
+
+By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[call classes in Kotlin are `final`].
+The `open` annotation on a class is the opposite of Java's `final`: it allows others to
+inherit from this class. Same for member functions that need to be open to be overridden.
+
+While Kotlin JVM-friendly design is generally a good fit with Spring, this specific point
+can prevent your application to start if not taken in account because Spring beans proxified
+with CGLIB - like `@Configuration` classes - need to be inherited at runtime for technical
+reasons.
+
+Before Kotlin 1.0.6, you needed to add an `open` keyword on each class and their member
+functions of Spring beans proxified with CGLIB like `@Configuration` classes.
+
+Fortunately, Kotlin 1.0.6+ now provides a
+https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
+plugin that open classes and their member functions by default for classes annotated or meta-annotated with one of the following annotation:
+
+* `@Component`
+* `@Async`
+* `@Transactional`
+* `@Cacheable`
+
+Meta-annotations support means that classes annotated with`@Configuration`, `@Controller`,
+`@RestController`, `@Service` or `@Repository` are automatically opened since these
+annotations are meta-annotated with `@Component`.
+
+http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default.
+
+=== What is the recommended way to inject dependencies in Kotlin?
+
+Try to favor constructor injection with `val` properties. As of Spring Framework 4.3, you
+just have to write `class MessageController(val repository: MessageService)` and Spring will automatically
+autowire the constructor.
+
+If you really need to use field injection, use `lateinit var`:
+
+[source,kotlin]
+----
+@Component
+class YourBean {
+
+    @Autowired
+    lateinit var mongoTemplate: MongoTemplate
+
+    @Autowired
+    lateinit var solrClient: SolrClient
+}
+----
+
+=== Easy testing Kotlin and JUnit 5
+
+Kotlin allows to specify meaningful test function names betweeen backticks,
+and as of JUnit 5.0 Kotlin test classes can use `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
+to enable a single instantiation of test classes which allows to use `@BeforeAll` and `@AfterAll`
+annotations on non-static methods, which is a good fit for Kotlin.
+
+It is also now possible to change the default behavior to `PER_CLASS` thanks to a
+`junit-platform.properties` file with a
+`junit.jupiter.testinstance.lifecycle.default = per_class` property.
+
+[source]
+----
+class IntegrationTests {
+
+  val application = Application(8181)
+  val client = WebClient.create("http://localhost:8181")
+
+  @BeforeAll
+  fun beforeAll() {
+    application.start()
+  }
+
+  @Test
+  fun `Find all users on HTML page`() {
+    client.get().uri("/users")
+        .accept(TEXT_HTML)
+        .retrieve()
+        .bodyToMono<String>()
+        .test()
+        .expectNextMatches { it.contains("Foo") }
+        .verifyComplete()
+  }
+
+  @AfterAll
+  fun afterAll() {
+    application.stop()
+  }
+}
+----
+
+
+=== Resources
+
+=== Blog posts
+
+* https://spring.io/blog/2016/02/15/developing-spring-boot-applications-with-kotlin[Developing Spring Boot applications with Kotlin]
+* https://spring.io/blog/2016/03/20/a-geospatial-messenger-with-kotlin-spring-boot-and-postgresql[A Geospatial Messenger with Kotlin, Spring Boot and PostgreSQL]
+* https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0[Introducing Kotlin support in Spring Framework 5.0]
+* https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[Spring Framework 5 Kotlin APIs, the functional way]
+
+=== Examples
+
+* https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: regular Spring Boot + Spring Data JPA project
+* https://github.com/mixitconf/mixit[mixit]: Spring Boot 2 + WebFlux + Reactive Spring Data MongoDB
+* https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean declaration DSL
+
+=== Tutorials
+
+* https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
+
+=== Pending issues to follow
+
+==== Spring Framework
+
+* https://jira.spring.io/browse/SPR-15541[Leveraging kotlin-reflect to determine interface method parameters]
+* https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
+
+
+==== Spring Boot
+
+* https://github.com/spring-projects/spring-boot/issues/5537[Improve Kotlin support]
+* https://github.com/spring-projects/spring-boot/issues/8762[Allow @ConfigurationProperties binding for immutable POJOs]
+* https://github.com/spring-projects/spring-boot/issues/8511[Provide support for Kotlin KClass parameter in `SpringApplication.run()`]
+
+==== Kotlin
+
+* https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
+* https://youtrack.jetbrains.com/issue/KT-15667[Support "::foo" as a short-hand syntax for bound callable reference to "this::foo"]
+* https://youtrack.jetbrains.com/issue/KT-11235[Allow specifying array annotation attribute single value without arrayOf()]
+* https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
+* https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
+* https://youtrack.jetbrains.com/issue/KT-19592[Apply JSR 305 meta-annotations to generic type parameters]
+* https://youtrack.jetbrains.com/issue/KT-18398[Provide a way for libraries to avoid mixing Kotlin 1.0 and 1.1 dependencies]
+* https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]

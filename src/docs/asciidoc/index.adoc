@@ -33,6 +33,8 @@ This reference document provides the following sections:
  ** <<web.adoc#spring-web,Servlet-based stack with Spring MVC>>
  ** <<reactive-web.adoc#spring-webflux, Reactive stack with Spring WebFlux>>
 
+* <<kotlin.adoc#kotlin,Kotlin support>>
+
 * <<integration.adoc#spring-integration,Integration with other technologies>>
 
 * <<appendix.adoc#spring-appendices,Appendix>>
