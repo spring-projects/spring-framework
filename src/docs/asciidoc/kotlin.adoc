@@ -28,7 +28,7 @@ and https://kotlinlang.org/docs/reference/extensions.html[Kotlin extensions], Sp
 Framework 5 Kotlin API is leveraging the Java's one, completed by a few Kotlin specific API
 available out of the box from Spring Framework JARs.
 
-{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/[Spring Framework KDoc API] lists
+{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/[Spring Framework KDoc API] lists
 and documents all Kotlin extensions and DSL available.
 
 [NOTE]
