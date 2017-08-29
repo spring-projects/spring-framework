@@ -63,7 +63,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	testCompile("org.hibernate:hibernate-validator:6.0.1.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
 	testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

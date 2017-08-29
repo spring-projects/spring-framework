@@ -62,7 +62,7 @@ dependencies {
 	testCompile("javax.interceptor:javax.interceptor-api:1.2")
 	testCompile("javax.cache:cache-api:1.0.0")
 	testCompile("org.hibernate:hibernate-core:5.2.10.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.1.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
 	// Enable use of the JUnitPlatform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 	testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
