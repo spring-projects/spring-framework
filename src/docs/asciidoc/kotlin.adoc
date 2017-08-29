@@ -246,8 +246,7 @@ Kotlin 1.1 provides such support and allows to render Kotlin based templates, se
 https://github.com/spring-projects/spring-framework/commit/badde3a479a53e1dd0777dd1bd5b55cb1021cf9e[this commit] for details.
 
 This enables some interesting use cases like writing type-safe templates using
-https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or simply Kotlin multiline `String` with interpolation,
-see https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] project for more details.
+https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or simply Kotlin multiline `String` with interpolation.
 
 This can allow you to write this kind of templates with full autocompletion and refactoring support in your IDE:
 
@@ -265,12 +264,8 @@ ${include("footer")}
 """
 ----
 
-[NOTE]
-====
-This feature is still experimental since it requires caching to reach production-level
-performances, subscribe to https://github.com/sdeleuze/kotlin-script-templating/issues/5[this issue]
-to follow progresses.
-====
+See https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
+project for more details.
 
 == Getting started
 
