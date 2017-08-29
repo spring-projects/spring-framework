@@ -1,16 +1,16 @@
-= How to contribute to the reference
+= How to contribute to the reference manual
 
-The Spring Framework reference now uses http://asciidoctor.org/[asciidoctor]. This
+The Spring Framework reference manual uses http://asciidoctor.org/[asciidoctor]. This
 document describes how to contribute documentation updates.
 
 == Building with Gradle
 
-You can build the documentation using gradle using the `asciidoctor` task. For example, from
+You can build the documentation using Gradle using the `asciidoctor` task. For example, from
 the project root execute the following command:
 
 	./gradlew asciidoctor
 
-the output will be available at `spring-framework/build/asciidoc/html5/index.html`
+The generated reference manual will then be available at `build/asciidoc/html5/index.html`.
 
 == Live editing
 
@@ -25,7 +25,7 @@ document. Once you have done that, there are additional gems to install to make 
 	gem install guard-rspec guard-livereload
 
 When running `guard start` within the `src/asciidoc/` folder, any changes to the
-`src/asciidoc/index.adoc` file will automatically be written at
+`src/asciidoc/index.adoc` file will automatically be written to
 `src/asciidoc/build/index.html`.
 
 == Troubleshooting
@@ -42,9 +42,9 @@ When running `guard start` within the `src/asciidoc/` folder, any changes to the
 
 Some notes on documentation
 
-* Documentation is wrapped at 90 chars, ensure that you manually wrap your edits
-* Tabs are used for indentation, do not use spaces
-* Follow the existing style when inserting `source` blocks
+* Documentation is wrapped at 90 chars; ensure that you manually wrap your edits.
+* Tabs are used for indentation; do not use spaces.
+* Follow the existing style when inserting `source` blocks.
 * http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/[Asciidoctor Quick Reference]
 * http://asciidoctor.org/docs/user-manual/[Asciidoctor Manual]
 * http://asciidoctor.org/docs/asciidoc-writers-guide/[Asciidoctor Writers Guide]
