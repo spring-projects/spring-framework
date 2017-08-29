@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,10 +88,11 @@ public class ExceptionHandlerMethodResolverTests {
 		new ExceptionHandlerMethodResolver(AmbiguousController.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noExceptionMapping() {
 		new ExceptionHandlerMethodResolver(NoExceptionController.class);
 	}
+
 
 	@Controller
 	static class ExceptionController {
@@ -111,6 +112,7 @@ public class ExceptionHandlerMethodResolverTests {
 		}
 	}
 
+
 	@Controller
 	static class InheritedController extends ExceptionController {
 
@@ -118,6 +120,7 @@ public class ExceptionHandlerMethodResolverTests {
 		public void handleIOException()	{
 		}
 	}
+
 
 	@Controller
 	static class AmbiguousController {
@@ -135,6 +138,7 @@ public class ExceptionHandlerMethodResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 
 	@Controller
 	static class NoExceptionController {
