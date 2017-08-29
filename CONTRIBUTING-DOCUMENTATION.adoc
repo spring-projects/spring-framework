@@ -5,12 +5,12 @@ document describes how to contribute documentation updates.
 
 == Building with Gradle
 
-You can build the documentation using gradle using the `reference` task. For example, from
+You can build the documentation using gradle using the `asciidoctor` task. For example, from
 the project root execute the following command:
 
-	./gradlew reference
+	./gradlew asciidoctor
 
-the output will be available at `spring-framework/build/reference/htmlsingle/index.html`
+the output will be available at `spring-framework/build/asciidoc/html5/index.html`
 
 == Live editing
 
