@@ -394,6 +394,48 @@ class YourBean {
 }
 ----
 
+=== Injecting configuration properties
+
+In Java, you can inject configuration properties using annotations like `@Value("${property}")`,
+however in Kotlin `$` is a reserved character that is used for https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
+
+In order to use `@Value` in Kotlin, you have to escape the `$` character by  writing `@Value("\${property}")`.
+
+As an alternative, you can also customize the properties placeholder prefix by declaring
+the following beans in your configuration:
+
+[source,kotlin]
+----
+@Bean
+fun propertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
+    setPlaceholderPrefix("%{")
+}
+----
+
+If you have any existing code (like Spring Boot actuators or `@LocalServerPort`) that is
+using the `${...}` syntax, you should declare the following beans in your configuration:
+
+[source,kotlin]
+----
+@Bean
+fun kotlinPropertyConfigurer() = PropertySourcesPlaceholderConfigurer().apply {
+    setPlaceholderPrefix("%{")
+    setIgnoreUnresolvablePlaceholders(true)
+}
+
+@Bean
+fun defaultPropertyConfigurer() = PropertySourcesPlaceholderConfigurer()
+----
+
+[NOTE]
+====
+If you are using Spring Boot, you would probably be interested in using
+https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
+instead of `@Value`, but currently you have to use it with nullable `var` (which is far from ideal)
+properties since immutable classes initialized by constructor are not support yet.
+See https://github.com/spring-projects/spring-boot/issues/8762[this issue] for more details.
+====
+
 === Easy testing Kotlin and JUnit 5
 
 Kotlin allows to specify meaningful test function names betweeen backticks,
