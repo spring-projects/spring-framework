@@ -256,9 +256,10 @@ This `beans()` function can then be used to register beans on your application c
 
 [source,kotlin]
 ----
-val context = GenericApplicationContext()
-beans().invoke(context)
-context.refresh()
+val context = GenericApplicationContext().apply {
+  beans().invoke(this)
+  refresh()
+}
 ----
 
 [NOTE]
