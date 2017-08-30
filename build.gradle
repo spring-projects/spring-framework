@@ -14,7 +14,7 @@ buildscript {
 plugins {
 	id "com.gradle.build-scan" version "1.8"
 	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.1.4" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.1.4-3" apply false
 	id "org.jetbrains.dokka" version "0.9.15"
 	id "org.asciidoctor.convert" version "1.5.3"
 }
@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion  = '5.0.0-RC3'
 	ext.junitPlatformVersion = '1.0.0-RC3'
 	ext.junitVintageVersion  = "4.12.0-RC3"
-	ext.kotlinVersion        = '1.1.4'
+	ext.kotlinVersion        = '1.1.4-3'
 	ext.log4jVersion         = '2.8.2'
 	ext.nettyVersion         = "4.1.15.Final"
 	ext.okhttp3Version       = "3.8.1"
