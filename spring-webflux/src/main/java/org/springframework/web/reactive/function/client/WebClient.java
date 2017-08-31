@@ -479,11 +479,6 @@ public interface WebClient {
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .retrieve()
 		 *     .bodyToMono(Pojo.class);
-		 *
-		 * Mono&lt;ResponseEntity&lt;Pojo&gt;&gt; entityMono = client.get().uri("/")
-		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .retrieve()
-		 *     .bodyToEntity(Pojo.class);
 		 * </pre>
 		 * @return spec with options for extracting the response body
 		 */
