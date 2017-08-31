@@ -481,7 +481,7 @@ class IntegrationTests {
 === Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]
-* https://kotlinslack.herokuapp.com/[Kotlin Slack] (with a dedicated #spring channel)
+* http://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
 * https://try.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
