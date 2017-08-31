@@ -11,7 +11,7 @@ https://kotlinlang.org[Kotlin] is a statically-typed language targeting the JVM 
 code while providing a very good https://kotlinlang.org/docs/reference/java-interop.html[interoperability] with libraries
 written in Java.
 
-Spring Framework 5 introduces first-class support for Kotlin in order to allow developers to write Spring + Kotlin
+Spring Framework 5 introduces first-class support for Kotlin and allows developers to write Spring + Kotlin
 applications almost like if Spring Framework was a native Kotlin framework.
 
 == Requirements ==
@@ -23,7 +23,7 @@ and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`k
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin[start.spring.io].
 
-== Kotlin extensions for Spring API
+== Extensions
 
 Thanks to its great https://kotlinlang.org/docs/reference/java-interop.html[Java interoperability]
 and to https://kotlinlang.org/docs/reference/extensions.html[Kotlin extensions], Spring
@@ -73,7 +73,7 @@ Other libraries like Reactor or Spring Data also provide Kotlin extensions for t
 in order to allow a better Kotlin development experience.
 ====
 
-== Null-safety of Spring API
+== Null-safety
 
 One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety]
 which allows to deal with `null` values at compile time rather than bumping into the famous
@@ -115,7 +115,7 @@ Other libraries like Reactor or Spring Data leverage these annotations to provid
 null-safe APIs for Kotlin developers.
 ====
 
-== Support for Kotlin classes
+== Classes
 
 Spring Framework 5 now supports various Kotlin constructs like instantiating Kotlin classes
 via primary constructors, immutable classes data binding and function optional parameters
@@ -131,7 +131,7 @@ Kotlin module.
 As of Spring Boot 2.0, Jackson Kotlin module is automatically provided via the JSON starter.
 ====
 
-== Leveraging null-safety in Spring annotations
+== Annotations
 
 Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
 to determine if an HTTP parameter is required without having to define explicitly the `required` attribute.
@@ -144,11 +144,11 @@ to know if a bean is required or not. `@Autowired lateinit var foo: Foo` implies
 of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
 
-== Spring WebFlux functional DSL
+== WebFlux functional DSL
 
 Spring Framework 5 comes with a
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL]
-that allows you to leverage the <<webflux-fn,WebFlux functional API] with clean and idiomatic Kotlin code:
+that allows you to leverage the <<reactive-web#webflux-fn,WebFlux functional API>> with clean and idiomatic Kotlin code:
 
 [source,kotlin]
 ----
@@ -278,7 +278,7 @@ see https://jira.spring.io/browse/SPR-13779[SPR-13779] and https://github.com/sp
 for more details and up to date informations.
 ====
 
-== Kotlin Script based templates
+== Kotlin Script templates
 
 As of version 4.3, Spring Framework provides a
 http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[ScriptTemplateView]
@@ -319,10 +319,10 @@ Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
 It is also possible to create a standalone WebFlux project as described in
 https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
 
-=== Choose your web flavor
+=== Choosing your web flavor
 
-Spring Framework now comes with 2 different web stacks: <<web.adoc,Spring MVC>> and
-<<reactive-web.adoc,Spring WebFlux>>.
+Spring Framework now comes with 2 different web stacks: <<web#mvc,Spring MVC>> and
+<<reactive-web#spring-web-reactive,Spring WebFlux>>.
 
 Spring WebFlux is recommended if you want to create applications that will deal with latency,
 long-lived connections, streaming scenarios or simply if you want to use the web functional
@@ -331,7 +331,7 @@ Kotlin DSL.
 For other use cases, Spring MVC and its annotation-based programming model is a perfectly
 valid and fully supported choice.
 
-=== Classes and member functions final by default
+=== Final by default
 
 By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[all classes in Kotlin are `final`].
 The `open` modifier on a class is the opposite of Java's `final`: it allows others to
@@ -360,7 +360,7 @@ annotations are meta-annotated with `@Component`.
 
 http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default.
 
-=== What is the recommended way to inject dependencies in Kotlin?
+=== Injecting dependencies
 
 Try to favor constructor injection with `val` read-only https://kotlinlang.org/docs/reference/properties.html[properties].
 
@@ -437,7 +437,7 @@ properties since immutable classes initialized by constructor are not support ye
 See https://github.com/spring-projects/spring-boot/issues/8762[this issue] for more details.
 ====
 
-=== Easy testing Kotlin and JUnit 5
+=== Testing
 
 Kotlin allows to specify meaningful test function names betweeen backticks,
 and as of JUnit 5 Kotlin test classes can use `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
@@ -478,7 +478,6 @@ class IntegrationTests {
 }
 ----
 
-
 === Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]
@@ -504,7 +503,9 @@ class IntegrationTests {
 
 * https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
 
-==== Pending issues to follow
+==== Issues
+
+Here is a list of pending issues related to Spring + Kotlin support.
 
 ===== Spring Framework
 
