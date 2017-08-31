@@ -1,8 +1,8 @@
-[[webflux-fn]]
-= Functional Programming Model
+==== Functional Programming Model
 
-[[webflux-fn-handler-functions]]
-== HandlerFunctions
+NOTE: This section is to be merged into `web-flux.adoc`.
+
+===== HandlerFunctions
 
 Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a function that
 takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The annotation counterpart to a
@@ -108,10 +108,9 @@ a completion signal when the person has been read from the request and stored. S
 when the `Person` has been saved.
 <3> `getPerson` is a handler function that returns a single person, identified via the path
 variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
-found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
+found. If it is not found, we use `otherwiseIfEmpty(Mono<T>)` to return a 404 Not Found response.
 
-[[webflux-fn-router-functions]]
-== RouterFunctions
+===== RouterFunctions
 
 Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a function
 that takes a `ServerRequest`, and returns a `Mono<HandlerFunction>`. If a request matches a
@@ -172,8 +171,7 @@ Most of the predicates found in `RequestPredicates` are compositions.
 For instance, `RequestPredicates.GET(String)` is a composition of
 `RequestPredicates.method(HttpMethod)` and `RequestPredicates.path(String)`.
 
-[[webflux-fn-running]]
-=== Running a Server
+====== Running a Server
 
 Now there is just one piece of the puzzle missing: running a router function in an HTTP server.
 You can convert a router function into a `HttpHandler` by using
@@ -208,10 +206,10 @@ tomcatServer.start();
 ----
 
 
-// TODO: DispatcherHandler
 
-[[webflux-fn-handler-filter-function]]
-== HandlerFilterFunction
+TODO: DispatcherHandler
+
+===== HandlerFilterFunction
 
 Routes mapped by a router function can be filtered by calling
 `RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is essentially a
