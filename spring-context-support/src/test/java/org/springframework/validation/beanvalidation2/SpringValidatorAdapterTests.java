@@ -22,12 +22,15 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
+import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
@@ -157,6 +160,35 @@ public class SpringValidatorAdapterTests {
 		assertNull(errors.getFieldValue("property[4]"));
 	}
 
+	@Test  // SPR-15839
+	public void testMapValueConstraint() {
+		Map<String, String> property = new HashMap<>();
+		property.put("no value can be", null);
+
+		BeanWithMapEntryConstraint bean = new BeanWithMapEntryConstraint();
+		bean.setProperty(property);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertThat(errors.getFieldErrorCount("property[no value can be]"), is(1));
+		assertNull(errors.getFieldValue("property[no value can be]"));
+	}
+
+	@Test  // SPR-15839
+	public void testMapEntryConstraint() {
+		Map<String, String> property = new HashMap<>();
+		property.put(null, null);
+
+		BeanWithMapEntryConstraint bean = new BeanWithMapEntryConstraint();
+		bean.setProperty(property);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertTrue(errors.hasFieldErrors("property[]"));
+		assertNull(errors.getFieldValue("property[]"));
+	}
 
 
 	@Same(field = "password", comparingField = "confirmPassword")
@@ -278,12 +310,29 @@ public class SpringValidatorAdapterTests {
 
 	public class BeanWithListElementConstraint {
 
+		@Valid
 		private List<@NotNull String> property;
 
 		public List<String> getProperty() {
 			return property;
 		}
+
 		public void setProperty(List<String> property) {
+			this.property = property;
+		}
+	}
+
+
+	public class BeanWithMapEntryConstraint {
+
+		@Valid
+		private Map<@NotNull String, @NotNull String> property;
+
+		public Map<String, String> getProperty() {
+			return property;
+		}
+
+		public void setProperty(Map<String, String> property) {
 			this.property = property;
 		}
 	}

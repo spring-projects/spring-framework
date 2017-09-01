@@ -194,7 +194,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				sb.append(']');
 			}
 			String name = node.getName();
-			if (name != null && node.getKind() == ElementKind.PROPERTY) {
+			if (name != null && node.getKind() == ElementKind.PROPERTY && !name.startsWith("<")) {
 				if (!first) {
 					sb.append('.');
 				}
