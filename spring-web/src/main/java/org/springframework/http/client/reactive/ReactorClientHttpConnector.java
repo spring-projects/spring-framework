@@ -48,11 +48,13 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 
 	/**
-	 * Create a Reactor Netty {@link ClientHttpConnector} with default {@link ClientOptions}
-	 * and SSL support enabled.
+	 * Create a Reactor Netty {@link ClientHttpConnector}
+	 * with default {@link ClientOptions} and HTTP compression support enabled.
 	 */
 	public ReactorClientHttpConnector() {
-		this.httpClient = HttpClient.create();
+		this.httpClient = HttpClient.builder()
+				.options(options -> options.compression(true))
+				.build();
 	}
 
 	/**
