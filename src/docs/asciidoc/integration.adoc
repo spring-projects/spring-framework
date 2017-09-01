@@ -8301,7 +8301,7 @@ entry is updated in the cache.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="foos", **sync="true"**)
+	@Cacheable(cacheNames="foos", **sync=true**)
 	public Foo executeExpensiveOperation(String id) {...}
 ----
 
