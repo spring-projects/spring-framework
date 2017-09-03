@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -351,6 +352,37 @@ public abstract class BeanFactoryUtils {
 
 		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type);
 		return uniqueBean(type, beansOfType);
+	}
+
+	/**
+	 * Get all bean names whose {@code Class} has the supplied {@link Annotation}
+	 * type, including those defined in ancestor factories, without creating any bean
+	 * instances yet. Will return unique names in case of overridden bean definitions.
+	 * @param lbf the bean factory
+	 * @param annotationType the type of annotation to look for
+	 * @return the array of matching bean names, or an empty array if none
+	 * @since 5.0
+	 */
+	public static String[] beanNamesForAnnotationIncludingAncestors(
+			ListableBeanFactory lbf, Class<? extends Annotation> annotationType) {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		String[] result = lbf.getBeanNamesForAnnotation(annotationType);
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForAnnotationIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), annotationType);
+				List<String> resultList = new ArrayList<>();
+				resultList.addAll(Arrays.asList(result));
+				for (String beanName : parentResult) {
+					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+						resultList.add(beanName);
+					}
+				}
+				result = StringUtils.toStringArray(resultList);
+			}
+		}
+		return result;
 	}
 
 	/**
