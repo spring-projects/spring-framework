@@ -181,7 +181,7 @@ See https://github.com/mixitconf/mixit/tree/bad6b92bce6193f9b3f696af9d416c276501
 for a concrete example.
 
 
-== Functional bean declaration DSL
+== Functional bean definition DSL
 
 Spring Framework 5 introduces a new way to register beans using lambda as an alternative
 to XML or JavaConfig with `@Configuration` and `@Bean`. In a nutshell, it makes it possible
@@ -210,9 +210,9 @@ val context = GenericApplicationContext().apply {
 ----
 
 In order to allow a more declarative approach and cleaner syntax, Spring Framework 5 introduces
-a new {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean declaration DSL]
-It conceptually declares a `Consumer<GenericApplicationContext>` via a clean declarative API
-which allows you to deal with profiles and `Environment` for customizing how your beans are registered.
+a new {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean definition DSL]
+It declares an `ApplicationContextInitializer` via a clean declarative API which allows
+you to deal with profiles and `Environment` for customizing how your beans are registered.
 
 [source,kotlin]
 ----
@@ -273,7 +273,7 @@ for a concrete example.
 
 [NOTE]
 ====
-Spring Boot is based on Java Config, but should allow using user-defined functional bean declarations,
+Spring Boot is based on Java Config, but should allow using user-defined functional bean definitions,
 see https://jira.spring.io/browse/SPR-13779[SPR-13779] and https://github.com/spring-projects/spring-boot/issues/8115[spring-boot/#8115]
 for more details and up to date informations.
 ====
@@ -497,7 +497,7 @@ class IntegrationTests {
 
 * https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: regular Spring Boot + Spring Data JPA project
 * https://github.com/mixitconf/mixit[mixit]: Spring Boot 2 + WebFlux + Reactive Spring Data MongoDB
-* https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean declaration DSL
+* https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean definition DSL
 
 ==== Tutorials
 
