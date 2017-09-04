@@ -36,9 +36,10 @@ class BeanDefinitionDslTests {
 			bean { Baz(ref("bar")) }
 		}
 
-		val context = GenericApplicationContext()
-		beans.invoke(context)
-		context.refresh()
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
 		
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
@@ -60,9 +61,10 @@ class BeanDefinitionDslTests {
 			}
 		}
 
-		val context = GenericApplicationContext()
-		beans.invoke(context)
-		context.refresh()
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
 
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))
@@ -87,9 +89,9 @@ class BeanDefinitionDslTests {
 
 		val context = GenericApplicationContext().apply { 
 			environment.propertySources.addFirst(SimpleCommandLinePropertySource("--name=foofoo"))
+			beans.initialize(this)
+			refresh()
 		}
-		beans.invoke(context)
-		context.refresh()
 
 		assertNotNull(context.getBean<Foo>())
 		assertNotNull(context.getBean<Bar>("bar"))

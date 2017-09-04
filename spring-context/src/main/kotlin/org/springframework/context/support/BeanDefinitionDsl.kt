@@ -17,6 +17,7 @@
 package org.springframework.context.support
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
+import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
 import java.util.function.Supplier
 
@@ -75,7 +76,7 @@ fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
  * @author Sebastien Deleuze
  * @since 5.0
  */
-class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : (GenericApplicationContext) -> Unit {
+class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : ApplicationContextInitializer<GenericApplicationContext> {
 
 	@PublishedApi
 	internal val registrations = arrayListOf<(GenericApplicationContext) -> Unit>()
@@ -210,17 +211,17 @@ class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Bool
 	}
 
 	/**
-	 * Register the bean defined via the DSL on thAh pe provided application context.
+	 * Register the bean defined via the DSL on the provided application context.
 	 * @param context The `ApplicationContext` to use for registering the beans
 	 */
-	override fun invoke(context: GenericApplicationContext) {
+	override fun initialize(context: GenericApplicationContext) {
 		for (registration in registrations) {
 			if (condition.invoke(context.environment)) {
 				registration.invoke(context)
 			}
 		}
 		for (child in children) {
-			child.invoke(context)
+			child.initialize(context)
 		}
 	}
 }
