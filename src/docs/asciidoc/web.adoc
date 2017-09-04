@@ -12,7 +12,7 @@ Chapters cover the Servlet-based <<mvc,Spring MVC>> web framework including <<mv
 <<mvc-cors,CORS>>, and <<websocket,WebSocket>> support.
 
 Note that as of Spring Framework 5.0 web applications can also run on a
-<<spring-web-reactive, reactive web stack>> (Reactive Streams API + non-blocking runtime).
+<<reactive-web.adoc#spring-reactive-web, reactive web stack>> (Reactive Streams API + non-blocking runtime).
 
 include::web/webmvc.adoc[leveloffset=+1]
 
