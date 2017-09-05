@@ -61,6 +61,9 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 		// SPR-15464
 		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));
+
+		// SPR-15910
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM));
 	}
 
 	@Test // SPR-15866
