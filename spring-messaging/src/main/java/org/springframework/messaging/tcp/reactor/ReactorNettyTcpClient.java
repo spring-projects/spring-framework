@@ -195,7 +195,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		ChannelGroupFuture close = this.channelGroup.close();
 		Mono<Void> completion = FutureMono.from(close)
-				.doAfterTerminate((x, e) -> {
+				.doOnSuccessOrError((x, e) -> {
 					// TODO: https://github.com/reactor/reactor-netty/issues/24
 					shutdownGlobalResources();
 
