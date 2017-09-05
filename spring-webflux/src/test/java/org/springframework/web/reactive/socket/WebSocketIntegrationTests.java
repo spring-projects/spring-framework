@@ -73,7 +73,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 							.subscribeWith(output)
 							.doOnNext(s -> logger.debug("inbound " + s))
 							.then()
-							.doOnTerminate((aVoid, ex) ->
+							.doOnSuccessOrError((aVoid, ex) ->
 									logger.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
 				})
 				.block(Duration.ofMillis(5000));
