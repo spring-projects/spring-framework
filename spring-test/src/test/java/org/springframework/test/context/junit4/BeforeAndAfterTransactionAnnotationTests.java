@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
@@ -43,6 +44,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @author Sam Brannen
  * @since 2.5
  */
+@Transactional
 public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactionalSpringRunnerTests {
 
 	protected static JdbcTemplate jdbcTemplate;
@@ -79,7 +81,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		assertInTransaction(false);
 		this.inTransaction = true;
 		BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls++;
@@ -88,7 +90,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
+	void afterTransaction() {
 		assertInTransaction(false);
 		this.inTransaction = false;
 		BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls++;
@@ -115,7 +117,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	@Test
-	@Transactional
 	public void transactionalMethod1() {
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
@@ -124,7 +125,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	@Test
-	@Transactional
 	public void transactionalMethod2() {
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
@@ -134,6 +134,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void nonTransactionalMethod() {
 		assertInTransaction(false);
 		assertEquals("Adding luke", 1, addPerson(jdbcTemplate, LUKE));

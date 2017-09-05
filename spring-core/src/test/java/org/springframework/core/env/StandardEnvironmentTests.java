@@ -129,42 +129,42 @@ public class StandardEnvironmentTests {
 		assertThat(activeProfiles.length, is(2));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfileArray() {
 		environment.setActiveProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNullProfile() {
 		environment.setActiveProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withEmptyProfile() {
 		environment.setActiveProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setActiveProfiles_withNotOperator() {
 		environment.setActiveProfiles("p1", "!p2");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
 		environment.setDefaultProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfile() {
 		environment.setDefaultProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withEmptyProfile() {
 		environment.setDefaultProfiles("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setDefaultProfiles_withNotOperator() {
 		environment.setDefaultProfiles("d1", "!d2");
 	}
@@ -204,7 +204,7 @@ public class StandardEnvironmentTests {
 		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void defaultProfileWithCircularPlaceholder() {
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
 		try {
@@ -263,22 +263,22 @@ public class StandardEnvironmentTests {
 		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItems("pd2", "pd3"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgumentList() {
 		environment.acceptsProfiles();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgumentList() {
 		environment.acceptsProfiles((String[])null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withNullArgument() {
 		environment.acceptsProfiles((String)null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withEmptyArgument() {
 		environment.acceptsProfiles("");
 	}
@@ -321,7 +321,7 @@ public class StandardEnvironmentTests {
 		assertThat(environment.acceptsProfiles("!p1"), is(false));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void acceptsProfiles_withInvalidNotOperator() {
 		environment.acceptsProfiles("p1", "!");
 	}

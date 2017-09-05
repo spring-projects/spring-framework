@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,15 +102,14 @@ public abstract class StoredProcedure extends SqlCall {
 	 * a convenience method where the order of the passed in parameter values
 	 * must match the order that the parameters where declared in.
 	 * @param inParams variable number of input parameters. Output parameters should
-	 * not be included in this map.
-	 * It is legal for values to be {@code null}, and this will produce the
-	 * correct behavior using a NULL argument to the stored procedure.
+	 * not be included in this map. It is legal for values to be {@code null}, and this
+	 * will produce the correct behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
-	 * Output parameters will appear here, with their values after the
-	 * stored procedure has been called.
+	 * Output parameters will appear here, with their values after the stored procedure
+	 * has been called.
 	 */
 	public Map<String, Object> execute(Object... inParams) {
-		Map<String, Object> paramsToUse = new HashMap<String, Object>();
+		Map<String, Object> paramsToUse = new HashMap<>();
 		validateParameters(inParams);
 		int i = 0;
 		for (SqlParameter sqlParameter : getDeclaredParameters()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 public class TaskExecutorRegistration {
 
+	@Nullable
 	private ThreadPoolTaskExecutor taskExecutor;
 
 	private int corePoolSize = Runtime.getRuntime().availableProcessors() * 2;
@@ -52,7 +54,7 @@ public class TaskExecutorRegistration {
 	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
 	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
 	 * <p>By default this is set to twice the value of
-	 * {@link Runtime#availableProcessors()}. In an an application where tasks do not
+	 * {@link Runtime#availableProcessors()}. In an application where tasks do not
 	 * block frequently, the number should be closer to or equal to the number of
 	 * available CPUs/cores.
 	 */

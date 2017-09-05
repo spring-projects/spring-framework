@@ -5,4 +5,7 @@
  * <p>Supports easy access to beans in the Spring root WebApplicationContext
  * from JSF EL expressions, for example in property values of JSF-managed beans.
  */
+@NonNullApi
 package org.springframework.web.jsf;
+
+import org.springframework.lang.NonNullApi;

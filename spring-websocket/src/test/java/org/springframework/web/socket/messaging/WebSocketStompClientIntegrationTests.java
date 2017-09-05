@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -171,7 +172,7 @@ public class WebSocketStompClientIntegrationTests {
 					return String.class;
 				}
 				@Override
-				public void handleFrame(StompHeaders headers, Object payload) {
+				public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 					received.add((String) payload);
 				}
 			});
@@ -208,7 +209,7 @@ public class WebSocketStompClientIntegrationTests {
 		}
 
 		@Override
-		public void handleFrame(StompHeaders headers, Object payload) {
+		public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 			logger.error("STOMP error frame " + headers + " payload=" + payload);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ public class FactoryBeanTests {
 	public void testFactoryBeanReturnsNull() throws Exception {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
-		Object result = factory.getBean("factoryBean");
-		assertNull(result);
+
+		assertEquals("null", factory.getBean("factoryBean").toString());
 	}
 
 	@Test
@@ -272,7 +272,7 @@ public class FactoryBeanTests {
 
 	public static class CountingPostProcessor implements BeanPostProcessor {
 
-		private final Map<String, AtomicInteger> count = new HashMap<String, AtomicInteger>();
+		private final Map<String, AtomicInteger> count = new HashMap<>();
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {

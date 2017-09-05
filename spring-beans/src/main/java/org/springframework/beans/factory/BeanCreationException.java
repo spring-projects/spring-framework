@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a BeanFactory encounters an error when
@@ -33,10 +34,13 @@ import org.springframework.core.NestedRuntimeException;
 @SuppressWarnings("serial")
 public class BeanCreationException extends FatalBeanException {
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private String resourceDescription;
 
+	@Nullable
 	private List<Throwable> relatedCauses;
 
 
@@ -85,7 +89,7 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message
 	 */
-	public BeanCreationException(String resourceDescription, String beanName, String msg) {
+	public BeanCreationException(@Nullable String resourceDescription, @Nullable String beanName, String msg) {
 		super("Error creating bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : "") + ": " + msg);
 		this.resourceDescription = resourceDescription;
@@ -100,36 +104,38 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable cause) {
+	public BeanCreationException(@Nullable String resourceDescription, String beanName, String msg, Throwable cause) {
 		this(resourceDescription, beanName, msg);
 		initCause(cause);
 	}
 
 
 	/**
-	 * Return the name of the bean requested, if any.
-	 */
-	public String getBeanName() {
-		return this.beanName;
-	}
-
-	/**
 	 * Return the description of the resource that the bean
 	 * definition came from, if any.
 	 */
+	@Nullable
 	public String getResourceDescription() {
 		return this.resourceDescription;
 	}
 
 	/**
+	 * Return the name of the bean requested, if any.
+	 */
+	@Nullable
+	public String getBeanName() {
+		return this.beanName;
+	}
+
+	/**
 	 * Add a related cause to this bean creation exception,
-	 * not being a direct cause of the failure but having occured
+	 * not being a direct cause of the failure but having occurred
 	 * earlier in the creation of the same bean instance.
 	 * @param ex the related cause to add
 	 */
 	public void addRelatedCause(Throwable ex) {
 		if (this.relatedCauses == null) {
-			this.relatedCauses = new LinkedList<Throwable>();
+			this.relatedCauses = new LinkedList<>();
 		}
 		this.relatedCauses.add(ex);
 	}
@@ -138,6 +144,7 @@ public class BeanCreationException extends FatalBeanException {
 	 * Return the related causes, if any.
 	 * @return the array of related causes, or {@code null} if none
 	 */
+	@Nullable
 	public Throwable[] getRelatedCauses() {
 		if (this.relatedCauses == null) {
 			return null;
@@ -185,7 +192,7 @@ public class BeanCreationException extends FatalBeanException {
 	}
 
 	@Override
-	public boolean contains(Class<?> exClass) {
+	public boolean contains(@Nullable Class<?> exClass) {
 		if (super.contains(exClass)) {
 			return true;
 		}

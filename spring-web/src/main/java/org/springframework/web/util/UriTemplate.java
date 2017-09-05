@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Represents a URI template. A URI template is a URI-like String that contains variables
- * enclosed by braces ({@code {}}), which can be expanded to produce an actual URI.
+ * enclosed by braces ({@code {}}) which can be expanded to produce an actual URI.
  *
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
  * for example usages.
@@ -39,18 +40,17 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
- * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
  */
 @SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
+
+	private final String uriTemplate;
 
 	private final UriComponents uriComponents;
 
 	private final List<String> variableNames;
 
 	private final Pattern matchPattern;
-
-	private final String uriTemplate;
 
 
 	/**
@@ -105,7 +105,7 @@ public class UriTemplate implements Serializable {
      * <p>Example:
      * <pre class="code">
      * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-     * System.out.println(template.expand("Rest & Relax", "42));
+     * System.out.println(template.expand("Rest & Relax", 42));
      * </pre>
      * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
      * @param uriVariableValues the array of URI variables
@@ -124,7 +124,7 @@ public class UriTemplate implements Serializable {
 	 * @param uri the URI to match to
 	 * @return {@code true} if it matches; {@code false} otherwise
 	 */
-	public boolean matches(String uri) {
+	public boolean matches(@Nullable String uri) {
 		if (uri == null) {
 			return false;
 		}
@@ -146,7 +146,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<String, String>(this.variableNames.size());
+		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size());
 		Matcher matcher = this.matchPattern.matcher(uri);
 		if (matcher.find()) {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -173,7 +173,6 @@ public class UriTemplate implements Serializable {
 
 		private final Pattern pattern;
 
-
 		private TemplateInfo(List<String> vars, Pattern pattern) {
 			this.variableNames = vars;
 			this.pattern = pattern;
@@ -187,9 +186,9 @@ public class UriTemplate implements Serializable {
 			return this.pattern;
 		}
 
-		private static TemplateInfo parse(String uriTemplate) {
+		public static TemplateInfo parse(String uriTemplate) {
 			int level = 0;
-			List<String> variableNames = new ArrayList<String>();
+			List<String> variableNames = new ArrayList<>();
 			StringBuilder pattern = new StringBuilder();
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0 ; i < uriTemplate.length(); i++) {
@@ -216,8 +215,7 @@ public class UriTemplate implements Serializable {
 						else {
 							if (idx + 1 == variable.length()) {
 								throw new IllegalArgumentException(
-										"No custom regular expression specified after ':' " +
-												"in \"" + variable + "\"");
+										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
 							String regex = variable.substring(idx + 1, variable.length());
 							pattern.append('(');
@@ -238,7 +236,7 @@ public class UriTemplate implements Serializable {
 		}
 
 		private static String quote(StringBuilder builder) {
-			return builder.length() != 0 ? Pattern.quote(builder.toString()) : "";
+			return (builder.length() > 0 ? Pattern.quote(builder.toString()) : "");
 		}
 	}
 

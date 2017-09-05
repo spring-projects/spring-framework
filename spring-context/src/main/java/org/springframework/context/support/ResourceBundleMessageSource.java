@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,12 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.context.MessageSource} implementation that
@@ -51,11 +52,11 @@ import org.springframework.util.StringUtils;
  * base class. The caching provided by this MessageSource is significantly faster
  * than the built-in caching of the {@code java.util.ResourceBundle} class.
  *
- * <p>Unfortunately, {@code java.util.ResourceBundle} caches loaded bundles
- * forever: Reloading a bundle during VM execution is <i>not</i> possible.
- * As this MessageSource relies on ResourceBundle, it faces the same limitation.
- * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
- * that is capable of refreshing the underlying bundle files.
+ * <p>The basenames follow {@link java.util.ResourceBundle} conventions: essentially,
+ * a fully-qualified classpath location. If it doesn't contain a package qualifier
+ * (such as {@code org.mypackage}), it will be resolved from the classpath root.
+ * Note that the JDK's standard ResourceBundle treats dots as package separators:
+ * This means that "test.theme" is effectively equivalent to "test/theme".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -64,18 +65,12 @@ import org.springframework.util.StringUtils;
  * @see java.util.ResourceBundle
  * @see java.text.MessageFormat
  */
-public class ResourceBundleMessageSource extends AbstractMessageSource implements BeanClassLoaderAware {
+public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
 
-	private String[] basenames = new String[0];
-
-	private String defaultEncoding = "ISO-8859-1";
-
-	private boolean fallbackToSystemLocale = true;
-
-	private long cacheMillis = -1;
-
+	@Nullable
 	private ClassLoader bundleClassLoader;
 
+	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
@@ -85,8 +80,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
-			new HashMap<String, Map<Locale, ResourceBundle>>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new HashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -96,105 +90,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
-			new HashMap<ResourceBundle, Map<String, Map<Locale, MessageFormat>>>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new HashMap<>();
 
-
-	/**
-	 * Set a single basename, following {@link java.util.ResourceBundle} conventions:
-	 * essentially, a fully-qualified classpath location. If it doesn't contain a
-	 * package qualifier (such as {@code org.mypackage}), it will be resolved
-	 * from the classpath root.
-	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
-	 * a web application's WAR structure. They can also be held in jar files on
-	 * the class path.
-	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
-	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
-	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
-	 * @see #setBasenames
-	 * @see java.util.ResourceBundle#getBundle(String)
-	 */
-	public void setBasename(String basename) {
-		setBasenames(basename);
-	}
-
-	/**
-	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
-	 * conventions: essentially, a fully-qualified classpath location. If it
-	 * doesn't contain a package qualifier (such as {@code org.mypackage}),
-	 * it will be resolved from the classpath root.
-	 * <p>The associated resource bundles will be checked sequentially
-	 * when resolving a message code. Note that message definitions in a
-	 * <i>previous</i> resource bundle will override ones in a later bundle,
-	 * due to the sequential lookup.
-	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
-	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
-	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
-	 * @see #setBasename
-	 * @see java.util.ResourceBundle#getBundle(String)
-	 */
-	public void setBasenames(String... basenames) {
-		if (basenames != null) {
-			this.basenames = new String[basenames.length];
-			for (int i = 0; i < basenames.length; i++) {
-				String basename = basenames[i];
-				Assert.hasText(basename, "Basename must not be empty");
-				this.basenames[i] = basename.trim();
-			}
-		}
-		else {
-			this.basenames = new String[0];
-		}
-	}
-
-	/**
-	 * Set the default charset to use for parsing resource bundle files.
-	 * <p>Default is the {@code java.util.ResourceBundle} default encoding:
-	 * ISO-8859-1.
-	 * @since 3.1.3
-	 */
-	public void setDefaultEncoding(String defaultEncoding) {
-		this.defaultEncoding = defaultEncoding;
-	}
-
-	/**
-	 * Set whether to fall back to the system Locale if no files for a specific
-	 * Locale have been found. Default is "true"; if this is turned off, the only
-	 * fallback will be the default file (e.g. "messages.properties" for
-	 * basename "messages").
-	 * <p>Falling back to the system Locale is the default behavior of
-	 * {@code java.util.ResourceBundle}. However, this is often not desirable
-	 * in an application server environment, where the system Locale is not relevant
-	 * to the application at all: Set this flag to "false" in such a scenario.
-	 * @since 3.1.3
-	 */
-	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
-		this.fallbackToSystemLocale = fallbackToSystemLocale;
-	}
-
-	/**
-	 * Set the number of seconds to cache loaded resource bundle files.
-	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever.
-	 * <li>A positive number will expire resource bundles after the given
-	 * number of seconds. This is essentially the interval between refresh checks.
-	 * Note that a refresh attempt will first check the last-modified timestamp
-	 * of the file before actually reloading it; so if files don't change, this
-	 * interval can be set rather low, as refresh attempts will not actually reload.
-	 * <li>A value of "0" will check the last-modified timestamp of the file on
-	 * every message access. <b>Do not use this in a production environment!</b>
-	 * <li><b>Note that depending on your ClassLoader, expiration might not work reliably
-	 * since the ClassLoader may hold on to a cached version of the bundle file.</b>
-	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
-	 * with resource bundle files in a non-classpath location.
-	 * </ul>
-	 * @since 3.1.3
-	 */
-	public void setCacheSeconds(int cacheSeconds) {
-		this.cacheMillis = (cacheSeconds * 1000);
-	}
 
 	/**
 	 * Set the ClassLoader to load resource bundles with.
@@ -213,13 +110,14 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Default is the containing BeanFactory's bean ClassLoader.
 	 * @see #setBundleClassLoader
 	 */
+	@Nullable
 	protected ClassLoader getBundleClassLoader() {
 		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
 	}
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -229,14 +127,17 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
-		String result = null;
-		for (int i = 0; result == null && i < this.basenames.length; i++) {
-			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+		Set<String> basenames = getBasenameSet();
+		for (String basename : basenames) {
+			ResourceBundle bundle = getResourceBundle(basename, locale);
 			if (bundle != null) {
-				result = getStringOrNull(bundle, code);
+				String result = getStringOrNull(bundle, code);
+				if (result != null) {
+					return result;
+				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	/**
@@ -244,15 +145,19 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * using a cached MessageFormat instance per message code.
 	 */
 	@Override
+	@Nullable
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		MessageFormat messageFormat = null;
-		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
-			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+		Set<String> basenames = getBasenameSet();
+		for (String basename : basenames) {
+			ResourceBundle bundle = getResourceBundle(basename, locale);
 			if (bundle != null) {
-				messageFormat = getMessageFormat(bundle, code, locale);
+				MessageFormat messageFormat = getMessageFormat(bundle, code, locale);
+				if (messageFormat != null) {
+					return messageFormat;
+				}
 			}
 		}
-		return messageFormat;
+		return null;
 	}
 
 
@@ -264,8 +169,9 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
+	@Nullable
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
-		if (this.cacheMillis >= 0) {
+		if (getCacheMillis() >= 0) {
 			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
 			// do its native caching, at the expense of more extensive lookup steps.
 			return doGetBundle(basename, locale);
@@ -283,7 +189,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				try {
 					ResourceBundle bundle = doGetBundle(basename, locale);
 					if (localeMap == null) {
-						localeMap = new HashMap<Locale, ResourceBundle>();
+						localeMap = new HashMap<>();
 						this.cachedResourceBundles.put(basename, localeMap);
 					}
 					localeMap.put(locale, bundle);
@@ -311,7 +217,9 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+		ClassLoader classLoader = getBundleClassLoader();
+		Assert.state(classLoader != null, "No bundle ClassLoader set");
+		return ResourceBundle.getBundle(basename, locale, classLoader, new MessageSourceControl());
 	}
 
 	/**
@@ -337,6 +245,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
+	@Nullable
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
@@ -356,11 +265,11 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 			String msg = getStringOrNull(bundle, code);
 			if (msg != null) {
 				if (codeMap == null) {
-					codeMap = new HashMap<String, Map<Locale, MessageFormat>>();
+					codeMap = new HashMap<>();
 					this.cachedBundleMessageFormats.put(bundle, codeMap);
 				}
 				if (localeMap == null) {
-					localeMap = new HashMap<Locale, MessageFormat>();
+					localeMap = new HashMap<>();
 					codeMap.put(code, localeMap);
 				}
 				MessageFormat result = createMessageFormat(msg, locale);
@@ -386,6 +295,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see ResourceBundle#getString(String)
 	 * @see ResourceBundle#containsKey(String)
 	 */
+	@Nullable
 	protected String getStringOrNull(ResourceBundle bundle, String key) {
 		if (bundle.containsKey(key)) {
 			try {
@@ -404,8 +314,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	public String toString() {
-		return getClass().getName() + ": basenames=[" +
-				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + ": basenames=" + getBasenameSet();
 	}
 
 
@@ -417,6 +326,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	private class MessageSourceControl extends ResourceBundle.Control {
 
 		@Override
+		@Nullable
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
 
@@ -428,34 +338,34 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				final boolean reloadFlag = reload;
 				InputStream stream;
 				try {
-					stream = AccessController.doPrivileged(
-							new PrivilegedExceptionAction<InputStream>() {
-								@Override
-								public InputStream run() throws IOException {
-									InputStream is = null;
-									if (reloadFlag) {
-										URL url = classLoader.getResource(resourceName);
-										if (url != null) {
-											URLConnection connection = url.openConnection();
-											if (connection != null) {
-												connection.setUseCaches(false);
-												is = connection.getInputStream();
-											}
-										}
-									}
-									else {
-										is = classLoader.getResourceAsStream(resourceName);
-									}
-									return is;
+					stream = AccessController.doPrivileged((PrivilegedExceptionAction<InputStream>) () -> {
+						InputStream is = null;
+						if (reloadFlag) {
+							URL url = classLoader.getResource(resourceName);
+							if (url != null) {
+								URLConnection connection = url.openConnection();
+								if (connection != null) {
+									connection.setUseCaches(false);
+									is = connection.getInputStream();
 								}
-							});
+							}
+						}
+						else {
+							is = classLoader.getResourceAsStream(resourceName);
+						}
+						return is;
+					});
 				}
 				catch (PrivilegedActionException ex) {
 					throw (IOException) ex.getException();
 				}
 				if (stream != null) {
+					String encoding = getDefaultEncoding();
+					if (encoding == null) {
+						encoding = "ISO-8859-1";
+					}
 					try {
-						return loadBundle(new InputStreamReader(stream, defaultEncoding));
+						return loadBundle(new InputStreamReader(stream, encoding));
 					}
 					finally {
 						stream.close();
@@ -472,12 +382,14 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		}
 
 		@Override
+		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return (fallbackToSystemLocale ? super.getFallbackLocale(baseName, locale) : null);
+			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
 		}
 
 		@Override
 		public long getTimeToLive(String baseName, Locale locale) {
+			long cacheMillis = getCacheMillis();
 			return (cacheMillis >= 0 ? cacheMillis : super.getTimeToLive(baseName, locale));
 		}
 

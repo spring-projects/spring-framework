@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,36 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
@@ -93,7 +103,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	 * {@code ResponseEntity}.
 	 */
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
-			ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
+			@Nullable ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 
 		super(converters, manager, requestResponseBodyAdvice);
 	}
@@ -112,23 +122,29 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		Type paramType = getHttpEntityType(parameter);
+		if (paramType == null) {
+			throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
+					"' in method " + parameter.getMethod() + " is not parameterized");
+		}
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
-			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+			return new RequestEntity<>(body, inputMessage.getHeaders(),
 					inputMessage.getMethod(), inputMessage.getURI());
 		}
 		else {
-			return new HttpEntity<Object>(body, inputMessage.getHeaders());
+			return new HttpEntity<>(body, inputMessage.getHeaders());
 		}
 	}
 
+	@Nullable
 	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
 		Type parameterType = parameter.getGenericParameterType();
@@ -143,12 +159,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else if (parameterType instanceof Class) {
 			return Object.class;
 		}
-		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
-				"' in method " + parameter.getMethod() + " is not parameterized");
+		else {
+			return null;
+		}
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
@@ -162,85 +179,110 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
 
+		HttpHeaders outputHeaders = outputMessage.getHeaders();
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
+		if (outputHeaders.containsKey(HttpHeaders.VARY) && entityHeaders.containsKey(HttpHeaders.VARY)) {
+			List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
+			if (!values.isEmpty()) {
+				outputHeaders.setVary(values);
+			}
+		}
 		if (!entityHeaders.isEmpty()) {
-			outputMessage.getHeaders().putAll(entityHeaders);
+			entityHeaders.forEach((key, value) -> {
+				if (!outputHeaders.containsKey(key)) {
+					outputHeaders.put(key, value);
+				}
+			});
 		}
 
-		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
-			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (HttpMethod.GET == inputMessage.getMethod() && isResourceNotModified(inputMessage, outputMessage)) {
-				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
-				// Ensure headers are flushed, no body should be written.
-				outputMessage.flush();
-				// Skip call to converters, as they may update the body.
-				return;
+			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
+			outputMessage.getServletResponse().setStatus(returnStatus);
+			if (returnStatus == 200) {
+				if (isResourceNotModified(inputMessage, outputMessage)) {
+					// Ensure headers are flushed, no body should be written.
+					outputMessage.flush();
+					// Skip call to converters, as they may update the body.
+					return;
+				}
+			}
+			else if (returnStatus / 100 == 3) {
+				String location = outputHeaders.getFirst("location");
+				if (location != null) {
+					saveFlashAttributes(mavContainer, webRequest, location);
+				}
 			}
 		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
-		writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
+		writeWithMessageConverters(responseEntity.getBody(), returnType, inputMessage, outputMessage);
 
 		// Ensure headers are flushed even if no body was written.
 		outputMessage.flush();
 	}
 
-	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
-		List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
-		long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
-		String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
-		long lastModified = outputMessage.getHeaders().getLastModified();
-		boolean notModified = false;
-
-		if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
-				|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
-			// invalid conditional request, do not process
+	private List<String> getVaryRequestHeadersToAdd(HttpHeaders responseHeaders, HttpHeaders entityHeaders) {
+		List<String> entityHeadersVary = entityHeaders.getVary();
+		List<String> vary = responseHeaders.get(HttpHeaders.VARY);
+		if (vary != null) {
+			List<String> result = new ArrayList<>(entityHeadersVary);
+			for (String header : vary) {
+				for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+					if ("*".equals(existing)) {
+						return Collections.emptyList();
+					}
+					for (String value : entityHeadersVary) {
+						if (value.equalsIgnoreCase(existing)) {
+							result.remove(value);
+						}
+					}
+				}
+			}
+			return result;
 		}
-		else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (lastModified != -1) {
-			notModified = isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag);
-		}
-		return notModified;
+		return entityHeadersVary;
 	}
 
-	private boolean isETagNotModified(List<String> ifNoneMatch, String etag) {
-		if (StringUtils.hasLength(etag)) {
-			for (String clientETag : ifNoneMatch) {
-				// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-				if (StringUtils.hasLength(clientETag) &&
-						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")))) {
-					return true;
+	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
+		ServletWebRequest servletWebRequest =
+				new ServletWebRequest(inputMessage.getServletRequest(), outputMessage.getServletResponse());
+		HttpHeaders responseHeaders = outputMessage.getHeaders();
+		String etag = responseHeaders.getETag();
+		long lastModifiedTimestamp = responseHeaders.getLastModified();
+		if (inputMessage.getMethod() == HttpMethod.GET || inputMessage.getMethod() == HttpMethod.HEAD) {
+			responseHeaders.remove(HttpHeaders.ETAG);
+			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
+		}
+
+		return servletWebRequest.checkNotModified(etag, lastModifiedTimestamp);
+	}
+
+	private void saveFlashAttributes(ModelAndViewContainer mav, NativeWebRequest request, String location) {
+		mav.setRedirectModelScenario(true);
+		ModelMap model = mav.getModel();
+		if (model instanceof RedirectAttributes) {
+			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+			if (!CollectionUtils.isEmpty(flashAttributes)) {
+				HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
+				HttpServletResponse res = request.getNativeResponse(HttpServletResponse.class);
+				if (req != null) {
+					RequestContextUtils.getOutputFlashMap(req).putAll(flashAttributes);
+					if (res != null) {
+						RequestContextUtils.saveOutputFlashMap(location, req, res);
+					}
 				}
 			}
 		}
-		return false;
-	}
-
-	private boolean isTimeStampNotModified(long ifModifiedSince, long lastModifiedTimestamp) {
-		return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
-	}
-
-	private String addEtagPadding(String etag) {
-		if (StringUtils.hasLength(etag) &&
-				(!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) ) {
-			etag = "\"" + etag + "\"";
-		}
-		return etag;
 	}
 
 	@Override
-	protected Class<?> getReturnValueType(Object returnValue, MethodParameter returnType) {
+	protected Class<?> getReturnValueType(@Nullable Object returnValue, MethodParameter returnType) {
 		if (returnValue != null) {
 			return returnValue.getClass();
 		}
 		else {
 			Type type = getHttpEntityType(returnType);
+			type = (type != null ? type : Object.class);
 			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
 		}
 	}

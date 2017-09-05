@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,14 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.Profile
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface ActiveProfiles {
 
 	/**
 	 * Alias for {@link #profiles}.
-	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #profiles}, but it may be used <em>instead</em> of {@link #profiles}.
 	 */
@@ -60,7 +59,6 @@ public @interface ActiveProfiles {
 
 	/**
 	 * The bean definition profiles to activate.
-	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used <em>instead</em> of {@link #value}.
 	 */
@@ -70,7 +68,6 @@ public @interface ActiveProfiles {
 	/**
 	 * The type of {@link ActiveProfilesResolver} to use for resolving the active
 	 * bean definition profiles programmatically.
-	 *
 	 * @since 4.0
 	 * @see ActiveProfilesResolver
 	 */
@@ -79,18 +76,15 @@ public @interface ActiveProfiles {
 	/**
 	 * Whether or not bean definition profiles from superclasses should be
 	 * <em>inherited</em>.
-	 *
 	 * <p>The default value is {@code true}, which means that a test
 	 * class will <em>inherit</em> bean definition profiles defined by a
 	 * test superclass. Specifically, the bean definition profiles for a test
 	 * class will be appended to the list of bean definition profiles
 	 * defined by a test superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of bean definition profiles.
-	 *
 	 * <p>If {@code inheritProfiles} is set to {@code false}, the bean
 	 * definition profiles for the test class will <em>shadow</em> and
 	 * effectively replace any bean definition profiles defined by a superclass.
-	 *
 	 * <p>In the following example, the {@code ApplicationContext} for
 	 * {@code BaseTest} will be loaded using only the &quot;base&quot;
 	 * bean definition profile; beans defined in the &quot;extended&quot; profile
@@ -110,11 +104,9 @@ public @interface ActiveProfiles {
 	 *     // ...
 	 * }
 	 * </pre>
-	 *
 	 * <p>Note: {@code @ActiveProfiles} can be used when loading an
 	 * {@code ApplicationContext} from path-based resource locations or
 	 * annotated classes.
-	 *
 	 * @see ContextConfiguration#locations
 	 * @see ContextConfiguration#classes
 	 * @see ContextConfiguration#inheritLocations

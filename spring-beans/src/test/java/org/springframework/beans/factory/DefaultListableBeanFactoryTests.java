@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -43,7 +44,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -82,6 +83,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.DependenciesBean;
@@ -775,6 +777,7 @@ public class DefaultListableBeanFactoryTests {
 	private void testSingleTestBean(ListableBeanFactory lbf) {
 		assertTrue("1 beans defined", lbf.getBeanDefinitionCount() == 1);
 		String[] names = lbf.getBeanDefinitionNames();
+		assertTrue(names != lbf.getBeanDefinitionNames());
 		assertTrue("Array length == 1", names.length == 1);
 		assertTrue("0th element == test", names[0].equals("test"));
 		TestBean tb = (TestBean) lbf.getBean("test");
@@ -1218,7 +1221,7 @@ public class DefaultListableBeanFactoryTests {
 	public void testExpressionInStringArray() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		BeanExpressionResolver beanExpressionResolver = mock(BeanExpressionResolver.class);
-		when(beanExpressionResolver.evaluate(eq("#{foo}"), Matchers.any(BeanExpressionContext.class)))
+		when(beanExpressionResolver.evaluate(eq("#{foo}"), ArgumentMatchers.any(BeanExpressionContext.class)))
 				.thenReturn("classpath:/org/springframework/beans/factory/xml/util.properties");
 		bf.setBeanExpressionResolver(beanExpressionResolver);
 
@@ -1434,12 +1437,14 @@ public class DefaultListableBeanFactoryTests {
 	public void testGetBeanByTypeWithPrimary() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setLazyInit(true);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		bd2.setPrimary(true);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
 		TestBean bean = lbf.getBean(TestBean.class);
 		assertThat(bean.getBeanName(), equalTo("bd2"));
+		assertFalse(lbf.containsSingleton("bd1"));
 	}
 
 	@Test
@@ -1743,24 +1748,6 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testAutowireBeanByTypeWithTwoMatches() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
-		lbf.registerBeanDefinition("test", bd);
-		lbf.registerBeanDefinition("spouse", bd2);
-		try {
-			lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("test"));
-			assertTrue(ex.getMessage().contains("spouse"));
-		}
-	}
-
-	@Test
-	public void testAutowireBeanByTypeWithTwoMatchesAndParameterNameDiscovery() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
@@ -2215,7 +2202,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForConstructor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
@@ -2234,7 +2221,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForFactoryMethod() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
@@ -2711,7 +2698,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void resolveEmbeddedValue() throws Exception {
+	public void resolveEmbeddedValue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		StringValueResolver r1 = mock(StringValueResolver.class);
 		StringValueResolver r2 = mock(StringValueResolver.class);
@@ -2721,13 +2708,32 @@ public class DefaultListableBeanFactoryTests {
 		bf.addEmbeddedValueResolver(r3);
 		given(r1.resolveStringValue("A")).willReturn("B");
 		given(r2.resolveStringValue("B")).willReturn(null);
-		given(r3.resolveStringValue(isNull(String.class))).willThrow(new IllegalArgumentException());
+		given(r3.resolveStringValue(isNull())).willThrow(new IllegalArgumentException());
 
 		bf.resolveEmbeddedValue("A");
 
 		verify(r1).resolveStringValue("A");
 		verify(r2).resolveStringValue("B");
-		verify(r3, never()).resolveStringValue(isNull(String.class));
+		verify(r3, never()).resolveStringValue(isNull());
+	}
+
+	@Test
+	public void populatedJavaUtilOptionalBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(Optional.class);
+		bd.setFactoryMethodName("of");
+		bd.getConstructorArgumentValues().addGenericArgumentValue("CONTENT");
+		bf.registerBeanDefinition("optionalBean", bd);
+		assertEquals(Optional.of("CONTENT"), bf.getBean(Optional.class));
+	}
+
+	@Test
+	public void emptyJavaUtilOptionalBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(Optional.class);
+		bd.setFactoryMethodName("empty");
+		bf.registerBeanDefinition("optionalBean", bd);
+		assertSame(Optional.empty(), bf.getBean(Optional.class));
 	}
 
 	/**
@@ -2890,7 +2896,13 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class BeanWithDestroyMethod {
+	public static abstract class BaseClassWithDestroyMethod {
+
+		public abstract BaseClassWithDestroyMethod close();
+	}
+
+
+	public static class BeanWithDestroyMethod extends BaseClassWithDestroyMethod {
 
 		private static int closeCount = 0;
 
@@ -2900,8 +2912,10 @@ public class DefaultListableBeanFactoryTests {
 			this.inner = inner;
 		}
 
-		public void close() {
+		@Override
+		public BeanWithDestroyMethod close() {
 			closeCount++;
+			return this;
 		}
 	}
 
@@ -3107,7 +3121,7 @@ public class DefaultListableBeanFactoryTests {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
 					return new Float(this.numberFormat.parse((String) value).floatValue());
@@ -3126,13 +3140,13 @@ public class DefaultListableBeanFactoryTests {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType, Field field) {
+		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
 		}
 	}

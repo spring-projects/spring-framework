@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.naming.OperationNotSupportedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,7 +59,7 @@ public class SimpleNamingContext implements Context {
 
 	private final Hashtable<String, Object> boundObjects;
 
-	private final Hashtable<String, Object> environment = new Hashtable<String, Object>();
+	private final Hashtable<String, Object> environment = new Hashtable<>();
 
 
 	/**
@@ -73,14 +74,16 @@ public class SimpleNamingContext implements Context {
 	 */
 	public SimpleNamingContext(String root) {
 		this.root = root;
-		this.boundObjects = new Hashtable<String, Object>();
+		this.boundObjects = new Hashtable<>();
 	}
 
 	/**
 	 * Create a new naming context with the given naming root,
 	 * the given name/object map, and the JNDI environment entries.
 	 */
-	public SimpleNamingContext(String root, Hashtable<String, Object> boundObjects, Hashtable<String, Object> env) {
+	public SimpleNamingContext(
+			String root, Hashtable<String, Object> boundObjects, @Nullable Hashtable<String, Object> env) {
+
 		this.root = root;
 		this.boundObjects = boundObjects;
 		if (env != null) {
@@ -302,7 +305,7 @@ public class SimpleNamingContext implements Context {
 				proot = proot + "/";
 			}
 			String root = context.root + proot;
-			Map<String, T> contents = new HashMap<String, T>();
+			Map<String, T> contents = new HashMap<>();
 			for (String boundName : context.boundObjects.keySet()) {
 				if (boundName.startsWith(root)) {
 					int startIndex = root.length();

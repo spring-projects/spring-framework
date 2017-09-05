@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -43,6 +44,7 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private String[] redirectPatterns;
 
 
@@ -55,13 +57,14 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * prefix as well.
 	 * @since 4.1
 	 */
-	public void setRedirectPatterns(String... redirectPatterns) {
+	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
 		this.redirectPatterns = redirectPatterns;
 	}
 
 	/**
 	 * The configured redirect patterns, if any.
 	 */
+	@Nullable
 	public String[] getRedirectPatterns() {
 		return this.redirectPatterns;
 	}
@@ -73,7 +76,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
@@ -98,6 +101,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 				}
 			}
 		}
+		mavContainer.setStatus(mav.getStatus());
 		mavContainer.addAllAttributes(mav.getModel());
 	}
 

@@ -9,4 +9,7 @@
  * existing Servlet API mock objects
  * (<a href="http://www.mockobjects.com">MockObjects</a>).
  */
+@NonNullApi
 package org.springframework.mock.web;
+
+import org.springframework.lang.NonNullApi;

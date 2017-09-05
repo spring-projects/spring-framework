@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -44,6 +45,7 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 
 	private final AnnotationMetadata metadata;
 
+	@Nullable
 	private MethodMetadata factoryMethodMetadata;
 
 
@@ -98,6 +100,7 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	}
 
 	@Override
+	@Nullable
 	public final MethodMetadata getFactoryMethodMetadata() {
 		return this.factoryMethodMetadata;
 	}

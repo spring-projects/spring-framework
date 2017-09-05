@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 			"<composer><name>Robert Schumann</name><someBoolean>false</someBoolean><someDouble>NaN</someDouble></composer>" +
 			"</composers></people>";
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
@@ -66,7 +67,6 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 	@Before
 	public void setup() {
-
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -75,7 +75,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 		this.people = new PeopleWrapper(composers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new Jaxb2RootElementHttpMessageConverter());
 
 		this.restTemplate = new RestTemplate();
@@ -97,7 +97,6 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 	@Test
 	public void testHamcrestNodeMatcher() throws Exception {
-
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")))
@@ -128,4 +127,5 @@ public class XmlContentRequestMatchersIntegrationTests {
 			return this.composers;
 		}
 	}
+
 }

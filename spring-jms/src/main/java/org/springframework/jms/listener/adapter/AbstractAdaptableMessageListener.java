@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,17 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.jms.support.converter.SmartMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.lang.Nullable;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
 /**
@@ -56,13 +60,18 @@ public abstract class AbstractAdaptableMessageListener
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private Object defaultResponseDestination;
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
+	@Nullable
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
+
+	@Nullable
+	private QosSettings responseQosSettings;
 
 
 	/**
@@ -134,7 +143,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * {@link javax.jms.TextMessage TextMessages} and
 	 * {@link javax.jms.ObjectMessage ObjectMessages}.
 	 */
-	public void setMessageConverter(MessageConverter messageConverter) {
+	public void setMessageConverter(@Nullable MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
 	}
 
@@ -143,6 +152,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * listener method arguments, and objects returned from listener
 	 * methods back to JMS messages.
 	 */
+	@Nullable
 	protected MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
@@ -163,6 +173,26 @@ public abstract class AbstractAdaptableMessageListener
 	 */
 	protected final MessagingMessageConverter getMessagingMessageConverter() {
 		return this.messagingMessageConverter;
+	}
+
+	/**
+	 * Set the {@link QosSettings} to use when sending a response. Can be set to
+	 * {@code null} to indicate that the broker's defaults should be used.
+	 * @param responseQosSettings the QoS settings to use when sending a response or
+	 * {@code null} to use the default values.
+	 * @since 5.0
+	 */
+	public void setResponseQosSettings(@Nullable QosSettings responseQosSettings) {
+		this.responseQosSettings = responseQosSettings;
+	}
+
+	/**
+	 * Return the {@link QosSettings} to use when sending a response,
+	 * or {@code null} if the defaults should be used.
+	 */
+	@Nullable
+	protected QosSettings getResponseQosSettings() {
+		return this.responseQosSettings;
 	}
 
 
@@ -189,6 +219,9 @@ public abstract class AbstractAdaptableMessageListener
 		}
 	}
 
+	@Override
+	public abstract void onMessage(Message message, @Nullable Session session) throws JMSException;
+
 	/**
 	 * Handle the given exception that arose during listener execution.
 	 * The default implementation logs the exception at error level.
@@ -201,6 +234,7 @@ public abstract class AbstractAdaptableMessageListener
 	protected void handleListenerException(Throwable ex) {
 		logger.error("Listener execution failed", ex);
 	}
+
 
 	/**
 	 * Extract the message body from the given JMS message.
@@ -234,7 +268,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #getResponseDestination
 	 * @see #sendResponse
 	 */
-	protected void handleResult(Object result, Message request, Session session) {
+	protected void handleResult(Object result, Message request, @Nullable Session session) {
 		if (session != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Listener method returned result [" + result +
@@ -269,14 +303,17 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
-		Object content = (result instanceof JmsResponse ? ((JmsResponse<?>) result).getResponse() : result);
-		if (content instanceof org.springframework.messaging.Message) {
-			return this.messagingMessageConverter.toMessage(content, session);
-		}
+		Object content = preProcessResponse(result instanceof JmsResponse
+				? ((JmsResponse<?>) result).getResponse() : result);
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
-			return converter.toMessage(content, session);
+			if (content instanceof org.springframework.messaging.Message) {
+				return this.messagingMessageConverter.toMessage(content, session);
+			}
+			else {
+				return converter.toMessage(content, session);
+			}
 		}
 
 		if (!(content instanceof Message)) {
@@ -284,6 +321,17 @@ public abstract class AbstractAdaptableMessageListener
 					"No MessageConverter specified - cannot handle message [" + content + "]");
 		}
 		return (Message) content;
+	}
+
+	/**
+	 * Pre-process the given result before it is converted to a {@link Message}.
+	 * @param result the result of the invocation
+	 * @return the payload response to handle, either the {@code result} argument
+	 * or any other object (for instance wrapping the result).
+	 * @since 4.3
+	 */
+	protected Object preProcessResponse(Object result) {
+		return result;
 	}
 
 	/**
@@ -358,6 +406,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setDefaultResponseTopicName
 	 * @see #setDestinationResolver
 	 */
+	@Nullable
 	protected Destination resolveDefaultResponseDestination(Session session) throws JMSException {
 		if (this.defaultResponseDestination instanceof Destination) {
 			return (Destination) this.defaultResponseDestination;
@@ -383,7 +432,14 @@ public abstract class AbstractAdaptableMessageListener
 		MessageProducer producer = session.createProducer(destination);
 		try {
 			postProcessProducer(producer, response);
-			producer.send(response);
+			QosSettings settings = getResponseQosSettings();
+			if (settings != null) {
+				producer.send(response, settings.getDeliveryMode(), settings.getPriority(),
+						settings.getTimeToLive());
+			}
+			else {
+				producer.send(response);
+			}
 		}
 		finally {
 			JmsUtils.closeMessageProducer(producer);
@@ -402,10 +458,17 @@ public abstract class AbstractAdaptableMessageListener
 
 
 	/**
-	 * Delegates payload extraction to {@link #extractMessage(javax.jms.Message)} to
-	 * enforce backward compatibility.
+	 * A {@link MessagingMessageConverter} that lazily invoke payload extraction and
+	 * delegate it to {@link #extractMessage(javax.jms.Message)} in order to enforce
+	 * backward compatibility.
 	 */
 	private class MessagingMessageConverterAdapter extends MessagingMessageConverter {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+			return new LazyResolutionMessage(message);
+		}
 
 		@Override
 		protected Object extractPayload(Message message) throws JMSException {
@@ -425,12 +488,70 @@ public abstract class AbstractAdaptableMessageListener
 		}
 
 		@Override
-		protected Message createMessageForPayload(Object payload, Session session) throws JMSException {
+		protected Message createMessageForPayload(Object payload, Session session, @Nullable Object conversionHint)
+				throws JMSException {
+
 			MessageConverter converter = getMessageConverter();
-			if (converter != null) {
-				return converter.toMessage(payload, session);
+			if (converter == null) {
+				throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
 			}
-			throw new IllegalStateException("No message converter - cannot handle [" + payload + "]");
+			if (converter instanceof SmartMessageConverter) {
+				return ((SmartMessageConverter) converter).toMessage(payload, session, conversionHint);
+
+			}
+			return converter.toMessage(payload, session);
+		}
+
+
+		protected class LazyResolutionMessage implements org.springframework.messaging.Message<Object> {
+
+			private final javax.jms.Message message;
+
+			@Nullable
+			private Object payload;
+
+			@Nullable
+			private MessageHeaders headers;
+
+			public LazyResolutionMessage(javax.jms.Message message) {
+				this.message = message;
+			}
+
+			@Override
+			public Object getPayload() {
+				if (this.payload == null) {
+					try {
+						this.payload = unwrapPayload();
+					}
+					catch (JMSException ex) {
+						throw new MessageConversionException(
+								"Failed to extract payload from [" + this.message + "]", ex);
+					}
+				}
+				return this.payload;
+			}
+
+			/**
+			 * Extract the payload of the current message. Since we deferred the resolution
+			 * of the payload, a custom converter may still return a full message for it. In
+			 * this case, its payload is returned.
+			 * @return the payload of the message
+			 */
+			private Object unwrapPayload() throws JMSException {
+				Object payload = extractPayload(this.message);
+				if (payload instanceof org.springframework.messaging.Message) {
+					return ((org.springframework.messaging.Message) payload).getPayload();
+				}
+				return payload;
+			}
+
+			@Override
+			public MessageHeaders getHeaders() {
+				if (this.headers == null) {
+					this.headers = extractHeaders(this.message);
+				}
+				return this.headers;
+			}
 		}
 	}
 

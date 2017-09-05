@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
+ * Test fixture for {@link DefaultSockJsService}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -239,6 +239,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponse();
 		sockJsPath = sessionUrlPrefix + "xhr_send";
 		setRequest("POST", sockJsPrefix + sockJsPath);
+		given(this.xhrSendHandler.checkSessionType(this.session)).willReturn(true);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus()); // session exists

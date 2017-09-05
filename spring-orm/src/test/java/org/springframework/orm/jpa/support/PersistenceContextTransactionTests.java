@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.SynchronizationType;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -40,7 +40,6 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 4.1.2
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class PersistenceContextTransactionTests {
 
 	private EntityManagerFactory factory;
@@ -71,7 +70,7 @@ public class PersistenceContextTransactionTests {
 		@SuppressWarnings("serial")
 		PersistenceAnnotationBeanPostProcessor pabpp = new PersistenceAnnotationBeanPostProcessor() {
 			@Override
-			protected EntityManagerFactory findEntityManagerFactory(String unitName, String requestingBeanName) {
+			protected EntityManagerFactory findEntityManagerFactory(@Nullable String unitName, String requestingBeanName) {
 				return factory;
 			}
 		};
@@ -94,12 +93,9 @@ public class PersistenceContextTransactionTests {
 	public void testTransactionCommitWithSharedEntityManager() {
 		given(manager.getTransaction()).willReturn(tx);
 
-		tt.execute(new TransactionCallback() {
-			@Override
-			public Object doInTransaction(TransactionStatus status) {
-				bean.sharedEntityManager.flush();
-				return null;
-			}
+		tt.execute(status -> {
+			bean.sharedEntityManager.flush();
+			return null;
 		});
 
 		verify(tx).commit();
@@ -113,12 +109,9 @@ public class PersistenceContextTransactionTests {
 
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 
-		tt.execute(new TransactionCallback() {
-			@Override
-			public Object doInTransaction(TransactionStatus status) {
-				bean.sharedEntityManager.clear();
-				return null;
-			}
+		tt.execute(status -> {
+			bean.sharedEntityManager.clear();
+			return null;
 		});
 
 		verify(manager).clear();
@@ -129,12 +122,9 @@ public class PersistenceContextTransactionTests {
 	public void testTransactionCommitWithExtendedEntityManager() {
 		given(manager.getTransaction()).willReturn(tx);
 
-		tt.execute(new TransactionCallback() {
-			@Override
-			public Object doInTransaction(TransactionStatus status) {
-				bean.extendedEntityManager.flush();
-				return null;
-			}
+		tt.execute(status -> {
+			bean.extendedEntityManager.flush();
+			return null;
 		});
 
 		verify(tx, times(2)).commit();
@@ -148,12 +138,111 @@ public class PersistenceContextTransactionTests {
 
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 
-		tt.execute(new TransactionCallback() {
-			@Override
-			public Object doInTransaction(TransactionStatus status) {
-				bean.extendedEntityManager.flush();
-				return null;
-			}
+		tt.execute(status -> {
+			bean.extendedEntityManager.flush();
+			return null;
+		});
+
+		verify(manager).flush();
+	}
+
+	@Test
+	public void testTransactionCommitWithSharedEntityManagerUnsynchronized() {
+		given(manager.getTransaction()).willReturn(tx);
+
+		tt.execute(status -> {
+			bean.sharedEntityManagerUnsynchronized.flush();
+			return null;
+		});
+
+		verify(tx).commit();
+		verify(manager).flush();
+		verify(manager, times(2)).close();
+	}
+
+	@Test
+	public void testTransactionCommitWithSharedEntityManagerUnsynchronizedAndPropagationSupports() {
+		given(manager.isOpen()).willReturn(true);
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		tt.execute(status -> {
+			bean.sharedEntityManagerUnsynchronized.clear();
+			return null;
+		});
+
+		verify(manager).clear();
+		verify(manager).close();
+	}
+
+	@Test
+	public void testTransactionCommitWithExtendedEntityManagerUnsynchronized() {
+		given(manager.getTransaction()).willReturn(tx);
+
+		tt.execute(status -> {
+			bean.extendedEntityManagerUnsynchronized.flush();
+			return null;
+		});
+
+		verify(tx).commit();
+		verify(manager).flush();
+		verify(manager).close();
+	}
+
+	@Test
+	public void testTransactionCommitWithExtendedEntityManagerUnsynchronizedAndPropagationSupports() {
+		given(manager.isOpen()).willReturn(true);
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		tt.execute(status -> {
+			bean.extendedEntityManagerUnsynchronized.flush();
+			return null;
+		});
+
+		verify(manager).flush();
+	}
+
+	@Test
+	public void testTransactionCommitWithSharedEntityManagerUnsynchronizedJoined() {
+		given(manager.getTransaction()).willReturn(tx);
+
+		tt.execute(status -> {
+			bean.sharedEntityManagerUnsynchronized.joinTransaction();
+			bean.sharedEntityManagerUnsynchronized.flush();
+			return null;
+		});
+
+		verify(tx).commit();
+		verify(manager).flush();
+		verify(manager, times(2)).close();
+	}
+
+	@Test
+	public void testTransactionCommitWithExtendedEntityManagerUnsynchronizedJoined() {
+		given(manager.getTransaction()).willReturn(tx);
+
+		tt.execute(status -> {
+			bean.extendedEntityManagerUnsynchronized.joinTransaction();
+			bean.extendedEntityManagerUnsynchronized.flush();
+			return null;
+		});
+
+		verify(tx, times(2)).commit();
+		verify(manager).flush();
+		verify(manager).close();
+	}
+
+	@Test
+	public void testTransactionCommitWithExtendedEntityManagerUnsynchronizedJoinedAndPropagationSupports() {
+		given(manager.isOpen()).willReturn(true);
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		tt.execute(status -> {
+			bean.extendedEntityManagerUnsynchronized.joinTransaction();
+			bean.extendedEntityManagerUnsynchronized.flush();
+			return null;
 		});
 
 		verify(manager).flush();
@@ -167,6 +256,12 @@ public class PersistenceContextTransactionTests {
 
 		@PersistenceContext(type = PersistenceContextType.EXTENDED)
 		public EntityManager extendedEntityManager;
+
+		@PersistenceContext(synchronization = SynchronizationType.UNSYNCHRONIZED)
+		public EntityManager sharedEntityManagerUnsynchronized;
+
+		@PersistenceContext(type = PersistenceContextType.EXTENDED, synchronization = SynchronizationType.UNSYNCHRONIZED)
+		public EntityManager extendedEntityManagerUnsynchronized;
 	}
 
 }

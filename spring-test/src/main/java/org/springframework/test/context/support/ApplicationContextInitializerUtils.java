@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.util.Assert;
@@ -69,12 +68,12 @@ abstract class ApplicationContextInitializerUtils {
 	 * superclasses if appropriate (never {@code null})
 	 * @since 3.2
 	 */
-	static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> resolveInitializerClasses(
+	static Set<Class<? extends ApplicationContextInitializer<?>>> resolveInitializerClasses(
 			List<ContextConfigurationAttributes> configAttributesList) {
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
 
-		final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
-		new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+		final Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses = //
+				new HashSet<>();
 
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {

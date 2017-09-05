@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * Utilities methods for use in the Ast classes.
@@ -43,10 +44,10 @@ public abstract class AstUtils {
 	 * @return a list of resolvers that should be tried in order to access the property
 	 */
 	public static List<PropertyAccessor> getPropertyAccessorsToTry(
-			Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
+			@Nullable Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
 
-		List<PropertyAccessor> specificAccessors = new ArrayList<PropertyAccessor>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> specificAccessors = new ArrayList<>();
+		List<PropertyAccessor> generalAccessors = new ArrayList<>();
 		for (PropertyAccessor resolver : propertyAccessors) {
 			Class<?>[] targets = resolver.getSpecificTargetClasses();
 			if (targets == null) {  // generic resolver that says it can be used for any type
@@ -67,7 +68,7 @@ public abstract class AstUtils {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new LinkedList<PropertyAccessor>();
+		List<PropertyAccessor> resolvers = new LinkedList<>();
 		resolvers.addAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,7 @@ import static org.springframework.util.SocketUtils.*;
  */
 public class SocketUtilsTests {
 
-	private void assertPortInRange(int port, int minPort, int maxPort) {
-		assertTrue("port [" + port + "] >= " + minPort, port >= minPort);
-		assertTrue("port [" + port + "] <= " + maxPort, port <= maxPort);
-	}
-
-	private void assertAvailablePorts(SortedSet<Integer> ports, int numRequested, int minPort, int maxPort) {
-		assertEquals("number of ports requested", numRequested, ports.size());
-		for (int port : ports) {
-			assertPortInRange(port, minPort, maxPort);
-		}
-	}
-
-	// --- TCP -----------------------------------------------------------------
+	// TCP
 
 	@Test(expected = IllegalArgumentException.class)
 	public void findAvailableTcpPortWithZeroMinPort() {
@@ -70,8 +58,7 @@ public class SocketUtilsTests {
 		int port = SocketUtils.findAvailableTcpPort();
 		ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"));
 		try {
-			// will only look for the exact port, since random.nextInt(1) always returns 0
-			SocketUtils.findAvailableTcpPort(port, port + 1);
+			SocketUtils.findAvailableTcpPort(port, port);
 		}
 		finally {
 			socket.close();
@@ -117,17 +104,8 @@ public class SocketUtilsTests {
 		findAvailableTcpPorts(50, 45000, 45010);
 	}
 
-	private void findAvailableTcpPorts(int numRequested) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested);
-		assertAvailablePorts(ports, numRequested, PORT_RANGE_MIN, PORT_RANGE_MAX);
-	}
 
-	private void findAvailableTcpPorts(int numRequested, int minPort, int maxPort) {
-		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested, minPort, maxPort);
-		assertAvailablePorts(ports, numRequested, minPort, maxPort);
-	}
-
-	// --- UDP -----------------------------------------------------------------
+	// UDP
 
 	@Test(expected = IllegalArgumentException.class)
 	public void findAvailableUdpPortWithZeroMinPort() {
@@ -150,8 +128,8 @@ public class SocketUtilsTests {
 		int port = SocketUtils.findAvailableUdpPort();
 		DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
 		try {
-			// will only look for the exact port, since random.nextInt(1) always returns 0
-			SocketUtils.findAvailableUdpPort(port, port + 1);
+			// will only look for the exact port
+			SocketUtils.findAvailableUdpPort(port, port);
 		}
 		finally {
 			socket.close();
@@ -197,6 +175,19 @@ public class SocketUtilsTests {
 		findAvailableUdpPorts(50, 45000, 45010);
 	}
 
+
+	// Helpers
+
+	private void findAvailableTcpPorts(int numRequested) {
+		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested);
+		assertAvailablePorts(ports, numRequested, PORT_RANGE_MIN, PORT_RANGE_MAX);
+	}
+
+	private void findAvailableTcpPorts(int numRequested, int minPort, int maxPort) {
+		SortedSet<Integer> ports = SocketUtils.findAvailableTcpPorts(numRequested, minPort, maxPort);
+		assertAvailablePorts(ports, numRequested, minPort, maxPort);
+	}
+
 	private void findAvailableUdpPorts(int numRequested) {
 		SortedSet<Integer> ports = SocketUtils.findAvailableUdpPorts(numRequested);
 		assertAvailablePorts(ports, numRequested, PORT_RANGE_MIN, PORT_RANGE_MAX);
@@ -205,6 +196,17 @@ public class SocketUtilsTests {
 	private void findAvailableUdpPorts(int numRequested, int minPort, int maxPort) {
 		SortedSet<Integer> ports = SocketUtils.findAvailableUdpPorts(numRequested, minPort, maxPort);
 		assertAvailablePorts(ports, numRequested, minPort, maxPort);
+	}
+	private void assertPortInRange(int port, int minPort, int maxPort) {
+		assertTrue("port [" + port + "] >= " + minPort, port >= minPort);
+		assertTrue("port [" + port + "] <= " + maxPort, port <= maxPort);
+	}
+
+	private void assertAvailablePorts(SortedSet<Integer> ports, int numRequested, int minPort, int maxPort) {
+		assertEquals("number of ports requested", numRequested, ports.size());
+		for (int port : ports) {
+			assertPortInRange(port, minPort, maxPort);
+		}
 	}
 
 }

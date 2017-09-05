@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,22 @@ import static org.junit.Assert.*;
 /**
  * @author Thomas Risberg
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
-public final class FileEditorTests {
+public class FileEditorTests {
 
 	@Test
 	public void testClasspathFileName() throws Exception {
 		PropertyEditor fileEditor = new FileEditor();
-		fileEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/"
-				+ ClassUtils.getShortName(getClass()) + ".class");
+		fileEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
+				ClassUtils.getShortName(getClass()) + ".class");
 		Object value = fileEditor.getValue();
 		assertTrue(value instanceof File);
 		File file = (File) value;
 		assertTrue(file.exists());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonExistentResource() throws Exception {
 		PropertyEditor propertyEditor = new FileEditor();
 		propertyEditor.setAsText("classpath:no_way_this_file_is_found.doc");
@@ -71,34 +72,29 @@ public final class FileEditorTests {
 	@Test
 	public void testUnqualifiedFileNameFound() throws Exception {
 		PropertyEditor fileEditor = new FileEditor();
-		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass())
-				+ ".class";
+		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
+				ClassUtils.getShortName(getClass()) + ".class";
 		fileEditor.setAsText(fileName);
 		Object value = fileEditor.getValue();
 		assertTrue(value instanceof File);
 		File file = (File) value;
 		assertTrue(file.exists());
-		String absolutePath = file.getAbsolutePath();
-		if (File.separatorChar == '\\') {
-			absolutePath = absolutePath.replace('\\', '/');
-		}
+		String absolutePath = file.getAbsolutePath().replace('\\', '/');
 		assertTrue(absolutePath.endsWith(fileName));
 	}
 
 	@Test
 	public void testUnqualifiedFileNameNotFound() throws Exception {
 		PropertyEditor fileEditor = new FileEditor();
-		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass())
-				+ ".clazz";
+		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
+				ClassUtils.getShortName(getClass()) + ".clazz";
 		fileEditor.setAsText(fileName);
 		Object value = fileEditor.getValue();
 		assertTrue(value instanceof File);
 		File file = (File) value;
 		assertFalse(file.exists());
-		String absolutePath = file.getAbsolutePath();
-		if (File.separatorChar == '\\') {
-			absolutePath = absolutePath.replace('\\', '/');
-		}
+		String absolutePath = file.getAbsolutePath().replace('\\', '/');
 		assertTrue(absolutePath.endsWith(fileName));
 	}
+
 }

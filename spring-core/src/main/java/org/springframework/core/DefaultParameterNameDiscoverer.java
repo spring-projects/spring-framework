@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.core;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
  * using the Java 8 standard reflection mechanism (if available), and falling back
@@ -33,14 +31,8 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
-	private static final boolean standardReflectionAvailable = ClassUtils.isPresent(
-			"java.lang.reflect.Executable", DefaultParameterNameDiscoverer.class.getClassLoader());
-
-
 	public DefaultParameterNameDiscoverer() {
-		if (standardReflectionAvailable) {
-			addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-		}
+		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
 		addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 	}
 

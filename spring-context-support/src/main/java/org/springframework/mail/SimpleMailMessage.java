@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mail;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -42,20 +43,28 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class SimpleMailMessage implements MailMessage, Serializable {
 
+	@Nullable
 	private String from;
 
+	@Nullable
 	private String replyTo;
 
+	@Nullable
 	private String[] to;
 
+	@Nullable
 	private String[] cc;
 
+	@Nullable
 	private String[] bcc;
 
+	@Nullable
 	private Date sentDate;
 
+	@Nullable
 	private String subject;
 
+	@Nullable
 	private String text;
 
 
@@ -68,10 +77,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy constructor for creating a new {@code SimpleMailMessage} from the state
 	 * of an existing {@code SimpleMailMessage} instance.
-	 * @throws IllegalArgumentException if the supplied message is {@code null}
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
-		Assert.notNull(original, "The 'original' message argument cannot be null");
+		Assert.notNull(original, "'original' message argument must not be null");
 		this.from = original.getFrom();
 		this.replyTo = original.getReplyTo();
 		if (original.getTo() != null) {
@@ -90,88 +98,96 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public void setFrom(String from) {
+	public void setFrom(@Nullable String from) {
 		this.from = from;
 	}
 
+	@Nullable
 	public String getFrom() {
 		return this.from;
 	}
 
 	@Override
-	public void setReplyTo(String replyTo) {
+	public void setReplyTo(@Nullable String replyTo) {
 		this.replyTo = replyTo;
 	}
 
+	@Nullable
 	public String getReplyTo() {
-		return replyTo;
+		return this.replyTo;
 	}
 
 	@Override
-	public void setTo(String to) {
+	public void setTo(@Nullable String to) {
 		this.to = new String[] {to};
 	}
 
 	@Override
-	public void setTo(String[] to) {
+	public void setTo(@Nullable String[] to) {
 		this.to = to;
 	}
 
+	@Nullable
 	public String[] getTo() {
 		return this.to;
 	}
 
 	@Override
-	public void setCc(String cc) {
+	public void setCc(@Nullable String cc) {
 		this.cc = new String[] {cc};
 	}
 
 	@Override
-	public void setCc(String[] cc) {
+	public void setCc(@Nullable String[] cc) {
 		this.cc = cc;
 	}
 
+	@Nullable
 	public String[] getCc() {
-		return cc;
+		return this.cc;
 	}
 
 	@Override
-	public void setBcc(String bcc) {
+	public void setBcc(@Nullable String bcc) {
 		this.bcc = new String[] {bcc};
 	}
 
 	@Override
-	public void setBcc(String[] bcc) {
+	public void setBcc(@Nullable String[] bcc) {
 		this.bcc = bcc;
 	}
 
+	@Nullable
 	public String[] getBcc() {
-		return bcc;
+		return this.bcc;
 	}
 
 	@Override
-	public void setSentDate(Date sentDate) {
+	public void setSentDate(@Nullable Date sentDate) {
 		this.sentDate = sentDate;
 	}
 
+	@Nullable
 	public Date getSentDate() {
-		return sentDate;
+		return this.sentDate;
 	}
 
 	@Override
-	public void setSubject(String subject) {
+	public void setSubject(@Nullable String subject) {
 		this.subject = subject;
 	}
 
+	@Nullable
 	public String getSubject() {
 		return this.subject;
 	}
 
 	@Override
-	public void setText(String text) {
+	public void setText(@Nullable String text) {
 		this.text = text;
 	}
 
+	@Nullable
 	public String getText() {
 		return this.text;
 	}

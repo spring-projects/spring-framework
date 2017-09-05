@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 
 import static org.hamcrest.MatcherAssert.*;
 
@@ -58,7 +60,7 @@ public class XmlExpectationsHelper {
 
 	/**
 	 * Parse the content as {@link DOMSource} and apply a {@link Matcher}.
-	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
+	 * @see <a href="https://github.com/davidehringer/xml-matchers">xml-matchers</a>
 	 */
 	public void assertSource(String content, Matcher<? super Source> matcher) throws Exception {
 		Document document = parseXmlString(content);
@@ -70,23 +72,46 @@ public class XmlExpectationsHelper {
 	 * two are "similar" -- i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this method assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
+	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit<a/> library is available.
 	 * @param expected the expected XML content
 	 * @param actual the actual XML content
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Object...)
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
-		XMLUnit.setIgnoreWhitespace(true);
-		XMLUnit.setIgnoreComments(true);
-		XMLUnit.setIgnoreAttributeOrder(true);
-
-		Document control = XMLUnit.buildControlDocument(expected);
-		Document test = XMLUnit.buildTestDocument(actual);
-		Diff diff = new Diff(control, test);
-		if (!diff.similar()) {
+		XmlUnitDiff diff = new XmlUnitDiff(expected, actual);
+		if (diff.hasDifferences()) {
 			AssertionErrors.fail("Body content " + diff.toString());
 		}
+	}
+
+
+	/**
+	 * Inner class to prevent hard dependency on XML Unit.
+	 */
+	private static class XmlUnitDiff {
+
+		private final Diff diff;
+
+
+		XmlUnitDiff(String expected, String actual) {
+			this.diff = DiffBuilder.compare(expected).withTest(actual)
+					.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+					.ignoreWhitespace().ignoreComments()
+					.checkForSimilar()
+					.build();
+		}
+
+
+		public boolean hasDifferences() {
+			return diff.hasDifferences();
+		}
+
+		@Override
+		public String toString() {
+			return diff.toString();
+		}
+
 	}
 
 }

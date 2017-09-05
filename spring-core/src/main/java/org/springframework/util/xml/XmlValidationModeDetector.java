@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -120,7 +121,7 @@ public class XmlValidationModeDetector {
 
 
 	/**
-	 * Does the content contain the the DTD DOCTYPE declaration?
+	 * Does the content contain the DTD DOCTYPE declaration?
 	 */
 	private boolean hasDoctype(String content) {
 		return content.contains(DOCTYPE);
@@ -146,16 +147,18 @@ public class XmlValidationModeDetector {
 	 * to strip leading comment content on a line since the first piece of non comment content will be either
 	 * the DOCTYPE declaration or the root element of the document.
 	 */
+	@Nullable
 	private String consumeCommentTokens(String line) {
 		if (!line.contains(START_COMMENT) && !line.contains(END_COMMENT)) {
 			return line;
 		}
-		while ((line = consume(line)) != null) {
-			if (!this.inComment && !line.trim().startsWith(START_COMMENT)) {
-				return line;
+		String currLine = line;
+		while ((currLine = consume(currLine)) != null) {
+			if (!this.inComment && !currLine.trim().startsWith(START_COMMENT)) {
+				return currLine;
 			}
 		}
-		return line;
+		return null;
 	}
 
 	/**

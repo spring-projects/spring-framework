@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Java 5 enumeration of HTTP request methods. Intended for use
  * with {@link org.springframework.http.client.ClientHttpRequest}
@@ -33,7 +35,7 @@ public enum HttpMethod {
 	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
 
-	private static final Map<String, HttpMethod> mappings = new HashMap<String, HttpMethod>(8);
+	private static final Map<String, HttpMethod> mappings = new HashMap<>(8);
 
 	static {
 		for (HttpMethod httpMethod : values()) {
@@ -48,7 +50,8 @@ public enum HttpMethod {
 	 * @return the corresponding {@code HttpMethod}, or {@code null} if not found
 	 * @since 4.2.4
 	 */
-	public static HttpMethod resolve(String method) {
+	@Nullable
+	public static HttpMethod resolve(@Nullable String method) {
 		return (method != null ? mappings.get(method) : null);
 	}
 

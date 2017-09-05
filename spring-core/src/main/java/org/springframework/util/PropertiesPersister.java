@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,6 @@ import java.util.Properties;
  * but allowing for reading from any Reader and writing to any Writer
  * (which allows to specify an encoding for a properties file).
  *
- * <p>As of Spring 1.2.2, this interface also supports properties XML files,
- * through the {@code loadFromXml} and {@code storeToXml} methods.
- * The default implementations delegate to JDK 1.5's corresponding methods.
- *
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see DefaultPropertiesPersister
@@ -62,7 +58,6 @@ public interface PropertiesPersister {
 	 */
 	void load(Properties props, Reader reader) throws IOException;
 
-
 	/**
 	 * Write the contents of the given Properties object to the
 	 * given OutputStream.
@@ -83,7 +78,6 @@ public interface PropertiesPersister {
 	 * @throws IOException in case of I/O errors
 	 */
 	void store(Properties props, Writer writer, String header) throws IOException;
-
 
 	/**
 	 * Load properties from the given XML InputStream into the

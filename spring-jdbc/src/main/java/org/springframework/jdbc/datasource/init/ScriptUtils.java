@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -163,23 +165,22 @@ public abstract class ScriptUtils {
 	 * @param statements the list that will contain the individual statements
 	 * @throws ScriptException if an error occurred while splitting the SQL script
 	 */
-	public static void splitSqlScript(EncodedResource resource, String script, String separator, String commentPrefix,
+	public static void splitSqlScript(@Nullable EncodedResource resource, String script, String separator, String commentPrefix,
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
 			throws ScriptException {
 
-		Assert.hasText(script, "script must not be null or empty");
-		Assert.notNull(separator, "separator must not be null");
-		Assert.hasText(commentPrefix, "commentPrefix must not be null or empty");
-		Assert.hasText(blockCommentStartDelimiter, "blockCommentStartDelimiter must not be null or empty");
-		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
+		Assert.hasText(script, "'script' must not be null or empty");
+		Assert.notNull(separator, "'separator' must not be null");
+		Assert.hasText(commentPrefix, "'commentPrefix' must not be null or empty");
+		Assert.hasText(blockCommentStartDelimiter, "'blockCommentStartDelimiter' must not be null or empty");
+		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
 
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
 		boolean inEscape = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
+			char c = script.charAt(i);
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
@@ -199,7 +200,7 @@ public abstract class ScriptUtils {
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
-					// we've reached the end of the current statement
+					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
@@ -208,32 +209,31 @@ public abstract class ScriptUtils {
 					continue;
 				}
 				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
+					// Skip over any content from the start of the comment to the EOL
 					int indexOfNextNewline = script.indexOf("\n", i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
 					}
 					else {
-						// if there's no EOL, we must be at the end
-						// of the script, so stop here.
+						// If there's no EOL, we must be at the end of the script, so stop here.
 						break;
 					}
 				}
 				else if (script.startsWith(blockCommentStartDelimiter, i)) {
-					// skip over any block comments
+					// Skip over any block comments
 					int indexOfCommentEnd = script.indexOf(blockCommentEndDelimiter, i);
 					if (indexOfCommentEnd > i) {
 						i = indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
 						continue;
 					}
 					else {
-						throw new ScriptParseException(String.format("Missing block comment end delimiter [%s].",
-							blockCommentEndDelimiter), resource);
+						throw new ScriptParseException(
+								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
 				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
+					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
@@ -274,8 +274,8 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	private static String readScript(EncodedResource resource, String commentPrefix, String separator)
-			throws IOException {
+	private static String readScript(EncodedResource resource, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
 
 		LineNumberReader lnr = new LineNumberReader(resource.getReader());
 		try {
@@ -301,8 +301,8 @@ public abstract class ScriptUtils {
 	 * @return a {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
-	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix, String separator)
-			throws IOException {
+	public static String readScript(LineNumberReader lineNumberReader, @Nullable String commentPrefix,
+			@Nullable String separator) throws IOException {
 
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
@@ -319,7 +319,7 @@ public abstract class ScriptUtils {
 		return scriptBuilder.toString();
 	}
 
-	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, String separator) {
+	private static void appendSeparatorToScriptIfNecessary(StringBuilder scriptBuilder, @Nullable String separator) {
 		if (separator == null) {
 			return;
 		}
@@ -341,9 +341,8 @@ public abstract class ScriptUtils {
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			if (script.charAt(i) == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
@@ -399,7 +398,7 @@ public abstract class ScriptUtils {
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
 		executeSqlScript(connection, resource, false, false, DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR,
-			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 	/**
@@ -435,8 +434,8 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
-			boolean ignoreFailedDrops, String commentPrefix, String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			boolean ignoreFailedDrops, String commentPrefix, @Nullable String separator,
+			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
 			if (logger.isInfoEnabled()) {
@@ -459,7 +458,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<String>();
+			List<String> statements = new LinkedList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 
@@ -472,7 +471,14 @@ public abstract class ScriptUtils {
 						stmt.execute(statement);
 						int rowsAffected = stmt.getUpdateCount();
 						if (logger.isDebugEnabled()) {
-							logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
+							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
+							SQLWarning warningToLog = stmt.getWarnings();
+							while (warningToLog != null) {
+								logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
+										"', error code '" + warningToLog.getErrorCode() +
+										"', message [" + warningToLog.getMessage() + "]");
+								warningToLog = warningToLog.getNextWarning();
+							}
 						}
 					}
 					catch (SQLException ex) {

@@ -17,7 +17,7 @@
 	</bean>
 
 	<bean id="regularlyProxiedOverload" lazy-init="true" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="target"><ref local="regularlyProxiedOverloadTarget"/></property>
+		<property name="target"><ref bean="regularlyProxiedOverloadTarget"/></property>
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="interceptorNames"><value>interceptor</value></property>
 	</bean>

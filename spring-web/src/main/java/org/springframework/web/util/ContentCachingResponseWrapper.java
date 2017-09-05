@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
+ * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
  *
  * @author Juergen Hoeller
  * @since 4.1.3
@@ -43,12 +45,15 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
 
-	private final ServletOutputStream outputStream = new ResponseServletOutputStream();
+	@Nullable
+	private ServletOutputStream outputStream;
 
+	@Nullable
 	private PrintWriter writer;
 
 	private int statusCode = HttpServletResponse.SC_OK;
 
+	@Nullable
 	private Integer contentLength;
 
 
@@ -109,6 +114,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
+		if (this.outputStream == null) {
+			this.outputStream = new ResponseServletOutputStream(getResponse().getOutputStream());
+		}
 		return this.outputStream;
 	}
 
@@ -228,6 +236,12 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private class ResponseServletOutputStream extends ServletOutputStream {
 
+		private final ServletOutputStream os;
+
+		public ResponseServletOutputStream(ServletOutputStream os) {
+			this.os = os;
+		}
+
 		@Override
 		public void write(int b) throws IOException {
 			content.write(b);
@@ -236,6 +250,16 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			content.write(b, off, len);
+		}
+
+		@Override
+		public boolean isReady() {
+			return this.os.isReady();
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+			this.os.setWriteListener(writeListener);
 		}
 	}
 

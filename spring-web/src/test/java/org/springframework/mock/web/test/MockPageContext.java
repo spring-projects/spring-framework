@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,7 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.PageContext} interface.
- *
- * <p>Used for testing the web framework; only necessary for testing
- * applications when testing custom JSP tags.
+ * Only necessary for testing applications when testing custom JSP tags.
  *
  * <p>Note: Expects initialization via the constructor rather than via the
  * {@code PageContext.initialize} method. Does not support writing to a
@@ -61,7 +59,7 @@ public class MockPageContext extends PageContext {
 
 	private final ServletConfig servletConfig;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private JspWriter out;
 
@@ -257,7 +255,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -356,12 +354,12 @@ public class MockPageContext extends PageContext {
 	}
 
 	public byte[] getContentAsByteArray() {
-		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		Assert.state(this.response instanceof MockHttpServletResponse, "MockHttpServletResponse required");
 		return ((MockHttpServletResponse) this.response).getContentAsByteArray();
 	}
 
 	public String getContentAsString() throws UnsupportedEncodingException {
-		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		Assert.state(this.response instanceof MockHttpServletResponse, "MockHttpServletResponse required");
 		return ((MockHttpServletResponse) this.response).getContentAsString();
 	}
 

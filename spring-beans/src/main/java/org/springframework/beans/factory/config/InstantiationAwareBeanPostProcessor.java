@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.lang.Nullable;
 
 /**
  * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
@@ -58,6 +59,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * <p>Post-processors may implement the extended
 	 * {@link SmartInstantiationAwareBeanPostProcessor} interface in order
 	 * to predict the type of the bean object that they are going to return here.
+	 * <p>The default implementation returns {@code null}.
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return the bean object to expose instead of a default instance of the target bean,
@@ -66,14 +68,17 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
 	 */
-	Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException;
+	@Nullable
+	default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+		return null;
+	}
 
 	/**
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
-	 * <p>This is the ideal callback for performing field injection on the given bean instance.
-	 * See Spring's own {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor}
-	 * for a typical example.
+	 * <p>This is the ideal callback for performing custom field injection on the given bean
+	 * instance, right before Spring's autowiring kicks in.
+	 * <p>The default implementation returns {@code true}.
 	 * @param bean the bean instance created, with properties not having been set yet
 	 * @param beanName the name of the bean
 	 * @return {@code true} if properties should be set on the bean; {@code false}
@@ -82,7 +87,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * instances being invoked on this bean instance.
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
-	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
+	default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+		return true;
+	}
 
 	/**
 	 * Post-process the given property values before the factory applies them
@@ -91,19 +98,23 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * <p>Also allows for replacing the property values to apply, typically through
 	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
 	 * adding or removing specific values.
+	 * <p>The default implementation returns the given {@code pvs} as-is.
 	 * @param pvs the property values that the factory is about to apply (never {@code null})
 	 * @param pds the relevant property descriptors for the target bean (with ignored
 	 * dependency types - which the factory handles specifically - already filtered out)
 	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
-	 * @return the actual property values to apply to to the given bean
+	 * @return the actual property values to apply to the given bean
 	 * (can be the passed-in PropertyValues instance), or {@code null}
 	 * to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.MutablePropertyValues
 	 */
-	PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
-			throws BeansException;
+	@Nullable
+	default PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+
+		return pvs;
+	}
 
 }

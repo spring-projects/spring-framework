@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,9 +40,10 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 	}
 
 	@Override
-	protected void doParse(Element element, BeanDefinitionBuilder builder) {
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		String location = element.getAttribute("location");
 		if (StringUtils.hasLength(location)) {
+			location = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(location);
 			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 			builder.addPropertyValue("locations", locations);
 		}

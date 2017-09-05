@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Registry for custom {@link org.springframework.jdbc.support.SQLExceptionTranslator} instances associated with
@@ -54,7 +56,7 @@ public class CustomSQLExceptionTranslatorRegistry {
 	 * Key is the database product name as defined in the
 	 * {@link org.springframework.jdbc.support.SQLErrorCodesFactory}.
 	 */
-	private final Map<String, SQLExceptionTranslator> translatorMap = new HashMap<String, SQLExceptionTranslator>();
+	private final Map<String, SQLExceptionTranslator> translatorMap = new HashMap<>();
 
 
 	/**
@@ -86,6 +88,7 @@ public class CustomSQLExceptionTranslatorRegistry {
 	 * @param dbName the database name
 	 * @return the custom translator, or {@code null} if none found
 	 */
+	@Nullable
 	public SQLExceptionTranslator findTranslatorForDatabase(String dbName) {
 		return this.translatorMap.get(dbName);
 	}

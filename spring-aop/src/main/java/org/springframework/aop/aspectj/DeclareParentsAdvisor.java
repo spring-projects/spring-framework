@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 	/**
 	 * Private constructor to share common code between impl-based delegate and reference-based delegate
-	 * (cannot use method such as init() to share common code, due the the use of final fields)
+	 * (cannot use method such as init() to share common code, due the use of final fields)
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
 	 * @param implementationClass implementation class
@@ -76,12 +76,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
 		// Excludes methods implemented.
-		ClassFilter exclusion = new ClassFilter() {
-			@Override
-			public boolean matches(Class<?> clazz) {
-				return !(introducedInterface.isAssignableFrom(clazz));
-			}
-		};
+		ClassFilter exclusion = clazz -> !(introducedInterface.isAssignableFrom(clazz));
 
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 		this.advice = advice;

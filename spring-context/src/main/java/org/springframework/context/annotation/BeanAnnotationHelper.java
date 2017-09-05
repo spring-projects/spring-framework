@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,19 @@ package org.springframework.context.annotation;
 
 import java.lang.reflect.Method;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 /**
  * Utilities for processing {@link Bean}-annotated methods.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 class BeanAnnotationHelper {
 
-	/**
-	 * Return whether the given method is directly or indirectly annotated with
-	 * the {@link Bean} annotation.
-	 */
 	public static boolean isBeanAnnotated(Method method) {
-		return (AnnotationUtils.findAnnotation(method, Bean.class) != null);
+		return AnnotatedElementUtils.hasAnnotation(method, Bean.class);
 	}
 
 	public static String determineBeanNameFor(Method beanMethod) {
@@ -41,7 +38,7 @@ class BeanAnnotationHelper {
 		String beanName = beanMethod.getName();
 
 		// Check to see if the user has explicitly set a custom bean name...
-		Bean bean = AnnotationUtils.findAnnotation(beanMethod, Bean.class);
+		Bean bean = AnnotatedElementUtils.findMergedAnnotation(beanMethod, Bean.class);
 		if (bean != null && bean.name().length > 0) {
 			beanName = bean.name()[0];
 		}

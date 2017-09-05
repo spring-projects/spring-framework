@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
 
+import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
@@ -50,8 +51,10 @@ public class MarshallingView extends AbstractView {
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
 
+	@Nullable
 	private Marshaller marshaller;
 
+	@Nullable
 	private String modelKey;
 
 
@@ -104,6 +107,8 @@ public class MarshallingView extends AbstractView {
 		if (toBeMarshalled == null) {
 			throw new IllegalStateException("Unable to locate object to be marshalled in model: " + model);
 		}
+
+		Assert.state(this.marshaller != null, "No Marshaller set");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 		this.marshaller.marshal(toBeMarshalled, new StreamResult(baos));
 
@@ -123,6 +128,7 @@ public class MarshallingView extends AbstractView {
 	 * {@linkplain #setModelKey(String) model key} is not supported by the marshaller
 	 * @see #setModelKey(String)
 	 */
+	@Nullable
 	protected Object locateToBeMarshalled(Map<String, Object> model) throws IllegalStateException {
 		if (this.modelKey != null) {
 			Object value = model.get(this.modelKey);
@@ -156,6 +162,7 @@ public class MarshallingView extends AbstractView {
 	 * @see Marshaller#supports(Class)
 	 */
 	protected boolean isEligibleForMarshalling(String modelKey, Object value) {
+		Assert.state(this.marshaller != null, "No Marshaller set");
 		Class<?> classToCheck = value.getClass();
 		if (value instanceof JAXBElement) {
 			classToCheck = ((JAXBElement) value).getDeclaredType();

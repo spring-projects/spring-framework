@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -108,18 +109,8 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * <p>Default is none. Specify, for example, "validation." to get
 	 * error codes like "validation.typeMismatch.name".
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
-	}
-
-	/**
-	 * Specify the format for message codes built by this resolver.
-	 * <p>The default is {@link Format#PREFIX_ERROR_CODE}.
-	 * @since 3.2
-	 * @see Format
-	 */
-	public void setMessageCodeFormatter(MessageCodeFormatter formatter) {
-		this.formatter = (formatter == null ? DEFAULT_FORMATTER : formatter);
 	}
 
 	/**
@@ -128,6 +119,16 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 */
 	protected String getPrefix() {
 		return this.prefix;
+	}
+
+	/**
+	 * Specify the format for message codes built by this resolver.
+	 * <p>The default is {@link Format#PREFIX_ERROR_CODE}.
+	 * @since 3.2
+	 * @see Format
+	 */
+	public void setMessageCodeFormatter(@Nullable MessageCodeFormatter formatter) {
+		this.formatter = (formatter != null ? formatter : DEFAULT_FORMATTER);
 	}
 
 
@@ -146,9 +147,9 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * @return the list of codes
 	 */
 	@Override
-	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
-		Set<String> codeList = new LinkedHashSet<String>();
-		List<String> fieldList = new ArrayList<String>();
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class<?> fieldType) {
+		Set<String> codeList = new LinkedHashSet<>();
+		List<String> fieldList = new ArrayList<>();
 		buildFieldList(field, fieldList);
 		addCodes(codeList, errorCode, objectName, fieldList);
 		int dotIndex = field.lastIndexOf('.');
@@ -163,13 +164,13 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		return StringUtils.toStringArray(codeList);
 	}
 
-	private void addCodes(Collection<String> codeList, String errorCode, String objectName, Iterable<String> fields) {
+	private void addCodes(Collection<String> codeList, String errorCode, @Nullable String objectName, Iterable<String> fields) {
 		for (String field : fields) {
 			addCode(codeList, errorCode, objectName, field);
 		}
 	}
 
-	private void addCode(Collection<String> codeList, String errorCode, String objectName, String field) {
+	private void addCode(Collection<String> codeList, String errorCode, @Nullable String objectName, @Nullable String field) {
 		codeList.add(postProcessMessageCode(this.formatter.format(errorCode, objectName, field)));
 	}
 
@@ -208,14 +209,10 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 
 	/**
 	 * Common message code formats.
-	 *
-	 * @author Phillip Webb
-	 * @author Chris Beams
-	 * @since 3.2
 	 * @see MessageCodeFormatter
 	 * @see DefaultMessageCodesResolver#setMessageCodeFormatter(MessageCodeFormatter)
 	 */
-	public static enum Format implements MessageCodeFormatter {
+	public enum Format implements MessageCodeFormatter {
 
 		/**
 		 * Prefix the error code at the beginning of the generated message code. e.g.:
@@ -223,7 +220,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 */
 		PREFIX_ERROR_CODE {
 			@Override
-			public String format(String errorCode, String objectName, String field) {
+			public String format(String errorCode, @Nullable String objectName, @Nullable String field) {
 				return toDelimitedString(errorCode, objectName, field);
 			}
 		},
@@ -234,7 +231,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 */
 		POSTFIX_ERROR_CODE {
 			@Override
-			public String format(String errorCode, String objectName, String field) {
+			public String format(String errorCode, @Nullable String objectName, @Nullable String field) {
 				return toDelimitedString(objectName, field, errorCode);
 			}
 		};

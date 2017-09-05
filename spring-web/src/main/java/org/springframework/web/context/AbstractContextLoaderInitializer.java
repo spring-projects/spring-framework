@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.lang.Nullable;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -79,6 +80,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * desired
 	 * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
 	 */
+	@Nullable
 	protected abstract WebApplicationContext createRootApplicationContext();
 
 	/**
@@ -88,6 +90,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * @see #createRootApplicationContext()
 	 * @see ContextLoaderListener#setContextInitializers
 	 */
+	@Nullable
 	protected ApplicationContextInitializer<?>[] getRootApplicationContextInitializers() {
 		return null;
 	}

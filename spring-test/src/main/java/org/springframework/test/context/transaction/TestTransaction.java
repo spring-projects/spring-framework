@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.transaction;
 
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.Assert;
 
 /**
  * {@code TestTransaction} provides a collection of static utility methods for
@@ -135,9 +136,7 @@ public class TestTransaction {
 
 	private static TransactionContext requireCurrentTransactionContext() {
 		TransactionContext txContext = TransactionContextHolder.getCurrentTransactionContext();
-		if (txContext == null) {
-			throw new IllegalStateException("TransactionContext is not active");
-		}
+		Assert.state(txContext != null, "TransactionContext is not active");
 		return txContext;
 	}
 

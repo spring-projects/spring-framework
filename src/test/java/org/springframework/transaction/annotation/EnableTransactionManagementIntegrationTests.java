@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ public class EnableTransactionManagementIntegrationTests {
 		try {
 			assertTxProxying(ctx);
 			fail("expected exception");
-		} catch (AssertionError ex) {
+		}
+		catch (AssertionError ex) {
 			assertThat(ex.getMessage(), equalTo("FooRepository is not a TX proxy"));
 		}
 	}
@@ -185,7 +186,7 @@ public class EnableTransactionManagementIntegrationTests {
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager mgr = new SimpleCacheManager();
-			ArrayList<Cache> caches = new ArrayList<Cache>();
+			ArrayList<Cache> caches = new ArrayList<>();
 			caches.add(new ConcurrentMapCache(""));
 			mgr.setCaches(caches);
 			return mgr;

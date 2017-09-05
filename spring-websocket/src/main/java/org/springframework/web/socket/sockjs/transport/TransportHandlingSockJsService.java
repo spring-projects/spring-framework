@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -66,14 +67,16 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
-	private final Map<TransportType, TransportHandler> handlers = new HashMap<TransportType, TransportHandler>();
+	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
 
+	@Nullable
 	private SockJsMessageCodec messageCodec;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
-	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
+	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<>();
 
+	@Nullable
 	private ScheduledFuture<?> sessionCleanupTask;
 
 	private boolean running;
@@ -132,14 +135,14 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
-				"Add Jackson 2 to the classpath, or configure a custom SockJsMessageCodec.");
+				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
 		return this.messageCodec;
 	}
 
 	/**
 	 * Configure one or more WebSocket handshake request interceptors.
 	 */
-	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {
+	public void setHandshakeInterceptors(@Nullable List<HandshakeInterceptor> interceptors) {
 		this.interceptors.clear();
 		if (interceptors != null) {
 			this.interceptors.addAll(interceptors);
@@ -199,7 +202,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		HandshakeFailureException failure = null;
 
 		try {
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
@@ -266,7 +269,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
-					Map<String, Object> attributes = new HashMap<String, Object>();
+					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
@@ -291,6 +294,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 						return;
 					}
 				}
+				if (!transportHandler.checkSessionType(session)) {
+					logger.debug("Session type does not match the transport type for the request.");
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
 			}
 
 			if (transportType.sendsNoCacheInstruction()) {
@@ -303,7 +311,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 			}
 
+
 			transportHandler.handleRequest(request, response, handler, session);
+
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {
@@ -359,26 +370,23 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
-			final List<String> removedSessionIds = new ArrayList<String>();
-			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
-				@Override
-				public void run() {
-					for (SockJsSession session : sessions.values()) {
-						try {
-							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-								sessions.remove(session.getId());
-								session.close();
-							}
-						}
-						catch (Throwable ex) {
-							// Could be part of normal workflow (e.g. browser tab closed)
-							logger.debug("Failed to close " + session, ex);
+			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
+				List<String> removedIds = new ArrayList<>();
+				for (SockJsSession session : sessions.values()) {
+					try {
+						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
+							sessions.remove(session.getId());
+							removedIds.add(session.getId());
+							session.close();
 						}
 					}
-					if (logger.isDebugEnabled() && !removedSessionIds.isEmpty()) {
-						logger.debug("Closed " + removedSessionIds.size() + " sessions " + removedSessionIds);
-						removedSessionIds.clear();
+					catch (Throwable ex) {
+						// Could be part of normal workflow (e.g. browser tab closed)
+						logger.debug("Failed to close " + session, ex);
 					}
+				}
+				if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
+					logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 				}
 			}, getDisconnectDelay());
 		}

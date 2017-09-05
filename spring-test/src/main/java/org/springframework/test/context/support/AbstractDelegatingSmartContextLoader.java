@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * {@code AbstractDelegatingSmartContextLoader} serves as an abstract base class
@@ -152,7 +152,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	@Override
 	public void processContextConfiguration(final ContextConfigurationAttributes configAttributes) {
 		Assert.notNull(configAttributes, "configAttributes must not be null");
-		Assert.isTrue(!(configAttributes.hasLocations() && configAttributes.hasClasses()), String.format(
+		Assert.isTrue(!(configAttributes.hasLocations() && configAttributes.hasClasses()), () -> String.format(
 			"Cannot process locations AND classes for context configuration %s: "
 					+ "configure one or the other, but not both.", configAttributes));
 
@@ -179,11 +179,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				}
 			}
 
-			if (configAttributes.hasClasses()) {
-				throw new IllegalStateException(String.format(
+			Assert.state(!configAttributes.hasClasses(), () -> String.format(
 					"%s should NOT have detected default configuration classes for context configuration %s.",
 					name(getXmlLoader()), configAttributes));
-			}
 
 			// Now let the annotation config loader process the configuration.
 			delegateProcessing(getAnnotationConfigLoader(), configAttributes);
@@ -196,20 +194,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				}
 			}
 
-			if (!xmlLoaderDetectedDefaults && configAttributes.hasLocations()) {
-				throw new IllegalStateException(String.format(
+			Assert.state(xmlLoaderDetectedDefaults || !configAttributes.hasLocations(), () -> String.format(
 					"%s should NOT have detected default locations for context configuration %s.",
 					name(getAnnotationConfigLoader()), configAttributes));
-			}
-
-			// If neither loader detected defaults and no initializers were declared,
-			// throw an exception.
-			if (!configAttributes.hasResources() && ObjectUtils.isEmpty(configAttributes.getInitializers())) {
-				throw new IllegalStateException(String.format(
-					"Neither %s nor %s was able to detect defaults, and no ApplicationContextInitializers "
-							+ "were declared for context configuration %s", name(getXmlLoader()),
-					name(getAnnotationConfigLoader()), configAttributes));
-			}
 
 			if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
 				String message = String.format(
@@ -247,12 +234,10 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 		List<SmartContextLoader> candidates = Arrays.asList(getXmlLoader(), getAnnotationConfigLoader());
 
-		if (mergedConfig.hasLocations() && mergedConfig.hasClasses()) {
-			throw new IllegalStateException(String.format(
+		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
 				"Neither %s nor %s supports loading an ApplicationContext from %s: "
 						+ "declare either 'locations' or 'classes' but not both.", name(getXmlLoader()),
 				name(getAnnotationConfigLoader()), mergedConfig));
-		}
 
 		for (SmartContextLoader loader : candidates) {
 			// Determine if each loader can load a context from the mergedConfig. If it
@@ -263,8 +248,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		}
 
 		// If neither of the candidates supports the mergedConfig based on resources but
-		// ACIs were declared, then delegate to the annotation config loader.
-		if (!mergedConfig.getContextInitializerClasses().isEmpty()) {
+		// ACIs or customizers were declared, then delegate to the annotation config
+		// loader.
+		if (!mergedConfig.getContextInitializerClasses().isEmpty() || !mergedConfig.getContextCustomizers().isEmpty()) {
 			return delegateLoading(getAnnotationConfigLoader(), mergedConfig);
 		}
 
@@ -283,7 +269,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
-	public final String[] processLocations(Class<?> clazz, String... locations) {
+	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call processContextConfiguration(ContextConfigurationAttributes) instead.");
 	}

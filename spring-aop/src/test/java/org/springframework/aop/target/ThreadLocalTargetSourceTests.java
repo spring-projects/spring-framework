@@ -154,7 +154,8 @@ public class ThreadLocalTargetSourceTests {
 		// try second time
 		try {
 			source.getTarget();
-		} catch(NullPointerException ex) {
+		}
+		catch (NullPointerException ex) {
 			fail("Should not throw NPE");
 		}
 	}

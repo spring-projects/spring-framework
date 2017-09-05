@@ -32,6 +32,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -62,13 +63,14 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the default {@link CacheManager} to use to lookup cache by name. Only mandatory
 	 * if the {@linkplain CacheResolver cache resolvers} have not been set.
 	 */
-	public void setCacheManager(CacheManager cacheManager) {
+	public void setCacheManager(@Nullable CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
 	 * Return the specified cache manager to use, if any.
 	 */
+	@Nullable
 	public CacheManager getCacheManager() {
 		return this.cacheManager;
 	}
@@ -77,13 +79,14 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the {@link CacheResolver} to resolve regular caches. If none is set, a default
 	 * implementation using the specified cache manager will be used.
 	 */
-	public void setCacheResolver(CacheResolver cacheResolver) {
+	public void setCacheResolver(@Nullable CacheResolver cacheResolver) {
 		this.cacheResolver = cacheResolver;
 	}
 
 	/**
 	 * Return the specified cache resolver to use, if any.
 	 */
+	@Nullable
 	public CacheResolver getCacheResolver() {
 		return this.cacheResolver;
 	}
@@ -92,13 +95,14 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Set the {@link CacheResolver} to resolve exception caches. If none is set, a default
 	 * implementation using the specified cache manager will be used.
 	 */
-	public void setExceptionCacheResolver(CacheResolver exceptionCacheResolver) {
+	public void setExceptionCacheResolver(@Nullable CacheResolver exceptionCacheResolver) {
 		this.exceptionCacheResolver = exceptionCacheResolver;
 	}
 
 	/**
 	 * Return the specified exception cache resolver to use, if any.
 	 */
+	@Nullable
 	public CacheResolver getExceptionCacheResolver() {
 		return this.exceptionCacheResolver;
 	}
@@ -108,13 +112,14 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * honoring the JSR-107 {@link javax.cache.annotation.CacheKey} and
 	 * {@link javax.cache.annotation.CacheValue} will be used.
 	 */
-	public void setKeyGenerator(KeyGenerator keyGenerator) {
+	public void setKeyGenerator(@Nullable KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
 	}
 
 	/**
 	 * Return the specified key generator to use, if any.
 	 */
+	@Nullable
 	public KeyGenerator getKeyGenerator() {
 		return this.keyGenerator;
 	}

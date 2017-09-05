@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import org.springframework.transaction.TransactionDefinition;
  * does not have to know about annotations. If no rules are relevant to the exception,
  * it will be treated like
  * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}
- * (rolling back on runtime exceptions).
+ * (rolling back on {@link RuntimeException} and {@link Error} but not on checked
+ * exceptions).
  *
  * <p>For specific information about the semantics of this annotation's attributes,
  * consult the {@link org.springframework.transaction.TransactionDefinition} and
@@ -102,7 +103,8 @@ public @interface Transactional {
 	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
-	 * <i>not</i> throw an exception when asked for a read-only transaction.
+	 * <i>not</i> throw an exception when asked for a read-only transaction
+	 * but rather silently ignore the hint.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
 	 */
 	boolean readOnly() default false;
@@ -111,10 +113,15 @@ public @interface Transactional {
 	 * Defines zero (0) or more exception {@link Class classes}, which must be
 	 * subclasses of {@link Throwable}, indicating which exception types must cause
 	 * a transaction rollback.
+	 * <p>By default, a transaction will be rolling back on {@link RuntimeException}
+	 * and {@link Error} but not on checked exceptions (business exceptions). See
+	 * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)}
+	 * for a detailed explanation.
 	 * <p>This is the preferred way to construct a rollback rule (in contrast to
 	 * {@link #rollbackForClassName}), matching the exception class and its subclasses.
-	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(Class clazz)}
+	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(Class clazz)}.
 	 * @see #rollbackForClassName
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	Class<? extends Throwable>[] rollbackFor() default {};
 
@@ -124,7 +131,7 @@ public @interface Transactional {
 	 * a transaction rollback.
 	 * <p>This can be a substring of a fully qualified class name, with no wildcard
 	 * support at present. For example, a value of {@code "ServletException"} would
-	 * match {@link javax.servlet.ServletException} and its subclasses.
+	 * match {@code javax.servlet.ServletException} and its subclasses.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * {@code "Exception"} will match nearly anything and will probably hide other
@@ -132,8 +139,9 @@ public @interface Transactional {
 	 * were meant to define a rule for all checked exceptions. With more unusual
 	 * {@link Exception} names such as {@code "BaseBusinessException"} there is no
 	 * need to use a FQN.
-	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(String exceptionName)}
+	 * <p>Similar to {@link org.springframework.transaction.interceptor.RollbackRuleAttribute#RollbackRuleAttribute(String exceptionName)}.
 	 * @see #rollbackFor
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	String[] rollbackForClassName() default {};
 
@@ -144,8 +152,9 @@ public @interface Transactional {
 	 * <p>This is the preferred way to construct a rollback rule (in contrast
 	 * to {@link #noRollbackForClassName}), matching the exception class and
 	 * its subclasses.
-	 * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(Class clazz)}
+	 * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(Class clazz)}.
 	 * @see #noRollbackForClassName
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	Class<? extends Throwable>[] noRollbackFor() default {};
 
@@ -155,8 +164,9 @@ public @interface Transactional {
 	 * cause a transaction rollback.
 	 * <p>See the description of {@link #rollbackForClassName} for further
 	 * information on how the specified names are treated.
-	 * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(String exceptionName)}
+	 * <p>Similar to {@link org.springframework.transaction.interceptor.NoRollbackRuleAttribute#NoRollbackRuleAttribute(String exceptionName)}.
 	 * @see #noRollbackFor
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	String[] noRollbackForClassName() default {};
 

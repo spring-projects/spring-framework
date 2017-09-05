@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,34 +18,35 @@ package org.springframework.web.servlet.view;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * that simply transforms the URI of the incoming request into a view name.
+ * {@link RequestToViewNameTranslator} that simply transforms the URI of
+ * the incoming request into a view name.
  *
- * <p>Can be explicitly defined as the "viewNameTranslator" bean in a
+ * <p>Can be explicitly defined as the {@code viewNameTranslator} bean in a
  * {@link org.springframework.web.servlet.DispatcherServlet} context.
  * Otherwise, a plain default instance will be used.
  *
  * <p>The default transformation simply strips leading and trailing slashes
  * as well as the file extension of the URI, and returns the result as the
- * view name with the configured {@link #setPrefix "prefix"} and a
- * {@link #setSuffix "suffix"} added as appropriate.
+ * view name with the configured {@link #setPrefix prefix} and a
+ * {@link #setSuffix suffix} added as appropriate.
  *
  * <p>The stripping of the leading slash and file extension can be disabled
- * using the {@link #setStripLeadingSlash "stripLeadingSlash"} and
- * {@link #setStripExtension "stripExtension"} properties, respectively.
+ * using the {@link #setStripLeadingSlash stripLeadingSlash} and
+ * {@link #setStripExtension stripExtension} properties, respectively.
  *
  * <p>Find below some examples of request to view name translation.
- *
- * <pre class="code">http://localhost:8080/gamecast/display.html -> display
- * http://localhost:8080/gamecast/displayShoppingCart.html -> displayShoppingCart
- * http://localhost:8080/gamecast/admin/index.html -> admin/index
- * </pre>
+ * <ul>
+ * <li>{@code http://localhost:8080/gamecast/display.html} &raquo; {@code display}</li>
+ * <li>{@code http://localhost:8080/gamecast/displayShoppingCart.html} &raquo; {@code displayShoppingCart}</li>
+ * <li>{@code http://localhost:8080/gamecast/admin/index.html} &raquo; {@code admin/index}</li>
+ * </ul>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -77,7 +78,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the prefix to prepend to generated view names.
 	 * @param prefix the prefix to prepend to generated view names
 	 */
-	public void setPrefix(String prefix) {
+	public void setPrefix(@Nullable String prefix) {
 		this.prefix = (prefix != null ? prefix : "");
 	}
 
@@ -85,7 +86,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the suffix to append to generated view names.
 	 * @param suffix the suffix to append to generated view names
 	 */
-	public void setSuffix(String suffix) {
+	public void setSuffix(@Nullable String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
@@ -123,10 +124,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -134,11 +132,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set if the context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
+	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 */
 	public void setUrlDecode(boolean urlDecode) {
@@ -185,6 +179,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * @return the transformed path, with slashes and extensions stripped
 	 * if desired
 	 */
+	@Nullable
 	protected String transformPath(String lookupPath) {
 		String path = lookupPath;
 		if (this.stripLeadingSlash && path.startsWith(SLASH)) {

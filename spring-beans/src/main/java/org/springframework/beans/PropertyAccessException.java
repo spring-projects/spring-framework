@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
-import org.springframework.core.ErrorCoded;
+import org.springframework.lang.Nullable;
 
 /**
  * Superclass for exceptions related to a property access,
@@ -28,8 +28,9 @@ import org.springframework.core.ErrorCoded;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
+public abstract class PropertyAccessException extends BeansException {
 
+	@Nullable
 	private transient PropertyChangeEvent propertyChangeEvent;
 
 
@@ -39,7 +40,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, Throwable cause) {
+	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
@@ -49,7 +50,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public PropertyAccessException(String msg, Throwable cause) {
+	public PropertyAccessException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -59,6 +60,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 	 * <p>May be {@code null}; only available if an actual bean property
 	 * was affected.
 	 */
+	@Nullable
 	public PropertyChangeEvent getPropertyChangeEvent() {
 		return this.propertyChangeEvent;
 	}
@@ -66,6 +68,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 	/**
 	 * Return the name of the affected property, if available.
 	 */
+	@Nullable
 	public String getPropertyName() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getPropertyName() : null);
 	}
@@ -73,8 +76,14 @@ public abstract class PropertyAccessException extends BeansException implements 
 	/**
 	 * Return the affected value that was about to be set, if any.
 	 */
+	@Nullable
 	public Object getValue() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getNewValue() : null);
 	}
+
+	/**
+	 * Return a corresponding error code for this type of exception.
+	 */
+	public abstract String getErrorCode();
 
 }

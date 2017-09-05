@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,6 +61,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 
 
 	@Override
+	@Nullable
 	public String extractVersion(String requestPath) {
 		return this.pathStrategy.extractVersion(requestPath);
 	}
@@ -89,6 +91,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		}
 
 		@Override
+		@Nullable
 		public String extractVersion(String requestPath) {
 			return (requestPath.startsWith(this.prefix) ? this.prefix : null);
 		}
@@ -105,7 +108,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 			}
 			else {
 				return (this.prefix.endsWith("/") || path.startsWith("/") ?
-						this.prefix + path : this.prefix + "/" + path);
+						this.prefix + path : this.prefix + '/' + path);
 			}
 		}
 	}
@@ -120,11 +123,12 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
 
 		@Override
+		@Nullable
 		public String extractVersion(String requestPath) {
 			Matcher matcher = pattern.matcher(requestPath);
 			if (matcher.find()) {
 				String match = matcher.group(1);
-				return (match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match);
+				return (match.contains("-") ? match.substring(match.lastIndexOf('-') + 1) : match);
 			}
 			else {
 				return null;
@@ -140,7 +144,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		public String addVersion(String requestPath, String version) {
 			String baseFilename = StringUtils.stripFilenameExtension(requestPath);
 			String extension = StringUtils.getFilenameExtension(requestPath);
-			return (baseFilename + "-" + version + "." + extension);
+			return (baseFilename + '-' + version + '.' + extension);
 		}
 	}
 

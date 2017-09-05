@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
@@ -54,11 +56,24 @@ public class MockHttpServletRequestTests {
 
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
-	private MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
-	public void content() throws IOException {
+	public void protocolAndScheme() {
+		assertEquals(MockHttpServletRequest.DEFAULT_PROTOCOL, request.getProtocol());
+		assertEquals(MockHttpServletRequest.DEFAULT_SCHEME, request.getScheme());
+		request.setProtocol("HTTP/2.0");
+		request.setScheme("https");
+		assertEquals("HTTP/2.0", request.getProtocol());
+		assertEquals("https", request.getScheme());
+	}
+
+	@Test
+	public void setContentAndGetInputStream() throws IOException {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
@@ -67,10 +82,38 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void setContentAndGetContentAsByteArray() throws IOException {
+		byte[] bytes = "request body".getBytes();
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsByteArray());
+		assertEquals(bytes, request.getContentAsByteArray());
+	}
+
+	@Test
+	public void getContentAsStringWithoutSettingCharacterEncoding() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage("Cannot get content as a String for a null character encoding");
+		request.getContentAsString();
+	}
+
+	@Test
+	public void setContentAndGetContentAsStringWithExplicitCharacterEncoding() throws IOException {
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes("UTF-16");
+		request.setCharacterEncoding("UTF-16");
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsString());
+		assertEquals(palindrome, request.getContentAsString());
+	}
+
+	@Test
 	public void noContent() throws IOException {
 		assertEquals(-1, request.getContentLength());
 		assertNotNull(request.getInputStream());
 		assertEquals(-1, request.getInputStream().read());
+		assertNull(request.getContentAsByteArray());
 	}
 
 	@Test
@@ -148,16 +191,10 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
-	public void nullParameterName() {
-		assertNull(request.getParameter(null));
-		assertNull(request.getParameterValues(null));
-	}
-
-	@Test
 	public void setMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.setParameters(params);
@@ -175,7 +212,7 @@ public class MockHttpServletRequestTests {
 	public void addMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
@@ -193,7 +230,7 @@ public class MockHttpServletRequestTests {
 	@Test
 	public void removeAllParameters() {
 		request.setParameter("key1", "value1");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key2", "value2");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
@@ -209,12 +246,14 @@ public class MockHttpServletRequestTests {
 		request.setCookies(cookie1, cookie2);
 
 		Cookie[] cookies = request.getCookies();
+		List<String> cookieHeaders = Collections.list(request.getHeaders("Cookie"));
 
 		assertEquals(2, cookies.length);
 		assertEquals("foo", cookies[0].getName());
 		assertEquals("bar", cookies[0].getValue());
 		assertEquals("baz", cookies[1].getName());
 		assertEquals("qux", cookies[1].getValue());
+		assertEquals(Arrays.asList("foo=bar", "baz=qux"), cookieHeaders);
 	}
 
 	@Test
@@ -245,7 +284,7 @@ public class MockHttpServletRequestTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setPreferredLocalesWithEmptyList() {
-		request.setPreferredLocales(new ArrayList<Locale>());
+		request.setPreferredLocales(new ArrayList<>());
 	}
 
 	@Test
@@ -253,6 +292,16 @@ public class MockHttpServletRequestTests {
 		List<Locale> preferredLocales = Arrays.asList(Locale.ITALY, Locale.CHINA);
 		request.setPreferredLocales(preferredLocales);
 		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
+		assertEquals("it-it, zh-cn", request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+	}
+
+	@Test
+	public void preferredLocalesFromAcceptLanguageHeader() {
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		request.addHeader("Accept-Language", headerValue);
+		List<Locale> actual = Collections.list(request.getLocales());
+		assertEquals(Arrays.asList(Locale.forLanguageTag("fr-ch"), Locale.forLanguageTag("fr"),
+				Locale.forLanguageTag("en"), Locale.forLanguageTag("de")), actual);
 	}
 
 	@Test

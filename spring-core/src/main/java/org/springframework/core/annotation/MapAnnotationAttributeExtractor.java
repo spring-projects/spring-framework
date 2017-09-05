@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * Implementation of the {@link AnnotationAttributeExtractor} strategy that
@@ -52,18 +53,20 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 * of the supplied type; may be {@code null} if unknown
 	 */
 	MapAnnotationAttributeExtractor(Map<String, Object> attributes, Class<? extends Annotation> annotationType,
-			AnnotatedElement annotatedElement) {
+			@Nullable AnnotatedElement annotatedElement) {
 
 		super(annotationType, annotatedElement, enrichAndValidateAttributes(attributes, annotationType));
 	}
 
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		return getRawAttributeValue(attributeMethod.getName());
 	}
 
 	@Override
+	@Nullable
 	protected Object getRawAttributeValue(String attributeName) {
 		return getSource().get(attributeName);
 	}
@@ -87,10 +90,10 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	private static Map<String, Object> enrichAndValidateAttributes(
 			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
-		Map<String, Object> attributes = new HashMap<String, Object>(originalAttributes);
-		Map<String, List<String>> attributeAliasMap = getAttributeAliasMap(annotationType);
+		Map<String, Object> attributes = new LinkedHashMap<>(originalAttributes);
+		Map<String, List<String>> attributeAliasMap = AnnotationUtils.getAttributeAliasMap(annotationType);
 
-		for (Method attributeMethod : getAttributeMethods(annotationType)) {
+		for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotationType)) {
 			String attributeName = attributeMethod.getName();
 			Object attributeValue = attributes.get(attributeName);
 
@@ -111,7 +114,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 			// if aliases not present, check default
 			if (attributeValue == null) {
-				Object defaultValue = getDefaultValue(annotationType, attributeName);
+				Object defaultValue = AnnotationUtils.getDefaultValue(annotationType, attributeName);
 				if (defaultValue != null) {
 					attributeValue = defaultValue;
 					attributes.put(attributeName, attributeValue);
@@ -119,26 +122,32 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			}
 
 			// if still null
-			if (attributeValue == null) {
-				throw new IllegalArgumentException(String.format(
-						"Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",
-						attributes, attributeName, annotationType.getName()));
-			}
+			Assert.notNull(attributeValue, () -> String.format(
+					"Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",
+					attributes, attributeName, annotationType.getName()));
 
 			// finally, ensure correct type
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
-			Class<? extends Object> actualReturnType = attributeValue.getClass();
+			Class<?> actualReturnType = attributeValue.getClass();
 
 			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
 				boolean converted = false;
 
+				// Single element overriding an array of the same type?
+				if (requiredReturnType.isArray() && requiredReturnType.getComponentType() == actualReturnType) {
+					Object array = Array.newInstance(requiredReturnType.getComponentType(), 1);
+					Array.set(array, 0, attributeValue);
+					attributes.put(attributeName, array);
+					converted = true;
+				}
+
 				// Nested map representing a single annotation?
-				if (Annotation.class.isAssignableFrom(requiredReturnType) &&
+				else if (Annotation.class.isAssignableFrom(requiredReturnType) &&
 						Map.class.isAssignableFrom(actualReturnType)) {
 					Class<? extends Annotation> nestedAnnotationType =
 							(Class<? extends Annotation>) requiredReturnType;
 					Map<String, Object> map = (Map<String, Object>) attributeValue;
-					attributes.put(attributeName, synthesizeAnnotation(map, nestedAnnotationType, null));
+					attributes.put(attributeName, AnnotationUtils.synthesizeAnnotation(map, nestedAnnotationType, null));
 					converted = true;
 				}
 
@@ -149,17 +158,15 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					Class<? extends Annotation> nestedAnnotationType =
 							(Class<? extends Annotation>) requiredReturnType.getComponentType();
 					Map<String, Object>[] maps = (Map<String, Object>[]) attributeValue;
-					attributes.put(attributeName, synthesizeAnnotationArray(maps, nestedAnnotationType));
+					attributes.put(attributeName, AnnotationUtils.synthesizeAnnotationArray(maps, nestedAnnotationType));
 					converted = true;
 				}
 
-				if (!converted) {
-					throw new IllegalArgumentException(String.format(
-							"Attributes map [%s] returned a value of type [%s] for attribute [%s], "
-							+ "but a value of type [%s] is required as defined by annotation type [%s].",
-							attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
-							annotationType.getName()));
-				}
+				Assert.isTrue(converted, () -> String.format(
+						"Attributes map %s returned a value of type [%s] for attribute '%s', " +
+						"but a value of type [%s] is required as defined by annotation type [%s].",
+						attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
+						annotationType.getName()));
 			}
 		}
 

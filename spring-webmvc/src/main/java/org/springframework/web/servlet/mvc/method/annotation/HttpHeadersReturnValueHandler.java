@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -41,16 +42,17 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 
 	@Override
 	@SuppressWarnings("resource")
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		mavContainer.setRequestHandled(true);
 
-		Assert.isInstanceOf(HttpHeaders.class, returnValue);
+		Assert.state(returnValue instanceof HttpHeaders, "HttpHeaders expected");
 		HttpHeaders headers = (HttpHeaders) returnValue;
 
 		if (!headers.isEmpty()) {
 			HttpServletResponse servletResponse = webRequest.getNativeResponse(HttpServletResponse.class);
+			Assert.state(servletResponse != null, "No HttpServletResponse");
 			ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(servletResponse);
 			outputMessage.getHeaders().putAll(headers);
 			outputMessage.getBody(); // flush headers

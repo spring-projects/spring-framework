@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class SimpleKeyGeneratorTests {
 		assertThat(k1.hashCode(), not(equalTo(k3.hashCode())));
 		assertThat(k1, equalTo(k2));
 		assertThat(k1, not(equalTo(k3)));
-		assertThat(k1, equalTo((Object) "a"));
+		assertThat(k1, equalTo("a"));
 	}
 
 	@Test

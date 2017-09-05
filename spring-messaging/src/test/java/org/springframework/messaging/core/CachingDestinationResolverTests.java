@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class CachingDestinationResolverTests {
 	public void cachedDestination() {
 		@SuppressWarnings("unchecked")
 		DestinationResolver<String> destinationResolver = mock(DestinationResolver.class);
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<String>(destinationResolver);
+		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>(destinationResolver);
 
 		given(destinationResolver.resolveDestination("abcd")).willReturn("dcba");
 		given(destinationResolver.resolveDestination("1234")).willReturn("4321");
@@ -49,7 +49,7 @@ public class CachingDestinationResolverTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noTargetSet() {
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<String>();
+		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>();
 		cachingDestinationResolver.afterPropertiesSet();
 	}
 

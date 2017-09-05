@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -62,26 +63,19 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param pathMatcher the PathMatcher to use
 	 */
-	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
-		this(asList(patterns), pathMatcher);
+	public DestinationPatternsMessageCondition(String[] patterns, @Nullable PathMatcher pathMatcher) {
+		this(Arrays.asList(patterns), pathMatcher);
 	}
 
-	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
+	private DestinationPatternsMessageCondition(Collection<String> patterns, @Nullable PathMatcher pathMatcher) {
 		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
 	}
 
 
-	private static List<String> asList(String... patterns) {
-		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
-	}
-
 	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
-		if (patterns == null) {
-			return Collections.emptySet();
-		}
 		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
+		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
 			if (slashSeparator) {
 				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
@@ -121,7 +115,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	 */
 	@Override
 	public DestinationPatternsMessageCondition combine(DestinationPatternsMessageCondition other) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
@@ -151,6 +145,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	 * or {@code null} either if a destination can not be extracted or there is no match
 	 */
 	@Override
+	@Nullable
 	public DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
 		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
 		if (destination == null) {
@@ -161,7 +156,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 			return this;
 		}
 
-		List<String> matches = new ArrayList<String>();
+		List<String> matches = new ArrayList<>();
 		for (String pattern : this.patterns) {
 			if (pattern.equals(destination) || this.pathMatcher.match(pattern, destination)) {
 				matches.add(pattern);
@@ -190,9 +185,12 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	@Override
 	public int compareTo(DestinationPatternsMessageCondition other, Message<?> message) {
 		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
+		if (destination == null) {
+			return 0;
+		}
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(destination);
 
-		Iterator<String> iterator = patterns.iterator();
+		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
 		while (iterator.hasNext() && iteratorOther.hasNext()) {
 			int result = patternComparator.compare(iterator.next(), iteratorOther.next());

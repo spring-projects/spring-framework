@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -86,6 +87,7 @@ public class JmsResponse<T> {
 	 * @return the {@link Destination} to use
 	 * @throws JMSException if the DestinationResolver failed to resolve the destination
 	 */
+	@Nullable
 	public Destination resolveDestination(DestinationResolver destinationResolver, Session session)
 			throws JMSException {
 
@@ -111,7 +113,7 @@ public class JmsResponse<T> {
 	 */
 	public static <T> JmsResponse<T> forQueue(T result, String queueName) {
 		Assert.notNull(queueName, "Queue name must not be null");
-		return new JmsResponse<T>(result, new DestinationNameHolder(queueName, false));
+		return new JmsResponse<>(result, new DestinationNameHolder(queueName, false));
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class JmsResponse<T> {
 	 */
 	public static <T> JmsResponse<T> forTopic(T result, String topicName) {
 		Assert.notNull(topicName, "Topic name must not be null");
-		return new JmsResponse<T>(result, new DestinationNameHolder(topicName, true));
+		return new JmsResponse<>(result, new DestinationNameHolder(topicName, true));
 	}
 
 	/**
@@ -127,7 +129,7 @@ public class JmsResponse<T> {
 	 */
 	public static <T> JmsResponse<T> forDestination(T result, Destination destination) {
 		Assert.notNull(destination, "Destination must not be null");
-		return new JmsResponse<T>(result, destination);
+		return new JmsResponse<>(result, destination);
 	}
 
 

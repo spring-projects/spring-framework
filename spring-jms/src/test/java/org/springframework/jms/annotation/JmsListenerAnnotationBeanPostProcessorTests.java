@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,12 +134,12 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void invalidProxy() {
 		thrown.expect(BeanCreationException.class);
 		thrown.expectCause(is(instanceOf(IllegalStateException.class)));
 		thrown.expectMessage("handleIt2");
-		new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, InvalidProxyTestBean.class);
+		new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InvalidProxyTestBean.class);
 	}
 
 

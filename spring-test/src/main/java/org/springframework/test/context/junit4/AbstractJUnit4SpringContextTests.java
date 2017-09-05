@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -61,10 +62,10 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * <ul>
  * <li>If you do not wish for your test classes to be tied to a Spring-specific
  * class hierarchy, you may configure your own custom test classes by using
- * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration @ContextConfiguration},
+ * {@link SpringRunner}, {@link ContextConfiguration @ContextConfiguration},
  * {@link TestExecutionListeners @TestExecutionListeners}, etc.</li>
  * <li>If you wish to extend this class and use a runner other than the
- * {@link SpringJUnit4ClassRunner}, as of Spring Framework 4.2 you can use
+ * {@link SpringRunner}, as of Spring Framework 4.2 you can use
  * {@link org.springframework.test.context.junit4.rules.SpringClassRule SpringClassRule} and
  * {@link org.springframework.test.context.junit4.rules.SpringMethodRule SpringMethodRule}
  * and specify your runner of choice via {@link RunWith @RunWith(...)}.</li>
@@ -85,7 +86,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
 	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
@@ -99,6 +100,7 @@ public abstract class AbstractJUnit4SpringContextTests implements ApplicationCon
 	 * The {@link ApplicationContext} that was injected into this test instance
 	 * via {@link #setApplicationContext(ApplicationContext)}.
 	 */
+	@Nullable
 	protected ApplicationContext applicationContext;
 
 

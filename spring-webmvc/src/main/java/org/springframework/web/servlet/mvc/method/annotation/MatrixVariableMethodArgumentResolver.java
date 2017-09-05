@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -48,37 +50,39 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		super(null);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(MatrixVariable.class)) {
 			return false;
 		}
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-			String variableName = parameter.getParameterAnnotation(MatrixVariable.class).name();
-			return StringUtils.hasText(variableName);
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
+			MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
+			return (matrixVariable != null && StringUtils.hasText(matrixVariable.name()));
 		}
 		return true;
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		MatrixVariable annotation = parameter.getParameterAnnotation(MatrixVariable.class);
-		return new MatrixVariableNamedValueInfo(annotation);
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		return new MatrixVariableNamedValueInfo(ann);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	@Nullable
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-
-		@SuppressWarnings("unchecked")
-		Map<String, MultiValueMap<String, String>> pathParameters =
-			(Map<String, MultiValueMap<String, String>>) request.getAttribute(
-					HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-
+		Map<String, MultiValueMap<String, String>> pathParameters = (Map<String, MultiValueMap<String, String>>)
+				request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		if (CollectionUtils.isEmpty(pathParameters)) {
 			return null;
 		}
 
-		String pathVar = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		String pathVar = ann.pathVar();
 		List<String> paramValues = null;
 
 		if (!pathVar.equals(ValueConstants.DEFAULT_NONE)) {
@@ -88,14 +92,14 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		}
 		else {
 			boolean found = false;
-			paramValues = new ArrayList<String>();
+			paramValues = new ArrayList<>();
 			for (MultiValueMap<String, String> params : pathParameters.values()) {
 				if (params.containsKey(name)) {
 					if (found) {
-						String paramType = parameter.getParameterType().getName();
+						String paramType = parameter.getNestedParameterType().getName();
 						throw new ServletRequestBindingException(
 								"Found more than one match for URI path parameter '" + name +
-								"' for parameter type [" + paramType + "]. Use pathVar attribute to disambiguate.");
+								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.");
 					}
 					paramValues.addAll(params.get(name));
 					found = true;
@@ -117,7 +121,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new ServletRequestBindingException("Missing matrix variable '" + name +
-				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
+				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 
 
@@ -127,4 +131,5 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

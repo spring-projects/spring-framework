@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] { new String("no match") });
+		methodInvoker.setArguments(new Object[] {"no match"});
 
 		exception.expect(NoSuchMethodException.class);
 		methodInvoker.prepare();
@@ -199,6 +199,7 @@ public class MethodInvokerTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	public static class Greeter {
 
@@ -223,12 +224,16 @@ public class MethodInvokerTests {
 		}
 	}
 
+
 	private interface Greetable {
+
 		String getGreeting();
 	}
 
+
 	private interface Person extends Greetable {
 	}
+
 
 	private static class Purchaser implements Greetable {
 
@@ -238,6 +243,7 @@ public class MethodInvokerTests {
 		}
 	}
 
+
 	private static class Shopper extends Purchaser implements Person {
 
 		@Override
@@ -245,6 +251,7 @@ public class MethodInvokerTests {
 			return "may I help you?";
 		}
 	}
+
 
 	private static class Salesman implements Person {
 
@@ -254,6 +261,7 @@ public class MethodInvokerTests {
 		}
 	}
 
+
 	private static class Customer extends Shopper {
 
 		@Override
@@ -261,6 +269,7 @@ public class MethodInvokerTests {
 			return "good day";
 		}
 	}
+
 
 	private static class Regular extends Customer {
 
@@ -275,6 +284,7 @@ public class MethodInvokerTests {
 			return "welcome back " + name ;
 		}
 	}
+
 
 	private static class VIP extends Regular {
 

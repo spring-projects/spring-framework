@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorMatches extends Operator {
 
-	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<String, Pattern>();
+	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<>();
 
 
 	public OperatorMatches(int pos, SpelNodeImpl... operands) {
@@ -60,12 +60,12 @@ public class OperatorMatches extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
-		Object left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValueInternal(state).getValue();
+		String left = leftOp.getValue(state, String.class);
+		Object right = getRightOperand().getValue(state);
 
-		if (!(left instanceof String)) {
+		if (left == null) {
 			throw new SpelEvaluationException(leftOp.getStartPosition(),
-					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, left);
+					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, (Object) null);
 		}
 		if (!(right instanceof String)) {
 			throw new SpelEvaluationException(rightOp.getStartPosition(),
@@ -73,14 +73,13 @@ public class OperatorMatches extends Operator {
 		}
 
 		try {
-			String leftString = (String) left;
 			String rightString = (String) right;
 			Pattern pattern = this.patternCache.get(rightString);
 			if (pattern == null) {
 				pattern = Pattern.compile(rightString);
 				this.patternCache.putIfAbsent(rightString, pattern);
 			}
-			Matcher matcher = pattern.matcher(leftString);
+			Matcher matcher = pattern.matcher(left);
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException ex) {

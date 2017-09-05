@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,10 +95,10 @@ import java.lang.annotation.Target;
  * @see org.springframework.context.annotation.Profile
  * @see org.springframework.test.context.ActiveProfiles
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface IfProfileValue {
 
 	/**
@@ -109,7 +109,6 @@ public @interface IfProfileValue {
 	/**
 	 * A single, permissible {@code value} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 *
 	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
 	 * will lead to a configuration conflict.
 	 */
@@ -118,7 +117,6 @@ public @interface IfProfileValue {
 	/**
 	 * A list of all permissible {@code values} of the <em>profile value</em>
 	 * for the given {@link #name}.
-	 *
 	 * <p>Note: Assigning values to both {@link #value} and {@link #values}
 	 * will lead to a configuration conflict.
 	 */

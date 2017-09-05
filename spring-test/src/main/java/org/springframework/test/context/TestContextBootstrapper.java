@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,14 @@ import java.util.List;
  *
  * <p>A custom bootstrapping strategy can be configured for a test class (or
  * test class hierarchy) via {@link BootstrapWith @BootstrapWith}, either
- * directly or as a meta-annotation. See
- * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
- * for an example.
+ * directly or as a meta-annotation.
  *
- * <p>If a bootstrapper is not explicitly configured via {@code @BootstrapWith}, the
- * {@link org.springframework.test.context.support.DefaultTestContextBootstrapper DefaultTestContextBootstrapper}
- * will be used.
+ * <p>If a bootstrapper is not explicitly configured via {@code @BootstrapWith},
+ * either the {@link org.springframework.test.context.support.DefaultTestContextBootstrapper
+ * DefaultTestContextBootstrapper} or the
+ * {@link org.springframework.test.context.web.WebTestContextBootstrapper
+ * WebTestContextBootstrapper} will be used, depending on the presence of
+ * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}.
  *
  * <h3>Implementation Notes</h3>
  *

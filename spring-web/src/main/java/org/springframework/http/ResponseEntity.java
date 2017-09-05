@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -65,61 +67,91 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
-	private final HttpStatus statusCode;
+	private final Object status;
 
 
 	/**
 	 * Create a new {@code ResponseEntity} with the given status code, and no body nor headers.
-	 * @param statusCode the status code
+	 * @param status the status code
 	 */
-	public ResponseEntity(HttpStatus statusCode) {
-		super();
-		this.statusCode = statusCode;
+	public ResponseEntity(HttpStatus status) {
+		this(null, null, status);
 	}
 
 	/**
 	 * Create a new {@code ResponseEntity} with the given body and status code, and no headers.
 	 * @param body the entity body
-	 * @param statusCode the status code
+	 * @param status the status code
 	 */
-	public ResponseEntity(T body, HttpStatus statusCode) {
-		super(body);
-		this.statusCode = statusCode;
+	public ResponseEntity(@Nullable T body, HttpStatus status) {
+		this(body, null, status);
 	}
 
 	/**
 	 * Create a new {@code HttpEntity} with the given headers and status code, and no body.
 	 * @param headers the entity headers
-	 * @param statusCode the status code
+	 * @param status the status code
 	 */
-	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatus statusCode) {
-		super(headers);
-		this.statusCode = statusCode;
+	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatus status) {
+		this(null, headers, status);
 	}
 
 	/**
 	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
-	 * @param statusCode the status code
+	 * @param status the status code
 	 */
-	public ResponseEntity(T body, MultiValueMap<String, String> headers, HttpStatus statusCode) {
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
 		super(body, headers);
-		this.statusCode = statusCode;
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.status = status;
+	}
+
+	/**
+	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
+	 * Just used behind the nested builder API.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param status the status code (as {@code HttpStatus} or as {@code Integer} value)
+	 */
+	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
+		super(body, headers);
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.status = status;
 	}
 
 
 	/**
 	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an HttpStatus enum value
+	 * @return the HTTP status as an HttpStatus enum entry
 	 */
 	public HttpStatus getStatusCode() {
-		return this.statusCode;
+		if (this.status instanceof HttpStatus) {
+			return (HttpStatus) this.status;
+		}
+		else {
+			return HttpStatus.valueOf((Integer) this.status);
+		}
+	}
+
+	/**
+	 * Return the HTTP status code of the response.
+	 * @return the HTTP status as an int value
+	 * @since 4.3
+	 */
+	public int getStatusCodeValue() {
+		if (this.status instanceof HttpStatus) {
+			return ((HttpStatus) this.status).value();
+		}
+		else {
+			return (Integer) this.status;
+		}
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -127,32 +159,30 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			return false;
 		}
 		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;
-		return ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode);
+		return ObjectUtils.nullSafeEquals(this.status, otherEntity.status);
 	}
 
 	@Override
 	public int hashCode() {
-		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode));
+		return (super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.status));
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.statusCode.toString());
-		builder.append(' ');
-		builder.append(this.statusCode.getReasonPhrase());
+		builder.append(this.status.toString());
+		if (this.status instanceof HttpStatus) {
+			builder.append(' ');
+			builder.append(((HttpStatus) this.status).getReasonPhrase());
+		}
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();
 		if (body != null) {
 			builder.append(body);
-			if (headers != null) {
-				builder.append(',');
-			}
+			builder.append(',');
 		}
-		if (headers != null) {
-			builder.append(headers);
-		}
+		builder.append(headers);
 		builder.append('>');
 		return builder.toString();
 	}
@@ -167,6 +197,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.1
 	 */
 	public static BodyBuilder status(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus must not be null");
 		return new DefaultBuilder(status);
 	}
 
@@ -177,7 +208,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.1
 	 */
 	public static BodyBuilder status(int status) {
-		return status(HttpStatus.valueOf(status));
+		return new DefaultBuilder(status);
 	}
 
 	/**
@@ -282,7 +313,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @since 4.1.2
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B headers(HttpHeaders headers);
+		B headers(@Nullable HttpHeaders headers);
 
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
@@ -295,11 +326,11 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 * @param eTag the new entity tag
+		 * @param etag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		B eTag(String eTag);
+		B eTag(String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -333,11 +364,22 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B cacheControl(CacheControl cacheControl);
 
 		/**
+		 * Configure one or more request header names (e.g. "Accept-Language") to
+		 * add to the "Vary" response header to inform clients that the response is
+		 * subject to content negotiation and variances based on the value of the
+		 * given request headers. The configured request header names are added only
+		 * if not already present in the response "Vary" header.
+		 * @param requestHeaders request header names
+		 * @since 4.3
+		 */
+		B varyBy(String... requestHeaders);
+
+		/**
 		 * Build the response entity with no body.
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
 		 */
-		ResponseEntity<Void> build();
+		<T> ResponseEntity<T> build();
 	}
 
 
@@ -371,18 +413,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @param body the body of the response entity
 		 * @return the built response entity
 		 */
-		<T> ResponseEntity<T> body(T body);
+		<T> ResponseEntity<T> body(@Nullable T body);
 	}
 
 
 	private static class DefaultBuilder implements BodyBuilder {
 
-		private final HttpStatus status;
+		private final Object statusCode;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		public DefaultBuilder(HttpStatus status) {
-			this.status = status;
+		public DefaultBuilder(Object statusCode) {
+			this.statusCode = statusCode;
 		}
 
 		@Override
@@ -394,7 +436,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder headers(HttpHeaders headers) {
+		public BodyBuilder headers(@Nullable HttpHeaders headers) {
 			if (headers != null) {
 				this.headers.putAll(headers);
 			}
@@ -403,7 +445,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder allow(HttpMethod... allowedMethods) {
-			this.headers.setAllow(new LinkedHashSet<HttpMethod>(Arrays.asList(allowedMethods)));
+			this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 			return this;
 		}
 
@@ -420,16 +462,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(String eTag) {
-			if (eTag != null) {
-				if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
-					eTag = "\"" + eTag;
-				}
-				if (!eTag.endsWith("\"")) {
-					eTag = eTag + "\"";
-				}
+		public BodyBuilder eTag(String etag) {
+			if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+				etag = "\"" + etag;
 			}
-			this.headers.setETag(eTag);
+			if (!etag.endsWith("\"")) {
+				etag = etag + "\"";
+			}
+			this.headers.setETag(etag);
 			return this;
 		}
 
@@ -455,13 +495,19 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public ResponseEntity<Void> build() {
-			return new ResponseEntity<Void>(null, this.headers, this.status);
+		public BodyBuilder varyBy(String... requestHeaders) {
+			this.headers.setVary(Arrays.asList(requestHeaders));
+			return this;
 		}
 
 		@Override
-		public <T> ResponseEntity<T> body(T body) {
-			return new ResponseEntity<T>(body, this.headers, this.status);
+		public <T> ResponseEntity<T> build() {
+			return body(null);
+		}
+
+		@Override
+		public <T> ResponseEntity<T> body(@Nullable T body) {
+			return new ResponseEntity<>(body, this.headers, this.statusCode);
 		}
 	}
 

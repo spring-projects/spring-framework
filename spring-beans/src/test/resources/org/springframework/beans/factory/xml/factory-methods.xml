@@ -23,7 +23,7 @@
 
 	<bean id="testBeanOnly" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance">
-		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
 	</bean>
 
 	<bean id="null" class="org.springframework.beans.factory.xml.FactoryMethods"
@@ -36,7 +36,7 @@
 
 	<bean id="full" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance">
-		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
 	</bean>
@@ -44,21 +44,21 @@
 	<bean id="fullWithNull" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" lazy-init="true">
 		<constructor-arg index="2" type="java.lang.Integer"><null/></constructor-arg>
-		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 	</bean>
 
 	<bean id="fullWithGenericNull" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" lazy-init="true">
 		<constructor-arg type="java.lang.Integer"><null/></constructor-arg>
-		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
 		<constructor-arg type="int"><value>27</value></constructor-arg>
 	</bean>
 
 	<bean id="fullWithNamedNull" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" lazy-init="true">
 		<constructor-arg name="something"><null/></constructor-arg>
-		<constructor-arg name="tb"><ref local="juergen"/></constructor-arg>
+		<constructor-arg name="tb"><ref bean="juergen"/></constructor-arg>
 		<constructor-arg name="num"><value>27</value></constructor-arg>
 	</bean>
 
@@ -80,25 +80,25 @@
 
 	<bean id="testBeanOnlyPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" scope="prototype">
-		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
 		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
 	</bean>
 
 	<bean id="invalidPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
 		  factory-method="nonExisting" scope="prototype">
-		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
 	</bean>
 
 	<bean id="fullPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" scope="prototype">
 		<constructor-arg type="int"><value>27</value></constructor-arg>
 		<constructor-arg><value>gotcha</value></constructor-arg>
-		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
 	</bean>
 
 	<bean id="noMatchPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" scope="prototype">
-		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
 		<constructor-arg index="3"><value>bogus</value></constructor-arg>

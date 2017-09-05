@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,36 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Holder of metadata for a specific parameter that is used for call processing.
  *
  * @author Thomas Risberg
  * @since 2.5
+ * @see GenericCallMetaDataProvider
  */
 public class CallParameterMetaData {
+
+	@Nullable
 	private String parameterName;
+
 	private int parameterType;
+
 	private int sqlType;
+
+	@Nullable
 	private String typeName;
+
 	private boolean nullable;
 
+
 	/**
-	 * Constructor taking all the properties
+	 * Constructor taking all the properties.
 	 */
-	public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+	public CallParameterMetaData(
+			@Nullable String columnName, int columnType, int sqlType, @Nullable String typeName, boolean nullable) {
+
 		this.parameterName = columnName;
 		this.parameterType = columnType;
 		this.sqlType = sqlType;
@@ -44,35 +57,38 @@ public class CallParameterMetaData {
 	/**
 	 * Get the parameter name.
 	 */
+	@Nullable
 	public String getParameterName() {
-		return parameterName;
+		return this.parameterName;
 	}
 
 	/**
 	 * Get the parameter type.
 	 */
 	public int getParameterType() {
-		return parameterType;
+		return this.parameterType;
 	}
 
 	/**
 	 * Get the parameter SQL type.
 	 */
 	public int getSqlType() {
-		return sqlType;
+		return this.sqlType;
 	}
 
 	/**
 	 * Get the parameter type name.
 	 */
+	@Nullable
 	public String getTypeName() {
-		return typeName;
+		return this.typeName;
 	}
 
 	/**
 	 * Get whether the parameter is nullable.
 	 */
 	public boolean isNullable() {
-		return nullable;
+		return this.nullable;
 	}
+
 }

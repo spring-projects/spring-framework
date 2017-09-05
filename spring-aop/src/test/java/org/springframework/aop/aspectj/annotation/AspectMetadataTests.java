@@ -30,9 +30,9 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class AspectMetadataTests {
+public class AspectMetadataTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNotAnAspect() {
 		new AspectMetadata(String.class,"someBean");
 	}

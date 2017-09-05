@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
  * <li>Some basic type converters are included
  * <li>properties/methods/constructors are discovered and invoked using reflection
  * </ul>
- * The scenarios after that then how how to plug in extensions:<br>
+ * The scenarios after that then how to plug in extensions:<br>
  * <ul>
  * <li>Adding entries to the classpath that will be used to load types and define well known 'imports'
  * <li>Defining variables that are then accessible in the expression
@@ -79,10 +79,12 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 			assertEquals("hello world", value);
 			assertEquals(String.class, value.getClass());
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -98,7 +100,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("favouriteColour","blue");
-		List<Integer> primes = new ArrayList<Integer>();
+		List<Integer> primes = new ArrayList<>();
 		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 		ctx.setVariable("primes",primes);
 
@@ -186,10 +188,12 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			Object value = expr.getValue(ctx);
 			assertEquals("hellohello", value);
 
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -213,7 +217,8 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		try {
 			expr.setValue(ctx, Color.blue);
 			fail("Should not be allowed to set oranges to be blue !");
-		} catch (SpelEvaluationException ee) {
+		}
+		catch (SpelEvaluationException ee) {
 			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
@@ -246,7 +251,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 */
 	private static class FruitColourAccessor implements PropertyAccessor {
 
-		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
+		private static Map<String,Color> propertyMap = new HashMap<>();
 
 		static {
 			propertyMap.put("banana",Color.yellow);
@@ -291,7 +296,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 */
 	private static class VegetableColourAccessor implements PropertyAccessor {
 
-		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
+		private static Map<String,Color> propertyMap = new HashMap<>();
 
 		static {
 			propertyMap.put("carrot",Color.orange);

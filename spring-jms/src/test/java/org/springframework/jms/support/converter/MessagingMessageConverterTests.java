@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,11 @@ import static org.mockito.BDDMockito.*;
  */
 public class MessagingMessageConverterTests {
 
+	private final MessagingMessageConverter converter = new MessagingMessageConverter();
+
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
-	private final MessagingMessageConverter converter = new MessagingMessageConverter();
 
 	@Test
 	public void onlyHandlesMessage() throws JMSException {
@@ -61,40 +62,12 @@ public class MessagingMessageConverterTests {
 	}
 
 	@Test
-	public void fromNull() throws JMSException {
-		assertNull(this.converter.fromMessage(null));
-	}
-
-	@Test
 	public void customPayloadConverter() throws JMSException {
 		TextMessage jmsMsg = new StubTextMessage("1224");
 
 		this.converter.setPayloadConverter(new TestMessageConverter());
 		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
 		assertEquals(1224L, msg.getPayload());
-	}
-
-	@Test
-	public void payloadConversionLazilyInvoked() throws JMSException {
-		TextMessage jmsMsg = new StubTextMessage("1224");
-		TestMessageConverter converter = new TestMessageConverter();
-		this.converter.setPayloadConverter(converter);
-		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
-		assertEquals("Converter should not have been called yet", false, converter.called);
-		assertEquals(1224L, msg.getPayload());
-		assertEquals("Converter should have been called", true, converter.called);
-	}
-
-	@Test
-	public void headerConversionLazilyInvoked() throws JMSException {
-		javax.jms.Message jmsMsg = mock(javax.jms.Message.class);
-		when(jmsMsg.getPropertyNames()).thenThrow(new IllegalArgumentException("Header failure"));
-
-		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
-
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Header failure");
-		msg.getHeaders(); // Triggers headers resolution
 	}
 
 
@@ -111,7 +84,6 @@ public class MessagingMessageConverterTests {
 			TextMessage textMessage = (TextMessage) message;
 			return Long.parseLong(textMessage.getText());
 		}
-
 	}
 
 }

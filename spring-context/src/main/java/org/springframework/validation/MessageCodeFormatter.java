@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A strategy interface for formatting message codes.
  *
@@ -35,5 +37,5 @@ public interface MessageCodeFormatter {
 	 * @return concatenated message code, e.g.: "typeMismatch.user.age"
 	 * @see DefaultMessageCodesResolver.Format
 	 */
-	String format(String errorCode, String objectName, String field);
+	String format(String errorCode, @Nullable String objectName, @Nullable String field);
 }

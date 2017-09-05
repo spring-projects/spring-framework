@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.remoting.caucho;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import com.caucho.hessian.client.HessianProxyFactory;
+import com.sun.net.httpserver.HttpServer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,11 +31,6 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SocketUtils;
 
-import com.caucho.burlap.client.BurlapProxyFactory;
-import com.caucho.hessian.client.HessianProxyFactory;
-
-import com.sun.net.httpserver.HttpServer;
-
 import static org.junit.Assert.*;
 
 /**
@@ -41,7 +38,6 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 16.05.2003
  */
-@SuppressWarnings("deprecation")
 public class CauchoRemotingTests {
 
 	@Rule
@@ -112,63 +108,6 @@ public class CauchoRemotingTests {
 	}
 
 	@Test
-	public void burlapProxyFactoryBeanWithAccessError() throws Exception {
-		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhosta/testbean");
-		factory.afterPropertiesSet();
-
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
-		ITestBean bean = (ITestBean) factory.getObject();
-
-		exception.expect(RemoteAccessException.class);
-		bean.setName("test");
-	}
-
-	@Test
-	public void burlapProxyFactoryBeanWithAuthenticationAndAccessError() throws Exception {
-		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhosta/testbean");
-		factory.setUsername("test");
-		factory.setPassword("bean");
-		factory.setOverloadEnabled(true);
-		factory.afterPropertiesSet();
-
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
-		ITestBean bean = (ITestBean) factory.getObject();
-
-		exception.expect(RemoteAccessException.class);
-		bean.setName("test");
-	}
-
-	@Test
-	public void burlapProxyFactoryBeanWithCustomProxyFactory() throws Exception {
-		TestBurlapProxyFactory proxyFactory = new TestBurlapProxyFactory();
-		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhosta/testbean");
-		factory.setProxyFactory(proxyFactory);
-		factory.setUsername("test");
-		factory.setPassword("bean");
-		factory.setOverloadEnabled(true);
-		factory.afterPropertiesSet();
-
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
-		ITestBean bean = (ITestBean) factory.getObject();
-
-		assertEquals(proxyFactory.user, "test");
-		assertEquals(proxyFactory.password, "bean");
-		assertTrue(proxyFactory.overloadEnabled);
-
-		exception.expect(RemoteAccessException.class);
-		bean.setName("test");
-	}
-
-	@Test
 	public void simpleHessianServiceExporter() throws IOException {
 		final int port = SocketUtils.findAvailableTcpPort();
 
@@ -200,29 +139,6 @@ public class CauchoRemotingTests {
 
 
 	private static class TestHessianProxyFactory extends HessianProxyFactory {
-
-		private String user;
-		private String password;
-		private boolean overloadEnabled;
-
-		@Override
-		public void setUser(String user) {
-			this.user = user;
-		}
-
-		@Override
-		public void setPassword(String password) {
-			this.password = password;
-		}
-
-		@Override
-		public void setOverloadEnabled(boolean overloadEnabled) {
-			this.overloadEnabled = overloadEnabled;
-		}
-	}
-
-
-	private static class TestBurlapProxyFactory extends BurlapProxyFactory {
 
 		private String user;
 		private String password;

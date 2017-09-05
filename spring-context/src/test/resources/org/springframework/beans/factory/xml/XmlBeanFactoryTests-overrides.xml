@@ -39,7 +39,7 @@
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 		<property name="friends">
 			<bean class="org.springframework.tests.sample.beans.TestBean"/>
@@ -56,7 +56,7 @@
 
 	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" scope="prototype">
 		<property name="spouse">
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 

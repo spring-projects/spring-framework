@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void defaultConstructor() throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
@@ -58,7 +58,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void constructorWithAttributeNames() throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
@@ -76,7 +76,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCopyHttpSessionId() throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
@@ -93,7 +93,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCopyAttributes() throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
@@ -109,7 +109,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCauseSessionCreation() throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
 
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();

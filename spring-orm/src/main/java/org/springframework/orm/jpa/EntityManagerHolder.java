@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
@@ -40,6 +41,7 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	private boolean transactionActive;
 
+	@Nullable
 	private SavepointManager savepointManager;
 
 
@@ -61,13 +63,15 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		return this.transactionActive;
 	}
 
-	protected void setSavepointManager(SavepointManager savepointManager) {
+	protected void setSavepointManager(@Nullable SavepointManager savepointManager) {
 		this.savepointManager = savepointManager;
 	}
 
+	@Nullable
 	protected SavepointManager getSavepointManager() {
 		return this.savepointManager;
 	}
+
 
 	@Override
 	public void clear() {

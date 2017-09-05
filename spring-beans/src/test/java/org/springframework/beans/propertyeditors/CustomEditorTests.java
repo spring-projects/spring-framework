@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -430,11 +430,6 @@ public class CustomEditorTests {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCustomNumberEditorCtorWithNullNumberType() throws Exception {
-		new CustomNumberEditor(null, true);
-	}
-
 	@Test
 	public void testCustomNumberEditorWithAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
@@ -485,7 +480,8 @@ public class CustomEditorTests {
 			CustomNumberEditor editor = new CustomNumberEditor(Short.class, true);
 			editor.setAsText(String.valueOf(Short.MAX_VALUE + 1));
 			fail(Short.MAX_VALUE + 1 + " is greater than max value");
-		} catch (NumberFormatException ex) {
+		}
+		catch (NumberFormatException ex) {
 			// expected
 		}
 	}
@@ -1361,7 +1357,7 @@ public class CustomEditorTests {
 		bw.registerCustomEditor(List.class, "list", new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
-				List<TestBean> result = new ArrayList<TestBean>();
+				List<TestBean> result = new ArrayList<>();
 				result.add(new TestBean("list" + text, 99));
 				setValue(result);
 			}
@@ -1396,7 +1392,7 @@ public class CustomEditorTests {
 		PropertyEditor pe = new CustomNumberEditor(Integer.class, true);
 		bw.registerCustomEditor(null, "list.age", pe);
 		TestBean tb = new TestBean();
-		bw.setPropertyValue("list", new ArrayList<Object>());
+		bw.setPropertyValue("list", new ArrayList<>());
 		bw.setPropertyValue("list[0]", tb);
 		assertEquals(tb, bean.getList().get(0));
 		assertEquals(pe, bw.findCustomEditor(int.class, "list.age"));

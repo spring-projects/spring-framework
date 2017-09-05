@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Interface specifying the API for a Simple JDBC Insert implemented by {@link SimpleJdbcInsert}.
@@ -75,22 +74,11 @@ public interface SimpleJdbcInsertOperations {
 
 	/**
 	 * Include synonyms for the column meta data lookups via JDBC.
-	 * Note: this is only necessary to include for Oracle since other
-	 * databases supporting synonyms seems to include the synonyms
-	 * automatically.
+	 * <p>Note: This is only necessary to include for Oracle since other databases
+	 * supporting synonyms seems to include the synonyms automatically.
 	 * @return the instance of this SimpleJdbcInsert
 	 */
 	SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData();
-
-	/**
-	 * Use a the provided NativeJdbcExtractor during the column meta data
-	 * lookups via JDBC.
-	 * Note: this is only necessary to include when running with a connection pool
-	 * that wraps the meta data connection and when using a database like Oracle
-	 * where it is necessary to access the native connection to include synonyms.
-	 * @return the instance of this SimpleJdbcInsert
-	 */
-	SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor);
 
 
 	/**
@@ -152,6 +140,7 @@ public interface SimpleJdbcInsertOperations {
 	 * @param batch an array of Maps containing a batch of column names and corresponding value
 	 * @return the array of number of rows affected as returned by the JDBC driver
 	 */
+	@SuppressWarnings("unchecked")
 	int[] executeBatch(Map<String, ?>... batch);
 
 	/**

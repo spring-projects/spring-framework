@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JSP tag for collecting name-value parameters and passing them to a
  * {@link ParamAware} ancestor in the tag hierarchy.
@@ -34,8 +36,9 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 @SuppressWarnings("serial")
 public class ParamTag extends BodyTagSupport {
 
-	private String name;
+	private String name = "";
 
+	@Nullable
 	private String value;
 
 	private boolean valueSet;
@@ -83,7 +86,7 @@ public class ParamTag extends BodyTagSupport {
 	@Override
 	public void release() {
 		super.release();
-		this.name = null;
+		this.name = "";
 		this.value = null;
 		this.valueSet = false;
 	}

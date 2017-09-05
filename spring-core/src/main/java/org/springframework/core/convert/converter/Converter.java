@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.converter;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A converter converts a source object of type {@code S} to a target of type {@code T}.
  *
@@ -28,6 +30,7 @@ package org.springframework.core.convert.converter;
  * @param <S> the source type
  * @param <T> the target type
  */
+@FunctionalInterface
 public interface Converter<S, T> {
 
 	/**
@@ -36,6 +39,7 @@ public interface Converter<S, T> {
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
+	@Nullable
 	T convert(S source);
 
 }

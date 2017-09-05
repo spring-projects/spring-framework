@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 2.0
  */
-public final class AtAspectJAfterThrowingTests {
+public class AtAspectJAfterThrowingTests {
 
 	@Test
 	public void testAccessThrowable() throws Exception {

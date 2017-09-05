@@ -18,6 +18,8 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Advice invoked before a method is invoked. Such advices cannot
  * prevent the method call proceeding, unless they throw a Throwable.
@@ -39,6 +41,6 @@ public interface MethodBeforeAdvice extends BeforeAdvice {
 	 * allowed by the method signature. Otherwise the exception
 	 * will be wrapped as a runtime exception.
 	 */
-	void before(Method method, Object[] args, Object target) throws Throwable;
+	void before(Method method, Object[] args, @Nullable Object target) throws Throwable;
 
 }

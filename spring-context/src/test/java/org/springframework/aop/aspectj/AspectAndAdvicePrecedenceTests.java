@@ -26,6 +26,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
@@ -34,7 +35,7 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AspectAndAdvicePrecedenceTests {
+public class AspectAndAdvicePrecedenceTests {
 
 	private PrecedenceTestAspect highPrecedenceAspect;
 
@@ -186,7 +187,9 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
 		}
-		catch(Throwable t) { throw new RuntimeException(t); }
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
 		this.collaborator.aroundAdviceOne(this.name);
 		return ret;
 	}
@@ -197,7 +200,9 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
 		}
-		catch(Throwable t) {throw new RuntimeException(t);}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
 		this.collaborator.aroundAdviceTwo(this.name);
 		return ret;
 	}
@@ -233,7 +238,7 @@ class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
 	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
 	 */
 	@Override
-	public void before(Method method, Object[] args, Object target)
+	public void before(Method method, Object[] args, @Nullable Object target)
 			throws Throwable {
 		this.collaborator.beforeAdviceOne(this.name);
 	}

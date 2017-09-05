@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,8 @@ public class AopNamespaceHandlerTests {
 
 
 	@Before
-	public void setUp() {
-		this.context =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+	public void setup() {
+		this.context = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 	}
 
 	protected ITestBean getTestBean() {
@@ -108,7 +107,27 @@ public class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testAspectAppliedForInitializeBean() {
+	public void testAspectAppliedForInitializeBeanWithEmptyName() {
+		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), "");
+
+		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
+
+		assertEquals("Incorrect before count", 0, advice.getBeforeCount());
+		assertEquals("Incorrect after count", 0, advice.getAfterCount());
+
+		bean.setName("Sally");
+
+		assertEquals("Incorrect before count", 1, advice.getBeforeCount());
+		assertEquals("Incorrect after count", 1, advice.getAfterCount());
+
+		bean.getName();
+
+		assertEquals("Incorrect before count", 1, advice.getBeforeCount());
+		assertEquals("Incorrect after count", 1, advice.getAfterCount());
+	}
+
+	@Test
+	public void testAspectAppliedForInitializeBeanWithNullName() {
 		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), null);
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
@@ -126,6 +145,7 @@ public class AopNamespaceHandlerTests {
 		assertEquals("Incorrect before count", 1, advice.getBeforeCount());
 		assertEquals("Incorrect after count", 1, advice.getAfterCount());
 	}
+
 }
 
 

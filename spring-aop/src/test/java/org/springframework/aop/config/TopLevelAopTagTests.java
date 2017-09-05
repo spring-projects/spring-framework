@@ -31,7 +31,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class TopLevelAopTagTests {
+public class TopLevelAopTagTests {
 
 	private static final Resource CONTEXT = qualifiedResource(TopLevelAopTagTests.class, "context.xml");
 

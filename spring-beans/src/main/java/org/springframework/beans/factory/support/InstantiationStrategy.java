@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface responsible for creating instances corresponding to a root bean definition.
@@ -44,7 +45,7 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner)
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner)
 			throws BeansException;
 
 	/**
@@ -60,8 +61,8 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
-			Constructor<?> ctor, Object... args) throws BeansException;
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
+			Constructor<?> ctor, @Nullable Object... args) throws BeansException;
 
 	/**
 	 * Return an instance of the bean with the given name in this factory,
@@ -78,7 +79,8 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation attempt failed
 	 */
-	Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner,
-			Object factoryBean, Method factoryMethod, Object... args) throws BeansException;
+	Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
+			@Nullable Object factoryBean, Method factoryMethod, @Nullable Object... args)
+			throws BeansException;
 
 }

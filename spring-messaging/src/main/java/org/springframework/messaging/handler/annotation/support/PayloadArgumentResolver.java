@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -56,6 +57,8 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final Validator validator;
 
+	private final boolean useDefaultResolution;
+
 
 	/**
 	 * Create a new {@code PayloadArgumentResolver} with the given
@@ -74,18 +77,35 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * @param validator the Validator to use (optional)
 	 */
 	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator) {
+		this(messageConverter, validator, true);
+	}
+
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter} and {@link Validator}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @param validator the Validator to use (optional)
+	 * @param useDefaultResolution if "true" (the default) this resolver supports
+	 * all parameters; if "false" then only arguments with the {@code @Payload}
+	 * annotation are supported.
+	 */
+	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator,
+			boolean useDefaultResolution) {
+
 		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 		this.validator = validator;
+		this.useDefaultResolution = useDefaultResolution;
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return true;
+		return (parameter.hasParameterAnnotation(Payload.class) || this.useDefaultResolution);
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Payload ann = parameter.getParameterAnnotation(Payload.class);
 		if (ann != null && StringUtils.hasText(ann.expression())) {
@@ -106,17 +126,22 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 
 		Class<?> targetClass = parameter.getParameterType();
-		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
+		Class<?> payloadClass = payload.getClass();
+		if (ClassUtils.isAssignable(targetClass, payloadClass)) {
 			validate(message, parameter, payload);
 			return payload;
 		}
 		else {
-			payload = (this.converter instanceof SmartMessageConverter ?
-					((SmartMessageConverter) this.converter).fromMessage(message, targetClass, parameter) :
-					this.converter.fromMessage(message, targetClass));
+			if (this.converter instanceof SmartMessageConverter) {
+				SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
+				payload = smartConverter.fromMessage(message, targetClass, parameter);
+			}
+			else {
+				payload = this.converter.fromMessage(message, targetClass);
+			}
 			if (payload == null) {
-				throw new MessageConversionException(message,
-						"No converter found to convert to " + targetClass + ", message=" + message);
+				throw new MessageConversionException(message, "Cannot convert from [" +
+						payloadClass.getName() + "] to [" + targetClass.getName() + "] for " + message);
 			}
 			validate(message, parameter, payload);
 			return payload;
@@ -132,7 +157,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * Specify if the given {@code payload} is empty.
 	 * @param payload the payload to check (can be {@code null})
 	 */
-	protected boolean isEmptyPayload(Object payload) {
+	protected boolean isEmptyPayload(@Nullable Object payload) {
 		if (payload == null) {
 			return true;
 		}

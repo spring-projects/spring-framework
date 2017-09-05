@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -48,10 +48,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
- * @see org.springframework.stereotype.Repository
- * @see org.springframework.dao.DataAccessException
- * @see org.springframework.dao.support.PersistenceExceptionTranslator
+ * @see Async
+ * @see AnnotationAsyncExecutionInterceptor
  */
 @SuppressWarnings("serial")
 public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
@@ -73,12 +71,14 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Create a new {@code AsyncAnnotationAdvisor} for the given task executor.
 	 * @param executor the task executor to use for asynchronous methods
-	 * @param exceptionHandler the {@link org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler} to use to
+	 * (can be {@code null} to trigger default executor resolution)
+	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use to
 	 * handle unexpected exception thrown by asynchronous method executions
+	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
 	 */
 	@SuppressWarnings("unchecked")
-	public AsyncAnnotationAdvisor(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
-		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<Class<? extends Annotation>>(2);
+	public AsyncAnnotationAdvisor(@Nullable Executor executor, @Nullable AsyncUncaughtExceptionHandler exceptionHandler) {
+		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<>(2);
 		asyncAnnotationTypes.add(Async.class);
 		try {
 			asyncAnnotationTypes.add((Class<? extends Annotation>)
@@ -86,9 +86,6 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		}
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
-		}
-		if (executor == null) {
-			executor = new SimpleAsyncTaskExecutor();
 		}
 		if (exceptionHandler != null) {
 			this.exceptionHandler = exceptionHandler;
@@ -119,7 +116,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	 */
 	public void setAsyncAnnotationType(Class<? extends Annotation> asyncAnnotationType) {
 		Assert.notNull(asyncAnnotationType, "'asyncAnnotationType' must not be null");
-		Set<Class<? extends Annotation>> asyncAnnotationTypes = new HashSet<Class<? extends Annotation>>();
+		Set<Class<? extends Annotation>> asyncAnnotationTypes = new HashSet<>();
 		asyncAnnotationTypes.add(asyncAnnotationType);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
 	}
@@ -146,7 +143,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	}
 
 
-	protected Advice buildAdvice(Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
+	protected Advice buildAdvice(@Nullable Executor executor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		return new AnnotationAsyncExecutionInterceptor(executor, exceptionHandler);
 	}
 
@@ -159,15 +156,16 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		ComposablePointcut result = null;
 		for (Class<? extends Annotation> asyncAnnotationType : asyncAnnotationTypes) {
 			Pointcut cpc = new AnnotationMatchingPointcut(asyncAnnotationType, true);
-			Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(asyncAnnotationType);
+			Pointcut mpc = new AnnotationMatchingPointcut(null, asyncAnnotationType, true);
 			if (result == null) {
-				result = new ComposablePointcut(cpc).union(mpc);
+				result = new ComposablePointcut(cpc);
 			}
 			else {
-				result.union(cpc).union(mpc);
+				result.union(cpc);
 			}
+			result = result.union(mpc);
 		}
-		return result;
+		return (result != null ? result : Pointcut.TRUE);
 	}
 
 }

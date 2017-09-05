@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -32,6 +33,7 @@ public abstract class MockMvcConfigurerAdapter implements MockMvcConfigurer {
 	}
 
 	@Override
+	@Nullable
 	public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext cxt) {
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.serializer.support.SerializationDelegate;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -51,6 +52,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 
 	private final ConcurrentMap<Object, Object> store;
 
+	@Nullable
 	private final SerializationDelegate serialization;
 
 
@@ -59,7 +61,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * @param name the name of the cache
 	 */
 	public ConcurrentMapCache(String name) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), true);
+		this(name, new ConcurrentHashMap<>(256), true);
 	}
 
 	/**
@@ -69,7 +71,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
+		this(name, new ConcurrentHashMap<>(256), allowNullValues);
 	}
 
 	/**
@@ -95,9 +97,10 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * (adapting them to an internal null holder value)
 	 * @param serialization the {@link SerializationDelegate} to use
 	 * to serialize cache entry or {@code null} to store the reference
+	 * @since 4.3
 	 */
 	protected ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store,
-			boolean allowNullValues, SerializationDelegate serialization) {
+			boolean allowNullValues, @Nullable SerializationDelegate serialization) {
 
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
@@ -107,13 +110,15 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 		this.serialization = serialization;
 	}
 
+
 	/**
 	 * Return whether this cache stores a copy of each entry ({@code true}) or
 	 * a reference ({@code false}, default). If store by value is enabled, each
 	 * entry in the cache must be serializable.
+	 * @since 4.3
 	 */
 	public final boolean isStoreByValue() {
-		return this.serialization != null;
+		return (this.serialization != null);
 	}
 
 	@Override
@@ -133,35 +138,26 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
-		if (this.store.containsKey(key)) {
-			return (T) get(key).get();
-		}
-		else {
-			synchronized (this.store) {
-				if (this.store.containsKey(key)) {
-					return (T) get(key).get();
-				}
-				T value;
-				try {
-					value = valueLoader.call();
-				}
-				catch (Exception ex) {
-					throw new ValueRetrievalException(key, valueLoader, ex);
-				}
-				put(key, value);
-				return value;
+		return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
+			try {
+				return toStoreValue(valueLoader.call());
 			}
-		}
+			catch (Throwable ex) {
+				throw new ValueRetrievalException(key, valueLoader, ex);
+			}
+		}));
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.store.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, Object value) {
+	@Nullable
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Object existing = this.store.putIfAbsent(key, toStoreValue(value));
 		return toValueWrapper(existing);
 	}
@@ -177,15 +173,15 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	protected Object toStoreValue(Object userValue) {
+	protected Object toStoreValue(@Nullable Object userValue) {
 		Object storeValue = super.toStoreValue(userValue);
 		if (this.serialization != null) {
 			try {
-				return serializeValue(storeValue);
+				return serializeValue(this.serialization, storeValue);
 			}
-			catch (Exception ex) {
-				throw new IllegalArgumentException("Failed to serialize cache value '"
-						+ userValue + "'. Does it implement Serializable?", ex);
+			catch (Throwable ex) {
+				throw new IllegalArgumentException("Failed to serialize cache value '" + userValue +
+						"'. Does it implement Serializable?", ex);
 			}
 		}
 		else {
@@ -193,10 +189,10 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 		}
 	}
 
-	private Object serializeValue(Object storeValue) throws IOException {
+	private Object serializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			this.serialization.serialize(storeValue, out);
+			serialization.serialize(storeValue, out);
 			return out.toByteArray();
 		}
 		finally {
@@ -208,11 +204,10 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	protected Object fromStoreValue(Object storeValue) {
 		if (this.serialization != null) {
 			try {
-				return super.fromStoreValue(deserializeValue(storeValue));
+				return super.fromStoreValue(deserializeValue(this.serialization, storeValue));
 			}
-			catch (Exception ex) {
-				throw new IllegalArgumentException("Failed to deserialize cache value '" +
-						storeValue + "'", ex);
+			catch (Throwable ex) {
+				throw new IllegalArgumentException("Failed to deserialize cache value '" + storeValue + "'", ex);
 			}
 		}
 		else {
@@ -221,10 +216,10 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 
 	}
 
-	private Object deserializeValue(Object storeValue) throws IOException {
+	private Object deserializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
 		ByteArrayInputStream in = new ByteArrayInputStream((byte[]) storeValue);
 		try {
-			return this.serialization.deserialize(in);
+			return serialization.deserialize(in);
 		}
 		finally {
 			in.close();

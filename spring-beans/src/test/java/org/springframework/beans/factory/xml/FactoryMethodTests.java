@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,8 +91,7 @@ public class FactoryMethodTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
-		FactoryMethods fm = (FactoryMethods) xbf.getBean("null");
-		assertNull(fm);
+		assertEquals("null", xbf.getBean("null").toString());
 
 		try {
 			xbf.getBean("nullWithProperty");

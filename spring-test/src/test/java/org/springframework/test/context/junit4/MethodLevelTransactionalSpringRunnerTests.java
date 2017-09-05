@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * {@link Transactional &#64;Transactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration
  * &#64;ContextConfiguration} annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the following
+ * {@link SpringRunner} and the following
  * {@link TestExecutionListener TestExecutionListeners}:
  *
  * <ul>

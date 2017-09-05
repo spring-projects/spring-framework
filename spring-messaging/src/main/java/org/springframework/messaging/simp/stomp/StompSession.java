@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.messaging.simp.stomp;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -87,6 +89,19 @@ public interface StompSession {
 	Subscription subscribe(StompHeaders headers, StompFrameHandler handler);
 
 	/**
+	 * Send an acknowledgement whether a message was consumed or not resulting
+	 * in an ACK or NACK frame respectively.
+	 * <p><strong>Note:</strong> to use this when subscribing you must set the
+	 * {@link StompHeaders#setAck(String) ack} header to "client" or
+	 * "client-individual" in order ot use this.
+	 * @param messageId the id of the message
+	 * @param consumed whether the message was consumed or not
+	 * @return a Receiptable for tracking receipts
+	 * @since 4.3
+	 */
+	Receiptable acknowledge(String messageId, boolean consumed);
+
+	/**
 	 * Disconnect the session by sending a DISCONNECT frame.
 	 */
 	void disconnect();
@@ -102,6 +117,7 @@ public interface StompSession {
 		 * Return the receipt id, or {@code null} if the STOMP frame for which
 		 * the handle was returned did not have a "receipt" header.
 		 */
+		@Nullable
 		String getReceiptId();
 
 		/**
@@ -118,6 +134,7 @@ public interface StompSession {
 		void addReceiptLostTask(Runnable runnable);
 	}
 
+
 	/**
 	 * A handle to use to unsubscribe or to track a receipt.
 	 */
@@ -126,12 +143,25 @@ public interface StompSession {
 		/**
 		 * Return the id for the subscription.
 		 */
+		@Nullable
 		String getSubscriptionId();
+
+		/**
+		 * Return the headers used on the SUBSCRIBE frame.
+		 */
+		StompHeaders getSubscriptionHeaders();
 
 		/**
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
 		 */
 		void unsubscribe();
+
+		/**
+		 * Alternative to {@link #unsubscribe()} with additional custom headers
+		 * to send to the server.
+		 * <p><strong>Note:</strong> There is no need to set the subscription id.
+		 */
+		void unsubscribe(@Nullable StompHeaders stompHeaders);
 	}
 
 }

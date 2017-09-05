@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link SQLExceptionTranslator} implementation that analyzes the SQL state in
@@ -45,15 +46,15 @@ import org.springframework.jdbc.BadSqlGrammarException;
  */
 public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLExceptionTranslator {
 
-	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<String>(8);
+	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<>(8);
 
-	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<String>(8);
+	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<>(8);
 
-	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<String>(4);
+	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<>(4);
 
 
 	static {
@@ -87,6 +88,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 
 
 	@Override
+	@Nullable
 	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
 		// First, the getSQLState check...
 		String sqlState = getSqlState(ex);
@@ -130,6 +132,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 	 * is to be extracted
 	 * @return the SQL state code
 	 */
+	@Nullable
 	private String getSqlState(SQLException ex) {
 		String sqlState = ex.getSQLState();
 		if (sqlState == null) {

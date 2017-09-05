@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.orm.jpa;
 
-import java.lang.reflect.Method;
 import java.util.Map;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -30,6 +30,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.PessimisticLockException;
 import javax.persistence.Query;
 import javax.persistence.QueryTimeoutException;
+import javax.persistence.SynchronizationType;
 import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
@@ -48,12 +49,11 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,7 +66,6 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("unchecked")
 public abstract class EntityManagerFactoryUtils {
 
 	/**
@@ -79,26 +78,6 @@ public abstract class EntityManagerFactoryUtils {
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
-
-
-	private static Method createEntityManagerWithSynchronizationTypeMethod;
-
-	private static Object synchronizationTypeUnsynchronized;
-
-	static {
-		try {
-			@SuppressWarnings( "rawtypes" )
-			Class<Enum> synchronizationTypeClass = (Class<Enum>) ClassUtils.forName(
-					"javax.persistence.SynchronizationType", EntityManagerFactoryUtils.class.getClassLoader());
-			createEntityManagerWithSynchronizationTypeMethod = EntityManagerFactory.class.getMethod(
-					"createEntityManager", synchronizationTypeClass, Map.class);
-			synchronizationTypeUnsynchronized = Enum.valueOf(synchronizationTypeClass, "UNSYNCHRONIZED");
-		}
-		catch (Exception ex) {
-			// No JPA 2.1 API available
-			createEntityManagerWithSynchronizationTypeMethod = null;
-		}
-	}
 
 
 	/**
@@ -119,7 +98,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see EntityManagerFactoryInfo#getPersistenceUnitName()
 	 */
 	public static EntityManagerFactory findEntityManagerFactory(
-			ListableBeanFactory beanFactory, String unitName) throws NoSuchBeanDefinitionException {
+			ListableBeanFactory beanFactory, @Nullable String unitName) throws NoSuchBeanDefinitionException {
 
 		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
 		if (StringUtils.hasLength(unitName)) {
@@ -153,6 +132,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
 			throws DataAccessResourceFailureException {
 
@@ -170,7 +150,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
+	@Nullable
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties, true);
@@ -192,6 +173,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws PersistenceException {
 
@@ -212,8 +194,10 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
+	@Nullable
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) throws PersistenceException {
+			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction)
+			throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
@@ -271,10 +255,9 @@ public abstract class EntityManagerFactoryUtils {
 		// Create a new EntityManager for use within the current transaction.
 		logger.debug("Opening JPA EntityManager");
 		EntityManager em = null;
-		if (!synchronizedWithTransaction && createEntityManagerWithSynchronizationTypeMethod != null) {
+		if (!synchronizedWithTransaction) {
 			try {
-				em = (EntityManager) ReflectionUtils.invokeMethod(createEntityManagerWithSynchronizationTypeMethod,
-						emf, synchronizationTypeUnsynchronized, properties);
+				em = emf.createEntityManager(SynchronizationType.UNSYNCHRONIZED, properties);
 			}
 			catch (AbstractMethodError err) {
 				// JPA 2.1 API available but method not actually implemented in persistence provider:
@@ -313,6 +296,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * (to be passed into cleanupTransaction)
 	 * @see JpaDialect#prepareTransaction
 	 */
+	@Nullable
 	private static Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
@@ -333,7 +317,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param emf the EntityManagerFactory that the EntityManager has been created with
 	 * @see JpaDialect#cleanupTransaction
 	 */
-	private static void cleanupTransaction(Object transactionData, EntityManagerFactory emf) {
+	private static void cleanupTransaction(@Nullable Object transactionData, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
@@ -374,6 +358,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @return the corresponding DataAccessException instance,
 	 * or {@code null} if the exception should not be translated
 	 */
+	@Nullable
 	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
 		// Following the JPA specification, a persistence provider can also
 		// throw these two exceptions, besides PersistenceException.
@@ -415,7 +400,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		// If we have another kind of PersistenceException, throw it.
 		if (ex instanceof PersistenceException) {
-			return new JpaSystemException((PersistenceException) ex);
+			return new JpaSystemException(ex);
 		}
 
 		// If we get here, we have an exception that resulted from user code,
@@ -430,7 +415,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param em the JPA EntityManager to close (may be {@code null})
 	 * @see javax.persistence.EntityManager#close()
 	 */
-	public static void closeEntityManager(EntityManager em) {
+	public static void closeEntityManager(@Nullable EntityManager em) {
 		if (em != null) {
 			logger.debug("Closing JPA EntityManager");
 			try {
@@ -450,21 +435,25 @@ public abstract class EntityManagerFactoryUtils {
 
 	/**
 	 * Callback for resource cleanup at the end of a non-JPA transaction
-	 * (e.g. when participating in a JtaTransactionManager transaction).
+	 * (e.g. when participating in a JtaTransactionManager transaction),
+	 * fully synchronized with the ongoing transaction.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	private static class TransactionalEntityManagerSynchronization
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
+		@Nullable
 		private final Object transactionData;
 
+		@Nullable
 		private final JpaDialect jpaDialect;
 
 		private final boolean newEntityManager;
 
 		public TransactionalEntityManagerSynchronization(
-				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
+				EntityManagerHolder emHolder, EntityManagerFactory emf, @Nullable Object txData, boolean newEm) {
+
 			super(emHolder, emf);
 			this.transactionData = txData;
 			this.jpaDialect = (emf instanceof EntityManagerFactoryInfo ?
@@ -512,7 +501,9 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		@Override
-		protected void cleanupResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey, boolean committed) {
+		protected void cleanupResource(
+				EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey, boolean committed) {
+
 			if (!committed) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.
 				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -56,8 +60,9 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest request, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		@SuppressWarnings("unchecked")
 		Map<String, MultiValueMap<String, String>> matrixVariables =
@@ -68,23 +73,40 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 			return Collections.emptyMap();
 		}
 
-		String pathVariable = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
+		Assert.state(ann != null, "No MatrixVariable annotation");
+		String pathVariable = ann.pathVar();
 
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
-			MultiValueMap<String, String> map = matrixVariables.get(pathVariable);
-			return (map != null) ? map : Collections.emptyMap();
+			MultiValueMap<String, String> mapForPathVariable = matrixVariables.get(pathVariable);
+			if (mapForPathVariable == null) {
+				return Collections.emptyMap();
+			}
+			map.putAll(mapForPathVariable);
 		}
-
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		for (MultiValueMap<String, String> vars : matrixVariables.values()) {
-			for (String name : vars.keySet()) {
-				for (String value : vars.get(name)) {
-					map.add(name, value);
+		else {
+			for (MultiValueMap<String, String> vars : matrixVariables.values()) {
+				for (String name : vars.keySet()) {
+					for (String value : vars.get(name)) {
+						map.add(name, value);
+					}
 				}
 			}
 		}
 
-		return map;
+		return (isSingleValueMap(parameter) ? map.toSingleValueMap() : map);
+	}
+
+	private boolean isSingleValueMap(MethodParameter parameter) {
+		if (!MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
+			ResolvableType[] genericTypes = ResolvableType.forMethodParameter(parameter).getGenerics();
+			if (genericTypes.length == 2) {
+				Class<?> declaredClass = genericTypes[1].getRawClass();
+				return (declaredClass == null || !List.class.isAssignableFrom(declaredClass));
+			}
+		}
+		return false;
 	}
 
 }

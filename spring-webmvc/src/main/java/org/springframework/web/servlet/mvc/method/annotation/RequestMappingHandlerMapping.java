@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -34,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.handler.MatchableHandlerMapping;
+import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
@@ -51,7 +54,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
-		implements EmbeddedValueResolverAware {
+		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
 
 	private boolean useSuffixPatternMatch = true;
 
@@ -61,6 +64,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -109,13 +113,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver  = resolver;
+		this.embeddedValueResolver = resolver;
 	}
 
 	@Override
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
-		this.config.setPathHelper(getUrlPathHelper());
+		this.config.setUrlPathHelper(getUrlPathHelper());
 		this.config.setPathMatcher(getPathMatcher());
 		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
 		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
@@ -157,6 +161,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
+	@Nullable
 	public List<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
@@ -164,12 +169,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * {@inheritDoc}
-	 * Expects a handler to have a type-level @{@link Controller} annotation.
+	 * <p>Expects a handler to have either a type-level @{@link Controller}
+	 * annotation or a type-level @{@link RequestMapping} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return ((AnnotationUtils.findAnnotation(beanType, Controller.class) != null) ||
-				(AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null));
+		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
+				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
 	}
 
 	/**
@@ -181,6 +187,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
+	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
@@ -199,9 +206,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
 	 */
+	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
-		RequestCondition<?> condition = (element instanceof Class<?> ?
+		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
@@ -217,6 +225,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@Nullable
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -232,6 +241,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@Nullable
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
@@ -243,19 +253,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
-			RequestMapping requestMapping, RequestCondition<?> customCondition) {
+			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
 
-		return RequestMappingInfo
+		RequestMappingInfo.Builder builder = RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())
 				.params(requestMapping.params())
 				.headers(requestMapping.headers())
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
-				.mappingName(requestMapping.name())
-				.customCondition(customCondition)
-				.options(this.config)
-				.build();
+				.mappingName(requestMapping.name());
+		if (customCondition != null) {
+			builder.customCondition(customCondition);
+		}
+		return builder.options(this.config).build();
 	}
 
 	/**
@@ -276,9 +287,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
+	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+		RequestMappingInfo info = RequestMappingInfo.paths(pattern).options(this.config).build();
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(request);
+		if (matchingInfo == null) {
+			return null;
+		}
+		Set<String> patterns = matchingInfo.getPatternsCondition().getPatterns();
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		return new RequestMatchResult(patterns.iterator().next(), lookupPath, getPathMatcher());
+	}
+
+	@Override
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
-		CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
+		Class<?> beanType = handlerMethod.getBeanType();
+		CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(beanType, CrossOrigin.class);
 		CrossOrigin methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
 
 		if (typeAnnotation == null && methodAnnotation == null) {
@@ -289,44 +313,32 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		updateCorsConfig(config, typeAnnotation);
 		updateCorsConfig(config, methodAnnotation);
 
-		if (CollectionUtils.isEmpty(config.getAllowedOrigins())) {
-			config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGINS));
-		}
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
 			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
 				config.addAllowedMethod(allowedMethod.name());
 			}
 		}
-		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
-			config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
-		}
-		if (config.getAllowCredentials() == null) {
-			config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
-		}
-		if (config.getMaxAge() == null) {
-			config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
-		}
-		return config;
+		return config.applyPermitDefaultValues();
 	}
 
-	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
+	private void updateCorsConfig(CorsConfiguration config, @Nullable CrossOrigin annotation) {
 		if (annotation == null) {
 			return;
 		}
 		for (String origin : annotation.origins()) {
-			config.addAllowedOrigin(origin);
+			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
 		}
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}
 		for (String header : annotation.allowedHeaders()) {
-			config.addAllowedHeader(header);
+			config.addAllowedHeader(resolveCorsAnnotationValue(header));
 		}
 		for (String header : annotation.exposedHeaders()) {
-			config.addExposedHeader(header);
+			config.addExposedHeader(resolveCorsAnnotationValue(header));
 		}
 
-		String allowCredentials = annotation.allowCredentials();
+		String allowCredentials = resolveCorsAnnotationValue(annotation.allowCredentials());
 		if ("true".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(true);
 		}
@@ -334,12 +346,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			config.setAllowCredentials(false);
 		}
 		else if (!allowCredentials.isEmpty()) {
-			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", "
-					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
+			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", " +
+					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
 		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
 			config.setMaxAge(annotation.maxAge());
+		}
+	}
+
+	private String resolveCorsAnnotationValue(String value) {
+		if (this.embeddedValueResolver != null) {
+			String resolved = this.embeddedValueResolver.resolveStringValue(value);
+			return (resolved != null ? resolved : "");
+		}
+		else {
+			return value;
 		}
 	}
 

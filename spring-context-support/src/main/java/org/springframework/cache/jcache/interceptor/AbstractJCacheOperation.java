@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 			throw new IllegalStateException("Values mismatch, operation has " +
 					this.allParameterDetails.size() + " parameter(s) but got " + values.length + " value(s)");
 		}
-		List<CacheInvocationParameter> result = new ArrayList<CacheInvocationParameter>();
+		List<CacheInvocationParameter> result = new ArrayList<>();
 		for (int i = 0; i < this.allParameterDetails.size(); i++) {
 			result.add(this.allParameterDetails.get(i).toCacheInvocationParameter(values[i]));
 		}
@@ -138,8 +138,8 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 
 	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
-		List<CacheParameterDetail> result = new ArrayList<CacheParameterDetail>();
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
+		List<CacheParameterDetail> result = new ArrayList<>();
+		for (int i = 0; i < method.getParameterCount(); i++) {
 			CacheParameterDetail detail = new CacheParameterDetail(method, i);
 			result.add(detail);
 		}
@@ -161,7 +161,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 		public CacheParameterDetail(Method method, int parameterPosition) {
 			this.rawType = method.getParameterTypes()[parameterPosition];
-			this.annotations = new LinkedHashSet<Annotation>();
+			this.annotations = new LinkedHashSet<>();
 			boolean foundKeyAnnotation = false;
 			boolean foundValueAnnotation = false;
 			for (Annotation annotation : method.getParameterAnnotations()[parameterPosition]) {

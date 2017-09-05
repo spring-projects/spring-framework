@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.web.servlet.resource;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
-import org.webjars.MultipleMatchesException;
 import org.webjars.WebJarAssetLocator;
 
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource and then
@@ -45,15 +45,33 @@ import org.springframework.core.io.Resource;
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars";
+	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars/";
 
 	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
-	private final WebJarAssetLocator webJarAssetLocator = new WebJarAssetLocator();
+
+	private final WebJarAssetLocator webJarAssetLocator;
+
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+	 */
+	public WebJarsResourceResolver() {
+		this(new WebJarAssetLocator());
+	}
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
+	 * e.g. with a custom index.
+	 * @since 4.3
+	 */
+	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
+		this.webJarAssetLocator = webJarAssetLocator;
+	}
 
 
 	@Override
-	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
@@ -80,25 +98,16 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		return path;
 	}
 
+	@Nullable
 	protected String findWebJarResourcePath(String path) {
-		try {
-			int startOffset = (path.startsWith("/") ? 1 : 0);
-			int endOffset = path.indexOf("/", 1);
-			if (endOffset != -1) {
-				String webjar = path.substring(startOffset, endOffset);
-				String partialPath = path.substring(endOffset);
-				String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
+		int startOffset = (path.startsWith("/") ? 1 : 0);
+		int endOffset = path.indexOf("/", 1);
+		if (endOffset != -1) {
+			String webjar = path.substring(startOffset, endOffset);
+			String partialPath = path.substring(endOffset + 1);
+			String webJarPath = webJarAssetLocator.getFullPathExact(webjar, partialPath);
+			if (webJarPath != null) {
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
-			}
-		}
-		catch (MultipleMatchesException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("WebJar version conflict for \"" + path + "\"", ex);
-			}
-		}
-		catch (IllegalArgumentException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No WebJar resource found for \"" + path + "\"");
 			}
 		}
 		return null;

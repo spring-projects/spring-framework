@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,7 +55,7 @@ class HtmlCharacterEntityReferences {
 
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<String, Character>(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
 
 
 	/**
@@ -121,6 +122,7 @@ class HtmlCharacterEntityReferences {
 	/**
 	 * Return the reference mapped to the given character or {@code null}.
 	 */
+	@Nullable
 	public String convertToReference(char character) {
 	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
@@ -129,6 +131,7 @@ class HtmlCharacterEntityReferences {
 	 * Return the reference mapped to the given character or {@code null}.
 	 * @since 4.1.2
 	 */
+	@Nullable
 	public String convertToReference(char character, String encoding) {
 		if (encoding.startsWith("UTF-")){
 			switch (character){

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * Annotation indicating that a method (or all methods on a class) triggers a
  * {@link org.springframework.cache.Cache#evict(Object) cache evict} operation.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Costin Leau
  * @author Stephane Nicoll
@@ -66,7 +69,9 @@ public @interface CacheEvict {
 	 * following meta-data:
 	 * <ul>
 	 * <li>{@code #result} for a reference to the result of the method invocation, which
-	 * can only be used if {@link #beforeInvocation()} is {@code false}.</li>
+	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
+	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
+	 * not the wrapper</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>

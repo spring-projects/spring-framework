@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -78,22 +79,22 @@ public abstract class TransactionSynchronizationManager {
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
 	private static final ThreadLocal<Map<Object, Object>> resources =
-			new NamedThreadLocal<Map<Object, Object>>("Transactional resources");
+			new NamedThreadLocal<>("Transactional resources");
 
 	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
-			new NamedThreadLocal<Set<TransactionSynchronization>>("Transaction synchronizations");
+			new NamedThreadLocal<>("Transaction synchronizations");
 
 	private static final ThreadLocal<String> currentTransactionName =
-			new NamedThreadLocal<String>("Current transaction name");
+			new NamedThreadLocal<>("Current transaction name");
 
 	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
-			new NamedThreadLocal<Boolean>("Current transaction read-only status");
+			new NamedThreadLocal<>("Current transaction read-only status");
 
 	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
-			new NamedThreadLocal<Integer>("Current transaction isolation level");
+			new NamedThreadLocal<>("Current transaction isolation level");
 
 	private static final ThreadLocal<Boolean> actualTransactionActive =
-			new NamedThreadLocal<Boolean>("Actual transaction active");
+			new NamedThreadLocal<>("Actual transaction active");
 
 
 	//-------------------------------------------------------------------------
@@ -133,6 +134,7 @@ public abstract class TransactionSynchronizationManager {
 	 * resource object), or {@code null} if none
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
+	@Nullable
 	public static Object getResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
@@ -146,6 +148,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Actually check the value of the resource that is bound for the given key.
 	 */
+	@Nullable
 	private static Object doGetResource(Object actualKey) {
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
@@ -177,7 +180,7 @@ public abstract class TransactionSynchronizationManager {
 		Map<Object, Object> map = resources.get();
 		// set ThreadLocal Map if none found
 		if (map == null) {
-			map = new HashMap<Object, Object>();
+			map = new HashMap<>();
 			resources.set(map);
 		}
 		Object oldValue = map.put(actualKey, value);
@@ -217,6 +220,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value, or {@code null} if none bound
 	 */
+	@Nullable
 	public static Object unbindResourceIfPossible(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		return doUnbindResource(actualKey);
@@ -225,6 +229,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Actually remove the value of the resource that is bound for the given key.
 	 */
+	@Nullable
 	private static Object doUnbindResource(Object actualKey) {
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
@@ -270,7 +275,7 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
 		logger.trace("Initializing transaction synchronization");
-		synchronizations.set(new LinkedHashSet<TransactionSynchronization>());
+		synchronizations.set(new LinkedHashSet<>());
 	}
 
 	/**
@@ -313,7 +318,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		else {
 			// Sort lazily here, not in registerSynchronization.
-			List<TransactionSynchronization> sortedSynchs = new ArrayList<TransactionSynchronization>(synchs);
+			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
 			AnnotationAwareOrderComparator.sort(sortedSynchs);
 			return Collections.unmodifiableList(sortedSynchs);
 		}
@@ -343,7 +348,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @param name the name of the transaction, or {@code null} to reset it
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
-	public static void setCurrentTransactionName(String name) {
+	public static void setCurrentTransactionName(@Nullable String name) {
 		currentTransactionName.set(name);
 	}
 
@@ -353,6 +358,7 @@ public abstract class TransactionSynchronizationManager {
 	 * for example to optimize fetch strategies for specific named transactions.
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
+	@Nullable
 	public static String getCurrentTransactionName() {
 		return currentTransactionName.get();
 	}
@@ -400,7 +406,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
-	public static void setCurrentTransactionIsolationLevel(Integer isolationLevel) {
+	public static void setCurrentTransactionIsolationLevel(@Nullable Integer isolationLevel) {
 		currentTransactionIsolationLevel.set(isolationLevel);
 	}
 
@@ -421,6 +427,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
+	@Nullable
 	public static Integer getCurrentTransactionIsolationLevel() {
 		return currentTransactionIsolationLevel.get();
 	}
@@ -461,11 +468,11 @@ public abstract class TransactionSynchronizationManager {
 	 * @see #setActualTransactionActive
 	 */
 	public static void clear() {
-		clearSynchronization();
-		setCurrentTransactionName(null);
-		setCurrentTransactionReadOnly(false);
-		setCurrentTransactionIsolationLevel(null);
-		setActualTransactionActive(false);
+		synchronizations.remove();
+		currentTransactionName.remove();
+		currentTransactionReadOnly.remove();
+		currentTransactionIsolationLevel.remove();
+		actualTransactionActive.remove();
 	}
 
 }

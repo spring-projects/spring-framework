@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.validation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -66,9 +67,12 @@ public abstract class ValidationUtils {
 	 * {@code null}, or if the supplied {@code Validator} does not {@link Validator#supports(Class) support}
 	 * the validation of the supplied object's type
 	 */
-	public static void invokeValidator(Validator validator, Object obj, Errors errors, Object... validationHints) {
+	public static void invokeValidator(
+			Validator validator, @Nullable Object obj, Errors errors, @Nullable Object... validationHints) {
+
 		Assert.notNull(validator, "Validator must not be null");
 		Assert.notNull(errors, "Errors object must not be null");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking validator [" + validator + "]");
 		}
@@ -76,12 +80,14 @@ public abstract class ValidationUtils {
 			throw new IllegalArgumentException(
 					"Validator [" + validator.getClass() + "] does not support [" + obj.getClass() + "]");
 		}
+
 		if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
 			((SmartValidator) validator).validate(obj, errors, validationHints);
 		}
 		else {
 			validator.validate(obj, errors);
 		}
+
 		if (logger.isDebugEnabled()) {
 			if (errors.hasErrors()) {
 				logger.debug("Validator found " + errors.getErrorCount() + " errors");
@@ -126,7 +132,7 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error codea nd error arguments
+	 * Reject the given field with the given error code and error arguments
 	 * if the value is empty.
 	 * <p>An 'empty' value in this context means either {@code null} or
 	 * the empty string "".
@@ -158,8 +164,8 @@ public abstract class ValidationUtils {
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmpty(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
@@ -218,7 +224,7 @@ public abstract class ValidationUtils {
 	 * (can be {@code null})
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs) {
 
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, errorArgs, null);
 	}
@@ -239,7 +245,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,10 +28,10 @@ import java.util.concurrent.Future;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
-import org.hamcrest.Matchers;
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
@@ -45,7 +44,6 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -62,7 +60,8 @@ public class ScriptTemplateViewTests {
 
 	private StaticWebApplicationContext wac;
 
-	private static final String RESOURCE_LOADER_PATH = "classpath:org/springframework/web/servlet/view/script/";
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 
 	@Before
@@ -71,19 +70,27 @@ public class ScriptTemplateViewTests {
 		this.wac = new StaticWebApplicationContext();
 		this.wac.getBeanFactory().registerSingleton("scriptTemplateConfigurer", this.configurer);
 		this.view = new ScriptTemplateView();
-		this.view.setUrl(RESOURCE_LOADER_PATH + "empty.txt");
+	}
+
+
+	@Test
+	public void missingTemplate() throws Exception {
+		MockServletContext servletContext = new MockServletContext();
+		this.wac.setServletContext(servletContext);
+		this.wac.refresh();
+		this.view.setResourceLoaderPath("classpath:org/springframework/web/servlet/view/script/");
+		this.view.setUrl("missing.txt");
+		this.view.setEngine(mock(InvocableScriptEngine.class));
+		this.configurer.setRenderFunction("render");
+		this.view.setApplicationContext(this.wac);
+		assertFalse(this.view.checkResource(Locale.ENGLISH));
 	}
 
 	@Test
 	public void missingScriptTemplateConfig() throws Exception {
-		try {
-			this.view.setApplicationContext(new StaticApplicationContext());
-		}
-		catch (ApplicationContextException ex) {
-			assertTrue(ex.getMessage().contains("ScriptTemplateConfig"));
-			return;
-		}
-		fail();
+		this.expectedException.expect(ApplicationContextException.class);
+		this.view.setApplicationContext(new StaticApplicationContext());
+		this.expectedException.expectMessage(contains("ScriptTemplateConfig"));
 	}
 
 	@Test
@@ -147,11 +154,11 @@ public class ScriptTemplateViewTests {
 		this.view.setApplicationContext(this.wac);
 		ExecutorService executor = Executors.newFixedThreadPool(4);
 		List<Future<Boolean>> results = new ArrayList<>();
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			results.add(executor.submit(() -> view.getEngine() != null));
 		}
 		assertEquals(iterations, results.size());
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			assertTrue(results.get(i).get());
 		}
 		executor.shutdown();
@@ -159,26 +166,16 @@ public class ScriptTemplateViewTests {
 
 	@Test
 	public void nonInvocableScriptEngine() throws Exception {
-		try {
-			this.view.setEngine(mock(ScriptEngine.class));
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("instance"));
-			return;
-		}
+		this.view.setEngine(mock(ScriptEngine.class));
+		this.view.setApplicationContext(this.wac);
 	}
 
 	@Test
-	public void noRenderFunctionDefined() {
-		this.view.setEngine(mock(InvocableScriptEngine.class));
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("renderFunction"));
-		}
+	public void nonInvocableScriptEngineWithRenderFunction() throws Exception {
+		this.view.setEngine(mock(ScriptEngine.class));
+		this.view.setRenderFunction("render");
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
 	}
 
 	@Test
@@ -186,13 +183,9 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setEngineName("test");
 		this.view.setRenderFunction("render");
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("'engine' or 'engineName'"));
-		}
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
+		this.expectedException.expectMessage(contains("'engine' or 'engineName'"));
 	}
 
 	@Test
@@ -200,37 +193,40 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");
 		this.view.setSharedEngine(false);
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("sharedEngine"));
-			return;
-		}
-		fail();
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
+		this.expectedException.expectMessage(contains("sharedEngine"));
 	}
 
-	@Test
-	@SuppressWarnings("resource")
-	public void parentLoader() {
-		this.view.setEngine(mock(InvocableScriptEngine.class));
+	@Test // SPR-14210
+	public void resourceLoaderPath() throws Exception {
+		MockServletContext servletContext = new MockServletContext();
+		this.wac.setServletContext(servletContext);
+		this.wac.refresh();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		Map<String, Object> model = new HashMap<>();
+		InvocableScriptEngine engine = mock(InvocableScriptEngine.class);
+		when(engine.invokeFunction(any(), any(), any(), any())).thenReturn("foo");
+		this.view.setEngine(engine);
 		this.view.setRenderFunction("render");
-		this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH);
 		this.view.setApplicationContext(this.wac);
-		ClassLoader classLoader = this.view.createClassLoader();
-		assertNotNull(classLoader);
-		URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(1));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/script/"));
-		this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH + ",classpath:org/springframework/web/servlet/view/");
-		classLoader = this.view.createClassLoader();
-		assertNotNull(classLoader);
-		urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(2));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(), Matchers.endsWith("org/springframework/web/servlet/view/script/"));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(1).toString(), Matchers.endsWith("org/springframework/web/servlet/view/"));
+		this.view.setUrl("org/springframework/web/servlet/view/script/empty.txt");
+		this.view.render(model, request, response);
+		assertEquals("foo", response.getContentAsString());
+
+		response = new MockHttpServletResponse();
+		this.view.setResourceLoaderPath("classpath:org/springframework/web/servlet/view/script/");
+		this.view.setUrl("empty.txt");
+		this.view.render(model, request, response);
+		assertEquals("foo", response.getContentAsString());
+
+		response = new MockHttpServletResponse();
+		this.view.setResourceLoaderPath("classpath:org/springframework/web/servlet/view/script");
+		this.view.setUrl("empty.txt");
+		this.view.render(model, request, response);
+		assertEquals("foo", response.getContentAsString());
 	}
 
 	@Test // SPR-13379
@@ -241,10 +237,11 @@ public class ScriptTemplateViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");
-		this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH);
+		this.view.setResourceLoaderPath("classpath:org/springframework/web/servlet/view/script/");
+		this.view.setUrl("empty.txt");
 		this.view.setApplicationContext(this.wac);
 
 		this.view.render(model, request, response);

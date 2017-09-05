@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,34 +52,34 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	static class Config {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "enigma";
 		}
 	}
 
 
-	protected ServletContext servletContext;
+	ServletContext servletContext;
 
 	@Autowired
-	protected WebApplicationContext wac;
+	WebApplicationContext wac;
 
 	@Autowired
-	protected MockServletContext mockServletContext;
+	MockServletContext mockServletContext;
 
 	@Autowired
-	protected MockHttpServletRequest request;
+	MockHttpServletRequest request;
 
 	@Autowired
-	protected MockHttpServletResponse response;
+	MockHttpServletResponse response;
 
 	@Autowired
-	protected MockHttpSession session;
+	MockHttpSession session;
 
 	@Autowired
-	protected ServletWebRequest webRequest;
+	ServletWebRequest webRequest;
 
 	@Autowired
-	protected String foo;
+	String foo;
 
 
 	@Override
@@ -88,7 +88,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void basicWacFeatures() throws Exception {
+	void basicWacFeatures() throws Exception {
 		assertNotNull("ServletContext should be set in the WAC.", wac.getServletContext());
 
 		assertNotNull("ServletContext should have been set via ServletContextAware.", servletContext);
@@ -112,7 +112,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void fooEnigmaAutowired() {
+	void fooEnigmaAutowired() {
 		assertEquals("enigma", foo);
 	}
 

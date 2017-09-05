@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A simple transaction-backed {@link Scope} implementation, delegating to
@@ -46,7 +48,7 @@ public class SimpleTransactionScope implements Scope {
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects == null) {
 			scopedObjects = new ScopedObjectsHolder();
-			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization());
+			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
 		Object scopedObject = scopedObjects.scopedInstances.get(name);
@@ -58,6 +60,7 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object remove(String name) {
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects != null) {
@@ -78,11 +81,13 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public String getConversationId() {
 		return TransactionSynchronizationManager.getCurrentTransactionName();
 	}
@@ -90,21 +95,38 @@ public class SimpleTransactionScope implements Scope {
 
 	static class ScopedObjectsHolder {
 
-		final Map<String, Object> scopedInstances = new HashMap<String, Object>();
+		final Map<String, Object> scopedInstances = new HashMap<>();
 
-		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<String, Runnable>();
+		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 	}
 
 
 	private class CleanupSynchronization extends TransactionSynchronizationAdapter {
 
+		private final ScopedObjectsHolder scopedObjects;
+
+		public CleanupSynchronization(ScopedObjectsHolder scopedObjects) {
+			this.scopedObjects = scopedObjects;
+		}
+
+		@Override
+		public void suspend() {
+			TransactionSynchronizationManager.unbindResource(SimpleTransactionScope.this);
+		}
+
+		@Override
+		public void resume() {
+			TransactionSynchronizationManager.bindResource(SimpleTransactionScope.this, this.scopedObjects);
+		}
+
 		@Override
 		public void afterCompletion(int status) {
-			ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder)
-					TransactionSynchronizationManager.unbindResourceIfPossible(SimpleTransactionScope.this);
-			for (Runnable callback : scopedObjects.destructionCallbacks.values()) {
+			TransactionSynchronizationManager.unbindResourceIfPossible(SimpleTransactionScope.this);
+			for (Runnable callback : this.scopedObjects.destructionCallbacks.values()) {
 				callback.run();
 			}
+			this.scopedObjects.destructionCallbacks.clear();
+			this.scopedObjects.scopedInstances.clear();
 		}
 	}
 

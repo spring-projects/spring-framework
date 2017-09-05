@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,27 +26,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Abstract implementation of {@link CacheOperation} that caches
- * attributes for methods and implements a fallback policy: 1. specific
- * target method; 2. target class; 3. declaring method; 4. declaring
- * class/interface.
+ * Abstract implementation of {@link CacheOperation} that caches attributes
+ * for methods and implements a fallback policy: 1. specific target method;
+ * 2. target class; 3. declaring method; 4. declaring class/interface.
  *
  * <p>Defaults to using the target class's caching attribute if none is
- * associated with the target method. Any caching attribute associated
- * with the target method completely overrides a class caching attribute.
- * If none found on the target class, the interface that the invoked
- * method has been called through (in case of a JDK proxy) will be
- * checked.
+ * associated with the target method. Any caching attribute associated with
+ * the target method completely overrides a class caching attribute.
+ * If none found on the target class, the interface that the invoked method
+ * has been called through (in case of a JDK proxy) will be checked.
  *
- * <p>This implementation caches attributes by method after they are
- * first used. If it is ever desirable to allow dynamic changing of
- * cacheable attributes (which is very unlikely), caching could be made
- * configurable.
+ * <p>This implementation caches attributes by method after they are first
+ * used. If it is ever desirable to allow dynamic changing of cacheable
+ * attributes (which is very unlikely), caching could be made configurable.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -69,12 +67,11 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of CacheOperations, keyed by {@link AnnotatedElementKey}.
+	 * Cache of CacheOperations, keyed by method on a specific target class.
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	private final Map<Object, Collection<CacheOperation>> attributeCache =
-			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
+	private final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<>(1024);
 
 
 	/**
@@ -86,7 +83,12 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * is not cacheable
 	 */
 	@Override
-	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
+	@Nullable
+	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		Object cacheKey = getCacheKey(method, targetClass);
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
 
@@ -116,11 +118,12 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @param targetClass the target class (may be {@code null})
 	 * @return the cache key (never {@code null})
 	 */
-	protected Object getCacheKey(Method method, Class<?> targetClass) {
-		return new AnnotatedElementKey(method, targetClass);
+	protected Object getCacheKey(Method method, @Nullable Class<?> targetClass) {
+		return new MethodClassKey(method, targetClass);
 	}
 
-	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
+	@Nullable
+	private Collection<CacheOperation> computeCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -140,19 +143,23 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 		// Second try is the caching operation on the target class.
 		opDef = findCacheOperations(specificMethod.getDeclaringClass());
-		if (opDef != null) {
+		if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
 			return opDef;
 		}
 
 		if (specificMethod != method) {
-			// Fall back is to look at the original method.
+			// Fallback is to look at the original method.
 			opDef = findCacheOperations(method);
 			if (opDef != null) {
 				return opDef;
 			}
-			// Last fall back is the class of the original method.
-			return findCacheOperations(method.getDeclaringClass());
+			// Last fallback is the class of the original method.
+			opDef = findCacheOperations(method.getDeclaringClass());
+			if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
+				return opDef;
+			}
 		}
+
 		return null;
 	}
 
@@ -164,6 +171,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this method
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
@@ -173,6 +181,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this class
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
 
 	/**

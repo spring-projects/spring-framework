@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -91,7 +92,7 @@ public class RestTemplateXhrTransportTests {
 	@Test
 	public void connectReceiveAndCloseWithPrelude() throws Exception {
 		StringBuilder sb = new StringBuilder(2048);
-		for (int i=0; i < 2048; i++) {
+		for (int i = 0; i < 2048; i++) {
 			sb.append('h');
 		}
 		String body = sb.toString() + "\n" + "o\n" + "a[\"foo\"]\n" + "c[3000,\"Go away!\"]";
@@ -109,7 +110,7 @@ public class RestTemplateXhrTransportTests {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/destination");
 		MessageHeaders headers = accessor.getMessageHeaders();
-		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(Charset.forName("UTF-8")), headers);
+		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(StandardCharsets.UTF_8), headers);
 		byte[] bytes = new StompEncoder().encode(message);
 		TextMessage textMessage = new TextMessage(bytes);
 		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), textMessage.getPayload());
@@ -197,7 +198,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	private InputStream getInputStream(String content) {
-		byte[] bytes = content.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 		return new ByteArrayInputStream(bytes);
 	}
 
@@ -213,7 +214,7 @@ public class RestTemplateXhrTransportTests {
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, RequestCallback callback, ResponseExtractor<T> extractor) throws RestClientException {
+		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback, @Nullable ResponseExtractor<T> extractor) throws RestClientException {
 			try {
 				extractor.extractData(this.responses.remove());
 			}

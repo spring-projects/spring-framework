@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * Common interface for classes that can access named properties
@@ -81,11 +82,10 @@ public interface PropertyAccessor {
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or {@code null} if not determinable
-	 * @throws InvalidPropertyException if there is no such property or
-	 * if the property isn't readable
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
+	@Nullable
 	Class<?> getPropertyType(String propertyName) throws BeansException;
 
 	/**
@@ -95,9 +95,10 @@ public interface PropertyAccessor {
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or {@code null} if not determinable
-	 * @throws InvalidPropertyException if there is no such property or
-	 * if the property isn't readable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed
 	 */
+	@Nullable
 	TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException;
 
 	/**
@@ -110,6 +111,7 @@ public interface PropertyAccessor {
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
+	@Nullable
 	Object getPropertyValue(String propertyName) throws BeansException;
 
 	/**
@@ -120,9 +122,9 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
-	void setPropertyValue(String propertyName, Object value) throws BeansException;
+	void setPropertyValue(String propertyName, @Nullable Object value) throws BeansException;
 
 	/**
 	 * Set the specified value as current property value.
@@ -130,7 +132,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
 	void setPropertyValue(PropertyValue pv) throws BeansException;
 
@@ -144,7 +146,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */
@@ -164,7 +166,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
@@ -185,7 +187,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
@@ -208,7 +210,7 @@ public interface PropertyAccessor {
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyBatchUpdateException if one or more PropertyAccessExceptions
-	 * occured for specific properties during the batch update. This exception bundles
+	 * occurred for specific properties during the batch update. This exception bundles
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */

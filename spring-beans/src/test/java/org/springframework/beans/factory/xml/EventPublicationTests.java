@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -31,8 +32,6 @@ import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
-
-import org.w3c.dom.Element;
 
 import static org.junit.Assert.*;
 
@@ -65,7 +64,6 @@ public class EventPublicationTests {
 		DocumentDefaultsDefinition defaults = (DocumentDefaultsDefinition) defaultsList.get(0);
 		assertEquals("true", defaults.getLazyInit());
 		assertEquals("constructor", defaults.getAutowire());
-		assertEquals("objects", defaults.getDependencyCheck());
 		assertEquals("myInit", defaults.getInitMethod());
 		assertEquals("myDestroy", defaults.getDestroyMethod());
 		assertEquals("true", defaults.getMerge());

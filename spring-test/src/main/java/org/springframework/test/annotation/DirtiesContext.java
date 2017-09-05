@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,19 +76,48 @@ import java.lang.annotation.Target;
  * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
  * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface DirtiesContext {
+
+	/**
+	 * The <i>mode</i> to use when a test method is annotated with
+	 * {@code @DirtiesContext}.
+	 * <p>Defaults to {@link MethodMode#AFTER_METHOD AFTER_METHOD}.
+	 * <p>Setting the method mode on an annotated test class has no meaning.
+	 * For class-level control, use {@link #classMode} instead.
+	 * @since 4.2
+	 */
+	MethodMode methodMode() default MethodMode.AFTER_METHOD;
+
+	/**
+	 * The <i>mode</i> to use when a test class is annotated with
+	 * {@code @DirtiesContext}.
+	 * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
+	 * <p>Setting the class mode on an annotated test method has no meaning.
+	 * For method-level control, use {@link #methodMode} instead.
+	 * @since 3.0
+	 */
+	ClassMode classMode() default ClassMode.AFTER_CLASS;
+
+	/**
+	 * The context cache clearing <em>mode</em> to use when a context is
+	 * configured as part of a hierarchy via
+	 * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
+	 * <p>Defaults to {@link HierarchyMode#EXHAUSTIVE EXHAUSTIVE}.
+	 * @since 3.2.2
+	 */
+	HierarchyMode hierarchyMode() default HierarchyMode.EXHAUSTIVE;
+
 
 	/**
 	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
 	 * interpreted when used to annotate a test method.
-	 *
 	 * @since 4.2
 	 */
-	static enum MethodMode {
+	enum MethodMode {
 
 		/**
 		 * The associated {@code ApplicationContext} will be marked as
@@ -103,13 +132,13 @@ public @interface DirtiesContext {
 		AFTER_METHOD;
 	}
 
+
 	/**
 	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
 	 * interpreted when used to annotate a test class.
-	 *
 	 * @since 3.0
 	 */
-	static enum ClassMode {
+	enum ClassMode {
 
 		/**
 		 * The associated {@code ApplicationContext} will be marked as
@@ -140,15 +169,15 @@ public @interface DirtiesContext {
 		AFTER_CLASS;
 	}
 
+
 	/**
 	 * Defines <i>modes</i> which determine how the context cache is cleared
 	 * when {@code @DirtiesContext} is used in a test whose context is
 	 * configured as part of a hierarchy via
 	 * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
-	 *
 	 * @since 3.2.2
 	 */
-	static enum HierarchyMode {
+	enum HierarchyMode {
 
 		/**
 		 * The context cache will be cleared using an <em>exhaustive</em> algorithm
@@ -173,38 +202,5 @@ public @interface DirtiesContext {
 		 */
 		CURRENT_LEVEL;
 	}
-
-
-	/**
-	 * The <i>mode</i> to use when a test method is annotated with
-	 * {@code @DirtiesContext}.
-	 * <p>Defaults to {@link MethodMode#AFTER_METHOD AFTER_METHOD}.
-	 * <p>Setting the method mode on an annotated test class has no meaning.
-	 * For class-level control, use {@link #classMode} instead.
-	 *
-	 * @since 4.2
-	 */
-	MethodMode methodMode() default MethodMode.AFTER_METHOD;
-
-	/**
-	 * The <i>mode</i> to use when a test class is annotated with
-	 * {@code @DirtiesContext}.
-	 * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
-	 * <p>Setting the class mode on an annotated test method has no meaning.
-	 * For method-level control, use {@link #methodMode} instead.
-	 *
-	 * @since 3.0
-	 */
-	ClassMode classMode() default ClassMode.AFTER_CLASS;
-
-	/**
-	 * The context cache clearing <em>mode</em> to use when a context is
-	 * configured as part of a hierarchy via
-	 * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
-	 * <p>Defaults to {@link HierarchyMode#EXHAUSTIVE EXHAUSTIVE}.
-	 *
-	 * @since 3.2.2
-	 */
-	HierarchyMode hierarchyMode() default HierarchyMode.EXHAUSTIVE;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -92,7 +93,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("No suitable resolver for argument [0] [type=java.lang.Integer]"));
+			assertTrue(ex.getMessage().contains("No suitable resolver for argument 0 of type 'java.lang.Integer'"));
 		}
 	}
 
@@ -191,9 +192,29 @@ public class InvocableHandlerMethodTests {
 		catch (IllegalStateException actual) {
 			assertNotNull(actual.getCause());
 			assertSame(expected, actual.getCause());
-			assertTrue(actual.getMessage().contains("Failed to invoke controller method"));
+			assertTrue(actual.getMessage().contains("Failed to invoke handler method"));
 		}
 	}
+
+	@Test  // SPR-13917
+	public void invocationErrorMessage() throws Exception {
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(new StubArgumentResolver(double.class, null));
+
+		Method method = Handler.class.getDeclaredMethod("handle", double.class);
+		Object handler = new Handler();
+		InvocableHandlerMethod hm = new InvocableHandlerMethod(handler, method);
+		hm.setHandlerMethodArgumentResolvers(composite);
+
+		try {
+			hm.invokeForRequest(this.webRequest, new ModelAndViewContainer());
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage(), containsString("Illegal argument"));
+		}
+	}
+
 
 	private void invokeExceptionRaisingHandler(Throwable expected) throws Exception {
 		Method method = ExceptionRaisingHandler.class.getDeclaredMethod("raiseException");
@@ -208,6 +229,9 @@ public class InvocableHandlerMethodTests {
 
 		public String handle(Integer intArg, String stringArg) {
 			return intArg + "-" + stringArg;
+		}
+
+		public void handle(double amount) {
 		}
 	}
 

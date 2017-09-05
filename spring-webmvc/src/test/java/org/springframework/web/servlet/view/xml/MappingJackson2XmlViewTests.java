@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class MappingJackson2XmlViewTests {
 
 	@Test
 	public void renderSimpleMap() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
 
@@ -103,7 +103,7 @@ public class MappingJackson2XmlViewTests {
 
 	@Test
 	public void renderWithSelectedContentType() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "bar");
 
 		view.render(model, request, response);
@@ -119,7 +119,7 @@ public class MappingJackson2XmlViewTests {
 	public void renderCaching() throws Exception {
 		view.setDisableCaching(false);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
 
@@ -131,7 +131,7 @@ public class MappingJackson2XmlViewTests {
 	@Test
 	public void renderSimpleBean() throws Exception {
 		Object bean = new TestBeanSimple();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", bean);
 
@@ -147,7 +147,7 @@ public class MappingJackson2XmlViewTests {
 	@Test
 	public void renderWithCustomSerializerLocatedByAnnotation() throws Exception {
 		Object bean = new TestBeanSimpleAnnotated();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("foo", bean);
 
 		view.render(model, request, response);
@@ -166,7 +166,7 @@ public class MappingJackson2XmlViewTests {
 		view.setObjectMapper(mapper);
 
 		Object bean = new TestBeanSimple();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("foo", bean);
 
 		view.render(model, request, response);
@@ -182,7 +182,7 @@ public class MappingJackson2XmlViewTests {
 	public void renderOnlySpecifiedModelKey() throws Exception {
 
 		view.setModelKey("bar");
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "foo");
 		model.put("bar", "bar");
 		model.put("baz", "baz");
@@ -201,7 +201,7 @@ public class MappingJackson2XmlViewTests {
 	@Test(expected = IllegalStateException.class)
 	public void renderModelWithMultipleKeys() throws Exception {
 
-		Map<String, Object> model = new TreeMap<String, Object>();
+		Map<String, Object> model = new TreeMap<>();
 		model.put("foo", "foo");
 		model.put("bar", "bar");
 
@@ -213,7 +213,7 @@ public class MappingJackson2XmlViewTests {
 	@Test
 	public void renderSimpleBeanWithJsonView() throws Exception {
 		Object bean = new TestBeanSimple();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", bean);
 		model.put(JsonView.class.getName(), MyJacksonView1.class);

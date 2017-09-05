@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
@@ -45,6 +47,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 
 	private boolean javaScriptEscape = false;
 
+	@Nullable
 	private BodyContent bodyContent;
 
 
@@ -79,7 +82,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 			String content = readBodyContent();
 			// HTML and/or JavaScript escape, if demanded
 			content = htmlEscape(content);
-			content = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content;
+			content = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(content) : content);
 			writeBodyContent(content);
 		}
 		catch (IOException ex) {
@@ -94,6 +97,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 	 * @throws IOException if reading failed
 	 */
 	protected String readBodyContent() throws IOException {
+		Assert.state(this.bodyContent != null, "No BodyContent set");
 		return this.bodyContent.getString();
 	}
 
@@ -104,6 +108,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeBodyContent(String content) throws IOException {
+		Assert.state(this.bodyContent != null, "No BodyContent set");
 		this.bodyContent.getEnclosingWriter().print(content);
 	}
 

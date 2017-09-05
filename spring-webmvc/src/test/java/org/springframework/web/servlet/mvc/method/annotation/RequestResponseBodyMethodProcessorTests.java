@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -69,17 +70,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
- * actual delegation to {@link HttpMessageConverter} instances.
- *
- * <p>Also see {@link RequestResponseBodyMethodProcessorMockTests}.
+ * actual delegation to {@link HttpMessageConverter} instances. Also see
+ * {@link RequestResponseBodyMethodProcessorMockTests}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -87,44 +83,41 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unused")
 public class RequestResponseBodyMethodProcessorTests {
 
+	private ModelAndViewContainer container;
+
+	private MockHttpServletRequest servletRequest;
+
+	private MockHttpServletResponse servletResponse;
+
+	private NativeWebRequest request;
+
+	private ValidatingBinderFactory factory;
+
 	private MethodParameter paramGenericList;
 	private MethodParameter paramSimpleBean;
 	private MethodParameter paramMultiValueMap;
 	private MethodParameter paramString;
 	private MethodParameter returnTypeString;
 
-	private ModelAndViewContainer mavContainer;
-
-	private NativeWebRequest webRequest;
-
-	private MockHttpServletRequest servletRequest;
-
-	private MockHttpServletResponse servletResponse;
-
-	private ValidatingBinderFactory binderFactory;
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
+		container = new ModelAndViewContainer();
+		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
+		servletResponse = new MockHttpServletResponse();
+		request = new ServletWebRequest(servletRequest, servletResponse);
+		this.factory = new ValidatingBinderFactory();
 
-		Method method = getClass().getDeclaredMethod("handle", List.class,
-				SimpleBean.class, MultiValueMap.class, String.class);
-
+		Method method = getClass().getDeclaredMethod("handle",
+				List.class, SimpleBean.class, MultiValueMap.class, String.class);
 		paramGenericList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 		paramMultiValueMap = new MethodParameter(method, 2);
 		paramString = new MethodParameter(method, 3);
 		returnTypeString = new MethodParameter(method, -1);
-
-		mavContainer = new ModelAndViewContainer();
-
-		servletRequest = new MockHttpServletRequest();
-		servletRequest.setMethod("POST");
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
-		this.binderFactory = new ValidatingBinderFactory();
 	}
+
 
 	@Test
 	public void resolveArgumentParameterizedType() throws Exception {
@@ -132,13 +125,13 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
 		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
-				paramGenericList, mavContainer, webRequest, binderFactory);
+				paramGenericList, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.get(0).getName());
@@ -152,13 +145,13 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new AllEncompassingFormHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, String> result = (MultiValueMap<String, String>) processor.resolveArgument(
-				paramMultiValueMap, mavContainer, webRequest, binderFactory);
+				paramMultiValueMap, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("apple", result.getFirst("fruit"));
@@ -171,12 +164,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		SimpleBean result = (SimpleBean) processor.resolveArgument(
-				paramSimpleBean, mavContainer, webRequest, binderFactory);
+				paramSimpleBean, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getName());
@@ -188,12 +181,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		String result = (String) processor.resolveArgument(
-				paramString, mavContainer, webRequest, binderFactory);
+				paramString, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("foobarbaz", result);
@@ -203,10 +196,10 @@ public class RequestResponseBodyMethodProcessorTests {
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
-		processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
+		processor.resolveArgument(paramString, container, request, factory);
 	}
 
 	@Test  // SPR-12778
@@ -216,7 +209,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		List<HttpMessageConverter<?>> converters = Collections.singletonList(new StringHttpMessageConverter());
 		List<Object> advice = Collections.singletonList(new EmptyRequestBodyAdvice());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters, advice);
-		String arg = (String) processor.resolveArgument(paramString, mavContainer, webRequest, binderFactory);
+		String arg = (String) processor.resolveArgument(paramString, container, request, factory);
 		assertNotNull(arg);
 		assertEquals("default value for empty body", arg);
 	}
@@ -231,14 +224,37 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getName());
+	}
+
+	@Test  // SPR-14470
+	public void resolveParameterizedWithTypeVariableArgument() throws Exception {
+		Method method = MyParameterizedControllerWithList.class.getMethod("handleDto", List.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedControllerWithList(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+
+		String content = "[{\"name\" : \"Jad\"}, {\"name\" : \"Robert\"}]";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		@SuppressWarnings("unchecked")
+		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
+				methodParam, container, request, factory);
+
+		assertNotNull(result);
+		assertEquals("Jad", result.get(0).getName());
+		assertEquals("Robert", result.get(1).getName());
 	}
 
 	@Test  // SPR-11225
@@ -251,13 +267,13 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		HttpMessageConverter target = new MappingJackson2HttpMessageConverter();
 		HttpMessageConverter proxy = ProxyFactory.getProxy(HttpMessageConverter.class, new SingletonTargetSource(target));
 		converters.add(proxy);
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, container, request, factory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getName());
@@ -267,24 +283,40 @@ public class RequestResponseBodyMethodProcessorTests {
 	public void handleReturnValueSortByQuality() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		processor.writeWithMessageConverters("Foo", returnTypeString, webRequest);
+		processor.writeWithMessageConverters("Foo", returnTypeString, request);
 
 		assertEquals("application/json;charset=UTF-8", servletResponse.getHeader("Content-Type"));
 	}
 
 	@Test
 	public void handleReturnValueString() throws Exception {
-		List<HttpMessageConverter<?>>converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
 		converters.add(new ByteArrayHttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
-		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
+		processor.handleReturnValue("Foo", returnTypeString, container, request);
+
+		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
+		assertEquals("Foo", servletResponse.getContentAsString());
+	}
+
+	@Test  // SPR-13423
+	public void handleReturnValueCharSequence() throws Exception {
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+
+		Method method = ResponseBodyController.class.getMethod("handleWithCharSequence");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+		processor.handleReturnValue(new StringBuilder("Foo"), returnType, container, request);
 
 		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
 		assertEquals("Foo", servletResponse.getContentAsString());
@@ -294,12 +326,12 @@ public class RequestResponseBodyMethodProcessorTests {
 	public void handleReturnValueStringAcceptCharset() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain;charset=UTF-8");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new ByteArrayHttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		processor.writeWithMessageConverters("Foo", returnTypeString, webRequest);
+		processor.writeWithMessageConverters("Foo", returnTypeString, request);
 
 		assertEquals("text/plain;charset=UTF-8", servletResponse.getHeader("Content-Type"));
 	}
@@ -313,11 +345,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		Method method = getClass().getDeclaredMethod("getImage");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
-		List<HttpMessageConverter<?>> converters = Collections.singletonList(new ResourceHttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new ResourceHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		ClassPathResource resource = new ClassPathResource("logo.jpg", getClass());
-		processor.writeWithMessageConverters(resource, returnType, this.webRequest);
+		processor.writeWithMessageConverters(resource, returnType, this.request);
 
 		assertEquals("image/jpeg", this.servletResponse.getHeader("Content-Type"));
 	}
@@ -329,12 +362,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		Method method = getClass().getDeclaredMethod("handleAndReturnOutputStream");
 		MethodParameter returnType = new MethodParameter(method, -1);
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(new ArrayList<>());
-		processor.writeWithMessageConverters(new ByteArrayOutputStream(), returnType, this.webRequest);
+		processor.writeWithMessageConverters(new ByteArrayOutputStream(), returnType, this.request);
 	}
 
 	@Test
 	public void addContentDispositionHeader() throws Exception {
-
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("pdf", new MediaType("application", "pdf"));
 		factory.afterPropertiesSet();
@@ -368,7 +400,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		Method method = ResponseBodyController.class.getMethod("handle");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
@@ -381,7 +413,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		Method method = TestRestController.class.getMethod("handle");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
@@ -395,14 +427,14 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonController().handleResponseBody();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
@@ -416,14 +448,14 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonController().handleResponseEntity();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("\"withView1\":\"with\""));
@@ -437,14 +469,14 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2XmlHttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonController().handleResponseBody();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("<withView1>with</withView1>"));
@@ -458,14 +490,14 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2XmlHttpMessageConverter());
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
 		Object returnValue = new JacksonController().handleResponseEntity();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertFalse(content.contains("<withView1>with</withView1>"));
@@ -483,15 +515,15 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.mavContainer, this.webRequest, this.binderFactory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -509,15 +541,15 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
-				this.mavContainer, this.webRequest, this.binderFactory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument( methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -536,15 +568,15 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2XmlHttpMessageConverter());
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		JacksonViewBean result = (JacksonViewBean)processor.resolveArgument(methodParameter,
-				this.mavContainer, this.webRequest, this.binderFactory);
+		JacksonViewBean result = (JacksonViewBean)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertEquals("with", result.getWithView1());
@@ -562,15 +594,15 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2XmlHttpMessageConverter());
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
 		@SuppressWarnings("unchecked")
-		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)processor.resolveArgument(methodParameter,
-				this.mavContainer, this.webRequest, this.binderFactory);
+		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
+				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
 		assertNotNull(result);
 		assertNotNull(result.getBody());
@@ -585,12 +617,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		Object returnValue = new JacksonController().handleTypeInfoList();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertTrue(content.contains("\"type\":\"foo\""));
@@ -603,12 +635,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		Object returnValue = new JacksonController().handleSubType();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertTrue(content.contains("\"id\":123"));
@@ -621,12 +653,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		Object returnValue = new JacksonController().handleSubTypeList();
-		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
 		assertTrue(content.contains("\"id\":123"));
@@ -635,11 +667,46 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertTrue(content.contains("\"name\":\"bar\""));
 	}
 
+	@Test  // SPR-13631
+	public void defaultCharset() throws Exception {
+		Method method = JacksonController.class.getMethod("defaultCharset");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().defaultCharset();
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
+
+		assertEquals("UTF-8", this.servletResponse.getCharacterEncoding());
+	}
+
+	@Test  // SPR-14520
+	public void resolveArgumentTypeVariableWithGenericInterface() throws Exception {
+		this.servletRequest.setContent("\"foo\"".getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+
+		Method method = MyControllerImplementingInterface.class.getMethod("handle", Object.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new MyControllerImplementingInterface(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		String value = (String) processor.readWithMessageConverters(
+				this.request, methodParameter, methodParameter.getGenericParameterType());
+		assertEquals("foo", value);
+	}
+
 	private void assertContentDisposition(RequestResponseBodyMethodProcessor processor,
 			boolean expectContentDisposition, String requestURI, String comment) throws Exception {
 
 		this.servletRequest.setRequestURI(requestURI);
-		processor.handleReturnValue("body", this.returnTypeString, this.mavContainer, this.webRequest);
+		processor.handleReturnValue("body", this.returnTypeString, this.container, this.request);
 
 		String header = servletResponse.getHeader("Content-Disposition");
 		if (expectContentDisposition) {
@@ -652,9 +719,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		this.servletRequest = new MockHttpServletRequest();
 		this.servletResponse = new MockHttpServletResponse();
-		this.webRequest = new ServletWebRequest(servletRequest, servletResponse);
+		this.request = new ServletWebRequest(servletRequest, servletResponse);
 	}
-
 
 
 	String handle(
@@ -675,20 +741,36 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+
 	private static abstract class MyParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(@RequestBody DTO dto) {}
 	}
 
+
 	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
 	}
+
 
 	private interface Identifiable extends Serializable {
 
 		Long getId();
 
 		void setId(Long id);
+	}
+
+
+	@SuppressWarnings("unused")
+	private static abstract class MyParameterizedControllerWithList<DTO extends Identifiable> {
+
+		public void handleDto(@RequestBody List<DTO> dto) {
+		}
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class MySimpleParameterizedControllerWithList extends MyParameterizedControllerWithList<SimpleBean> {
 	}
 
 
@@ -722,7 +804,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
-		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		public WebDataBinder createBinder(NativeWebRequest request, @Nullable Object target, String objectName) {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
@@ -739,6 +821,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		public String handle() {
 			return "hello";
 		}
+
+		@RequestMapping
+		public CharSequence handleWithCharSequence() {
+			return null;
+		}
 	}
 
 
@@ -751,8 +838,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	private interface MyJacksonView1 {}
+
 	private interface MyJacksonView2 {}
+
 
 	private static class JacksonViewBean {
 
@@ -789,6 +879,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	public static class ParentClass {
 
@@ -810,6 +901,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeName("foo")
 	public static class Foo extends ParentClass {
 
@@ -821,6 +913,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
+
 	@JsonTypeName("bar")
 	public static class Bar extends ParentClass {
 
@@ -831,6 +924,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			super(parentProperty);
 		}
 	}
+
 
 	private static class JacksonController {
 
@@ -854,7 +948,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			bean.setWithoutView("without");
 			ModelAndView mav = new ModelAndView(new MappingJackson2JsonView());
 			mav.addObject("bean", bean);
-			return new ResponseEntity<JacksonViewBean>(bean, HttpStatus.OK);
+			return new ResponseEntity<>(bean, HttpStatus.OK);
 		}
 
 		@RequestMapping
@@ -898,7 +992,14 @@ public class RequestResponseBodyMethodProcessorTests {
 			bar.setName("bar");
 			return Arrays.asList(foo, bar);
 		}
+
+		@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public String defaultCharset() {
+			return "foo";
+		}
 	}
+
 
 	private static class EmptyRequestBodyAdvice implements RequestBodyAdvice {
 
@@ -907,13 +1008,6 @@ public class RequestResponseBodyMethodProcessorTests {
 				Class<? extends HttpMessageConverter<?>> converterType) {
 
 			return StringHttpMessageConverter.class.equals(converterType);
-		}
-
-		@Override
-		public Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-
-			return "default value for empty body";
 		}
 
 		@Override
@@ -929,6 +1023,25 @@ public class RequestResponseBodyMethodProcessorTests {
 
 			return body;
 		}
+
+		@Override
+		public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+				Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+
+			return "default value for empty body";
+		}
+	}
+
+
+	interface MappingInterface<A> {
+
+		default A handle(@RequestBody A arg) {
+			return arg;
+		}
+	}
+
+
+	static class MyControllerImplementingInterface implements MappingInterface<String> {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,26 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -48,20 +52,28 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 public class ServletInvocableHandlerMethodTests {
 
-	private final HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private final List<HttpMessageConverter<?>> converters =
+			Collections.singletonList(new StringHttpMessageConverter());
 
-	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+	private final HandlerMethodArgumentResolverComposite argumentResolvers =
+			new HandlerMethodArgumentResolverComposite();
+
+	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
+			new HandlerMethodReturnValueHandlerComposite();
 
 	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
@@ -93,6 +105,15 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
+	public void invokeAndHandle_VoidWithTypeLevelResponseStatus() throws Exception {
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseStatusHandler(), "handle");
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertTrue(this.mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
+	}
+
+	@Test
 	public void invokeAndHandle_VoidWithHttpServletResponseArgument() throws Exception {
 		this.argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 
@@ -117,19 +138,17 @@ public class ServletInvocableHandlerMethodTests {
 				this.mavContainer.isRequestHandled());
 	}
 
-	// SPR-9159
-
-	@Test
+	@Test  // SPR-9159
 	public void invokeAndHandle_NotVoidWithResponseStatusAndReason() throws Exception {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatusWithReason");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("When a status reason w/ used, the the request is handled", this.mavContainer.isRequestHandled());
+		assertTrue("When a status reason w/ used, the request is handled", this.mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
 		assertEquals("400 Bad Request", this.response.getErrorMessage());
 	}
 
-	@Test(expected=HttpMessageNotWritableException.class)
+	@Test(expected = HttpMessageNotWritableException.class)
 	public void invokeAndHandle_Exception() throws Exception {
 		this.returnValueHandlers.addHandler(new ExceptionRaisingReturnValueHandler());
 
@@ -160,30 +179,50 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_MethodLevelResponseBody() throws Exception {
-		wrapConcurrentResult_ResponseBody(new MethodLevelResponseBodyHandler());
+		wrapConcurrentResult_ResponseBody(new MethodLevelResponseBodyHandler(), "bar", String.class);
+	}
+
+	@Test
+	public void wrapConcurrentResult_MethodLevelResponseBodyEmpty() throws Exception {
+		wrapConcurrentResult_ResponseBody(new MethodLevelResponseBodyHandler(), null, String.class);
 	}
 
 	@Test
 	public void wrapConcurrentResult_TypeLevelResponseBody() throws Exception {
-		wrapConcurrentResult_ResponseBody(new TypeLevelResponseBodyHandler());
+		wrapConcurrentResult_ResponseBody(new TypeLevelResponseBodyHandler(), "bar", String.class);
 	}
 
-	private void wrapConcurrentResult_ResponseBody(Object handler) throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new StringHttpMessageConverter());
-		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters));
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(handler, "handle");
-		handlerMethod = handlerMethod.wrapConcurrentResult("bar");
-		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+	@Test
+	public void wrapConcurrentResult_TypeLevelResponseBodyEmpty() throws Exception {
+		wrapConcurrentResult_ResponseBody(new TypeLevelResponseBodyHandler(), null, String.class);
+	}
 
-		assertEquals("bar", this.response.getContentAsString());
+	@Test
+	public void wrapConcurrentResult_DeferredResultSubclass() throws Exception {
+		wrapConcurrentResult_ResponseBody(new DeferredResultSubclassHandler(), "bar", String.class);
+	}
+
+	@Test
+	public void wrapConcurrentResult_DeferredResultSubclassEmpty() throws Exception {
+		wrapConcurrentResult_ResponseBody(new DeferredResultSubclassHandler(), null, CustomDeferredResult.class);
+	}
+
+	private void wrapConcurrentResult_ResponseBody(Object handler, Object result, Class<?> expectedReturnType)
+			throws Exception {
+
+		this.returnValueHandlers.addHandler(new ModelAndViewMethodReturnValueHandler());
+		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(this.converters));
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(handler, "handle");
+
+		handlerMethod = handlerMethod.wrapConcurrentResult(result);
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+		assertEquals((result != null ? result.toString() : ""), this.response.getContentAsString());
+		assertEquals(expectedReturnType, handlerMethod.getReturnValueType(result).getParameterType());
 	}
 
 	@Test
 	public void wrapConcurrentResult_ResponseEntity() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new StringHttpMessageConverter());
-		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(converters));
+		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>("bar", HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
@@ -191,15 +230,9 @@ public class ServletInvocableHandlerMethodTests {
 		assertEquals("bar", this.response.getContentAsString());
 	}
 
-	// SPR-12287
-
-	@Test
+	@Test  // SPR-12287
 	public void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new StringHttpMessageConverter());
-		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
-		this.returnValueHandlers.addHandler(processor);
+		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>(HttpStatus.OK));
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
@@ -210,11 +243,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseEntityNullReturnValue() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new StringHttpMessageConverter());
-		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
-		this.returnValueHandlers.addHandler(processor);
+		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
@@ -225,10 +254,10 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseBodyEmitter() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new StringHttpMessageConverter());
-		this.returnValueHandlers.addHandler(new ResponseBodyEmitterReturnValueHandler(converters));
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new AsyncHandler(), "handleWithEmitter");
+
+		this.returnValueHandlers.addHandler(new ResponseBodyEmitterReturnValueHandler(this.converters));
+
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new StreamingHandler(), "handleEmitter");
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -239,7 +268,7 @@ public class ServletInvocableHandlerMethodTests {
 	@Test
 	public void wrapConcurrentResult_StreamingResponseBody() throws Exception {
 		this.returnValueHandlers.addHandler(new StreamingResponseBodyReturnValueHandler());
-		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new AsyncHandler(), "handleWithStreaming");
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new StreamingHandler(), "handleStreamBody");
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -247,14 +276,45 @@ public class ServletInvocableHandlerMethodTests {
 		assertEquals("", this.response.getContentAsString());
 	}
 
-	// SPR-12287 (16/Oct/14 comments)
-
 	@Test
+	public void wrapConcurrentResult_CollectedValuesList() throws Exception {
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		ResolvableType elementType = ResolvableType.forClass(List.class);
+		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList(elementType);
+		result.add(Arrays.asList("foo1", "bar1"));
+		result.add(Arrays.asList("foo2", "bar2"));
+
+		ContentNegotiationManager manager = new ContentNegotiationManager();
+		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters, manager));
+		ServletInvocableHandlerMethod hm = getHandlerMethod(new MethodLevelResponseBodyHandler(), "handleFluxOfLists");
+		hm = hm.wrapConcurrentResult(result);
+		hm.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("[[\"foo1\",\"bar1\"],[\"foo2\",\"bar2\"]]", this.response.getContentAsString());
+	}
+
+	@Test // SPR-15478
+	public void wrapConcurrentResult_CollectedValuesListWithResponseEntity() throws Exception {
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		ResolvableType elementType = ResolvableType.forClass(Bar.class);
+		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList(elementType);
+		result.add(new Bar("foo"));
+		result.add(new Bar("bar"));
+
+		ContentNegotiationManager manager = new ContentNegotiationManager();
+		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters, manager));
+		ServletInvocableHandlerMethod hm = getHandlerMethod(new ResponseEntityHandler(), "handleFlux");
+		hm = hm.wrapConcurrentResult(result);
+		hm.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("[{\"value\":\"foo\"},{\"value\":\"bar\"}]", this.response.getContentAsString());
+	}
+
+	@Test  // SPR-12287 (16/Oct/14 comments)
 	public void responseEntityRawTypeWithNullBody() throws Exception {
-		List<HttpMessageConverter<?>> converters = Collections.singletonList(new StringHttpMessageConverter());
-		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
-		this.returnValueHandlers.addHandler(processor);
+		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleRawType");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -272,6 +332,8 @@ public class ServletInvocableHandlerMethodTests {
 		return handlerMethod;
 	}
 
+
+	@SuppressWarnings("unused")
 	@ResponseStatus
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedResponseStatus {
@@ -279,6 +341,7 @@ public class ServletInvocableHandlerMethodTests {
 		@AliasFor(annotation = ResponseStatus.class, attribute = "code")
 		HttpStatus responseStatus() default HttpStatus.INTERNAL_SERVER_ERROR;
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class Handler {
@@ -311,34 +374,57 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
+
+	@SuppressWarnings("unused")
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	private static class ResponseStatusHandler {
+
+		public void handle() { }
+	}
+
+
 	private static class MethodLevelResponseBodyHandler {
 
 		@ResponseBody
-		public DeferredResult<String> handle() {
-			return new DeferredResult<>();
-		}
+		public DeferredResult<String> handle() { return null; }
+
+		// Unusual but legal return type
+		// Properly test generic type handling of Flux values collected to a List
+
+		@ResponseBody
+		public Flux<List<String>> handleFluxOfLists() { return null; }
 	}
+
 
 	@SuppressWarnings("unused")
 	@ResponseBody
 	private static class TypeLevelResponseBodyHandler {
 
-		public DeferredResult<String> handle() {
-			return new DeferredResult<String>();
-		}
+		public DeferredResult<String> handle() { return null; }
 	}
+
+
+	private static class DeferredResultSubclassHandler {
+
+		@ResponseBody
+		public CustomDeferredResult handle() { return null; }
+	}
+
+
+	private static class CustomDeferredResult extends DeferredResult<String> {
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class ResponseEntityHandler {
 
-		public DeferredResult<ResponseEntity<String>> handleDeferred() {
-			return new DeferredResult<>();
-		}
+		public DeferredResult<ResponseEntity<String>> handleDeferred() { return null; }
 
-		public ResponseEntity<Void> handleRawType() {
-			return ResponseEntity.ok().build();
-		}
+		public ResponseEntity<Void> handleRawType() { return null; }
+
+		public ResponseEntity<Flux<Bar>> handleFlux() { return null; }
 	}
+
 
 	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
@@ -354,15 +440,26 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private static class AsyncHandler {
 
-		public ResponseBodyEmitter handleWithEmitter() {
-			return null;
+	@SuppressWarnings("unused")
+	private static class StreamingHandler {
+
+		public ResponseBodyEmitter handleEmitter() { return null; }
+
+		public StreamingResponseBody handleStreamBody() { return null; }
+
+	}
+
+	private static class Bar {
+
+		private final String value;
+
+		public Bar(String value) {
+			this.value = value;
 		}
 
-		public StreamingResponseBody handleWithStreaming() {
-			return null;
+		public String getValue() {
+			return this.value;
 		}
 	}
 

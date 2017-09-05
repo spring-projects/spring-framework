@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -57,7 +58,7 @@ abstract class MvcNamespaceUtils {
 	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
 
-	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
+	public static void registerDefaultComponents(ParserContext parserContext, @Nullable Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
 		registerHttpRequestHandlerAdapter(parserContext, source);
 		registerSimpleControllerHandlerAdapter(parserContext, source);
@@ -68,7 +69,9 @@ abstract class MvcNamespaceUtils {
 	 * under that well-known name, unless already registered.
 	 * @return a RuntimeBeanReference to this {@link UrlPathHelper} instance
 	 */
-	public static RuntimeBeanReference registerUrlPathHelper(RuntimeBeanReference urlPathHelperRef, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerUrlPathHelper(
+			@Nullable RuntimeBeanReference urlPathHelperRef, ParserContext parserContext, @Nullable Object source) {
+
 		if (urlPathHelperRef != null) {
 			if (parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(URL_PATH_HELPER_BEAN_NAME);
@@ -91,7 +94,9 @@ abstract class MvcNamespaceUtils {
 	 * under that well-known name, unless already registered.
 	 * @return a RuntimeBeanReference to this {@link PathMatcher} instance
 	 */
-	public static RuntimeBeanReference registerPathMatcher(RuntimeBeanReference pathMatcherRef, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerPathMatcher(@Nullable RuntimeBeanReference pathMatcherRef,
+			ParserContext parserContext, @Nullable Object source) {
+
 		if (pathMatcherRef != null) {
 			if (parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
 				parserContext.getRegistry().removeAlias(PATH_MATCHER_BEAN_NAME);
@@ -113,7 +118,7 @@ abstract class MvcNamespaceUtils {
 	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
-	private static void registerBeanNameUrlHandlerMapping(ParserContext parserContext, Object source) {
+	private static void registerBeanNameUrlHandlerMapping(ParserContext parserContext, @Nullable Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME)){
 			RootBeanDefinition beanNameMappingDef = new RootBeanDefinition(BeanNameUrlHandlerMapping.class);
 			beanNameMappingDef.setSource(source);
@@ -130,7 +135,7 @@ abstract class MvcNamespaceUtils {
 	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
-	private static void registerHttpRequestHandlerAdapter(ParserContext parserContext, Object source) {
+	private static void registerHttpRequestHandlerAdapter(ParserContext parserContext, @Nullable Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(HTTP_REQUEST_HANDLER_ADAPTER_BEAN_NAME)) {
 			RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(HttpRequestHandlerAdapter.class);
 			handlerAdapterDef.setSource(source);
@@ -144,7 +149,7 @@ abstract class MvcNamespaceUtils {
 	 * Registers a {@link SimpleControllerHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
-	private static void registerSimpleControllerHandlerAdapter(ParserContext parserContext, Object source) {
+	private static void registerSimpleControllerHandlerAdapter(ParserContext parserContext, @Nullable Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME)) {
 			RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
 			handlerAdapterDef.setSource(source);
@@ -160,7 +165,10 @@ abstract class MvcNamespaceUtils {
 	 * if a non-null CORS configuration is provided.
 	 * @return a RuntimeBeanReference to this {@code Map<String, CorsConfiguration>} instance
 	 */
-	public static RuntimeBeanReference registerCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerCorsConfigurations(
+			@Nullable Map<String, CorsConfiguration> corsConfigurations,
+			ParserContext parserContext, @Nullable Object source) {
+
 		if (!parserContext.getRegistry().containsBeanDefinition(CORS_CONFIGURATION_BEAN_NAME)) {
 			RootBeanDefinition corsConfigurationsDef = new RootBeanDefinition(LinkedHashMap.class);
 			corsConfigurationsDef.setSource(source);
@@ -177,5 +185,25 @@ abstract class MvcNamespaceUtils {
 		}
 		return new RuntimeBeanReference(CORS_CONFIGURATION_BEAN_NAME);
 	}
+
+	/**
+	 * Find the {@code ContentNegotiationManager} bean created by or registered
+	 * with the {@code annotation-driven} element.
+	 * @return a bean definition, bean reference, or null.
+	 */
+	@Nullable
+	public static Object getContentNegotiationManager(ParserContext context) {
+		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);
+			return handlerMappingBeanDef.getPropertyValues().get("contentNegotiationManager");
+		}
+		name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			return new RuntimeBeanReference(name);
+		}
+		return null;
+	}
+
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.document;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.ServletOutputStream;
@@ -71,7 +70,7 @@ public abstract class AbstractXlsView extends AbstractView {
 		response.setContentType(getContentType());
 
 		// Flush byte array to servlet output stream.
-		renderWorkbook(workbook, response);;
+		renderWorkbook(workbook, response);
 	}
 
 
@@ -98,12 +97,7 @@ public abstract class AbstractXlsView extends AbstractView {
 	protected void renderWorkbook(Workbook workbook, HttpServletResponse response) throws IOException {
 		ServletOutputStream out = response.getOutputStream();
 		workbook.write(out);
-		out.flush();
-
-		// Closeable only implemented as of POI 3.10
-		if (workbook instanceof Closeable) {
-			((Closeable) workbook).close();
-		}
+		workbook.close();
 	}
 
 	/**

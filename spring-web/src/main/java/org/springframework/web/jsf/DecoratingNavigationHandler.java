@@ -19,6 +19,8 @@ package org.springframework.web.jsf;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.FacesContext;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Base class for JSF NavigationHandler implementations that want
  * to be capable of decorating an original NavigationHandler.
@@ -37,6 +39,7 @@ import javax.faces.context.FacesContext;
  */
 public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
+	@Nullable
 	private NavigationHandler decoratedNavigationHandler;
 
 
@@ -58,6 +61,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * Return the fixed original NavigationHandler decorated by this handler, if any
 	 * (that is, if passed in through the constructor).
 	 */
+	@Nullable
 	public final NavigationHandler getDecoratedNavigationHandler() {
 		return this.decoratedNavigationHandler;
 	}
@@ -95,7 +99,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * @see #callNextHandlerInChain
 	 */
 	public abstract void handleNavigation(
-			FacesContext facesContext, String fromAction, String outcome, NavigationHandler originalNavigationHandler);
+			FacesContext facesContext, @Nullable String fromAction, @Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler);
 
 
 	/**
@@ -127,7 +131,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * or {@code null} if none
 	 */
 	protected final void callNextHandlerInChain(
-			FacesContext facesContext, String fromAction, String outcome, NavigationHandler originalNavigationHandler) {
+			FacesContext facesContext, @Nullable String fromAction, @Nullable String outcome, @Nullable NavigationHandler originalNavigationHandler) {
 
 		NavigationHandler decoratedNavigationHandler = getDecoratedNavigationHandler();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.support;
 
 import java.lang.annotation.ElementType;
@@ -27,6 +28,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.AnnotationFormatterFactory;
@@ -84,7 +86,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testCustomFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<Object> formatters = new HashSet<Object>();
+		Set<Object> formatters = new HashSet<>();
 		formatters.add(new TestBeanFormatter());
 		formatters.add(new SpecialIntAnnotationFormatterFactory());
 		factory.setFormatters(formatters);
@@ -105,7 +107,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testFormatterRegistrar() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<FormatterRegistrar> registrars = new HashSet<FormatterRegistrar>();
+		Set<FormatterRegistrar> registrars = new HashSet<>();
 		registrars.add(new TestFormatterRegistrar());
 		factory.setFormatterRegistrars(registrars);
 		factory.afterPropertiesSet();
@@ -119,7 +121,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testInvalidFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<Object> formatters = new HashSet<Object>();
+		Set<Object> formatters = new HashSet<>();
 		formatters.add(new Object());
 		factory.setFormatters(formatters);
 		try {
@@ -132,9 +134,15 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 
-	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+	@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface SpecialInt {
+
+		@AliasFor("alias")
+		String value() default "";
+
+		@AliasFor("value")
+		String alias() default "";
 	}
 
 
@@ -143,7 +151,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		@NumberFormat(pattern = "##,00")
 		private double pattern;
 
-		@SpecialInt
+		@SpecialInt("aliased")
 		private int specialInt;
 
 		public int getSpecialInt() {
@@ -174,7 +182,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 	private static class SpecialIntAnnotationFormatterFactory implements AnnotationFormatterFactory<SpecialInt> {
 
-		private final Set<Class<?>> fieldTypes = new HashSet<Class<?>>(1);
+		private final Set<Class<?>> fieldTypes = new HashSet<>(1);
 
 		public SpecialIntAnnotationFormatterFactory() {
 			fieldTypes.add(Integer.class);
@@ -187,6 +195,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 		@Override
 		public Printer<?> getPrinter(SpecialInt annotation, Class<?> fieldType) {
+			assertEquals("aliased", annotation.value());
+			assertEquals("aliased", annotation.alias());
 			return new Printer<Integer>() {
 				@Override
 				public String print(Integer object, Locale locale) {
@@ -197,6 +207,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 		@Override
 		public Parser<?> getParser(SpecialInt annotation, Class<?> fieldType) {
+			assertEquals("aliased", annotation.value());
+			assertEquals("aliased", annotation.alias());
 			return new Parser<Integer>() {
 				@Override
 				public Integer parse(String text, Locale locale) throws ParseException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,12 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -58,7 +61,7 @@ import org.springframework.util.StringUtils;
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
  *
- * <p>For 'null' values read from the databasem, we will attempt to call the setter, but in the case of
+ * <p>For 'null' values read from the database, we will attempt to call the setter, but in the case of
  * Java primitives, this causes a TypeMismatchException. This class can be configured (using the
  * primitivesDefaultedForNullValue property) to trap this exception and use the primitives default value.
  * Be aware that if you use the values from the generated bean to update the database the primitive value
@@ -77,6 +80,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** The class we are mapping to */
+	@Nullable
 	private Class<T> mappedClass;
 
 	/** Whether we're strictly validating */
@@ -85,10 +89,16 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/** Whether we're defaulting primitives when mapping a null value */
 	private boolean primitivesDefaultedForNullValue = false;
 
+	/** ConversionService for binding JDBC values to bean properties */
+	@Nullable
+	private ConversionService conversionService = DefaultConversionService.getSharedInstance();
+
 	/** Map of the fields we provide mapping for */
+	@Nullable
 	private Map<String, PropertyDescriptor> mappedFields;
 
 	/** Set of bean properties we provide mapping for */
+	@Nullable
 	private Set<String> mappedProperties;
 
 
@@ -141,6 +151,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Get the class that we are mapping to.
 	 */
+	@Nullable
 	public final Class<T> getMappedClass() {
 		return this.mappedClass;
 	}
@@ -179,6 +190,28 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		return this.primitivesDefaultedForNullValue;
 	}
 
+	/**
+	 * Set a {@link ConversionService} for binding JDBC values to bean properties,
+	 * or {@code null} for none.
+	 * <p>Default is a {@link DefaultConversionService}, as of Spring 4.3. This
+	 * provides support for {@code java.time} conversion and other special types.
+	 * @since 4.3
+	 * @see #initBeanWrapper(BeanWrapper)
+	 */
+	public void setConversionService(@Nullable ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Return a {@link ConversionService} for binding JDBC values to bean properties,
+	 * or {@code null} if none.
+	 * @since 4.3
+	 */
+	@Nullable
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
+
 
 	/**
 	 * Initialize the mapping metadata for the given class.
@@ -186,8 +219,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 */
 	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
-		this.mappedFields = new HashMap<String, PropertyDescriptor>();
-		this.mappedProperties = new HashSet<String>();
+		this.mappedFields = new HashMap<>();
+		this.mappedProperties = new HashSet<>();
 		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
 		for (PropertyDescriptor pd : pds) {
 			if (pd.getWriteMethod() != null) {
@@ -248,24 +281,24 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
-		T mappedObject = BeanUtils.instantiate(this.mappedClass);
+		T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 		initBeanWrapper(bw);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<String>() : null);
+		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<>() : null);
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
 			String field = lowerCaseName(column.replaceAll(" ", ""));
-			PropertyDescriptor pd = this.mappedFields.get(field);
+			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);
 					if (rowNumber == 0 && logger.isDebugEnabled()) {
 						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
-								"' of type [" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "]");
+								"' of type '" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "'");
 					}
 					try {
 						bw.setPropertyValue(pd.getName(), value);
@@ -275,9 +308,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 							if (logger.isDebugEnabled()) {
 								logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
 										" and column '" + column + "' with null value when setting property '" +
-										pd.getName() + "' of type [" +
+										pd.getName() + "' of type '" +
 										ClassUtils.getQualifiedName(pd.getPropertyType()) +
-										"] on object: " + mappedObject, ex);
+										"' on object: " + mappedObject, ex);
 							}
 						}
 						else {
@@ -313,10 +346,17 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Initialize the given BeanWrapper to be used for row mapping.
 	 * To be called for each row.
-	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * <p>The default implementation applies the configured {@link ConversionService},
+	 * if any. Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
+	 * @see #getConversionService()
+	 * @see BeanWrapper#setConversionService
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
+		ConversionService cs = getConversionService();
+		if (cs != null) {
+			bw.setConversionService(cs);
+		}
 	}
 
 	/**
@@ -328,11 +368,11 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param pd the bean property that each result object is expected to match
-	 * (or {@code null} if none specified)
 	 * @return the Object value
 	 * @throws SQLException in case of extraction failure
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)
 	 */
+	@Nullable
 	protected Object getColumnValue(ResultSet rs, int index, PropertyDescriptor pd) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
 	}
@@ -344,7 +384,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
-		return new BeanPropertyRowMapper<T>(mappedClass);
+		return new BeanPropertyRowMapper<>(mappedClass);
 	}
 
 }

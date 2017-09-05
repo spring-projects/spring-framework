@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Holder containing one or more {@link PropertySource} objects.
  *
@@ -34,6 +36,7 @@ public interface PropertySources extends Iterable<PropertySource<?>> {
 	 * Return the property source with the given name, {@code null} if not found.
 	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
 	 */
+	@Nullable
 	PropertySource<?> get(String name);
 
 }

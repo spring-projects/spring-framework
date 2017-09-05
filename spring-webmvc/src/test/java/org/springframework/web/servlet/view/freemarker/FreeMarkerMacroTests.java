@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,7 +28,6 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,12 +69,14 @@ public class FreeMarkerMacroTests {
 
 	@Before
 	public void setUp() throws Exception {
+		ServletContext sc = new MockServletContext();
 		wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.setServletContext(sc);
 
 		// final Template expectedTemplate = new Template();
 		fc = new FreeMarkerConfigurer();
 		fc.setTemplateLoaderPaths("classpath:/", "file://" + System.getProperty("java.io.tmpdir"));
+		fc.setServletContext(sc);
 		fc.afterPropertiesSet();
 
 		wac.getDefaultListableBeanFactory().registerSingleton("freeMarkerConfigurer", fc);
@@ -107,7 +109,7 @@ public class FreeMarkerMacroTests {
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("tb", new TestBean("juergen", 99));
 		fv.render(model, request, response);
 	}
@@ -126,7 +128,7 @@ public class FreeMarkerMacroTests {
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
@@ -211,12 +213,12 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm3() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", getMacroOutput("FORM3"));
+		assertEquals("<textarea id=\"name\" name=\"name\" >\nDarren</textarea>", getMacroOutput("FORM3"));
 	}
 
 	@Test
 	public void testForm4() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", getMacroOutput("FORM4"));
+		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>", getMacroOutput("FORM4"));
 	}
 
 	// TODO verify remaining output (fix whitespace)
@@ -283,11 +285,11 @@ public class FreeMarkerMacroTests {
 		FileCopyUtils.copy("<#import \"spring.ftl\" as spring />\n" + macro, new FileWriter(resource.getPath()));
 
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
-		Map<String, String> msgMap = new HashMap<String, String>();
+		Map<String, String> msgMap = new HashMap<>();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
 		rc.setMessageMap(msgMap);
-		Map<String, String> themeMsgMap = new HashMap<String, String>();
+		Map<String, String> themeMsgMap = new HashMap<>();
 		themeMsgMap.put("hello", "Howdy!");
 		themeMsgMap.put("world", "Mundo!");
 		rc.setThemeMessageMap(themeMsgMap);
@@ -301,14 +303,14 @@ public class FreeMarkerMacroTests {
 		darren.setStringArray(new String[] {"John", "Fred"});
 		request.setAttribute("command", darren);
 
-		Map<String, String> names = new HashMap<String, String>();
+		Map<String, String> names = new HashMap<>();
 		names.put("Darren", "Darren Davison");
 		names.put("John", "John Doe");
 		names.put("Fred", "Fred Bloggs");
 		names.put("Rob&Harrop", "Rob Harrop");
 
 		Configuration config = fc.getConfiguration();
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("command", darren);
 		model.put("springMacroRequestContext", rc);
 		model.put("msgArgs", new Object[] { "World" });
@@ -326,6 +328,7 @@ public class FreeMarkerMacroTests {
 
 		// tokenize output and ignore whitespace
 		String output = response.getContentAsString();
+		output = output.replace("\r\n", "\n");
 		return output.trim();
 	}
 

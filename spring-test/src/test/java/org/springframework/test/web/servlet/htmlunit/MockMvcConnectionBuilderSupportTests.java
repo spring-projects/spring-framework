@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,11 @@ import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,20 +41,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link MockMvcWebConnectionBuilderSupport}.
  *
  * @author Rob Winch
+ * @author Rossen Stoyanchev
  * @since 4.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,93 +61,85 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("rawtypes")
 public class MockMvcConnectionBuilderSupportTests {
 
-	private final WebConnection delegateConnection = mock(WebConnection.class);
+	private final WebClient client = mock(WebClient.class);
+
+	private MockMvcWebConnectionBuilderSupport builder;
 
 	@Autowired
 	private WebApplicationContext wac;
 
-	private MockMvc mockMvc;
-
-	private WebConnection connection;
 
 	@Before
 	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-
-		connection = new MockMvcWebConnectionBuilderSupport(mockMvc){}
-				.createConnection(delegateConnection);
+		when(this.client.getWebConnection()).thenReturn(mock(WebConnection.class));
+		this.builder = new MockMvcWebConnectionBuilderSupport(this.wac) {};
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void constructorMockMvcNull() {
-		new MockMvcWebConnectionBuilderSupport((MockMvc)null){};
+		new MockMvcWebConnectionBuilderSupport((MockMvc) null){};
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void constructorContextNull() {
-		new MockMvcWebConnectionBuilderSupport((WebApplicationContext)null){};
+		new MockMvcWebConnectionBuilderSupport((WebApplicationContext) null){};
 	}
 
 	@Test
 	public void context() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.createConnection(delegateConnection);
+		WebConnection conn = this.builder.createConnection(this.client);
 
-		assertMvcProcessed("http://localhost/");
-		assertDelegateProcessed("http://example.com/");
+		assertMockMvcUsed(conn, "http://localhost/");
+		assertMockMvcNotUsed(conn, "http://example.com/");
 	}
 
 	@Test
 	public void mockMvc() throws Exception {
-		assertMvcProcessed("http://localhost/");
-		assertDelegateProcessed("http://example.com/");
+		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+		WebConnection conn = new MockMvcWebConnectionBuilderSupport(mockMvc) {}.createConnection(this.client);
+
+		assertMockMvcUsed(conn, "http://localhost/");
+		assertMockMvcNotUsed(conn, "http://example.com/");
 	}
 
 	@Test
 	public void mockMvcExampleDotCom() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.useMockMvcForHosts("example.com")
-				.createConnection(delegateConnection);
+		WebConnection conn = this.builder.useMockMvcForHosts("example.com").createConnection(this.client);
 
-		assertMvcProcessed("http://localhost/");
-		assertMvcProcessed("http://example.com/");
-		assertDelegateProcessed("http://other.com/");
+		assertMockMvcUsed(conn, "http://localhost/");
+		assertMockMvcUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "http://other.com/");
 	}
 
 	@Test
 	public void mockMvcAlwaysUseMockMvc() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.alwaysUseMockMvc()
-				.createConnection(delegateConnection);
-
-		assertMvcProcessed("http://other.com/");
+		WebConnection conn = this.builder.alwaysUseMockMvc().createConnection(this.client);
+		assertMockMvcUsed(conn, "http://other.com/");
 	}
 
 	@Test
 	public void defaultContextPathEmpty() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.createConnection(delegateConnection);
-
-		assertThat(getWebResponse("http://localhost/abc").getContentAsString(), equalTo(""));
+		WebConnection conn = this.builder.createConnection(this.client);
+		assertThat(getResponse(conn, "http://localhost/abc").getContentAsString(), equalTo(""));
 	}
 
 	@Test
 	public void defaultContextPathCustom() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.contextPath("/abc").createConnection(delegateConnection);
-
-		assertThat(getWebResponse("http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
+		WebConnection conn = this.builder.contextPath("/abc").createConnection(this.client);
+		assertThat(getResponse(conn, "http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
 	}
 
-	private void assertMvcProcessed(String url) throws Exception {
-		assertThat(getWebResponse(url), notNullValue());
+
+	private void assertMockMvcUsed(WebConnection connection, String url) throws Exception {
+		assertThat(getResponse(connection, url), notNullValue());
 	}
 
-	private void assertDelegateProcessed(String url) throws Exception {
-		assertThat(getWebResponse(url), nullValue());
+	private void assertMockMvcNotUsed(WebConnection connection, String url) throws Exception {
+		assertThat(getResponse(connection, url), nullValue());
 	}
 
-	private WebResponse getWebResponse(String url) throws IOException {
+	private WebResponse getResponse(WebConnection connection, String url) throws IOException {
 		return connection.getResponse(new WebRequest(new URL(url)));
 	}
 

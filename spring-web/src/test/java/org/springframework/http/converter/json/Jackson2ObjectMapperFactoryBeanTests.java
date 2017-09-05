@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -76,6 +77,7 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -84,15 +86,6 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private final Jackson2ObjectMapperFactoryBean factory = new Jackson2ObjectMapperFactoryBean();
 
-
-	@Test
-	public void settingNullValuesShouldNotThrowExceptions() {
-		this.factory.setSerializers((JsonSerializer<?>[]) null);
-		this.factory.setSerializersByType(null);
-		this.factory.setDeserializersByType(null);
-		this.factory.setFeaturesToEnable((Object[]) null);
-		this.factory.setFeaturesToDisable((Object[]) null);
-	}
 
 	@Test(expected = FatalBeanException.class)
 	public void unknownFeature() {
@@ -282,9 +275,10 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void setMixIns() {
 		Class<?> target = String.class;
 		Class<?> mixinSource = Object.class;
-		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixinSource);
 
+		this.factory.setModules(Collections.emptyList());
 		this.factory.setMixIns(mixIns);
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
@@ -314,7 +308,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertTrue(this.factory.isSingleton());
 		assertEquals(ObjectMapper.class, this.factory.getObjectType());
 
-		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
+		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<>();
 		deserializers.put(Date.class, new DateDeserializer());
 
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
@@ -387,6 +381,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+	@Test  // SPR-14435
+	public void setFactory() {
+		this.factory.setFactory(new SmileFactory());
+		this.factory.afterPropertiesSet();
+
+		assertNotNull(this.factory.getObject());
+		assertTrue(this.factory.isSingleton());
+		assertEquals(SmileFactory.class, this.factory.getObject().getFactory().getClass());
 	}
 
 

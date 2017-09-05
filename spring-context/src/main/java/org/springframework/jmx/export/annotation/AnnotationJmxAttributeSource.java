@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jmx.export.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Set;
 
@@ -27,9 +28,11 @@ import org.springframework.beans.annotation.AnnotationBeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -39,6 +42,7 @@ import org.springframework.util.StringValueResolver;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jennifer Hickey
+ * @author Stephane Nicoll
  * @since 1.2
  * @see ManagedResource
  * @see ManagedAttribute
@@ -46,28 +50,29 @@ import org.springframework.util.StringValueResolver;
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFactoryAware {
 
+	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
 
 	@Override
-	public void setBeanFactory(final BeanFactory beanFactory) {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
-			// Not using EmbeddedValueResolverAware in order to avoid a spring-context dependency:
-			// ConfigurableBeanFactory and its resolveEmbeddedValue live in the spring-beans module.
-			this.embeddedValueResolver = new StringValueResolver() {
-				@Override
-				public String resolveStringValue(String strVal) {
-					return ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(strVal);
-				}
-			};
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
 	}
 
+
 	@Override
+	@Nullable
 	public org.springframework.jmx.export.metadata.ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
 		ManagedResource ann = AnnotationUtils.findAnnotation(beanClass, ManagedResource.class);
 		if (ann == null) {
 			return null;
+		}
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(ManagedResource.class, beanClass);
+		Class<?> target = (declaringClass != null && !declaringClass.isInterface() ? declaringClass : beanClass);
+		if (!Modifier.isPublic(target.getModifiers())) {
+			throw new InvalidMetadataException("@ManagedResource class '" + target.getName() + "' must be public");
 		}
 		org.springframework.jmx.export.metadata.ManagedResource managedResource = new org.springframework.jmx.export.metadata.ManagedResource();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource, this.embeddedValueResolver);
@@ -75,6 +80,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
+	@Nullable
 	public org.springframework.jmx.export.metadata.ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
 		ManagedAttribute ann = AnnotationUtils.findAnnotation(method, ManagedAttribute.class);
 		if (ann == null) {
@@ -89,12 +95,14 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
+	@Nullable
 	public org.springframework.jmx.export.metadata.ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
 		ManagedMetric ann = AnnotationUtils.findAnnotation(method, ManagedMetric.class);
 		return copyPropertiesToBean(ann, org.springframework.jmx.export.metadata.ManagedMetric.class);
 	}
 
 	@Override
+	@Nullable
 	public org.springframework.jmx.export.metadata.ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
 		ManagedOperation ann = AnnotationUtils.findAnnotation(method, ManagedOperation.class);
 		return copyPropertiesToBean(ann, org.springframework.jmx.export.metadata.ManagedOperation.class);
@@ -129,11 +137,12 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		return beans;
 	}
 
-	private static <T> T copyPropertiesToBean(Annotation ann, Class<T> beanClass) {
+	@Nullable
+	private static <T> T copyPropertiesToBean(@Nullable Annotation ann, Class<T> beanClass) {
 		if (ann == null) {
 			return null;
 		}
-		T bean = BeanUtils.instantiate(beanClass);
+		T bean = BeanUtils.instantiateClass(beanClass);
 		AnnotationBeanUtils.copyPropertiesToBean(ann, bean);
 		return bean;
 	}

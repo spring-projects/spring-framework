@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
+public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 
 	private TestInterface testBean;
 

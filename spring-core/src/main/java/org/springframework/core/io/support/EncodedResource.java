@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -37,6 +38,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.6
+ * @see Resource#getInputStream()
  * @see java.io.Reader
  * @see java.nio.charset.Charset
  */
@@ -44,15 +46,17 @@ public class EncodedResource implements InputStreamSource {
 
 	private final Resource resource;
 
+	@Nullable
 	private final String encoding;
 
+	@Nullable
 	private final Charset charset;
 
 
 	/**
 	 * Create a new {@code EncodedResource} for the given {@code Resource},
 	 * not specifying an explicit encoding or {@code Charset}.
-	 * @param resource the {@code Resource} to hold; never {@code null}
+	 * @param resource the {@code Resource} to hold (never {@code null})
 	 */
 	public EncodedResource(Resource resource) {
 		this(resource, null, null);
@@ -61,24 +65,24 @@ public class EncodedResource implements InputStreamSource {
 	/**
 	 * Create a new {@code EncodedResource} for the given {@code Resource},
 	 * using the specified {@code encoding}.
-	 * @param resource the {@code Resource} to hold; never {@code null}
+	 * @param resource the {@code Resource} to hold (never {@code null})
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public EncodedResource(Resource resource, String encoding) {
+	public EncodedResource(Resource resource, @Nullable String encoding) {
 		this(resource, encoding, null);
 	}
 
 	/**
 	 * Create a new {@code EncodedResource} for the given {@code Resource},
 	 * using the specified {@code Charset}.
-	 * @param resource the {@code Resource} to hold; never {@code null}
+	 * @param resource the {@code Resource} to hold (never {@code null})
 	 * @param charset the {@code Charset} to use for reading from the resource
 	 */
-	public EncodedResource(Resource resource, Charset charset) {
+	public EncodedResource(Resource resource, @Nullable Charset charset) {
 		this(resource, null, charset);
 	}
 
-	private EncodedResource(Resource resource, String encoding, Charset charset) {
+	private EncodedResource(Resource resource, @Nullable String encoding, @Nullable Charset charset) {
 		super();
 		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
@@ -98,6 +102,7 @@ public class EncodedResource implements InputStreamSource {
 	 * Return the encoding to use for reading from the {@linkplain #getResource() resource},
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	public final String getEncoding() {
 		return this.encoding;
 	}
@@ -106,6 +111,7 @@ public class EncodedResource implements InputStreamSource {
 	 * Return the {@code Charset} to use for reading from the {@linkplain #getResource() resource},
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	public final Charset getCharset() {
 		return this.charset;
 	}
@@ -142,8 +148,8 @@ public class EncodedResource implements InputStreamSource {
 	}
 
 	/**
-	 * Open a {@code java.io.InputStream} for the specified resource, ignoring any
-	 * specified {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
+	 * Open an {@code InputStream} for the specified resource, ignoring any specified
+	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
 	 * @throws IOException if opening the InputStream failed
 	 * @see #requiresReader()
 	 * @see #getReader()

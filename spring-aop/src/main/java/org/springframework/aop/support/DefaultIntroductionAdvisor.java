@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -43,7 +44,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private final Advice advice;
 
-	private final Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+	private final Set<Class<?>> interfaces = new LinkedHashSet<>();
 
 	private int order = Integer.MAX_VALUE;
 
@@ -64,7 +65,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * @param introductionInfo the IntroductionInfo that describes
 	 * the interface to introduce (may be {@code null})
 	 */
-	public DefaultIntroductionAdvisor(Advice advice, IntroductionInfo introductionInfo) {
+	public DefaultIntroductionAdvisor(Advice advice, @Nullable IntroductionInfo introductionInfo) {
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 		if (introductionInfo != null) {

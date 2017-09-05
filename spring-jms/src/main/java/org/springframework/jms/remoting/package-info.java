@@ -5,4 +5,7 @@
  * receivers, and provides a level of indirection between the client and the
  * service: They only need to agree on a queue name and a service interface.
  */
+@NonNullApi
 package org.springframework.jms.remoting;
+
+import org.springframework.lang.NonNullApi;

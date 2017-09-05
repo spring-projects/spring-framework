@@ -42,7 +42,7 @@ public interface FreeMarkerConfig {
 	Configuration getConfiguration();
 
 	/**
-	 * Returns the {@link TaglibFactory} used to enable JSP tags to be
+	 * Return the {@link TaglibFactory} used to enable JSP tags to be
 	 * accessed from FreeMarker templates.
 	 */
 	TaglibFactory getTaglibFactory();

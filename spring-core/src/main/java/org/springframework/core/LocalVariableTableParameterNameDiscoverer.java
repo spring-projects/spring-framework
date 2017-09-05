@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -60,11 +61,11 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
 
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
-	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache =
-			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
+	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache = new ConcurrentHashMap<>(32);
 
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Method method) {
 		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
 		Class<?> declaringClass = originalMethod.getDeclaringClass();
@@ -80,6 +81,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
@@ -110,7 +112,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		try {
 			ClassReader classReader = new ClassReader(is);
-			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>(32);
+			Map<Member, String[]> map = new ConcurrentHashMap<>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
 			return map;
 		}
@@ -158,6 +160,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 
 		@Override
+		@Nullable
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			// exclude synthetic + bridged && static class initialization
 			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {

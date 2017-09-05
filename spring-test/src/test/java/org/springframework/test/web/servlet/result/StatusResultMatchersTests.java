@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ public class StatusResultMatchersTests {
 	@Test
 	public void testHttpStatusCodeResultMatchers() throws Exception {
 
-		List<AssertionError> failures = new ArrayList<AssertionError>();
+		List<AssertionError> failures = new ArrayList<>();
 
-		for(HttpStatus status : HttpStatus.values()) {
+		for (HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
 			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);
@@ -91,9 +91,7 @@ public class StatusResultMatchersTests {
 
 	@Test
 	public void statusRanges() throws Exception {
-
-		for(HttpStatus status : HttpStatus.values()) {
-
+		for (HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
 			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);

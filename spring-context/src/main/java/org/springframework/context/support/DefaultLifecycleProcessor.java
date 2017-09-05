@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,6 +57,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private volatile boolean running;
 
+	@Nullable
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
 
@@ -70,8 +72,17 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"DefaultLifecycleProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
+		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+	}
+
+	private ConfigurableListableBeanFactory getBeanFactory() {
+		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
+		Assert.state(beanFactory != null, "No BeanFactory available");
+		return beanFactory;
 	}
 
 
@@ -129,9 +140,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
-		for (Map.Entry<String, ? extends Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		Map<Integer, LifecycleGroup> phases = new HashMap<>();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
@@ -139,11 +149,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
-				group.add(entry.getKey(), bean);
+				group.add(beanName, bean);
 			}
-		}
-		if (phases.size() > 0) {
-			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
+		});
+		if (!phases.isEmpty()) {
+			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys) {
 				phases.get(key).start();
@@ -160,7 +170,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null && !this.equals(bean)) {
-			String[] dependenciesForBean = this.beanFactory.getDependenciesForBean(beanName);
+			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
 			for (String dependency : dependenciesForBean) {
 				doStart(lifecycleBeans, dependency, autoStartupOnly);
 			}
@@ -184,19 +194,18 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private void stopBeans() {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
-		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle bean = entry.getValue();
+		Map<Integer, LifecycleGroup> phases = new HashMap<>();
+		lifecycleBeans.forEach((beanName, bean) -> {
 			int shutdownOrder = getPhase(bean);
 			LifecycleGroup group = phases.get(shutdownOrder);
 			if (group == null) {
 				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
 				phases.put(shutdownOrder, group);
 			}
-			group.add(entry.getKey(), bean);
-		}
-		if (phases.size() > 0) {
-			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
+			group.add(beanName, bean);
+		});
+		if (!phases.isEmpty()) {
+			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());
 			for (Integer key : keys) {
 				phases.get(key).stop();
@@ -215,7 +224,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null) {
-			String[] dependentBeans = this.beanFactory.getDependentBeans(beanName);
+			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
 			for (String dependentBean : dependentBeans) {
 				doStop(lifecycleBeans, dependentBean, latch, countDownBeanNames);
 			}
@@ -226,14 +235,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
-						((SmartLifecycle) bean).stop(new Runnable() {
-							@Override
-							public void run() {
-								latch.countDown();
-								countDownBeanNames.remove(beanName);
-								if (logger.isDebugEnabled()) {
-									logger.debug("Bean '" + beanName + "' completed its stop procedure");
-								}
+						((SmartLifecycle) bean).stop(() -> {
+							latch.countDown();
+							countDownBeanNames.remove(beanName);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Bean '" + beanName + "' completed its stop procedure");
 							}
 						});
 					}
@@ -269,16 +275,17 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @return the Map of applicable beans, with bean names as keys and bean instances as values
 	 */
 	protected Map<String, Lifecycle> getLifecycleBeans() {
-		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
-		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		Map<String, Lifecycle> beans = new LinkedHashMap<>();
+		String[] beanNames = getBeanFactory().getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
-			boolean isFactoryBean = this.beanFactory.isFactoryBean(beanNameToRegister);
+			boolean isFactoryBean = getBeanFactory().isFactoryBean(beanNameToRegister);
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
-			if ((this.beanFactory.containsSingleton(beanNameToRegister) &&
-					(!isFactoryBean || Lifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck)))) ||
-					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck))) {
-				Lifecycle bean = this.beanFactory.getBean(beanNameToCheck, Lifecycle.class);
+			if ((getBeanFactory().containsSingleton(beanNameToRegister) &&
+					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck))) ||
+					matchesBeanType(SmartLifecycle.class, beanNameToCheck)) {
+				Lifecycle bean = getBeanFactory().getBean(beanNameToCheck, Lifecycle.class);
 				if (bean != this) {
 					beans.put(beanNameToRegister, bean);
 				}
@@ -287,12 +294,17 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		return beans;
 	}
 
+	private boolean matchesBeanType(Class<?> targetType, String beanName) {
+		Class<?> beanType = getBeanFactory().getType(beanName);
+		return (beanType != null && targetType.isAssignableFrom(beanType));
+	}
+
 	/**
 	 * Determine the lifecycle phase of the given bean.
 	 * <p>The default implementation checks for the {@link Phased} interface.
 	 * Can be overridden to apply other/further policies.
 	 * @param bean the bean to introspect
-	 * @return the phase an an integer value. The suggested default is 0.
+	 * @return the phase an integer value. The suggested default is 0.
 	 * @see Phased
 	 * @see SmartLifecycle
 	 */
@@ -307,7 +319,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class LifecycleGroup {
 
-		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
+		private final List<LifecycleGroupMember> members = new ArrayList<>();
 
 		private final int phase;
 
@@ -357,7 +369,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			Collections.sort(this.members, Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
-			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<String>());
+			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
 			for (LifecycleGroupMember member : this.members) {
 				if (this.lifecycleBeans.containsKey(member.name)) {
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);

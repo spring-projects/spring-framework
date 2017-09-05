@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
@@ -37,7 +38,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class BeanNamePointcutTests {
+public class BeanNamePointcutTests {
 
 	private ITestBean testBean1;
 	private ITestBean testBean2;
@@ -68,6 +69,7 @@ public final class BeanNamePointcutTests {
 
 		counterAspect.reset();
 	}
+
 
 	// We don't need to test all combination of pointcuts due to BeanNamePointcutMatchingTests
 
@@ -128,7 +130,7 @@ public final class BeanNamePointcutTests {
 		private int interceptionCount;
 
 		@Override
-		public void before(Method method, Object[] args, Object target) throws Throwable {
+		public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 			interceptionCount++;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import org.xml.sax.InputSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring class path (or JAR file).
  *
- * <p>Fetches "spring-beans-2.0.dtd" from the class path resource
- * "/org/springframework/beans/factory/xml/spring-beans-2.0.dtd",
+ * <p>Fetches "spring-beans.dtd" from the class path resource
+ * "/org/springframework/beans/factory/xml/spring-beans.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
  * in the DTD name or as "http://www.springframework.org/dtd/spring-beans-2.0.dtd".
  *
@@ -44,15 +45,14 @@ public class BeansDtdResolver implements EntityResolver {
 
 	private static final String DTD_EXTENSION = ".dtd";
 
-	private static final String DTD_FILENAME = "spring-beans-2.0";
-
 	private static final String DTD_NAME = "spring-beans";
 
 	private static final Log logger = LogFactory.getLog(BeansDtdResolver.class);
 
 
 	@Override
-	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
+	@Nullable
+	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
@@ -61,7 +61,7 @@ public class BeansDtdResolver implements EntityResolver {
 			int lastPathSeparator = systemId.lastIndexOf("/");
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
 			if (dtdNameStart != -1) {
-				String dtdFile = DTD_FILENAME + DTD_EXTENSION;
+				String dtdFile = DTD_NAME + DTD_EXTENSION;
 				if (logger.isTraceEnabled()) {
 					logger.trace("Trying to locate [" + dtdFile + "] in Spring jar on classpath");
 				}

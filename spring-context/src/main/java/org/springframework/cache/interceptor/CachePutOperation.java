@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,61 @@
 
 package org.springframework.cache.interceptor;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Class describing a cache 'put' operation.
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Marcin Kamionowski
  * @since 3.1
  */
 public class CachePutOperation extends CacheOperation {
 
-	private String unless;
+	@Nullable
+	private final String unless;
 
 
+	/**
+	 * @since 4.3
+	 */
+	public CachePutOperation(CachePutOperation.Builder b) {
+		super(b);
+		this.unless = b.unless;
+	}
+
+
+	@Nullable
 	public String getUnless() {
-		return unless;
+		return this.unless;
 	}
 
-	public void setUnless(String unless) {
-		this.unless = unless;
+
+	/**
+	 * @since 4.3
+	 */
+	public static class Builder extends CacheOperation.Builder {
+
+		@Nullable
+		private String unless;
+
+		public void setUnless(String unless) {
+			this.unless = unless;
+		}
+
+		@Override
+		protected StringBuilder getOperationDescription() {
+			StringBuilder sb = super.getOperationDescription();
+			sb.append(" | unless='");
+			sb.append(this.unless);
+			sb.append("'");
+			return sb;
+		}
+
+		public CachePutOperation build() {
+			return new CachePutOperation(this);
+		}
 	}
 
-	@Override
-	protected StringBuilder getOperationDescription() {
-		StringBuilder sb = super.getOperationDescription();
-		sb.append(" | unless='");
-		sb.append(this.unless);
-		sb.append("'");
-		return sb;
-	}
 }

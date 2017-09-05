@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.WebUtils;
@@ -87,6 +89,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @see WebContentInterceptor
  */
 public abstract class AbstractController extends WebContentGenerator implements Controller {
@@ -146,8 +149,14 @@ public abstract class AbstractController extends WebContentGenerator implements 
 
 
 	@Override
+	@Nullable
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
+		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+			response.setHeader("Allow", getAllowHeader());
+			return null;
+		}
 
 		// Delegate to WebContentGenerator for checking and preparing.
 		checkRequest(request);
@@ -172,6 +181,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * The contract is the same as for {@code handleRequest}.
 	 * @see #handleRequest
 	 */
+	@Nullable
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 

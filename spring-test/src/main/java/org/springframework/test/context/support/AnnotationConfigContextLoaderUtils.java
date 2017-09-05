@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 
@@ -60,7 +61,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	public static Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
 
-		List<Class<?>> configClasses = new ArrayList<Class<?>>();
+		List<Class<?>> configClasses = new ArrayList<>();
 
 		for (Class<?> candidate : declaringClass.getDeclaredClasses()) {
 			if (isDefaultConfigurationClassCandidate(candidate)) {
@@ -101,9 +102,9 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * @param clazz the class to check
 	 * @return {@code true} if the supplied class meets the candidate criteria
 	 */
-	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
+	private static boolean isDefaultConfigurationClassCandidate(@Nullable Class<?> clazz) {
 		return (clazz != null && isStaticNonPrivateAndNonFinal(clazz) &&
-				(AnnotationUtils.findAnnotation(clazz, Configuration.class) != null));
+				AnnotatedElementUtils.hasAnnotation(clazz, Configuration.class));
 	}
 
 	private static boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {

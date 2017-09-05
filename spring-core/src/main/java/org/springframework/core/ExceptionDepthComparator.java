@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 			return exceptionTypes.iterator().next();
 		}
 		List<Class<? extends Throwable>> handledExceptions =
-				new ArrayList<Class<? extends Throwable>>(exceptionTypes);
+				new ArrayList<>(exceptionTypes);
 		Collections.sort(handledExceptions, new ExceptionDepthComparator(targetException));
 		return handledExceptions.get(0);
 	}

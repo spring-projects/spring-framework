@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,7 +251,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		ctx.addMethodResolver(dummy);
 		assertEquals(2, ctx.getMethodResolvers().size());
 
-		List<MethodResolver> copy = new ArrayList<MethodResolver>();
+		List<MethodResolver> copy = new ArrayList<>();
 		copy.addAll(ctx.getMethodResolvers());
 		assertTrue(ctx.removeMethodResolver(dummy));
 		assertFalse(ctx.removeMethodResolver(dummy));
@@ -341,7 +341,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		@Override
 		public List<Method> filter(List<Method> methods) {
 			filterCalled = true;
-			List<Method> forRemoval = new ArrayList<Method>();
+			List<Method> forRemoval = new ArrayList<>();
 			for (Method method: methods) {
 				if (removeIfNotAnnotated && !isAnnotated(method)) {
 					forRemoval.add(method);

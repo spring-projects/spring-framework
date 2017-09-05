@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,6 +58,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	private final SimpUserRegistry userRegistry;
 
 	private String prefix = "/user/";
+
+	private boolean keepLeadingSlash = true;
 
 
 	/**
@@ -94,19 +98,41 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return this.prefix;
 	}
 
+	/**
+	 * Provide the {@code PathMatcher} in use for working with destinations
+	 * which in turn helps to determine whether the leading slash should be
+	 * kept in actual destinations after removing the
+	 * {@link #setUserDestinationPrefix userDestinationPrefix}.
+	 * <p>By default actual destinations have a leading slash, e.g.
+	 * {@code /queue/position-updates} which makes sense with brokers that
+	 * support destinations with slash as separator. When a {@code PathMatcher}
+	 * is provided that supports an alternative separator, then resulting
+	 * destinations won't have a leading slash, e.g. {@code
+	 * jms.queue.position-updates}.
+	 * @param pathMatcher the PathMatcher used to work with destinations
+	 * @since 4.3
+	 */
+	public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
+		if (pathMatcher != null) {
+			this.keepLeadingSlash = pathMatcher.combine("1", "2").equals("1/2");
+		}
+	}
+
 
 	@Override
+	@Nullable
 	public UserDestinationResult resolveDestination(Message<?> message) {
-		String sourceDestination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		ParseResult parseResult = parse(message);
 		if (parseResult == null) {
 			return null;
 		}
 		String user = parseResult.getUser();
-		Set<String> targetSet = new HashSet<String>();
+		String sourceDestination = parseResult.getSourceDestination();
+		Set<String> targetSet = new HashSet<>();
 		for (String sessionId : parseResult.getSessionIds()) {
 			String actualDestination = parseResult.getActualDestination();
-			String targetDestination = getTargetDestination(sourceDestination, actualDestination, sessionId, user);
+			String targetDestination = getTargetDestination(
+					sourceDestination, actualDestination, sessionId, user);
 			if (targetDestination != null) {
 				targetSet.add(targetDestination);
 			}
@@ -115,61 +141,88 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return new UserDestinationResult(sourceDestination, targetSet, subscribeDestination, user);
 	}
 
+	@Nullable
 	private ParseResult parse(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
-		String destination = SimpMessageHeaderAccessor.getDestination(headers);
-		if (destination == null || !checkDestination(destination, this.prefix)) {
+		String sourceDestination = SimpMessageHeaderAccessor.getDestination(headers);
+		if (sourceDestination == null || !checkDestination(sourceDestination, this.prefix)) {
 			return null;
 		}
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
-		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			if (sessionId == null) {
-				logger.error("No session id. Ignoring " + message);
-				return null;
+		if (messageType != null) {
+			switch (messageType) {
+				case SUBSCRIBE:
+				case UNSUBSCRIBE:
+					return parseSubscriptionMessage(message, sourceDestination);
+				case MESSAGE:
+					return parseMessage(headers, sourceDestination);
 			}
-			int prefixEnd = this.prefix.length() - 1;
-			String actualDestination = destination.substring(prefixEnd);
-			String user = (principal != null ? principal.getName() : null);
-			return new ParseResult(actualDestination, destination, Collections.singleton(sessionId), user);
 		}
-		else if (SimpMessageType.MESSAGE.equals(messageType)) {
-			int prefixEnd = this.prefix.length();
-			int userEnd = destination.indexOf('/', prefixEnd);
-			Assert.isTrue(userEnd > 0, "Expected destination pattern \"/user/{userId}/**\"");
-			String actualDestination = destination.substring(userEnd);
-			String subscribeDestination = this.prefix.substring(0, prefixEnd - 1) + actualDestination;
-			String userName = destination.substring(prefixEnd, userEnd);
-			userName = StringUtils.replace(userName, "%2F", "/");
-			Set<String> sessionIds;
-			if (userName.equals(sessionId)) {
-				userName = null;
+		return null;
+	}
+
+	private ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		if (sessionId == null) {
+			logger.error("No session id. Ignoring " + message);
+			return null;
+		}
+		int prefixEnd = this.prefix.length() - 1;
+		String actualDestination = sourceDestination.substring(prefixEnd);
+		if (!this.keepLeadingSlash) {
+			actualDestination = actualDestination.substring(1);
+		}
+		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
+		String user = (principal != null ? principal.getName() : null);
+		Set<String> sessionIds = Collections.singleton(sessionId);
+		return new ParseResult(sourceDestination, actualDestination, sourceDestination, sessionIds, user);
+	}
+
+	private ParseResult parseMessage(MessageHeaders headers, String sourceDest) {
+		int prefixEnd = this.prefix.length();
+		int userEnd = sourceDest.indexOf('/', prefixEnd);
+		Assert.isTrue(userEnd > 0, "Expected destination pattern \"/user/{userId}/**\"");
+		String actualDest = sourceDest.substring(userEnd);
+		String subscribeDest = this.prefix.substring(0, prefixEnd - 1) + actualDest;
+		String userName = sourceDest.substring(prefixEnd, userEnd);
+		userName = StringUtils.replace(userName, "%2F", "/");
+
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		Set<String> sessionIds;
+		if (userName.equals(sessionId)) {
+			userName = null;
+			sessionIds = Collections.singleton(sessionId);
+		}
+		else {
+			sessionIds = getSessionIdsByUser(userName, sessionId);
+		}
+
+		if (!this.keepLeadingSlash) {
+			actualDest = actualDest.substring(1);
+		}
+		return new ParseResult(sourceDest, actualDest, subscribeDest, sessionIds, userName);
+	}
+
+	private Set<String> getSessionIdsByUser(String userName, @Nullable String sessionId) {
+		Set<String> sessionIds;
+		SimpUser user = this.userRegistry.getUser(userName);
+		if (user != null) {
+			if (sessionId != null && user.getSession(sessionId) != null) {
 				sessionIds = Collections.singleton(sessionId);
 			}
 			else {
-				SimpUser user = this.userRegistry.getUser(userName);
-				if (user != null) {
-					if (user.getSession(sessionId) != null) {
-						sessionIds = Collections.singleton(sessionId);
-					}
-					else {
-						Set<SimpSession> sessions = user.getSessions();
-						sessionIds = new HashSet<String>(sessions.size());
-						for (SimpSession session : sessions) {
-							sessionIds.add(session.getId());
-						}
-					}
-				}
-				else {
-					sessionIds = Collections.<String>emptySet();
+				Set<SimpSession> sessions = user.getSessions();
+				sessionIds = new HashSet<>(sessions.size());
+				for (SimpSession session : sessions) {
+					sessionIds.add(session.getId());
 				}
 			}
-			return new ParseResult(actualDestination, subscribeDestination, sessionIds, userName);
 		}
 		else {
-			return null;
+			sessionIds = Collections.emptySet();
 		}
+		return sessionIds;
 	}
 
 	protected boolean checkDestination(String destination, String requiredPrefix) {
@@ -186,8 +239,9 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @return a target destination, or {@code null} if none
 	 */
 	@SuppressWarnings("unused")
+	@Nullable
 	protected String getTargetDestination(String sourceDestination, String actualDestination,
-			String sessionId, String user) {
+			String sessionId, @Nullable String user) {
 
 		return actualDestination + "-user" + sessionId;
 	}
@@ -203,22 +257,30 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 */
 	private static class ParseResult {
 
+		private final String sourceDestination;
+
 		private final String actualDestination;
 
 		private final String subscribeDestination;
 
 		private final Set<String> sessionIds;
 
+		@Nullable
 		private final String user;
 
+		public ParseResult(String sourceDest, String actualDest, String subscribeDest,
+				Set<String> sessionIds, @Nullable String user) {
 
-		public ParseResult(String actualDest, String subscribeDest, Set<String> sessionIds, String user) {
+			this.sourceDestination = sourceDest;
 			this.actualDestination = actualDest;
 			this.subscribeDestination = subscribeDest;
 			this.sessionIds = sessionIds;
 			this.user = user;
 		}
 
+		public String getSourceDestination() {
+			return this.sourceDestination;
+		}
 
 		public String getActualDestination() {
 			return this.actualDestination;
@@ -232,6 +294,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return this.sessionIds;
 		}
 
+		@Nullable
 		public String getUser() {
 			return this.user;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.jms.listener.endpoint.StubJmsActivationSpecFactory;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -124,12 +125,12 @@ public class JmsListenerContainerFactoryTests {
 	@Test
 	public void jcaExclusiveProperties() {
 		DefaultJcaListenerContainerFactory factory = new DefaultJcaListenerContainerFactory();
-		factory.setDestinationResolver(destinationResolver);
+		factory.setDestinationResolver(this.destinationResolver);
 		factory.setActivationSpecFactory(new StubJmsActivationSpecFactory());
 
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setMessageListener(new MessageListenerAdapter());
-		thrown.expect(IllegalStateException.class);
+		this.thrown.expect(IllegalStateException.class);
 		factory.createListenerContainer(endpoint);
 	}
 
@@ -151,48 +152,52 @@ public class JmsListenerContainerFactoryTests {
 
 
 	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory<?> factory) {
-		factory.setConnectionFactory(connectionFactory);
-		factory.setDestinationResolver(destinationResolver);
-		factory.setMessageConverter(messageConverter);
+		factory.setConnectionFactory(this.connectionFactory);
+		factory.setDestinationResolver(this.destinationResolver);
+		factory.setMessageConverter(this.messageConverter);
 		factory.setSessionTransacted(true);
 		factory.setSessionAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
 		factory.setPubSubDomain(true);
 		factory.setReplyPubSubDomain(true);
+		factory.setReplyQosSettings(new QosSettings(1, 7, 5000));
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
 		factory.setAutoStartup(false);
 	}
 
 	private void assertDefaultJmsConfig(AbstractMessageListenerContainer container) {
-		assertEquals(connectionFactory, container.getConnectionFactory());
-		assertEquals(destinationResolver, container.getDestinationResolver());
-		assertEquals(messageConverter, container.getMessageConverter());
+		assertEquals(this.connectionFactory, container.getConnectionFactory());
+		assertEquals(this.destinationResolver, container.getDestinationResolver());
+		assertEquals(this.messageConverter, container.getMessageConverter());
 		assertEquals(true, container.isSessionTransacted());
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, container.getSessionAcknowledgeMode());
 		assertEquals(true, container.isPubSubDomain());
 		assertEquals(true, container.isReplyPubSubDomain());
+		assertEquals(new QosSettings(1, 7, 5000), container.getReplyQosSettings());
 		assertEquals(true, container.isSubscriptionDurable());
 		assertEquals("client-1234", container.getClientId());
 		assertEquals(false, container.isAutoStartup());
 	}
 
 	private void setDefaultJcaConfig(DefaultJcaListenerContainerFactory factory) {
-		factory.setDestinationResolver(destinationResolver);
-		factory.setTransactionManager(transactionManager);
-		factory.setMessageConverter(messageConverter);
+		factory.setDestinationResolver(this.destinationResolver);
+		factory.setTransactionManager(this.transactionManager);
+		factory.setMessageConverter(this.messageConverter);
 		factory.setAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
 		factory.setPubSubDomain(true);
+		factory.setReplyQosSettings(new QosSettings(1, 7, 5000));
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
 	}
 
 	private void assertDefaultJcaConfig(JmsMessageEndpointManager container) {
-		assertEquals(messageConverter, container.getMessageConverter());
-		assertEquals(destinationResolver, container.getDestinationResolver());
+		assertEquals(this.messageConverter, container.getMessageConverter());
+		assertEquals(this.destinationResolver, container.getDestinationResolver());
 		JmsActivationSpecConfig config = container.getActivationSpecConfig();
 		assertNotNull(config);
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, config.getAcknowledgeMode());
 		assertEquals(true, config.isPubSubDomain());
+		assertEquals(new QosSettings(1, 7, 5000), container.getReplyQosSettings());
 		assertEquals(true, config.isSubscriptionDurable());
 		assertEquals("client-1234", config.getClientId());
 	}

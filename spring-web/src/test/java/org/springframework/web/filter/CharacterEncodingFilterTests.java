@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,28 @@ public class CharacterEncodingFilterTests {
 		verify(request).setCharacterEncoding(ENCODING);
 		verify(request).setAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		verify(request).removeAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+		verify(filterChain).doFilter(request, response);
+	}
+
+	// SPR-14240
+	@Test
+	public void setForceEncodingOnRequestOnly() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		request.setCharacterEncoding(ENCODING);
+		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
+		given(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).willReturn(null);
+
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain filterChain = mock(FilterChain.class);
+
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING, true, false);
+		filter.init(new MockFilterConfig(FILTER_NAME));
+		filter.doFilter(request, response, filterChain);
+
+		verify(request).setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
+		verify(request).removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+		verify(request, times(2)).setCharacterEncoding(ENCODING);
+		verify(response, never()).setCharacterEncoding(ENCODING);
 		verify(filterChain).doFilter(request, response);
 	}
 

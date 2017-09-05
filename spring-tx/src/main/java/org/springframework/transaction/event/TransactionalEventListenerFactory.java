@@ -41,7 +41,7 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	@Override
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 

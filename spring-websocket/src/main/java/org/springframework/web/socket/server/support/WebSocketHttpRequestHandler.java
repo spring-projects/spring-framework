@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.ServletContextAware;
@@ -64,7 +65,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 
 	private final HandshakeHandler handshakeHandler;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private volatile boolean running = false;
 
@@ -98,7 +99,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	/**
 	 * Configure one or more WebSocket handshake request interceptors.
 	 */
-	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {
+	public void setHandshakeInterceptors(@Nullable List<HandshakeInterceptor> interceptors) {
 		this.interceptors.clear();
 		if (interceptors != null) {
 			this.interceptors.addAll(interceptors);
@@ -159,7 +160,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 			if (logger.isDebugEnabled()) {
 				logger.debug(servletRequest.getMethod() + " " + servletRequest.getRequestURI());
 			}
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}

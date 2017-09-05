@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -82,6 +84,14 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation always returns {@code false}.
+	 */
+	@Override
+	public boolean isFile() {
+		return false;
+	}
+
+	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
 	 */
@@ -115,16 +125,25 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation returns {@link Channels#newChannel(InputStream)}
+	 * with the result of {@link #getInputStream()}.
+	 * <p>This is the same as in {@link Resource}'s corresponding default method
+	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return Channels.newChannel(getInputStream());
+	}
+
+	/**
 	 * This implementation reads the entire InputStream to calculate the
 	 * content length. Subclasses will almost always be able to provide
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
-	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	@Override
 	public long contentLength() throws IOException {
-		InputStream is = this.getInputStream();
-		Assert.state(is != null, "resource input stream must not be null");
+		InputStream is = getInputStream();
 		try {
 			long size = 0;
 			byte[] buf = new byte[255];
@@ -162,8 +181,9 @@ public abstract class AbstractResource implements Resource {
 	 * Determine the File to use for timestamp checking.
 	 * <p>The default implementation delegates to {@link #getFile()}.
 	 * @return the File to use for timestamp checking (never {@code null})
-	 * @throws IOException if the resource cannot be resolved as absolute
-	 * file path, i.e. if the resource is not available in a file system
+	 * @throws FileNotFoundException if the resource cannot be resolved as
+	 * an absolute file path, i.e. is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
 	 */
 	protected File getFileForLastModifiedCheck() throws IOException {
 		return getFile();
@@ -183,6 +203,7 @@ public abstract class AbstractResource implements Resource {
 	 * assuming that this resource type does not have a filename.
 	 */
 	@Override
+	@Nullable
 	public String getFilename() {
 		return null;
 	}

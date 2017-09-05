@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import org.springframework.aop.MethodMatcher;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.IOther;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -120,7 +121,7 @@ public class MethodMatchersTests {
 		}
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass) {
 			return m.getName().startsWith(prefix);
 		}
 	}
@@ -129,7 +130,7 @@ public class MethodMatchersTests {
 	private static class TestDynamicMethodMatcherWhichMatches extends DynamicMethodMatcher {
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass, Object... args) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 			return true;
 		}
 	}
@@ -138,7 +139,7 @@ public class MethodMatchersTests {
 	private static class TestDynamicMethodMatcherWhichDoesNotMatch extends DynamicMethodMatcher {
 
 		@Override
-		public boolean matches(Method m, Class<?> targetClass, Object... args) {
+		public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 			return false;
 		}
 	}

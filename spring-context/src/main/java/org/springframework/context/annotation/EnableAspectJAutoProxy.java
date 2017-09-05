@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
  * &#064;Configuration
  * &#064;EnableAspectJAutoProxy
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public FooService fooService() {
  *         return new FooService();
@@ -47,12 +48,14 @@ import java.lang.annotation.Target;
  *
  * <pre class="code">
  * public class FooService {
+ *
  *     // various methods
  * }</pre>
  *
  * <pre class="code">
  * &#064;Aspect
  * public class MyAspect {
+ *
  *     &#064;Before("execution(* FooService+.*(..))")
  *     public void advice() {
  *         // advise FooService methods as appropriate
@@ -66,6 +69,7 @@ import java.lang.annotation.Target;
  * <p>Users can control the type of proxy that gets created for {@code FooService} using
  * the {@link #proxyTargetClass()} attribute. The following enables CGLIB-style 'subclass'
  * proxies as opposed to the default interface-based JDK proxy approach.
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableAspectJAutoProxy(proxyTargetClass=true)
@@ -75,6 +79,7 @@ import java.lang.annotation.Target;
  *
  * <p>Note that {@code @Aspect} beans may be component-scanned like any other. Simply
  * mark the aspect with both {@code @Aspect} and {@code @Component}:
+ *
  * <pre class="code">
  * package com.foo;
  *
@@ -86,15 +91,18 @@ import java.lang.annotation.Target;
  * public class MyAspect { ... }</pre>
  *
  * Then use the @{@link ComponentScan} annotation to pick both up:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;ComponentScan("com.foo")
  * &#064;EnableAspectJAutoProxy
  * public class AppConfig {
+ *
  *     // no explicit &#064Bean definitions required
  * }</pre>
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see org.aspectj.lang.annotation.Aspect
  */
@@ -109,5 +117,13 @@ public @interface EnableAspectJAutoProxy {
 	 * to standard Java interface-based proxies. The default is {@code false}.
 	 */
 	boolean proxyTargetClass() default false;
+
+	/**
+	 * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
+	 * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
+	 * Off by default, i.e. no guarantees that {@code AopContext} access will work.
+	 * @since 4.3.1
+	 */
+	boolean exposeProxy() default false;
 
 }

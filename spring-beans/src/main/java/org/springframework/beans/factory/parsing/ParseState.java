@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.parsing;
 
 import java.util.Stack;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during
@@ -47,7 +49,7 @@ public final class ParseState {
 	 * Create a new {@code ParseState} with an empty {@link Stack}.
 	 */
 	public ParseState() {
-		this.state = new Stack<Entry>();
+		this.state = new Stack<>();
 	}
 
 	/**
@@ -78,6 +80,7 @@ public final class ParseState {
 	 * Return the {@link Entry} currently at the top of the {@link Stack} or
 	 * {@code null} if the {@link Stack} is empty.
 	 */
+	@Nullable
 	public Entry peek() {
 		return this.state.empty() ? null : this.state.peek();
 	}

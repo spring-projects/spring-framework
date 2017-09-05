@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.test.web.client.match;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
-
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Factory for assertions on the request content using
@@ -66,6 +65,23 @@ public class JsonPathRequestMatchers {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
 				JsonPathRequestMatchers.this.jsonPathHelper.assertValue(request.getBodyAsString(), matcher);
+			}
+		};
+	}
+
+	/**
+	 * An overloaded variant of (@link {@link #value(Matcher)} that also
+	 * accepts a target type for the resulting value that the matcher can work
+	 * reliably against. This can be useful for matching numbers reliably for
+	 * example coercing an integer into a double.
+	 * @since 4.3.3
+	 */
+	public <T> RequestMatcher value(final Matcher<T> matcher, final Class<T> targetType) {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				String body = request.getBodyAsString();
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValue(body, matcher, targetType);
 			}
 		};
 	}
@@ -235,8 +251,8 @@ public class JsonPathRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (ParseException e) {
-				throw new AssertionError("Failed to parse JSON request content: " + e.getMessage());
+			catch (ParseException ex) {
+				throw new AssertionError("Failed to parse JSON request content", ex);
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -84,13 +85,14 @@ public class SubProtocolWebSocketHandler
 	private final SubscribableChannel clientOutboundChannel;
 
 	private final Map<String, SubProtocolHandler> protocolHandlerLookup =
-			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
+			new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<SubProtocolHandler>();
+	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<>();
 
+	@Nullable
 	private SubProtocolHandler defaultProtocolHandler;
 
-	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<String, WebSocketSessionHolder>();
+	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();
 
 	private int sendTimeLimit = 10 * 1000;
 
@@ -134,7 +136,7 @@ public class SubProtocolWebSocketHandler
 	}
 
 	public List<SubProtocolHandler> getProtocolHandlers() {
-		return new ArrayList<SubProtocolHandler>(this.protocolHandlers);
+		return new ArrayList<>(this.protocolHandlers);
 	}
 
 	/**
@@ -170,7 +172,7 @@ public class SubProtocolWebSocketHandler
 	 * sub-protocol.
 	 * @param defaultProtocolHandler the default handler
 	 */
-	public void setDefaultProtocolHandler(SubProtocolHandler defaultProtocolHandler) {
+	public void setDefaultProtocolHandler(@Nullable SubProtocolHandler defaultProtocolHandler) {
 		this.defaultProtocolHandler = defaultProtocolHandler;
 		if (this.protocolHandlerLookup.isEmpty()) {
 			setProtocolHandlers(Collections.singletonList(defaultProtocolHandler));
@@ -180,6 +182,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return the default sub-protocol handler to use.
 	 */
+	@Nullable
 	public SubProtocolHandler getDefaultProtocolHandler() {
 		return this.defaultProtocolHandler;
 	}
@@ -188,7 +191,7 @@ public class SubProtocolWebSocketHandler
 	 * Return all supported protocols.
 	 */
 	public List<String> getSubProtocols() {
-		return new ArrayList<String>(this.protocolHandlerLookup.keySet());
+		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
 
 	/**
@@ -240,13 +243,6 @@ public class SubProtocolWebSocketHandler
 	}
 
 	@Override
-	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
-
-	@Override
 	public final void start() {
 		Assert.isTrue(this.defaultProtocolHandler != null || !this.protocolHandlers.isEmpty(), "No handlers");
 		synchronized (this.lifecycleMonitor) {
@@ -278,6 +274,13 @@ public class SubProtocolWebSocketHandler
 		synchronized (this.lifecycleMonitor) {
 			stop();
 			callback.run();
+		}
+	}
+
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
 		}
 	}
 

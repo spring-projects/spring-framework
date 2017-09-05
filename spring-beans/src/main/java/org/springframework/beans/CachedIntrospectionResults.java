@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -107,21 +108,21 @@ public class CachedIntrospectionResults {
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
 	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<ClassLoader, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
 	 * This variant is being used for cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> strongClassCache =
-			new ConcurrentHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentHashMap<>(64);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
 	 * This variant is being used for non-cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
-			new ConcurrentReferenceHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentReferenceHashMap<>(64);
 
 
 	/**
@@ -136,7 +137,7 @@ public class CachedIntrospectionResults {
 	 * be paired with a {@link #clearClassLoader} call at application shutdown.
 	 * @param classLoader the ClassLoader to accept
 	 */
-	public static void acceptClassLoader(ClassLoader classLoader) {
+	public static void acceptClassLoader(@Nullable ClassLoader classLoader) {
 		if (classLoader != null) {
 			acceptedClassLoaders.add(classLoader);
 		}
@@ -148,7 +149,7 @@ public class CachedIntrospectionResults {
 	 * removing the ClassLoader (and its children) from the acceptance list.
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
-	public static void clearClassLoader(ClassLoader classLoader) {
+	public static void clearClassLoader(@Nullable ClassLoader classLoader) {
 		for (Iterator<ClassLoader> it = acceptedClassLoaders.iterator(); it.hasNext();) {
 			ClassLoader registeredLoader = it.next();
 			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
@@ -226,7 +227,7 @@ public class CachedIntrospectionResults {
 	 * @param candidate the candidate ClassLoader to check
 	 * @param parent the parent ClassLoader to check for
 	 */
-	private static boolean isUnderneathClassLoader(ClassLoader candidate, ClassLoader parent) {
+	private static boolean isUnderneathClassLoader(@Nullable ClassLoader candidate, @Nullable ClassLoader parent) {
 		if (candidate == parent) {
 			return true;
 		}
@@ -283,7 +284,7 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new LinkedHashMap<String, PropertyDescriptor>();
+			this.propertyDescriptorCache = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
@@ -303,7 +304,25 @@ public class CachedIntrospectionResults {
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 
-			this.typeDescriptorCache = new ConcurrentReferenceHashMap<PropertyDescriptor, TypeDescriptor>();
+			// Explicitly check implemented interfaces for setter/getter methods as well,
+			// in particular for Java 8 default methods...
+			Class<?> clazz = beanClass;
+			while (clazz != null) {
+				Class<?>[] ifcs = clazz.getInterfaces();
+				for (Class<?> ifc : ifcs) {
+					BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
+					PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
+					for (PropertyDescriptor pd : ifcPds) {
+						if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
+							pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+							this.propertyDescriptorCache.put(pd.getName(), pd);
+						}
+					}
+				}
+				clazz = clazz.getSuperclass();
+			}
+
+			this.typeDescriptorCache = new ConcurrentReferenceHashMap<>();
 		}
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
@@ -318,6 +337,7 @@ public class CachedIntrospectionResults {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
+	@Nullable
 	PropertyDescriptor getPropertyDescriptor(String name) {
 		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
 		if (pd == null && StringUtils.hasLength(name)) {
@@ -357,6 +377,7 @@ public class CachedIntrospectionResults {
 		return (existing != null ? existing : td);
 	}
 
+	@Nullable
 	TypeDescriptor getTypeDescriptor(PropertyDescriptor pd) {
 		return this.typeDescriptorCache.get(pd);
 	}

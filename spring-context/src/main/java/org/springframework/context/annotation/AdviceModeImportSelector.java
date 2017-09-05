@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
- /**
+/**
  * Convenient base class for {@link ImportSelector} implementations that select imports
  * based on an {@link AdviceMode} value from an annotation (such as the {@code @Enable*}
  * annotations).
@@ -59,12 +61,14 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 */
 	@Override
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
-		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
-		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
+		Class<?> annType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
+		Assert.state(annType != null, "Unresolvable type argument for AdviceModeImportSelector");
+
+		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annType);
 		if (attributes == null) {
 			throw new IllegalArgumentException(String.format(
 				"@%s is not present on importing class '%s' as expected",
-				annoType.getSimpleName(), importingClassMetadata.getClassName()));
+				annType.getSimpleName(), importingClassMetadata.getClassName()));
 		}
 
 		AdviceMode adviceMode = attributes.getEnum(this.getAdviceModeAttributeName());
@@ -85,6 +89,7 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 * @return array containing classes to import; empty array if none, {@code null} if
 	 * the given {@code AdviceMode} is unknown.
 	 */
+	@Nullable
 	protected abstract String[] selectImports(AdviceMode adviceMode);
 
 }

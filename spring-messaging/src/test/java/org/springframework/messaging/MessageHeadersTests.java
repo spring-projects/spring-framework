@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class MessageHeadersTests {
 	@Test
 	public void testNonTypedAccessOfHeaderValue() {
 		Integer value = new Integer(123);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
 		assertEquals(value, headers.get("test"));
@@ -116,7 +116,7 @@ public class MessageHeadersTests {
 	@Test
 	public void testTypedAccessOfHeaderValue() {
 		Integer value = new Integer(123);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
 		assertEquals(value, headers.get("test", Integer.class));
@@ -125,7 +125,7 @@ public class MessageHeadersTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void testHeaderValueAccessWithIncorrectType() {
 		Integer value = new Integer(123);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
 		assertEquals(value, headers.get("test", String.class));
@@ -133,21 +133,21 @@ public class MessageHeadersTests {
 
 	@Test
 	public void testNullHeaderValue() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertNull(headers.get("nosuchattribute"));
 	}
 
 	@Test
 	public void testNullHeaderValueWithTypedAccess() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertNull(headers.get("nosuchattribute", String.class));
 	}
 
 	@Test
 	public void testHeaderKeys() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("key1", "val1");
 		map.put("key2", new Integer(123));
 		MessageHeaders headers = new MessageHeaders(map);
@@ -158,7 +158,7 @@ public class MessageHeadersTests {
 
 	@Test
 	public void serializeWithAllSerializableHeaders() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("name", "joe");
 		map.put("age", 42);
 		MessageHeaders input = new MessageHeaders(map);
@@ -172,7 +172,7 @@ public class MessageHeadersTests {
 	@Test
 	public void serializeWithNonSerializableHeader() throws Exception {
 		Object address = new Object();
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("name", "joe");
 		map.put("address", address);
 		MessageHeaders input = new MessageHeaders(map);

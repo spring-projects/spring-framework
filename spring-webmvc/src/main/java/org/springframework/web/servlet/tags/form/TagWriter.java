@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.servlet.tags.form;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -44,7 +46,7 @@ public class TagWriter {
 	/**
 	 * Stores {@link TagStateEntry tag state}. Stack model naturally supports tag nesting.
 	 */
-	private final Stack<TagStateEntry> tagState = new Stack<TagStateEntry>();
+	private final Stack<TagStateEntry> tagState = new Stack<>();
 
 
 	/**
@@ -100,7 +102,7 @@ public class TagWriter {
 	 * or zero length.
 	 * @see #writeAttribute(String, String)
 	 */
-	public void writeOptionalAttributeValue(String attributeName, String attributeValue) throws JspException {
+	public void writeOptionalAttributeValue(String attributeName, @Nullable String attributeValue) throws JspException {
 		if (StringUtils.hasText(attributeValue)) {
 			writeAttribute(attributeName, attributeValue);
 		}

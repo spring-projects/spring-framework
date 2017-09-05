@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,11 @@ import org.springframework.protobuf.SecondMsg;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-
 /**
- * Test suite for {@link ProtobufHttpMessageConverter}
+ * Test suite for {@link ProtobufHttpMessageConverter}.
+ *
  * @author Alex Antonov
+ * @author Juergen Hoeller
  */
 public class ProtobufHttpMessageConverterTests {
 
@@ -46,24 +47,21 @@ public class ProtobufHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
 		this.converter = new ProtobufHttpMessageConverter(this.registryInitializer);
 		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 	}
 
+
 	@Test
 	public void extensionRegistryInitialized() {
-	    verify(this.registryInitializer, times(1)).initializeExtensionRegistry(anyObject());
+	    verify(this.registryInitializer, times(1)).initializeExtensionRegistry(any());
 	}
 
 	@Test
 	public void extensionRegistryNull() {
-	     try {
-	     	new ProtobufHttpMessageConverter(null);
-	     } catch (Exception e) {
-	     	fail("Unable to create ProtobufHttpMessageConverter with null extensionRegistry");
-	     }
+		new ProtobufHttpMessageConverter(null);
 	}
 
 	@Test
@@ -73,6 +71,7 @@ public class ProtobufHttpMessageConverterTests {
 		assertTrue(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON));
 		assertTrue(this.converter.canRead(Msg.class, MediaType.APPLICATION_XML));
 		assertTrue(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN));
+
 		// only supported as an output format
 		assertFalse(this.converter.canRead(Msg.class, MediaType.TEXT_HTML));
 	}
@@ -114,9 +113,11 @@ public class ProtobufHttpMessageConverterTests {
 		Message result = Msg.parseFrom(outputMessage.getBodyAsBytes());
 		assertEquals(this.testMsg, result);
 
-		String messageHeader = outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER);
+		String messageHeader =
+				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER);
 		assertEquals("Msg", messageHeader);
-		String schemaHeader = outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER);
+		String schemaHeader =
+				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER);
 		assertEquals("sample.proto", schemaHeader);
 	}
 
@@ -132,4 +133,5 @@ public class ProtobufHttpMessageConverterTests {
 		this.converter.write(this.testMsg, contentType, outputMessage);
 		assertEquals(-1, outputMessage.getHeaders().getContentLength());
 	}
+
 }

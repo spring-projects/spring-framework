@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -37,15 +36,10 @@ import static org.mockito.BDDMockito.*;
  */
 public class DefaultResponseErrorHandlerTests {
 
-	private DefaultResponseErrorHandler handler;
+	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
 
-	private ClientHttpResponse response;
+	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
 
-	@Before
-	public void setUp() throws Exception {
-		handler = new DefaultResponseErrorHandler();
-		response = mock(ClientHttpResponse.class);
-	}
 
 	@Test
 	public void hasErrorTrue() throws Exception {
@@ -103,9 +97,7 @@ public class DefaultResponseErrorHandlerTests {
 		handler.handleError(response);
 	}
 
-	// SPR-9406
-
-	@Test(expected=UnknownHttpStatusCodeException.class)
+	@Test(expected = UnknownHttpStatusCodeException.class)  // SPR-9406
 	public void unknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -117,4 +109,5 @@ public class DefaultResponseErrorHandlerTests {
 
 		handler.handleError(response);
 	}
+
 }

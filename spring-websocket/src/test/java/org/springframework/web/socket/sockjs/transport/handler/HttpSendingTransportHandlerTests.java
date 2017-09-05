@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.sql.Date;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,14 +31,10 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
+import org.springframework.web.util.UriUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpSendingTransportHandler} and sub-classes.
@@ -114,7 +110,8 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		setRequest("POST", "/");
 
 		if (callbackValue != null) {
-			this.servletRequest.setQueryString("c=" + callbackValue);
+			// need to encode the query parameter
+			this.servletRequest.setQueryString("c=" + UriUtils.encodeQueryParam(callbackValue, "UTF-8"));
 			this.servletRequest.addParameter("c", callbackValue);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.web.method.annotation;
 import java.util.ArrayList;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -47,13 +49,16 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	@Nullable
+	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+
+		Assert.state(mavContainer != null, "Errors/BindingResult argument only supported on regular handler methods");
 
 		ModelMap model = mavContainer.getModel();
 		if (model.size() > 0) {
 			int lastIndex = model.size()-1;
-			String lastKey = new ArrayList<String>(model.keySet()).get(lastIndex);
+			String lastKey = new ArrayList<>(model.keySet()).get(lastIndex);
 			if (lastKey.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 				return model.get(lastKey);
 			}

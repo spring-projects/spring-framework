@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	/**
 	 * Contains names of beans that have overrides
 	 */
-	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
+	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 
 	/**
@@ -144,12 +144,14 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 			ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
 
 		BeanDefinition bd = factory.getBeanDefinition(beanName);
-		while (bd.getOriginatingBeanDefinition() != null) {
+		BeanDefinition bdToUse = bd;
+		while (bd != null) {
+			bdToUse = bd;
 			bd = bd.getOriginatingBeanDefinition();
 		}
 		PropertyValue pv = new PropertyValue(property, value);
 		pv.setOptional(this.ignoreInvalidKeys);
-		bd.getPropertyValues().addPropertyValue(pv);
+		bdToUse.getPropertyValues().addPropertyValue(pv);
 	}
 
 
@@ -157,8 +159,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 * Were there overrides for this bean?
 	 * Only valid after processing has occurred at least once.
 	 * @param beanName name of the bean to query status for
-	 * @return whether there were property overrides for
-	 * the named bean
+	 * @return whether there were property overrides for the named bean
 	 */
 	public boolean hasPropertyOverridesFor(String beanName) {
 		return this.beanNames.contains(beanName);

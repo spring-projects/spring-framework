@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
@@ -214,7 +214,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		sac.addApplicationListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
-		Map<String, String> usMessages = new HashMap<String, String>(3);
+		Map<String, String> usMessages = new HashMap<>(3);
 		usMessages.put("message.format.example1", MSG_TXT1_US);
 		usMessages.put("message.format.example2", MSG_TXT2_US);
 		usMessages.put("message.format.example3", MSG_TXT3_US);

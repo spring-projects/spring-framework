@@ -3,38 +3,31 @@
 
 <beans>
 
-	<bean id="rod1" class="org.springframework.tests.sample.beans.DependenciesBean"
-			autowire="byType" dependency-check="objects">
+	<bean id="rod1" class="org.springframework.tests.sample.beans.DependenciesBean" autowire="byType">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod1a" class="org.springframework.tests.sample.beans.DependenciesBean"
-			autowire="autodetect" dependency-check="objects">
+	<bean id="rod1a" class="org.springframework.tests.sample.beans.DependenciesBean" autowire="autodetect">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod2" class="org.springframework.tests.sample.beans.DependenciesBean"
-			autowire="byName" dependency-check="objects">
+	<bean id="rod2" class="org.springframework.tests.sample.beans.DependenciesBean" autowire="byName">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod2a" class="org.springframework.tests.sample.beans.DependenciesBean"
-			autowire="byName" dependency-check="objects">
+	<bean id="rod2a" class="org.springframework.tests.sample.beans.DependenciesBean" autowire="byName">
 		<property name="spouse" ref="spouse"/>
 	</bean>
 
-	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
-			autowire="constructor" dependency-check="objects">
+	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" autowire="constructor">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod3a" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
-			autowire="autodetect" dependency-check="objects">
+	<bean id="rod3a" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" autowire="autodetect">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod4" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
-			scope="prototype" dependency-check="objects">
+	<bean id="rod4" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
 		<!-- Should not pick up spouse automatically -->
 	</bean>
 

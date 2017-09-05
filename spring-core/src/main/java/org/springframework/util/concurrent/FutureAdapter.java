@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Abstract class that adapts a {@link Future} parameterized over S into a {@code
- * Future} parameterized over T. All methods are delegated to the adaptee, where {@link
- * #get()} and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's
- * result.
+ * Abstract class that adapts a {@link Future} parameterized over S into a {@code Future}
+ * parameterized over T. All methods are delegated to the adaptee, where {@link #get()}
+ * and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's result.
  *
  * @author Arjen Poutsma
  * @since 4.0
@@ -38,7 +38,8 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 
 	private final Future<S> adaptee;
 
-	private Object result = null;
+	@Nullable
+	private Object result;
 
 	private State state = State.NEW;
 
@@ -78,16 +79,19 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	}
 
 	@Override
+	@Nullable
 	public T get() throws InterruptedException, ExecutionException {
 		return adaptInternal(this.adaptee.get());
 	}
 
 	@Override
+	@Nullable
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return adaptInternal(this.adaptee.get(timeout, unit));
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	final T adaptInternal(S adapteeResult) throws ExecutionException {
 		synchronized (this.mutex) {
 			switch (this.state) {
@@ -123,6 +127,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	 * Adapts the given adaptee's result into T.
 	 * @return the adapted result
 	 */
+	@Nullable
 	protected abstract T adapt(S adapteeResult) throws ExecutionException;
 
 

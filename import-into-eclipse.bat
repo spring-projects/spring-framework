@@ -1,5 +1,4 @@
 @echo off
-set STS_TEST_VERSION='2.9.2.RELEASE'
 
 set CURRENT_DIR=%~dp0
 cd %CURRENT_DIR%
@@ -8,16 +7,22 @@ cls
 
 echo.
 echo -----------------------------------------------------------------------
-echo Spring Framework Eclipse/STS project import guide
+echo Spring Framework - Eclipse/STS project import guide
 echo.
-echo This script will guide you through the process of importing the
-echo Spring Framework sources into Eclipse/STS. It is recommended that you
-echo have a recent version of the SpringSource Tool Suite (this script has
-echo been tested against STS %STS_TEST_VERSION%), but at the minimum you will
-echo need Eclipse + AJDT.
+echo This script will guide you through the process of importing the Spring
+echo Framework projects into Eclipse or the Spring Tool Suite (STS). It is
+echo recommended that you have a recent version of Eclipse or STS. As a bare
+echo minimum you will need Eclipse with full Java 8 support, the AspectJ
+echo Development Tools (AJDT), and the Groovy Compiler.
 echo.
-echo If you need to download and install STS, please do that now by
-echo visiting http://spring.io/tools/sts/all 
+echo If you need to download and install Eclipse or STS, please do that now
+echo by visiting one of the following sites:
+echo.
+echo - Eclipse downloads: http://download.eclipse.org/eclipse/downloads
+echo - STS downloads: http://spring.io/tools/sts/all
+echo - STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
+echo - ADJT: http://www.eclipse.org/ajdt/downloads/
+echo - Groovy Eclipse: https://github.com/groovy/groovy-eclipse/wiki
 echo.
 echo Otherwise, press enter and we'll begin.
 
@@ -29,8 +34,8 @@ REM - generates OXM test classes to avoid errors on import into Eclipse
 REM - generates metadata for all subprojects
 REM - skips metadata gen for the root project (-x :eclipse) to work
 REM   around Eclipse's inability to import hierarchical project structures
-REM SET COMMAND="./gradlew cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse"
-SET COMMAND=gradlew cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse
+REM SET COMMAND="./gradlew --no-daemon cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse"
+SET COMMAND=gradlew --no-daemon cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse
 
 echo.
 echo -----------------------------------------------------------------------
@@ -69,7 +74,7 @@ echo When the above is complete, return here and press the enter key.
 
 pause
 
-set COMMAND=gradlew :eclipse
+set COMMAND=gradlew --no-daemon :eclipse
 
 echo.
 echo -----------------------------------------------------------------------

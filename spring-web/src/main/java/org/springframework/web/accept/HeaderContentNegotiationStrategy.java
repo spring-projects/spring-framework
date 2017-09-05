@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.web.accept;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -30,32 +30,33 @@ import org.springframework.web.context.request.NativeWebRequest;
  * A {@code ContentNegotiationStrategy} that checks the 'Accept' request header.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public class HeaderContentNegotiationStrategy implements ContentNegotiationStrategy {
 
-
 	/**
 	 * {@inheritDoc}
-	 * @throws HttpMediaTypeNotAcceptableException if the 'Accept' header
-	 * cannot be parsed.
+	 * @throws HttpMediaTypeNotAcceptableException if the 'Accept' header cannot be parsed
 	 */
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
-		String header = request.getHeader(HttpHeaders.ACCEPT);
-		if (!StringUtils.hasText(header)) {
+		String[] headerValueArray = request.getHeaderValues(HttpHeaders.ACCEPT);
+		if (headerValueArray == null) {
 			return Collections.emptyList();
 		}
+
+		List<String> headerValues = Arrays.asList(headerValueArray);
 		try {
-			List<MediaType> mediaTypes = MediaType.parseMediaTypes(header);
+			List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerValues);
 			MediaType.sortBySpecificityAndQuality(mediaTypes);
 			return mediaTypes;
 		}
 		catch (InvalidMediaTypeException ex) {
 			throw new HttpMediaTypeNotAcceptableException(
-					"Could not parse 'Accept' header [" + header + "]: " + ex.getMessage());
+					"Could not parse 'Accept' header " + headerValues + ": " + ex.getMessage());
 		}
 	}
 

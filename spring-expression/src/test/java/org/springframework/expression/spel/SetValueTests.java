@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class SetValueTests extends AbstractExpressionTests {
 
 	private final static boolean DEBUG = false;
 
+
 	@Test
 	public void testSetProperty() {
 		setValue("wonNobelPrize", true);
@@ -61,7 +62,8 @@ public class SetValueTests extends AbstractExpressionTests {
 
 	@Test
 	public void testSetElementOfNull() {
-		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
+				SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test
@@ -90,7 +92,8 @@ public class SetValueTests extends AbstractExpressionTests {
 		try {
 			assertFalse("Should not be writable!",e.isWritable(lContext));
 			fail("Should have had an error because wibble does not really exist");
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 //			org.springframework.expression.spel.SpelEvaluationException: EL1008E:(pos 15): Property or field 'wibble' cannot be found on object of type 'org.springframework.expression.spel.testresources.ArrayContainer' - maybe not public?
 //					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
 			// success!
@@ -110,7 +113,8 @@ public class SetValueTests extends AbstractExpressionTests {
 		try {
 			assertFalse("Should not be writable!",e.isWritable(lContext));
 			fail("Should have had an error because wibble does not really exist");
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			// success!
 		}
 
@@ -119,7 +123,8 @@ public class SetValueTests extends AbstractExpressionTests {
 		try {
 			assertFalse("Should not be writable!",e.isWritable(lContext));
 			fail("Should have had an error because wibble does not really exist");
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			// success!
 		}
 	}
@@ -247,10 +252,12 @@ public class SetValueTests extends AbstractExpressionTests {
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 			e.setValue(lContext, value);
 			fail("expected an error");
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			// success!
 		}
 	}
@@ -268,10 +275,12 @@ public class SetValueTests extends AbstractExpressionTests {
 			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
 			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext,value.getClass()));
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -299,12 +308,15 @@ public class SetValueTests extends AbstractExpressionTests {
 				fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
 //				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
 			}
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
+
 }

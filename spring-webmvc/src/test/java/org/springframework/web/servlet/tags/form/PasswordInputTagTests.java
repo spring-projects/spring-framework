@@ -100,7 +100,8 @@ public class PasswordInputTagTests extends InputTagTests {
 	protected void assertValueAttribute(String output, String expectedValue) {
 		if (this.getPasswordTag().isShowPassword()) {
 			super.assertValueAttribute(output, expectedValue);
-		} else {
+		}
+		else {
 			super.assertValueAttribute(output, "");
 		}
 	}

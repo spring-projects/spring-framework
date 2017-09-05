@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * @author Alef Arendsen
  * @author Rick Evans
  */
-public final class TagUtilsTests {
+public class TagUtilsTests {
 
 	@Test
 	public void getScopeSunnyDay() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,46 +45,46 @@ import static org.junit.Assert.*;
  */
 public class ResourceUrlProviderTests {
 
-	private List<Resource> locations;
+	private final List<Resource> locations = new ArrayList<>();
 
-	private ResourceUrlProvider translator;
+	private final ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 
-	private ResourceHttpRequestHandler handler;
+	private final Map<String, ResourceHttpRequestHandler> handlerMap = new HashMap<>();
 
-	private Map<String, ResourceHttpRequestHandler> handlerMap;
+	private final ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 
 
 	@Before
-	public void setUp() {
-		this.locations = new ArrayList<Resource>();
+	public void setUp() throws Exception {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
-
-		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setServletContext(new MockServletContext());
 		this.handler.setLocations(locations);
-
-		this.handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+		this.handler.afterPropertiesSet();
 		this.handlerMap.put("/resources/**", this.handler);
+		this.urlProvider.setHandlerMap(this.handlerMap);
 	}
+
 
 	@Test
 	public void getStaticResourceUrl() {
-		initTranslator();
-
-		String url = this.translator.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
 		assertEquals("/resources/foo.css", url);
 	}
 
-	// SPR-13374
-	@Test
-	public void getStaticResourceUrlRequestWithRequestParams() {
-		initTranslator();
+	@Test // SPR-13374
+	public void getStaticResourceUrlRequestWithQueryOrHash() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContextPath("/");
 		request.setRequestURI("/");
 
-		String url = this.translator.getForRequestUrl(request, "/resources/foo.css?foo=bar&url=http://example.org");
-		assertEquals("/resources/foo.css?foo=bar&url=http://example.org", url);
+		String url = "/resources/foo.css?foo=bar&url=http://example.org";
+		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
+		assertEquals("/resources/foo.css?foo=bar&url=http://example.org", resolvedUrl);
+
+		url = "/resources/foo.css#hash";
+		resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
+		assertEquals("/resources/foo.css#hash", resolvedUrl);
 	}
 
 	@Test
@@ -94,23 +94,16 @@ public class ResourceUrlProviderTests {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(versionStrategyMap);
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
-		initTranslator();
 
-		String url = this.translator.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
-	private void initTranslator() {
-		this.translator = new ResourceUrlProvider();
-		this.translator.setHandlerMap(this.handlerMap);
-	}
-
-	// SPR-12647
-	@Test
+	@Test // SPR-12647
 	public void bestPatternMatch() throws Exception {
 		ResourceHttpRequestHandler otherHandler = new ResourceHttpRequestHandler();
 		otherHandler.setLocations(this.locations);
@@ -119,36 +112,39 @@ public class ResourceUrlProviderTests {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(versionStrategyMap);
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		otherHandler.setResourceResolvers(resolvers);
 
 		this.handlerMap.put("/resources/*.css", otherHandler);
-		initTranslator();
+		this.urlProvider.setHandlerMap(this.handlerMap);
 
-		String url = this.translator.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
-	// SPR-12592
-	@Test
+	@Test // SPR-12592
 	public void initializeOnce() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(HandlerMappingConfiguration.class);
 		context.refresh();
-		ResourceUrlProvider translator = context.getBean(ResourceUrlProvider.class);
-		assertThat(translator.getHandlerMap(), Matchers.hasKey("/resources/**"));
-		assertFalse(translator.isAutodetect());
+
+		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
+		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
+		assertFalse(urlProviderBean.isAutodetect());
 	}
 
+
 	@Configuration
-	public static class HandlerMappingConfiguration {
+	@SuppressWarnings({"unused", "WeakerAccess"})
+	static class HandlerMappingConfiguration {
+
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
 			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-			HashMap<String, ResourceHttpRequestHandler> handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+			HashMap<String, ResourceHttpRequestHandler> handlerMap = new HashMap<>();
 			handlerMap.put("/resources/**", handler);
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
 			hm.setUrlMap(handlerMap);

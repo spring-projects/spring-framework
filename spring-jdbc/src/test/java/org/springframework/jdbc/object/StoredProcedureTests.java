@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.jdbc.core.support.AbstractSqlTypeValue;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.junit.Assert.*;
@@ -81,7 +82,7 @@ public class StoredProcedureTests {
 
 	@After
 	public void verifyClosed() throws Exception {
-		if(verifyClosedAfter) {
+		if (verifyClosedAfter) {
 			verify(callableStatement).close();
 			verify(connection, atLeastOnce()).close();
 		}
@@ -189,7 +190,7 @@ public class StoredProcedureTests {
 		TestJdbcTemplate t = new TestJdbcTemplate();
 		t.setDataSource(dataSource);
 		// Will fail without the following, because we're not able to get a connection
-		// from the DataSource here if we need to to create an ExceptionTranslator
+		// from the DataSource here if we need to create an ExceptionTranslator
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
 
@@ -447,7 +448,7 @@ public class StoredProcedureTests {
 		}
 
 		public int execute(int intIn) {
-			Map<String, Integer> in = new HashMap<String, Integer>();
+			Map<String, Integer> in = new HashMap<>();
 			in.put("intIn", intIn);
 			Map<String, Object> out = execute(in);
 			return ((Number) out.get("intOut")).intValue();
@@ -468,7 +469,7 @@ public class StoredProcedureTests {
 		}
 
 		public int execute(int amount, int custid) {
-			Map<String, Integer> in = new HashMap<String, Integer>();
+			Map<String, Integer> in = new HashMap<>();
 			in.put("amount", amount);
 			in.put("custid", custid);
 			Map<String, Object> out = execute(in);
@@ -507,7 +508,7 @@ public class StoredProcedureTests {
 		}
 
 		public void execute(String s) {
-			Map<String, String> in = new HashMap<String, String>();
+			Map<String, String> in = new HashMap<>();
 			in.put("ptest", s);
 			execute(in);
 		}
@@ -524,7 +525,7 @@ public class StoredProcedureTests {
 		}
 
 		public void execute() {
-			execute(new HashMap<String, Object>());
+			execute(new HashMap<>());
 		}
 	}
 
@@ -548,7 +549,7 @@ public class StoredProcedureTests {
 		}
 
 		public void execute() {
-			execute(new HashMap<String, Object>());
+			execute(new HashMap<>());
 		}
 	}
 
@@ -566,7 +567,7 @@ public class StoredProcedureTests {
 		}
 
 		public void execute() {
-			execute(new HashMap<String, Object>());
+			execute(new HashMap<>());
 		}
 
 		public int getCount() {
@@ -593,7 +594,7 @@ public class StoredProcedureTests {
 		}
 
 		public Map<String, Object> execute() {
-			return execute(new HashMap<String, Object>());
+			return execute(new HashMap<>());
 		}
 
 		private static class RowMapperImpl implements RowMapper<String> {
@@ -628,7 +629,7 @@ public class StoredProcedureTests {
 
 			@Override
 			public Map<String, ?> createMap(Connection con) throws SQLException {
-				Map<String, Object> inParms = new HashMap<String, Object>();
+				Map<String, Object> inParms = new HashMap<>();
 				String testValue = con.toString();
 				inParms.put("in", testValue);
 				return inParms;
@@ -649,7 +650,7 @@ public class StoredProcedureTests {
 		}
 
 		public Map<String, Object> executeTest(final int[] inValue) {
-			Map<String, AbstractSqlTypeValue> in = new HashMap<String, AbstractSqlTypeValue>();
+			Map<String, AbstractSqlTypeValue> in = new HashMap<>();
 			in.put("in", new AbstractSqlTypeValue() {
 				@Override
 				public Object createTypeValue(Connection con, int type, String typeName) {
@@ -675,7 +676,7 @@ public class StoredProcedureTests {
 		}
 
 		public Map<String, Object> executeTest() {
-			return execute(new HashMap<String, Object>());
+			return execute(new HashMap<>());
 		}
 	}
 
@@ -689,7 +690,8 @@ public class StoredProcedureTests {
 			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
 
 				@Override
-				public DataAccessException translate(String task, String sql,
+				@Nullable
+				public DataAccessException translate(String task, @Nullable String sql,
 						SQLException sqlex) {
 					return new CustomDataException(sql, sqlex);
 				}
@@ -699,7 +701,7 @@ public class StoredProcedureTests {
 		}
 
 		public void execute() {
-			execute(new HashMap<String, Object>());
+			execute(new HashMap<>());
 		}
 	}
 

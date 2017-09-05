@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ package org.springframework.http;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @since 3.0
  * @see HttpStatus.Series
  * @see <a href="http://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
  * @see <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
@@ -127,7 +128,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 302 Moved Temporarily}.
 	 * @see <a href="http://tools.ietf.org/html/rfc1945#section-9.3">HTTP/1.0, section 9.3</a>
-	 * @deprecated In favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
+	 * @deprecated in favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
 	 */
 	@Deprecated
 	MOVED_TEMPORARILY(302, "Moved Temporarily"),
@@ -235,7 +236,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 413 Request Entity Too Large}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1, section 10.4.14</a>
-	 * @deprecated In favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
+	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
 	 */
 	@Deprecated
 	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
@@ -248,7 +249,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 414 Request-URI Too Long}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.15">HTTP/1.1, section 10.4.15</a>
-	 * @deprecated In favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
+	 * @deprecated in favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
 	 */
 	@Deprecated
 	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
@@ -325,9 +326,10 @@ public enum HttpStatus {
 	/**
 	 * {@code 451 Unavailable For Legal Reasons}.
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-legally-restricted-status-04">
-	 *     An HTTP Status Code to Report Legal Obstacles</a>
+	 * An HTTP Status Code to Report Legal Obstacles</a>
+	 * @since 4.3
 	 */
-	UNAVAILABLE_FOR_LEGAL_REASONS(451,"Unavailable For Legal Reasons"),
+	UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons"),
 
 	// --- 5xx Server Error ---
 
@@ -392,16 +394,16 @@ public enum HttpStatus {
 	NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
 
 
-
 	private final int value;
 
 	private final String reasonPhrase;
 
 
-	private HttpStatus(int value, String reasonPhrase) {
+	HttpStatus(int value, String reasonPhrase) {
 		this.value = value;
 		this.reasonPhrase = reasonPhrase;
 	}
+
 
 	/**
 	 * Return the integer value of this status code.
@@ -414,7 +416,7 @@ public enum HttpStatus {
 	 * Return the reason phrase of this status code.
 	 */
 	public String getReasonPhrase() {
-		return reasonPhrase;
+		return this.reasonPhrase;
 	}
 
 	/**
@@ -423,7 +425,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is1xxInformational() {
-		return (Series.INFORMATIONAL.equals(series()));
+		return Series.INFORMATIONAL.equals(series());
 	}
 
 	/**
@@ -432,7 +434,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is2xxSuccessful() {
-		return (Series.SUCCESSFUL.equals(series()));
+		return Series.SUCCESSFUL.equals(series());
 	}
 
 	/**
@@ -441,7 +443,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is3xxRedirection() {
-		return (Series.REDIRECTION.equals(series()));
+		return Series.REDIRECTION.equals(series());
 	}
 
 
@@ -451,7 +453,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is4xxClientError() {
-		return (Series.CLIENT_ERROR.equals(series()));
+		return Series.CLIENT_ERROR.equals(series());
 	}
 
 	/**
@@ -460,7 +462,17 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is5xxServerError() {
-		return (Series.SERVER_ERROR.equals(series()));
+		return Series.SERVER_ERROR.equals(series());
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 */
+	public boolean isError() {
+		return is4xxClientError() || is5xxServerError();
 	}
 
 	/**
@@ -476,7 +488,7 @@ public enum HttpStatus {
 	 */
 	@Override
 	public String toString() {
-		return Integer.toString(value);
+		return Integer.toString(this.value);
 	}
 
 
@@ -497,10 +509,10 @@ public enum HttpStatus {
 
 
 	/**
-	 * Java 5 enumeration of HTTP status series.
+	 * Enumeration of HTTP status series.
 	 * <p>Retrievable via {@link HttpStatus#series()}.
 	 */
-	public static enum Series {
+	public enum Series {
 
 		INFORMATIONAL(1),
 		SUCCESSFUL(2),
@@ -510,7 +522,7 @@ public enum HttpStatus {
 
 		private final int value;
 
-		private Series(int value) {
+		Series(int value) {
 			this.value = value;
 		}
 
@@ -534,7 +546,6 @@ public enum HttpStatus {
 		public static Series valueOf(HttpStatus status) {
 			return valueOf(status.value);
 		}
-
 	}
 
 }

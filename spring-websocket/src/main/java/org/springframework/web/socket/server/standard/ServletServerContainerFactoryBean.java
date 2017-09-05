@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.websocket.server.ServerContainer;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
@@ -40,19 +41,28 @@ import org.springframework.web.context.ServletContextAware;
  * to customize the properties of the (one and only) {@code ServerContainer} instance.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class ServletServerContainerFactoryBean
 		implements FactoryBean<WebSocketContainer>, ServletContextAware, InitializingBean {
 
+	@Nullable
 	private Long asyncSendTimeout;
 
+	@Nullable
 	private Long maxSessionIdleTimeout;
 
+	@Nullable
 	private Integer maxTextMessageBufferSize;
 
+	@Nullable
 	private Integer maxBinaryMessageBufferSize;
 
+	@Nullable
+	private ServletContext servletContext;
+
+	@Nullable
 	private ServerContainer serverContainer;
 
 
@@ -60,7 +70,8 @@ public class ServletServerContainerFactoryBean
 		this.asyncSendTimeout = timeoutInMillis;
 	}
 
-	public long getAsyncSendTimeout() {
+	@Nullable
+	public Long getAsyncSendTimeout() {
 		return this.asyncSendTimeout;
 	}
 
@@ -68,6 +79,7 @@ public class ServletServerContainerFactoryBean
 		this.maxSessionIdleTimeout = timeoutInMillis;
 	}
 
+	@Nullable
 	public Long getMaxSessionIdleTimeout() {
 		return this.maxSessionIdleTimeout;
 	}
@@ -76,6 +88,7 @@ public class ServletServerContainerFactoryBean
 		this.maxTextMessageBufferSize = bufferSize;
 	}
 
+	@Nullable
 	public Integer getMaxTextMessageBufferSize() {
 		return this.maxTextMessageBufferSize;
 	}
@@ -84,20 +97,25 @@ public class ServletServerContainerFactoryBean
 		this.maxBinaryMessageBufferSize = bufferSize;
 	}
 
+	@Nullable
 	public Integer getMaxBinaryMessageBufferSize() {
 		return this.maxBinaryMessageBufferSize;
 	}
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		this.serverContainer = (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+		this.servletContext = servletContext;
 	}
 
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.state(this.serverContainer != null,
+		Assert.state(this.servletContext != null,
 				"A ServletContext is required to access the javax.websocket.server.ServerContainer instance");
+		this.serverContainer = (ServerContainer) this.servletContext.getAttribute(
+				"javax.websocket.server.ServerContainer");
+		Assert.state(this.serverContainer != null,
+				"Attribute 'javax.websocket.server.ServerContainer' not found in ServletContext");
 
 		if (this.asyncSendTimeout != null) {
 			this.serverContainer.setAsyncSendTimeout(this.asyncSendTimeout);
@@ -115,6 +133,7 @@ public class ServletServerContainerFactoryBean
 
 
 	@Override
+	@Nullable
 	public ServerContainer getObject() {
 		return this.serverContainer;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#a0"),  @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
 	public Object multiEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}
@@ -219,7 +219,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
-	@Caching(cacheable = { @Cacheable(cacheNames = "primary", condition = "#p0 == 3") }, evict = { @CacheEvict("secondary") })
+	@Caching(cacheable = { @Cacheable(cacheNames = "primary", condition = "#a0 == 3") }, evict = { @CacheEvict("secondary") })
 	public Object multiConditionalCacheAndEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}

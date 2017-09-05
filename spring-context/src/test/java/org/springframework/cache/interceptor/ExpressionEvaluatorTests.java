@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,16 @@ import static org.junit.Assert.*;
  */
 public class ExpressionEvaluatorTests {
 
-	private ExpressionEvaluator eval = new ExpressionEvaluator();
+	private final CacheOperationExpressionEvaluator eval = new CacheOperationExpressionEvaluator();
 
-	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
+	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
+
 
 	private Collection<CacheOperation> getOps(String name) {
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name, Object.class, Object.class);
-		return source.getCacheOperations(method, AnnotatedClass.class);
+		return this.source.getCacheOperations(method, AnnotatedClass.class);
 	}
+
 
 	@Test
 	public void testMultipleCachingSource() throws Exception {
@@ -79,7 +81,7 @@ public class ExpressionEvaluatorTests {
 		Object[] args = new Object[] { new Object(), new Object() };
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 
-		EvaluationContext evalCtx = eval.createEvaluationContext(caches, method, args,
+		EvaluationContext evalCtx = this.eval.createEvaluationContext(caches, method, args,
 				target, target.getClass(), null);
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 
@@ -87,8 +89,8 @@ public class ExpressionEvaluatorTests {
 
 		AnnotatedElementKey key = new AnnotatedElementKey(method, AnnotatedClass.class);
 
-		Object keyA = eval.key(it.next().getKey(), key, evalCtx);
-		Object keyB = eval.key(it.next().getKey(), key, evalCtx);
+		Object keyA = this.eval.key(it.next().getKey(), key, evalCtx);
+		Object keyB = this.eval.key(it.next().getKey(), key, evalCtx);
 
 		assertEquals(args[0], keyA);
 		assertEquals(args[1], keyB);
@@ -98,7 +100,7 @@ public class ExpressionEvaluatorTests {
 	public void withReturnValue() throws Exception {
 		EvaluationContext context = createEvaluationContext("theResult");
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, equalTo((Object) "theResult"));
+		assertThat(value, equalTo("theResult"));
 	}
 
 	@Test
@@ -110,14 +112,14 @@ public class ExpressionEvaluatorTests {
 
 	@Test
 	public void withoutReturnValue() throws Exception {
-		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.NO_RESULT);
+		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
 		assertThat(value, nullValue());
 	}
 
 	@Test
 	public void unavailableReturnValue() throws Exception {
-		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.RESULT_UNAVAILABLE);
+		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
 		try {
 			new SpelExpressionParser().parseExpression("#result").getValue(context);
 			fail("Should have failed to parse expression, result not available");
@@ -134,7 +136,7 @@ public class ExpressionEvaluatorTests {
 		applicationContext.registerBeanDefinition("myBean", beanDefinition);
 		applicationContext.refresh();
 
-		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.NO_RESULT, applicationContext);
+		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT, applicationContext);
 		Object value = new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
 		assertThat(value, is(String.class.getName()));
 	}
@@ -149,7 +151,7 @@ public class ExpressionEvaluatorTests {
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
-		return eval.createEvaluationContext(caches, method, args, target, target.getClass(), result, beanFactory);
+		return this.eval.createEvaluationContext(caches, method, args, target, target.getClass(), result, beanFactory);
 	}
 
 

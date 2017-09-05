@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -27,9 +28,9 @@ import org.springframework.util.Assert;
  * how a message code list is built for an {@code ObjectError}.
  *
  * @author Juergen Hoeller
+ * @since 10.03.2003
  * @see FieldError
  * @see DefaultMessageCodesResolver
- * @since 10.03.2003
  */
 @SuppressWarnings("serial")
 public class ObjectError extends DefaultMessageSourceResolvable {
@@ -53,7 +54,9 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * @param arguments	the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
-	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
+	public ObjectError(
+			String objectName, @Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage) {
+
 		super(codes, arguments, defaultMessage);
 		Assert.notNull(objectName, "Object name must not be null");
 		this.objectName = objectName;
@@ -74,11 +77,11 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (getClass() != other.getClass() || !super.equals(other)) {
+		if (other == null || other.getClass() != getClass() || !super.equals(other)) {
 			return false;
 		}
 		ObjectError otherError = (ObjectError) other;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class AutowireUtilsTests {
 
 		// Ideally we would expect Boolean.class instead of Object.class, but this
 		// information is not available at run-time due to type erasure.
-		Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+		Map<Integer, Boolean> map = new HashMap<>();
 		map.put(0, false);
 		map.put(1, true);
 		Method extractMagicValue = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractMagicValue", new Class[] { Map.class });

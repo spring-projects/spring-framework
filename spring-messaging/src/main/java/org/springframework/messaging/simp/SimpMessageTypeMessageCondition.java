@@ -19,6 +19,7 @@ package org.springframework.messaging.simp;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
@@ -71,6 +72,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 	}
 
 	@Override
+	@Nullable
 	public SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
 		Object actualMessageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 		if (actualMessageType == null) {

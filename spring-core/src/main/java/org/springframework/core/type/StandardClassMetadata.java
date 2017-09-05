@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.type;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -93,6 +94,7 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
+	@Nullable
 	public String getEnclosingClassName() {
 		Class<?> enclosingClass = this.introspectedClass.getEnclosingClass();
 		return (enclosingClass != null ? enclosingClass.getName() : null);
@@ -104,6 +106,7 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
+	@Nullable
 	public String getSuperClassName() {
 		Class<?> superClass = this.introspectedClass.getSuperclass();
 		return (superClass != null ? superClass.getName() : null);
@@ -121,7 +124,7 @@ public class StandardClassMetadata implements ClassMetadata {
 
 	@Override
 	public String[] getMemberClassNames() {
-		LinkedHashSet<String> memberClassNames = new LinkedHashSet<String>();
+		LinkedHashSet<String> memberClassNames = new LinkedHashSet<>();
 		for (Class<?> nestedClass : this.introspectedClass.getDeclaredClasses()) {
 			memberClassNames.add(nestedClass.getName());
 		}

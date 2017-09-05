@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodClassKey;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -51,12 +52,12 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Object, Object> cache = new ConcurrentHashMap<Object, Object>(1024);
+	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<>(1024);
 
 
 	@Override
 	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
-		Object cacheKey = new AnnotatedElementKey(method, targetClass);
+		MethodClassKey cacheKey = new MethodClassKey(method, targetClass);
 		Object cached = this.cache.get(cacheKey);
 
 		if (cached != null) {
@@ -77,6 +78,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 		}
 	}
 
+	@Nullable
 	private JCacheOperation<?> computeCacheOperation(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
@@ -95,7 +97,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 			return operation;
 		}
 		if (specificMethod != method) {
-			// Fall back is to look at the original method.
+			// Fallback is to look at the original method.
 			operation = findCacheOperation(method, targetClass);
 			if (operation != null) {
 				return operation;
@@ -113,6 +115,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * @return the cache operation associated with this method
 	 * (or {@code null} if none)
 	 */
+	@Nullable
 	protected abstract JCacheOperation<?> findCacheOperation(Method method, Class<?> targetType);
 
 	/**

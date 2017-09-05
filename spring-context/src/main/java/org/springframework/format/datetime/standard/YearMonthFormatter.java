@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.time.YearMonth;
 import java.util.Locale;
 
 import org.springframework.format.Formatter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * {@link Formatter} implementation for a JSR-310 {@link YearMonth},
@@ -31,7 +30,6 @@ import org.springframework.lang.UsesJava8;
  * @since 4.2.4
  * @see YearMonth#parse
  */
-@UsesJava8
 class YearMonthFormatter implements Formatter<YearMonth> {
 
 	@Override

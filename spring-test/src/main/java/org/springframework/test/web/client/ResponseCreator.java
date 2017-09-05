@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 
 /**
@@ -29,12 +30,13 @@ import org.springframework.test.web.client.response.MockRestResponseCreators;
  * @author Craig Walls
  * @since 3.2
  */
+@FunctionalInterface
 public interface ResponseCreator {
 
 	/**
 	 * Create a response for the given request.
 	 * @param request the request
 	 */
-	ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException;
+	ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException;
 
 }

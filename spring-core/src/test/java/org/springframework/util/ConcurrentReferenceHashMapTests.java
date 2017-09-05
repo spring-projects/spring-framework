@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap.Entry;
 import org.springframework.util.ConcurrentReferenceHashMap.Reference;
 import org.springframework.util.ConcurrentReferenceHashMap.Restructure;
@@ -56,12 +57,12 @@ public class ConcurrentReferenceHashMapTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private TestWeakConcurrentCache<Integer, String> map = new TestWeakConcurrentCache<Integer, String>();
+	private TestWeakConcurrentCache<Integer, String> map = new TestWeakConcurrentCache<>();
 
 
 	@Test
 	public void shouldCreateWithDefaults() throws Exception {
-		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<Integer, String>();
+		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>();
 		assertThat(map.getSegmentsSize(), is(16));
 		assertThat(map.getSegment(0).getSize(), is(1));
 		assertThat(map.getLoadFactor(), is(0.75f));
@@ -69,7 +70,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldCreateWithInitialCapacity() throws Exception {
-		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<Integer, String>(32);
+		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(32);
 		assertThat(map.getSegmentsSize(), is(16));
 		assertThat(map.getSegment(0).getSize(), is(2));
 		assertThat(map.getLoadFactor(), is(0.75f));
@@ -77,7 +78,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldCreateWithInitialCapacityAndLoadFactor() throws Exception {
-		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<Integer, String>(32, 0.5f);
+		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(32, 0.5f);
 		assertThat(map.getSegmentsSize(), is(16));
 		assertThat(map.getSegment(0).getSize(), is(2));
 		assertThat(map.getLoadFactor(), is(0.5f));
@@ -85,7 +86,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldCreateWithInitialCapacityAndConcurrenyLevel() throws Exception {
-		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<Integer, String>(16, 2);
+		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(16, 2);
 		assertThat(map.getSegmentsSize(), is(2));
 		assertThat(map.getSegment(0).getSize(), is(8));
 		assertThat(map.getLoadFactor(), is(0.75f));
@@ -93,7 +94,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldCreateFullyCustom() throws Exception {
-		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<Integer, String>(5, 0.5f, 3);
+		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(5, 0.5f, 3);
 		// concurrencyLevel of 3 ends up as 4 (nearest power of 2)
 		assertThat(map.getSegmentsSize(), is(4));
 		// initialCapacity is 5/4 (rounded up, to nearest power of 2)
@@ -174,7 +175,7 @@ public class ConcurrentReferenceHashMapTests {
 	@Test
 	public void shouldGetFollowingNexts() throws Exception {
 		// Use loadFactor to disable resize
-		this.map = new TestWeakConcurrentCache<Integer, String>(1, 10.0f, 1);
+		this.map = new TestWeakConcurrentCache<>(1, 10.0f, 1);
 		this.map.put(1, "1");
 		this.map.put(2, "2");
 		this.map.put(3, "3");
@@ -187,7 +188,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldResize() throws Exception {
-		this.map = new TestWeakConcurrentCache<Integer, String>(1, 0.75f, 1);
+		this.map = new TestWeakConcurrentCache<>(1, 0.75f, 1);
 		this.map.put(1, "1");
 		assertThat(this.map.getSegment(0).getSize(), is(1));
 		assertThat(this.map.get(1), is("1"));
@@ -217,7 +218,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldPurgeOnGet() throws Exception {
-		this.map = new TestWeakConcurrentCache<Integer, String>(1, 0.75f, 1);
+		this.map = new TestWeakConcurrentCache<>(1, 0.75f, 1);
 		for (int i = 1; i <= 5; i++) {
 			this.map.put(i, String.valueOf(i));
 		}
@@ -232,7 +233,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldPergeOnPut() throws Exception {
-		this.map = new TestWeakConcurrentCache<Integer, String>(1, 0.75f, 1);
+		this.map = new TestWeakConcurrentCache<>(1, 0.75f, 1);
 		for (int i = 1; i <= 5; i++) {
 			this.map.put(i, String.valueOf(i));
 		}
@@ -377,7 +378,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	@Test
 	public void shouldPutAll() throws Exception {
-		Map<Integer, String> m = new HashMap<Integer, String>();
+		Map<Integer, String> m = new HashMap<>();
 		m.put(123, "123");
 		m.put(456, null);
 		m.put(null, "789");
@@ -405,7 +406,7 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(123, "123");
 		this.map.put(456, null);
 		this.map.put(null, "789");
-		Set<Integer> expected = new HashSet<Integer>();
+		Set<Integer> expected = new HashSet<>();
 		expected.add(123);
 		expected.add(456);
 		expected.add(null);
@@ -417,8 +418,8 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(123, "123");
 		this.map.put(456, null);
 		this.map.put(null, "789");
-		List<String> actual = new ArrayList<String>(this.map.values());
-		List<String> expected = new ArrayList<String>();
+		List<String> actual = new ArrayList<>(this.map.values());
+		List<String> expected = new ArrayList<>();
 		expected.add("123");
 		expected.add(null);
 		expected.add("789");
@@ -432,7 +433,7 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(123, "123");
 		this.map.put(456, null);
 		this.map.put(null, "789");
-		HashMap<Integer, String> expected = new HashMap<Integer, String>();
+		HashMap<Integer, String> expected = new HashMap<>();
 		expected.put(123, "123");
 		expected.put(456, null);
 		expected.put(null, "789");
@@ -442,11 +443,11 @@ public class ConcurrentReferenceHashMapTests {
 	@Test
 	public void shouldGetEntrySetFollowingNext() throws Exception {
 		// Use loadFactor to disable resize
-		this.map = new TestWeakConcurrentCache<Integer, String>(1, 10.0f, 1);
+		this.map = new TestWeakConcurrentCache<>(1, 10.0f, 1);
 		this.map.put(1, "1");
 		this.map.put(2, "2");
 		this.map.put(3, "3");
-		HashMap<Integer, String> expected = new HashMap<Integer, String>();
+		HashMap<Integer, String> expected = new HashMap<>();
 		expected.put(1, "1");
 		expected.put(2, "2");
 		expected.put(3, "3");
@@ -491,7 +492,7 @@ public class ConcurrentReferenceHashMapTests {
 
 					@Override
 					public WeakReference<String> newValue(int v) {
-						return new WeakReference<String>(String.valueOf(v));
+						return new WeakReference<>(String.valueOf(v));
 					}
 				});
 		System.out.println(mapTime.prettyPrint());
@@ -567,7 +568,7 @@ public class ConcurrentReferenceHashMapTests {
 
 		private int supplimentalHash;
 
-		private final LinkedList<MockReference<K, V>> queue = new LinkedList<MockReference<K, V>>();
+		private final LinkedList<MockReference<K, V>> queue = new LinkedList<>();
 
 		private boolean disableTestHooks;
 
@@ -588,7 +589,7 @@ public class ConcurrentReferenceHashMapTests {
 		}
 
 		@Override
-		protected int getHash(Object o) {
+		protected int getHash(@Nullable Object o) {
 			if (this.disableTestHooks) {
 				return super.getHash(o);
 			}
@@ -606,11 +607,11 @@ public class ConcurrentReferenceHashMapTests {
 			return new ReferenceManager() {
 				@Override
 				public Reference<K, V> createReference(Entry<K, V> entry, int hash,
-						Reference<K, V> next) {
+						@Nullable Reference<K, V> next) {
 					if (TestWeakConcurrentCache.this.disableTestHooks) {
 						return super.createReference(entry, hash, next);
 					}
-					return new MockReference<K, V>(entry, hash, next, TestWeakConcurrentCache.this.queue);
+					return new MockReference<>(entry, hash, next, TestWeakConcurrentCache.this.queue);
 				}
 				@Override
 				public Reference<K, V> pollForPurge() {

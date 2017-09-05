@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
  * @since 15.10.2003
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public final class TransactionAttributeSourceTests {
+public class TransactionAttributeSourceTests {
 
 	@Test
 	public void matchAlwaysTransactionAttributeSource() throws Exception {
@@ -50,16 +50,6 @@ public final class TransactionAttributeSourceTests {
 				IOException.class.getMethod("getMessage", (Class[]) null), IOException.class);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
-	}
-
-	@Test
-	public void matchAlwaysTransactionAttributeSourceWithNulls() throws Exception {
-		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
-		TransactionDefinition definition = tas.getTransactionAttribute(null, null);
-		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, definition.getPropagationBehavior());
-		assertEquals(TransactionDefinition.ISOLATION_DEFAULT, definition.getIsolationLevel());
-		assertEquals(TransactionDefinition.TIMEOUT_DEFAULT, definition.getTimeout());
-		assertFalse(definition.isReadOnly());
 	}
 
 	@Test

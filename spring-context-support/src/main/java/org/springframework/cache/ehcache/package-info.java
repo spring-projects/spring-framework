@@ -7,6 +7,9 @@
  * <p>Note: EhCache 3.x lives in a different package namespace
  * and is not covered by the traditional support classes here.
  * Instead, consider using it through JCache (JSR-107), with
- * Spring's support in {@link org.springframework.cache.jcache}.
+ * Spring's support in {@code org.springframework.cache.jcache}.
  */
+@NonNullApi
 package org.springframework.cache.ehcache;
+
+import org.springframework.lang.NonNullApi;

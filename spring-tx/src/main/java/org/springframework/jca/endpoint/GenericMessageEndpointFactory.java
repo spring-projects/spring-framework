@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Generic implementation of the JCA 1.5
+ * Generic implementation of the JCA 1.7
  * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
  * providing transaction management capabilities for any kind of message
  * listener object (e.g. {@link javax.jms.MessageListener} objects or
@@ -52,6 +54,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactory {
 
+	@Nullable
 	private Object messageListener;
 
 
@@ -65,6 +68,15 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	}
 
 	/**
+	 * Return the message listener object for this endpoint.
+	 * @since 5.0
+	 */
+	protected Object getMessageListener() {
+		Assert.state(this.messageListener != null, "No message listener set");
+		return this.messageListener;
+	}
+
+	/**
 	 * Wrap each concrete endpoint instance with an AOP proxy,
 	 * exposing the message listener's interfaces as well as the
 	 * endpoint SPI through an AOP introduction.
@@ -72,7 +84,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	@Override
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		GenericMessageEndpoint endpoint = (GenericMessageEndpoint) super.createEndpoint(xaResource);
-		ProxyFactory proxyFactory = new ProxyFactory(this.messageListener);
+		ProxyFactory proxyFactory = new ProxyFactory(getMessageListener());
 		DelegatingIntroductionInterceptor introduction = new DelegatingIntroductionInterceptor(endpoint);
 		introduction.suppressInterface(MethodInterceptor.class);
 		proxyFactory.addAdvice(introduction);
@@ -136,7 +148,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 
 		@Override
 		protected ClassLoader getEndpointClassLoader() {
-			return messageListener.getClass().getClassLoader();
+			return getMessageListener().getClass().getClassLoader();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.test.web.servlet.result;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
 import org.junit.Test;
@@ -39,7 +40,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link PrintingResultHandler}.
@@ -61,27 +63,34 @@ public class PrintingResultHandlerTests {
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private final StubMvcResult mvcResult = new StubMvcResult(this.request, null, null,
-			null, null, null, this.response);
+	private final StubMvcResult mvcResult = new StubMvcResult(
+			this.request, null, null, null, null, null, this.response);
 
 
 	@Test
 	public void printRequest() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
+		this.request.setCharacterEncoding("UTF-16");
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes("UTF-16");
+		this.request.setContent(bytes);
+		this.request.getSession().setAttribute("foo", "bar");
 
 		this.handler.handle(this.mvcResult);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("param", "paramValue");
 
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
 		assertValue("MockHttpServletRequest", "Request URI", this.request.getRequestURI());
 		assertValue("MockHttpServletRequest", "Parameters", params);
 		assertValue("MockHttpServletRequest", "Headers", headers);
+		assertValue("MockHttpServletRequest", "Body", palindrome);
+		assertValue("MockHttpServletRequest", "Session Attrs", Collections.singletonMap("foo", "bar"));
 	}
 
 	@Test
@@ -106,10 +115,18 @@ public class PrintingResultHandlerTests {
 
 		this.handler.handle(this.mvcResult);
 
+		// Manually validate cookie values since maxAge changes...
+		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
+		assertEquals(2, cookieValues.size());
+		assertEquals("cookie=cookieValue", cookieValues.get(0));
+		assertTrue("Actual: " + cookieValues.get(1), cookieValues.get(1).startsWith(
+				"enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires="));
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		headers.setLocation(new URI("/redirectFoo"));
+		headers.put("Set-Cookie", cookieValues);
 
 		String heading = "MockHttpServletResponse";
 		assertValue(heading, "Status", this.response.getStatus());
@@ -129,8 +146,55 @@ public class PrintingResultHandlerTests {
 		assertTrue(cookie1.contains("name = 'cookie', value = 'cookieValue'"));
 		assertTrue(cookie1.endsWith("]"));
 		assertTrue(cookie2.startsWith("[" + Cookie.class.getSimpleName()));
-		assertTrue(cookie2.contains("name = 'enigma', value = '42', comment = 'This is a comment', domain = '.example.com', maxAge = 1234, path = '/crumbs', secure = true, version = 0, httpOnly = true"));
+		assertTrue(cookie2.contains("name = 'enigma', value = '42', " +
+				"comment = 'This is a comment', domain = '.example.com', maxAge = 1234, " +
+				"path = '/crumbs', secure = true, version = 0, httpOnly = true"));
 		assertTrue(cookie2.endsWith("]"));
+	}
+
+	@Test
+	public void printRequestWithCharacterEncoding() throws Exception {
+		this.request.setCharacterEncoding("UTF-8");
+		this.request.setContent("text".getBytes("UTF-8"));
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "text");
+	}
+
+	@Test
+	public void printRequestWithoutCharacterEncoding() throws Exception {
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "<no character encoding set>");
+	}
+
+	@Test
+	public void printResponseWithCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding("UTF-8");
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+		assertValue("MockHttpServletResponse", "Body", "text");
+	}
+
+	@Test
+	public void printResponseWithDefaultCharacterEncoding() throws Exception {
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletResponse", "Body", "text");
+	}
+
+	@Test
+	public void printResponseWithoutCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding(null);
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletResponse", "Body", "<no character encoding set>");
 	}
 
 	@Test
@@ -223,14 +287,15 @@ public class PrintingResultHandlerTests {
 
 	private void assertValue(String heading, String label, Object value) {
 		Map<String, Map<String, Object>> printedValues = this.handler.getPrinter().printedValues;
-		assertTrue("Heading " + heading + " not printed", printedValues.containsKey(heading));
-		assertEquals(value, printedValues.get(heading).get(label));
+		assertTrue("Heading '" + heading + "' not printed", printedValues.containsKey(heading));
+		assertEquals("For label '" + label + "' under heading '" + heading + "' =>", value,
+				printedValues.get(heading).get(label));
 	}
 
 
 	private static class TestPrintingResultHandler extends PrintingResultHandler {
 
-		public TestPrintingResultHandler() {
+		TestPrintingResultHandler() {
 			super(new TestResultValuePrinter());
 		}
 
@@ -243,12 +308,12 @@ public class PrintingResultHandlerTests {
 
 			private String printedHeading;
 
-			private Map<String, Map<String, Object>> printedValues = new HashMap<String, Map<String, Object>>();
+			private Map<String, Map<String, Object>> printedValues = new HashMap<>();
 
 			@Override
 			public void printHeading(String heading) {
 				this.printedHeading = heading;
-				this.printedValues.put(heading, new HashMap<String, Object>());
+				this.printedValues.put(heading, new HashMap<>());
 			}
 
 			@Override

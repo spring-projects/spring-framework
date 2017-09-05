@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.context;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to provide configuration for a web application. This is read-only while
@@ -66,12 +67,6 @@ public interface WebApplicationContext extends ApplicationContext {
 	String SCOPE_SESSION = "session";
 
 	/**
-	 * Scope identifier for global session scope: "globalSession".
-	 * Supported in addition to the standard scopes "singleton" and "prototype".
-	 */
-	String SCOPE_GLOBAL_SESSION = "globalSession";
-
-	/**
 	 * Scope identifier for the global web application scope: "application".
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
 	 */
@@ -104,8 +99,8 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Servlet API ServletContext for this application.
-	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
+	@Nullable
 	ServletContext getServletContext();
 
 }

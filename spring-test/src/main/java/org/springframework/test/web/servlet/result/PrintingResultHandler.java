@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
@@ -53,6 +56,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 3.2
  */
 public class PrintingResultHandler implements ResultHandler {
+
+	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
+
 
 	private final ResultValuePrinter printer;
 
@@ -103,10 +109,15 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the request.
 	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
+		String body = (request.getCharacterEncoding() != null ?
+				request.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
 		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
+		this.printer.printValue("Body", body);
+		this.printer.printValue("Session Attrs", getSessionAttributes(request));
 	}
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
@@ -124,7 +135,7 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
-		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
 		for (String name : params.keySet()) {
 			if (params.get(name) != null) {
 				for (String value : params.get(name)) {
@@ -133,6 +144,13 @@ public class PrintingResultHandler implements ResultHandler {
 			}
 		}
 		return multiValueMap;
+	}
+
+	protected final Map<String, Object> getSessionAttributes(MockHttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		return session == null ? Collections.emptyMap() :
+				Collections.list(session.getAttributeNames()).stream()
+						.collect(Collectors.toMap(n -> n, session::getAttribute));
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
@@ -151,7 +169,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the handler.
 	 */
-	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
+	protected void printHandler(@Nullable Object handler, @Nullable HandlerInterceptor[] interceptors) throws Exception {
 		if (handler == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -170,7 +188,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print exceptions resolved through a HandlerExceptionResolver.
 	 */
-	protected void printResolvedException(Exception resolvedException) throws Exception {
+	protected void printResolvedException(@Nullable Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
 		}
@@ -182,7 +200,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print the ModelAndView.
 	 */
-	protected void printModelAndView(ModelAndView mav) throws Exception {
+	protected void printModelAndView(@Nullable ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
 		if (mav == null || mav.getModel().size() == 0) {
@@ -222,11 +240,14 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the response.
 	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
+		String body = (response.getCharacterEncoding() != null ?
+				response.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
 		this.printer.printValue("Headers", getResponseHeaders(response));
 		this.printer.printValue("Content type", response.getContentType());
-		this.printer.printValue("Body", response.getContentAsString());
+		this.printer.printValue("Body", body);
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
 		printCookies(response.getCookies());
@@ -272,7 +293,7 @@ public class PrintingResultHandler implements ResultHandler {
 
 		void printHeading(String heading);
 
-		void printValue(String label, Object value);
+		void printValue(String label, @Nullable Object value);
 	}
 
 }

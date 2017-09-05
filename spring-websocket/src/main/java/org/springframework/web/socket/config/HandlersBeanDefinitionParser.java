@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
@@ -56,6 +57,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
@@ -87,7 +89,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			strategy = new WebSocketHandlerMappingStrategy(handshakeHandler, interceptors);
 		}
 
-		ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
+		ManagedMap<String, Object> urlMap = new ManagedMap<>();
 		urlMap.setSource(source);
 		for (Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
 			strategy.addMapping(mappingElement, urlMap, context);
@@ -112,7 +114,6 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 		private final ManagedList<?> interceptorsList;
 
-
 		private WebSocketHandlerMappingStrategy(RuntimeBeanReference handshakeHandler, ManagedList<?> interceptors) {
 			this.handshakeHandlerReference = handshakeHandler;
 			this.interceptorsList = interceptors;
@@ -126,9 +127,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 
 			ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 			cavs.addIndexedArgumentValue(0, handlerReference);
-			if (this.handshakeHandlerReference != null) {
-				cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
-			}
+			cavs.addIndexedArgumentValue(1, this.handshakeHandlerReference);
 			RootBeanDefinition requestHandlerDef = new RootBeanDefinition(WebSocketHttpRequestHandler.class, cavs, null);
 			requestHandlerDef.setSource(context.extractSource(element));
 			requestHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

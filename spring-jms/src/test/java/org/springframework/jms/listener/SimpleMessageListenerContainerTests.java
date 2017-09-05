@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 import static org.junit.Assert.*;
@@ -75,13 +76,13 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 				container.isPubSubNoLocal());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToZeroIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(0);
 		container.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(-198);
 		container.afterPropertiesSet();
@@ -170,13 +171,13 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 		given(connectionFactory.createConnection()).willReturn(connection);
 
-		final Set<String> failure = new HashSet<String>(1);
+		final Set<String> failure = new HashSet<>(1);
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session sess) {
+			public void onMessage(Message message, @Nullable Session sess) {
 				try {
 					// Check correct Session passed into SessionAwareMessageListener.
 					assertSame(sess, session);
@@ -272,7 +273,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session session) throws JMSException {
+			public void onMessage(Message message, @Nullable Session session) throws JMSException {
 				throw theException;
 			}
 		});
@@ -322,7 +323,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener<Message>() {
 			@Override
-			public void onMessage(Message message, Session session) throws JMSException {
+			public void onMessage(Message message, @Nullable Session session) throws JMSException {
 				throw theException;
 			}
 		});

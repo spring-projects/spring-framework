@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -45,6 +47,7 @@ import org.springframework.util.StringUtils;
  * Base class for YAML factories.
  *
  * @author Dave Syer
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class YamlProcessor {
@@ -191,7 +194,7 @@ public abstract class YamlProcessor {
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> asMap(Object object) {
 		// YAML can have numbers as keys
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		Map<String, Object> result = new LinkedHashMap<>();
 		if (!(object instanceof Map)) {
 			// A document can be a text literal
 			result.put("document", object);
@@ -199,12 +202,10 @@ public abstract class YamlProcessor {
 		}
 
 		Map<Object, Object> map = (Map<Object, Object>) object;
-		for (Entry<Object, Object> entry : map.entrySet()) {
-			Object value = entry.getValue();
+		map.forEach((key, value) -> {
 			if (value instanceof Map) {
 				value = asMap(value);
 			}
-			Object key = entry.getKey();
 			if (key instanceof CharSequence) {
 				result.put(key.toString(), value);
 			}
@@ -212,12 +213,12 @@ public abstract class YamlProcessor {
 				// It has to be a map key in this case
 				result.put("[" + key.toString() + "]", value);
 			}
-		}
+		});
 		return result;
 	}
 
 	private boolean process(Map<String, Object> map, MatchCallback callback) {
-		Properties properties = new Properties();
+		Properties properties = CollectionFactory.createStringAdaptingProperties();
 		properties.putAll(getFlattenedMap(map));
 
 		if (this.documentMatchers.isEmpty()) {
@@ -265,12 +266,12 @@ public abstract class YamlProcessor {
 	 * @since 4.1.3
 	 */
 	protected final Map<String, Object> getFlattenedMap(Map<String, Object> source) {
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		Map<String, Object> result = new LinkedHashMap<>();
 		buildFlattenedMap(result, source, null);
 		return result;
 	}
 
-	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, String path) {
+	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
 		for (Entry<String, Object> entry : source.entrySet()) {
 			String key = entry.getKey();
 			if (StringUtils.hasText(path)) {
@@ -278,7 +279,7 @@ public abstract class YamlProcessor {
 					key = path + key;
 				}
 				else {
-					key = path + "." + key;
+					key = path + '.' + key;
 				}
 			}
 			Object value = entry.getValue();
@@ -302,21 +303,23 @@ public abstract class YamlProcessor {
 				}
 			}
 			else {
-				result.put(key, value != null ? value : "");
+				result.put(key, (value != null ? value : ""));
 			}
 		}
 	}
 
 
 	/**
-	 * Callback interface used to process properties in a resulting map.
+	 * Callback interface used to process the YAML parsing results.
 	 */
 	public interface MatchCallback {
 
 		/**
-		 * Process the properties.
-		 * @param properties the properties to process
-		 * @param map a mutable result map
+		 * Process the given representation of the parsing results.
+		 * @param properties the properties to process (as a flattened
+		 * representation with indexed keys in case of a collection or map)
+		 * @param map the result map (preserving the original value structure
+		 * in the YAML document)
 		 */
 		void process(Properties properties, Map<String, Object> map);
 	}

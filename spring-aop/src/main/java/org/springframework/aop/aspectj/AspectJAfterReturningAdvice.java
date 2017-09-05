@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.TypeUtils;
 
@@ -60,7 +61,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	}
 
 	@Override
-	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+	public void afterReturning(@Nullable Object returnValue, Method method, Object[] args, @Nullable Object target) throws Throwable {
 		if (shouldInvokeOnReturnValueOf(method, returnValue)) {
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);
 		}
@@ -75,7 +76,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value
 	 */
-	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
+	private boolean shouldInvokeOnReturnValueOf(Method method, @Nullable Object returnValue) {
 		Class<?> type = getDiscoveredReturningType();
 		Type genericType = getDiscoveredReturningGenericType();
 		// If we aren't dealing with a raw type, check if generic parameters are assignable.
@@ -94,14 +95,14 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value and type
 	 */
-	private boolean matchesReturnValue(Class<?> type, Method method, Object returnValue) {
+	private boolean matchesReturnValue(Class<?> type, Method method, @Nullable Object returnValue) {
 		if (returnValue != null) {
 			return ClassUtils.isAssignableValue(type, returnValue);
 		}
 		else if (Object.class == type && void.class == method.getReturnType()) {
 			return true;
 		}
-		else{
+		else {
 			return ClassUtils.isAssignable(type, method.getReturnType());
 		}
 	}

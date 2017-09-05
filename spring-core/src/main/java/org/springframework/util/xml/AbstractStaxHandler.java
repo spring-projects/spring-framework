@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract base class for SAX {@code ContentHandler} and {@code LexicalHandler}
  * implementations that use StAX as a basis. All methods delegate to internal template
@@ -40,7 +42,7 @@ import org.xml.sax.ext.LexicalHandler;
  */
 abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 
-	private final List<Map<String, String>> namespaceMappings = new ArrayList<Map<String, String>>();
+	private final List<Map<String, String>> namespaceMappings = new ArrayList<>();
 
 	private boolean inCData;
 
@@ -147,7 +149,7 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	}
 
 	@Override
-	public final void startDTD(String name, String publicId, String systemId) throws SAXException {
+	public final void startDTD(String name, @Nullable String publicId, String systemId) throws SAXException {
 		try {
 			StringBuilder builder = new StringBuilder("<!DOCTYPE ");
 			builder.append(name);
@@ -223,8 +225,8 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	protected boolean isNamespaceDeclaration(QName qName) {
 		String prefix = qName.getPrefix();
 		String localPart = qName.getLocalPart();
-		return (XMLConstants.XMLNS_ATTRIBUTE.equals(localPart) && prefix.length() == 0) ||
-				(XMLConstants.XMLNS_ATTRIBUTE.equals(prefix) && localPart.length() != 0);
+		return (XMLConstants.XMLNS_ATTRIBUTE.equals(localPart) && prefix.isEmpty()) ||
+				(XMLConstants.XMLNS_ATTRIBUTE.equals(prefix) && !localPart.isEmpty());
 	}
 
 
@@ -233,7 +235,7 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	}
 
 	private void newNamespaceMapping() {
-		this.namespaceMappings.add(new HashMap<String, String>());
+		this.namespaceMappings.add(new HashMap<>());
 	}
 
 	private void removeNamespaceMapping() {

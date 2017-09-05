@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.hamcrest.Matchers;
-
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -32,6 +31,9 @@ import org.springframework.util.StreamUtils;
  * @author Rossen Stoyanchev
  */
 public class XpathResultMatchersTests {
+
+	private static final String RESPONSE_CONTENT = "<foo><bar>111</bar><bar>true</bar></foo>";
+
 
 	@Test
 	public void node() throws Exception {
@@ -107,7 +109,7 @@ public class XpathResultMatchersTests {
 	public void stringEncodingDetection() throws Exception {
 		String content = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
 				"<person><name>Jürgen</name></person>";
-		byte[] bytes = content.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/xml");
 		StreamUtils.copy(bytes, response.getOutputStream());
@@ -117,12 +119,10 @@ public class XpathResultMatchersTests {
 	}
 
 
-	private static final String RESPONSE_CONTENT = "<foo><bar>111</bar><bar>true</bar></foo>";
-
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/xml");
-		response.getWriter().print(new String(RESPONSE_CONTENT.getBytes("ISO-8859-1")));
+		response.getWriter().print(new String(RESPONSE_CONTENT.getBytes(StandardCharsets.ISO_8859_1)));
 		return new StubMvcResult(null, null, null, null, null, null, response);
 	}
 

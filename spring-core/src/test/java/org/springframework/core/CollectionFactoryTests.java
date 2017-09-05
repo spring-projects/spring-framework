@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.springframework.core.CollectionFactory.*;
 
@@ -165,27 +166,27 @@ public class CollectionFactoryTests {
 	@Test
 	public void createApproximateCollectionFromEmptyHashSet() {
 		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
-		assertThat(set.size(), is(0));
+		assertThat(set, is(empty()));
 	}
 
 	@Test
 	public void createApproximateCollectionFromNonEmptyHashSet() {
-		HashSet<String> hashSet = new HashSet<String>();
+		HashSet<String> hashSet = new HashSet<>();
 		hashSet.add("foo");
 		Collection<String> set = createApproximateCollection(hashSet, 2);
-		assertThat(set.size(), is(0));
+		assertThat(set, is(empty()));
 	}
 
 	@Test
 	public void createApproximateCollectionFromEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.noneOf(Color.class), 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors, is(empty()));
 	}
 
 	@Test
 	public void createApproximateCollectionFromNonEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.of(Color.BLUE), 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors, is(empty()));
 	}
 
 	@Test
@@ -196,7 +197,7 @@ public class CollectionFactoryTests {
 
 	@Test
 	public void createApproximateMapFromNonEmptyHashMap() {
-		Map<String, String> hashMap = new HashMap<String, String>();
+		Map<String, String> hashMap = new HashMap<>();
 		hashMap.put("foo", "bar");
 		Map<String, String> map = createApproximateMap(hashMap, 2);
 		assertThat(map.size(), is(0));
@@ -210,7 +211,7 @@ public class CollectionFactoryTests {
 
 	@Test
 	public void createApproximateMapFromNonEmptyEnumMap() {
-		EnumMap<Color, String> enumMap = new EnumMap<Color, String>(Color.class);
+		EnumMap<Color, String> enumMap = new EnumMap<>(Color.class);
 		enumMap.put(Color.BLUE, "blue");
 		Map<Color, String> colors = createApproximateMap(enumMap, 2);
 		assertThat(colors.size(), is(0));

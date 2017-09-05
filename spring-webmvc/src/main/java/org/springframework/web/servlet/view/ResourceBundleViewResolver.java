@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -72,17 +73,17 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 
 	private ClassLoader bundleClassLoader = Thread.currentThread().getContextClassLoader();
 
+	@Nullable
 	private String defaultParentView;
 
+	@Nullable
 	private Locale[] localesToInitialize;
 
 	/* Locale -> BeanFactory */
-	private final Map<Locale, BeanFactory> localeCache =
-			new HashMap<Locale, BeanFactory>();
+	private final Map<Locale, BeanFactory> localeCache = new HashMap<>();
 
 	/* List of ResourceBundle -> BeanFactory */
-	private final Map<List<ResourceBundle>, ConfigurableApplicationContext> bundleCache =
-			new HashMap<List<ResourceBundle>, ConfigurableApplicationContext>();
+	private final Map<List<ResourceBundle>, ConfigurableApplicationContext> bundleCache = new HashMap<>();
 
 
 	public void setOrder(int order) {
@@ -220,7 +221,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		}
 
 		// Build list of ResourceBundle references for Locale.
-		List<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+		List<ResourceBundle> bundles = new LinkedList<>();
 		for (String basename : this.basenames) {
 			ResourceBundle bundle = getBundle(basename, locale);
 			bundles.add(bundle);

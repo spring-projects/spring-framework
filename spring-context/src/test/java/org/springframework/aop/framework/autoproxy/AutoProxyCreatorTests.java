@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -56,7 +57,7 @@ import static org.junit.Assert.*;
  * @since 09.12.2003
  */
 @SuppressWarnings("resource")
-public final class AutoProxyCreatorTests {
+public class AutoProxyCreatorTests {
 
 	@Test
 	public void testBeanNameAutoProxyCreator() {
@@ -253,6 +254,23 @@ public final class AutoProxyCreatorTests {
 	}
 
 	@Test
+	public void testAutoProxyCreatorWithPackageVisibleMethod() {
+		StaticApplicationContext sac = new StaticApplicationContext();
+		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class);
+		sac.registerSingleton("packageVisibleMethodToBeProxied", PackageVisibleMethod.class);
+		sac.refresh();
+
+		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
+		tapc.testInterceptor.nrOfInvocations = 0;
+
+		PackageVisibleMethod tb = (PackageVisibleMethod) sac.getBean("packageVisibleMethodToBeProxied");
+		assertTrue(AopUtils.isCglibProxy(tb));
+		assertEquals(0, tapc.testInterceptor.nrOfInvocations);
+		tb.doSomething();
+		assertEquals(1, tapc.testInterceptor.nrOfInvocations);
+	}
+
+	@Test
 	public void testAutoProxyCreatorWithFactoryBean() {
 		StaticApplicationContext sac = new StaticApplicationContext();
 		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class);
@@ -378,7 +396,8 @@ public final class AutoProxyCreatorTests {
 		}
 
 		@Override
-		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, TargetSource customTargetSource) {
+		@Nullable
+		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, @Nullable TargetSource customTargetSource) {
 			if (StaticMessageSource.class.equals(beanClass)) {
 				return DO_NOT_PROXY;
 			}

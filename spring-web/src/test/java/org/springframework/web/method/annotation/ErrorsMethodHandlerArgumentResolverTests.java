@@ -72,7 +72,7 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		assertSame(actual, bindingResult);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void bindingResultNotFound() throws Exception {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(bindingResult.getModel());
@@ -81,7 +81,7 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noBindingResult() throws Exception {
 		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);
 	}

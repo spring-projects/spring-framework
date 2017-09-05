@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -47,12 +48,11 @@ import org.springframework.web.context.request.WebRequest;
  */
 public class SessionAttributesHandler {
 
-	private final Set<String> attributeNames = new HashSet<String>();
+	private final Set<String> attributeNames = new HashSet<>();
 
-	private final Set<Class<?>> attributeTypes = new HashSet<Class<?>>();
+	private final Set<Class<?>> attributeTypes = new HashSet<>();
 
-	private final Set<String> knownAttributeNames =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
+	private final Set<String> knownAttributeNames = Collections.newSetFromMap(new ConcurrentHashMap<>(4));
 
 	private final SessionAttributeStore sessionAttributeStore;
 
@@ -65,10 +65,11 @@ public class SessionAttributesHandler {
 	 * @param sessionAttributeStore used for session access
 	 */
 	public SessionAttributesHandler(Class<?> handlerType, SessionAttributeStore sessionAttributeStore) {
-		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null.");
+		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
 
-		SessionAttributes annotation = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
+		SessionAttributes annotation =
+				AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
 		if (annotation != null) {
 			this.attributeNames.addAll(Arrays.asList(annotation.names()));
 			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
@@ -84,19 +85,17 @@ public class SessionAttributesHandler {
 	 * session attributes through an {@link SessionAttributes} annotation.
 	 */
 	public boolean hasSessionAttributes() {
-		return ((this.attributeNames.size() > 0) || (this.attributeTypes.size() > 0));
+		return (!this.attributeNames.isEmpty() || !this.attributeTypes.isEmpty());
 	}
 
 	/**
 	 * Whether the attribute name or type match the names and types specified
 	 * via {@code @SessionAttributes} in underlying controller.
-	 *
 	 * <p>Attributes successfully resolved through this method are "remembered"
 	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
 	 * {@link #cleanupAttributes(WebRequest)}.
-	 *
-	 * @param attributeName the attribute name to check, never {@code null}
-	 * @param attributeType the type for the attribute, possibly {@code null}
+	 * @param attributeName the attribute name to check
+	 * @param attributeType the type for the attribute
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -118,9 +117,7 @@ public class SessionAttributesHandler {
 	public void storeAttributes(WebRequest request, Map<String, ?> attributes) {
 		for (String name : attributes.keySet()) {
 			Object value = attributes.get(name);
-			Class<?> attrType = (value != null) ? value.getClass() : null;
-
-			if (isHandlerSessionAttribute(name, attrType)) {
+			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
 		}
@@ -134,7 +131,7 @@ public class SessionAttributesHandler {
 	 * @return a map with handler session attributes, possibly empty
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);
 			if (value != null) {
@@ -162,6 +159,7 @@ public class SessionAttributesHandler {
 	 * @param attributeName the name of the attribute of interest
 	 * @return the attribute value or {@code null}
 	 */
+	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName) {
 		return this.sessionAttributeStore.retrieveAttribute(request, attributeName);
 	}

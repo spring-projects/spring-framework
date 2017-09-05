@@ -39,7 +39,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class HotSwappableTargetSourceTests {
+public class HotSwappableTargetSourceTests {
 
 	private static final Resource CONTEXT = qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml");
 

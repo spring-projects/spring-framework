@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 
 /**
  * TransactionAttribute implementation that works out whether a given exception
@@ -50,6 +52,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	/** Static for optimal serializability */
 	private static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
+	@Nullable
 	private List<RollbackRuleAttribute> rollbackRules;
 
 
@@ -78,11 +81,11 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	public RuleBasedTransactionAttribute(RuleBasedTransactionAttribute other) {
 		super(other);
-		this.rollbackRules = new ArrayList<RollbackRuleAttribute>(other.rollbackRules);
+		this.rollbackRules = (other.rollbackRules != null ? new ArrayList<>(other.rollbackRules) : null);
 	}
 
 	/**
-	 * Create a new DefaultTransactionAttribute with the the given
+	 * Create a new DefaultTransactionAttribute with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface
@@ -113,7 +116,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	public List<RollbackRuleAttribute> getRollbackRules() {
 		if (this.rollbackRules == null) {
-			this.rollbackRules = new LinkedList<RollbackRuleAttribute>();
+			this.rollbackRules = new LinkedList<>();
 		}
 		return this.rollbackRules;
 	}

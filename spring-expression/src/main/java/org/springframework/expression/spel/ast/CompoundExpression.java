@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
@@ -91,7 +92,7 @@ public class CompoundExpression extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, Object value) throws EvaluationException {
+	public void setValue(ExpressionState state, @Nullable Object value) throws EvaluationException {
 		getValueRef(state).setValue(value);
 	}
 
