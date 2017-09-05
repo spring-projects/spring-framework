@@ -79,9 +79,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.resolve(Object.class);
-		return (Object.class == clazz) ||
-				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
-						getObjectMapper().canSerialize(clazz) && supportsMimeType(mimeType);
+		return supportsMimeType(mimeType) && (Object.class == clazz ||
+				(!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
 	}
 
 	@Override
