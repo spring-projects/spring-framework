@@ -101,7 +101,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = (bodyClass == null && body != null ? ResolvableType.forInstance(body) : bodyType);
+			elementType = ((bodyClass == null || bodyClass.equals(Object.class)) && body != null ?
+					ResolvableType.forInstance(body) : bodyType);
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
