@@ -93,7 +93,7 @@ public class DefaultWebSessionManagerTests {
 	public void getSessionSaveWhenCreatedAndNotStartedThenNotSaved() throws Exception {
 		when(this.idResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).block();
-		session.save().block();
+		this.exchange.getResponse().setComplete().block();
 
 		assertFalse(session.isStarted());
 		assertFalse(session.isExpired());
@@ -107,7 +107,7 @@ public class DefaultWebSessionManagerTests {
 		when(this.idResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).block();
 		when(this.createSession.isStarted()).thenReturn(true);
-		session.save().block();
+		this.exchange.getResponse().setComplete().block();
 
 		String id = session.getId();
 		verify(this.store).createWebSession();

@@ -15,12 +15,8 @@
  */
 package org.springframework.web.server.session;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.lang.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -85,8 +81,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 						.flatMap(session -> removeSessionIfExpired(exchange, session))
 						.flatMap(this.getSessionStore()::updateLastAccessTime)
 						.switchIfEmpty(this.sessionStore.createWebSession())
-						.map( session -> new ExchangeWebSession(exchange, session))
-						.doOnNext(session -> exchange.getResponse().beforeCommit(session::save)));
+						.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
@@ -103,104 +98,28 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return Mono.just(session);
 	}
 
-	class ExchangeWebSession implements WebSession {
-		private final ServerWebExchange exchange;
-		private final WebSession delegate;
-
-		ExchangeWebSession(ServerWebExchange exchange, WebSession delegate) {
-			this.exchange = exchange;
-			this.delegate = delegate;
+	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
+		if (session.isExpired()) {
+			return Mono.error(new IllegalStateException(
+					"Sessions are checked for expiration and have their " +
+							"lastAccessTime updated when first accessed during request processing. " +
+							"However this session is expired meaning that maxIdleTime elapsed " +
+							"before the call to session.save()."));
 		}
 
-		@Override
-		public String getId() {
-			return this.delegate.getId();
+		if (!session.isStarted()) {
+			return Mono.empty();
 		}
 
-		@Override
-		public Map<String, Object> getAttributes() {
-			return this.delegate.getAttributes();
+		if (hasNewSessionId(exchange, session)) {
+			DefaultWebSessionManager.this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}
 
-		@Override
-		@Nullable public <T> T getAttribute(String name) {
-			return this.delegate.getAttribute(name);
-		}
+		return session.save();
+	}
 
-		@Override
-		public <T> T getRequiredAttribute(String name) {
-			return this.delegate.getRequiredAttribute(name);
-		}
-
-		@Override
-		public <T> T getAttributeOrDefault(String name, T defaultValue) {
-			return this.delegate.getAttributeOrDefault(name, defaultValue);
-		}
-
-		@Override
-		public void start() {
-			this.delegate.start();
-		}
-
-		@Override
-		public boolean isStarted() {
-			return this.delegate.isStarted();
-		}
-
-		@Override
-		public Mono<Void> changeSessionId() {
-			return this.delegate.changeSessionId();
-		}
-
-		@Override
-		public Mono<Void> save() {
-			if (isExpired()) {
-				return Mono.error(new IllegalStateException(
-						"Sessions are checked for expiration and have their " +
-								"lastAccessTime updated when first accessed during request processing. " +
-								"However this session is expired meaning that maxIdleTime elapsed " +
-								"before the call to session.save()."));
-			}
-
-			if (!isStarted()) {
-				return Mono.empty();
-			}
-
-			if (hasNewSessionId()) {
-				DefaultWebSessionManager.this.sessionIdResolver.setSessionId(this.exchange, this.getId());
-			}
-
-			return this.delegate.save();
-		}
-
-		private boolean hasNewSessionId() {
-			List<String> ids = getSessionIdResolver().resolveSessionIds(this.exchange);
-			return ids.isEmpty() || !getId().equals(ids.get(0));
-		}
-
-		@Override
-		public boolean isExpired() {
-			return this.delegate.isExpired();
-		}
-
-		@Override
-		public Instant getCreationTime() {
-			return this.delegate.getCreationTime();
-		}
-
-		@Override
-		public Instant getLastAccessTime() {
-			return this.delegate.getLastAccessTime();
-		}
-
-		@Override
-		public void setMaxIdleTime(Duration maxIdleTime) {
-			this.delegate.setMaxIdleTime(maxIdleTime);
-		}
-
-		@Override
-		public Duration getMaxIdleTime() {
-			return this.delegate.getMaxIdleTime();
-		}
+	private boolean hasNewSessionId(ServerWebExchange exchange, WebSession session) {
+		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
+		return ids.isEmpty() || !session.getId().equals(ids.get(0));
 	}
 }
