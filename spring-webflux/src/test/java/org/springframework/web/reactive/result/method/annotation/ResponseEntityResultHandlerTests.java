@@ -195,9 +195,6 @@ public class ResponseEntityResultHandlerTests {
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
 		testHandle(returnValue, returnType);
 
-		returnType = on(TestController.class).resolveReturnType(Object.class);
-		testHandle(returnValue, returnType);
-
 		returnValue = Mono.just(ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(Mono.class, entity(String.class));
 		testHandle(returnValue, returnType);
@@ -304,7 +301,7 @@ public class ResponseEntityResultHandlerTests {
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
-		assertResponseBody(exchange, "body");
+		assertResponseBody(exchange, "\"body\"");
 	}
 
 	@Test // SPR-14877
