@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsCollectionContaining.*;
-import static org.junit.Assert.*;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -29,6 +24,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -37,24 +33,36 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+
 /**
- * Tests using {@link HeaderSessionIdResolver}.
+ * Tests using {@link HeaderWebSessionIdResolver}.
  *
  * @author Greg Turnquist
  */
-public class HeaderSessionIdResolverTests {
+public class HeaderWebSessionIdResolverTests {
 
 	private static final Clock CLOCK = Clock.system(ZoneId.of("GMT"));
 
-	private HeaderSessionIdResolver idResolver;
+
+	private HeaderWebSessionIdResolver idResolver;
 
 	private DefaultWebSessionManager manager;
 
 	private ServerWebExchange exchange;
 
+
 	@Before
 	public void setUp() {
-		this.idResolver = new HeaderSessionIdResolver();
+		this.idResolver = new HeaderWebSessionIdResolver();
 		this.manager = new DefaultWebSessionManager();
 		this.manager.setSessionIdResolver(this.idResolver);
 
@@ -172,4 +180,5 @@ public class HeaderSessionIdResolverTests {
 	private DefaultWebSession createDefaultWebSession(UUID sessionId) {
 		return new DefaultWebSession(() -> sessionId, CLOCK, (s, session) -> Mono.empty(), s -> Mono.empty());
 	}
+
 }

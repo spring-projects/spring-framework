@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,21 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Header-based {@link WebSessionIdResolver}.
+ * Request and response header-based {@link WebSessionIdResolver}.
  * 
  * @author Greg Turnquist
  * @since 5.0
  */
-public class HeaderSessionIdResolver implements WebSessionIdResolver {
+public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 
 	private String headerName = "SESSION";
 
+
 	/**
 	 * Set the name of the session header to use for the session id.
-	 * <p>By default set to "SESSION".
+	 * The name is used to extract the session id from the request headers as
+	 * well to set the session id on the response headers.
+	 * <p>By default set to {@literal "SESSION"}.
 	 * @param headerName the header name
 	 */
 	public void setHeaderName(String headerName) {
@@ -49,24 +52,22 @@ public class HeaderSessionIdResolver implements WebSessionIdResolver {
 		return this.headerName;
 	}
 
+
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		List<String> sessionHeaders = headers.get(this.getHeaderName());
-		if (sessionHeaders == null) {
-			return Collections.emptyList();
-		}
-		return sessionHeaders;
+		return headers.getOrDefault(getHeaderName(), Collections.emptyList());
 	}
 
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Assert.notNull(id, "'id' is required.");
-		exchange.getResponse().getHeaders().set(this.headerName, id);
+		exchange.getResponse().getHeaders().set(getHeaderName(), id);
 	}
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
 		this.setSessionId(exchange, "");
 	}
+
 }
