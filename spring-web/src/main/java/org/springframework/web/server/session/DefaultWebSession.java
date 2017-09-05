@@ -86,7 +86,9 @@ class DefaultWebSession implements WebSession {
 	}
 
 	/**
-	 * For testing purposes.
+	 * Constructor for creating a new session with an updated last access time.
+	 * @param existingSession the existing session to copy
+	 * @param lastAccessTime the new last access time
 	 */
 	DefaultWebSession(DefaultWebSession existingSession, Instant lastAccessTime) {
 		this.id = existingSession.id;
