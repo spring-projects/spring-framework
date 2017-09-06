@@ -148,49 +148,12 @@ to know if a bean is required or not. `@Autowired lateinit var foo: Foo` implies
 of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
 
-== WebFlux functional DSL
+== Bean definition DSL
 
-Spring Framework 5 comes with a
-{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL]
-that allows you to leverage the <<reactive-web#webflux-fn,WebFlux functional API>> with clean and idiomatic Kotlin code:
-
-[source,kotlin]
-----
-router {
-  accept(TEXT_HTML).nest {
-    GET("/") { ok().render("index") }
-    GET("/sse") { ok().render("sse") }
-    GET("/users", userHandler::findAllView)
-  }
-  "/api".nest {
-    accept(APPLICATION_JSON).nest {
-      GET("/users", userHandler::findAll)
-    }
-    accept(TEXT_EVENT_STREAM).nest {
-      GET("/users", userHandler::stream)
-    }
-  }
-  resources("/**", ClassPathResource("static/"))
-}
-----
-
-[NOTE]
-====
-This DSL is programmatic, thus also allows custom registration logic of beans via `if` expression,
-`for` loop or any other Kotlin constructs. That can be useful when routes need to be registered
-depending on dynamic data, for example created via the backoffice.
-====
-
-See https://github.com/mixitconf/mixit/tree/bad6b92bce6193f9b3f696af9d416c276501dbf1/src/main/kotlin/mixit/web/routes[MiXiT project routes]
-for a concrete example.
-
-
-== Functional bean definition DSL
-
-Spring Framework 5 introduces a new way to register beans using lambda as an alternative
-to XML or JavaConfig with `@Configuration` and `@Bean`. In a nutshell, it makes it possible
-to register beans with a `Supplier` lambda that acts as a `FactoryBean`.  It is very efficient
-and does not require any reflection or CGLIB proxies.
+Spring Framework 5 introduces a new way to register beans in a functional way using lambda
+as an alternative to XML or JavaConfig with `@Configuration` and `@Bean`. In a nutshell,
+it makes it possible to register beans with a lambda that acts as a `FactoryBean`.
+It is very efficient and does not require any reflection or CGLIB proxies.
 
 In Java you will for example write:
 
@@ -282,7 +245,45 @@ see https://jira.spring.io/browse/SPR-13779[SPR-13779] and https://github.com/sp
 for more details and up to date informations.
 ====
 
-== Kotlin Script templates
+== Web
+
+=== WebFlux Functional DSL
+
+Spring Framework 5 comes with a
+{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL]
+that allows you to leverage the <<reactive-web#webflux-fn,WebFlux functional API>> with clean and idiomatic Kotlin code:
+
+[source,kotlin]
+----
+router {
+  accept(TEXT_HTML).nest {
+    GET("/") { ok().render("index") }
+    GET("/sse") { ok().render("sse") }
+    GET("/users", userHandler::findAllView)
+  }
+  "/api".nest {
+    accept(APPLICATION_JSON).nest {
+      GET("/users", userHandler::findAll)
+    }
+    accept(TEXT_EVENT_STREAM).nest {
+      GET("/users", userHandler::stream)
+    }
+  }
+  resources("/**", ClassPathResource("static/"))
+}
+----
+
+[NOTE]
+====
+This DSL is programmatic, thus also allows custom registration logic of beans via `if` expression,
+`for` loop or any other Kotlin constructs. That can be useful when routes need to be registered
+depending on dynamic data, for example created via the backoffice.
+====
+
+See https://github.com/mixitconf/mixit/tree/bad6b92bce6193f9b3f696af9d416c276501dbf1/src/main/kotlin/mixit/web/routes[MiXiT project routes]
+for a concrete example.
+
+=== Kotlin Script templates
 
 As of version 4.3, Spring Framework provides a
 http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[ScriptTemplateView]
@@ -315,25 +316,7 @@ ${include("footer")}
 See https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
-== Getting started
-
-The easiest way to start a new Spring Framework 5 project in Kotlin is to create a new Spring
-Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
-
-It is also possible to create a standalone WebFlux project as described in
-https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
-
-=== Choosing your web flavor
-
-Spring Framework now comes with 2 different web stacks: <<web#mvc,Spring MVC>> and
-<<reactive-web#spring-web-reactive,Spring WebFlux>>.
-
-Spring WebFlux is recommended if you want to create applications that will deal with latency,
-long-lived connections, streaming scenarios or simply if you want to use the web functional
-Kotlin DSL.
-
-For other use cases, Spring MVC and its annotation-based programming model is a perfectly
-valid and fully supported choice.
+== Spring projects in Kotlin
 
 === Final by default
 
@@ -482,7 +465,29 @@ class IntegrationTests {
 }
 ----
 
-=== Resources
+== Getting started
+
+=== start.spring.io
+
+The easiest way to start a new Spring Framework 5 project in Kotlin is to create a new Spring
+Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
+
+It is also possible to create a standalone WebFlux project as described in
+https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[this blog post].
+
+=== Choosing your web flavor
+
+Spring Framework now comes with 2 different web stacks: <<web#mvc,Spring MVC>> and
+<<reactive-web#spring-web-reactive,Spring WebFlux>>.
+
+Spring WebFlux is recommended if you want to create applications that will deal with latency,
+long-lived connections, streaming scenarios or simply if you want to use the web functional
+Kotlin DSL.
+
+For other use cases, Spring MVC and its annotation-based programming model is a perfectly
+valid and fully supported choice.
+
+== Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]
 * http://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
@@ -490,39 +495,39 @@ class IntegrationTests {
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
 
-==== Blog posts
+=== Blog posts
 
 * https://spring.io/blog/2016/02/15/developing-spring-boot-applications-with-kotlin[Developing Spring Boot applications with Kotlin]
 * https://spring.io/blog/2016/03/20/a-geospatial-messenger-with-kotlin-spring-boot-and-postgresql[A Geospatial Messenger with Kotlin, Spring Boot and PostgreSQL]
 * https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0[Introducing Kotlin support in Spring Framework 5.0]
 * https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-way[Spring Framework 5 Kotlin APIs, the functional way]
 
-==== Examples
+=== Examples
 
 * https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: regular Spring Boot + Spring Data JPA project
 * https://github.com/mixitconf/mixit[mixit]: Spring Boot 2 + WebFlux + Reactive Spring Data MongoDB
 * https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: standalone WebFlux + functional bean definition DSL
 
-==== Tutorials
+=== Tutorials
 
 * https://kotlinlang.org/docs/tutorials/spring-boot-restful.html[Creating a RESTful Web Service with Spring Boot]
 
-==== Issues
+=== Issues
 
 Here is a list of pending issues related to Spring + Kotlin support.
 
-===== Spring Framework
+==== Spring Framework
 
 * https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
 
-===== Spring Boot
+==== Spring Boot
 
 * https://github.com/spring-projects/spring-boot/issues/5537[Improve Kotlin support]
 * https://github.com/spring-projects/spring-boot/issues/8762[Allow @ConfigurationProperties binding for immutable POJOs]
 * https://github.com/spring-projects/spring-boot/issues/8511[Provide support for Kotlin KClass parameter in `SpringApplication.run()`]
 * https://github.com/spring-projects/spring-boot/issues/8115[Expose the functional bean registration API via `SpringApplication`]
 
-===== Kotlin
+==== Kotlin
 
 * https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
 * https://youtrack.jetbrains.com/issue/KT-15667[Support "::foo" as a short-hand syntax for bound callable reference to "this::foo"]
