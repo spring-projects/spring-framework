@@ -31,12 +31,12 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 
-	/**
-	 * The default header name
-	 */
+	/** Default value for {@link #setHeaderName(String)}. */
 	public static final String DEFAULT_HEADER_NAME = "SESSION";
 
+
 	private String headerName = DEFAULT_HEADER_NAME;
+
 
 	/**
 	 * Set the name of the session header to use for the session id.
@@ -49,6 +49,15 @@ public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 		Assert.hasText(headerName, "'headerName' must not be empty.");
 		this.headerName = headerName;
 	}
+
+	/**
+	 * Return the configured header name.
+	 * @return the configured header name
+	 */
+	public String getHeaderName() {
+		return this.headerName;
+	}
+
 
 	@Override
 	public List<String> resolveSessionIds(ServerWebExchange exchange) {
@@ -67,11 +76,4 @@ public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 		this.setSessionId(exchange, "");
 	}
 
-	/**
-	 * Return the configured header name.
-	 * @return the configured header name
-	 */
-	private String getHeaderName() {
-		return this.headerName;
-	}
 }

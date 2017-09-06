@@ -39,9 +39,32 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	private static final IdGenerator idGenerator = new JdkIdGenerator();
 
+
 	private Clock clock = Clock.system(ZoneId.of("GMT"));
 
 	private final Map<String, WebSession> sessions = new ConcurrentHashMap<>();
+
+
+	/**
+	 * Configure the {@link Clock} to use to set lastAccessTime on every created
+	 * session and to calculate if it is expired.
+	 * <p>This may be useful to align to different timezone or to set the clock
+	 * back in a test, e.g. {@code Clock.offset(clock, Duration.ofMinutes(-31))}
+	 * in order to simulate session expiration.
+	 * <p>By default this is {@code Clock.system(ZoneId.of("GMT"))}.
+	 * @param clock the clock to use
+	 */
+	public void setClock(Clock clock) {
+		Assert.notNull(clock, "'clock' is required.");
+		this.clock = clock;
+	}
+
+	/**
+	 * Return the configured clock for session lastAccessTime calculations.
+	 */
+	public Clock getClock() {
+		return this.clock;
+	}
 
 
 	@Override
@@ -68,27 +91,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 			Instant lastAccessTime = Instant.now(getClock());
 			return new DefaultWebSession(session, lastAccessTime);
 		});
-	}
-
-	/**
-	 * Configure the {@link Clock} to use to set lastAccessTime on every created
-	 * session and to calculate if it is expired.
-	 * <p>This may be useful to align to different timezone or to set the clock
-	 * back in a test, e.g. {@code Clock.offset(clock, Duration.ofMinutes(-31))}
-	 * in order to simulate session expiration.
-	 * <p>By default this is {@code Clock.system(ZoneId.of("GMT"))}.
-	 * @param clock the clock to use
-	 */
-	public void setClock(Clock clock) {
-		Assert.notNull(clock, "'clock' is required.");
-		this.clock = clock;
-	}
-
-	/**
-	 * Return the configured clock for session lastAccessTime calculations.
-	 */
-	public Clock getClock() {
-		return this.clock;
 	}
 
 	private Mono<Void> changeSessionId(String oldId, WebSession session) {

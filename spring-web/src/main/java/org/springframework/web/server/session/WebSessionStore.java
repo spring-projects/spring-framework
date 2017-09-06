@@ -19,8 +19,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.WebSession;
 
-import java.time.Instant;
-
 /**
  * Strategy for {@link WebSession} persistence.
  *
@@ -31,8 +29,12 @@ import java.time.Instant;
 public interface WebSessionStore {
 
 	/**
-	 * Creates the WebSession that can be stored by this WebSessionStore.
-	 * @return the session
+	 * Create a new WebSession.
+	 * <p>Note that this does nothing more than create a new instance.
+	 * The session can later be started explicitly via {@link WebSession#start()}
+	 * or implicitly by adding attributes -- and then persisted via
+	 * {@link WebSession#save()}.
+	 * @return the created session instance
 	 */
 	Mono<WebSession> createWebSession();
 
@@ -51,7 +53,7 @@ public interface WebSessionStore {
 	Mono<Void> removeSession(String sessionId);
 
 	/**
-	 * Update the last accessed time to now.
+	 * Update the last accessed timestamp to "now".
 	 * @param webSession the session to update
 	 * @return the session with the updated last access time
 	 */

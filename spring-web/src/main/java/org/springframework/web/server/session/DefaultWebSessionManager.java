@@ -40,6 +40,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	private WebSessionStore sessionStore = new InMemoryWebSessionStore();
 
+
 	/**
 	 * Configure the id resolution strategy.
 	 * <p>By default an instance of {@link CookieWebSessionIdResolver}.
@@ -73,6 +74,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	public WebSessionStore getSessionStore() {
 		return this.sessionStore;
 	}
+
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {

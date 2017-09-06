@@ -60,7 +60,7 @@ class DefaultWebSession implements WebSession {
 
 
 	/**
-	 * Constructor for creating a brand, new session.
+	 * Constructor for creating a new session instance.
 	 * @param idGenerator the session id generator
 	 * @param clock for access to current time
 	 */
@@ -86,7 +86,8 @@ class DefaultWebSession implements WebSession {
 	}
 
 	/**
-	 * Constructor for creating a new session with an updated last access time.
+	 * Copy constructor to re-create a session at the start of a new request
+	 * refreshing the last access time of the session.
 	 * @param existingSession the existing session to copy
 	 * @param lastAccessTime the new last access time
 	 */
