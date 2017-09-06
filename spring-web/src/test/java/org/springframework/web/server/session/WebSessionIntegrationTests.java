@@ -111,11 +111,9 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 		// Now set the clock of the session back by 31 minutes
 		InMemoryWebSessionStore store = (InMemoryWebSessionStore) this.sessionManager.getSessionStore();
-		DefaultWebSession session = (DefaultWebSession) store.retrieveSession(id).block();
+		WebSession session = store.retrieveSession(id).block();
 		assertNotNull(session);
-		Instant lastAccessTime = Clock.offset(store.getClock(), Duration.ofMinutes(-31)).instant();
-		session = new DefaultWebSession(session, lastAccessTime);
-		session.save().block();
+		store.setClock(Clock.offset(store.getClock(), Duration.ofMinutes(31)));
 
 		// Third request: expired session, new session created
 		request = RequestEntity.get(createUri()).header("Cookie", "SESSION=" + id).build();

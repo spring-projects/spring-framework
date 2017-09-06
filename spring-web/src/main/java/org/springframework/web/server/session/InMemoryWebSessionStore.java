@@ -16,16 +16,18 @@
 package org.springframework.web.server.session;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.JdkIdGenerator;
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.server.WebSession;
 
 /**
@@ -68,6 +70,11 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 
 	@Override
+	public Mono<WebSession> createWebSession() {
+		return Mono.fromSupplier(InMemoryWebSession::new);
+	}
+
+	@Override
 	public Mono<WebSession> retrieveSession(String id) {
 		return (this.sessions.containsKey(id) ? Mono.just(this.sessions.get(id)) : Mono.empty());
 	}
@@ -78,20 +85,15 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		return Mono.empty();
 	}
 
-	public Mono<WebSession> createWebSession() {
-		return Mono.fromSupplier(() ->
-				new DefaultWebSession(idGenerator, getClock(),
-						(oldId, session) -> this.changeSessionId(oldId, session),
-						this::storeSession));
-	}
-
 	public Mono<WebSession> updateLastAccessTime(WebSession webSession) {
 		return Mono.fromSupplier(() -> {
-			DefaultWebSession session = (DefaultWebSession) webSession;
+			InMemoryWebSession session = (InMemoryWebSession) webSession;
 			Instant lastAccessTime = Instant.now(getClock());
-			return new DefaultWebSession(session, lastAccessTime);
+			return new InMemoryWebSession(session, lastAccessTime);
 		});
 	}
+
+	/* Private methods for InMemoryWebSession */
 
 	private Mono<Void> changeSessionId(String oldId, WebSession session) {
 		this.sessions.remove(oldId);
@@ -103,4 +105,100 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		this.sessions.put(session.getId(), session);
 		return Mono.empty();
 	}
+
+
+	private class InMemoryWebSession implements WebSession {
+
+		private final AtomicReference<String> id;
+
+		private final Map<String, Object> attributes;
+
+		private final Instant creationTime;
+
+		private final Instant lastAccessTime;
+
+		private volatile Duration maxIdleTime;
+
+		private volatile boolean started;
+
+
+		InMemoryWebSession() {
+			this.id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
+			this.attributes = new ConcurrentHashMap<>();
+			this.creationTime = Instant.now(getClock());
+			this.lastAccessTime = this.creationTime;
+			this.maxIdleTime = Duration.ofMinutes(30);
+		}
+
+		InMemoryWebSession(InMemoryWebSession existingSession, Instant lastAccessTime) {
+			this.id = existingSession.id;
+			this.attributes = existingSession.attributes;
+			this.creationTime = existingSession.creationTime;
+			this.lastAccessTime = lastAccessTime;
+			this.maxIdleTime = existingSession.maxIdleTime;
+			this.started = existingSession.isStarted(); // Use method (explicit or implicit start)
+		}
+
+
+		@Override
+		public String getId() {
+			return this.id.get();
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			return this.attributes;
+		}
+
+		@Override
+		public Instant getCreationTime() {
+			return this.creationTime;
+		}
+
+		@Override
+		public Instant getLastAccessTime() {
+			return this.lastAccessTime;
+		}
+
+		@Override
+		public void setMaxIdleTime(Duration maxIdleTime) {
+			this.maxIdleTime = maxIdleTime;
+		}
+
+		@Override
+		public Duration getMaxIdleTime() {
+			return this.maxIdleTime;
+		}
+
+
+		@Override
+		public void start() {
+			this.started = true;
+		}
+
+		@Override
+		public boolean isStarted() {
+			return this.started || !getAttributes().isEmpty();
+		}
+
+		@Override
+		public Mono<Void> changeSessionId() {
+			String oldId = this.id.get();
+			String newId = String.valueOf(idGenerator.generateId());
+			this.id.set(newId);
+			return InMemoryWebSessionStore.this.changeSessionId(oldId, this).doOnError(ex -> this.id.set(oldId));
+		}
+
+		@Override
+		public Mono<Void> save() {
+			return InMemoryWebSessionStore.this.storeSession(this);
+		}
+
+		@Override
+		public boolean isExpired() {
+			return (isStarted() && !this.maxIdleTime.isNegative() &&
+					Instant.now(getClock()).minus(this.maxIdleTime).isAfter(this.lastAccessTime));
+		}
+	}
+
 }

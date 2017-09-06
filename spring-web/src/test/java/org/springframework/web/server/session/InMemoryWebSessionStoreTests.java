@@ -16,59 +16,58 @@
 package org.springframework.web.server.session;
 
 import org.junit.Test;
-import org.springframework.util.IdGenerator;
-import org.springframework.util.JdkIdGenerator;
-import reactor.core.publisher.Mono;
 
-import java.time.Clock;
-import java.time.ZoneId;
+import org.springframework.web.server.WebSession;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Unit tests.
  * @author Rob Winch
- * @since 5.0
  */
-public class DefaultWebSessionTests {
-	private static final Clock CLOCK = Clock.system(ZoneId.of("GMT"));
+public class InMemoryWebSessionStoreTests {
 
-	private static final IdGenerator idGenerator = new JdkIdGenerator();
+	private InMemoryWebSessionStore sessionStore = new InMemoryWebSessionStore();
+
 
 	@Test
 	public void constructorWhenImplicitStartCopiedThenCopyIsStarted() {
-		DefaultWebSession original = createDefaultWebSession();
+		WebSession original = this.sessionStore.createWebSession().block();
+		assertNotNull(original);
 		original.getAttributes().put("foo", "bar");
 
-		DefaultWebSession copy = new DefaultWebSession(original, CLOCK.instant());
-
+		WebSession copy = this.sessionStore.updateLastAccessTime(original).block();
+		assertNotNull(copy);
 		assertTrue(copy.isStarted());
 	}
 
 	@Test
 	public void constructorWhenExplicitStartCopiedThenCopyIsStarted() {
-		DefaultWebSession original = createDefaultWebSession();
+		WebSession original = this.sessionStore.createWebSession().block();
+		assertNotNull(original);
 		original.start();
 
-		DefaultWebSession copy = new DefaultWebSession(original, CLOCK.instant());
-
+		WebSession copy = this.sessionStore.updateLastAccessTime(original).block();
+		assertNotNull(copy);
 		assertTrue(copy.isStarted());
 	}
 
 	@Test
 	public void startsSessionExplicitly() {
-		DefaultWebSession session = createDefaultWebSession();
+		WebSession session = this.sessionStore.createWebSession().block();
+		assertNotNull(session);
 		session.start();
 		assertTrue(session.isStarted());
 	}
 
 	@Test
 	public void startsSessionImplicitly() {
-		DefaultWebSession session = createDefaultWebSession();
+		WebSession session = this.sessionStore.createWebSession().block();
+		assertNotNull(session);
+		session.start();
 		session.getAttributes().put("foo", "bar");
 		assertTrue(session.isStarted());
 	}
 
-	private DefaultWebSession createDefaultWebSession() {
-		return new DefaultWebSession(idGenerator, CLOCK, (s, session) -> Mono.empty(), s -> Mono.empty());
-	}
 }
