@@ -115,11 +115,15 @@ Other libraries like Reactor or Spring Data leverage these annotations to provid
 null-safe APIs for Kotlin developers.
 ====
 
-== Classes
+== Classes & Interfaces
 
 Spring Framework 5 now supports various Kotlin constructs like instantiating Kotlin classes
 via primary constructors, immutable classes data binding and function optional parameters
 with default values.
+
+Kotlin parameter names are recognized via a dedicated `KotlinReflectionParameterNameDiscoverer`
+which allows to find interface method parameter names without requiring Java 8 `-parameters`
+compiler flag.
 
 https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module] which is required
 for serializing / deserializing JSON data is automatically registered when present in the
@@ -509,7 +513,6 @@ Here is a list of pending issues related to Spring + Kotlin support.
 
 ===== Spring Framework
 
-* https://jira.spring.io/browse/SPR-15541[Leveraging kotlin-reflect to determine interface method parameters]
 * https://jira.spring.io/browse/SPR-15413[Add support for Kotlin coroutines]
 
 ===== Spring Boot
