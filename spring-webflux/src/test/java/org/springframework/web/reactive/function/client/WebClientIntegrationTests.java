@@ -70,6 +70,12 @@ public class WebClientIntegrationTests {
 	public void headers() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
+		this.webClient.get().uri("/test")
+				.exchange()
+				.map(response -> {
+					response.close();
+					return response.statusCode();
+				});
 		Mono<HttpHeaders> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
 				.exchange()

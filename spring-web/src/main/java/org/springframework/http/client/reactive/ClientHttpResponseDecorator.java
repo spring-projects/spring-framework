@@ -70,6 +70,10 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 		return this.delegate.getBody();
 	}
 
+	@Override
+	public void close() {
+		this.delegate.close();
+	}
 
 	@Override
 	public String toString() {

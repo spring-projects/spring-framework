@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -43,7 +44,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface ClientResponse {
+public interface ClientResponse extends Closeable {
 
 	/**
 	 * Return the status code of this response.
@@ -132,6 +133,18 @@ public interface ClientResponse {
 	 */
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
 
+	/**
+	 * Close this response, freeing any resources created.
+	 * <p>This non-blocking method has to be called once the response has been processed
+	 * and the resources are no longer needed.
+	 * <p>{@code ClientResponse.bodyTo*}, {@code ClientResponse.toEntity*}
+	 * and all methods under {@code WebClient.retrieve()} will close the response
+	 * automatically.
+	 * <p>It is required to call close() manually otherwise; not doing so might
+	 * create resource leaks or connection issues.
+	 */
+	@Override
+	void close();
 
 	/**
 	 * Represents the headers of the HTTP response.

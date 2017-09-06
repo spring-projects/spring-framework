@@ -89,6 +89,10 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
+	@Override
+	public void close() {
+		this.response.dispose();
+	}
 
 	@Override
 	public String toString() {

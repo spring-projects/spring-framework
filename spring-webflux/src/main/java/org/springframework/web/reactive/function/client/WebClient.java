@@ -461,6 +461,17 @@ public interface WebClient {
 		 *     .exchange()
 		 *     .flatMapMany(response -> response.bodyToFlux(Pojo.class));
 		 * </pre>
+		 * <p>If the response body is not consumed with {@code bodyTo*}
+		 * or {@code toEntity*} methods, it is your responsibility
+		 * to release the HTTP resources with {@link ClientResponse#close()}.
+		 * <pre>
+		 * Mono&lt;HttpStatus&gt; mono = client.get().uri("/")
+		 *     .exchange()
+		 *     .map(response -> {
+		 *         response.close();
+		 *         return response.statusCode();
+		 *     });
+		 * </pre>
 		 * @return a {@code Mono} with the response
 		 * @see #retrieve()
 		 */
