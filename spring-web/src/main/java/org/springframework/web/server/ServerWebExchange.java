@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
@@ -177,6 +178,23 @@ public interface ServerWebExchange {
 	 */
 	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
+	/**
+	 * Transform the given url according to the registered transformation function(s).
+	 * By default, this method returns the given {@code url}, though additional
+	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * @param url the URL to transform
+	 * @return the transformed URL
+	 */
+	String transformUrl(String url);
+
+	/**
+	 * Register an additional URL transformation function for use with {@link #transformUrl}.
+	 * The given function can be used to insert an id for authentication, a nonce for CSRF
+	 * protection, etc.
+	 * <p>Note that the given function is applied after any previously registered functions.
+	 * @param transformer a URL transformation function to add
+	 */
+	void addUrlTransformer(Function<String, String> transformer);
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

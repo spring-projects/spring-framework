@@ -289,9 +289,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @param exchange current exchange
 	 */
 	protected Mono<Void> sendRedirect(String targetUrl, ServerWebExchange exchange) {
+		String transformedUrl = (isRemoteHost(targetUrl) ? targetUrl : exchange.transformUrl(targetUrl));
 		ServerHttpResponse response = exchange.getResponse();
-		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
-		response.getHeaders().setLocation(URI.create(encodedURL));
+		response.getHeaders().setLocation(URI.create(transformedUrl));
 		response.setStatusCode(getStatusCode());
 		return Mono.empty();
 	}

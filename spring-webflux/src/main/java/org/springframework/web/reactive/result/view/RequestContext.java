@@ -203,7 +203,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**
@@ -220,7 +220,7 @@ public class RequestContext {
 		String url = StringUtils.applyRelativePath(getContextPath() + "/", relativeUrl);
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
-		return getExchange().getResponse().encodeUrl(url);
+		return getExchange().transformUrl(url);
 	}
 
 	/**

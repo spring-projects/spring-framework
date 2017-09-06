@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -68,9 +67,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
-
-	@Nullable
-	private Function<String, String> urlEncoder = url -> url;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
@@ -134,16 +130,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		else {
 			getCookies().add(cookie.getName(), cookie);
 		}
-	}
-
-	@Override
-	public String encodeUrl(String url) {
-		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
-	}
-
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
 	}
 
 	@Override
