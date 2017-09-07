@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResourceHandlerFunctionTests {
 
@@ -80,6 +81,7 @@ public class ResourceHandlerFunctionTests {
 		Mono<Void> result = responseMono.flatMap(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
 					assertTrue(response instanceof EntityResponse);
+					@SuppressWarnings("unchecked")
 					EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 					assertEquals(this.resource, entityResponse.entity());
 					return response.writeTo(exchange, context);
@@ -115,6 +117,7 @@ public class ResourceHandlerFunctionTests {
 		Mono<Void> result = responseMono.flatMap(response -> {
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertTrue(response instanceof EntityResponse);
+			@SuppressWarnings("unchecked")
 			EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 			assertEquals(this.resource.getFilename(), entityResponse.entity().getFilename());
 			return response.writeTo(exchange, context);
