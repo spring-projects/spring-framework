@@ -20,8 +20,10 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.ssl.SslHandler;
 import reactor.core.publisher.Flux;
 import reactor.ipc.netty.http.server.HttpServerRequest;
 
@@ -62,6 +64,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
+		String scheme = getScheme(request);
 		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
 		if (header != null) {
 			final int portIndex;
@@ -73,7 +76,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			}
 			if (portIndex != -1) {
 				try {
-					return new URI(null, null, header.substring(0, portIndex),
+					return new URI(scheme, null, header.substring(0, portIndex),
 							Integer.parseInt(header.substring(portIndex + 1)), null, null, null);
 				}
 				catch (NumberFormatException ex) {
@@ -81,14 +84,20 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 				}
 			}
 			else {
-				return new URI(null, header, null, null);
+				return new URI(scheme, header, null, null);
 			}
 		}
 		else {
 			InetSocketAddress localAddress = (InetSocketAddress) request.context().channel().localAddress();
-			return new URI(null, null, localAddress.getHostString(),
+			return new URI(scheme, null, localAddress.getHostString(),
 					localAddress.getPort(), null, null, null);
 		}
+	}
+
+	private static String getScheme(HttpServerRequest request) {
+		ChannelPipeline pipeline = request.context().channel().pipeline();
+		boolean ssl = pipeline.get(SslHandler.class) != null;
+		return ssl ? "https" : "http";
 	}
 
 	private static HttpHeaders initHeaders(HttpServerRequest channel) {

@@ -74,7 +74,8 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI createUrl(InetSocketAddress address, String requestUri) throws URISyntaxException {
-		URI baseUrl = new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
+		// TODO: determine scheme
+		URI baseUrl = new URI("http", null, address.getHostString(), address.getPort(), null, null, null);
 		return new URI(baseUrl.toString() + requestUri);
 	}
 
