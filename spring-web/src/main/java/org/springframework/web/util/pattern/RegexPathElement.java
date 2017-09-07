@@ -153,9 +153,6 @@ class RegexPathElement extends PathElement {
 				}
 			}
 			else {
-				if (matchingContext.isMatchStartMatching && (pathIndex + 1 >= matchingContext.pathLength)) {
-					return true;  // no more data but matches up to this point
-				}
 				matches = (this.next != null && this.next.matches(pathIndex + 1, matchingContext));
 			}
 		}

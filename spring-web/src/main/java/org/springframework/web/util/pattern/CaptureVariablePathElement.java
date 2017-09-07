@@ -111,10 +111,7 @@ class CaptureVariablePathElement extends PathElement {
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				match = true;  // no more data but matches up to this point
-			}
-			else if (this.next != null) {
+			if (this.next != null) {
 				match = this.next.matches(pathIndex, matchingContext);
 			}
 		}

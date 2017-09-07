@@ -104,9 +104,6 @@ class LiteralPathElement extends PathElement {
 			}
 		}
 		else {
-			if (matchingContext.isMatchStartMatching && pathIndex == matchingContext.pathLength) {
-				return true;  // no more data but everything matched so far
-			}
 			return (this.next != null && this.next.matches(pathIndex, matchingContext));
 		}
 	}

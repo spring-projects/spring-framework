@@ -581,8 +581,6 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		final int pathLength;
 
-		boolean isMatchStartMatching = false;
-
 		@Nullable
 		private Map<String, String> extractedUriVariables;
 
@@ -611,10 +609,6 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		public boolean isMatchOptionalTrailingSeparator() {
 			return matchOptionalTrailingSeparator;
-		}
-
-		public void setMatchStartMatching(boolean b) {
-			isMatchStartMatching = b;
 		}
 
 		public void set(String key, String value, MultiValueMap<String,String> parameters) {
