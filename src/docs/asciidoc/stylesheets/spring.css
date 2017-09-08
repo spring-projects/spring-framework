@@ -383,7 +383,7 @@ table.tableblock > caption.title { white-space: nowrap; overflow: visible; max-w
 
 table.tableblock #preamble > .sectionbody > .paragraph:first-of-type p { font-size: inherit; }
 
-.admonitionblock > table { border-collapse: separate; border: 0; background: none; width: 100%; }
+.admonitionblock > table { border-collapse: separate; border: 0; background: none; width: 100%; margin-bottom: 0; }
 .admonitionblock > table td.icon { text-align: center; width: 80px; }
 .admonitionblock > table td.icon img { max-width: initial; }
 .admonitionblock > table td.icon .title { font-weight: bold; font-family: Montserrat, sans-serif; text-transform: uppercase; }
