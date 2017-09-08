@@ -30,6 +30,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.BindingContext;
@@ -73,12 +74,13 @@ class ModelInitializer {
 		List<Mono<HandlerResult>> resultList = new ArrayList<>();
 		attributeMethods.forEach(invocable -> resultList.add(invocable.invoke(exchange, bindingContext)));
 
-		return Mono.zip(resultList, objectArray -> {
-			return Arrays.stream(objectArray)
-					.map(object -> (HandlerResult) object)
-					.map(handlerResult -> handleResult(handlerResult, bindingContext))
-					.collect(Collectors.toList());
-		}).flatMap(completionList -> Mono.when(completionList));
+		return Mono
+				.zip(resultList, objectArray -> {
+					return Arrays.stream(objectArray)
+							.map(object -> handleResult(((HandlerResult) object), bindingContext))
+							.collect(Collectors.toList());
+				})
+				.flatMap(completionList -> Mono.when(completionList));
 	}
 
 	private Mono<Void> handleResult(HandlerResult handlerResult, BindingContext bindingContext) {
@@ -86,16 +88,17 @@ class ModelInitializer {
 		if (value != null) {
 			ResolvableType type = handlerResult.getReturnType();
 			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.getRawClass(), value);
-			if (adapter != null) {
-				Class<?> attributeType = (adapter.isNoValue() ? Void.class : type.resolveGeneric());
-				if (attributeType == Void.class) {
-					return Mono.from(adapter.toPublisher(value));
-				}
+			if (isAsyncVoidType(type, adapter)) {
+				return Mono.from(adapter.toPublisher(value));
 			}
 			String name = getAttributeName(handlerResult.getReturnTypeSource());
 			bindingContext.getModel().asMap().putIfAbsent(name, value);
 		}
 		return Mono.empty();
+	}
+
+	private boolean isAsyncVoidType(ResolvableType type, @Nullable  ReactiveAdapter adapter) {
+		return adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class);
 	}
 
 	private String getAttributeName(MethodParameter param) {

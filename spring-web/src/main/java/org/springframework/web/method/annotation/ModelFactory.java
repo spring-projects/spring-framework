@@ -243,13 +243,12 @@ public final class ModelFactory {
 
 
 	/**
-	 * Derive the model attribute name for a method parameter based on:
-	 * <ol>
-	 * <li>the parameter {@code @ModelAttribute} annotation value
-	 * <li>the parameter type
-	 * </ol>
+	 * Derive the model attribute name for the given method parameter based on
+	 * a {@code @ModelAttribute} parameter annotation (if present) or falling
+	 * back on parameter type based conventions.
 	 * @param parameter a descriptor for the method parameter
-	 * @return the derived name (never {@code null} or empty String)
+	 * @return the derived name
+	 * @see Conventions#getVariableNameForParameter(MethodParameter)
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);

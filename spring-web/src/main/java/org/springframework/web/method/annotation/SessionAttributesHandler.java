@@ -74,10 +74,7 @@ public class SessionAttributesHandler {
 			this.attributeNames.addAll(Arrays.asList(annotation.names()));
 			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
 		}
-
-		for (String attributeName : this.attributeNames) {
-			this.knownAttributeNames.add(attributeName);
-		}
+		this.knownAttributeNames.addAll(this.attributeNames);
 	}
 
 	/**
@@ -90,7 +87,7 @@ public class SessionAttributesHandler {
 
 	/**
 	 * Whether the attribute name or type match the names and types specified
-	 * via {@code @SessionAttributes} in underlying controller.
+	 * via {@code @SessionAttributes} on the underlying controller.
 	 * <p>Attributes successfully resolved through this method are "remembered"
 	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
 	 * {@link #cleanupAttributes(WebRequest)}.
