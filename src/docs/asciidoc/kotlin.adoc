@@ -227,7 +227,7 @@ This `beans()` function can then be used to register beans on the application co
 [source,kotlin]
 ----
 val context = GenericApplicationContext().apply {
-  beans().invoke(this)
+  beans().initialize(this)
   refresh()
 }
 ----
