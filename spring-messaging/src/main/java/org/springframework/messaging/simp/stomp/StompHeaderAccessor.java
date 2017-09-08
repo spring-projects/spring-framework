@@ -429,7 +429,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	@Override
 	public String getDetailedLogMessage(@Nullable Object payload) {
 		if (isHeartbeat()) {
-			return "heart-beat in session " + getSessionId();
+			String sessionId = getSessionId();
+			return "heart-beat" + (sessionId != null ? " in session " + sessionId : "");
 		}
 		StompCommand command = getCommand();
 		if (command == null) {
