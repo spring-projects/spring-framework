@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,7 +416,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	@Override
 	public String getDetailedLogMessage(Object payload) {
 		if (isHeartbeat()) {
-			return "heart-beat in session " + getSessionId();
+			String sessionId = getSessionId();
+			return "heart-beat" + (sessionId != null ? " in session " + sessionId : "");
 		}
 		StompCommand command = getCommand();
 		if (command == null) {
