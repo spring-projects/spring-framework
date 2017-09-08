@@ -301,6 +301,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
+	// TODO: SPR-15871, SPR-15542
+
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
 		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
