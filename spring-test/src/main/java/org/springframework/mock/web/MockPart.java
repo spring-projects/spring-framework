@@ -49,20 +49,22 @@ public class MockPart implements Part {
 
 	/**
 	 * Constructor for a part with byte[] content only.
+	 * @see #getHeaders()
 	 */
-	public MockPart(String name, byte[] content) {
+	public MockPart(String name, @Nullable byte[] content) {
 		this(name, null, content);
 	}
 
 	/**
-	 * Constructor for a part with a filename.
+	 * Constructor for a part with a filename and streamed content.
+	 * @see #getHeaders()
 	 */
 	public MockPart(String name, @Nullable String filename, InputStream content) throws IOException {
 		this(name, filename, FileCopyUtils.copyToByteArray(content));
 	}
 
 	/**
-	 * Constructor for a part with byte[] content only.
+	 * Constructor for a part with a filename and byte[] content.
 	 * @see #getHeaders()
 	 */
 	private MockPart(String name, @Nullable String filename, @Nullable byte[] content) {

@@ -20,13 +20,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
-
 
 /**
  * Mock implementation of {@code javax.servlet.http.Part}.
@@ -47,20 +47,22 @@ public class MockPart implements Part {
 
 	/**
 	 * Constructor for a part with byte[] content only.
+	 * @see #getHeaders()
 	 */
 	public MockPart(String name, byte[] content) {
 		this(name, null, content);
 	}
 
 	/**
-	 * Constructor for a part with a filename.
+	 * Constructor for a part with a filename and streamed content.
+	 * @see #getHeaders()
 	 */
 	public MockPart(String name, String filename, InputStream content) throws IOException {
 		this(name, filename, FileCopyUtils.copyToByteArray(content));
 	}
 
 	/**
-	 * Constructor for a part with byte[] content only.
+	 * Constructor for a part with a filename and byte[] content.
 	 * @see #getHeaders()
 	 */
 	private MockPart(String name, String filename, byte[] content) {
@@ -105,7 +107,8 @@ public class MockPart implements Part {
 
 	@Override
 	public Collection<String> getHeaders(String name) {
-		return this.headers.get(name);
+		Collection<String> headerValues = this.headers.get(name);
+		return (headerValues != null ? headerValues : Collections.emptyList());
 	}
 
 	@Override

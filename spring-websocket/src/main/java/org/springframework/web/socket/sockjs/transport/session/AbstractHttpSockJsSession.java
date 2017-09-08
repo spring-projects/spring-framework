@@ -295,7 +295,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		synchronized (this.responseLock) {
 			this.messageCache.add(message);
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.messageCache.size() + " message(s) to flush in session " + this.getId());
+				logger.trace(this.messageCache.size() + " message(s) to flush in session " + getId());
 			}
 			if (isActive() && this.readyToSend) {
 				if (logger.isTraceEnabled()) {

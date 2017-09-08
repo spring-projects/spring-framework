@@ -146,6 +146,7 @@ public interface ClientResponse extends Closeable {
 	@Override
 	void close();
 
+
 	/**
 	 * Represents the headers of the HTTP response.
 	 * @see ClientResponse#headers()
@@ -175,6 +176,6 @@ public interface ClientResponse extends Closeable {
 		 * Return the headers as a {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
-
 	}
+
 }
