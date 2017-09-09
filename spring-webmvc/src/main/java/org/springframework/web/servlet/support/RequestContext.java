@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -225,18 +226,21 @@ public class RequestContext {
 		TimeZone timeZone = null;
 
 		// Determine locale to use for this RequestContext.
-		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
-			locale = localeContext.getLocale();
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
-			}
-		}
-		else if (localeResolver != null) {
-			// Try LocaleResolver (we're within a DispatcherServlet request).
-			locale = localeResolver.resolveLocale(request);
-		}
+		try {
+	        LocaleResolver localeResolver = this.webApplicationContext.getBean(LocaleContextResolver.class);
+	        
+	        if (localeResolver instanceof LocaleContextResolver) {
+	            LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
+	            locale = localeContext.getLocale();
+	            if (localeContext instanceof TimeZoneAwareLocaleContext) {
+	                timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+	            }
+	        }
+	        else if (localeResolver != null) {
+	            // Try LocaleResolver (we're within a DispatcherServlet request).
+	            locale = localeResolver.resolveLocale(request);
+	        }
+        } catch (NoSuchBeanDefinitionException ex) {}
 
 		this.locale = locale;
 		this.timeZone = timeZone;
