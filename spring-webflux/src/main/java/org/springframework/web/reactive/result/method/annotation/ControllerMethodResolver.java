@@ -97,6 +97,8 @@ class ControllerMethodResolver {
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<>(64);
 
+	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
+
 
 	ControllerMethodResolver(ArgumentResolverConfigurer argumentResolvers,
 			List<HttpMessageReader<?>> messageReaders, ReactiveAdapterRegistry reactiveRegistry,
@@ -154,6 +156,7 @@ class ControllerMethodResolver {
 		registrar.addIfModelAttribute(() -> new ErrorsMethodArgumentResolver(reactiveRegistry));
 		registrar.add(new ServerWebExchangeArgumentResolver(reactiveRegistry));
 		registrar.add(new PrincipalArgumentResolver(reactiveRegistry));
+		registrar.addIfRequestBody(readers -> new SessionStatusMethodArgumentResolver());
 		registrar.add(new WebSessionArgumentResolver(reactiveRegistry));
 
 		// Custom...
@@ -315,6 +318,25 @@ class ControllerMethodResolver {
 		return invocable;
 	}
 
+	/**
+	 * Return the handler for the type-level {@code @SessionAttributes} annotation
+	 * based on the given controller method.
+	 */
+	public SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
+		Class<?> handlerType = handlerMethod.getBeanType();
+		SessionAttributesHandler result = this.sessionAttributesHandlerCache.get(handlerType);
+		if (result == null) {
+			synchronized (this.sessionAttributesHandlerCache) {
+				result = this.sessionAttributesHandlerCache.get(handlerType);
+				if (result == null) {
+					result = new SessionAttributesHandler(handlerType);
+					this.sessionAttributesHandlerCache.put(handlerType, result);
+				}
+			}
+		}
+		return result;
+	}
+
 
 	/** Filter for {@link InitBinder @InitBinder} methods. */
 	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
@@ -335,6 +357,7 @@ class ControllerMethodResolver {
 		private final boolean modelAttributeSupported;
 
 		private final List<HandlerMethodArgumentResolver> result = new ArrayList<>();
+
 
 		private ArgumentResolverRegistrar(ArgumentResolverConfigurer resolvers,
 				List<HttpMessageReader<?>> messageReaders, boolean modelAttribute) {

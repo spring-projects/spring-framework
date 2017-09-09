@@ -21,13 +21,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.Conventions;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -39,7 +37,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -115,7 +112,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 				() -> getClass().getSimpleName() + " does not support multi-value reactive type wrapper: " +
 						parameter.getGenericParameterType());
 
-		String name = getAttributeName(parameter);
+		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
@@ -148,13 +145,6 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}));
 		});
-	}
-
-	private String getAttributeName(MethodParameter parameter) {
-		return Optional.ofNullable(parameter.getParameterAnnotation(ModelAttribute.class))
-				.filter(ann -> StringUtils.hasText(ann.value()))
-				.map(ModelAttribute::value)
-				.orElse(Conventions.getVariableNameForParameter(parameter));
 	}
 
 	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,

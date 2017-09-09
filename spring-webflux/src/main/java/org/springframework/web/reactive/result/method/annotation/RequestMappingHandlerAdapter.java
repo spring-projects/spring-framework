@@ -169,7 +169,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
 				this.messageReaders, this.reactiveAdapterRegistry, this.applicationContext);
 
-		this.modelInitializer = new ModelInitializer(this.reactiveAdapterRegistry);
+		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
 	}
 
 
@@ -183,21 +183,20 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		Assert.state(this.methodResolver != null && this.modelInitializer != null, "Not initialized");
 
-		BindingContext bindingContext = new InitBinderBindingContext(
+		InitBinderBindingContext bindingContext = new InitBinderBindingContext(
 				getWebBindingInitializer(), this.methodResolver.getInitBinderMethods(handlerMethod));
 
-		List<InvocableHandlerMethod> modelAttributeMethods =
-				this.methodResolver.getModelAttributeMethods(handlerMethod);
+		InvocableHandlerMethod invocableMethod = this.methodResolver.getRequestMappingMethod(handlerMethod);
 
 		Function<Throwable, Mono<HandlerResult>> exceptionHandler =
 				ex -> handleException(ex, handlerMethod, bindingContext, exchange);
 
 		return this.modelInitializer
-				.initModel(bindingContext, modelAttributeMethods, exchange)
-				.then(Mono.defer(() -> this.methodResolver.getRequestMappingMethod(handlerMethod)
-						.invoke(exchange, bindingContext)
-						.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-						.onErrorResume(exceptionHandler)));
+				.initModel(handlerMethod, bindingContext, exchange)
+				.then(Mono.defer(() -> invocableMethod.invoke(exchange, bindingContext)))
+				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
+				.doOnNext(result -> bindingContext.saveModel())
+				.onErrorResume(exceptionHandler);
 	}
 
 	private Mono<HandlerResult> handleException(Throwable exception, HandlerMethod handlerMethod,

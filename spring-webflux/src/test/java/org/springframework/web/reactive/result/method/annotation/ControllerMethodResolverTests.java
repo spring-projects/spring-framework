@@ -46,7 +46,8 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link ControllerMethodResolver}.
@@ -108,6 +109,7 @@ public class ControllerMethodResolverTests {
 		assertEquals(ErrorsMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ServerWebExchangeArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PrincipalArgumentResolver.class, next(resolvers, index).getClass());
+		assertEquals(SessionStatusMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(WebSessionArgumentResolver.class, next(resolvers, index).getClass());
 
 		assertEquals(CustomArgumentResolver.class, next(resolvers, index).getClass());
