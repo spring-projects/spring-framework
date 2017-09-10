@@ -75,7 +75,7 @@ import org.springframework.util.ReflectionUtils;
  * instead. If you really need programmatic {@code #forExecutables} access, inject this class as
  * a {@link ValidatorFactory} and call {@link #getValidator()} on it, then {@code #forExecutables}
  * on the returned native {@link Validator} reference instead of directly on this class.
- * Alternatively, call {@code #unwrap(Validator.class) which will also provide the native object.
+ * Alternatively, call {@code #unwrap(Validator.class)} which will also provide the native object.
  *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
  * {@code javax.validation} API being present but no explicit Validator having been configured.
