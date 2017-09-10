@@ -353,7 +353,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			ReflectionUtils.invokeMethod(parameterNameProviderMethod, configuration, parameterNameProvider);
 
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			// Bean Validation 1.1 API not available - simply not applying the ParameterNameDiscoverer
 		}
 	}
