@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	}
 
 
-	private final Validator validator;
+	private volatile Validator validator;
 
 
 	/**
@@ -116,7 +116,18 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 		if (forExecutablesMethod != null) {
 			// Standard Bean Validation 1.1 API
-			Object execVal = ReflectionUtils.invokeMethod(forExecutablesMethod, this.validator);
+			Object execVal;
+			try {
+				execVal = ReflectionUtils.invokeMethod(forExecutablesMethod, this.validator);
+			}
+			catch (AbstractMethodError err) {
+				// Probably an adapter (maybe a lazy-init proxy) without BV 1.1 support
+				Validator nativeValidator = this.validator.unwrap(Validator.class);
+				execVal = ReflectionUtils.invokeMethod(forExecutablesMethod, nativeValidator);
+				// If successful, store native Validator for further use
+				this.validator = nativeValidator;
+			}
+
 			Method methodToValidate = invocation.getMethod();
 			Set<ConstraintViolation<?>> result;
 
@@ -137,13 +148,11 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			}
 
 			Object returnValue = invocation.proceed();
-
 			result = (Set<ConstraintViolation<?>>) ReflectionUtils.invokeMethod(validateReturnValueMethod,
 					execVal, invocation.getThis(), methodToValidate, returnValue, groups);
 			if (!result.isEmpty()) {
 				throw new ConstraintViolationException(result);
 			}
-
 			return returnValue;
 		}
 
