@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import javax.validation.Validator;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
@@ -26,6 +27,10 @@ import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
@@ -37,7 +42,6 @@ import static org.junit.Assert.*;
 /**
  * @author Juergen Hoeller
  */
-@SuppressWarnings("rawtypes")
 public class MethodValidationTests {
 
 	@Test
@@ -62,8 +66,6 @@ public class MethodValidationTests {
 		ac.close();
 	}
 
-
-	@SuppressWarnings("unchecked")
 	private void doTestProxyValidation(MyValidInterface proxy) {
 		assertNotNull(proxy.myValidMethod("value", 5));
 		try {
@@ -114,6 +116,13 @@ public class MethodValidationTests {
 		}
 	}
 
+	@Test
+	public void testLazyValidatorForMethodValidation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				LazyMethodValidationConfig.class, CustomValidatorBean.class, MyValidBean.class);
+		ctx.getBean(MyValidInterface.class).myValidMethod("value", 5);
+	}
+
 
 	@MyStereotype
 	public static class MyValidBean implements MyValidInterface<String> {
@@ -162,6 +171,18 @@ public class MethodValidationTests {
 	@Validated({OtherGroup.class, Default.class})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyValid {
+	}
+
+
+	@Configuration
+	public static class LazyMethodValidationConfig {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(@Lazy Validator validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidator(validator);
+			return postProcessor;
+		}
 	}
 
 }
