@@ -177,7 +177,9 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @see org.springframework.validation.FieldError#getField()
 	 */
 	protected String determineField(ConstraintViolation<Object> violation) {
-		return violation.getPropertyPath().toString();
+		String path = violation.getPropertyPath().toString();
+		int elementIndex = path.indexOf(".<");
+		return (elementIndex >= 0 ? path.substring(0, elementIndex) : path);
 	}
 
 	/**
