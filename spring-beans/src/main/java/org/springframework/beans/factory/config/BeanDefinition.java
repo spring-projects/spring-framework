@@ -126,7 +126,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setScope(@Nullable String scope);
 
 	/**
-	 * Return the name of the current target scope for this bean.
+	 * Return the name of the current target scope for this bean,
+	 * or {@code null} if not known yet.
 	 */
 	@Nullable
 	String getScope();
