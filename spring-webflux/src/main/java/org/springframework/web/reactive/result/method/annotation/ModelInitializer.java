@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Conventions;
@@ -104,7 +103,6 @@ class ModelInitializer {
 				});
 	}
 
-	@NotNull
 	private Mono<Void> invokeModelAttributeMethods(BindingContext bindingContext,
 			List<InvocableHandlerMethod> modelMethods, ServerWebExchange exchange) {
 

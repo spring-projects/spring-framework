@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -208,7 +207,6 @@ public class ModelInitializerTests {
 	}
 
 
-	@NotNull
 	private InitBinderBindingContext getBindingContext(Object controller) {
 
 		List<SyncInvocableHandlerMethod> binderMethods =
