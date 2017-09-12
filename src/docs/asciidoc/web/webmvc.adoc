@@ -4,14 +4,18 @@
 
 [[mvc-introduction]]
 == Introduction
-Spring Web MVC is the Servlet-based, web framework included in the Spring Framework.
-Its name is based on the name of the module, "spring-webmvc", but most people call
-it simply Spring MVC.
+Spring Web MVC is the original web framework built on the Servlet API and included
+in the Spring Framework from the very beginning. The formal name "Spring Web MVC"
+comes from the name of its source module
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc]
+but it is more commonly known as "Spring MVC".
 
-The Spring Framework also includes the reactive, <<webflux,Spring WebFlux>>
-web framework that does not depend on the Servlet API but can run on Servlet containers
-(via Servlet 3.1 non-blocking I/O) or on other non-blocking runtimes such as
-Netty or Undertow.
+Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive stack, web framework
+whose name Spring WebFlux is also based on its source module
+https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux].
+
+This section covers Spring Web MVC. The <<reactive-web.adoc#spring-reactive-web,next section>>
+covers Spring WebFlux.
 
 
 
@@ -19,25 +23,22 @@ Netty or Undertow.
 == The DispatcherServlet
 
 Spring MVC, like many other web frameworks, is designed around the front controller
-pattern with a central `Servlet`, the `DispatcherServlet`, dispatching incoming
-requests to registered handlers for processing requests, providing convenient mapping
-and exception handling facilities.
+pattern where a central `Servlet`, the `DispatcherServlet`, dispatches incoming
+requests to registered handlers for request processing.
 
-The `DispatcherServlet` provides the shared algorithm for processing requests while
+`DispatcherServlet` provides a shared algorithm for request processing while
 actual work is performed by configurable, delegate components. This model is very
-flexible and it can be used with just about any workflow, with the installation of the
-appropriate delegate components.
+flexible and supports diverse workflows.
 
-The `DispatcherServlet` uses Spring configuration to discover the delegate components
-it needs to perform handler mapping, view resolution, and much more
-(see <<mvc-servlet-special-bean-types,Special Bean Types>>). As an actual
-`Servlet` it also needs to be declared and mapped according to the Servlet specification.
-This can be done through code-based configuration or in `web.xml`.
+The `DispatcherServlet`, as any `Servlet`, needs to be declared and mapped according
+to the Servlet specification using Java configuration or in `web.xml`.
+In turn the `DispatcherServlet` uses Spring configuration to discover
+the delegate components it needs for request mapping, view resolution, exception
+handling, <<mvc-servlet-special-bean-types,and more>>.
 
-Below is an example of code-based configuration. Note that `WebApplicationInitializer` is
-an interface provided by Spring MVC that ensures it is auto-detected by the Servlet
-container (see <<mvc-container-config,Code-based, Servlet container initialization>>
-for more details):
+Below is an example of the Java configuration that registers and initializes
+the `DispatcherServlet`. This class is auto-detected by the Servlet container
+(see <<mvc-container-config,Code-based, Servlet container initialization>>):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -64,12 +65,14 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
 }
 ----
 
-In addition to using the ServletContext API directly as shown above, you can also extend
-the convenient base class `AbstractAnnotationConfigDispatcherServletInitializer` and
-override specific methods to customize it. An example of that is shown in the next
-section <<mvc-servlet-context-hierarchy,WebApplicationContext Hierarchy>>.
+[NOTE]
+====
+In addition to using the ServletContext API directly, you can also extend
+`AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods
+(see example under <<mvc-servlet-context-hierarchy,WebApplicationContext Hierarchy>>).
+====
 
-Below is the `web.xml` equivalent of the above code-based example:
+Below is an example of `web.xml` configuration to register and initialize the `DispatcherServlet`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -103,37 +106,41 @@ Below is the `web.xml` equivalent of the above code-based example:
 </web-app>
 ----
 
+[NOTE]
+====
+Spring Boot follows a different initialization sequence. Rather than hooking into
+the lifecycle of the Servlet container, Spring Boot uses Spring configuration to
+bootstrap itself and the embedded Servlet container. `Filter` and `Servlet` declarations
+are detected in Spring configuration and registered with the Servlet container.
+For more details check the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-embedded-container[Spring Boot docs].
+====
+
 
 [[mvc-servlet-context-hierarchy]]
 === WebApplicationContext Hierarchy
 
-[NOTE]
-====
-`WebApplicationContext` is an extension of the plain `ApplicationContext` that has
-some extra features necessary for web applications. It differs from a normal
-`ApplicationContext` in that it is capable of resolving themes (see
-<<mvc-themeresolver>>), and that it knows which Servlet it is associated with (by having
-a link to the `ServletContext`). `WebApplicationContext` is bound to the
-`ServletContext` and by using static methods on the `RequestContextUtils` class you can
-always look up the `WebApplicationContext` if you need access to it.
-====
+`DispatcherServlet` expects a `WebApplicationContext`, an extension of a plain
+`ApplicationContext`, for its own configuration. `WebApplicationContext` has a link to the
+`ServletContext` and `Servlet` it is associated with. It is also bound to the `ServletContext`
+such that applications can use static methods on `RequestContextUtils` to look up the
+`WebApplicationContext` if they need access to it.
 
-For many applications, a single `WebApplicationContext` is simple and sufficient.
-However it is also possible to set up a context hierarchy where one root `WebApplicationContext`
-is shared across multiple `DispatcherServlet` instances, or other `Servlet`, each with
-its own `WebApplicationContext` configuration --
-see <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>
-for more on the context hierarchy feature of Spring.
+For many applications having a single `WebApplicationContext` is simple and sufficient.
+It is also possible to have a context hierarchy where one root `WebApplicationContext`
+is shared across multiple `DispatcherServlet` (or other `Servlet`) instances, each with
+its own child `WebApplicationContext` configuration.
+See <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>
+for more on the context hierarchy feature.
 
-The root `WebApplicationContext` should contain infrastructure beans, e.g. data repositories or
-business services, that need to be shared across multiple `Servlet` instances. These beans
-are effectively inherited and could be overridden, or rather re-declared, in the Servlet-specific
-`WebApplicationContext` which for the most part contains beans local to the given `Servlet`
-as shown in the below diagram:
+The root `WebApplicationContext` typically contains infrastructure beans such as data repositories and
+business services that need to be shared across multiple `Servlet` instances. Those beans
+are effectively inherited and could be overridden (i.e. re-declared) in the Servlet-specific,
+child `WebApplicationContext` which typically contains beans local to the given `Servlet`:
 
 image::images/mvc-context-hierarchy.png[]
 
-Below is example configuration of how to set up a `WebApplicationContext` hierarchy:
+Below is example configuration with a `WebApplicationContext` hierarchy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -198,13 +205,9 @@ And the `web.xml` equivalent:
 
 The `DispatcherServlet` delegates to special beans to process requests and render the
 appropriate responses. By "special beans" we mean Spring-managed Object instances that
-implement specific framework contracts listed in the table further below in this section.
-Spring MVC provides built-in implementations of these contracts so all you
-need to do is configure them in your Spring configuration. It is however possible to
-customize, extend, or completely replace those built-in implementations.
-
-The table below lists special bean types the `DispatcherServlet` depends on
-and delegates to.
+implement one of the framework contracts listed in the table below.
+Spring MVC provides built-in implementations of these contracts but you can also
+customize, extend, or replace them.
 
 [[mvc-webappctx-special-beans-tbl]]
 .Special bean types in the WebApplicationContext
@@ -251,23 +254,19 @@ and delegates to.
 
 [[mvc-servlet-config]]
 === `DispatcherServlet` Configuration
-There are more than one ways to actually configure the `DispatcherServlet` with the special
-bean types listed in the previous section.
-
-If there are no beans of a given type in the `WebApplicationContext` by default the
-`DispatcherServlet` will refer to a list of default implementations to use in the file
+For each type of special bean, the `DispatcherServlet` checks for the `WebApplicationContext` first.
+If there are no matching bean types, it falls back on the default types listed in
 https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[DispatcherServlet.properties].
 
-Applications can explicitly declare the special beans to use to take over the defaults.
-However for most applications the MVC Java config or the MVC XML namespace are the
-best starting point. Each creates the necessary Spring configuration for the
-`DispatcherServlet` and also provide a higher-level API to configure Spring MVC without
-having to understand all the details. See <<mvc-config>> for more details.
+Applications can declare the special beans they wish to have. Most applications however
+will find a better starting point in the MVC Java config or the MVC XML namespace which
+provide a higher level configuration API that in turn make the necessary bean declarations.
+See <<mvc-config>> for more details.
 
 [NOTE]
 ====
-Spring Boot uses the MVC Java config to configure Spring MVC and provides many
-extra options and conveniences on top.
+Spring Boot relies on the MVC Java config to configure Spring MVC and also
+provides many extra convenient options on top.
 ====
 
 
@@ -337,26 +336,10 @@ initialization parameters ( `init-param` elements) to the Servlet declaration in
 
 
 [[mvc-controller]]
-== Implementing Controllers
-Controllers provide access to the application behavior that you typically define through
-a service interface. Controllers interpret user input and transform it into a model that
-is represented to the user by the view. Spring implements a controller in a very
-abstract way, which enables you to create a wide variety of controllers.
-
-Spring 2.5 introduced an annotation-based programming model for MVC controllers that
-uses annotations such as `@RequestMapping`, `@RequestParam`, `@ModelAttribute`, and so
-on. Controllers implemented in this style do not have to extend specific base classes or
-implement specific interfaces. Furthermore, they do not usually have direct dependencies
-on Servlet APIs, although you can easily configure access to Servlet facilities if needed.
-
-[TIP]
-====
-
-Available in the https://github.com/spring-projects/[spring-projects Org on Github],
-a number of web applications leverage the annotation support described in this section
-including __MvcShowcase__, __MvcAjax__, __MvcBasic__, __PetClinic__, __PetCare__,
-and others.
-====
+== Annotated Controllers
+Spring MVC provides an annotation-based programming model where `@Controller` components
+use annotations to express request mappings, to bind request input to controller method
+arguments, to declare exception handling, and much more. Here is a basic example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -364,44 +347,52 @@ and others.
 	@Controller
 	public class HelloWorldController {
 
-		@RequestMapping("/helloWorld")
+		@GetMapping("/helloWorld")
 		public String helloWorld(Model model) {
 			model.addAttribute("message", "Hello World!");
-			return "helloWorld";
+			return "index";
 		}
 	}
 ----
 
-As you can see, the `@Controller` and `@RequestMapping` annotations allow flexible
-method names and signatures. In this particular example the method accepts a `Model` and
-returns a view name as a `String`, but various other method parameters and return values
-can be used as explained later in this section. `@Controller` and `@RequestMapping` and
-a number of other annotations form the basis for the Spring MVC implementation. This
-section documents these annotations and how they are most commonly used in a Servlet
-environment.
+Annotated controllers have flexible method signatures and do not have to extend base
+classes or implement specific interfaces. They do not need to have direct dependencies
+on Servlet APIs either. In this particular example the method accepts a `Model` and
+returns a view name as a `String` but many other options exist and are explained further
+below in this chapter.
+
+[TIP]
+====
+Guides and tutorials on https://spring.io/guides[spring.io] use the annotation-based
+programming model described in this section.
+====
 
 
 
 [[mvc-ann-controller]]
 === Defining a controller with @Controller
 
-The `@Controller` annotation indicates that a particular class serves the role of
-a __controller__. Spring does not require you to extend any controller base class or
-reference the Servlet API. However, you can still reference Servlet-specific features if
-you need to.
+You can define controller beans using a standard Spring bean definition in the
+Servlet's `WebApplicationContext`. The `@Controller` stereotype allows for auto-detection,
+aligned with Spring general support for detecting `@Component` classes in the classpath
+and auto-registering bean definitions for them. It also acts as a stereotype for the
+annotated class, indicating its role as a web component.
 
-The `@Controller` annotation acts as a stereotype for the annotated class, indicating
-its role. The dispatcher scans such annotated classes for mapped methods and detects
-`@RequestMapping` annotations (see the next section).
+To enable auto-detection of such `@Controller` beans, you can add component scanning to
+your Java configuration:
 
-You can define annotated controller beans explicitly, using a standard Spring bean
-definition in the dispatcher's context. However, the `@Controller` stereotype also
-allows for autodetection, aligned with Spring general support for detecting component
-classes in the classpath and auto-registering bean definitions for them.
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan("org.example.web")
+	public class WebConfig {
 
-To enable autodetection of such annotated controllers, you add component scanning to
-your configuration. Use the __spring-context__ schema as shown in the following XML
-snippet:
+		// ...
+	}
+----
+
+The XML configuration equivalent:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -417,7 +408,7 @@ snippet:
 			http://www.springframework.org/schema/context
 			http://www.springframework.org/schema/context/spring-context.xsd">
 
-		<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
+		<context:component-scan base-package="org.example.web"/>
 
 		<!-- ... -->
 
@@ -429,11 +420,11 @@ snippet:
 [[mvc-ann-requestmapping]]
 === Mapping Requests With @RequestMapping
 
-You use the `@RequestMapping` annotation to map URLs such as `/appointments` onto an
-entire class or a particular handler method. Typically the class-level annotation maps a
-specific request path (or path pattern) onto a form controller, with additional
-method-level annotations narrowing the primary mapping for a specific HTTP
-request method ("GET", "POST", etc.) or an HTTP request parameter condition.
+The `@RequestMapping` annotation is used to map URLs such as `/appointments` onto an
+entire class or a particular handler method. A class-level annotation can express
+mappings shared across all controller methods such as a URL prefix. Each controller
+method then can complete the URL mapping and for example narrow down to a specific
+HTTP method such as "GET", "POST", etc.
 
 The following example from the __Petcare__ sample shows a controller in a Spring MVC
 application that uses this annotation:
@@ -481,7 +472,7 @@ application that uses this annotation:
 In the above example, `@RequestMapping` is used in a number of places. The first usage is
 on the type (class) level, which indicates that all handler methods in this controller
 are relative to the `/appointments` path. The `get()` method has a further
-`@RequestMapping` refinement: it only accepts `GET` requests, meaning that an HTTP `GET` for
+`@GetMapping` refinement: it only accepts `GET` requests, meaning that an HTTP `GET` for
 `/appointments` invokes this method. The `add()` has a similar refinement, and the
 `getNewForm()` combines the definition of HTTP method and path into one, so that `GET`
 requests for `appointments/new` are handled by that method.
@@ -490,7 +481,7 @@ The `getForDay()` method shows another usage of `@RequestMapping`: URI templates
 <<mvc-ann-requestmapping-uri-templates>>).
 
 A `@RequestMapping` on the class level is not required. Without it, all paths are simply
-absolute, and not relative. The following example from the __PetClinic__ sample
+absolute, and not relative to it. The following example from the __PetClinic__ sample
 application shows a multi-action controller using `@RequestMapping`:
 
 [source,java,indent=0]
@@ -518,17 +509,17 @@ application shows a multi-action controller using `@RequestMapping`:
 	}
 ----
 
-The above example does not specify `GET` vs. `PUT`, `POST`, and so forth, because
-`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)` or
+Note that the above example does not specify `GET` vs. `PUT`, `POST`, and so forth, because
+`@RequestMapping` maps all HTTP methods by default. Use `@GetMapping(method=GET)` or
 `@GetMapping` to narrow the mapping.
 
 [[mvc-ann-requestmapping-composed]]
 ==== Composed @RequestMapping Variants
 
-Spring Framework 4.3 introduces the following method-level _composed_ variants of the
-`@RequestMapping` annotation that help to simplify mappings for common HTTP methods and
-better express the semantics of the annotated handler method. For example, a
-`@GetMapping` can be read as a `GET` `@RequestMapping`.
+Spring MVC also supports _composed_ shortcut variants of the `@RequestMapping` annotation
+that help to simplify mappings for common HTTP methods and better express the semantics of
+the annotated handler method. For example, a `@GetMapping` can be read as a `GET`
+`@RequestMapping`.
 
 - `@GetMapping`
 - `@PostMapping`
@@ -546,36 +537,19 @@ previous section that has been simplified with _composed_ `@RequestMapping` anno
 	**@RequestMapping("/appointments")**
 	public class AppointmentsController {
 
-		private final AppointmentBook appointmentBook;
-
-		@Autowired
-		public AppointmentsController(AppointmentBook appointmentBook) {
-			this.appointmentBook = appointmentBook;
-		}
+		// ...
 
 		**@GetMapping**
-		public Map<String, Appointment> get() {
-			return appointmentBook.getAppointmentsForToday();
-		}
+		public Map<String, Appointment> get() {}
 
 		**@GetMapping("/{day}")**
-		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
-			return appointmentBook.getAppointmentsForDay(day);
-		}
+		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {}
 
 		**@GetMapping("/new")**
-		public AppointmentForm getNewForm() {
-			return new AppointmentForm();
-		}
+		public AppointmentForm getNewForm() {}
 
 		**@PostMapping**
-		public String add(@Valid AppointmentForm appointment, BindingResult result) {
-			if (result.hasErrors()) {
-				return "appointments/new";
-			}
-			appointmentBook.addAppointment(appointment);
-			return "redirect:/appointments";
-		}
+		public String add(@Valid AppointmentForm appointment, BindingResult result) {}
 	}
 ----
 
@@ -590,49 +564,6 @@ However if a controller must implement an interface that is not a Spring Context
 callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
 configure class-based proxying. For example with `<tx:annotation-driven/>`,
 change to `<tx:annotation-driven proxy-target-class="true"/>`.
-
-[[mvc-ann-requestmapping-31-vs-30]]
-==== New Support Classes for @RequestMapping methods in Spring MVC 3.1
-Spring 3.1 introduced a new set of support classes for `@RequestMapping` methods called
-`RequestMappingHandlerMapping` and `RequestMappingHandlerAdapter` respectively. They are
-recommended for use and even required to take advantage of new features in Spring MVC
-3.1 and going forward. The new support classes are enabled by default by the MVC
-namespace and the MVC Java config but must be configured explicitly if using neither.
-This section describes a few important differences between the old and the new support
-classes.
-
-Prior to Spring 3.1, type and method-level request mappings were examined in two
-separate stages -- a controller was selected first by the
-`DefaultAnnotationHandlerMapping` and the actual method to invoke was narrowed down
-second by the `AnnotationMethodHandlerAdapter`.
-
-With the new support classes in Spring 3.1, the `RequestMappingHandlerMapping` is the
-only place where a decision is made about which method should process the request. Think
-of controller methods as a collection of unique endpoints with mappings for each method
-derived from type and method-level `@RequestMapping` information.
-
-This enables some new possibilities. For once a `HandlerInterceptor` or a
-`HandlerExceptionResolver` can now expect the Object-based handler to be a
-`HandlerMethod`, which allows them to examine the exact method, its parameters and
-associated annotations. The processing for a URL no longer needs to be split across
-different controllers.
-
-There are also several things no longer possible:
-
-* Select a controller first with a `SimpleUrlHandlerMapping` or
-  `BeanNameUrlHandlerMapping` and then narrow the method based on `@RequestMapping`
-  annotations.
-* Rely on method names as a fall-back mechanism to disambiguate between two
-  `@RequestMapping` methods that don't have an explicit path mapping URL path but
-  otherwise match equally, e.g. by HTTP method. In the new support classes
-  `@RequestMapping` methods have to be mapped uniquely.
-* Have a single default method (without an explicit path mapping) with which requests
-  are processed if no other controller method matches more concretely. In the new
-  support classes if a matching method is not found a 404 error is raised.
-
-The above features are still supported with the existing support classes. However to
-take advantage of new Spring MVC 3.1 features you'll need to use the new support classes.
-
 
 [[mvc-ann-requestmapping-uri-templates]]
 ==== URI Template Patterns

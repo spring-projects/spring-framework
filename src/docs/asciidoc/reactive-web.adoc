@@ -1,13 +1,16 @@
 [[spring-reactive-web]]
-= Reactive Web
+= Web on Reactive Stack
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 3
 
-This part of the documentation covers support for web applications designed to run on a
-reactive web stack (Reactive Streams API + non-blocking runtime) using <<webflux-module, Spring WebFlux>>,
-including its <<webflux-fn,functional programming model>>.
+This part of the documentation covers support for reactive stack, web applications built on
+http://www.reactive-streams.org/[Reactive Streams] and adapted to non-blocking runtimes
+such as Netty, Undertow, and Servlet containers via Servlet 3.1 non-blocking I/O.
+Individual chapters cover <<webflux-module, Spring WebFlux>> and its
+<<webflux-fn,functional programming model>>. The previous section covers support for
+<<web.adoc#spring-web,Servlet web>> applications.
 
 [[spring-reactive-web-intro]]
 == Introduction

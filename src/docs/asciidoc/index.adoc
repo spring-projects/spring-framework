@@ -29,9 +29,7 @@ This reference document provides the following sections:
 
 * <<data-access.adoc#spring-data-tier,Data access and transaction management>>
 
-* The Web:
- ** <<web.adoc#spring-web,Servlet stack>>
- ** <<reactive-web.adoc#spring-webflux,Reactive stack>>
+* The Web on <<web.adoc#spring-web,Servlet>> or <<reactive-web.adoc#spring-webflux,Reactive>> stacks
 
 * <<kotlin.adoc#kotlin,Kotlin support>>
 
