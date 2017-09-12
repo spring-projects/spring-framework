@@ -357,7 +357,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			try {
 				return new UrlResource("jar", url + "!/");
 			} catch (final MalformedURLException ex) {
-				//LOG.catching(ex);
+				//MalformedURLException can be ignored
 			}
 		}
 		return new UrlResource(url);
@@ -695,14 +695,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				rootDir = new File(rootDir.getAbsolutePath().substring(0, rootDir.getAbsolutePath().lastIndexOf("\\classes")) + "\\lib");
 			}
 			if (rootDir.isDirectory()) {
-				//System.out.println("[CONFIG] config doFindPathMatchingJarResources rootDir: " + rootDir.getAbsolutePath());
 				Set<Resource> containedJARs = doFindMatchingFileSystemResources(rootDir, "*.jar");
 				for (Resource jar : containedJARs) {
 					Set<Resource> matchingResourcesFoundInJar = doFindPathMatchingJarResources(convertClassLoaderURL(jar.getURL()), jar.getURL(), subPattern);
 					if (matchingResourcesFoundInJar != null && matchingResourcesFoundInJar.size() > 0) {
-						//for (Resource resource : matchingResourcesFoundInJar) {
-							//System.out.println("[CONFIG] config doFindPathMatchingJarResources resource: " + resource.getURL());
-						//}
 						matches.addAll(matchingResourcesFoundInJar);
 					}
 				}
