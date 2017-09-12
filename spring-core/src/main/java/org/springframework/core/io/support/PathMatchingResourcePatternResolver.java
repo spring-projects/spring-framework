@@ -700,9 +700,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				for (Resource jar : containedJARs) {
 					Set<Resource> matchingResourcesFoundInJar = doFindPathMatchingJarResources(convertClassLoaderURL(jar.getURL()), jar.getURL(), subPattern);
 					if (matchingResourcesFoundInJar != null && matchingResourcesFoundInJar.size() > 0) {
-						for (Resource resource : matchingResourcesFoundInJar) {
+						//for (Resource resource : matchingResourcesFoundInJar) {
 							//System.out.println("[CONFIG] config doFindPathMatchingJarResources resource: " + resource.getURL());
-						}
+						//}
 						matches.addAll(matchingResourcesFoundInJar);
 					}
 				}
