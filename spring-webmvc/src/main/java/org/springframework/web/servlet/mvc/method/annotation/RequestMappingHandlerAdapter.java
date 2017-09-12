@@ -430,7 +430,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 */
 	public void setReactiveRegistry(ReactiveAdapterRegistry reactiveRegistry) {
 		Assert.notNull(reactiveRegistry, "ReactiveAdapterRegistry is required");
-		this.reactiveRegistry = this.reactiveRegistry;
+		this.reactiveRegistry = reactiveRegistry;
 	}
 
 	/**
