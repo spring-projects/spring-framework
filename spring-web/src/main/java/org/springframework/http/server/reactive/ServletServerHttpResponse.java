@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +51,8 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private final HttpServletResponse response;
 
+	private final ServletOutputStream outputStream;
+
 	private final int bufferSize;
 
 	@Nullable
@@ -73,6 +74,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		Assert.isTrue(bufferSize > 0, "Buffer size must be greater than 0");
 
 		this.response = response;
+		this.outputStream = response.getOutputStream();
 		this.bufferSize = bufferSize;
 
 		asyncContext.addListener(new ResponseAsyncListener());
@@ -147,7 +149,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	 * @return the number of bytes written
 	 */
 	protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-		ServletOutputStream outputStream = response.getOutputStream();
+		ServletOutputStream outputStream = this.outputStream;
 		InputStream input = dataBuffer.asInputStream();
 		int bytesWritten = 0;
 		byte[] buffer = new byte[this.bufferSize];
@@ -160,7 +162,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 	private void flush() throws IOException {
-		ServletOutputStream outputStream = this.response.getOutputStream();
+		ServletOutputStream outputStream = this.outputStream;
 		if (outputStream.isReady()) {
 			try {
 				outputStream.flush();
@@ -174,6 +176,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		else {
 			this.flushOnNext = true;
 		}
+	}
+
+	private boolean isWritePossible() {
+		return this.outputStream.isReady();
 	}
 
 
@@ -233,6 +239,12 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			if (processor != null) {
 				processor.onWritePossible();
 			}
+			else {
+				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+				if (flushProcessor != null) {
+					flushProcessor.onFlushPossible();
+				}
+			}
 		}
 
 		@Override
@@ -242,6 +254,13 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 				processor.cancel();
 				processor.onError(ex);
 			}
+			else {
+				ResponseBodyFlushProcessor flushProcessor = bodyFlushProcessor;
+				if (flushProcessor != null) {
+					flushProcessor.cancel();
+					flushProcessor.onError(ex);
+				}
+			}
 		}
 	}
 
@@ -250,15 +269,9 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		@Override
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
-			try {
-				ServletOutputStream outputStream = response.getOutputStream();
-				ResponseBodyProcessor processor = new ResponseBodyProcessor(outputStream);
-				bodyProcessor = processor;
-				return processor;
-			}
-			catch (IOException ex) {
-				throw new UncheckedIOException(ex);
-			}
+			ResponseBodyProcessor processor = new ResponseBodyProcessor();
+			bodyProcessor = processor;
+			return processor;
 		}
 
 		@Override
@@ -268,20 +281,24 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 			ServletServerHttpResponse.this.flush();
 		}
+
+		@Override
+		protected boolean isWritePossible() {
+			return ServletServerHttpResponse.this.isWritePossible();
+		}
+
+		@Override
+		protected boolean isFlushPending() {
+			return flushOnNext;
+		}
 	}
 
 
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
-		private final ServletOutputStream outputStream;
-
-		public ResponseBodyProcessor(ServletOutputStream outputStream) {
-			this.outputStream = outputStream;
-		}
-
 		@Override
 		protected boolean isWritePossible() {
-			return this.outputStream.isReady();
+			return ServletServerHttpResponse.this.isWritePossible();
 		}
 
 		@Override
@@ -306,7 +323,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 				}
 				flush();
 			}
-			boolean ready = this.outputStream.isReady();
+			boolean ready = ServletServerHttpResponse.this.isWritePossible();
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
 			}

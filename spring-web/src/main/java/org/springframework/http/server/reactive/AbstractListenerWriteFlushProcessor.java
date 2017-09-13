@@ -124,6 +124,29 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 */
 	protected abstract void flush() throws IOException;
 
+	/**
+	 * Whether writing is possible.
+	 */
+	protected abstract boolean isWritePossible();
+
+	/**
+	 * Whether flushing is pending.
+	 */
+	protected abstract boolean isFlushPending();
+
+	/**
+	 * Listeners can call this to notify when flushing is possible.
+	 */
+	protected final void onFlushPossible() {
+		this.state.get().onFlushPossible(this);
+	}
+
+	private void flushIfPossible() {
+		if (isWritePossible()) {
+			onFlushPossible();
+		}
+	}
+
 
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
@@ -181,7 +204,12 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					return;
 				}
 				if (processor.subscriberCompleted) {
-					if (processor.changeState(this, COMPLETED)) {
+					if (processor.isFlushPending()) {
+						// Ensure the final flush
+						processor.changeState(this, FLUSHING);
+						processor.flushIfPossible();
+					}
+					else if (processor.changeState(this, COMPLETED)) {
 						processor.resultPublisher.publishComplete();
 					}
 				}
@@ -195,6 +223,28 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.subscriberCompleted = true;
+			}
+		},
+
+		FLUSHING {
+			public <T> void onFlushPossible(AbstractListenerWriteFlushProcessor<T> processor) {
+				try {
+					processor.flush();
+				}
+				catch (IOException ex) {
+					processor.flushingFailed(ex);
+					return;
+				}
+				if (processor.changeState(this, COMPLETED)) {
+					processor.resultPublisher.publishComplete();
+				}
+			}
+			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> publisher) {
+				// ignore
+			}
+			@Override
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
+				// ignore
 			}
 		},
 
@@ -232,6 +282,10 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		}
 
 		public <T> void writeComplete(AbstractListenerWriteFlushProcessor<T> processor) {
+			// ignore
+		}
+
+		public <T> void onFlushPossible(AbstractListenerWriteFlushProcessor<T> processor) {
 			// ignore
 		}
 
