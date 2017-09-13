@@ -147,8 +147,20 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		return new ResponseBodyProcessor(this.responseChannel);
 	}
 
+	private boolean isWritePossible() {
+		if (this.responseChannel == null) {
+			this.responseChannel = this.exchange.getResponseChannel();
+		}
+		if (this.responseChannel.isWriteResumed()) {
+			return true;
+		} else {
+			this.responseChannel.resumeWrites();
+			return false;
+		}
+	}
 
-	private static class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
+
+	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final StreamSinkChannel channel;
 
@@ -164,12 +176,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 		@Override
 		protected boolean isWritePossible() {
-			if (this.channel.isWriteResumed()) {
-				return true;
-			} else {
-				this.channel.resumeWrites();
-				return false;
-			}
+			return UndertowServerHttpResponse.this.isWritePossible();
 		}
 
 		@Override
@@ -263,6 +270,16 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		protected void flushingFailed(Throwable t) {
 			cancel();
 			onError(t);
+		}
+
+		@Override
+		protected boolean isWritePossible() {
+			return UndertowServerHttpResponse.this.isWritePossible();
+		}
+
+		@Override
+		protected boolean isFlushPending() {
+			return false;
 		}
 	}
 
