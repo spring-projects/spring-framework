@@ -377,6 +377,26 @@ public class WebClientIntegrationTests {
 		});
 	}
 
+	@Test // SPR-15946
+	public void shouldGetErrorSignalOnEmptyErrorResponse() throws Exception {
+		prepareResponse(response -> response.setResponseCode(404)
+				.setHeader("Content-Type", "text/plain"));
+
+		Mono<String> result = this.webClient.get().uri("/greeting")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting", request.getPath());
+		});
+	}
+
 	@Test
 	public void shouldGetInternalServerErrorSignal() throws Exception {
 		String errorMessage = "Internal Server error";
@@ -473,9 +493,7 @@ public class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
-		expectRequest(request -> {
-			assertEquals("bar", request.getHeader("foo"));
-		});
+		expectRequest(request -> assertEquals("bar", request.getHeader("foo")));
 	}
 
 	@Test
@@ -563,7 +581,7 @@ public class WebClientIntegrationTests {
 	@SuppressWarnings("serial")
 	private static class MyException extends RuntimeException {
 
-		public MyException(String message) {
+		MyException(String message) {
 			super(message);
 		}
 	}

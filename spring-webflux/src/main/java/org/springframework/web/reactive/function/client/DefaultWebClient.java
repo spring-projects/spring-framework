@@ -483,6 +483,7 @@ class DefaultWebClient implements WebClient {
 						DataBufferUtils.release(dataBuffer);
 						return bytes;
 					})
+					.defaultIfEmpty(new byte[0])
 					.map(bodyBytes -> {
 						String msg = String.format("ClientResponse has erroneous status code: %d %s", response.statusCode().value(),
 								response.statusCode().getReasonPhrase());
