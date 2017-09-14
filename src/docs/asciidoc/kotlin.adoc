@@ -261,7 +261,7 @@ for more details and up-to-date information.
 
 Spring Framework now comes with a
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[Kotlin routing DSL]
-that allows one to leverage the <<reactive-web#webflux-fn,WebFlux functional
+that allows one to leverage the <<web-reactive#webflux-fn,WebFlux functional
 API>> for writing clean and idiomatic Kotlin code:
 
 [source,kotlin]
@@ -583,7 +583,7 @@ https://spring.io/blog/2017/08/01/spring-framework-5-kotlin-apis-the-functional-
 === Choosing the web flavor
 
 Spring Framework now comes with 2 different web stacks: <<web#mvc,Spring MVC>> and
-<<reactive-web#spring-web-reactive,Spring WebFlux>>.
+<<web-reactive#spring-web-reactive,Spring WebFlux>>.
 
 Spring WebFlux is recommended if one wants to create applications that will deal with latency,
 long-lived connections, streaming scenarios or simply if one wants to use the web functional

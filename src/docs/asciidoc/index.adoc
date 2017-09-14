@@ -12,8 +12,8 @@ IoC container, with any web framework on top, but you can also use only the
 <<data-access.adoc#jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative
 transaction management, remote access to your logic through RMI or web services, and various
 options for persisting your data.
-It offers full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
-and <<reactive-web.adoc#webflux, Spring WebFlux>>; and it enables you to
+It offers full-featured web frameworks such as <<web.adoc#mvc,Spring Web MVC>>
+and <<web-reactive.adoc#webflux, Spring WebFlux>>; and it enables you to
 integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
 
 This document is a reference guide to Spring Framework features. Questions on the
@@ -29,7 +29,7 @@ This reference document provides the following sections:
 
 * <<data-access.adoc#spring-data-tier,Data access and transaction management>>
 
-* The Web on <<web.adoc#spring-web,Servlet>> or <<reactive-web.adoc#spring-webflux,Reactive>> stacks
+* The Web on <<web.adoc#spring-web,Servlet>> or <<web-reactive.adoc#spring-webflux,Reactive>> stacks
 
 * <<kotlin.adoc#kotlin,Kotlin support>>
 

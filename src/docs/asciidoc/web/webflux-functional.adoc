@@ -1,17 +1,25 @@
 [[webflux-fn]]
-= Functional Programming Model
+= Functional Endpoints
+
+Spring WebFlux provides a lightweight, functional programming model where functions
+are used to route and handle requests and where contracts are designed for immutability.
+It is an alternative to the annotated-based programming model but runs on the same
+<<web-reactive.adoc#webflux-reactive-spring-web>> foundation
+
 
 [[webflux-fn-handler-functions]]
-== HandlerFunctions
+== HandlerFunction
 
 Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a function that
 takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The annotation counterpart to a
-handler function would be a method with `@RequestMapping`.
+handler function is an `@RequestMapping` method.
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly access
-to the underlying HTTP messages. Both are fully reactive by
-building on top of Reactor: the request expose the body as `Flux` or `Mono`; the response accepts
-any http://www.reactive-streams.org[Reactive Streams] `Publisher` as body.
+to the underlying HTTP messages with http://www.reactive-streams.org[Reactive Streams]
+non-blocking back pressure. The request exposes the body as Reactor `Flux` or `Mono`
+types; the response accepts any Reactive Streams `Publisher` as body (see
+<<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>).
+
 
 `ServerRequest` gives access to various HTTP request elements:
 the method, URI, query parameters, and -- through the separate `ServerRequest.Headers` interface
@@ -26,7 +34,7 @@ contains JSON, or JAXB if XML).
 
  Flux<Person> people = request.bodyToFlux(Person.class);
 
-The two methods above (`bodyToMono` and `bodyToFlux`) are, in fact, convenience methods that use the
+The above -- `bodyToMono` and `bodyToFlux`, are, in fact, convenience methods that use the
 generic `ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is
 a functional strategy interface that allows you to write your own extraction logic, but common
 `BodyExtractor` instances can be found in the `BodyExtractors` utility class. So, the above
@@ -43,7 +51,8 @@ a JSON content-type, and a body:
  Mono<Person> person = ...
  ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
 
-And here is how to build a response with a 201 Created status, Location header, and empty body:
+And here is how to build a response with a 201 CREATED status, a `"Location"` header, and
+empty body:
 
  URI location = ...
  ServerResponse.created(location).build();
@@ -111,7 +120,7 @@ variable `id`. We retrieve that `Person` via the repository, and create a JSON r
 found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
 
 [[webflux-fn-router-functions]]
-== RouterFunctions
+== RouterFunction
 
 Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a function
 that takes a `ServerRequest`, and returns a `Mono<HandlerFunction>`. If a request matches a
@@ -172,43 +181,23 @@ Most of the predicates found in `RequestPredicates` are compositions.
 For instance, `RequestPredicates.GET(String)` is a composition of
 `RequestPredicates.method(HttpMethod)` and `RequestPredicates.path(String)`.
 
+
 [[webflux-fn-running]]
-=== Running a Server
+== Running a server
 
-Now there is just one piece of the puzzle missing: running a router function in an HTTP server.
-You can convert a router function into a `HttpHandler` by using
-`RouterFunctions.toHttpHandler(RouterFunction)`.
-The `HttpHandler` allows you to run on a wide variety of reactive runtimes: Reactor Netty,
-Servlet 3.1+, and Undertow.
-Here is how we run a router function in Reactor Netty, for instance:
+How do you run a router function in an HTTP server? A simple option is to convert a
+router function to an `HttpHandler` via `RouterFunctions.toHttpHandler(RouterFunction)`.
+The `HttpHandler` can then be used with a number of servers adapters.
+See <<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific
+instructions.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-RouterFunction<ServerResponse> route = ...
-HttpHandler httpHandler = RouterFunctions.toHttpHandler(route);
-ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(httpHandler);
-HttpServer server = HttpServer.create(HOST, PORT);
-server.newHandler(adapter).block();
-----
-
-For Tomcat it looks like this:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-RouterFunction<ServerResponse> route = ...
-HttpHandler httpHandler = RouterFunctions.toHttpHandler(route);
-HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
-Tomcat server = new Tomcat();
-Context rootContext = server.addContext("", System.getProperty("java.io.tmpdir"));
-Tomcat.addServlet(rootContext, "servlet", servlet);
-rootContext.addServletMapping("/", "servlet");
-tomcatServer.start();
-----
+it is also possible to run with a
+<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> setup -- side by side
+with annotated controllers. The easiest way to do that is through the
+<<web-reactive.adoc#webflux-config>> which creates the necessary configuration to
+handle requests with router and handler functions.
 
 
-// TODO: DispatcherHandler
 
 [[webflux-fn-handler-filter-function]]
 == HandlerFilterFunction
