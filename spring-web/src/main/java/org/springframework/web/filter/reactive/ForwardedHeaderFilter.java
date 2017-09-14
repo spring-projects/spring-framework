@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
 import reactor.core.publisher.Mono;
 
@@ -34,14 +33,9 @@ import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Extract values from "Forwarded" and "X-Forwarded-*" headers in order to wrap
- * and override the following from the request and response:
- * {@link HttpServletRequest#getServerName() getServerName()},
- * {@link HttpServletRequest#getServerPort() getServerPort()},
- * {@link HttpServletRequest#getScheme() getScheme()},
- * {@link HttpServletRequest#isSecure() isSecure()}, and
- * {@link HttpServletResponse#sendRedirect(String) sendRedirect(String)}.
- * In effect the wrapped request and response reflect the client-originated
+ * Extract values from "Forwarded" and "X-Forwarded-*" headers in order to change
+ * and override {@link ServerHttpRequest#getURI()}.
+ * In effect the request URI will reflect the client-originated
  * protocol and address.
  *
  * <p><strong>Note:</strong> This filter can also be used in a
