@@ -48,7 +48,7 @@ dependencies {
 	optional("org.seleniumhq.selenium:htmlunit-driver:2.27") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:selenium-java:3.4.0") {
+	optional("org.seleniumhq.selenium:selenium-java:3.5.3") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "io.netty", module: "netty"
 	}
@@ -64,7 +64,7 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2")
 	testCompile("javax.cache:cache-api:1.0.0")
-	testCompile("org.hibernate:hibernate-core:5.2.10.Final")
+	testCompile("org.hibernate:hibernate-core:5.2.11.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
 	// Enable use of the JUnitPlatform Runner
 	testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
