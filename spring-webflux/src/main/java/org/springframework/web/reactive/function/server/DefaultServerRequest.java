@@ -35,7 +35,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
@@ -83,10 +82,9 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 
-
 	@Override
-	public HttpMethod method() {
-		return request().getMethod();
+	public String methodName() {
+		return request().getMethodValue();
 	}
 
 	@Override

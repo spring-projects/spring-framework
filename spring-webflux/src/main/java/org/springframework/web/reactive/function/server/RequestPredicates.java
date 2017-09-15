@@ -477,6 +477,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public String methodName() {
+			return this.request.methodName();
+		}
+
+		@Override
 		public URI uri() {
 			return this.request.uri();
 		}

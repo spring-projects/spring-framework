@@ -59,9 +59,19 @@ public interface ServerRequest {
 
 	/**
 	 * Return the HTTP method.
+	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
+	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
 	@Nullable
-	HttpMethod method();
+	default HttpMethod method() {
+		return HttpMethod.resolve(methodName());
+	}
+
+	/**
+	 * Return the name of the HTTP method.
+	 * @return the HTTP method as a String
+	 */
+	String methodName();
 
 	/**
 	 * Return the request URI.

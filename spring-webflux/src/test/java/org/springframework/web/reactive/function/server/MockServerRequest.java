@@ -109,6 +109,11 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public String methodName() {
+		return this.method.name();
+	}
+
+	@Override
 	public URI uri() {
 		return this.uri;
 	}

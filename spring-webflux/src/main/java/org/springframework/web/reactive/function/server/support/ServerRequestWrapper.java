@@ -80,6 +80,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public String methodName() {
+		return this.delegate.methodName();
+	}
+
+	@Override
 	public URI uri() {
 		return this.delegate.uri();
 	}
