@@ -1,0 +1,53 @@
+[[null-safety]]
+= Null-safety
+
+Although Java does not allow to express null-safety with its type system, Spring Framework
+now provides annotations declared in the `org.springframework.lang` package to declare
+nullability of APIs and fields.
+
+Spring Framework leverages these annotations, but they can also be used in any Spring based
+Java project to declare null-safe APIs and optionally null-safe fields. Nullability of
+types used inside method bodies is outside of the scope of this feature.
+
+These annotations are meta-annotated with https://jcp.org/en/jsr/detail?id=305[JSR 305]
+annotations (a dormant JSR but supported by tools like IntelliJ IDEA) to provide useful
+warnings to Java developers related to null-safety in order to avoid `NullPointerException`
+at runtime. JSR 305 meta-annotations allows tooling vendors to provide null-safety support
+in a generic way, without having to hard-code support for Spring annotations.
+
+They are also used by Kotlin which supports natively
+https://kotlinlang.org/docs/reference/null-safety.html[null-safety]. By default, types from
+Java APIs used in Kotlin are recognized as
+https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types]
+for which null-checks are relaxed.
+https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[Kotlin support for JSR 305 annotations]
++ Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
+with the advantage of dealing with `null` related issues at compile time rather than bumping into the famous
+`NullPointerException` at runtime. More details are available in <<kotlin#null-safety,Kotlin support documentation>>.
+
+[NOTE]
+====
+Other libraries like Reactor or Spring Data leverage these annotations as well to provide
+null-safe APIs.
+====
+
+The following annotations are provided:
+
+ * {api-spring-framework}/lang/NonNull.html[`@NonNull`] annotation where specific parameter,
+ return value, generic type argument, varargs element, array element or field cannot be `null`
+ (not needed on parameter and return value where `@NonNullApi` and `@NonNullFields` applies) .
+ * {api-spring-framework}/lang/Nullable.html[`@Nullable`] annotation where specific
+ parameter, return value, generic type argument, varargs element, array element or field
+ can be `null`.
+ * {api-spring-framework}/lang/NonNullApi.html[`@NonNullApi`] annotation at package level
+ declares non-null as the default behavior for parameters and return values.
+ * {api-spring-framework}/lang/NonNullFields.html[`@NonNullFields`] annotation at package
+ level declares non-null as the default behavior for fields.
+
+[NOTE]
+====
+Generic type arguments, varargs and array elements are out of the scope of `@NonNullApi`
+and `@NonNullFields`, because `@TypeQualifierDefault(ElementType.TYPE_USE)` would apply to
+a lot of other use cases. As a consequence, nullability for such elements need to be specified
+explicitly with `@NonNull` and `@Nullable`.
+====

@@ -5,6 +5,7 @@
 :toc: left
 :toclevels: 2
 
+[[introduction]]
 == Introduction
 
 https://kotlinlang.org[Kotlin] is a statically-typed language targeting the JVM (and other platforms)
@@ -15,6 +16,7 @@ existing libraries written in Java.
 Spring Framework 5 introduces first-class support for Kotlin and allows developers to write
 Spring + Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
 
+[[requirements]]
 == Requirements ==
 
 Spring Framework supports Kotlin 1.1+ and requires
@@ -25,6 +27,7 @@ and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`k
 to be present on the classpath. They are provided by default if one bootstraps a Kotlin project on
 https://start.spring.io/#!language=kotlin[start.spring.io].
 
+[[extensions]]
 == Extensions
 
 Thanks to its great https://kotlinlang.org/docs/reference/java-interop.html[Java interoperability]
@@ -74,6 +77,7 @@ val users : Flux<User> = client.get().retrieve().bodyToFlux()
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
 for a shorter syntax.
 
+[[null-safety]]
 == Null-safety
 
 One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety]
@@ -84,21 +88,15 @@ declarations and expressing "value or no value" semantics without paying the cos
 http://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
 
 Although Java does not allow one to express null-safety in its type-system, Spring Framework now
-provides https://jira.spring.io/browse/SPR-15540[null-safety of the whole Spring Framework API]
-via tooling-friendly annotations:
-
- * `@NonNullApi` annotations at package level declare non-null as the default behavior
- * `@Nullable` annotations where specific parameters or return values can be `null`.
-
-Both annotations are meta-annotated with https://jcp.org/en/jsr/detail?id=305[JSR 305]
-annotations (a dormant JSR but supported by tools like IDEA, Findbugs, etc.)
-to provide useful warnings to Java developers.
-
-On the Kotlin side - as of https://blog.jetbrains.com/kotlin/2017/08/kotlin-1-1-4-is-out/[Kotlin 1.1.4 release] -
-these annotations https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[are recognized by Kotlin]
-in order to provide null-safety for the whole Spring Framework API. That means
-one should never experience a `NullPointerException` when using Spring Framework and Kotlin because
-the compiler will not allow it.
+provides <<core#null-safety,null-safety of the whole Spring Framework API>>
+via tooling-friendly annotations declared in the `org.springframework.lang` package.
+By default, types from Java APIs used in Kotlin are recognized as
+https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types]
+for which null-checks are relaxed.
+https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[Kotlin support for JSR 305 annotations]
+available as of https://blog.jetbrains.com/kotlin/2017/08/kotlin-1-1-4-is-out/[1.1.4 release]
++ Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
+with the advantage of dealing with `null` related issues at compile time.
 
 For now, one needs to use a `-Xjsr305-annotations=enable` flag (specified via the
 `freeCompilerArgs` property with Maven or Gradle Kotlin plugins), but that should become
@@ -109,10 +107,11 @@ until Kotlin 1.1.5 is released (it will fix https://youtrack.jetbrains.com/issue
 
 [NOTE]
 ====
-Other libraries like Reactor and Spring Data leverage these annotations to provide
+Other libraries like Reactor and Spring Data leverage these annotations as well to provide
 null-safe APIs for Kotlin developers.
 ====
 
+[[classes-interfaces]]
 == Classes & Interfaces
 
 Spring Framework supports various Kotlin constructs like instantiating Kotlin classes
@@ -133,6 +132,7 @@ detected without the Jackson Kotlin module present.
 As of Spring Boot 2.0, Jackson Kotlin module is automatically provided via the JSON starter.
 ====
 
+[[annotations]]
 == Annotations
 
 Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
@@ -146,6 +146,7 @@ to determine if a bean is required or not. `@Autowired lateinit var foo: Foo` im
 of type `Foo` must be registered in the application context while `@Autowired lateinit var foo: Foo?`
 won’t raise an error if such bean does not exist.
 
+[[bean-definition-dsl]]
 == Bean definition DSL
 
 Spring Framework 5 introduces a new way to register beans in a functional way using lambdas
@@ -247,6 +248,7 @@ see https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-defi
 for more details and up-to-date information.
 ====
 
+[[web]]
 == Web
 
 === WebFlux Functional DSL
@@ -321,6 +323,7 @@ ${include("footer")}
 See https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
+[[spring-projects-in-kotlin]]
 == Spring projects in Kotlin
 
 This section provides a focus on some specific hints and recommendations worth
@@ -532,6 +535,7 @@ class IntegrationTests {
 }
 ----
 
+[[getting-started]]
 == Getting started
 
 === start.spring.io
@@ -554,6 +558,7 @@ Kotlin DSL.
 For other use cases, Spring MVC and its annotation-based programming model is a perfectly
 valid and fully supported choice.
 
+[[resources-started]]
 == Resources
 
 * http://kotlinlang.org/docs/reference/[Kotlin language reference]

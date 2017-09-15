@@ -5,6 +5,8 @@
  * Contains a View implementation for FreeMarker templates.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.web.reactive.result.view.freemarker;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

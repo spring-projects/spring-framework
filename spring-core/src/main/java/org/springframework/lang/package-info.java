@@ -3,5 +3,6 @@
  * Used descriptively within the framework codebase; validated by Animal Sniffer at build time.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.lang;
 

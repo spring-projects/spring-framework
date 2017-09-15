@@ -26,25 +26,30 @@ import javax.annotation.meta.TypeQualifierDefault;
 
 /**
  * A common Spring annotation to declare that parameters and return values
- * are to be considered as non-nullable by default for a given package,
- * along with their underlying fields.
+ * are to be considered as non-nullable by default for a given package.
+ * Leverages JSR 305 meta-annotations to indicate nullability in Java to common tools with
+ * JSR 305 support and used by Kotlin to infer nullability of Spring API.
+ *
  *
  * <p>Should be used at package level in association with {@link Nullable}
  * annotations at parameter and return value level.
  *
- * <p>Leverages JSR-305 meta-annotations to indicate its semantics to
- * common tools with JSR-305 support.
+ * <p>This annotation does not define nullability of generic type arguments, because
+ * {@code @TypeQualifierDefault(ElementType.TYPE_USE)} scope would be too broad.
+ * As a consequence, each API generic type argument should be annotated
+ * with {@link Nullable} or {@link NonNull} to specify their nullability.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
+ * @see NonNullFields
  * @see Nullable
- * @see javax.annotation.Nonnull
+ * @see NonNull
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull
-@TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_PARAMETER, ElementType.FIELD})
+@TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER})
 public @interface NonNullApi {
 }

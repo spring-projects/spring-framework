@@ -5,6 +5,8 @@
  * {@link org.springframework.http.client.reactive.ClientHttpConnector}.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.http.client.reactive;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;
