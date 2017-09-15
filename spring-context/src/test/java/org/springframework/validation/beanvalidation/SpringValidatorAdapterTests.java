@@ -60,8 +60,9 @@ public class SpringValidatorAdapterTests {
 
 	@Before
 	public void setupSpringValidatorAdapter() {
+		messageSource.addMessage("javax.validation.constraints.Size.message", Locale.ENGLISH, "{0}'s size is must be between {2} and {1}");
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
-		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value with {1}");
+		messageSource.addMessage("org.springframework.validation.beanvalidation.Same.message", Locale.ENGLISH, "{2} must be same value with {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
 	}

@@ -17,6 +17,7 @@
 package org.springframework.validation.beanvalidation;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -55,6 +56,7 @@ import org.springframework.validation.SmartValidator;
  * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 3.0
  */
 public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
@@ -134,6 +136,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				try {
 					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
 					String errorCode = determineErrorCode(cd);
+					String bvMessageCode = determineBvMessageCode(cd);
 					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
 					if (errors instanceof BindingResult) {
 						// Can do custom FieldError registration with invalid value from ConstraintViolation,
@@ -142,12 +145,18 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						String nestedField = bindingResult.getNestedPath() + field;
 						if ("".equals(nestedField)) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
+							if (bvMessageCode != null) {
+								errorCodes = buildNewErrorCodes(errorCodes, bvMessageCode);
+							}
 							bindingResult.addError(new ObjectError(
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
 						}
 						else {
 							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
+							if (bvMessageCode != null) {
+								errorCodes = buildNewErrorCodes(errorCodes, bvMessageCode);
+							}
 							bindingResult.addError(new FieldError(
 									errors.getObjectName(), nestedField, rejectedValue, false,
 									errorCodes, errorArgs, violation.getMessage()));
@@ -219,6 +228,30 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 */
 	protected String determineErrorCode(ConstraintDescriptor<?> descriptor) {
 		return descriptor.getAnnotation().annotationType().getSimpleName();
+	}
+
+	/**
+	 * Determine a bean validation message code for the given constraint descriptor.
+	 * @param descriptor the JSR-303 ConstraintDescriptor for the current violation
+	 * @return a corresponding bean validation message code
+	 */
+	@Nullable
+	private String determineBvMessageCode(ConstraintDescriptor<?> descriptor) {
+		String messageTemplate = descriptor.getMessageTemplate();
+		return (messageTemplate.startsWith("{") && messageTemplate.endsWith("}")) ?
+			messageTemplate.substring(1, messageTemplate.length() - 1) : null;
+	}
+
+	/**
+	 * Build new error codes with original error codes and a bean validation message code.
+	 * @param errorCodes original error codes
+	 * @param bvMessageCode a bean validation message code
+	 * @return new error codes with appending a bean validation message code
+	 */
+	private String[] buildNewErrorCodes(String[] errorCodes, String bvMessageCode) {
+		String[] newErrorCodes = Arrays.copyOf(errorCodes, errorCodes.length + 1);
+		newErrorCodes[errorCodes.length] = bvMessageCode;
+		return newErrorCodes;
 	}
 
 	/**
