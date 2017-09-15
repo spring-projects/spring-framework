@@ -2,10 +2,9 @@
 = Null-safety
 
 Although Java does not allow to express null-safety with its type system, Spring Framework
-now provides annotations declared in the `org.springframework.lang` package to declare
-nullability of APIs and fields.
+now provides annotations to declare nullability of APIs and fields.
 
-Spring Framework leverages these annotations, but they can also be used in any Spring based
+Spring Framework leverages itself these annotations, but they can also be used in any Spring based
 Java project to declare null-safe APIs and optionally null-safe fields. Nullability of
 types used inside method bodies is outside of the scope of this feature.
 
@@ -14,6 +13,11 @@ annotations (a dormant JSR but supported by tools like IntelliJ IDEA) to provide
 warnings to Java developers related to null-safety in order to avoid `NullPointerException`
 at runtime. JSR 305 meta-annotations allows tooling vendors to provide null-safety support
 in a generic way, without having to hard-code support for Spring annotations.
+
+[NOTE]
+====
+It is not necessary nor recommanded to have JSR 305 dependency in user project classpath.
+====
 
 They are also used by Kotlin which supports natively
 https://kotlinlang.org/docs/reference/null-safety.html[null-safety]. By default, types from
@@ -31,7 +35,7 @@ Other libraries like Reactor or Spring Data leverage these annotations as well t
 null-safe APIs.
 ====
 
-The following annotations are provided:
+The following annotations are provided in the `org.springframework.lang` package:
 
  * {api-spring-framework}/lang/NonNull.html[`@NonNull`] annotation where specific parameter,
  return value, generic type argument, varargs element, array element or field cannot be `null`
