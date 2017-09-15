@@ -41,6 +41,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -199,10 +200,12 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			getTemplate(locale).process(freeMarkerModel, writer);
 		}
 		catch (IOException ex) {
+			DataBufferUtils.release(dataBuffer);
 			String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
 			return Mono.error(new IllegalStateException(message, ex));
 		}
 		catch (Throwable ex) {
+			DataBufferUtils.release(dataBuffer);
 			return Mono.error(ex);
 		}
 		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
