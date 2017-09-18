@@ -1,4 +1,7 @@
-== Spring Framework Overview
+:toc: left
+:toclevels: 1
+:docinfo1:
+= Spring Framework Overview
 
 Spring makes it easy to create Java enterprise applications. It provides everything you
 need beyond the Java language itself. It also provides extensions and support for
@@ -14,7 +17,7 @@ Spring is open source. It has a large and active community that provides continu
 based on a diverse range of real-world use cases. This has helped Spring to successfully
 evolve over a very long time.
 
-=== What We Mean by "Spring"
+== What We Mean by "Spring"
 
 The term, "Spring," means different things in different contexts. It can be used to refer to
 the Spring Framework project itself, which is where it all started. Over time, other Spring
@@ -29,7 +32,7 @@ support for different application architectures, including messaging, transactio
 persistence, and web. It also includes the servlet-based Spring MVC web framework and, in
 parallel, the Spring WebFlux reactive web framework.
 
-=== History of Spring and the Spring Framework
+== History of Spring and the Spring Framework
 
 Spring came into being in 2003 as a response to the complexity of the early
 https://en.wikipedia.org/wiki/Java_Platform,_Enterprise_Edition[J2EE] specifications.
@@ -62,7 +65,7 @@ among others. It’s important to remember that each project has its own source 
 issue tracker, and release cadence. See https://spring.io/projects[spring.io/projects] for
 the complete list of Spring projects.
 
-=== Design Philosophy
+== Design Philosophy
 
 When you learn about a framework, it’s important to know not only what it does but what
 principles it follows. Here are the guiding principles of the Spring Framework:
@@ -84,7 +87,7 @@ that are intuitive and that hold up across many versions and many years.
 meaningful, current, and accurate Javadoc. It is one of very few projects that can claim
 clean code structure with  no circular dependencies between packages.
 
-=== Feedback and Contributions
+== Feedback and Contributions
 
 For how-to questions or diagnosing or debugging issues, we suggest using StackOverflow,
 and we have a https://spring.io/questions[questions page] that lists the suggested tags to use.
@@ -103,7 +106,7 @@ information that is not specific to any one version. For example, it has migrati
 notes from earlier versions, comprehensive information on what's new across multiple
 versions, contributor guidelines, the Spring Framework code style, and other information.
 
-=== Getting Started
+== Getting Started
 
 If you are just getting started with Spring, you may want to begin using the Spring
 Framework by creating a http://projects.spring.io/spring-boot/[Spring Boot]-based

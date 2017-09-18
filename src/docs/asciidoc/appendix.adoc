@@ -5,6 +5,7 @@
 :wiki-spring-framework: https://github.com/spring-projects/spring-framework/wiki
 :toc: left
 :toclevels: 2
+:docinfo1:
 
 [[spring-whats-new]]
 == What's New in the Spring Framework

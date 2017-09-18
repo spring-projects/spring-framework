@@ -1,0 +1,10 @@
+<script>
+    var rootLink = document.createElement("a");
+    rootLink.setAttribute("href", "index.html");
+    rootLink.innerHTML = "<i class=\"fa fa-chevron-left\" aria-hidden=\"true\"></i>&nbsp;&nbsp;Back to index";
+    var p = document.createElement("p");
+    p.appendChild(rootLink);
+    var toc = document.getElementById('toc')
+    var sectlevel1 = toc.getElementsByClassName("sectlevel1")[0]
+    toc.insertBefore(p,  sectlevel1);
+</script>

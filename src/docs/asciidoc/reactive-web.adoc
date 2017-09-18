@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 3
+:docinfo1:
 
 This part of the documentation covers support for reactive stack, web applications built on
 http://www.reactive-streams.org/[Reactive Streams] and adapted to non-blocking runtimes
