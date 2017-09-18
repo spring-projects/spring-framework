@@ -57,7 +57,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * (or another SLF4J provider) onto your classpath, without any extra bridges,
  * and let the framework auto-adapt to your choice.
  *
- * @author Juergen Hoeller
+ * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0
  */
 public abstract class LogFactory {
