@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "'messageConverter' must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 	}
 
