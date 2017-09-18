@@ -81,7 +81,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "'messageConverter' must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 	}
 

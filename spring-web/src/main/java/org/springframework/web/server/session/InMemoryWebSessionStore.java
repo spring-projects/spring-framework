@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.time.Clock;
@@ -57,7 +58,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * @param clock the clock to use
 	 */
 	public void setClock(Clock clock) {
-		Assert.notNull(clock, "'clock' is required.");
+		Assert.notNull(clock, "Clock is required");
 		this.clock = clock;
 	}
 
@@ -93,7 +94,8 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		});
 	}
 
-	/* Private methods for InMemoryWebSession */
+
+	// Private methods for InMemoryWebSession
 
 	private Mono<Void> changeSessionId(String oldId, WebSession session) {
 		this.sessions.remove(oldId);
@@ -121,7 +123,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		private volatile boolean started;
 
-
 		InMemoryWebSession() {
 			this.id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
 			this.attributes = new ConcurrentHashMap<>();
@@ -138,7 +139,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 			this.maxIdleTime = existingSession.maxIdleTime;
 			this.started = existingSession.isStarted(); // Use method (explicit or implicit start)
 		}
-
 
 		@Override
 		public String getId() {
@@ -169,7 +169,6 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		public Duration getMaxIdleTime() {
 			return this.maxIdleTime;
 		}
-
 
 		@Override
 		public void start() {
