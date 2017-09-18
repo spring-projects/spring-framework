@@ -56,6 +56,15 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	}
 
 	/**
+	 * Create an instance with the specific payload converter.
+	 * @param payloadConverter the payload converter to use
+	 * @since 4.3.12
+	 */
+	public MessagingMessageConverter(MessageConverter payloadConverter) {
+		this(payloadConverter, new SimpleJmsHeaderMapper());
+	}
+
+	/**
 	 * Create an instance with the specified payload converter and
 	 * header mapper.
 	 */

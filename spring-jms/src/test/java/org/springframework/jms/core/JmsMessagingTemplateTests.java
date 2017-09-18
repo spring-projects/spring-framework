@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,14 @@ import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.MessageNotReadableException;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.messaging.Message;
@@ -81,6 +82,47 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void validateJmsTemplate() {
 		assertSame(this.jmsTemplate, this.messagingTemplate.getJmsTemplate());
+	}
+
+	@Test
+	public void payloadConverterIsConsistentConstructor() {
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
+		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
+		messagingTemplate.afterPropertiesSet();
+		assertPayloadConverter(messagingTemplate, messageConverter);
+	}
+
+	@Test
+	public void payloadConverterIsConsistentSetter() {
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
+		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
+		messagingTemplate.setJmsTemplate(this.jmsTemplate);
+		messagingTemplate.afterPropertiesSet();
+		assertPayloadConverter(messagingTemplate, messageConverter);
+	}
+
+	@Test
+	public void customConverterAlwaysTakesPrecedence() {
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
+		MessageConverter customMessageConverter = mock(MessageConverter.class);
+		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
+		messagingTemplate.setJmsMessageConverter(
+				new MessagingMessageConverter(customMessageConverter));
+		messagingTemplate.setJmsTemplate(this.jmsTemplate);
+		messagingTemplate.afterPropertiesSet();
+		assertPayloadConverter(messagingTemplate, customMessageConverter);
+	}
+
+	private void assertPayloadConverter(JmsMessagingTemplate messagingTemplate,
+			MessageConverter messageConverter) {
+		MessageConverter jmsMessageConverter = messagingTemplate.getJmsMessageConverter();
+		assertNotNull(jmsMessageConverter);
+		assertEquals(MessagingMessageConverter.class, jmsMessageConverter.getClass());
+		assertSame(messageConverter, new DirectFieldAccessor(jmsMessageConverter)
+				.getPropertyValue("payloadConverter"));
 	}
 
 	@Test
