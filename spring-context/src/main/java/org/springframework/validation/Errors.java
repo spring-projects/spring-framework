@@ -172,7 +172,7 @@ public interface Errors {
 	/**
 	 * Add all errors from the given {@code Errors} instance to this
 	 * {@code Errors} instance.
-	 * <p>This is a onvenience method to avoid repeated {@code reject(..)}
+	 * <p>This is a convenience method to avoid repeated {@code reject(..)}
 	 * calls for merging an {@code Errors} instance into another
 	 * {@code Errors} instance.
 	 * <p>Note that the passed-in {@code Errors} instance is supposed
