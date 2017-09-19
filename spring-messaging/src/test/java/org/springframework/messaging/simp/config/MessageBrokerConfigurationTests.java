@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -511,14 +511,14 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void configureClientInboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(this.interceptor);
+			registration.interceptors(this.interceptor);
 			registration.taskExecutor(new CustomThreadPoolTaskExecutor())
 					.corePoolSize(11).maxPoolSize(12).keepAliveSeconds(13).queueCapacity(14);
 		}
 
 		@Override
 		protected void configureClientOutboundChannel(ChannelRegistration registration) {
-			registration.setInterceptors(this.interceptor, this.interceptor);
+			registration.interceptors(this.interceptor, this.interceptor);
 			registration.taskExecutor().corePoolSize(21).maxPoolSize(22).keepAliveSeconds(23).queueCapacity(24);
 		}
 
@@ -534,7 +534,7 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.configureBrokerChannel().setInterceptors(this.interceptor, this.interceptor, this.interceptor);
+			registry.configureBrokerChannel().interceptors(this.interceptor, this.interceptor, this.interceptor);
 			registry.configureBrokerChannel().taskExecutor().corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
 			registry.setCacheLimit(8192);
