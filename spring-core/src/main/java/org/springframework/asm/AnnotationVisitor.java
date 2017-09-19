@@ -41,7 +41,7 @@ public abstract class AnnotationVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * must be one of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     protected final int api;
 
@@ -56,7 +56,7 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      */
     public AnnotationVisitor(final int api) {
         this(api, null);
@@ -67,13 +67,13 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     *            of {@link Opcodes#ASM4}, {@link Opcodes#ASM5} or {@link Opcodes#ASM6}.
      * @param av
      *            the annotation visitor to which this visitor must delegate
      *            method calls. May be null.
      */
     public AnnotationVisitor(final int api, final AnnotationVisitor av) {
-        if (api != Opcodes.ASM4 && api != Opcodes.ASM5) {
+        if (api < Opcodes.ASM4 || api > Opcodes.ASM6) {
             throw new IllegalArgumentException();
         }
         this.api = api;

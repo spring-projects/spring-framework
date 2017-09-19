@@ -260,7 +260,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * Number of stack map frames in the StackMapTable attribute.
      */
-    private int frameCount;
+    int frameCount;
 
     /**
      * The StackMapTable attribute.
@@ -456,7 +456,7 @@ class MethodWriter extends MethodVisitor {
     MethodWriter(final ClassWriter cw, final int access, final String name,
             final String desc, final String signature,
             final String[] exceptions, final int compute) {
-        super(Opcodes.ASM5);
+        super(Opcodes.ASM6);
         if (cw.firstMethod == null) {
             cw.firstMethod = this;
         } else {
@@ -848,7 +848,7 @@ class MethodWriter extends MethodVisitor {
     @Override
     public void visitTypeInsn(final int opcode, final String type) {
         lastCodeOffset = code.length;
-        Item i = cw.newClassItem(type);
+        Item i = cw.newStringishItem(ClassWriter.CLASS, type);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES || compute == INSERTED_FRAMES) {
@@ -1050,8 +1050,8 @@ class MethodWriter extends MethodVisitor {
             /*
              * case of a backward jump with an offset < -32768. In this case we
              * automatically replace GOTO with GOTO_W, JSR with JSR_W and IFxxx
-             * <l> with IFNOTxxx <l'> GOTO_W <l>, where IFNOTxxx is the
-             * "opposite" opcode of IFxxx (i.e., IFNE for IFEQ) and where <l'>
+             * <l> with IFNOTxxx <L> GOTO_W <l> L:..., where IFNOTxxx is the
+             * "opposite" opcode of IFxxx (i.e., IFNE for IFEQ) and where <L>
              * designates the instruction just after the GOTO_W.
              */
             if (opcode == Opcodes.GOTO) {
@@ -1067,7 +1067,11 @@ class MethodWriter extends MethodVisitor {
                 code.putByte(opcode <= 166 ? ((opcode + 1) ^ 1) - 1
                         : opcode ^ 1);
                 code.putShort(8); // jump offset
-                code.putByte(200); // GOTO_W
+                // ASM pseudo GOTO_W insn, see ClassReader. We don't use a real
+                // GOTO_W because we might need to insert a frame just after (as
+                // the target of the IFNOTxxx jump instruction).
+                code.putByte(220);
+                cw.hasAsmInsns = true;
             }
             label.put(this, code, code.length - 1, true);
         } else if (isWide) {
@@ -1291,7 +1295,7 @@ class MethodWriter extends MethodVisitor {
     @Override
     public void visitMultiANewArrayInsn(final String desc, final int dims) {
         lastCodeOffset = code.length;
-        Item i = cw.newClassItem(desc);
+        Item i = cw.newStringishItem(ClassWriter.CLASS, desc);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES || compute == INSERTED_FRAMES) {
