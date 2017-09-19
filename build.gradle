@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.javamailVersion      = "1.6.0"
 	ext.jaxbVersion          = "2.2.11"
 	ext.jaxwsVersion         = "2.2.11"
-	ext.jettyVersion         = "9.4.7.RC0"
+	ext.jettyVersion         = "9.4.7.v20170914"
 	ext.junitJupiterVersion  = '5.0.0'
 	ext.junitPlatformVersion = '1.0.0'
 	ext.junitVintageVersion  = "4.12.0"
@@ -91,11 +91,10 @@ configure(allprojects) { project ->
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 	}
 
-	def commonCompilerArgs = [
-			"-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
-			"-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
-			"-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options"
-			]
+	def commonCompilerArgs =
+			["-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
+			 "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
+			 "-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options"]
 
 	compileJava.options*.compilerArgs = commonCompilerArgs +
 			["-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes",
@@ -177,10 +176,11 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
 	jar {
-		manifest.attributes["Created-By"] =
-			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
 		manifest.attributes["Implementation-Title"] = subproject.name
 		manifest.attributes["Implementation-Version"] = subproject.version
+		manifest.attributes["Automatic-Module-Name"] = subproject.name.replace('-', '.')  // for Jigsaw
+		manifest.attributes["Created-By"] =
+				"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
 
 		from("${rootProject.projectDir}/src/dist") {
 			include "license.txt"
@@ -285,10 +285,10 @@ configure(rootProject) {
 			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
 			File wrapperFile = file("gradlew")
 			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-				"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
+					"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
 			File wrapperBatFile = file("gradlew.bat")
 			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+					"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
 		}
 	}
 
