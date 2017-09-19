@@ -542,6 +542,59 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.OK, "body", etagValue, -1);
 	}
 
+	@Test
+	public void varyHeader() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {};
+		String[] expected = {"Accept-Language, User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingWildcard() throws Exception {
+		String[] entityValues = {"Accept-Language"};
+		String[] existingValues = {"*"};
+		String[] expected = {"*"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingCommaValues() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding", "Accept-Language"};
+		String[] expected = {"Accept-Encoding", "Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingCommaSeparatedValues() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding, Accept-Language"};
+		String[] expected = {"Accept-Encoding, Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void handleReturnValueVaryHeader() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding, Accept-Language"};
+		String[] expected = {"Accept-Encoding, Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+
+	private void testVaryHeader(String[] entityValues, String[] existingValues, String[] expected) throws Exception {
+		ResponseEntity<String> returnValue = ResponseEntity.ok().varyBy(entityValues).body("Foo");
+		for (String value : existingValues) {
+			servletResponse.addHeader("Vary", value);
+		}
+		initStringMessageConversion(MediaType.TEXT_PLAIN);
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(Arrays.asList(expected), servletResponse.getHeaders("Vary"));
+		verify(stringHttpMessageConverter).write(eq("Foo"), eq(MediaType.TEXT_PLAIN), isA(HttpOutputMessage.class));
+	}
 
 	private void initStringMessageConversion(MediaType accepted) {
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
@@ -554,8 +607,7 @@ public class HttpEntityMethodProcessorMockTests {
 		verify(stringHttpMessageConverter).write(eq(body), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 	}
 
-	private void assertConditionalResponse(HttpStatus status, String body,
-			String etag, long lastModified) throws Exception {
+	private void assertConditionalResponse(HttpStatus status, String body, String etag, long lastModified) throws Exception {
 		assertEquals(status.value(), servletResponse.getStatus());
 		assertTrue(mavContainer.isRequestHandled());
 		if (body != null) {
