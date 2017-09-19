@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,15 +172,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
-		if (outputHeaders.containsKey(HttpHeaders.VARY) && entityHeaders.containsKey(HttpHeaders.VARY)) {
-			List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
-			if (!values.isEmpty()) {
-				outputHeaders.setVary(values);
-			}
-		}
 		if (!entityHeaders.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry : entityHeaders.entrySet()) {
-				if (!outputHeaders.containsKey(entry.getKey())) {
+				if (HttpHeaders.VARY.equals(entry.getKey()) && outputHeaders.containsKey(HttpHeaders.VARY)) {
+					List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
+					if (!values.isEmpty()) {
+						outputHeaders.setVary(values);
+					}
+				}
+				else {
 					outputHeaders.put(entry.getKey(), entry.getValue());
 				}
 			}
@@ -207,24 +207,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private List<String> getVaryRequestHeadersToAdd(HttpHeaders responseHeaders, HttpHeaders entityHeaders) {
-		if (!responseHeaders.containsKey(HttpHeaders.VARY)) {
-			return entityHeaders.getVary();
-		}
 		List<String> entityHeadersVary = entityHeaders.getVary();
-		List<String> result = new ArrayList<String>(entityHeadersVary);
-		for (String header : responseHeaders.get(HttpHeaders.VARY)) {
-			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
-				if ("*".equals(existing)) {
-					return Collections.emptyList();
-				}
-				for (String value : entityHeadersVary) {
-					if (value.equalsIgnoreCase(existing)) {
-						result.remove(value);
+		List<String> vary = responseHeaders.get(HttpHeaders.VARY);
+		if (vary != null) {
+			List<String> result = new ArrayList<String>(entityHeadersVary);
+			for (String header : vary) {
+				for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+					if ("*".equals(existing)) {
+						return Collections.emptyList();
+					}
+					for (String value : entityHeadersVary) {
+						if (value.equalsIgnoreCase(existing)) {
+							result.remove(value);
+						}
 					}
 				}
 			}
+			return result;
 		}
-		return result;
+		return entityHeadersVary;
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
