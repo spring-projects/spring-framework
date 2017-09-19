@@ -99,17 +99,25 @@ available as of https://blog.jetbrains.com/kotlin/2017/08/kotlin-1-1-4-is-out/[1
 + Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
 with the advantage of dealing with `null` related issues at compile time.
 
-For now, one needs to use a `-Xjsr305-annotations=enable` flag (specified via the
-`freeCompilerArgs` property with Maven or Gradle Kotlin plugins), but that should become
-the default behavior in an upcoming release of Kotlin.
-
-Make sure to https://github.com/sdeleuze/spring-kotlin-functional/blob/2d6ac07adfc2b8f25e91681dbb2b58a1c6cdf9a7/build.gradle.kts#L57[include JSR-305 JAR]
-until Kotlin 1.1.5 is released (it will fix https://youtrack.jetbrains.com/issue/KT-19419[KT-19419]).
-
 [NOTE]
 ====
 Other libraries like Reactor and Spring Data leverage these annotations as well to provide
 null-safe APIs for Kotlin developers.
+====
+
+For now, one needs to use a `-Xjsr305-annotations=enable` flag (specified via the
+`freeCompilerArgs` property with Maven or Gradle Kotlin plugins), but that should become
+the default behavior in an upcoming release of Kotlin.
+
+[NOTE]
+====
+Make sure to https://github.com/sdeleuze/spring-kotlin-functional/blob/2d6ac07adfc2b8f25e91681dbb2b58a1c6cdf9a7/build.gradle.kts#L57[include JSR-305 JAR]
+until Kotlin 1.1.5 is released (it will fix https://youtrack.jetbrains.com/issue/KT-19419[KT-19419]).
+
+Support for generic type arguments, varargs and array elements is still work in progress,
+see https://youtrack.jetbrains.com/issue/KT-19592[KT-19592] and
+https://youtrack.jetbrains.com/issue/IDEA-153093[IDEA-153093] for up-to-date
+informations.
 ====
 
 [[classes-interfaces]]
