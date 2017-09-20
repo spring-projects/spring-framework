@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -44,10 +43,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -73,10 +71,10 @@ public class MultipartControllerTests {
 	@Test
 	public void multipartRequestWithServletParts() throws Exception {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
-		MockPart filePart = new MockPart("file", "orig", new ByteArrayInputStream(fileContent));
+		MockPart filePart = new MockPart("file", "orig", fileContent);
 
 		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
-		MockPart jsonPart = new MockPart("json", "json", new ByteArrayInputStream(json));
+		MockPart jsonPart = new MockPart("json", "json", json);
 		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		standaloneSetup(new MultipartController()).build()
