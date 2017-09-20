@@ -171,8 +171,7 @@ as the local file system, from the Java `CLASSPATH`, and so on.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	ApplicationContext context =
-		new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});
+	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
 ----
 
 [NOTE]
@@ -716,7 +715,6 @@ factory method itself with the `factory-method` attribute.
 	public class DefaultServiceLocator {
 
 		private static ClientService clientService = new ClientServiceImpl();
-		private DefaultServiceLocator() {}
 
 		public ClientService createClientServiceInstance() {
 			return clientService;
@@ -748,9 +746,8 @@ One factory class can also hold more than one factory method as shown here:
 	public class DefaultServiceLocator {
 
 		private static ClientService clientService = new ClientServiceImpl();
-		private static AccountService accountService = new AccountServiceImpl();
 
-		private DefaultServiceLocator() {}
+		private static AccountService accountService = new AccountServiceImpl();
 
 		public ClientService createClientServiceInstance() {
 			return clientService;
@@ -759,7 +756,6 @@ One factory class can also hold more than one factory method as shown here:
 		public AccountService createAccountServiceInstance() {
 			return accountService;
 		}
-
 	}
 ----
 
@@ -837,7 +833,6 @@ has no dependencies on container specific interfaces, base classes or annotation
 		}
 
 		// business logic that actually uses the injected MovieFinder is omitted...
-
 	}
 ----
 
@@ -860,7 +855,6 @@ being instantiated. Consider the following class:
 		public Foo(Bar bar, Baz baz) {
 			// ...
 		}
-
 	}
 ----
 
@@ -906,7 +900,6 @@ by type without help. Consider the following class:
 			this.years = years;
 			this.ultimateAnswer = ultimateAnswer;
 		}
-
 	}
 ----
 
@@ -979,7 +972,6 @@ then have to look as follows:
 			this.years = years;
 			this.ultimateAnswer = ultimateAnswer;
 		}
-
 	}
 ----
 --
@@ -1010,7 +1002,6 @@ on container specific interfaces, base classes or annotations.
 		}
 
 		// business logic that actually uses the injected MovieFinder is omitted...
-
 	}
 ----
 
@@ -1156,7 +1147,9 @@ part of a Spring XML configuration file specifies some bean definitions:
 	public class ExampleBean {
 
 		private AnotherBean beanOne;
+
 		private YetAnotherBean beanTwo;
+
 		private int i;
 
 		public void setBeanOne(AnotherBean beanOne) {
@@ -1170,7 +1163,6 @@ part of a Spring XML configuration file specifies some bean definitions:
 		public void setIntegerProperty(int i) {
 			this.i = i;
 		}
-
 	}
 ----
 
@@ -1202,7 +1194,9 @@ in the XML file. The following example uses constructor-based DI:
 	public class ExampleBean {
 
 		private AnotherBean beanOne;
+
 		private YetAnotherBean beanTwo;
+
 		private int i;
 
 		public ExampleBean(
@@ -1211,7 +1205,6 @@ in the XML file. The following example uses constructor-based DI:
 			this.beanTwo = yetAnotherBean;
 			this.i = i;
 		}
-
 	}
 ----
 
@@ -1254,7 +1247,6 @@ told to call a `static` factory method to return an instance of the object:
 			// some other operations...
 			return eb;
 		}
-
 	}
 ----
 
@@ -2323,7 +2315,6 @@ the following class, with a method computeValue, which we want to override:
 		}
 
 		// some other methods...
-
 	}
 ----
 
@@ -3103,7 +3094,6 @@ see <<beans-java-lifecycle-callbacks>>. For example, the following:
 		public void init() {
 			// do some initialization work
 		}
-
 	}
 ----
 
@@ -3123,7 +3113,6 @@ see <<beans-java-lifecycle-callbacks>>. For example, the following:
 		public void afterPropertiesSet() {
 			// do some initialization work
 		}
-
 	}
 ----
 
@@ -3165,7 +3154,6 @@ With Java config, you use the `destroyMethod` attribute of `@Bean`, see
 		public void cleanup() {
 			// do some destruction work (like releasing pooled connections)
 		}
-
 	}
 ----
 
@@ -3185,7 +3173,6 @@ is exactly the same as:
 		public void destroy() {
 			// do some destruction work (like releasing pooled connections)
 		}
-
 	}
 ----
 
@@ -3242,7 +3229,6 @@ following example.
 				throw new IllegalStateException("The [blogDao] property must be set.");
 			}
 		}
-
 	}
 ----
 
@@ -3332,7 +3318,6 @@ lifecycle requirements (e.g. starts and stops some background process):
 		void stop();
 
 		boolean isRunning();
-
 	}
 ----
 
@@ -3349,7 +3334,6 @@ defined within that context. It does this by delegating to a `LifecycleProcessor
 		void onRefresh();
 
 		void onClose();
-
 	}
 ----
 
@@ -3383,7 +3367,6 @@ another option, namely the `getPhase()` method as defined on its super-interface
 	public interface Phased {
 
 		int getPhase();
-
 	}
 ----
 
@@ -3395,7 +3378,6 @@ another option, namely the `getPhase()` method as defined on its super-interface
 		boolean isAutoStartup();
 
 		void stop(Runnable callback);
-
 	}
 ----
 
@@ -3472,9 +3454,7 @@ declared on the `ConfigurableApplicationContext` interface:
 	public final class Boot {
 
 		public static void main(final String[] args) throws Exception {
-
-			ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(
-					new String []{"beans.xml"});
+			ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
 
 			// add a shutdown hook for the above context...
 			ctx.registerShutdownHook();
@@ -3482,7 +3462,6 @@ declared on the `ConfigurableApplicationContext` interface:
 			// app runs here...
 
 			// main method exits, hook is called prior to the app shutting down...
-
 		}
 	}
 ----
@@ -3502,7 +3481,6 @@ with a reference to that `ApplicationContext`.
 	public interface ApplicationContextAware {
 
 		void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
-
 	}
 ----
 
@@ -3538,7 +3516,6 @@ a reference to the name defined in its associated object definition.
 	public interface BeanNameAware {
 
 		void setBeanName(String name) throws BeansException;
-
 	}
 ----
 
@@ -3842,17 +3819,14 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 	public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor {
 
 		// simply return the instantiated bean as-is
-		public Object postProcessBeforeInitialization(Object bean,
-				String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
 			return bean; // we could potentially return any object reference here...
 		}
 
-		public Object postProcessAfterInitialization(Object bean,
-				String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
 			return bean;
 		}
-
 	}
 ----
 
@@ -4292,7 +4266,6 @@ example:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4330,15 +4303,15 @@ You can apply the `@Autowired` annotation to constructors:
 		}
 
 		// ...
-
 	}
 ----
 
 [NOTE]
 ====
-As of Spring Framework 4.3, the `@Autowired` constructor is no longer necessary if the
-target bean only defines one constructor. If several constructors are available, at
-least one must be annotated to teach the container which one it has to use.
+As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
+no longer necessary if the target bean only defines one constructor to begin with.
+However, if several constructors are available, at least one must be annotated to
+teach the container which one to use.
 ====
 
 As expected, you can also apply the `@Autowired` annotation to "traditional" setter
@@ -4357,7 +4330,6 @@ methods:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4381,7 +4353,6 @@ arguments:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4403,9 +4374,22 @@ You can apply `@Autowired` to fields as well and even mix it with constructors:
 		}
 
 		// ...
-
 	}
 ----
+
+[TIP]
+====
+Make sure that your target components (e.g. `MovieCatalog`, `CustomerPreferenceDao`)
+are consistently declared by the type that you are using for your `@Autowired`-annotated
+injection points. Otherwise injection may fail due to no type match found at runtime.
+
+For XML-defined beans or component classes found through a classpath scan, the container
+usually knows the concrete type upfront. However, for `@Bean` factory methods, you need
+to make sure that the declared return type is sufficiently expressive. For components
+implementing several interfaces or for components potentially referred to by their
+implementation type, consider declaring the most specific return type on your factory
+method (at least as specific as required by the injection points referring to your bean).
+====
 
 It is also possible to provide __all__ beans of a particular type from the
 `ApplicationContext` by adding the annotation to a field or method that expects an array
@@ -4420,7 +4404,6 @@ of that type:
 		private MovieCatalog[] movieCatalogs;
 
 		// ...
-
 	}
 ----
 
@@ -4439,7 +4422,6 @@ The same applies for typed collections:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4467,7 +4449,6 @@ corresponding bean names:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4482,13 +4463,12 @@ indicating __required__ dependencies. This behavior can be changed as demonstrat
 
 		private MovieFinder movieFinder;
 
-		@Autowired(required=false)
+		@Autowired(required = false)
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4524,7 +4504,6 @@ automatically resolved, with no special setup necessary.
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4564,7 +4543,6 @@ _primary_ `MovieCatalog`.
 		public MovieCatalog secondMovieCatalog() { ... }
 
 		// ...
-
 	}
 ----
 
@@ -4580,7 +4558,6 @@ With such configuration, the following `MovieRecommender` will be autowired with
 		private MovieCatalog movieCatalog;
 
 		// ...
-
 	}
 ----
 
@@ -4634,7 +4611,6 @@ chosen for each argument. In the simplest case, this can be a plain descriptive 
 		private MovieCatalog movieCatalog;
 
 		// ...
-
 	}
 ----
 
@@ -4658,7 +4634,6 @@ method parameters:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4775,6 +4750,7 @@ Then you can provide the custom qualifier on autowired fields and parameters:
 		@Autowired
 		**@Genre("Action")**
 		private MovieCatalog actionCatalog;
+
 		private MovieCatalog comedyCatalog;
 
 		@Autowired
@@ -4783,7 +4759,6 @@ Then you can provide the custom qualifier on autowired fields and parameters:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -4855,7 +4830,6 @@ Then add the annotation to the field or property to be autowired:
 		private MovieCatalog offlineCatalog;
 
 		// ...
-
 	}
 ----
 
@@ -4926,7 +4900,6 @@ for both attributes: `genre` and `format`.
 		private MovieCatalog comedyBluRayCatalog;
 
 		// ...
-
 	}
 ----
 
@@ -5006,7 +4979,6 @@ configuration:
 		public IntegerStore integerStore() {
 			return new IntegerStore();
 		}
-
 	}
 ----
 
@@ -5095,7 +5067,6 @@ demonstrated in this example:
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
-
 	}
 ----
 
@@ -5115,7 +5086,6 @@ name "movieFinder" injected into its setter method:
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
-
 	}
 ----
 
@@ -5155,7 +5125,6 @@ dependency type `ApplicationContext`.
 		}
 
 		// ...
-
 	}
 ----
 
@@ -5189,7 +5158,6 @@ pre-populated upon initialization and cleared upon destruction.
 		public void clearMovieCache() {
 			// clears the movie cache upon destruction...
 		}
-
 	}
 ----
 
@@ -5347,7 +5315,6 @@ are eligible for such autodetection:
 		public SimpleMovieLister(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
-
 	}
 ----
 
@@ -5531,7 +5498,6 @@ annotated classes. Here is a simple example:
 		public void doWork() {
 			// Component method implementation omitted
 		}
-
 	}
 ----
 
@@ -5587,7 +5553,6 @@ support for autowiring of `@Bean` methods:
 		public TestBean requestScopedInstance() {
 			return new TestBean("requestScopedInstance", 3);
 		}
-
 	}
 ----
 
@@ -6034,7 +5999,7 @@ used as follows:
 	import javax.inject.Inject;
 	import javax.inject.Named;
 
-	@Named("movieListener") // @ManagedBean("movieListener") could be used as well
+	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
 	public class SimpleMovieLister {
 
 		private MovieFinder movieFinder;
@@ -6181,7 +6146,6 @@ The simplest possible `@Configuration` class would read as follows:
 		public MyService myService() {
 			return new MyServiceImpl();
 		}
-
 	}
 ----
 
@@ -6441,10 +6405,9 @@ the method name. The following is a simple example of a `@Bean` method declarati
 	public class AppConfig {
 
 		@Bean
-		public TransferService transferService() {
+		public TransferServiceImpl transferService() {
 			return new TransferServiceImpl();
 		}
-
 	}
 ----
 
@@ -6467,6 +6430,39 @@ Both declarations make a bean named `transferService` available in the
 transferService -> com.acme.TransferServiceImpl
 ----
 
+You may also declare your `@Bean` method with an interface (or base class)
+return type:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public TransferService transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+----
+
+However, this limits the visibility for advance type prediction to the specified
+interface type (`TransferService`) then, with the full type (`TransferServiceImpl`)
+only known to the container once the affected singleton bean has been instantiated.
+Non-lazy singleton beans get instantiated according to their declaration order,
+so you may see different type matching results depending on when another component
+tries to match by a non-declared type (such as `@Autowired TransferServiceImpl`
+which will only resolve once the "transferService" bean has been instantiated).
+
+[TIP]
+====
+If you consistently refer to your types by a declared service interface, your
+`@Bean` return types may safely join that design decision. However, for components
+implementing several interfaces or for components potentially referred to by their
+implementation type, it is safer to declare the most specific return type possible
+(at least as specific as required by the injection points referring to your bean).
+====
+
 
 [[beans-java-dependencies]]
 ==== Bean dependencies
@@ -6486,7 +6482,6 @@ parameter:
 		public TransferService transferService(AccountRepository accountRepository) {
 			return new TransferServiceImpl(accountRepository);
 		}
-
 	}
 ----
 
@@ -6519,12 +6514,14 @@ on the `bean` element:
 [subs="verbatim,quotes"]
 ----
 	public class Foo {
+
 		public void init() {
 			// initialization logic
 		}
 	}
 
 	public class Bar {
+
 		public void cleanup() {
 			// destruction logic
 		}
@@ -6542,7 +6539,6 @@ on the `bean` element:
 		public Bar bar() {
 			return new Bar();
 		}
-
 	}
 ----
 
@@ -6583,6 +6579,7 @@ method directly during construction:
 ----
 	@Configuration
 	public class AppConfig {
+
 		@Bean
 		public Foo foo() {
 			Foo foo = new Foo();
@@ -6591,7 +6588,6 @@ method directly during construction:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -6625,7 +6621,6 @@ The default scope is `singleton`, but you can override this with the `@Scope` an
 		public Encryptor encryptor() {
 			// ...
 		}
-
 	}
 ----
 
@@ -6678,7 +6673,6 @@ resulting bean. This functionality can be overridden, however, with the `name` a
 		public Foo foo() {
 			return new Foo();
 		}
-
 	}
 ----
 
@@ -6700,7 +6694,6 @@ annotation accepts a String array for this purpose.
 		public DataSource dataSource() {
 			// instantiate, configure and return DataSource bean...
 		}
-
 	}
 ----
 
@@ -6726,7 +6719,6 @@ annotation can be used:
 		public Foo foo() {
 			return new Foo();
 		}
-
 	}
 ----
 
@@ -6761,7 +6753,6 @@ as having one bean method call another:
 		public Bar bar() {
 			return new Bar();
 		}
-
 	}
 ----
 
@@ -6858,7 +6849,6 @@ The following example shows a `@Bean` annotated method being called twice:
 		public ClientDao clientDao() {
 			return new ClientDaoImpl();
 		}
-
 	}
 ----
 
@@ -6926,7 +6916,6 @@ another configuration class:
 		public B b() {
 			return new B();
 		}
-
 	}
 ----
 
@@ -6982,7 +6971,6 @@ classes, each depending on beans declared in the others:
 		public TransferService transferService(AccountRepository accountRepository) {
 			return new TransferServiceImpl(accountRepository);
 		}
-
 	}
 
 	@Configuration
@@ -6992,7 +6980,6 @@ classes, each depending on beans declared in the others:
 		public AccountRepository accountRepository(DataSource dataSource) {
 			return new JdbcAccountRepository(dataSource);
 		}
-
 	}
 
 	@Configuration
@@ -7003,7 +6990,6 @@ classes, each depending on beans declared in the others:
 		public DataSource dataSource() {
 			// return new DataSource
 		}
-
 	}
 
 	public static void main(String[] args) {
@@ -7044,7 +7030,6 @@ work on the configuration class itself since it is being created as a bean insta
 		public TransferService transferService() {
 			return new TransferServiceImpl(accountRepository);
 		}
-
 	}
 
 	@Configuration
@@ -7061,7 +7046,6 @@ work on the configuration class itself since it is being created as a bean insta
 		public AccountRepository accountRepository() {
 			return new JdbcAccountRepository(dataSource);
 		}
-
 	}
 
 	@Configuration
@@ -7072,7 +7056,6 @@ work on the configuration class itself since it is being created as a bean insta
 		public DataSource dataSource() {
 			// return new DataSource
 		}
-
 	}
 
 	public static void main(String[] args) {
@@ -7121,7 +7104,6 @@ configuration classes themselves:
 			// navigate 'through' the config class to the @Bean method!
 			return new TransferServiceImpl(repositoryConfig.accountRepository());
 		}
-
 	}
 ----
 
@@ -7150,7 +7132,6 @@ abstract class-based `@Configuration` classes. Consider the following:
 
 		@Bean
 		AccountRepository accountRepository();
-
 	}
 
 	@Configuration
@@ -7160,11 +7141,10 @@ abstract class-based `@Configuration` classes. Consider the following:
 		public AccountRepository accountRepository() {
 			return new JdbcAccountRepository(...);
 		}
-
 	}
 
 	@Configuration
-	@Import({ServiceConfig.class, DefaultRepositoryConfig.class}) // import the concrete config!
+	@Import({ServiceConfig.class, DefaultRepositoryConfig.class})  // import the concrete config!
 	public class SystemTestConfig {
 
 		@Bean
@@ -7280,7 +7260,6 @@ properly.
 		public TransferService transferService() {
 			return new TransferService(accountRepository());
 		}
-
 	}
 ----
 
@@ -7391,7 +7370,6 @@ bare minimum.
 		public DataSource dataSource() {
 			return new DriverManagerDataSource(url, username, password);
 		}
-
 	}
 ----
 
@@ -7874,6 +7852,7 @@ a call to `testBean.getName()` will return "myTestBean".
    @Configuration
    **@PropertySource("classpath:/com/myco/app.properties")**
    public class AppConfig {
+
 	   @Autowired
 	   Environment env;
 
@@ -7896,6 +7875,7 @@ environment. For example:
    @Configuration
    @PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
    public class AppConfig {
+
 	   @Autowired
 	   Environment env;
 
@@ -7955,7 +7935,6 @@ To enable load-time weaving add the `@EnableLoadTimeWeaving` to one of your
 	@Configuration
 	@EnableLoadTimeWeaving
 	public class AppConfig {
-
 	}
 ----
 
@@ -8146,7 +8125,6 @@ converted into Strings and inserted into placeholders in the lookup message.
 				new Object [] {"userDao"}, "Required", null);
 			System.out.println(message);
 		}
-
 	}
 ----
 
@@ -8292,7 +8270,6 @@ simple class that extends Spring's `ApplicationEvent` base class:
 		}
 
 		// accessor and other methods...
-
 	}
 ----
 
@@ -8325,7 +8302,6 @@ example demonstrates such a class:
 			}
 			// send email...
 		}
-
 	}
 ----
 
@@ -8353,7 +8329,6 @@ demonstrates such a class:
 		public void onApplicationEvent(BlackListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
-
 	}
 ----
 
@@ -8428,7 +8403,6 @@ follows:
 		public void processBlackListEvent(BlackListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
-
 	}
 ----
 
