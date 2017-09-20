@@ -244,7 +244,14 @@ public abstract class StatementCreatorUtils {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
 			if (!shouldIgnoreGetParameterType) {
-				sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				try {
+					sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
+				}
+				catch (SQLException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("JDBC getParameterType call failed - using fallback method instead: " + ex);
+					}
+				}
 			}
 			if (sqlTypeToUse == null) {
 				// Proceed with database-specific checks
