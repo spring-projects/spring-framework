@@ -84,6 +84,8 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramRequired;
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramOptional;
+	private MethodParameter paramOptionalArray;
+	private MethodParameter paramOptionalList;
 	private MethodParameter multipartFileOptional;
 
 	private NativeWebRequest webRequest;
@@ -119,7 +121,9 @@ public class RequestParamMethodArgumentResolverTests {
 		paramRequired = new SynthesizingMethodParameter(method, 15);
 		paramNotRequired = new SynthesizingMethodParameter(method, 16);
 		paramOptional = new SynthesizingMethodParameter(method, 17);
-		multipartFileOptional = new SynthesizingMethodParameter(method, 18);
+		paramOptionalArray = new SynthesizingMethodParameter(method, 18);
+		paramOptionalList = new SynthesizingMethodParameter(method, 19);
+		multipartFileOptional = new SynthesizingMethodParameter(method, 20);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -438,6 +442,83 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamValue() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void resolveOptionalParamArray() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		this.request.addParameter("name", "123", "456");
+		result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertArrayEquals(new Integer[] {123, 456}, (Integer[]) ((Optional) result).get());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamArray() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(paramOptionalArray, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void resolveOptionalParamList() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		this.request.addParameter("name", "123", "456");
+		result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertEquals(Arrays.asList("123", "456"), ((Optional) result).get());
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void missingOptionalParamList() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Object result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
+		assertEquals(Optional.empty(), result);
+
+		result = resolver.resolveArgument(paramOptionalList, null, webRequest, binderFactory);
+		assertEquals(Optional.class, result.getClass());
+		assertFalse(((Optional) result).isPresent());
+	}
+
+	@Test
 	public void resolveOptionalMultipartFile() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -493,6 +574,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") String paramRequired,
 			@RequestParam(name = "name", required = false) String paramNotRequired,
 			@RequestParam("name") Optional<Integer> paramOptional,
+			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
+			@RequestParam("name") Optional<List> paramOptionalList,
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
 	}
 
