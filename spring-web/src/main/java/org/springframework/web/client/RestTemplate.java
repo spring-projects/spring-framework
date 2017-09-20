@@ -969,10 +969,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
 			if (this.delegate != null) {
 				T body = this.delegate.extractData(response);
-				return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
+				return ResponseEntity.status(response.getRawStatusCode()).headers(response.getHeaders()).body(body);
 			}
 			else {
-				return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
+				return ResponseEntity.status(response.getRawStatusCode()).headers(response.getHeaders()).build();
 			}
 		}
 	}

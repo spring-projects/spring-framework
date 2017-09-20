@@ -523,7 +523,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -535,7 +535,7 @@ public class AsyncRestTemplate extends org.springframework.http.client.support.I
 		if (logger.isWarnEnabled()) {
 			try {
 				logger.warn("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
+						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
 			}
 			catch (IOException ex) {
 				// ignore

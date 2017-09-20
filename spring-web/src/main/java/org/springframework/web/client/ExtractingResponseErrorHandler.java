@@ -132,8 +132,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	}
 
 	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = getHttpStatusCode(response);
+	public void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
 		if (this.statusMapping.containsKey(statusCode)) {
 			extract(this.statusMapping.get(statusCode), response);
 		}
@@ -141,7 +140,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 			extract(this.seriesMapping.get(statusCode.series()), response);
 		}
 		else {
-			super.handleError(response);
+			super.handleError(response, statusCode);
 		}
 	}
 

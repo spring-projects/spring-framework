@@ -45,18 +45,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willThrow;
-import static org.springframework.http.MediaType.parseMediaType;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * @author Arjen Poutsma
@@ -272,15 +263,12 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(String.class, textPlain)).willReturn(true);
 		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willReturn(expected);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		ResponseEntity<String> result = template.getForEntity("http://example.com", String.class);
 		assertEquals("Invalid GET result", expected, result.getBody());
@@ -505,15 +493,12 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
 		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
 		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		ResponseEntity<Integer> result = template.postForEntity("http://example.com", request, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
@@ -567,14 +552,11 @@ public class RestTemplateTests {
 		responseHeaders.setContentType(textPlain);
 		responseHeaders.setContentLength(10);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getBody()).willReturn(StreamUtils.emptyInput());
 		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
 		given(converter.read(Integer.class, response)).willReturn(null);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		ResponseEntity<Integer> result = template.postForEntity("http://example.com", null, Integer.class);
 		assertFalse("Invalid POST result", result.hasBody());
@@ -777,16 +759,13 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
 		given(converter.canRead(Integer.class, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(converter.read(Integer.class, response)).willReturn(expected);
 		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
@@ -822,15 +801,12 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
+		given(response.getStatusText()).willReturn(HttpStatus.OK.getReasonPhrase());
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
 		given(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(converter.read(eq(intList.getType()), eq(null), any(HttpInputMessage.class))).willReturn(expected);
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
-		HttpStatus status = HttpStatus.OK;
-		given(response.getStatusCode()).willReturn(status);
-		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");

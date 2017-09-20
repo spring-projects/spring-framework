@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Enumeration of HTTP status codes.
  *
@@ -499,12 +501,28 @@ public enum HttpStatus {
 	 * @throws IllegalArgumentException if this enum has no constant for the specified numeric value
 	 */
 	public static HttpStatus valueOf(int statusCode) {
+		HttpStatus status = resolve(statusCode);
+		if (status == null) {
+			throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		}
+		return status;
+	}
+
+
+	/**
+	 * Resolve the given status code to an {@code HttpStatus}, if possible.
+	 * @param statusCode the HTTP status code (potentially non-standard)
+	 * @return the corresponding {@code HttpStatus}, or {@code null} if not found
+	 * @since 5.0
+	 */
+	@Nullable
+	public static HttpStatus resolve(int statusCode) {
 		for (HttpStatus status : values()) {
 			if (status.value == statusCode) {
 				return status;
 			}
 		}
-		throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		return null;
 	}
 
 
