@@ -49,6 +49,21 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
+	 * Template method called from {@link #hasError(ClientHttpResponse)}.
+	 * <p>The default implementation checks if the given status code is
+	 * {@link HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@link HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * Can be overridden in subclasses.
+	 * @param statusCode the HTTP status code
+	 * @return {@code true} if the response has an error; {@code false} otherwise
+	 * @see #getHttpStatusCode(ClientHttpResponse)
+	 */
+	protected boolean hasError(HttpStatus statusCode) {
+		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
+				statusCode.series() == HttpStatus.Series.SERVER_ERROR);
+	}
+
+	/**
 	 * This default implementation throws a {@link HttpClientErrorException} if the response status code
 	 * is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
 	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
@@ -90,33 +105,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Template method called from {@link #hasError(ClientHttpResponse)}.
-	 * <p>The default implementation checks if the given status code is
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR}
-	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
-	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code
-	 * @return {@code true} if the response has an error; {@code false} otherwise
-	 * @see #getHttpStatusCode(ClientHttpResponse)
-	 */
-	protected boolean hasError(HttpStatus statusCode) {
-		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
-				statusCode.series() == HttpStatus.Series.SERVER_ERROR);
-	}
-
-	/**
-	 * Determine the charset of the response (for inclusion in a status exception).
-	 * @param response the response to inspect
-	 * @return the associated charset, or {@code null} if none
-	 * @since 4.3.8
-	 */
-	protected Charset getCharset(ClientHttpResponse response) {
-		HttpHeaders headers = response.getHeaders();
-		MediaType contentType = headers.getContentType();
-		return (contentType != null ? contentType.getCharset() : null);
-	}
-
-	/**
 	 * Read the body of the given response (for inclusion in a status exception).
 	 * @param response the response to inspect
 	 * @return the response body as a byte array,
@@ -131,6 +119,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			// ignore
 		}
 		return new byte[0];
+	}
+
+	/**
+	 * Determine the charset of the response (for inclusion in a status exception).
+	 * @param response the response to inspect
+	 * @return the associated charset, or {@code null} if none
+	 * @since 4.3.8
+	 */
+	protected Charset getCharset(ClientHttpResponse response) {
+		HttpHeaders headers = response.getHeaders();
+		MediaType contentType = headers.getContentType();
+		return (contentType != null ? contentType.getCharset() : null);
 	}
 
 }

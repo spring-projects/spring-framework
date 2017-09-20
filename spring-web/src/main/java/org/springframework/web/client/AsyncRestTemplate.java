@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -513,7 +513,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + ")");
+						response.getRawStatusCode() + " (" + response.getStatusText() + ")");
 			}
 			catch (IOException ex) {
 				// ignore
@@ -525,7 +525,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 		if (logger.isWarnEnabled()) {
 			try {
 				logger.warn("Async " + method.name() + " request for \"" + url + "\" resulted in " +
-						response.getStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
+						response.getRawStatusCode() + " (" + response.getStatusText() + "); invoking error handler");
 			}
 			catch (IOException ex) {
 				// ignore

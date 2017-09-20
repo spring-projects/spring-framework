@@ -37,6 +37,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -205,14 +206,22 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		@Override
 		public Object extractData(ClientHttpResponse response) throws IOException {
-			if (!HttpStatus.OK.equals(response.getStatusCode())) {
-				throw new HttpServerErrorException(response.getStatusCode());
+			try {
+				if (!HttpStatus.OK.equals(response.getStatusCode())) {
+					throw new HttpServerErrorException(response.getStatusCode());
+				}
 			}
+			catch (IllegalArgumentException ex) {
+				throw new UnknownHttpStatusCodeException(
+						response.getRawStatusCode(), response.getStatusText(), response.getHeaders(), null, null);
+			}
+
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR receive headers: " + response.getHeaders());
 			}
 			InputStream is = response.getBody();
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
+
 			while (true) {
 				if (this.sockJsSession.isDisconnected()) {
 					if (logger.isDebugEnabled()) {
