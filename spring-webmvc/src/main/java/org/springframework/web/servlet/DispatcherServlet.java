@@ -771,6 +771,19 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Return the configured {@link HandlerMapping} beans that were detected by
+	 * type in the {@link WebApplicationContext} or initialized based on the
+	 * default set of strategies from {@literal DispatcherServlet.properties}.
+	 * @return immutable list with the configured mappings or an empty list
+	 * @since 5.0
+	 */
+	public List<HandlerMapping> getHandlerMappings() {
+		return this.handlerMappings != null ?
+				Collections.unmodifiableList(this.handlerMappings) :
+				Collections.emptyList();
+	}
+
+	/**
 	 * Return this servlet's ThemeSource, if any; else return {@code null}.
 	 * <p>Default is to return the WebApplicationContext as ThemeSource,
 	 * provided that it implements the ThemeSource interface.

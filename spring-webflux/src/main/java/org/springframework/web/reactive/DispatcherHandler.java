@@ -91,17 +91,29 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 
+	/**
+	 * Return all {@link HandlerMapping} beans detected by type in the
+	 * {@link #setApplicationContext injected context} and also
+	 * {@link AnnotationAwareOrderComparator#sort(List) sorted}.
+	 * @return immutable list with the configured mappings
+	 */
+	public List<HandlerMapping> getHandlerMappings() {
+		return this.handlerMappings;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		initStrategies(applicationContext);
 	}
 
+
 	protected void initStrategies(ApplicationContext context) {
 		Map<String, HandlerMapping> mappingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerMapping.class, true, false);
 
-		this.handlerMappings = new ArrayList<>(mappingBeans.values());
+		ArrayList<HandlerMapping> mappings = new ArrayList<>(mappingBeans.values());
 		AnnotationAwareOrderComparator.sort(this.handlerMappings);
+		this.handlerMappings = Collections.unmodifiableList(mappings);
 
 		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerAdapter.class, true, false);
