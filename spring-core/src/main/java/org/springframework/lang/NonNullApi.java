@@ -30,14 +30,8 @@ import javax.annotation.meta.TypeQualifierDefault;
  * Leverages JSR 305 meta-annotations to indicate nullability in Java to common tools with
  * JSR 305 support and used by Kotlin to infer nullability of Spring API.
  *
- *
  * <p>Should be used at package level in association with {@link Nullable}
  * annotations at parameter and return value level.
- *
- * <p>This annotation does not define nullability of generic type arguments, because
- * {@code @TypeQualifierDefault(ElementType.TYPE_USE)} scope would be too broad.
- * As a consequence, each API generic type argument should be annotated
- * with {@link Nullable} or {@link NonNull} to specify their nullability.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller

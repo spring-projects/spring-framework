@@ -30,15 +30,13 @@ import javax.annotation.meta.TypeQualifierNickname;
  * Leverages JSR 305 meta-annotations to indicate nullability in Java to common tools with
  * JSR 305 support and used by Kotlin to infer nullability of Spring API.
  *
- * <p>Should be used at generic type argument, parameter, return value, and field level.
+ * <p>Should be used at parameter, return value, and field level.
  * Methods overrides should repeat parent {@code @NonNull} annotations unless they behave
  * differently.
  *
  * <p>Use {@code @NonNullApi} (scope = parameters + return values) and/or {@code @NonNullFields}
  * (scope = fields) to set the default behavior to non-nullable in order to avoid annotating
- * your whole codebase with {@code @NonNull}. No default retricted to generic type argument
- * is possible ({@code ElementType.TYPE_USE} scope is too wide) so each generic type argument
- * needs to be annotated with @code @NonNull}.
+ * your whole codebase with {@code @NonNull}.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -47,7 +45,7 @@ import javax.annotation.meta.TypeQualifierNickname;
  * @see NonNullFields
  * @see Nullable
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE, ElementType.FIELD})
+@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull
