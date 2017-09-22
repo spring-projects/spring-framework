@@ -23,7 +23,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.Resource;
 
 /**
- * Implementation of {@link RouterFunctions.Visitor} that creates a
+ * Implementation of {@link RouterFunctions.Visitor} that creates a formatted string representation
+ * of router functions.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
