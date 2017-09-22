@@ -47,8 +47,7 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @see #andOther(RouterFunction)
 	 */
 	default RouterFunction<T> and(RouterFunction<T> other) {
-		return request -> this.route(request)
-				.switchIfEmpty(Mono.defer(() -> other.route(request)));
+		return new RouterFunctions.SameComposedRouterFunction<>(this, other);
 	}
 
 	/**
@@ -61,10 +60,7 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @see #and(RouterFunction)
 	 */
 	default RouterFunction<?> andOther(RouterFunction<?> other) {
-		return request -> this.route(request)
-				.map(RouterFunctions::cast)
-				.switchIfEmpty(
-						Mono.defer(() -> other.route(request).map(RouterFunctions::cast)));
+		return new RouterFunctions.DifferentComposedRouterFunction(this, other);
 	}
 
 	/**
@@ -105,7 +101,18 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @return the filtered routing function
 	 */
 	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
-		return request -> this.route(request).map(filterFunction::apply);
+		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
+	}
+
+	/**
+	 * Accept the given visitor. Default implementation calls
+	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * router function
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RouterFunctions.Visitor visitor) {
+		visitor.unknown(this);
 	}
 
 }

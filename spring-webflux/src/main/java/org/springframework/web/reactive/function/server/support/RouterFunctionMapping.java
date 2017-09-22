@@ -102,8 +102,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 		List<RouterFunction<?>> routerFunctions = routerFunctions();
 		if (!CollectionUtils.isEmpty(routerFunctions) && logger.isInfoEnabled()) {
-			routerFunctions.forEach(routerFunction1 -> {
-				logger.info("Mapped " + routerFunction1);
+			routerFunctions.forEach(routerFunction -> {
+				logger.info("Mapped " + routerFunction);
 			});
 		}
 		this.routerFunction = routerFunctions.stream()

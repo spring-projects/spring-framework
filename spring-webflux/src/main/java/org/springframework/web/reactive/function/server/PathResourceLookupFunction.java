@@ -155,4 +155,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s -> %s", this.pattern, this.location);
+	}
 }
