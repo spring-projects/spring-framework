@@ -223,7 +223,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
-					Operators.addAndGet(DEMAND_FIELD_UPDATER, publisher, n);
+					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
 					if (publisher.changeState(this, DEMAND)) {
 						publisher.checkOnDataAvailable();
 					}
@@ -241,7 +241,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
-					Operators.addAndGet(DEMAND_FIELD_UPDATER, publisher, n);
+					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
 				}
 			}
 
@@ -269,7 +269,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.validate(n)) {
-					Operators.addAndGet(DEMAND_FIELD_UPDATER, publisher, n);
+					Operators.addCap(DEMAND_FIELD_UPDATER, publisher, n);
 				}
 			}
 		},
