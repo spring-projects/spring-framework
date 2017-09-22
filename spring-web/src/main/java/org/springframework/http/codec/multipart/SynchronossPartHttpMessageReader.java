@@ -139,6 +139,9 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 				catch (IOException ex) {
 					listener.onError("Exception thrown providing input to the parser", ex);
 				}
+				finally {
+					DataBufferUtils.release(buffer);
+				}
 			}, (ex) -> {
 				try {
 					listener.onError("Request body input error", ex);
