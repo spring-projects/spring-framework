@@ -60,7 +60,7 @@ configure(allprojects) { project ->
 	ext.log4jVersion         = '2.9.0'
 	ext.nettyVersion         = "4.1.15.Final"
 	ext.okhttp3Version       = "3.9.0"
-	ext.reactorVersion       = "Bismuth-BUILD-SNAPSHOT"
+	ext.reactorVersion       = "Bismuth-RC1"
 	ext.rxjavaVersion        = '1.3.2'
 	ext.rxjavaAdapterVersion = '1.2.1'
 	ext.rxjava2Version       = '2.1.3'
