@@ -24,6 +24,7 @@ import org.junit.Test
  * 
  * @author Sebastien Deleuze
  */
+@Suppress("unused", "UNUSED_PARAMETER")
 class BeanUtilsKotlinTests {
 
 	@Test
@@ -65,10 +66,54 @@ class BeanUtilsKotlinTests {
 		assertEquals(12, baz.param2)
 	}
 
+	@Test
+	fun `2 constructors with default one`() {
+		assertEquals(TwoConstructorsWithDefaultOne::class.java.getDeclaredConstructor(), BeanUtils.findPrimaryConstructor(TwoConstructorsWithDefaultOne::class.java))
+	}
+
+	@Test
+	fun `2 constructors without default one`() {
+		assertNull(BeanUtils.findPrimaryConstructor(TwoConstructorsWithoutDefaultOne::class.java))
+	}
+
+	@Test
+	fun `1 constructor with default one`() {
+		assertEquals(OneConstructorWithDefaultOne::class.java.getDeclaredConstructor(), BeanUtils.findPrimaryConstructor(OneConstructorWithDefaultOne::class.java))
+	}
+
+	@Test
+	fun `1 constructor without default one`() {
+		assertEquals(OneConstructorWithoutDefaultOne::class.java.getDeclaredConstructor(String::class.java), BeanUtils.findPrimaryConstructor(OneConstructorWithoutDefaultOne::class.java))
+	}
+
 	class Foo(val param1: String, val param2: Int)
 
 	class Bar(val param1: String, val param2: Int = 12)
 
 	class Baz(var param1: String = "a", var param2: Int = 12)
+
+	class TwoConstructorsWithDefaultOne {
+
+		constructor()
+
+		constructor(param1: String)
+	}
+
+	class TwoConstructorsWithoutDefaultOne {
+
+		constructor(param1: String)
+
+		constructor(param1: String, param2: String)
+	}
+
+	class OneConstructorWithDefaultOne {
+
+		constructor()
+	}
+
+	class OneConstructorWithoutDefaultOne {
+
+		constructor(param1: String)
+	}
 
 }

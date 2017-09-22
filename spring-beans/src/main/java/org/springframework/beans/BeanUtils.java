@@ -332,9 +332,12 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Return the primary constructor of the provided class (single or default constructor
-	 * for Java classes and primary constructor for Kotlin classes), if any.
-	 * @param clazz the {@link Class} of the Kotlin class
+	 * Return the primary constructor of the provided class. For Java classes, it returns
+	 * the single or the default constructor if any. For Kotlin classes, it returns the Java
+	 * constructor corresponding to the Kotlin primary constructor (as defined in
+	 * Kotlin specification), the single or the default constructor if any.
+	 *
+	 * @param clazz the class to check
 	 * @since 5.0
 	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
 	 */
@@ -343,20 +346,21 @@ public abstract class BeanUtils {
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (useKotlinSupport(clazz)) {
-			return KotlinDelegate.findPrimaryConstructor(clazz);
+			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
+			if (kotlinPrimaryConstructor != null) {
+				return kotlinPrimaryConstructor;
+			}
+		}
+		Constructor<T>[] ctors = (Constructor<T>[]) clazz.getConstructors();
+		if (ctors.length == 1) {
+			return ctors[0];
 		}
 		else {
-			Constructor<T>[] ctors = (Constructor<T>[]) clazz.getConstructors();
-			if (ctors.length == 1) {
-				return ctors[0];
+			try {
+				return clazz.getDeclaredConstructor();
 			}
-			else {
-				try {
-					return clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					return null;
-				}
+			catch (NoSuchMethodException ex) {
+				return null;
 			}
 		}
 	}
