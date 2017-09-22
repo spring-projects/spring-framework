@@ -111,9 +111,8 @@ the default behavior in an upcoming release of Kotlin.
 
 [NOTE]
 ====
-Generic type arguments, varargs and array elements nullability are not yet supported,
-see https://github.com/Kotlin/KEEP/issues/79[this dicussion] for up-to-date
-informations.
+Generic type arguments, varargs and array elements nullability are not supported yet,
+see https://jira.spring.io/browse/SPR-15942[SPR-15942] for up-to-date information.
 ====
 
 [[classes-interfaces]]
