@@ -31,34 +31,42 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
- * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
- * handlers for processing a web request, providing convenient mapping facilities.
+ * Central dispatcher for HTTP request handlers/controllers. Dispatches to
+ * registered handlers for processing a request, providing convenient mapping
+ * facilities.
  *
- * <p>It can use any {@link HandlerMapping} implementation to control the routing of
- * requests to handler objects. HandlerMapping objects can be defined as beans in
- * the application context.
+ * <p>{@code DispatcherHandler} discovers the delegate components it needs from
+ * Spring configuration. It detects the following in the application context:
+ * <ul>
+ * <li>{@link HandlerMapping} -- map requests to handler objects
+ * <li>{@link HandlerAdapter} -- for using any handler interface
+ * <li>{@link HandlerResultHandler} -- process handler return values
+ * </ul>
  *
- * <p>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
- * HandlerAdapter objects can be added as beans in the application context.
+ * <p>{@code DispatcherHandler} s also designed to be a Spring bean itself and
+ * implements {@link ApplicationContextAware} for access to the context it runs
+ * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
+ * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
+ * creates a processing chain together with {@code WebFilter},
+ * {@code WebExceptionHandler} and others.
  *
- * <p>It can use any {@link HandlerResultHandler}; this allows to process the result of
- * the request handling. HandlerResultHandler objects can be added as beans in the
- * application context.
+ * <p>A {@code DispatcherHandler} bean declaration is included in
+ * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
+ * configuration.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
+ * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)
  */
 public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
@@ -179,41 +187,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
-	}
-
-
-	/**
-	 * Expose a dispatcher-based {@link WebHandler} for the given application context,
-	 * typically for further configuration with filters and exception handlers through
-	 * a {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder}.
-	 * @param applicationContext the application context to find the handler beans in
-	 * @see #DispatcherHandler(ApplicationContext)
-	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#webHandler
-	 */
-	public static WebHandler toWebHandler(ApplicationContext applicationContext) {
-		return new DispatcherHandler(applicationContext);
-	}
-
-	/**
-	 * Expose a dispatcher-based {@link HttpHandler} for the given application context,
-	 * typically for direct registration with an engine adapter such as
-	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}.
-	 *
-	 * <p>Delegates to {@link WebHttpHandlerBuilder#applicationContext} that
-	 * detects the target {@link DispatcherHandler} along with
-	 * {@link org.springframework.web.server.WebFilter}s, and
-	 * {@link org.springframework.web.server.WebExceptionHandler}s in the given
-	 * ApplicationContext.
-	 *
-	 * @param context the application context to find the handler beans in
-	 * @see #DispatcherHandler(ApplicationContext)
-	 * @see HttpWebHandlerAdapter
-	 * @see org.springframework.http.server.reactive.ServletHttpHandlerAdapter
-	 * @see org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
-	 * @see org.springframework.http.server.reactive.UndertowHttpHandlerAdapter
-	 */
-	public static HttpHandler toHttpHandler(ApplicationContext context) {
-		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 }

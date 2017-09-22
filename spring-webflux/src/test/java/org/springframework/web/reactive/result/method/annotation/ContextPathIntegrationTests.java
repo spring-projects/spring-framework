@@ -28,10 +28,10 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that demonstrate running multiple applications under
@@ -55,8 +55,8 @@ public class ContextPathIntegrationTests {
 		context2.register(WebApp2Config.class);
 		context2.refresh();
 
-		HttpHandler webApp1Handler = DispatcherHandler.toHttpHandler(context1);
-		HttpHandler webApp2Handler = DispatcherHandler.toHttpHandler(context2);
+		HttpHandler webApp1Handler = WebHttpHandlerBuilder.applicationContext(context1).build();
+		HttpHandler webApp2Handler = WebHttpHandlerBuilder.applicationContext(context2).build();
 
 		this.server = new ReactorHttpServer();
 

@@ -61,6 +61,7 @@ import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyReques
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assume.*;
 
@@ -160,7 +161,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		context.register(DispatcherConfig.class, this.serverConfigClass);
 		context.register(getWebConfigClass());
 		context.refresh();
-		return DispatcherHandler.toHttpHandler(context);
+		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 	protected URI getUrl(String path) throws URISyntaxException {
