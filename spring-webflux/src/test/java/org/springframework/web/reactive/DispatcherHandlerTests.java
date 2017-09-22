@@ -17,18 +17,14 @@ package org.springframework.web.reactive;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.Test;
-import org.mockito.MockSettings;
-import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -43,7 +39,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 /**
- *
+ * Unit tests for {@link DispatcherHandler}.
  * @author Rossen Stoyanchev
  */
 public class DispatcherHandlerTests {

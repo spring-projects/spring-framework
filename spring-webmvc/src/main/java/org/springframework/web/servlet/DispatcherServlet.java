@@ -774,13 +774,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Return the configured {@link HandlerMapping} beans that were detected by
 	 * type in the {@link WebApplicationContext} or initialized based on the
 	 * default set of strategies from {@literal DispatcherServlet.properties}.
-	 * @return immutable list with the configured mappings or an empty list
+	 * <p><strong>Note:</strong> This method may return {@code null} if invoked
+	 * prior to {@link #onRefresh(ApplicationContext)}.
+	 * @return immutable list with the configured mappings or {@code null}
 	 * @since 5.0
 	 */
+	@Nullable
 	public List<HandlerMapping> getHandlerMappings() {
-		return this.handlerMappings != null ?
-				Collections.unmodifiableList(this.handlerMappings) :
-				Collections.emptyList();
+		return this.handlerMappings != null ? Collections.unmodifiableList(this.handlerMappings) : null;
 	}
 
 	/**

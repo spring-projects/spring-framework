@@ -71,6 +71,18 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 
 	/**
+	 * Return the configured {@link RouterFunction}.
+	 * <p><strong>Note:</strong> When router functions are detected from the
+	 * ApplicationContext, this method may return {@code null} if invoked
+	 * prior to {@link #afterPropertiesSet()}.
+	 * @return the router function or {@code null}
+	 */
+	@Nullable
+	public RouterFunction<?> getRouterFunction() {
+		return this.routerFunction;
+	}
+
+	/**
 	 * Configure HTTP message readers to de-serialize the request body with.
 	 * <p>By default this is set to the {@link ServerCodecConfigurer}'s defaults.
 	 */
