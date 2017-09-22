@@ -396,12 +396,6 @@ public class FastByteArrayOutputStream extends OutputStream {
 			else if (len == 0) {
 				return 0;
 			}
-			else if (len < 0) {
-				throw new IllegalArgumentException("len must be 0 or greater: " + len);
-			}
-			else if (off < 0) {
-				throw new IllegalArgumentException("off must be 0 or greater: " + off);
-			}
 			else {
 				if (this.currentBuffer == null) {
 					// This stream doesn't have any data in it...

@@ -292,7 +292,6 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
 	 */
-	@Nullable
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType) {
 
@@ -1524,7 +1523,6 @@ public abstract class AnnotationUtils {
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */
-	@Nullable
 	public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
 		return synthesizeAnnotation(Collections.<String, Object> emptyMap(), annotationType, null);
 	}

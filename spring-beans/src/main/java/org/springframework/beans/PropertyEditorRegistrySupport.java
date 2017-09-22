@@ -541,6 +541,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			return this.registeredType;
 		}
 
+		@Nullable
 		private PropertyEditor getPropertyEditor(@Nullable Class<?> requiredType) {
 			// Special case: If no required type specified, which usually only happens for
 			// Collection elements, or required type is not assignable to registered type,

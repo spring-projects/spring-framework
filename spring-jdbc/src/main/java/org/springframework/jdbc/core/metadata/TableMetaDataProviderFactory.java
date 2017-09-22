@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.util.Assert;
 
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation
@@ -77,7 +76,6 @@ public class TableMetaDataProviderFactory {
 				}
 				return provider;
 			});
-			Assert.state(result != null, "No TableMetaDataProvider");
 			return result;
 		}
 		catch (MetaDataAccessException ex) {

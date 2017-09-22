@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
-
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -481,12 +480,14 @@ public abstract class EntityManagerFactoryUtils {
 				em.flush();
 			}
 			catch (RuntimeException ex) {
+				DataAccessException dae;
 				if (this.jpaDialect != null) {
-					throw this.jpaDialect.translateExceptionIfPossible(ex);
+					dae = this.jpaDialect.translateExceptionIfPossible(ex);
 				}
 				else {
-					throw convertJpaAccessExceptionIfPossible(ex);
+					dae = convertJpaAccessExceptionIfPossible(ex);
 				}
+				throw (dae != null ? dae : ex);
 			}
 		}
 

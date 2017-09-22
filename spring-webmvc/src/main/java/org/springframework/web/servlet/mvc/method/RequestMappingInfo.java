@@ -189,6 +189,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}
 
+	@Nullable
 	private String combineNames(RequestMappingInfo other) {
 		if (this.name != null && other.name != null) {
 			String separator = RequestMappingInfoHandlerMethodMappingNamingStrategy.SEPARATOR;

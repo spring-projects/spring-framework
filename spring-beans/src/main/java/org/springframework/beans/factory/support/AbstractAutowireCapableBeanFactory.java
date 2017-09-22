@@ -1556,7 +1556,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param pvs the new property values
 	 */
 	protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
-		if (pvs == null || pvs.isEmpty()) {
+		if (pvs.isEmpty()) {
 			return;
 		}
 
@@ -1649,7 +1649,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Convert the given value for the specified target property.
 	 */
 	@Nullable
-	private Object convertForProperty(Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
+	private Object convertForProperty(
+			@Nullable Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
+
 		if (converter instanceof BeanWrapperImpl) {
 			return ((BeanWrapperImpl) converter).convertForProperty(value, propertyName);
 		}

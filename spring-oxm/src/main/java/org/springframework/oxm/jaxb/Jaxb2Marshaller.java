@@ -490,7 +490,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (context == null) {
 				try {
 					if (StringUtils.hasLength(this.contextPath)) {
-						context = createJaxbContextFromContextPath();
+						context = createJaxbContextFromContextPath(this.contextPath);
 					}
 					else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
 						context = createJaxbContextFromClasses(this.classesToBeBound);
@@ -511,26 +511,26 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
-	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
+	private JAXBContext createJaxbContextFromContextPath(String contextPath) throws JAXBException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Creating JAXBContext with context path [" + this.contextPath + "]");
 		}
 		if (this.jaxbContextProperties != null) {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
+				return JAXBContext.newInstance(contextPath, this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
 				// analogous to the JAXBContext.newInstance(String) implementation
-				return JAXBContext.newInstance(this.contextPath, Thread.currentThread().getContextClassLoader(),
+				return JAXBContext.newInstance(contextPath, Thread.currentThread().getContextClassLoader(),
 						this.jaxbContextProperties);
 			}
 		}
 		else {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader);
+				return JAXBContext.newInstance(contextPath, this.beanClassLoader);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath);
+				return JAXBContext.newInstance(contextPath);
 			}
 		}
 	}

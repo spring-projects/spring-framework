@@ -30,6 +30,7 @@ import okhttp3.RequestBody;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -145,6 +146,7 @@ public class OkHttp3ClientHttpRequestFactory
 		return builder.build();
 	}
 
+	@Nullable
 	private static okhttp3.MediaType getContentType(HttpHeaders headers) {
 		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
 		return (StringUtils.hasText(rawContentType) ? okhttp3.MediaType.parse(rawContentType) : null);

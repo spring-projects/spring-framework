@@ -411,6 +411,7 @@ public class SubProtocolWebSocketHandler
 		return handler;
 	}
 
+	@Nullable
 	private String resolveSessionId(Message<?> message) {
 		for (SubProtocolHandler handler : this.protocolHandlerLookup.values()) {
 			String sessionId = handler.resolveSessionId(message);

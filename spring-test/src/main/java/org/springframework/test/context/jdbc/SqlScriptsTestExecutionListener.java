@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
@@ -231,6 +232,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 	}
 
+	@Nullable
 	private DataSource getDataSourceFromTransactionManager(PlatformTransactionManager transactionManager) {
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");

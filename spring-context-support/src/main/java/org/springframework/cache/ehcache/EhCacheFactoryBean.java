@@ -205,7 +205,9 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 		String cacheName = getName();
 		if (cacheName == null) {
 			cacheName = this.beanName;
-			setName(cacheName);
+			if (cacheName != null) {
+				setName(cacheName);
+			}
 		}
 
 		// If no CacheManager given, fetch the default.

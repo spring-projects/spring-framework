@@ -299,7 +299,6 @@ public abstract class WebUtils {
 	 * @return the value of the session attribute, or {@code null} if not found
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
-	@Nullable
 	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
 			throws IllegalStateException {
 

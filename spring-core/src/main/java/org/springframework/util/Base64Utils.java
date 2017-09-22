@@ -20,8 +20,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import org.springframework.lang.Nullable;
-
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
@@ -90,9 +88,8 @@ public abstract class Base64Utils {
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
-	@Nullable
-	public static byte[] decodeUrlSafe(@Nullable byte[] src) {
-		if (src == null || src.length == 0) {
+	public static byte[] decodeUrlSafe(byte[] src) {
+		if (src.length == 0) {
 			return src;
 		}
 		return Base64.getUrlDecoder().decode(src);
@@ -130,7 +127,6 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	@Nullable
 	public static String encodeToUrlSafeString(byte[] src) {
 		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
 	}
@@ -143,7 +139,6 @@ public abstract class Base64Utils {
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
-	@Nullable
 	public static byte[] decodeFromUrlSafeString(String src) {
 		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
 	}

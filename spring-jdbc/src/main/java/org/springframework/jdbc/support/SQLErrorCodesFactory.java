@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Factory for creating {@link SQLErrorCodes} based on the
@@ -211,7 +212,7 @@ public class SQLErrorCodesFactory {
 					// We could not find it - got to look it up.
 					try {
 						String name = JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-						if (name != null) {
+						if (StringUtils.hasLength(name)) {
 							return registerDatabase(dataSource, name);
 						}
 					}

@@ -81,6 +81,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		}
 	}
 
+	@Nullable
 	private ResourceResolver getNext() {
 		Assert.state(this.index <= this.resolvers.size(),
 				"Current index exceeds the number of configured ResourceResolvers");

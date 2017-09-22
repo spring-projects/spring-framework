@@ -198,6 +198,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nullable
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.variableResolver == null) {
 				return null;

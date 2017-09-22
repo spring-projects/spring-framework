@@ -129,6 +129,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return (getValidatedMember(targetClass, sourceClass) != null);
 	}
 
+	@Nullable
 	private static Member getValidatedMember(Class<?> targetClass, Class<?> sourceClass) {
 		Member member = conversionMemberCache.get(targetClass);
 		if (isApplicable(member, sourceClass)) {
@@ -166,6 +167,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		}
 	}
 
+	@Nullable
 	private static Method determineToMethod(Class<?> targetClass, Class<?> sourceClass) {
 		if (String.class == targetClass || String.class == sourceClass) {
 			// Do not accept a toString() method or any to methods on String itself
@@ -177,6 +179,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				ClassUtils.isAssignable(targetClass, method.getReturnType()) ? method : null);
 	}
 
+	@Nullable
 	private static Method determineFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
 		if (String.class == targetClass) {
 			// Do not accept the String.valueOf(Object) method

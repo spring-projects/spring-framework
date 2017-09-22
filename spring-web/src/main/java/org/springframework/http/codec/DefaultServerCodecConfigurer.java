@@ -91,6 +91,7 @@ class DefaultServerCodecConfigurer extends AbstractCodecConfigurer implements Se
 			return result;
 		}
 
+		@Nullable
 		private Encoder<?> getSseEncoder() {
 			if (this.sseEncoder != null) {
 				return this.sseEncoder;

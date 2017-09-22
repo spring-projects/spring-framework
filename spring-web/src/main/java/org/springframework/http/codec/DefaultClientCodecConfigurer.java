@@ -79,6 +79,7 @@ class DefaultClientCodecConfigurer extends AbstractCodecConfigurer implements Cl
 			return result;
 		}
 
+		@Nullable
 		private Decoder<?> getSseDecoder() {
 			if (this.sseDecoder != null) {
 				return this.sseDecoder;

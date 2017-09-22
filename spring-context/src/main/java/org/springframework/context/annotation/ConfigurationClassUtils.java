@@ -35,6 +35,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -205,6 +206,7 @@ abstract class ConfigurationClassUtils {
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
 	 * @since 5.0
 	 */
+	@Nullable
 	public static Integer getOrder(AnnotationMetadata metadata) {
 		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
 		return (orderAttributes != null ? ((Integer) orderAttributes.get(AnnotationUtils.VALUE)) : null);

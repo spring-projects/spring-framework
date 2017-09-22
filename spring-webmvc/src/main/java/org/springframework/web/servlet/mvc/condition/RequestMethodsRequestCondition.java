@@ -130,6 +130,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
+	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
 		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
 		if (httpMethod != null) {

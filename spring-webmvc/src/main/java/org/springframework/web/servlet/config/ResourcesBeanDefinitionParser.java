@@ -154,6 +154,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
+	@Nullable
 	private String registerResourceHandler(ParserContext parserContext, Element element, @Nullable Object source) {
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {

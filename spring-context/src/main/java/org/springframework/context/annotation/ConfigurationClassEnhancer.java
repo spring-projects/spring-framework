@@ -364,7 +364,6 @@ class ConfigurationClassEnhancer {
 			return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);
 		}
 
-		@Nullable
 		private Object resolveBeanReference(Method beanMethod, Object[] beanMethodArgs,
 				ConfigurableBeanFactory beanFactory, String beanName) {
 

@@ -522,6 +522,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return (credentials != null ? credentials.passcode : null);
 	}
 
+	@Nullable
 	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
 		List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
 		return (!CollectionUtils.isEmpty(values) ? Integer.valueOf(values.get(0)) : null);

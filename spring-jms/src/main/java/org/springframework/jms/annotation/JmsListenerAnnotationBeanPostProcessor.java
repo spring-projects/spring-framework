@@ -345,7 +345,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		private MessageHandlerMethodFactory createDefaultJmsHandlerMethodFactory() {
 			DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
-			defaultFactory.setBeanFactory(beanFactory);
+			if (beanFactory != null) {
+				defaultFactory.setBeanFactory(beanFactory);
+			}
 			defaultFactory.afterPropertiesSet();
 			return defaultFactory;
 		}

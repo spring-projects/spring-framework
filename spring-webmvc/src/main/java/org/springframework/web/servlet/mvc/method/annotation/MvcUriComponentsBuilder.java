@@ -552,6 +552,7 @@ public class MvcUriComponentsBuilder {
 		}
 	}
 
+	@Nullable
 	private static WebApplicationContext getWebApplicationContext() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		if (requestAttributes == null) {

@@ -50,7 +50,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * same number of conditions so they may be compared and combined.
 	 * It is acceptable to provide {@code null} conditions.
 	 */
-	public CompositeRequestCondition(@Nullable RequestCondition<?>... requestConditions) {
+	public CompositeRequestCondition(RequestCondition<?>... requestConditions) {
 		this.requestConditions = wrap(requestConditions);
 	}
 

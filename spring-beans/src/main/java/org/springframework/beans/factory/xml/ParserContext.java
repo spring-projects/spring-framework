@@ -93,6 +93,7 @@ public final class ParserContext {
 		return this.readerContext.extractSource(sourceCandidate);
 	}
 
+	@Nullable
 	public CompositeComponentDefinition getContainingComponent() {
 		return (!this.containingComponents.isEmpty() ?
 				(CompositeComponentDefinition) this.containingComponents.lastElement() : null);

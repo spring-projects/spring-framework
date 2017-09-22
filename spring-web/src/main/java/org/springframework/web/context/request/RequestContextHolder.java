@@ -145,6 +145,7 @@ public abstract class RequestContextHolder  {
  	 */
 	private static class FacesRequestAttributesFactory {
 
+		@Nullable
 		public static RequestAttributes getFacesRequestAttributes() {
 			FacesContext facesContext = FacesContext.getCurrentInstance();
 			return (facesContext != null ? new FacesRequestAttributes(facesContext) : null);

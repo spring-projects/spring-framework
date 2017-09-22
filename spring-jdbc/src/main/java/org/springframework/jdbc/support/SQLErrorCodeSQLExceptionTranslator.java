@@ -169,7 +169,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 	@Override
 	@Nullable
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		SQLException sqlEx = ex;
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
@@ -232,11 +232,11 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				// Next, look for grouped error codes.
 				if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new BadSqlGrammarException(task, sql, sqlEx);
+					return new BadSqlGrammarException(task, (sql != null ? sql : ""), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getInvalidResultSetAccessCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new InvalidResultSetAccessException(task, sql, sqlEx);
+					return new InvalidResultSetAccessException(task, (sql != null ? sql : ""), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDuplicateKeyCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
@@ -397,12 +397,12 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 	}
 
-	private void logTranslation(String task, String sql, SQLException sqlEx, boolean custom) {
+	private void logTranslation(String task, @Nullable String sql, SQLException sqlEx, boolean custom) {
 		if (logger.isDebugEnabled()) {
 			String intro = custom ? "Custom translation of" : "Translating";
 			logger.debug(intro + " SQLException with SQL state '" + sqlEx.getSQLState() +
-					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() +
-					"]; SQL was [" + sql + "] for task [" + task + "]");
+					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() + "]" +
+					(sql != null ? "; SQL was [" + sql + "]": "") + " for task [" + task + "]");
 		}
 	}
 

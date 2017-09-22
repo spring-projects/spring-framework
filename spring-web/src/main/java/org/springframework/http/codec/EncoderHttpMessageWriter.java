@@ -67,6 +67,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
 	}
 
+	@Nullable
 	private static MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
 		return mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
 	}

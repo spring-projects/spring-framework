@@ -459,21 +459,18 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		boolean hasClosureArgument = (args[args.length - 1] instanceof Closure);
 		if (args[0] instanceof Class) {
 			Class<?> beanClass = (Class<?>) args[0];
-			if (args.length >= 1) {
-				if (hasClosureArgument) {
-					if (args.length - 1 != 1) {
-						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
-								beanName, beanClass, resolveConstructorArguments(args, 1, args.length - 1));
-					}
-					else {
-						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
-					}
-				}
-				else  {
+			if (hasClosureArgument) {
+				if (args.length - 1 != 1) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
-							beanName, beanClass, resolveConstructorArguments(args, 1, args.length));
+							beanName, beanClass, resolveConstructorArguments(args, 1, args.length - 1));
 				}
-
+				else {
+					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
+				}
+			}
+			else  {
+				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
+						beanName, beanClass, resolveConstructorArguments(args, 1, args.length));
 			}
 		}
 		else if (args[0] instanceof RuntimeBeanReference) {

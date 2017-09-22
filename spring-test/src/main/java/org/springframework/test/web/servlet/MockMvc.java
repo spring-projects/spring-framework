@@ -95,7 +95,7 @@ public final class MockMvc {
 	 * A default request builder merged into every performed request.
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#defaultRequest(RequestBuilder)
 	 */
-	void setDefaultRequest(RequestBuilder requestBuilder) {
+	void setDefaultRequest(@Nullable RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
 	}
 
@@ -104,7 +104,7 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#alwaysExpect(ResultMatcher)
 	 */
 	void setGlobalResultMatchers(List<ResultMatcher> resultMatchers) {
-		Assert.notNull(resultMatchers, "resultMatchers is required");
+		Assert.notNull(resultMatchers, "ResultMatcher List is required");
 		this.defaultResultMatchers = resultMatchers;
 	}
 
@@ -113,7 +113,7 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder#alwaysDo(ResultHandler)
 	 */
 	void setGlobalResultHandlers(List<ResultHandler> resultHandlers) {
-		Assert.notNull(resultHandlers, "resultHandlers is required");
+		Assert.notNull(resultHandlers, "ResultHandler List is required");
 		this.defaultResultHandlers = resultHandlers;
 	}
 

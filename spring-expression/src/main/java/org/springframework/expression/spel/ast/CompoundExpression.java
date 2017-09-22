@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public class CompoundExpression extends SpelNodeImpl {
 
-	public CompoundExpression(int pos,SpelNodeImpl... expressionComponents) {
+	public CompoundExpression(int pos, SpelNodeImpl... expressionComponents) {
 		super(pos, expressionComponents);
 		if (expressionComponents.length < 2) {
 			throw new IllegalStateException("Do not build compound expressions with less than two entries: " +

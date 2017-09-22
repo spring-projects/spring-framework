@@ -72,8 +72,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		Assert.isTrue(pos != 0, "Pos must not be 0");
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
-			for (SpelNodeImpl childNode : operands) {
-				childNode.parent = this;
+			for (SpelNodeImpl operand : operands) {
+				Assert.notNull(operand, "Operand must not be null");
+				operand.parent = this;
 			}
 		}
 	}

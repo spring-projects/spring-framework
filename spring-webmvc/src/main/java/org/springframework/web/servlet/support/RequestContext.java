@@ -904,6 +904,7 @@ public class RequestContext {
 	 */
 	private static class JstlLocaleResolver {
 
+		@Nullable
 		public static Locale getJstlLocale(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object localeObject = Config.get(request, Config.FMT_LOCALE);
 			if (localeObject == null) {
@@ -918,6 +919,7 @@ public class RequestContext {
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
 		}
 
+		@Nullable
 		public static TimeZone getJstlTimeZone(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object timeZoneObject = Config.get(request, Config.FMT_TIME_ZONE);
 			if (timeZoneObject == null) {

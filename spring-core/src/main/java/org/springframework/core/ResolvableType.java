@@ -766,6 +766,7 @@ public class ResolvableType implements Serializable {
 		return (this.resolved != null ? this.resolved : fallback);
 	}
 
+	@Nullable
 	private Class<?> resolveClass() {
 		if (this.type == EmptyType.INSTANCE) {
 			return null;
@@ -1474,6 +1475,7 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
+		@Nullable
 		public Type getOwnerType() {
 			return null;
 		}

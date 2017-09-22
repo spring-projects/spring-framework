@@ -205,7 +205,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * @throws TypeMismatchException if type conversion failed
 	 */
 	@Nullable
-	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
+	public Object convertForProperty(@Nullable Object value, String propertyName) throws TypeMismatchException {
 		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
 		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
 		if (pd == null) {
