@@ -112,7 +112,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				context, HandlerMapping.class, true, false);
 
 		ArrayList<HandlerMapping> mappings = new ArrayList<>(mappingBeans.values());
-		AnnotationAwareOrderComparator.sort(this.handlerMappings);
+		AnnotationAwareOrderComparator.sort(mappings);
 		this.handlerMappings = Collections.unmodifiableList(mappings);
 
 		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
