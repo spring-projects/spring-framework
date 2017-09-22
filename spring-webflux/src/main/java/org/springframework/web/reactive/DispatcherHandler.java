@@ -33,6 +33,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -68,11 +69,14 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
-	private List<HandlerMapping> handlerMappings = Collections.emptyList();
+	@Nullable
+	private List<HandlerMapping> handlerMappings;
 
-	private List<HandlerAdapter> handlerAdapters = Collections.emptyList();
+	@Nullable
+	private List<HandlerAdapter> handlerAdapters;
 
-	private List<HandlerResultHandler> resultHandlers = Collections.emptyList();
+	@Nullable
+	private List<HandlerResultHandler> resultHandlers;
 
 
 	/**
@@ -95,8 +99,11 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * Return all {@link HandlerMapping} beans detected by type in the
 	 * {@link #setApplicationContext injected context} and also
 	 * {@link AnnotationAwareOrderComparator#sort(List) sorted}.
-	 * @return immutable list with the configured mappings
+	 * <p><strong>Note:</strong> This method may return {@code null} if invoked
+	 * prior to {@link #setApplicationContext(ApplicationContext)}.
+	 * @return immutable list with the configured mappings or {@code null}
 	 */
+	@Nullable
 	public List<HandlerMapping> getHandlerMappings() {
 		return this.handlerMappings;
 	}
@@ -135,6 +142,9 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 			ServerHttpRequest request = exchange.getRequest();
 			logger.debug("Processing " + request.getMethodValue() + " request for [" + request.getURI() + "]");
 		}
+		if (this.handlerMappings == null) {
+			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
+		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
@@ -144,9 +154,11 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
-		for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-			if (handlerAdapter.supports(handler)) {
-				return handlerAdapter.handle(exchange, handler);
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
+				if (handlerAdapter.supports(handler)) {
+					return handlerAdapter.handle(exchange, handler);
+				}
 			}
 		}
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
@@ -159,9 +171,11 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
-		for (HandlerResultHandler resultHandler : this.resultHandlers) {
-			if (resultHandler.supports(handlerResult)) {
-				return resultHandler;
+		if (this.resultHandlers != null) {
+			for (HandlerResultHandler resultHandler : this.resultHandlers) {
+				if (resultHandler.supports(handlerResult)) {
+					return resultHandler;
+				}
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
