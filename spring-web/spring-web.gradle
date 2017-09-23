@@ -24,47 +24,47 @@ dependencies {
 	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.faces:javax.faces-api:2.2")
+	optional("javax.json.bind:javax.json.bind-api:1.0")
+	optional("javax.mail:javax.mail-api:${javamailVersion}")
 	optional("javax.validation:validation-api:1.1.0.Final")
-	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
-	optional("com.caucho:hessian:4.0.51")
-	optional("commons-fileupload:commons-fileupload:1.3.3")
-	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
-	optional("io.projectreactor.ipc:reactor-netty")
+	optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
+	optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 	optional("io.reactivex:rxjava:${rxjavaVersion}")
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+	optional("io.netty:netty-all")
+	optional("io.projectreactor.ipc:reactor-netty")
 	optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-	optional("io.undertow:undertow-core:${undertowVersion}")
-	optional("com.fasterxml.woodstox:woodstox-core:5.0.3") {  // woodstox before aalto
-		exclude group: "stax", module: "stax-api"
+	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
-	optional("com.fasterxml:aalto-xml:1.0.0")
+	optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
+		exclude group: "javax.servlet", module: "javax.servlet-api"
+	}
+	optional("io.undertow:undertow-core:${undertowVersion}")
+	optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.apache.httpcomponents:httpasyncclient:4.1.3") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("io.netty:netty-all")
-	optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
+	optional("commons-fileupload:commons-fileupload:1.3.3")
+	optional("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
+	optional("com.fasterxml.woodstox:woodstox-core:5.0.3") {  // woodstox before aalto
+		exclude group: "stax", module: "stax-api"
+	}
+	optional("com.fasterxml:aalto-xml:1.0.0")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
-	optional("com.google.code.gson:gson:2.8.1")
-	optional("javax.json.bind:javax.json.bind-api:1.0")
-	optional("com.rometools:rome:1.7.4")
-	optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
-		exclude group: "javax.servlet", module: "javax.servlet-api"
-	}
-	optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
-		exclude group: "javax.servlet", module: "javax.servlet-api"
-	}
+	optional("com.google.code.gson:gson:2.8.2")
 	optional("com.google.protobuf:protobuf-java-util:3.4.0")
 	optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
-	optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
-	optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
-	optional("javax.mail:javax.mail-api:${javamailVersion}")
+	optional("com.rometools:rome:1.8.0")
+	optional("com.caucho:hessian:4.0.51")
+	optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("io.projectreactor:reactor-test")

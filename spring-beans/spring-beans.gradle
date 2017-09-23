@@ -30,4 +30,3 @@ compileGroovy {
 compileGroovy.dependsOn = compileGroovy.taskDependencies.values - 'compileJava'
 compileKotlin.dependsOn(compileGroovy)
 compileKotlin.classpath += files(compileGroovy.destinationDir)
-

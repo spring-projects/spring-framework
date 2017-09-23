@@ -22,16 +22,13 @@ dependencies {
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("javax.servlet:javax.servlet-api:3.1.0")
 	optional("javax.websocket:javax.websocket-api:1.1")
+	optional("org.webjars:webjars-locator:0.32-1")
+	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
-	optional("org.freemarker:freemarker:${freemarkerVersion}")
-	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
-	optional('org.webjars:webjars-locator:0.32-1')
-	optional("io.projectreactor.ipc:reactor-netty")
 	optional("io.reactivex:rxjava:${rxjavaVersion}")
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+	optional("io.projectreactor.ipc:reactor-netty")
 	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
@@ -42,26 +39,29 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
+	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
-	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
+	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("io.reactivex:rxnetty-http:0.5.2") {
+		exclude group: 'io.reactivex', module: 'rxjava'
+	}
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
-	testCompile("io.reactivex:rxnetty-http:0.5.2") {
-		exclude group: 'io.reactivex', module: 'rxjava'
-	}
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
 	testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.1.12.0")
+	testRuntime("org.jruby:jruby:9.1.13.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	testRuntime("org.webjars:underscorejs:1.8.3")

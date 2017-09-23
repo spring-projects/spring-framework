@@ -76,7 +76,7 @@ dependencies {
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
 	compile(project(":spring-jcl"))
-	optional("net.sf.jopt-simple:jopt-simple:5.0.3")
+	optional("net.sf.jopt-simple:jopt-simple:5.0.4")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
