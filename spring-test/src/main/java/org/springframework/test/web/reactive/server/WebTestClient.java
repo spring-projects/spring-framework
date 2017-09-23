@@ -29,6 +29,7 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -663,6 +664,15 @@ public interface WebTestClient {
 		 * Variant of {@link #returnResult(Class)} for element types with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
+
+		/**
+		 * Return the exchange result with the body decoded to
+		 * {@code Flux<DataBuffer>}. Use this option for infinite streams and
+		 * consume the stream with the {@code StepVerifier} from the Reactor Add-Ons.
+		 *
+		 * @return
+		 */
+		FluxExchangeResult<DataBuffer> returnResult();
 	}
 
 	/**

@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -46,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -377,6 +379,11 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public BodyContentSpec expectBody() {
 			return new DefaultBodyContentSpec(this.result.decodeToByteArray());
+		}
+
+		@Override
+		public FluxExchangeResult<DataBuffer> returnResult() {
+			return this.result.decodeToFlux(BodyExtractors.toDataBuffers());
 		}
 
 		@Override
