@@ -735,14 +735,19 @@ public abstract class BeanUtils {
 		 */
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
-			KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
-			if (primaryConstructor == null) {
+			try {
+				KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+				if (primaryConstructor == null) {
+					return null;
+				}
+				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
+				Assert.notNull(constructor,
+						() -> "Failed to find Java constructor corresponding to Kotlin primary constructor: " + clazz.getName());
+				return constructor;
+			}
+			catch (UnsupportedOperationException ex) {
 				return null;
 			}
-			Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
-			Assert.notNull(constructor,
-					() -> "Failed to find Java constructor corresponding to Kotlin primary constructor: " + clazz.getName());
-			return constructor;
 		}
 
 		/**

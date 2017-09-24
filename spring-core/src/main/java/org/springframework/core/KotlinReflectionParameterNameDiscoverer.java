@@ -62,8 +62,13 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 		if (!useKotlinSupport(method.getDeclaringClass())) {
 			return null;
 		}
-		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-		return (function != null ? getParameterNames(function.getParameters()) : null);
+		try {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			return (function != null ? getParameterNames(function.getParameters()) : null);
+		}
+		catch (UnsupportedOperationException ex) {
+			return null;
+		}
 	}
 
 	@Override
@@ -72,8 +77,13 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 		if (!useKotlinSupport(ctor.getDeclaringClass())) {
 			return null;
 		}
-		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
-		return (function != null ? getParameterNames(function.getParameters()) : null);
+		try {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
+			return (function != null ? getParameterNames(function.getParameters()) : null);
+		}
+		catch (UnsupportedOperationException ex) {
+			return null;
+		}
 	}
 
 	@Nullable
