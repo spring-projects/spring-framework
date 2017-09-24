@@ -105,9 +105,12 @@ Other libraries like Reactor and Spring Data leverage these annotations as well 
 null-safe APIs for Kotlin developers.
 ====
 
-For now, one needs to use a `-Xjsr305-annotations=enable` flag (specified via the
-`freeCompilerArgs` property with Maven or Gradle Kotlin plugins), but that should become
-the default behavior in an upcoming release of Kotlin.
+The JSR 305 checks can be configured by adding the `-Xjsr305` compiler flag with the following
+options: `-Xjsr305={strict|warn|ignore}`.
+
+For kotlin versions 1.1.50+/1.2, the default behavior is the same to `-Xjsr305=warn`. The
+`strict` value should be considered experimental (Spring API nullability could evolve and
+more checks may be added in the future).
 
 [NOTE]
 ====
