@@ -86,7 +86,7 @@ dependencies {
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
+	testCompile("javax.xml.bind:jaxb-api:2.3.0")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("com.fasterxml.woodstox:woodstox-core:5.0.3") {
 		exclude group: "stax", module: "stax-api"

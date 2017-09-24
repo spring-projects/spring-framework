@@ -39,12 +39,12 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+	optional("org.apache.httpcomponents:httpclient:4.5.3") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-	testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
+	testCompile("javax.xml.bind:jaxb-api:2.3.0")
 	testCompile("org.hibernate:hibernate-validator:6.0.2.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
@@ -57,7 +57,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
-	testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.9.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
 	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
@@ -66,7 +66,7 @@ dependencies {
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	testRuntime("org.webjars:underscorejs:1.8.3")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
-	testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-	testRuntime("javax.activation:activation:${activationVersion}")
+	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0")
+	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0")
+	testRuntime("javax.activation:activation:1.1.1")
 }

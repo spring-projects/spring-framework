@@ -6,7 +6,7 @@ dependencies {
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 	optional("javax.ejb:javax.ejb-api:3.2")
-	optional("javax.interceptor:javax.interceptor-api:1.2")
+	optional("javax.interceptor:javax.interceptor-api:1.2.1")
 	optional("javax.resource:javax.resource-api:1.7")
 	optional("javax.transaction:javax.transaction-api:1.2")
 	optional("com.ibm.websphere:uow:6.0.2.17")
