@@ -16,8 +16,11 @@ in a generic way, without having to hard-code support for Spring annotations.
 
 [NOTE]
 ====
-It is not necessary with Kotlin 1.1.5+ nor recommanded to have JSR 305 dependency in user
-project classpath.
+It is not necessary nor recommanded to have JSR 305 dependency in project classpath to
+take advatange of Spring null-safe API. Only projects like
+Spring-based libraries using null-safety annotations in their codebase should add
+`com.google.code.findbugs:jsr305:3.0.2` with `compileOnly` Gradle configuration or Maven
+`provided` scope to avoid compile warnings.
 ====
 
 They are also used by Kotlin which supports natively
