@@ -14,7 +14,7 @@ dependencies {
 	xjc 'javax.xml.bind:jaxb-api:2.3.0'
 	xjc 'com.sun.xml.bind:jaxb-core:2.3.0'
 	xjc 'com.sun.xml.bind:jaxb-impl:2.3.0'
-	xjc 'com.sun.xml.bind:jaxb-xjc:2.3.0'
+	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.11'  // 2.3.0 breaks with "xjc failed"
 }
 
 ext.genSourcesDir = "${buildDir}/generated-sources"
