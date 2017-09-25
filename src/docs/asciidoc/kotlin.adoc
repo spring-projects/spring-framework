@@ -353,8 +353,9 @@ functions of Spring beans proxified with CGLIB such as `@Configuration` classes.
 
 Fortunately, Kotlin 1.0.6+ now provides a
 https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
-plugin that automatically opens classes and their member functions for types
-annotated or meta-annotated with one of the following annotations:
+plugin, a preconfigured version of `kotlin-allopen` plugin that automatically opens classes
+and their member functions for types annotated or meta-annotated with one of the following
+annotations:
 
 * `@Component`
 * `@Async`
@@ -366,6 +367,33 @@ Meta-annotations support means that types annotated with `@Configuration`, `@Con
 annotations are meta-annotated with `@Component`.
 
 http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default.
+
+=== Using immutable class instances for persistence
+
+In Kotlin, it is very convenient and a best practice to declare read-only properties within
+the primary constructor, as in the following example:
+
+[source,kotlin]
+----
+class Person(val name: String, val age: Int)
+----
+
+But some persistence technologies like JPA require a default constructor, preventing this
+kind of design. Fortunately, there is now a workaround for this
+https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["default constructor hell"]
+since Kotlin provides a https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[kotlin-jpa]
+plugin which generates synthetic no-arg constructor for classes annotated with JPA annotations.
+
+If you need to leverage this kind of mechanism for other persistence technologies, you can
+configure https://kotlinlang.org/docs/reference/compiler-plugins.html#how-to-use-no-arg-plugin[kotlin-noarg]
+plugin.
+
+[NOTE]
+====
+As of Kay release train, Spring Data supports Kotlin immutable class instances and should
+not require `kotlin-noarg` plugin if the underlying persistence solution allows it
+(for example with MongoDB).
+====
 
 === Injecting dependencies
 
@@ -562,8 +590,8 @@ Spring WebFlux is recommended if one wants to create applications that will deal
 long-lived connections, streaming scenarios or simply if one wants to use the web functional
 Kotlin DSL.
 
-For other use cases, Spring MVC and its annotation-based programming model is a perfectly
-valid and fully supported choice.
+For other use cases, especially if you are using blocking technologies like JPA, Spring
+MVC and its annotation-based programming model is a perfectly valid and fully supported choice.
 
 [[resources-started]]
 == Resources
