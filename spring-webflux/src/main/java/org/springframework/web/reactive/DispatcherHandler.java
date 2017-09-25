@@ -112,7 +112,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * @return immutable list with the configured mappings or {@code null}
 	 */
 	@Nullable
-	public List<HandlerMapping> getHandlerMappings() {
+	public final List<HandlerMapping> getHandlerMappings() {
 		return this.handlerMappings;
 	}
 
