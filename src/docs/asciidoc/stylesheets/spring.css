@@ -688,4 +688,5 @@ b.conum * { color: inherit !important; }
 
 #toc a:hover { text-decoration: underline; }
 
+.admonitionblock > table { margin-bottom: 0; }
 .admonitionblock > table td.content { border-left: none; }
