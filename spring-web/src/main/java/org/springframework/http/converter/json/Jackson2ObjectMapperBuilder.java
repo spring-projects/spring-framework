@@ -75,7 +75,6 @@ import org.springframework.util.xml.StaxUtils;
  * <p>It also automatically registers the following well-known modules if they are
  * detected on the classpath:
  * <ul>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>: support for Java 7 types like {@link java.nio.file.Path}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
@@ -732,15 +731,6 @@ public class Jackson2ObjectMapperBuilder {
 
 	@SuppressWarnings("unchecked")
 	private void registerWellKnownModulesIfAvailable(ObjectMapper objectMapper) {
-		try {
-			Class<? extends Module> jdk7Module = (Class<? extends Module>)
-					ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
-			objectMapper.registerModule(BeanUtils.instantiateClass(jdk7Module));
-		}
-		catch (ClassNotFoundException ex) {
-			// jackson-datatype-jdk7 not available
-		}
-
 		try {
 			Class<? extends Module> jdk8Module = (Class<? extends Module>)
 					ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
