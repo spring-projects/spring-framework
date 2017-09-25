@@ -46,6 +46,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -484,6 +485,11 @@ public abstract class RequestPredicates {
 		@Override
 		public URI uri() {
 			return this.request.uri();
+		}
+
+		@Override
+		public UriBuilder uriBuilder() {
+			return this.request.uriBuilder();
 		}
 
 		@Override

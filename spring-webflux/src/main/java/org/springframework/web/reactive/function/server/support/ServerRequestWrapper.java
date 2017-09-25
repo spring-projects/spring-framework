@@ -43,6 +43,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 
 /**
  * Implementation of the {@link ServerRequest} interface that can be subclassed
@@ -87,6 +88,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public URI uri() {
 		return this.delegate.uri();
+	}
+
+	@Override
+	public UriBuilder uriBuilder() {
+		return this.delegate.uriBuilder();
 	}
 
 	@Override

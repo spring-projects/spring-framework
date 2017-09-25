@@ -36,6 +36,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.PathContainer;
@@ -49,6 +50,8 @@ import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * {@code ServerRequest} implementation based on a {@link ServerWebExchange}.
@@ -90,6 +93,11 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public URI uri() {
 		return request().getURI();
+	}
+
+	@Override
+	public UriBuilder uriBuilder() {
+		return UriComponentsBuilder.fromHttpRequest(new ServerRequestAdapter());
 	}
 
 	@Override
@@ -254,5 +262,24 @@ class DefaultServerRequest implements ServerRequest {
 			return delegate().toString();
 		}
 	}
+
+	private final class ServerRequestAdapter implements HttpRequest {
+
+		@Override
+		public String getMethodValue() {
+			return methodName();
+		}
+
+		@Override
+		public URI getURI() {
+			return uri();
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return request().getHeaders();
+		}
+	}
+
 
 }

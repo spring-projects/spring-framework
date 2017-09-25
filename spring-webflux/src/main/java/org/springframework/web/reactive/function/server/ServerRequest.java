@@ -45,6 +45,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
 
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
@@ -77,6 +78,16 @@ public interface ServerRequest {
 	 * Return the request URI.
 	 */
 	URI uri();
+
+	/**
+	 * Return a {@code UriBuilderComponents}  from the URI associated with this
+	 * {@code ServerRequest}, while also overlaying with values from the headers
+	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
+	 * "Forwarded" is not found.
+	 * @return a URI builder
+	 */
+	UriBuilder uriBuilder();
 
 	/**
 	 * Return the request path.

@@ -38,6 +38,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -49,6 +50,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock implementation of {@link ServerRequest}.
@@ -116,6 +119,11 @@ public class MockServerRequest implements ServerRequest {
 	@Override
 	public URI uri() {
 		return this.uri;
+	}
+
+	@Override
+	public UriBuilder uriBuilder() {
+		return UriComponentsBuilder.fromHttpRequest(new ServerRequestAdapter());
 	}
 
 	@Override
@@ -465,5 +473,24 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 	}
+
+	private final class ServerRequestAdapter implements HttpRequest {
+
+		@Override
+		public String getMethodValue() {
+			return methodName();
+		}
+
+		@Override
+		public URI getURI() {
+			return MockServerRequest.this.uri;
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return MockServerRequest.this.headers.headers;
+		}
+	}
+
 
 }
