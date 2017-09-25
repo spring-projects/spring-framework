@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import com.sun.jndi.toolkit.url.Uri;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -30,8 +31,12 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -56,6 +61,9 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriComponentsBuilder.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriBuilder.class)));
+
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
 		try {
 			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, ServerWebExchange.class));
@@ -76,6 +84,15 @@ public class ServerWebExchangeArgumentResolverTests {
 		testResolveArgument(this.testMethod.arg(HttpMethod.class), HttpMethod.GET);
 	}
 
+	@Test
+	public void resolveUriComponentsBuilder() throws Exception {
+		MethodParameter param = this.testMethod.arg(UriComponentsBuilder.class);
+		Object value = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block();
+
+		assertNotNull(value);
+		assertEquals(UriComponentsBuilder.class, value.getClass());
+		assertEquals("/path/next", ((UriComponentsBuilder) value).path("/next").build().toUriString());
+	}
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
 		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
@@ -90,6 +107,8 @@ public class ServerWebExchangeArgumentResolverTests {
 			ServerHttpResponse response,
 			WebSession session,
 			HttpMethod httpMethod,
+			UriComponentsBuilder uriComponentsBuilder,
+			UriBuilder uriBuilder,
 			String s,
 			Mono<ServerWebExchange> monoExchange) {
 	}
