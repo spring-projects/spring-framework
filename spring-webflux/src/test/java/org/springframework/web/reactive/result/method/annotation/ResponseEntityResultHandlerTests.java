@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,6 +42,7 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -121,6 +123,9 @@ public class ResponseEntityResultHandlerTests {
 		returnType = on(TestController.class).resolveReturnType(CompletableFuture.class, entity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, returnType)));
 
+		returnType = on(TestController.class).resolveReturnType(HttpHeaders.class);
+		assertTrue(this.resultHandler.supports(handlerResult(value, returnType)));
+
 		// SPR-15785
 		value = ResponseEntity.ok("testing");
 		returnType = on(TestController.class).resolveReturnType(Object.class);
@@ -150,7 +155,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	public void statusCode() throws Exception {
+	public void responseEntityStatusCode() throws Exception {
 		ResponseEntity<Void> value = ResponseEntity.noContent().build();
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
 		HandlerResult result = handlerResult(value, returnType);
@@ -163,7 +168,22 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	public void headers() throws Exception {
+	public void httpHeaders() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAllow(new LinkedHashSet<>(Arrays.asList(HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS)));
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
+		HandlerResult result = handlerResult(headers, returnType);
+		MockServerWebExchange exchange = get("/path").toExchange();
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
+		assertEquals(1, exchange.getResponse().getHeaders().size());
+		assertEquals("GET,POST,OPTIONS", exchange.getResponse().getHeaders().getFirst("Allow"));
+		assertResponseBodyIsEmpty(exchange);
+	}
+
+	@Test
+	public void responseEntityHeaders() throws Exception {
 		URI location = new URI("/path");
 		ResponseEntity<Void> value = ResponseEntity.created(location).build();
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
@@ -381,6 +401,8 @@ public class ResponseEntityResultHandlerTests {
 		ResponseEntity<String> responseEntityString() { return null; }
 
 		ResponseEntity<Void> responseEntityVoid() { return null; }
+
+		HttpHeaders httpHeaders() { return null; }
 
 		Mono<ResponseEntity<String>> mono() { return null; }
 

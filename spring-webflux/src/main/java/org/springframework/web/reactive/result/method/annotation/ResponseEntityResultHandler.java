@@ -28,6 +28,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -100,8 +101,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 	}
 
 	private boolean isSupportedType(@Nullable Class<?> clazz) {
-		return (clazz != null && HttpEntity.class.isAssignableFrom(clazz) &&
-				!RequestEntity.class.isAssignableFrom(clazz));
+		return (clazz != null && ((HttpEntity.class.isAssignableFrom(clazz) &&
+				!RequestEntity.class.isAssignableFrom(clazz)) ||
+				HttpHeaders.class.isAssignableFrom(clazz)));
 	}
 
 
@@ -123,8 +125,17 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 
 		return returnValueMono.flatMap(returnValue -> {
-			Assert.isInstanceOf(HttpEntity.class, returnValue, "HttpEntity expected");
-			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
+			HttpEntity<?> httpEntity;
+			if (returnValue instanceof HttpEntity) {
+				httpEntity = (HttpEntity<?>) returnValue;
+			}
+			else if (returnValue instanceof HttpHeaders) {
+				httpEntity = new ResponseEntity<Void>((HttpHeaders) returnValue, HttpStatus.OK);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+			}
 
 			if (httpEntity instanceof ResponseEntity) {
 				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
@@ -139,7 +150,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
-			if(httpEntity.getBody() == null) {
+
+			if(httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
 				return exchange.getResponse().setComplete();
 			}
 
