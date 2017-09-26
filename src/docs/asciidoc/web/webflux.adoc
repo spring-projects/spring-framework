@@ -1393,8 +1393,7 @@ the classpath.
 
 The `spring-webflux` module includes a non-blocking, reactive client for HTTP requests
 with Reactive Streams back pressure. It shares <<webflux-codecs,HTTP codecs>> and other
-infrastructure with the server <<webflux-functional.adoc#webflux-fn,functional web
-framework>>.
+infrastructure with the server <<webflux-fn,functional web framework>>.
 
 `WebClient` provides a higher level API over HTTP client libraries. By default
 it uses https://github.com/reactor/reactor-netty[Reactor Netty] but that is pluggable
@@ -1415,7 +1414,7 @@ non-blocking I/O.
 [[webflux-client-retrieve]]
 === Retrieve
 
-The `retrieve()` method is the easiest way to get a decoded response body:
+The `retrieve()` method is the easiest way to get a response body and decode it:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1428,7 +1427,7 @@ The `retrieve()` method is the easiest way to get a decoded response body:
             .bodyToMono(Person.class);
 ----
 
-You can also get a stream of decoded objects:
+You can also get a stream of objects decoded from the response:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1439,7 +1438,7 @@ You can also get a stream of decoded objects:
             .bodyToFlux(Quote.class);
 ----
 
-By default, a response with 4xx or 5xx status code results in an error of type
+By default, responses with 4xx or 5xx status codes result in an error of type
 `WebClientResponseException` but you can customize that:
 
 [source,java,intent=0]
@@ -1459,7 +1458,7 @@ By default, a response with 4xx or 5xx status code results in an error of type
 === Exchange
 
 The `exchange()` method provides more control. The below example is equivalent
-to `retrieve()` but with access to the `ClientResponse`:
+to `retrieve()` but also provides access to the `ClientResponse`:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1514,7 +1513,7 @@ The request body can be encoded from an Object:
             .bodyToMono(Void.class);
 ----
 
-You can also encode from a stream of objects:
+You can also have a stream of objects encoded:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1529,7 +1528,7 @@ You can also encode from a stream of objects:
             .bodyToMono(Void.class);
 ----
 
-Or if you have the actual value, use the `syncBody` shortcut:
+Or if you have the actual value, use the `syncBody` shortcut method:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1550,9 +1549,9 @@ Or if you have the actual value, use the `syncBody` shortcut:
 
 A simple way to create `WebClient` is through the static factory methods `create()` and
 `create(String)` with a base URL for all requests. You can also use `WebClient.builder()`
-for further options.
+for access to more options.
 
-To customize options of the underlying HTTP client:
+To customize the underlying HTTP client:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1567,7 +1566,7 @@ To customize options of the underlying HTTP client:
             .build();
 ----
 
-To customize <<webflux-codecs,HTTP codecs>> used for encoding and decoding:
+To customize the <<webflux-codecs,HTTP codecs>> used for encoding and decoding HTTP messages:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1586,11 +1585,11 @@ To customize <<webflux-codecs,HTTP codecs>> used for encoding and decoding:
 
 The builder can be used to insert <<webflux-client-filter>>.
 
-You can also customize URI building, set default headers, cookies, and more. Explore
-the `WebClient.Builder` in your IDE.
+Explore the `WebClient.Builder` in your IDE for other options related to URI building,
+default headers (and cookies), and more.
 
-Note that you can also obtain a builder from an already existing `WebClient` instance
-and create a modified version without affecting the original instance:
+After the `WebClient` is built, you can always obtain a new builder from it, in order to
+build a new `WebClient`, based on, but without affecting the current instance:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -1598,7 +1597,6 @@ and create a modified version without affecting the original instance:
     WebClient modifiedClient = client.mutate()
             // user builder methods...
             .build();
-
 ----
 
 
@@ -1669,14 +1667,15 @@ with proper translation of cardinality. This is done with the help of the
 `spring-core` which provides pluggable support for reactive and async types. The registry
 has built-in support for RxJava and `CompletableFuture` but others can be registered.
 
-For functional endpoints and other functional APIs such as the `WebClient`:
+For functional endpoints, the `WebClient`, and other functional APIs, the general rule
+of thumb for WebFlux APIs applies:
 
-* `Flux` or `Mono` for output -- use them to compose logic or pass to any Reactive
+* `Flux` or `Mono` as return values -- use them to compose logic or pass to any Reactive
 Streams library (both are `Publisher` implementations).
-* `Publisher` for input -- if a `Publisher` from another reactive library is provided
-it can only be treated as a stream with unknown semantics (0..N). If the semantics are
-known -- e.g. `io.reactivex.Single`, you can use `Mono.from(Publisher)` and pass that
-in instead of the raw `Publisher`.
+* Reactive Streams `Publisher` for input -- if a `Publisher` from another reactive library
+is provided it can only be treated as a stream with unknown semantics (0..N). If the
+semantics are known -- e.g. `io.reactivex.Single`, you can use `Mono.from(Publisher)` and
+pass that in instead of the raw `Publisher`.
 
 [NOTE]
 ====
