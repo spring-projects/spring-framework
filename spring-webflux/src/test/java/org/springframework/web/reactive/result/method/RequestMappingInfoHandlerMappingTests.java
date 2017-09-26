@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -112,7 +111,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	@Ignore
 	public void getHandlerEmptyPathMatch() throws Exception {
 		Method expected = on(TestController.class).annot(requestMapping("")).resolveMethod();
 		ServerWebExchange exchange = get("").toExchange();
