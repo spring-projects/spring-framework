@@ -60,7 +60,7 @@ fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl().apply(rou
  * @since 5.0
  * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
  */
-class RouterFunctionDsl {
+open class RouterFunctionDsl {
 
 	private val routes = mutableListOf<RouterFunction<ServerResponse>>()
 

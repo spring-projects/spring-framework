@@ -76,7 +76,7 @@ fun beans(init: BeanDefinitionDsl.() -> Unit): BeanDefinitionDsl {
  * @author Sebastien Deleuze
  * @since 5.0
  */
-class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : ApplicationContextInitializer<GenericApplicationContext> {
+open class BeanDefinitionDsl(private val condition: (ConfigurableEnvironment) -> Boolean = { true }) : ApplicationContextInitializer<GenericApplicationContext> {
 
 	@PublishedApi
 	internal val registrations = arrayListOf<(GenericApplicationContext) -> Unit>()
