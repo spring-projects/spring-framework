@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 
@@ -30,6 +31,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ZeroCopyHttpOutputMessage;
 
 /**
  * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client.
@@ -38,7 +40,7 @@ import org.springframework.http.HttpMethod;
  * @since 5.0
  * @see reactor.ipc.netty.http.client.HttpClient
  */
-public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
+public class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
 	private final HttpMethod httpMethod;
 
@@ -87,6 +89,11 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
 		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
+	}
+
+	@Override
+	public Mono<Void> writeWith(File file, long position, long count) {
+		return doCommit(() -> this.httpRequest.sendFile(file.toPath(), position, count).then());
 	}
 
 	@Override
