@@ -220,7 +220,8 @@ fun beans() = beans {
 }
 ----
 
-In this example, `ref<Routes>()` is a shortcut for `applicationContext.getBean(Routes::class.java)`.
+In this example, `bean<Routes>()` is using autowiring by constructor and `ref<Routes>()`
+is a shortcut for `applicationContext.getBean(Routes::class.java)`.
 
 This `beans()` function can then be used to register beans on the application context.
 
