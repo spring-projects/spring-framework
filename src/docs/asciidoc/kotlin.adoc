@@ -192,9 +192,7 @@ how beans are registered.
 ----
 fun beans() = beans {
   bean<UserHandler>()
-  bean {
-    Routes(ref(), ref())
-  }
+  bean<Routes>()
   bean<WebHandler>("webHandler") {
     RouterFunctions.toWebHandler(
       ref<Routes>().router(),
@@ -222,9 +220,7 @@ fun beans() = beans {
 }
 ----
 
-In this example, `Routes(ref(), ref())` is the equivalent of `Routes(ref<UserHandler>(), ref<MessageSource>())`
-(types are not required thanks to Kotlin type inference) where `ref<UserHandler>()`
-is a shortcut for `applicationContext.getBean(UserHandler::class.java)`.
+In this example, `ref<Routes>()` is a shortcut for `applicationContext.getBean(Routes::class.java)`.
 
 This `beans()` function can then be used to register beans on the application context.
 
@@ -242,7 +238,7 @@ This DSL is programmatic, thus it allows custom registration logic of beans
 via an `if` expression, a `for` loop or any other Kotlin constructs.
 ====
 
-See https://github.com/sdeleuze/spring-kotlin-functional/blob/3d12ab102c28f4761bd6a0736e2f585713eb2243/src/main/kotlin/functional/Beans.kt[spring-kotlin-functional beans declaration]
+See https://github.com/sdeleuze/spring-kotlin-functional/blob/master/src/main/kotlin/functional/Beans.kt[spring-kotlin-functional beans declaration]
 for a concrete example.
 
 [NOTE]
