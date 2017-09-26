@@ -96,13 +96,15 @@ class TransactionContext {
 	void startTransaction() {
 		Assert.state(this.transactionStatus == null,
 				"Cannot start a new transaction without ending the existing transaction first.");
+
 		this.flaggedForRollback = this.defaultRollback;
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
+
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
-				"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
-				this.transactionsStarted, this.testContext, this.transactionManager, flaggedForRollback));
+					"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
+					this.transactionsStarted, this.testContext, this.transactionManager, flaggedForRollback));
 		}
 	}
 
@@ -113,14 +115,14 @@ class TransactionContext {
 	void endTransaction() {
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format(
-				"Ending transaction for test context %s; transaction status [%s]; rollback [%s]", this.testContext,
-				this.transactionStatus, flaggedForRollback));
+					"Ending transaction for test context %s; transaction status [%s]; rollback [%s]",
+					this.testContext, this.transactionStatus, this.flaggedForRollback));
 		}
 		Assert.state(this.transactionStatus != null, () -> String.format(
 				"Failed to end transaction for test context %s: transaction does not exist.", this.testContext));
 
 		try {
-			if (flaggedForRollback) {
+			if (this.flaggedForRollback) {
 				this.transactionManager.rollback(this.transactionStatus);
 			}
 			else {
@@ -132,8 +134,8 @@ class TransactionContext {
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("%s transaction for test context %s.", (flaggedForRollback ? "Rolled back"
-					: "Committed"), this.testContext));
+			logger.info(String.format("%s transaction for test context %s.",
+					(this.flaggedForRollback ? "Rolled back" : "Committed"), this.testContext));
 		}
 	}
 

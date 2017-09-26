@@ -70,11 +70,15 @@ public class ChannelRegistration {
 	}
 
 	/**
+	 * Configure interceptors for the message channel.
 	 * @deprecated as of 4.3.12, in favor of {@link #interceptors(ChannelInterceptor...)}
 	 */
 	@Deprecated
-	public ChannelRegistration setInterceptors(ChannelInterceptor... interceptors) {
-		return interceptors(interceptors);
+	public ChannelRegistration setInterceptors(@Nullable ChannelInterceptor... interceptors) {
+		if (interceptors != null) {
+			this.interceptors.addAll(Arrays.asList(interceptors));
+		}
+		return this;
 	}
 
 

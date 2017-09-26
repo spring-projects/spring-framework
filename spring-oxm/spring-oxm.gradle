@@ -2,8 +2,8 @@ description = "Spring Object/XML Marshalling"
 
 configurations {
 	castor
-	xjc
 	jibx
+	xjc
 }
 
 dependencies {

@@ -203,7 +203,6 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	/**
 	 * Build the URL for the tag from the tag attributes and parameters.
 	 * @return the URL value as a String
-	 * @throws JspException
 	 */
 	String createUrl() throws JspException {
 		Assert.state(this.value != null, "No value set");

@@ -162,7 +162,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see #setEnvironment(org.springframework.core.env.Environment)
 	 */
 	public DelegatingFilterProxy(String targetBeanName, @Nullable WebApplicationContext wac) {
-		Assert.hasText(targetBeanName, "target Filter bean name must not be null or empty");
+		Assert.hasText(targetBeanName, "Target Filter bean name must not be null or empty");
 		this.setTargetBeanName(targetBeanName);
 		this.webApplicationContext = wac;
 		if (wac != null) {

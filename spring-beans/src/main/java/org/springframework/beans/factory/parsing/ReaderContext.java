@@ -91,7 +91,7 @@ public class ReaderContext {
 	}
 
 	/**
-	 * Raise a fatal error.
+	 * Raise a regular error.
 	 */
 	public void error(String message, @Nullable Object source) {
 		error(message, source, null, null);

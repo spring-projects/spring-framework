@@ -106,12 +106,12 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 				return interceptor.intercept(request, body, this);
 			}
 			else {
-				URI theUri = request.getURI();
+				URI uri = request.getURI();
 				HttpMethod method = request.getMethod();
 				HttpHeaders headers = request.getHeaders();
 
 				Assert.state(method != null, "No standard HTTP method");
-				AsyncClientHttpRequest delegate = requestFactory.createAsyncRequest(theUri, method);
+				AsyncClientHttpRequest delegate = requestFactory.createAsyncRequest(uri, method);
 				delegate.getHeaders().putAll(headers);
 				if (body.length > 0) {
 					StreamUtils.copy(body, delegate.getBody());

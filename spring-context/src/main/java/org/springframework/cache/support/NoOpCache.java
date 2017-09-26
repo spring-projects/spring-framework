@@ -46,7 +46,6 @@ public class NoOpCache implements Cache {
 	}
 
 
-
 	@Override
 	public String getName() {
 		return this.name;

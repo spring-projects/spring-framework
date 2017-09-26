@@ -91,7 +91,7 @@ public abstract class VfsUtils {
 			Class<?> visitorAttributesClass = loader.loadClass(VFS3_PKG + "VisitorAttributes");
 			VISITOR_ATTRIBUTES_FIELD_RECURSE = visitorAttributesClass.getField("RECURSE");
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not detect JBoss VFS infrastructure", ex);
 		}
 	}

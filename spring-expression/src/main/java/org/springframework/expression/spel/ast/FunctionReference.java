@@ -62,7 +62,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
-		super(pos,arguments);
+		super(pos, arguments);
 		this.name = functionName;
 	}
 

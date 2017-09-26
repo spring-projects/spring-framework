@@ -44,6 +44,7 @@ import org.springframework.web.context.request.WebRequest;
  * {@link SessionStatus#setComplete()}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class SessionAttributesHandler {
@@ -154,7 +155,7 @@ public class SessionAttributesHandler {
 	 * A pass-through call to the underlying {@link SessionAttributeStore}.
 	 * @param request the current request
 	 * @param attributeName the name of the attribute of interest
-	 * @return the attribute value or {@code null}
+	 * @return the attribute value, or {@code null} if none
 	 */
 	@Nullable
 	Object retrieveAttribute(WebRequest request, String attributeName) {

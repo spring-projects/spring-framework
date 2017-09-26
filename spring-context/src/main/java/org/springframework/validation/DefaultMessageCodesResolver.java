@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * object/field-specific code, a field-specific code, a plain error code.
 	 * <p>Arrays, Lists and Maps are resolved both for specific elements and
 	 * the whole collection.
-	 * <p>See the {@link DefaultMessageCodesResolver class level Javadoc} for
+	 * <p>See the {@link DefaultMessageCodesResolver class level javadoc} for
 	 * details on the generated codes.
 	 * @return the list of codes
 	 */

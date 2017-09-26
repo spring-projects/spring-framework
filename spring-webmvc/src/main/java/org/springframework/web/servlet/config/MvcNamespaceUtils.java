@@ -189,7 +189,7 @@ abstract class MvcNamespaceUtils {
 	/**
 	 * Find the {@code ContentNegotiationManager} bean created by or registered
 	 * with the {@code annotation-driven} element.
-	 * @return a bean definition, bean reference, or null.
+	 * @return a bean definition, bean reference, or {@code null}
 	 */
 	@Nullable
 	public static Object getContentNegotiationManager(ParserContext context) {

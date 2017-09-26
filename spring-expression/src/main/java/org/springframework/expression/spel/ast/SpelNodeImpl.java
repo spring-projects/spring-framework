@@ -196,9 +196,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	
 	/**
-	 * Generate code that handles building the argument values for the specified method. This method will take account
-	 * of whether the invoked method is a varargs method and if it is then the argument values will be appropriately
-	 * packaged into an array.
+	 * Generate code that handles building the argument values for the specified method.
+	 * This method will take account of whether the invoked method is a varargs method
+	 * and if it is then the argument values will be appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
 	 * @param member the method or constructor for which arguments are being setup
@@ -208,7 +208,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		String[] paramDescriptors = null;
 		boolean isVarargs = false;
 		if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>)member;
+			Constructor<?> ctor = (Constructor<?>) member;
 			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
 			isVarargs = ctor.isVarArgs();
 		}

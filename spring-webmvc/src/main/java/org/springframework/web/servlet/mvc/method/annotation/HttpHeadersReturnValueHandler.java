@@ -55,7 +55,7 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 			Assert.state(servletResponse != null, "No HttpServletResponse");
 			ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(servletResponse);
 			outputMessage.getHeaders().putAll(headers);
-			outputMessage.getBody(); // flush headers
+			outputMessage.getBody();  // flush headers
 		}
 	}
 

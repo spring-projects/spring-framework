@@ -115,7 +115,6 @@ public class HttpEntityMethodProcessorMockTests {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
-
 		stringHttpMessageConverter = mock(HttpMessageConverter.class);
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		resourceMessageConverter = mock(HttpMessageConverter.class);
