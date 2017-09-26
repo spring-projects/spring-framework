@@ -56,7 +56,7 @@ public class Param {
 	}
 
 	/**
-	 * Return the raw parameter value
+	 * Return the raw parameter value.
 	 */
 	public String getValue() {
 		return this.value;

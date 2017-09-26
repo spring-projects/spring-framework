@@ -89,14 +89,14 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * containing object name mappings.
 	 */
 	public void setMappingLocation(Resource location) {
-		this.mappingLocations = new Resource[]{location};
+		this.mappingLocations = new Resource[] {location};
 	}
 
 	/**
 	 * Set location of properties files to be loaded,
 	 * containing object name mappings.
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 

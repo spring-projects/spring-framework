@@ -67,8 +67,8 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] body)
 			throws IOException {
 
-        return new AsyncRequestExecution().executeAsync(this, body);
-    }
+		return new AsyncRequestExecution().executeAsync(this, body);
+	}
 
 	@Override
 	public HttpMethod getMethod() {

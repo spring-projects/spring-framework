@@ -106,10 +106,12 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
 			if (arguments != null) {
-				this.argumentConversionOccurred = ReflectionHelper.convertArguments(context.getTypeConverter(), arguments, this.method, this.varargsPosition);
-			}
-			if (this.method.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
+				this.argumentConversionOccurred = ReflectionHelper.convertArguments(
+						context.getTypeConverter(), arguments, this.method, this.varargsPosition);
+				if (this.method.isVarArgs()) {
+					arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
+							this.method.getParameterTypes(), arguments);
+				}
 			}
 			ReflectionUtils.makeAccessible(this.method);
 			Object value = this.method.invoke(target, arguments);

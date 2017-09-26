@@ -34,11 +34,11 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
+
 /**
  * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
  * @author Rossen Stoyanchev
- * @author Juergen Hoeller
  * @since 4.0
  */
 public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketEndpointRegistration {
