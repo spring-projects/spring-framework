@@ -29,5 +29,4 @@ dependencies {
 	testRuntime("javax.xml.bind:jaxb-api:2.3.0")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")
 	testRuntime("org.javamoney:moneta:1.1")
-	testRuntime("org.aspectj:aspectjweaver:1.9.0.BETA-7")  // for JDK 9 build compatibility
 }

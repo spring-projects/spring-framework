@@ -6,5 +6,4 @@ dependencies {
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.apache.commons:commons-pool2:2.4.2")
 	optional("com.jamonapi:jamon:2.81")
-	testRuntime("org.aspectj:aspectjweaver:1.9.0.BETA-7")  // for JDK 9 build compatibility
 }
