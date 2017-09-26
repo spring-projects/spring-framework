@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,12 +109,12 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		}
 
 		MessageHeaders headers = message.getHeaders();
-		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 
 		if (subscriptionId == null) {
-			throw new IllegalStateException("No subscriptionId in " + message +
+			throw new IllegalStateException("No subscription id in " + message +
 					" returned by: " + returnType.getMethod());
 		}
 

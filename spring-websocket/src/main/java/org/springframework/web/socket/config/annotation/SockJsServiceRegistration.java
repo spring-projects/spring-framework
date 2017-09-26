@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
 /**
- * A helper class for configuring SockJS fallback options, typically used indirectly, in
- * conjunction with {@link org.springframework.web.socket.config.annotation.EnableWebSocket @EnableWebSocket} and
- * {@link WebSocketConfigurer}.
+ * A helper class for configuring SockJS fallback options for use with an
+ * {@link org.springframework.web.socket.config.annotation.EnableWebSocket} and
+ * {@link WebSocketConfigurer} setup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -264,12 +264,11 @@ public class SockJsServiceRegistration {
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
 		}
-		if (this.allowedOrigins != null) {
-			service.setAllowedOrigins(this.allowedOrigins);
-		}
 		if (this.suppressCors != null) {
 			service.setSuppressCors(this.suppressCors);
 		}
+		service.setAllowedOrigins(this.allowedOrigins);
+
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);
 		}

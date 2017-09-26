@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package org.springframework.core;
  *
  * <p>Users of this interface should be careful in complex hierarchy scenarios, especially
  * when the generic type signature of the class changes in sub-classes. It is always
- * possible to return {@code null} to fallback on a default behaviour.
+ * possible to return {@code null} to fallback on a default behavior.
  *
  * @author Stephane Nicoll
  * @since 4.2

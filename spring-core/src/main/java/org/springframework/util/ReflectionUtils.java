@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -724,12 +724,8 @@ public abstract class ReflectionUtils {
 	 * work on objects with public no-arg constructors.
 	 */
 	public static void shallowCopyFieldState(final Object src, final Object dest) {
-		if (src == null) {
-			throw new IllegalArgumentException("Source for field copy cannot be null");
-		}
-		if (dest == null) {
-			throw new IllegalArgumentException("Destination for field copy cannot be null");
-		}
+		Assert.notNull(src, "Source for field copy cannot be null");
+		Assert.notNull(dest, "Destination for field copy cannot be null");
 		if (!src.getClass().isAssignableFrom(dest.getClass())) {
 			throw new IllegalArgumentException("Destination class [" + dest.getClass().getName() +
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");

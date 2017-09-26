@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see #setEnvironment(org.springframework.core.env.Environment)
 	 */
 	public DelegatingFilterProxy(Filter delegate) {
-		Assert.notNull(delegate, "delegate Filter object must not be null");
+		Assert.notNull(delegate, "Delegate Filter must not be null");
 		this.delegate = delegate;
 	}
 
@@ -157,7 +157,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see #setEnvironment(org.springframework.core.env.Environment)
 	 */
 	public DelegatingFilterProxy(String targetBeanName, WebApplicationContext wac) {
-		Assert.hasText(targetBeanName, "target Filter bean name must not be null or empty");
+		Assert.hasText(targetBeanName, "Target Filter bean name must not be null or empty");
 		this.setTargetBeanName(targetBeanName);
 		this.webApplicationContext = wac;
 		if (wac != null) {
@@ -246,15 +246,16 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 		Filter delegateToUse = this.delegate;
 		if (delegateToUse == null) {
 			synchronized (this.delegateMonitor) {
-				if (this.delegate == null) {
+				delegateToUse = this.delegate;
+				if (delegateToUse == null) {
 					WebApplicationContext wac = findWebApplicationContext();
 					if (wac == null) {
 						throw new IllegalStateException("No WebApplicationContext found: " +
 								"no ContextLoaderListener or DispatcherServlet registered?");
 					}
-					this.delegate = initDelegate(wac);
+					delegateToUse = initDelegate(wac);
 				}
-				delegateToUse = this.delegate;
+				this.delegate = delegateToUse;
 			}
 		}
 

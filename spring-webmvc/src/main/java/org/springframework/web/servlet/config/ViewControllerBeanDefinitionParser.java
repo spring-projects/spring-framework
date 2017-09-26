@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import org.springframework.web.servlet.view.RedirectView;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
  * parses the following MVC namespace elements:
  * <ul>
- *	<li>{@code <view-controller>}
- *	<li>{@code <redirect-view-controller>}
- *	<li>{@code <status-controller>}
+ * <li>{@code <view-controller>}
+ * <li>{@code <redirect-view-controller>}
+ * <li>{@code <status-controller>}
  * </ul>
  *
  * <p>All elements result in the registration of a
@@ -55,7 +55,7 @@ import org.springframework.web.servlet.view.RedirectView;
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String HANDLER_MAPPING_BEAN_NAME =
-		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
 	@Override

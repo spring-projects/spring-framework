@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ import org.springframework.util.StringUtils;
  * returning {@code null} in the case that the parameter names cannot be discovered.
  *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -154,22 +155,16 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
+	/** The pointcut expression associated with the advice, as a simple String */
+	private String pointcutExpression;
+
 	private boolean raiseExceptions;
 
-	/**
-	 * If the advice is afterReturning, and binds the return value, this is the parameter name used.
-	 */
+	/** If the advice is afterReturning, and binds the return value, this is the parameter name used */
 	private String returningName;
 
-	/**
-	 * If the advice is afterThrowing, and binds the thrown value, this is the parameter name used.
-	 */
+	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used */
 	private String throwingName;
-
-	/**
-	 * The pointcut expression associated with the advice, as a simple String.
-	 */
-	private String pointcutExpression;
 
 	private Class<?>[] argumentTypes;
 
@@ -185,6 +180,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	public AspectJAdviceParameterNameDiscoverer(String pointcutExpression) {
 		this.pointcutExpression = pointcutExpression;
 	}
+
 
 	/**
 	 * Indicate whether {@link IllegalArgumentException} and {@link AmbiguousBindingException}
@@ -212,6 +208,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	public void setThrowingName(String throwingName) {
 		this.throwingName = throwingName;
 	}
+
 
 	/**
 	 * Deduce the parameter names for an advice method.
@@ -474,7 +471,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * If the token starts meets Java identifier conventions, it's in.
 	 */
 	private String maybeExtractVariableName(String candidateToken) {
-		if (candidateToken == null || candidateToken.equals("")) {
+		if (!StringUtils.hasLength(candidateToken)) {
 			return null;
 		}
 		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&

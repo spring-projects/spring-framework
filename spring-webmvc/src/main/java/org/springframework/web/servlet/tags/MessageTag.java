@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,8 +227,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 			// We have a code or default text that we need to resolve.
 			Object[] argumentsArray = resolveArguments(this.arguments);
 			if (!this.nestedArguments.isEmpty()) {
-				argumentsArray = appendArguments(argumentsArray,
-						this.nestedArguments.toArray());
+				argumentsArray = appendArguments(argumentsArray, this.nestedArguments.toArray());
 			}
 
 			if (this.text != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to
@@ -53,6 +54,12 @@ public class ExpressionState {
 
 	private final TypedValue rootObject;
 
+	private final SpelParserConfiguration configuration;
+
+	private Stack<TypedValue> contextObjects;
+
+	private Stack<VariableScope> variableScopes;
+
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
 	// This stack captures those objects at each nested scope level.
@@ -61,12 +68,6 @@ public class ExpressionState {
 	// On entering the selection we enter a new scope, and #this is now the
 	// element from list1
 	private Stack<TypedValue> scopeRootObjects;
-
-	private final SpelParserConfiguration configuration;
-
-	private Stack<VariableScope> variableScopes;
-
-	private Stack<TypedValue> contextObjects;
 
 
 	public ExpressionState(EvaluationContext context) {
@@ -105,7 +106,7 @@ public class ExpressionState {
 	 * The active context object is what unqualified references to properties/etc are resolved against.
 	 */
 	public TypedValue getActiveContextObject() {
-		if (this.contextObjects == null || this.contextObjects.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.contextObjects)) {
 			return this.rootObject;
 		}
 		return this.contextObjects.peek();
@@ -130,7 +131,7 @@ public class ExpressionState {
 	}
 
 	public TypedValue getScopeRootContextObject() {
-		if (this.scopeRootObjects == null || this.scopeRootObjects.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.scopeRootObjects)) {
 			return this.rootObject;
 		}
 		return this.scopeRootObjects.peek();
@@ -142,12 +143,7 @@ public class ExpressionState {
 
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
-		if (value == null) {
-			return TypedValue.NULL;
-		}
-		else {
-			return new TypedValue(value);
-		}
+		return (value != null ? new TypedValue(value) : TypedValue.NULL);
 	}
 
 	public TypeComparator getTypeComparator() {

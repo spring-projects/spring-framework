@@ -48,10 +48,20 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	private final Method copyMethod;
 
 
+	/**
+	 * Create a new instance of the {@link GlassFishLoadTimeWeaver} class using
+	 * the default {@link ClassLoader class loader}.
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
+	 */
 	public GlassFishLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
+	/**
+	 * Create a new instance of the {@link GlassFishLoadTimeWeaver} class using
+	 * the supplied {@link ClassLoader}.
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
+	 */
 	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 

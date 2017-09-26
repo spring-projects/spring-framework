@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,40 +30,45 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with
- * one or more {@link ContentNegotiationStrategy} instances. The following shows
- * the resulting strategy instances, the methods used to configured them, and
- * whether enabled by default:
+ * one or more {@link ContentNegotiationStrategy} instances.
+ *
+ * <p>As of 5.0 you can set the exact strategies to use via
+ * {@link #strategies(List)}.
+ *
+ * <p>As an alternative you can also rely on the set of defaults described below
+ * which can be turned on or off or customized through the methods of this
+ * builder:
  *
  * <table>
  * <tr>
- *     <th>Configurer Property</th>
- *     <th>Underlying Strategy</th>
- *     <th>Default Setting</th>
+ * <th>Configurer Property</th>
+ * <th>Underlying Strategy</th>
+ * <th>Default Setting</th>
  * </tr>
  * <tr>
- *     <td>{@link #favorPathExtension}</td>
- *     <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
- *     <td>On</td>
+ * <td>{@link #favorPathExtension}</td>
+ * <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #favorParameter}</td>
- *     <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
- *     <td>Off</td>
+ * <td>{@link #favorParameter}</td>
+ * <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ * <td>Off</td>
  * </tr>
  * <tr>
- *     <td>{@link #ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
- *     <td>On</td>
+ * <td>{@link #ignoreAcceptHeader}</td>
+ * <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #defaultContentType}</td>
- *     <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #defaultContentType}</td>
+ * <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
+ * <td>Not set</td>
  * </tr>
  * <tr>
- *     <td>{@link #defaultContentTypeStrategy}</td>
- *     <td>{@link ContentNegotiationStrategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #defaultContentTypeStrategy}</td>
+ * <td>{@link ContentNegotiationStrategy}</td>
+ * <td>Not set</td>
  * </tr>
  * </table>
  *

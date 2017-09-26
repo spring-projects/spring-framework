@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,11 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public CollectionToArrayConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -51,7 +53,8 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(),
+				targetType.getElementTypeDescriptor(), this.conversionService);
 	}
 
 	@Override
@@ -63,7 +66,8 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 		Object array = Array.newInstance(targetType.getElementTypeDescriptor().getType(), sourceCollection.size());
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+			Object targetElement = this.conversionService.convert( sourceElement,
+					sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 			Array.set(array, i++, targetElement);
 		}
 		return array;

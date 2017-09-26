@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,14 @@ class TransactionContext {
 
 	TransactionContext(TestContext testContext, PlatformTransactionManager transactionManager,
 			TransactionDefinition transactionDefinition, boolean defaultRollback) {
+
 		this.testContext = testContext;
 		this.transactionManager = transactionManager;
 		this.transactionDefinition = transactionDefinition;
 		this.defaultRollback = defaultRollback;
 		this.flaggedForRollback = defaultRollback;
 	}
+
 
 	TransactionStatus getTransactionStatus() {
 		return this.transactionStatus;
@@ -105,23 +107,22 @@ class TransactionContext {
 	}
 
 	/**
-	 * Immediately force a <em>commit</em> or <em>rollback</em> of the transaction
-	 * for the configured {@linkplain #getTestContext test context}, according to
-	 * the {@linkplain #isFlaggedForRollback rollback flag}.
+	 * Immediately force a <em>commit</em> or <em>rollback</em> of the transaction for the
+	 * configured test context, according to the {@linkplain #isFlaggedForRollback rollback flag}.
 	 */
 	void endTransaction() {
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format(
-				"Ending transaction for test context %s; transaction status [%s]; rollback [%s]", this.testContext,
-				this.transactionStatus, flaggedForRollback));
+					"Ending transaction for test context %s; transaction status [%s]; rollback [%s]",
+					this.testContext, this.transactionStatus, this.flaggedForRollback));
 		}
 		if (this.transactionStatus == null) {
 			throw new IllegalStateException(String.format(
-				"Failed to end transaction for test context %s: transaction does not exist.", this.testContext));
+					"Failed to end transaction for test context %s: transaction does not exist.", this.testContext));
 		}
 
 		try {
-			if (flaggedForRollback) {
+			if (this.flaggedForRollback) {
 				this.transactionManager.rollback(this.transactionStatus);
 			}
 			else {
@@ -133,8 +134,8 @@ class TransactionContext {
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("%s transaction for test context %s.", (flaggedForRollback ? "Rolled back"
-					: "Committed"), this.testContext));
+			logger.info(String.format("%s transaction for test context %s.",
+					(this.flaggedForRollback ? "Rolled back" : "Committed"), this.testContext));
 		}
 	}
 

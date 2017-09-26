@@ -578,7 +578,7 @@ public class MessageHeaderAccessor {
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
-			if (requiredType.isAssignableFrom(headerAccessor.getClass()))  {
+			if (requiredType == null || requiredType.isInstance(headerAccessor))  {
 				return (T) headerAccessor;
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.web.socket.sockjs.client;
-
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -57,12 +56,7 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getNativeSession(Class<T> requiredType) {
-		if (requiredType != null) {
-			if (requiredType.isInstance(this.webSocketSession)) {
-				return (T) this.webSocketSession;
-			}
-		}
-		return null;
+		return (requiredType == null || requiredType.isInstance(this.webSocketSession) ? (T) this.webSocketSession : null);
 	}
 
 	@Override

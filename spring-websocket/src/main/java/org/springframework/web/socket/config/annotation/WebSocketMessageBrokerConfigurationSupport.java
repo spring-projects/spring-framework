@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
 		// Use Jackson builder in order to have JSR-310 and Joda-Time modules registered automatically
 		messageConverter.setObjectMapper(Jackson2ObjectMapperBuilder.json()
-				.applicationContext(this.getApplicationContext()).build());
+				.applicationContext(getApplicationContext()).build());
 		return messageConverter;
 	}
 

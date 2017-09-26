@@ -38,11 +38,14 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
 
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
+	private static final Method NO_METHOD_FOUND =
+			ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods =
+			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
-	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
+			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
 
 	/**

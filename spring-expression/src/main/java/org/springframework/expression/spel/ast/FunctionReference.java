@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
-		super(pos,arguments);
+		super(pos, arguments);
 		this.name = functionName;
 	}
 
@@ -107,15 +107,15 @@ public class FunctionReference extends SpelNodeImpl {
 					SpelMessage.FUNCTION_MUST_BE_STATIC, ClassUtils.getQualifiedMethodName(method), this.name);
 		}
 
-		argumentConversionOccurred = false;
+		this.argumentConversionOccurred = false;
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
+			this.argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		}
 		if (method.isVarArgs()) {
-			functionArgs =
-					ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
+					method.getParameterTypes(), functionArgs);
 		}
 
 		try {

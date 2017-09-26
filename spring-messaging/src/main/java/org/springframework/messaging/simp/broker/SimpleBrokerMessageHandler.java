@@ -347,7 +347,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 					getClientOutboundChannel().send(reply);
 				}
 				catch (Throwable ex) {
-					logger.error("Failed to send " + message, ex);
+					if (logger.isErrorEnabled()) {
+						logger.error("Failed to send " + message, ex);
+					}
 				}
 				finally {
 					SessionInfo info = this.sessions.get(subscriptionEntry.getKey());

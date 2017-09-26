@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import org.springframework.util.Assert;
  * application servers and periodically broadcasts the content of the local
  * user registry.
  *
- * The aggregated information
- * is maintained in a {@link MultiServerUserRegistry}.
+ * <p>The aggregated information is maintained in a {@link MultiServerUserRegistry}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -62,8 +61,8 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 	 * Constructor.
 	 * @param userRegistry the registry with local and remote user registry information
 	 * @param brokerTemplate template for broadcasting local registry information
-	 * @param broadcastDestination  the destination to broadcast to
-	 * @param scheduler
+	 * @param broadcastDestination the destination to broadcast to
+	 * @param scheduler the task scheduler to use
 	 */
 	public UserRegistryMessageHandler(MultiServerUserRegistry userRegistry,
 			SimpMessagingTemplate brokerTemplate, String broadcastDestination, TaskScheduler scheduler) {
@@ -112,9 +111,12 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 			long delay = getRegistryExpirationPeriod() / 2;
 			this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(this.schedulerTask, delay);
 		}
-		else if (this.scheduledFuture != null ){
-			this.scheduledFuture.cancel(true);
-			this.scheduledFuture = null;
+		else {
+			ScheduledFuture<?> future = this.scheduledFuture;
+			if (future != null ){
+				future.cancel(true);
+				this.scheduledFuture = null;
+			}
 		}
 	}
 

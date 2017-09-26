@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	}
 
 	/**
-	 * @return the configured {@code ResourceUrlProvider}.
+	 * Return the configured {@code ResourceUrlProvider}.
 	 */
 	public ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
@@ -69,7 +69,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param request the current request
 	 * @param resource the resource being transformed
 	 * @param transformerChain the transformer chain
-	 * @return the resolved URL or null
+	 * @return the resolved URL, or {@code} if not resolvable
 	 */
 	protected String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {

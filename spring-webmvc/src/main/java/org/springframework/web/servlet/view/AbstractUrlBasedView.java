@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(super.toString());
-		sb.append("; URL [").append(getUrl()).append("]");
-		return sb.toString();
+		return super.toString() + "; URL [" + getUrl() + "]";
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,6 +151,10 @@ public abstract class CommonsFileUploadSupport {
 		this.fileUpload.setHeaderEncoding(defaultEncoding);
 	}
 
+	/**
+	 * Determine the default encoding to use for parsing requests.
+	 * @see #setDefaultEncoding
+	 */
 	protected String getDefaultEncoding() {
 		String encoding = getFileUpload().getHeaderEncoding();
 		if (encoding == null) {
@@ -172,6 +176,10 @@ public abstract class CommonsFileUploadSupport {
 		this.uploadTempDirSpecified = true;
 	}
 
+	/**
+	 * Return the temporary directory where uploaded files get stored.
+	 * @see #setUploadTempDir
+	 */
 	protected boolean isUploadTempDirSpecified() {
 		return this.uploadTempDirSpecified;
 	}

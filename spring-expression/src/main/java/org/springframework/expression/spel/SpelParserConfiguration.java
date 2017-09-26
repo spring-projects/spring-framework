@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.expression.spel;
 
 import org.springframework.core.SpringProperties;
-
 
 /**
  * Configuration object for the SpEL expression parser.
@@ -106,35 +105,35 @@ public class SpelParserConfiguration {
 
 
 	/**
-	 * @return the configuration mode for parsers using this configuration object
+	 * Return the configuration mode for parsers using this configuration object.
 	 */
 	public SpelCompilerMode getCompilerMode() {
 		return this.compilerMode;
 	}
 
 	/**
-	 * @return the ClassLoader to use as the basis for expression compilation
+	 * Return the ClassLoader to use as the basis for expression compilation.
 	 */
 	public ClassLoader getCompilerClassLoader() {
 		return this.compilerClassLoader;
 	}
 
 	/**
-	 * @return {@code true} if {@code null} references should be automatically grown
+	 * Return {@code true} if {@code null} references should be automatically grown.
 	 */
 	public boolean isAutoGrowNullReferences() {
 		return this.autoGrowNullReferences;
 	}
 
 	/**
-	 * @return {@code true} if collections should be automatically grown
+	 * Return {@code true} if collections should be automatically grown.
 	 */
 	public boolean isAutoGrowCollections() {
 		return this.autoGrowCollections;
 	}
 
 	/**
-	 * @return the maximum size that a collection can auto grow
+	 * Return the maximum size that a collection can auto grow.
 	 */
 	public int getMaximumAutoGrowSize() {
 		return this.maximumAutoGrowSize;

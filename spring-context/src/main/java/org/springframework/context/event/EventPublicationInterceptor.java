@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,15 +64,14 @@ public class EventPublicationInterceptor
 	 */
 	public void setApplicationEventClass(Class<?> applicationEventClass) {
 		if (ApplicationEvent.class == applicationEventClass ||
-			!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
-			throw new IllegalArgumentException("applicationEventClass needs to extend ApplicationEvent");
+				!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
+			throw new IllegalArgumentException("'applicationEventClass' needs to extend ApplicationEvent");
 		}
 		try {
-			this.applicationEventClassConstructor =
-					applicationEventClass.getConstructor(new Class<?>[] {Object.class});
+			this.applicationEventClassConstructor = applicationEventClass.getConstructor(Object.class);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new IllegalArgumentException("applicationEventClass [" +
+			throw new IllegalArgumentException("ApplicationEvent class [" +
 					applicationEventClass.getName() + "] does not have the required Object constructor: " + ex);
 		}
 	}
@@ -85,7 +84,7 @@ public class EventPublicationInterceptor
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.applicationEventClassConstructor == null) {
-			throw new IllegalArgumentException("applicationEventClass is required");
+			throw new IllegalArgumentException("Property 'applicationEventClass' is required");
 		}
 	}
 
@@ -95,7 +94,7 @@ public class EventPublicationInterceptor
 		Object retVal = invocation.proceed();
 
 		ApplicationEvent event = (ApplicationEvent)
-				this.applicationEventClassConstructor.newInstance(new Object[] {invocation.getThis()});
+				this.applicationEventClassConstructor.newInstance(invocation.getThis());
 		this.applicationEventPublisher.publishEvent(event);
 
 		return retVal;

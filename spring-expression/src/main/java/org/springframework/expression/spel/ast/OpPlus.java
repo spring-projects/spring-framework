@@ -192,8 +192,8 @@ public class OpPlus extends Operator {
 	private void walk(MethodVisitor mv, CodeFlow cf, SpelNodeImpl operand) {
 		if (operand instanceof OpPlus) {
 			OpPlus plus = (OpPlus)operand;
-			walk(mv,cf,plus.getLeftOperand());
-			walk(mv,cf,plus.getRightOperand());
+			walk(mv, cf, plus.getLeftOperand());
+			walk(mv, cf, plus.getRightOperand());
 		}
 		else {
 			cf.enterCompilationScope();

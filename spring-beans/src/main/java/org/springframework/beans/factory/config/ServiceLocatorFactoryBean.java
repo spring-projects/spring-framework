@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,15 +281,15 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	@SuppressWarnings("unchecked")
 	protected Constructor<Exception> determineServiceLocatorExceptionConstructor(Class<? extends Exception> exceptionClass) {
 		try {
-			return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {String.class, Throwable.class});
+			return (Constructor<Exception>) exceptionClass.getConstructor(String.class, Throwable.class);
 		}
 		catch (NoSuchMethodException ex) {
 			try {
-				return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {Throwable.class});
+				return (Constructor<Exception>) exceptionClass.getConstructor(Throwable.class);
 			}
 			catch (NoSuchMethodException ex2) {
 				try {
-					return (Constructor<Exception>) exceptionClass.getConstructor(new Class<?>[] {String.class});
+					return (Constructor<Exception>) exceptionClass.getConstructor(String.class);
 				}
 				catch (NoSuchMethodException ex3) {
 					throw new IllegalArgumentException(
@@ -357,7 +357,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 				return System.identityHashCode(proxy);
 			}
 			else if (ReflectionUtils.isToStringMethod(method)) {
-				return "Service locator: " + serviceLocatorInterface.getName();
+				return "Service locator: " + serviceLocatorInterface;
 			}
 			else {
 				return invokeServiceLocatorMethod(method, args);

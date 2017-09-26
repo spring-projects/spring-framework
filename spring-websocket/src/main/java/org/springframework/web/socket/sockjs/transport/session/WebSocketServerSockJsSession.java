@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	@Override
 	public Object getNativeSession() {
 		return (this.webSocketSession instanceof NativeWebSocketSession ?
-				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : null);
+				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : this.webSocketSession);
 	}
 
 	@Override
@@ -190,7 +190,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;
 		}
-		delegateMessages(messages);
+		if (messages != null) {
+			delegateMessages(messages);
+		}
 	}
 
 	@Override
@@ -226,7 +228,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 			synchronized (this.disconnectLock) {
 				if (isActive()) {
 					this.disconnected = true;
-					this.webSocketSession.close(status);
+					if (this.webSocketSession != null) {
+						this.webSocketSession.close(status);
+					}
 				}
 			}
 		}

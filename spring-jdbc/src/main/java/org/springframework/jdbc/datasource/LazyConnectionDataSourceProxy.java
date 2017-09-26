@@ -408,7 +408,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// Apply kept transaction settings, if any.
 				if (this.readOnly) {
 					try {
-						this.target.setReadOnly(this.readOnly);
+						this.target.setReadOnly(true);
 					}
 					catch (Exception ex) {
 						// "read-only not supported" -> ignore, it's just a hint anyway

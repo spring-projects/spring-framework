@@ -75,7 +75,7 @@ public abstract class StompClientSupport {
 
 	/**
 	 * Configure a scheduler to use for heartbeats and for receipt tracking.
-	 * <p><strong>Note:</strong> some transports have built-in support to work
+	 * <p><strong>Note:</strong> Some transports have built-in support to work
 	 * with heartbeats and therefore do not require a TaskScheduler.
 	 * Receipts however, if needed, do require a TaskScheduler to be configured.
 	 * <p>By default, this is not set.
@@ -123,7 +123,8 @@ public abstract class StompClientSupport {
 	 * is set to "0,0", and {@code true} otherwise.
 	 */
 	public boolean isDefaultHeartbeatEnabled() {
-		return (getDefaultHeartbeat() != null && getDefaultHeartbeat()[0] != 0 && getDefaultHeartbeat()[1] != 0);
+		long[] heartbeat = getDefaultHeartbeat();
+		return (heartbeat[0] != 0 && heartbeat[1] != 0);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private volatile boolean removeOnCancelPolicy = false;
 
-	private volatile ScheduledExecutorService scheduledExecutor;
-
 	private volatile ErrorHandler errorHandler;
+
+	private volatile ScheduledExecutorService scheduledExecutor;
 
 
 	/**

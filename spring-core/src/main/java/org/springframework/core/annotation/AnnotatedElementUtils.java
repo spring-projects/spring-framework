@@ -1441,8 +1441,8 @@ public class AnnotatedElementUtils {
 		 * <p>If this method returns {@code true}, then {@link #getAggregatedResults()}
 		 * must return a non-null value.
 		 * @return {@code true} if this processor supports aggregated results
-		 * @see #getAggregatedResults
 		 * @since 4.3
+		 * @see #getAggregatedResults
 		 */
 		boolean aggregates();
 
@@ -1453,10 +1453,9 @@ public class AnnotatedElementUtils {
 		 * responsible for asking this processor if it {@link #aggregates} results
 		 * and then adding the post-processed results to the list returned by this
 		 * method.
-		 * @return the list of results aggregated by this processor
-		 * (never {@code null} unless {@link #aggregates} returns {@code false})
-		 * @see #aggregates
+		 * @return the list of results aggregated by this processor (never {@code null})
 		 * @since 4.3
+		 * @see #aggregates
 		 */
 		List<T> getAggregatedResults();
 	}

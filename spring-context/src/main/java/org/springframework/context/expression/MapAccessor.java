@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,27 +68,6 @@ public class MapAccessor implements CompilablePropertyAccessor {
 		map.put(name, newValue);
 	}
 
-
-	/**
-	 * Exception thrown from {@code read} in order to reset a cached
-	 * PropertyAccessor, allowing other accessors to have a try.
-	 */
-	@SuppressWarnings("serial")
-	private static class MapAccessException extends AccessException {
-
-		private final String key;
-
-		public MapAccessException(String key) {
-			super(null);
-			this.key = key;
-		}
-
-		@Override
-		public String getMessage() {
-			return "Map does not contain a value for key '" + this.key + "'";
-		}
-	}
-
 	@Override
 	public boolean isCompilable() {
 		return true;
@@ -110,6 +89,27 @@ public class MapAccessor implements CompilablePropertyAccessor {
 		}
 		mv.visitLdcInsn(propertyName);
 		mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
+	}
+
+
+	/**
+	 * Exception thrown from {@code read} in order to reset a cached
+	 * PropertyAccessor, allowing other accessors to have a try.
+	 */
+	@SuppressWarnings("serial")
+	private static class MapAccessException extends AccessException {
+
+		private final String key;
+
+		public MapAccessException(String key) {
+			super(null);
+			this.key = key;
+		}
+
+		@Override
+		public String getMessage() {
+			return "Map does not contain a value for key '" + this.key + "'";
+		}
 	}
 
 }

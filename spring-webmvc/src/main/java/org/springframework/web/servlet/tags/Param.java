@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,37 +33,39 @@ public class Param {
 
 	private String value;
 
-	/**
-	 * @return the raw parameter name
-	 */
-	public String getName() {
-		return name;
-	}
 
 	/**
-	 * Set the raw name of the parameter
+	 * Set the raw name of the parameter.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * @return the raw parameter value
+	 * Return the raw parameter name.
 	 */
-	public String getValue() {
-		return value;
+	public String getName() {
+		return this.name;
 	}
 
 	/**
-	 * Set the raw value of the parameter
+	 * Set the raw value of the parameter.
 	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * Return the raw parameter value
+	 */
+	public String getValue() {
+		return this.value;
+	}
+
+
 	@Override
 	public String toString() {
-		return "JSP Tag Param: name '" + name + "', value '" + value + "'";
+		return "JSP Tag Param: name '" + this.name + "', value '" + this.value + "'";
 	}
 
 }

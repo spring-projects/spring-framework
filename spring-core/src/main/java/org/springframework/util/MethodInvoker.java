@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ public class MethodInvoker {
 	 * Set arguments for the method invocation. If this property is not set,
 	 * or the Object array is of length 0, a method with no arguments is assumed.
 	 */
-	public void setArguments(Object[] arguments) {
-		this.arguments = (arguments != null ? arguments : new Object[0]);
+	public void setArguments(Object... arguments) {
+		this.arguments = arguments;
 	}
 
 	/**
@@ -156,12 +156,8 @@ public class MethodInvoker {
 
 		Class<?> targetClass = getTargetClass();
 		String targetMethod = getTargetMethod();
-		if (targetClass == null) {
-			throw new IllegalArgumentException("Either 'targetClass' or 'targetObject' is required");
-		}
-		if (targetMethod == null) {
-			throw new IllegalArgumentException("Property 'targetMethod' is required");
-		}
+		Assert.notNull(targetClass, "Either 'targetClass' or 'targetObject' is required");
+		Assert.notNull(targetMethod, "Property 'targetMethod' is required");
 
 		Object[] arguments = getArguments();
 		Class<?>[] argTypes = new Class<?>[arguments.length];

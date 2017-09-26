@@ -218,7 +218,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * not initialized yet via {@link #afterPropertiesSet()}.
 	 */
 	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return (this.argumentResolvers != null) ? this.argumentResolvers.getResolvers() : null;
+		return (this.argumentResolvers != null ? this.argumentResolvers.getResolvers() : null);
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * {@code null} if not initialized yet via {@link #afterPropertiesSet()}.
 	 */
 	public List<HandlerMethodArgumentResolver> getInitBinderArgumentResolvers() {
-		return (this.initBinderArgumentResolvers != null) ? this.initBinderArgumentResolvers.getResolvers() : null;
+		return (this.initBinderArgumentResolvers != null ? this.initBinderArgumentResolvers.getResolvers() : null);
 	}
 
 	/**
@@ -277,7 +277,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * initialized yet via {@link #afterPropertiesSet()}.
 	 */
 	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
-		return this.returnValueHandlers.getHandlers();
+		return (this.returnValueHandlers != null ? this.returnValueHandlers.getHandlers() : null);
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Return the configured {@link ModelAndViewResolver}s, or {@code null}.
 	 */
 	public List<ModelAndViewResolver> getModelAndViewResolvers() {
-		return modelAndViewResolvers;
+		return this.modelAndViewResolvers;
 	}
 
 	/**

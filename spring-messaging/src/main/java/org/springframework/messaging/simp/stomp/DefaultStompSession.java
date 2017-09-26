@@ -268,8 +268,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 	private void execute(Message<byte[]> message) {
-		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		if (logger.isTraceEnabled()) {
+			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			logger.trace("Sending " + accessor.getDetailedLogMessage(message.getPayload()));
 		}
 		TcpConnection<byte[]> conn = this.connection;

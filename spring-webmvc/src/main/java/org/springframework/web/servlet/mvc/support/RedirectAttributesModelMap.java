@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 
 	private final ModelMap flashAttributes = new ModelMap();
 
-	/**
-	 * Class constructor.
-	 * @param dataBinder used to format attribute values as Strings.
-	 */
-	public RedirectAttributesModelMap(DataBinder dataBinder) {
-		this.dataBinder = dataBinder;
-	}
 
 	/**
 	 * Default constructor without a DataBinder.
@@ -53,6 +46,15 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	public RedirectAttributesModelMap() {
 		this(null);
 	}
+
+	/**
+	 * Constructor with a DataBinder.
+	 * @param dataBinder used to format attribute values as Strings
+	 */
+	public RedirectAttributesModelMap(DataBinder dataBinder) {
+		this.dataBinder = dataBinder;
+	}
+
 
 	/**
 	 * Return the attributes candidate for flash storage or an empty Map.
@@ -76,7 +78,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		if (value == null) {
 			return null;
 		}
-		return (dataBinder != null) ? dataBinder.convertIfNecessary(value, String.class) : value.toString();
+		return (this.dataBinder != null ? this.dataBinder.convertIfNecessary(value, String.class) : value.toString());
 	}
 
 	/**

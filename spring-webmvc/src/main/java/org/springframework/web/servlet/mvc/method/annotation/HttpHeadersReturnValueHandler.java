@@ -46,14 +46,14 @@ public class HttpHeadersReturnValueHandler implements HandlerMethodReturnValueHa
 
 		mavContainer.setRequestHandled(true);
 
-		Assert.isInstanceOf(HttpHeaders.class, returnValue, "HttpHeaders expected");
+		Assert.state(returnValue instanceof HttpHeaders, "HttpHeaders expected");
 		HttpHeaders headers = (HttpHeaders) returnValue;
 
 		if (!headers.isEmpty()) {
 			HttpServletResponse servletResponse = webRequest.getNativeResponse(HttpServletResponse.class);
 			ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(servletResponse);
 			outputMessage.getHeaders().putAll(headers);
-			outputMessage.getBody(); // flush headers
+			outputMessage.getBody();  // flush headers
 		}
 	}
 

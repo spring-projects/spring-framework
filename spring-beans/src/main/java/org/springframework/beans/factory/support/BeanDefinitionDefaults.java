@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class BeanDefinitionDefaults {
 	}
 
 	public void setInitMethodName(String initMethodName) {
-		this.initMethodName = (StringUtils.hasText(initMethodName)) ? initMethodName : null;
+		this.initMethodName = (StringUtils.hasText(initMethodName) ? initMethodName : null);
 	}
 
 	public String getInitMethodName() {
@@ -70,7 +70,7 @@ public class BeanDefinitionDefaults {
 	}
 
 	public void setDestroyMethodName(String destroyMethodName) {
-		this.destroyMethodName = (StringUtils.hasText(destroyMethodName)) ? destroyMethodName : null;
+		this.destroyMethodName = (StringUtils.hasText(destroyMethodName) ? destroyMethodName : null);
 	}
 
 	public String getDestroyMethodName() {

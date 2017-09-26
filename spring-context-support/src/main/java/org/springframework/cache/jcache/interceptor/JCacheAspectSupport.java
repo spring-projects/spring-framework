@@ -94,7 +94,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
-			Class<?> targetClass = getTargetClass(target);
+			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 			JCacheOperation<?> operation = getCacheOperationSource().getCacheOperation(method, targetClass);
 			if (operation != null) {
 				CacheOperationInvocationContext<?> context =
@@ -112,14 +112,6 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 		return new DefaultCacheInvocationContext<Annotation>(
 				(JCacheOperation<Annotation>) operation, target, args);
-	}
-
-	private Class<?> getTargetClass(Object target) {
-		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
-		if (targetClass == null && target != null) {
-			targetClass = target.getClass();
-		}
-		return targetClass;
 	}
 
 	@SuppressWarnings("unchecked")

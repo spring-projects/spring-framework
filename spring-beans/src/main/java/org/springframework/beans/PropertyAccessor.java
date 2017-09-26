@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,6 @@ public interface PropertyAccessor {
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or {@code null} if not determinable
-	 * @throws InvalidPropertyException if there is no such property or
-	 * if the property isn't readable
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
@@ -95,8 +93,8 @@ public interface PropertyAccessor {
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or {@code null} if not determinable
-	 * @throws InvalidPropertyException if there is no such property or
-	 * if the property isn't readable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed
 	 */
 	TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException;
 

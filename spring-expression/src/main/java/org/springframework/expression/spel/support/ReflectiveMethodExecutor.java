@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private boolean argumentConversionOccurred = false;
 
+
 	public ReflectiveMethodExecutor(Method method) {
 		this.method = method;
 		if (method.isVarArgs()) {
@@ -54,6 +55,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 			this.varargsPosition = null;
 		}
 	}
+
 
 	public Method getMethod() {
 		return this.method;
@@ -68,8 +70,8 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 * method (if there is one!). For toString() it may walk as far as Object.
 	 */
 	public Class<?> getPublicDeclaringClass() {
-		if (!computedPublicDeclaringClass) {
-			this.publicDeclaringClass = discoverPublicClass(method, method.getDeclaringClass());
+		if (!this.computedPublicDeclaringClass) {
+			this.publicDeclaringClass = discoverPublicClass(this.method, this.method.getDeclaringClass());
 			this.computedPublicDeclaringClass = true;
 		}
 		return this.publicDeclaringClass;

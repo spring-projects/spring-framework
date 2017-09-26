@@ -87,7 +87,7 @@ public abstract class Operator extends SpelNodeImpl {
 
 	protected boolean isCompilableOperatorUsingNumerics() {
 		SpelNodeImpl left = getLeftOperand();
-		SpelNodeImpl right= getRightOperand();
+		SpelNodeImpl right = getRightOperand();
 		if (!left.isCompilable() || !right.isCompilable()) {
 			return false;
 		}
@@ -273,11 +273,11 @@ public abstract class Operator extends SpelNodeImpl {
 			boolean rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
 			
 			// If the declared descriptors aren't providing the information, try the actual descriptors
-			if (!leftNumeric && !ld.equals(leftActualDescriptor)) {
+			if (!leftNumeric && !ObjectUtils.nullSafeEquals(ld, leftActualDescriptor)) {
 				ld = leftActualDescriptor;
 				leftNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(ld);
 			}
-			if (!rightNumeric && !rd.equals(rightActualDescriptor)) {
+			if (!rightNumeric && !ObjectUtils.nullSafeEquals(rd, rightActualDescriptor)) {
 				rd = rightActualDescriptor;
 				rightNumeric = CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
 			}

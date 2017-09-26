@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
  * how a message code list is built for an {@code ObjectError}.
  *
  * @author Juergen Hoeller
+ * @since 10.03.2003
  * @see FieldError
  * @see DefaultMessageCodesResolver
- * @since 10.03.2003
  */
 @SuppressWarnings("serial")
 public class ObjectError extends DefaultMessageSourceResolvable {

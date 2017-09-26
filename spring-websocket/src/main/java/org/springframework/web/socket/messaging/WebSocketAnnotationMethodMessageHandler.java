@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.messaging;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -27,7 +28,6 @@ import org.springframework.messaging.handler.annotation.support.AnnotationExcept
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.web.method.ControllerAdviceBean;
-
 
 /**
  * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support
@@ -38,7 +38,6 @@ import org.springframework.web.method.ControllerAdviceBean;
  * @since 4.2
  */
 public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
-
 
 	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel,
 			MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
@@ -54,13 +53,14 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 	}
 
 	private void initControllerAdviceCache() {
-		if (getApplicationContext() == null) {
+		ApplicationContext context = getApplicationContext();
+		if (context == null) {
 			return;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for @MessageExceptionHandler mappings: " + getApplicationContext());
+			logger.debug("Looking for @MessageExceptionHandler mappings: " + context);
 		}
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(context);
 		AnnotationAwareOrderComparator.sort(beans);
 		initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
 	}

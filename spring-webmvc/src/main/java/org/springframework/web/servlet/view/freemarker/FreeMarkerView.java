@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,24 +199,25 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	@Override
 	public boolean checkResource(Locale locale) throws Exception {
+		String url = getUrl();
 		try {
 			// Check that we can get the template, even if we might subsequently get it again.
-			getTemplate(getUrl(), locale);
+			getTemplate(url, locale);
 			return true;
 		}
 		catch (FileNotFoundException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No FreeMarker view found for URL: " + getUrl());
+				logger.debug("No FreeMarker view found for URL: " + url);
 			}
 			return false;
 		}
 		catch (ParseException ex) {
 			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
+					"Failed to parse FreeMarker template for URL [" + url + "]", ex);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(
-					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
+					"Could not load FreeMarker template for URL [" + url + "]", ex);
 		}
 	}
 

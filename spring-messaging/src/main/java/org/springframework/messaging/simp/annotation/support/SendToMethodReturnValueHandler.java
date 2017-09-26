@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
-		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
+		Assert.notNull(messagingTemplate, "'messagingTemplate' must not be null");
 		this.messagingTemplate = messagingTemplate;
 		this.annotationRequired = annotationRequired;
 	}
@@ -124,7 +124,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	/**
-	 * @return the configured header initializer.
+	 * Return the configured header initializer.
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
@@ -141,7 +141,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
@@ -151,7 +153,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		PlaceholderResolver varResolver = initVarResolver(headers);
 		Object annotation = findAnnotation(returnType);
 
-		if (annotation != null && annotation instanceof SendToUser) {
+		if (annotation instanceof SendToUser) {
 			SendToUser sendToUser = (SendToUser) annotation;
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
@@ -176,7 +178,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		else {
-			SendTo sendTo = (SendTo) annotation;
+			SendTo sendTo = (SendTo) annotation;  // possibly null
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);

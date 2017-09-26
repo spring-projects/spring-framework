@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +34,17 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.jmx.support.MetricType;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of the {@link MBeanInfoAssembler}
- * interface that reads the management interface information from source level metadata.
+ * Implementation of the {@link MBeanInfoAssembler} interface that reads
+ * the management interface information from source level metadata.
  *
  * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
  * metadata can be read using any supported implementation. Out of the box,
- * Spring provides an implementation based on JDK 1.5+ annotations,
+ * Spring provides an implementation based on annotations:
  * {@code AnnotationJmxAttributeSource}.
  *
  * @author Rob Harrop
@@ -339,9 +338,9 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		}
 		else {
 			ManagedAttribute gma =
-				(getter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(getter);
+					(getter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(getter);
 			ManagedAttribute sma =
-				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
+					(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
 			populateAttributeDescriptor(desc,gma,sma);
 		}
 	}
@@ -384,8 +383,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			desc.setField(FIELD_METRIC_CATEGORY, metric.getCategory());
 		}
 
-		String metricType = (metric.getMetricType() == null) ? MetricType.GAUGE.toString() : metric.getMetricType().toString();
-		desc.setField(FIELD_METRIC_TYPE, metricType);
+		desc.setField(FIELD_METRIC_TYPE, metric.getMetricType().toString());
 	}
 
 	/**

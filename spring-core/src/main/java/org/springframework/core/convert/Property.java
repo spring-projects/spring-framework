@@ -207,8 +207,8 @@ public final class Property {
 	}
 
 	private void addAnnotationsToMap(
-		Map<Class<? extends Annotation>, Annotation> annotationMap,
-		AnnotatedElement object) {
+			Map<Class<? extends Annotation>, Annotation> annotationMap, AnnotatedElement object) {
+
 		if (object != null) {
 			for (Annotation annotation : object.getAnnotations()) {
 				annotationMap.put(annotation.annotationType(), annotation);

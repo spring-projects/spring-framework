@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,13 @@ public class ReaderContext {
 	private final SourceExtractor sourceExtractor;
 
 
+	/**
+	 * Construct a new {@code ReaderContext}.
+	 * @param resource the XML bean definition resource
+	 * @param problemReporter the problem reporter in use
+	 * @param eventListener the event listener in use
+	 * @param sourceExtractor the source extractor in use
+	 */
 	public ReaderContext(Resource resource, ProblemReporter problemReporter,
 			ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
 
@@ -51,83 +58,150 @@ public class ReaderContext {
 	}
 
 
+	// Errors and warnings
+
+	/**
+	 * Raise a fatal error.
+	 */
 	public void fatal(String message, Object source) {
 		fatal(message, source, null, null);
 	}
 
+	/**
+	 * Raise a fatal error.
+	 */
 	public void fatal(String message, Object source, Throwable ex) {
 		fatal(message, source, null, ex);
 	}
 
+	/**
+	 * Raise a fatal error.
+	 */
 	public void fatal(String message, Object source, ParseState parseState) {
 		fatal(message, source, parseState, null);
 	}
 
+	/**
+	 * Raise a fatal error.
+	 */
 	public void fatal(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.fatal(new Problem(message, location, parseState, cause));
 	}
 
+	/**
+	 * Raise a regular error.
+	 */
 	public void error(String message, Object source) {
 		error(message, source, null, null);
 	}
 
+	/**
+	 * Raise a regular error.
+	 */
 	public void error(String message, Object source, Throwable ex) {
 		error(message, source, null, ex);
 	}
 
+	/**
+	 * Raise a regular error.
+	 */
 	public void error(String message, Object source, ParseState parseState) {
 		error(message, source, parseState, null);
 	}
 
+	/**
+	 * Raise a regular error.
+	 */
 	public void error(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.error(new Problem(message, location, parseState, cause));
 	}
 
+	/**
+	 * Raise a non-critical warning.
+	 */
 	public void warning(String message, Object source) {
 		warning(message, source, null, null);
 	}
 
+	/**
+	 * Raise a non-critical warning.
+	 */
 	public void warning(String message, Object source, Throwable ex) {
 		warning(message, source, null, ex);
 	}
 
+	/**
+	 * Raise a non-critical warning.
+	 */
 	public void warning(String message, Object source, ParseState parseState) {
 		warning(message, source, parseState, null);
 	}
 
+	/**
+	 * Raise a non-critical warning.
+	 */
 	public void warning(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
 		this.problemReporter.warning(new Problem(message, location, parseState, cause));
 	}
 
 
+	// Explicit parse events
+
+	/**
+	 * Fire an defaults-registered event.
+	 */
 	public void fireDefaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.eventListener.defaultsRegistered(defaultsDefinition);
 	}
 
+	/**
+	 * Fire an component-registered event.
+	 */
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
 	}
 
+	/**
+	 * Fire an alias-registered event.
+	 */
 	public void fireAliasRegistered(String beanName, String alias, Object source) {
 		this.eventListener.aliasRegistered(new AliasDefinition(beanName, alias, source));
 	}
 
+	/**
+	 * Fire an import-processed event.
+	 */
 	public void fireImportProcessed(String importedResource, Object source) {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
+	/**
+	 * Fire an import-processed event.
+	 */
 	public void fireImportProcessed(String importedResource, Resource[] actualResources, Object source) {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, actualResources, source));
 	}
 
 
+	// Source extraction
+
+	/**
+	 * Return the source extractor in use.
+	 */
 	public SourceExtractor getSourceExtractor() {
 		return this.sourceExtractor;
 	}
 
+	/**
+	 * Call the source extractor for the given source object.
+	 * @param sourceCandidate the original source object
+	 * @return the source object to store, or {@code null} for none.
+	 * @see #getSourceExtractor()
+	 * @see SourceExtractor#extractSource
+	 */
 	public Object extractSource(Object sourceCandidate) {
 		return this.sourceExtractor.extractSource(sourceCandidate, this.resource);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,9 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy constructor for creating a new {@code SimpleMailMessage} from the state
 	 * of an existing {@code SimpleMailMessage} instance.
-	 * @throws IllegalArgumentException if the supplied message is {@code null}
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
-		Assert.notNull(original, "The 'original' message argument cannot be null");
+		Assert.notNull(original, "'original' message argument must not be null");
 		this.from = original.getFrom();
 		this.replyTo = original.getReplyTo();
 		if (original.getTo() != null) {
@@ -104,7 +103,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	public String getReplyTo() {
-		return replyTo;
+		return this.replyTo;
 	}
 
 	@Override
@@ -132,7 +131,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	public String[] getCc() {
-		return cc;
+		return this.cc;
 	}
 
 	@Override
@@ -146,7 +145,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	public String[] getBcc() {
-		return bcc;
+		return this.bcc;
 	}
 
 	@Override
@@ -155,7 +154,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	public Date getSentDate() {
-		return sentDate;
+		return this.sentDate;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,29 +196,30 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Perform a shutdown on the underlying ExecutorService.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
-	 * @see #awaitTerminationIfNecessary()
 	 */
 	public void shutdown() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
-		if (this.waitForTasksToCompleteOnShutdown) {
-			this.executor.shutdown();
+		if (this.executor != null) {
+			if (this.waitForTasksToCompleteOnShutdown) {
+				this.executor.shutdown();
+			}
+			else {
+				this.executor.shutdownNow();
+			}
+			awaitTerminationIfNecessary(this.executor);
 		}
-		else {
-			this.executor.shutdownNow();
-		}
-		awaitTerminationIfNecessary();
 	}
 
 	/**
 	 * Wait for the executor to terminate, according to the value of the
 	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
 	 */
-	private void awaitTerminationIfNecessary() {
+	private void awaitTerminationIfNecessary(ExecutorService executor) {
 		if (this.awaitTerminationSeconds > 0) {
 			try {
-				if (!this.executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+				if (!executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Timed out while waiting for executor" +
 								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");

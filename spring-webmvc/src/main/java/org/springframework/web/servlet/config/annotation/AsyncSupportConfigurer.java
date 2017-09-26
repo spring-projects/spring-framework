@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,9 @@ public class AsyncSupportConfigurer {
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * returns a {@link Callable}. Controller methods can override this default on
 	 * a per-request basis by returning a {@link WebAsyncTask}.
-	 *
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used, and it's
 	 * highly recommended to change that default in production since the simple
 	 * executor does not re-use threads.
-	 *
 	 * @param taskExecutor the task executor instance to use by default
 	 */
 	public AsyncSupportConfigurer setTaskExecutor(AsyncTaskExecutor taskExecutor) {
@@ -70,7 +68,6 @@ public class AsyncSupportConfigurer {
 	 * for further processing of the concurrently produced result.
 	 * <p>If this value is not set, the default timeout of the underlying
 	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
-	 *
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public AsyncSupportConfigurer setDefaultTimeout(long timeout) {
@@ -82,7 +79,6 @@ public class AsyncSupportConfigurer {
 	 * Configure lifecycle interceptors with callbacks around concurrent request
 	 * execution that starts when a controller returns a
 	 * {@link java.util.concurrent.Callable}.
-	 *
 	 * @param interceptors the interceptors to register
 	 */
 	public AsyncSupportConfigurer registerCallableInterceptors(CallableProcessingInterceptor... interceptors) {
@@ -94,7 +90,6 @@ public class AsyncSupportConfigurer {
 	/**
 	 * Configure lifecycle interceptors with callbacks around concurrent request
 	 * execution that starts when a controller returns a {@link DeferredResult}.
-	 *
 	 * @param interceptors the interceptors to register
 	 */
 	public AsyncSupportConfigurer registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
@@ -102,6 +97,7 @@ public class AsyncSupportConfigurer {
 		this.deferredResultInterceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}
+
 
 	protected AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;

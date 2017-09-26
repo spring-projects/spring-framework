@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.converter;
 
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 
 /**
@@ -29,15 +30,11 @@ public interface ContentTypeResolver {
 
 	/**
 	 * Determine the {@link MimeType} of a message from the given MessageHeaders.
-	 *
 	 * @param headers the headers to use for the resolution
-	 * @return the resolved {@code MimeType} of {@code null} if none found
-	 *
-	 * @throws org.springframework.util.InvalidMimeTypeException if the content type
-	 * 	is a String that cannot be parsed
-	 * @throws java.lang.IllegalArgumentException if there is a content type but
-	 * 	its type is unknown
+	 * @return the resolved {@code MimeType}, or {@code null} if none found
+	 * @throws InvalidMimeTypeException if the content type is a String that cannot be parsed
+	 * @throws IllegalArgumentException if there is a content type but its type is unknown
 	 */
-	MimeType resolve(MessageHeaders headers);
+	MimeType resolve(MessageHeaders headers) throws InvalidMimeTypeException;
 
 }

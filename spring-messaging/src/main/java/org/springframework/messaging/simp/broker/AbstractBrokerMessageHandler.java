@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class AbstractBrokerMessageHandler
 		this.clientOutboundChannel = outboundChannel;
 		this.brokerChannel = brokerChannel;
 
-		destinationPrefixes = (destinationPrefixes != null) ? destinationPrefixes : Collections.<String>emptyList();
+		destinationPrefixes = (destinationPrefixes != null ? destinationPrefixes : Collections.<String>emptyList());
 		this.destinationPrefixes = Collections.unmodifiableCollection(destinationPrefixes);
 	}
 
@@ -242,7 +242,7 @@ public abstract class AbstractBrokerMessageHandler
 
 
 	protected boolean checkDestinationPrefix(String destination) {
-		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+		if (destination == null || CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return true;
 		}
 		for (String prefix : this.destinationPrefixes) {

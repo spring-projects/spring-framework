@@ -71,6 +71,13 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
+	 * Return the fragment. Can be {@code null}.
+	 */
+	public final String getFragment() {
+		return this.fragment;
+	}
+
+	/**
 	 * Return the scheme specific part. Can be {@code null}.
 	 */
 	public abstract String getSchemeSpecificPart();
@@ -109,13 +116,6 @@ public abstract class UriComponents implements Serializable {
 	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	public abstract MultiValueMap<String, String> getQueryParams();
-
-	/**
-	 * Return the fragment. Can be {@code null}.
-	 */
-	public final String getFragment() {
-		return this.fragment;
-	}
 
 
 	/**

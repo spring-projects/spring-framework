@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	private final AspectInstanceFactory aspectInstanceFactory;
 
 	/**
-	 * The name of the aspect (ref bean) in which this advice was defined (used
-	 * when determining advice precedence so that we can determine
+	 * The name of the aspect (ref bean) in which this advice was defined
+	 * (used when determining advice precedence so that we can determine
 	 * whether two pieces of advice come from the same aspect).
 	 */
 	private String aspectName;
@@ -118,13 +118,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * This will be non-null if the creator of this advice object knows the argument names
 	 * and sets them explicitly
 	 */
-	private String[] argumentNames = null;
+	private String[] argumentNames;
 
 	/** Non-null if after throwing advice binds the thrown value */
-	private String throwingName = null;
+	private String throwingName;
 
 	/** Non-null if after returning advice binds the return value */
-	private String returningName = null;
+	private String returningName;
 
 	private Class<?> discoveredReturningType = Object.class;
 
@@ -295,8 +295,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
-						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
-						"Root cause: " + ex);
+						"' is neither a valid argument name nor the fully-qualified " +
+						"name of a Java type on the classpath. Root cause: " + ex);
 			}
 		}
 	}
@@ -329,8 +329,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Throwing name '" + name  +
-						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
-						"Root cause: " + ex);
+						"' is neither a valid argument name nor the fully-qualified " +
+						"name of a Java type on the classpath. Root cause: " + ex);
 			}
 		}
 	}

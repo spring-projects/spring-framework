@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 * Provide an {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		Assert.notNull(errorHandler, "ErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
@@ -166,7 +166,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 				return new EnterpriseConcurrentTriggerScheduler().schedule(decorateTask(task, true), trigger);
 			}
 			else {
-				ErrorHandler errorHandler = (this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
+				ErrorHandler errorHandler =
+						(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true));
 				return new ReschedulingRunnable(task, trigger, this.scheduledExecutor, errorHandler).schedule();
 			}
 		}
@@ -248,9 +249,9 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			return executor.schedule(task, new javax.enterprise.concurrent.Trigger() {
 				@Override
 				public Date getNextRunTime(LastExecution le, Date taskScheduledTime) {
-					return trigger.nextExecutionTime(le != null ?
+					return (trigger.nextExecutionTime(le != null ?
 							new SimpleTriggerContext(le.getScheduledStart(), le.getRunStart(), le.getRunEnd()) :
-							new SimpleTriggerContext());
+							new SimpleTriggerContext()));
 				}
 				@Override
 				public boolean skipRun(LastExecution lastExecution, Date scheduledRunTime) {

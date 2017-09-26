@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,21 +113,21 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
+	 * Return the prefix to be applied to any code built by this resolver.
+	 * <p>Returns an empty String in case of no prefix.
+	 */
+	protected String getPrefix() {
+		return this.prefix;
+	}
+
+	/**
 	 * Specify the format for message codes built by this resolver.
 	 * <p>The default is {@link Format#PREFIX_ERROR_CODE}.
 	 * @since 3.2
 	 * @see Format
 	 */
 	public void setMessageCodeFormatter(MessageCodeFormatter formatter) {
-		this.formatter = (formatter == null ? DEFAULT_FORMATTER : formatter);
-	}
-
-	/**
-	 * Return the prefix to be applied to any code built by this resolver.
-	 * <p>Returns an empty String in case of no prefix.
-	 */
-	protected String getPrefix() {
-		return this.prefix;
+		this.formatter = (formatter != null ? formatter : DEFAULT_FORMATTER);
 	}
 
 
@@ -141,7 +141,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * object/field-specific code, a field-specific code, a plain error code.
 	 * <p>Arrays, Lists and Maps are resolved both for specific elements and
 	 * the whole collection.
-	 * <p>See the {@link DefaultMessageCodesResolver class level Javadoc} for
+	 * <p>See the {@link DefaultMessageCodesResolver class level javadoc} for
 	 * details on the generated codes.
 	 * @return the list of codes
 	 */
@@ -208,14 +208,10 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 
 	/**
 	 * Common message code formats.
-	 *
-	 * @author Phillip Webb
-	 * @author Chris Beams
-	 * @since 3.2
 	 * @see MessageCodeFormatter
 	 * @see DefaultMessageCodesResolver#setMessageCodeFormatter(MessageCodeFormatter)
 	 */
-	public static enum Format implements MessageCodeFormatter {
+	public enum Format implements MessageCodeFormatter {
 
 		/**
 		 * Prefix the error code at the beginning of the generated message code. e.g.:

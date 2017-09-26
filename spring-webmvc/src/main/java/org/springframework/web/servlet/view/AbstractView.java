@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
-	private String beanName;
-
 	private String contentType = DEFAULT_CONTENT_TYPE;
 
 	private String requestContextAttribute;
@@ -80,23 +78,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	private Set<String> exposedContextBeanNames;
 
+	private String beanName;
 
-	/**
-	 * Set the view's name. Helpful for traceability.
-	 * <p>Framework code must call this when constructing views.
-	 */
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	/**
-	 * Return the view's name. Should never be {@code null},
-	 * if the view was correctly configured.
-	 */
-	public String getBeanName() {
-		return this.beanName;
-	}
 
 	/**
 	 * Set the content type for this view.
@@ -282,6 +265,23 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
 		this.exposedContextBeanNames = new HashSet<String>(Arrays.asList(exposedContextBeanNames));
+	}
+
+	/**
+	 * Set the view's name. Helpful for traceability.
+	 * <p>Framework code must call this when constructing views.
+	 */
+	@Override
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	/**
+	 * Return the view's name. Should never be {@code null},
+	 * if the view was correctly configured.
+	 */
+	public String getBeanName() {
+		return this.beanName;
 	}
 
 

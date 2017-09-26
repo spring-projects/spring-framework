@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,10 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private Object convertToByteBuffer(Object source, TypeDescriptor sourceType) {
 		byte[] bytes = (byte[]) (source instanceof byte[] ? source :
 				this.conversionService.convert(source, sourceType, BYTE_ARRAY_TYPE));
+
+		if (bytes == null) {
+			return ByteBuffer.wrap(new byte[0]);
+		}
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
 		byteBuffer.put(bytes);

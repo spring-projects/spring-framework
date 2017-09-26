@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -229,7 +228,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 
 		boolean validated = validateIfNoneMatch(etag);
-
 		if (!validated) {
 			validateIfModifiedSince(lastModifiedTimestamp);
 		}
@@ -286,6 +284,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (!StringUtils.hasLength(etag)) {
 			return false;
 		}
+
 		Enumeration<String> ifNoneMatch;
 		try {
 			ifNoneMatch = getRequest().getHeaders(IF_NONE_MATCH);
@@ -296,21 +295,22 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (!ifNoneMatch.hasMoreElements()) {
 			return false;
 		}
+
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
-
-			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			while (eTagMatcher.find()) {
-				if (StringUtils.hasLength(eTagMatcher.group())
-						&& etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
+			while (etagMatcher.find()) {
+				if (StringUtils.hasLength(etagMatcher.group()) &&
+						etag.replaceFirst("^W/", "").equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}
 			}
 		}
+
 		return true;
 	}
 

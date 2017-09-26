@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 	public boolean condition(String conditionExpression,
 			AnnotatedElementKey elementKey, EvaluationContext evalContext) {
 
-		return getExpression(this.conditionCache, elementKey, conditionExpression)
-				.getValue(evalContext, boolean.class);
+		return getExpression(this.conditionCache, elementKey, conditionExpression).getValue(
+				evalContext, boolean.class);
 	}
 
 	private Method getTargetMethod(Class<?> targetClass, Method method) {
@@ -77,9 +77,6 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 		Method targetMethod = this.targetMethodCache.get(methodKey);
 		if (targetMethod == null) {
 			targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-			if (targetMethod == null) {
-				targetMethod = method;
-			}
 			this.targetMethodCache.put(methodKey, targetMethod);
 		}
 		return targetMethod;

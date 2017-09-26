@@ -121,8 +121,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	public AbstractSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler handler,
 			Map<String, Object> attributes) {
 
-		Assert.notNull(id, "SessionId must not be null");
-		Assert.notNull(config, "SockJsConfig must not be null");
+		Assert.notNull(id, "Session id must not be null");
+		Assert.notNull(config, "SockJsServiceConfig must not be null");
 		Assert.notNull(handler, "WebSocketHandler must not be null");
 
 		this.id = id;

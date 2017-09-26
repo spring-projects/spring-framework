@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +190,9 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	@Override
 	public int compareTo(DestinationPatternsMessageCondition other, Message<?> message) {
 		String destination = (String) message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
+		if (destination == null) {
+			return 0;
+		}
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(destination);
 
 		Iterator<String> iterator = patterns.iterator();
