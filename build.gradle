@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion         = "9.3.14.v20161028"  // as of 9.3.15, Jetty has hard Servlet 3.1 requirement
 	ext.jetty94Version       = "9.4.6.v20170531"  // for spring-websocket support, optimized for Jetty 9.4
 	ext.jodaVersion          = "2.9.9"
-	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 primarily supported through JSR-223 (StandardScriptFactory)
+	ext.jrubyVersion         = "1.7.27"  // JRuby 9000 primarily supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.log4jVersion         = "1.2.17"
@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.7"
-	ext.tomcatVersion        = "8.5.16"
+	ext.tomcatVersion        = "8.5.21"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.3.31.Final"
 	ext.xmlunitVersion       = "1.6"
@@ -475,8 +475,8 @@ project("spring-context") {
 	dependencies {
 		compile(project(":spring-aop"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-expression"))
 		compile(project(":spring-core"))
+		compile(project(":spring-expression"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional(project(":spring-instrument"))
 		optional("javax.inject:javax.inject:1")
@@ -726,7 +726,7 @@ project("spring-web") {
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
-    testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+    	testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}
 }
@@ -856,7 +856,7 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
-		optional('org.webjars:webjars-locator:0.32')
+		optional('org.webjars:webjars-locator:0.32-1')
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
@@ -879,7 +879,7 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.4")
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("org.mozilla:rhino:1.7.7.1")
+		testCompile("org.mozilla:rhino:1.7.7.2")
 		testRuntime("org.jruby:jruby:${jrubyVersion}")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")

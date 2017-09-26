@@ -1,8 +1,8 @@
 configurations {
 	castor
+	jibx
 	xjc
 	xmlbeans
-	jibx
 }
 
 dependencies {
