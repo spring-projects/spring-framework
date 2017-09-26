@@ -368,7 +368,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
 					try {
 						UrlResource jarResource = new UrlResource(
-								ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
+								ResourceUtils.JAR_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
 						if (jarResource.exists()) {
 							result.add(jarResource);
 						}
@@ -420,11 +420,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			for (String path : StringUtils.delimitedListToStringArray(
 					javaClassPathProperty, System.getProperty("path.separator"))) {
 				try {
-					File file = new File(path);
+					String filePath = new File(path).getAbsolutePath();
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
-							ResourceUtils.FILE_URL_PREFIX + file.getAbsolutePath() +
-							ResourceUtils.JAR_URL_SEPARATOR);
-					if (jarResource.exists()) {
+							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
+					// Potentially overlapping with URLClassLoader.getURLs() result above!
+					if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
 						result.add(jarResource);
 					}
 				}
@@ -440,6 +440,29 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to evaluate 'java.class.path' manifest entries: " + ex);
 			}
+		}
+	}
+
+	/**
+	 * Check whether the given file path has a duplicate but differently structured entry
+	 * in the existing result, i.e. with or without a leading slash.
+	 * @param filePath the file path (with or without a leading slash)
+	 * @param result the current result
+	 * @return {@code true} if there is a duplicate (i.e. to ignore the given file path),
+	 * {@code false} to proceed with adding a corresponding resource to the current result
+	 */
+	private boolean hasDuplicate(String filePath, Set<Resource> result) {
+		if (result.isEmpty()) {
+			return false;
+		}
+		String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
+		try {
+			return result.contains(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX +
+					duplicatePath + ResourceUtils.JAR_URL_SEPARATOR));
+		}
+		catch (MalformedURLException ex) {
+			// Ignore: just for testing against duplicate.
+			return false;
 		}
 	}
 
