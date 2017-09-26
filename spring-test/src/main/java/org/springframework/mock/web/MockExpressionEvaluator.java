@@ -21,8 +21,6 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
-import org.springframework.util.Assert;
-
 /**
  * Mock implementation of the JSP 2.0 {@link javax.servlet.jsp.el.ExpressionEvaluator}
  * interface, delegating to the Apache JSTL ExpressionEvaluatorManager.
