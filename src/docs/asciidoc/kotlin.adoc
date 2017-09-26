@@ -95,27 +95,26 @@ By default, types from Java APIs used in Kotlin are recognized as
 https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types]
 for which null-checks are relaxed.
 https://github.com/Kotlin/KEEP/blob/jsr-305/proposals/jsr-305-custom-nullability-qualifiers.md[Kotlin support for JSR 305 annotations]
-available as of https://blog.jetbrains.com/kotlin/2017/08/kotlin-1-1-4-is-out/[1.1.4 release]
 + Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
 with the advantage of dealing with `null` related issues at compile time.
 
 [NOTE]
 ====
-Other libraries like Reactor and Spring Data leverage these annotations as well to provide
-null-safe APIs for Kotlin developers.
+Libraries like Reactor or Spring Data provide null-safe APIs leveraging this feature.
 ====
 
 The JSR 305 checks can be configured by adding the `-Xjsr305` compiler flag with the following
 options: `-Xjsr305={strict|warn|ignore}`.
 
-For kotlin versions 1.1.50+/1.2, the default behavior is the same to `-Xjsr305=warn`. The
-`strict` value should be considered experimental (Spring API nullability could evolve and
-more checks may be added in the future).
+For kotlin versions 1.1.50+, the default behavior is the same to `-Xjsr305=warn`. The
+`strict` value should be considered experimental (Spring API nullability declaration could
+evolve even between minor releases and more checks may be added in the future).
 
 [NOTE]
 ====
 Generic type arguments, varargs and array elements nullability are not supported yet,
-see https://jira.spring.io/browse/SPR-15942[SPR-15942] for up-to-date information.
+but should be in an upcoming release, see https://jira.spring.io/browse/SPR-15942[SPR-15942]
+for up-to-date information.
 ====
 
 [[classes-interfaces]]
@@ -127,7 +126,7 @@ with default values.
 
 Kotlin parameter names are recognized via a dedicated `KotlinReflectionParameterNameDiscoverer`
 which allows finding interface method parameter names without requiring the Java 8 `-parameters`
-compiler flag enabled during compliation.
+compiler flag enabled during compilation.
 
 https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module] which is required
 for serializing / deserializing JSON data is automatically registered when
@@ -390,9 +389,9 @@ plugin.
 
 [NOTE]
 ====
-As of Kay release train, Spring Data supports Kotlin immutable class instances and should
-not require `kotlin-noarg` plugin if the underlying persistence solution allows it
-(for example with MongoDB).
+As of Kay release train, Spring Data supports Kotlin immutable class instances
+and should not require `kotlin-noarg` plugin if the module leverages Spring Data object
+mapping (like with MongoDB, Redis, Cassandra, etc.).
 ====
 
 === Injecting dependencies
