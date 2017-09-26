@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import com.sun.jndi.toolkit.url.Uri;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
