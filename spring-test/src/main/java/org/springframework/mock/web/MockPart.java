@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.web.test;
+package org.springframework.mock.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
- * @since 3.1
+ * @since 4.3.12
  * @see MockHttpServletRequest#addPart
  * @see MockMultipartFile
  */
