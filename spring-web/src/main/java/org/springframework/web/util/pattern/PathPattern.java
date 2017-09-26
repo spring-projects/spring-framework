@@ -156,7 +156,6 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.patternString;
 	}
 
-
 	/**
 	 * Whether this pattern matches the given path.
 	 * @param pathContainer the candidate path to attempt to match against
@@ -164,7 +163,8 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matches(PathContainer pathContainer) {
 		if (this.head == null) {
-			return !hasLength(pathContainer);
+			return !hasLength(pathContainer) || 
+				(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer));
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -187,7 +187,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	@Nullable
 	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
 		if (this.head == null) {
-			return hasLength(pathContainer) ? null : PathMatchInfo.EMPTY;
+			return hasLength(pathContainer) &&
+				!(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer))
+				? null : PathMatchInfo.EMPTY;
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -707,6 +709,11 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	private static int scoreByNormalizedLength(PathPattern pattern) {
 		return -pattern.getNormalizedLength();
+	}
+	
+	private boolean pathContainerIsJustSeparator(PathContainer pathContainer) {
+		return pathContainer.value().length() == 1 && 
+				pathContainer.value().charAt(0) == separator;
 	}
 
 }

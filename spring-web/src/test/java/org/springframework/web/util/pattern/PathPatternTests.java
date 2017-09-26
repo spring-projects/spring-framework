@@ -77,6 +77,7 @@ public class PathPatternTests {
 	@Test
 	public void basicMatching() {
 		checkMatches("", "");
+		checkMatches("", "/");
 		checkMatches("", null);
 		checkNoMatch("/abc", "/");
 		checkMatches("/", "/");
@@ -1113,8 +1114,12 @@ public class PathPatternTests {
 		result = matchAndExtract("/abc/{var}","/abc/one");
 		assertEquals("one",result.getUriVariables().get("var"));
 		assertNull(result.getMatrixVariables().get("var"));
+		
+		result = matchAndExtract("","");
+		assertNotNull(result);
+		result = matchAndExtract("","/");
+		assertNotNull(result);
 	}
-
 
 	private PathPattern.PathMatchInfo matchAndExtract(String pattern, String path) {
 		 return parse(pattern).matchAndExtract(PathPatternTests.toPathContainer(path));
