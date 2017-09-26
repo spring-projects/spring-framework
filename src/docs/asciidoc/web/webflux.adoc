@@ -96,15 +96,21 @@ Mono<Account> account = client.get()
 		.flatMap(response -> response.bodyToMono(Account.class));
 ----
 
+As stated above, `WebClient` requires a `ClientHttpConnector` to operate, the default being the `ReactorClientHttpConnector`.
+When constructing a `ReactorClientHttpConnector`, you can use the `HttpClientOptions.Builder` to further customize it.
+For instance, to customize the Netty `SslContext`:
 
-[NOTE]
-====
-The `AsyncRestTemplate` also supports non-blocking interactions. The main difference
-is it can't support non-blocking streaming, like for example
-https://dev.twitter.com/streaming/overview[Twitter one], because fundamentally it's
-still based and relies on `InputStream` and `OutputStream`.
-====
-
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+SslContext sslContext = ...
+ReactorClientHttpConnector connector = new ReactorClientHttpConnector(builder -> {
+	builder.sslContext(sslContext);
+});
+WebClient webClient = WebClient.builder()
+		.clientConnector(connector)
+		.build();
+----
 
 [[webflux-http-body]]
 == Request and Response Body Conversion
