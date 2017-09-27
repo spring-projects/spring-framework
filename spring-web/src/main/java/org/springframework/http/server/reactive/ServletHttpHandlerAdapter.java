@@ -36,6 +36,7 @@ import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -109,6 +110,10 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
+
+		if (HttpMethod.HEAD.equals(httpRequest.getMethod())) {
+			httpResponse = new HttpHeadResponseDecorator(httpResponse);
+		}
 
 		asyncContext.addListener(ERROR_LISTENER);
 

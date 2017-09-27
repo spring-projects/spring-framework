@@ -81,32 +81,6 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> {
-			FileChannel source = null;
-			try {
-				source = FileChannel.open(file.toPath(), StandardOpenOption.READ);
-				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
-				Channels.transferBlocking(destination, source, position, count);
-				return Mono.empty();
-			}
-			catch (IOException ex) {
-				return Mono.error(ex);
-			}
-			finally {
-				if (source != null) {
-					try {
-						source.close();
-					}
-					catch (IOException ex) {
-						// ignore
-					}
-				}
-			}
-		});
-	}
-
-	@Override
 	protected void applyHeaders() {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			HttpString headerName = HttpString.tryFromString(entry.getKey());
@@ -134,6 +108,33 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			}
 		}
 	}
+
+	@Override
+	public Mono<Void> writeWith(File file, long position, long count) {
+		return doCommit(() -> {
+			FileChannel source = null;
+			try {
+				source = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
+				Channels.transferBlocking(destination, source, position, count);
+				return Mono.empty();
+			}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+			finally {
+				if (source != null) {
+					try {
+						source.close();
+					}
+					catch (IOException ex) {
+						// ignore
+					}
+				}
+			}
+		});
+	}
+
 
 	@Override
 	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {

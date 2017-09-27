@@ -27,6 +27,7 @@ import reactor.ipc.netty.http.server.HttpServerResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
@@ -54,8 +55,8 @@ public class ReactorHttpHandlerAdapter
 	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
 
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
-		ReactorServerHttpRequest adaptedRequest;
-		ReactorServerHttpResponse adaptedResponse;
+		ServerHttpRequest adaptedRequest;
+		ServerHttpResponse adaptedResponse;
 		try {
 			adaptedRequest = new ReactorServerHttpRequest(request, bufferFactory);
 			adaptedResponse = new ReactorServerHttpResponse(response, bufferFactory);
@@ -64,6 +65,10 @@ public class ReactorHttpHandlerAdapter
 			logger.error("Invalid URL " + ex.getMessage(), ex);
 			response.status(HttpResponseStatus.BAD_REQUEST);
 			return Mono.empty();
+		}
+
+		if (HttpMethod.HEAD.equals(adaptedRequest.getMethod())) {
+			adaptedResponse = new HttpHeadResponseDecorator(adaptedResponse);
 		}
 
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)

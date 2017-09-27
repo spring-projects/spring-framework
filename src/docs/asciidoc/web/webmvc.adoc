@@ -852,6 +852,11 @@ instead.
 ==== HTTP HEAD and OPTIONS
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-head-options,Same in Spring WebFlux>>#
 
+`@GetMapping` -- and also `@RequestMapping(method=HttpMethod.GET)`, support HTTP HEAD
+transparently for request mapping purposes. Controller methods don't need to change.
+A response wrapper, applied in `javax.servlet.http.HttpServlet`, ensures a `"Content-Length"`
+header is set to the number of bytes written and without actually writing to the response.
+
 `@GetMapping` -- and also `@RequestMapping(method=HttpMethod.GET)`, are implicitly mapped to
 and also support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
 but instead of writing the body, the number of bytes are counted and the "Content-Length"

@@ -811,10 +811,10 @@ You can also use the same with request header conditions:
 ==== HTTP HEAD, OPTIONS
 [.small]#<<web.adoc#mvc-ann-requestmapping-head-options,Same in Spring MVC>>#
 
-`@GetMapping` -- and also `@RequestMapping(method=HttpMethod.GET)`, are implicitly mapped to
-and also support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
-but instead of writing the body, the number of bytes are counted and the "Content-Length"
-header set.
+`@GetMapping` -- and also `@RequestMapping(method=HttpMethod.GET)`, support HTTP HEAD
+transparently for request mapping purposes. Controller methods don't need to change.
+A response wrapper, applied in the `HttpHandler` server adapter, ensures a `"Content-Length"`
+header is set to the number of bytes written and without actually writing to the response.
 
 By default HTTP OPTIONS is handled by setting the "Allow" response header to the list of HTTP
 methods listed in all `@RequestMapping` methods with matching URL patterns.

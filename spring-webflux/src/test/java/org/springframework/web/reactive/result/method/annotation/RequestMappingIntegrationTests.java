@@ -79,6 +79,15 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		assertEquals(expected, performGet("/object-stream-result", MediaType.ALL, String.class).getBody());
 	}
 
+	@Test
+	public void httpHead() throws Exception {
+		String url = "http://localhost:" + this.port + "/param?name=George";
+		HttpHeaders headers = getRestTemplate().headForHeaders(url);
+		String contentType = headers.getFirst("Content-Type");
+		assertNotNull(contentType);
+		assertEquals("text/html;charset=utf-8", contentType.toLowerCase());
+		assertEquals(13, headers.getContentLength());
+	}
 
 	@Configuration
 	@EnableWebFlux

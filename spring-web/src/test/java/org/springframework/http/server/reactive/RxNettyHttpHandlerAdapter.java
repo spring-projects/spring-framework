@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 import io.netty.buffer.ByteBuf;
@@ -64,8 +65,8 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.alloc());
 		InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();
 
-		RxNettyServerHttpRequest request;
-		RxNettyServerHttpResponse response;
+		ServerHttpRequest request;
+		ServerHttpResponse response;
 		try {
 			request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
 			response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
@@ -74,6 +75,10 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 			logger.error("Could not complete request", ex);
 			nativeResponse.setStatus(HttpResponseStatus.BAD_REQUEST);
 			return Observable.empty();
+		}
+
+		if (HttpMethod.HEAD.equals(request.getMethod())) {
+			response = new HttpHeadResponseDecorator(response);
 		}
 
 		Publisher<Void> result = this.httpHandler.handle(request, response)
