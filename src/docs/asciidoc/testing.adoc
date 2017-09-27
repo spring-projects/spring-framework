@@ -1144,14 +1144,14 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@Sql`
 * `@SqlConfig`
 * `@SqlGroup`
-* `@Repeat` _(JUnit 4)_
-* `@Timed` _(JUnit 4)_
-* `@IfProfileValue` _(JUnit 4)_
-* `@ProfileValueSourceConfiguration` _(JUnit 4)_
-* `@SpringJUnitConfig` _(JUnit Jupiter)_
-* `@SpringJUnitWebConfig` _(JUnit Jupiter)_
-* `@EnabledIf` _(JUnit Jupiter)_
-* `@DisabledIf` _(JUnit Jupiter)_
+* `@Repeat` _(only supported on JUnit 4)_
+* `@Timed` _(only supported on JUnit 4)_
+* `@IfProfileValue` _(only supported on JUnit 4)_
+* `@ProfileValueSourceConfiguration` _(only supported on JUnit 4)_
+* `@SpringJUnitConfig` _(only supported on JUnit Jupiter)_
+* `@SpringJUnitWebConfig` _(only supported on JUnit Jupiter)_
+* `@EnabledIf` _(only supported on JUnit Jupiter)_
+* `@DisabledIf` _(only supported on JUnit Jupiter)_
 
 For example, if we discover that we are repeating the following configuration across our
 _JUnit 4_ based test suite...
