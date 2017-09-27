@@ -16,7 +16,7 @@ plugins {
 	id "io.spring.dependency-management" version "1.0.3.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.1.50" apply false
 	id "org.jetbrains.dokka" version "0.9.15"
-	id "org.asciidoctor.convert" version "1.5.3"
+	id "org.asciidoctor.convert" version "1.5.6"
 }
 
 buildScan {
