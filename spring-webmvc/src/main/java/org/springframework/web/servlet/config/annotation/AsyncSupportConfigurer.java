@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
@@ -82,7 +82,6 @@ public class AsyncSupportConfigurer {
 	 * @param interceptors the interceptors to register
 	 */
 	public AsyncSupportConfigurer registerCallableInterceptors(CallableProcessingInterceptor... interceptors) {
-		Assert.notNull(interceptors, "Interceptors are required");
 		this.callableInterceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}
@@ -93,7 +92,6 @@ public class AsyncSupportConfigurer {
 	 * @param interceptors the interceptors to register
 	 */
 	public AsyncSupportConfigurer registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
-		Assert.notNull(interceptors, "Interceptors are required");
 		this.deferredResultInterceptors.addAll(Arrays.asList(interceptors));
 		return this;
 	}

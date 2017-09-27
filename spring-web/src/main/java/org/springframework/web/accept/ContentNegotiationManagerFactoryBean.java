@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ import org.springframework.web.context.ServletContextAware;
  * extension to a MediaType. You may {@link #setUseJaf suppress} the use of JAF.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public class ContentNegotiationManagerFactoryBean
@@ -255,8 +256,7 @@ public class ContentNegotiationManagerFactoryBean
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
 			if (this.servletContext != null && !isUseJafTurnedOff()) {
-				strategy = new ServletPathExtensionContentNegotiationStrategy(
-						this.servletContext, this.mediaTypes);
+				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
 			}
 			else {
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
@@ -269,8 +269,7 @@ public class ContentNegotiationManagerFactoryBean
 		}
 
 		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy =
-					new ParameterContentNegotiationStrategy(this.mediaTypes);
+			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
 			strategy.setParameterName(this.parameterName);
 			strategies.add(strategy);
 		}

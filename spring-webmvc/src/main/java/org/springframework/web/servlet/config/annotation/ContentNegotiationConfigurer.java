@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.HashMap;
@@ -31,9 +32,6 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with
  * one or more {@link ContentNegotiationStrategy} instances.
- *
- * <p>As of 5.0 you can set the exact strategies to use via
- * {@link #strategies(List)}.
  *
  * <p>As an alternative you can also rely on the set of defaults described below
  * which can be turned on or off or customized through the methods of this
@@ -86,12 +84,14 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  * of JAF.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 3.2
+ * @see ContentNegotiationManagerFactoryBean
  */
 public class ContentNegotiationConfigurer {
 
-	private final ContentNegotiationManagerFactoryBean factory =
-			new ContentNegotiationManagerFactoryBean();
+	private final ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 
@@ -226,18 +226,32 @@ public class ContentNegotiationConfigurer {
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #defaultContentType
 	 * @since 4.1.2
+	 * @see #defaultContentType
 	 */
 	public ContentNegotiationConfigurer defaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
 		this.factory.setDefaultContentTypeStrategy(defaultStrategy);
 		return this;
 	}
 
-	protected ContentNegotiationManager getContentNegotiationManager() throws Exception {
+
+	/**
+	 * Build a {@link ContentNegotiationManager} based on this configurer's settings.
+	 * @since 4.3.12
+	 * @see ContentNegotiationManagerFactoryBean#getObject()
+	 */
+	protected ContentNegotiationManager buildContentNegotiationManager() {
 		this.factory.addMediaTypes(this.mediaTypes);
 		this.factory.afterPropertiesSet();
 		return this.factory.getObject();
+	}
+
+	/**
+	 * @deprecated as of 4.3.12, in favor of {@link #buildContentNegotiationManager()}
+	 */
+	@Deprecated
+	protected ContentNegotiationManager getContentNegotiationManager() throws Exception {
+		return buildContentNegotiationManager();
 	}
 
 }

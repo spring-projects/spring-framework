@@ -246,32 +246,32 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping handlerMapping = createRequestMappingHandlerMapping();
-		handlerMapping.setOrder(0);
-		handlerMapping.setInterceptors(getInterceptors());
-		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
-		handlerMapping.setCorsConfigurations(getCorsConfigurations());
+		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
+		mapping.setOrder(0);
+		mapping.setInterceptors(getInterceptors());
+		mapping.setContentNegotiationManager(mvcContentNegotiationManager());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if (configurer.isUseSuffixPatternMatch() != null) {
-			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
 		}
 		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
-			handlerMapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
 		}
 		if (configurer.isUseTrailingSlashMatch() != null) {
-			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
 		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
 		if (pathHelper != null) {
-			handlerMapping.setUrlPathHelper(pathHelper);
+			mapping.setUrlPathHelper(pathHelper);
 		}
 		PathMatcher pathMatcher = configurer.getPathMatcher();
 		if (pathMatcher != null) {
-			handlerMapping.setPathMatcher(pathMatcher);
+			mapping.setPathMatcher(pathMatcher);
 		}
 
-		return handlerMapping;
+		return mapping;
 	}
 
 	/**
@@ -364,12 +364,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
 			configurer.mediaTypes(getDefaultMediaTypes());
 			configureContentNegotiation(configurer);
-			try {
-				this.contentNegotiationManager = configurer.getContentNegotiationManager();
-			}
-			catch (Throwable ex) {
-				throw new BeanInitializationException("Could not create ContentNegotiationManager", ex);
-			}
+			this.contentNegotiationManager = configurer.buildContentNegotiationManager();
 		}
 		return this.contentNegotiationManager;
 	}
@@ -403,11 +398,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping viewControllerHandlerMapping() {
-		ViewControllerRegistry registry = new ViewControllerRegistry();
-		registry.setApplicationContext(this.applicationContext);
+		ViewControllerRegistry registry = new ViewControllerRegistry(this.applicationContext);
 		addViewControllers(registry);
 
-		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
+		AbstractHandlerMapping handlerMapping = registry.buildHandlerMapping();
 		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
@@ -492,11 +486,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping defaultServletHandlerMapping() {
-		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(servletContext);
+		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(this.servletContext);
 		configureDefaultServletHandling(configurer);
-		AbstractHandlerMapping handlerMapping = configurer.getHandlerMapping();
-		handlerMapping = handlerMapping != null ? handlerMapping : new EmptyHandlerMapping();
-		return handlerMapping;
+
+		HandlerMapping handlerMapping = configurer.buildHandlerMapping();
+		return (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
 	}
 
 	/**
@@ -911,9 +905,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public ViewResolver mvcViewResolver() {
-		ViewResolverRegistry registry = new ViewResolverRegistry();
-		registry.setContentNegotiationManager(mvcContentNegotiationManager());
-		registry.setApplicationContext(this.applicationContext);
+		ViewResolverRegistry registry = new ViewResolverRegistry(
+				mvcContentNegotiationManager(), this.applicationContext);
 		configureViewResolvers(registry);
 
 		if (registry.getViewResolvers().isEmpty()) {

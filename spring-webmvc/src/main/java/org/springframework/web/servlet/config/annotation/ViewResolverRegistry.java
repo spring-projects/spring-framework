@@ -53,24 +53,30 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  */
 public class ViewResolverRegistry {
 
+	private ContentNegotiationManager contentNegotiationManager;
+
+	private ApplicationContext applicationContext;
+
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
 
 	private Integer order;
 
-	private ContentNegotiationManager contentNegotiationManager;
 
-	private ApplicationContext applicationContext;
-
-
-	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	/**
+	 * Class constructor with {@link ContentNegotiationManager} and {@link ApplicationContext}.
+	 * @since 4.3.12
+	 */
+	public ViewResolverRegistry(ContentNegotiationManager contentNegotiationManager, ApplicationContext context) {
 		this.contentNegotiationManager = contentNegotiationManager;
+		this.applicationContext = context;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	@Deprecated
+	public ViewResolverRegistry() {
 	}
+
 
 	/**
 	 * Whether any view resolvers have been registered.
@@ -78,7 +84,6 @@ public class ViewResolverRegistry {
 	public boolean hasRegistrations() {
 		return (this.contentNegotiatingResolver != null || !this.viewResolvers.isEmpty());
 	}
-
 
 	/**
 	 * Enable use of a {@link ContentNegotiatingViewResolver} to front all other
@@ -161,7 +166,7 @@ public class ViewResolverRegistry {
 	 * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration tiles() {
-		if (this.applicationContext != null && !hasBeanOfType(TilesConfigurer.class)) {
+		if (!checkBeanOfType(TilesConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a Tiles view resolver " +
 					"there must also be a single TilesConfigurer bean in this web application context " +
 					"(or its parent).");
@@ -178,7 +183,7 @@ public class ViewResolverRegistry {
 	 * {@link org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer} bean.
 	 */
 	public UrlBasedViewResolverRegistration freeMarker() {
-		if (this.applicationContext != null && !hasBeanOfType(FreeMarkerConfigurer.class)) {
+		if (!checkBeanOfType(FreeMarkerConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a FreeMarker view resolver " +
 					"there must also be a single FreeMarkerConfig bean in this web application context " +
 					"(or its parent): FreeMarkerConfigurer is the usual implementation. " +
@@ -198,7 +203,7 @@ public class ViewResolverRegistry {
 	 */
 	@Deprecated
 	public UrlBasedViewResolverRegistration velocity() {
-		if (this.applicationContext != null && !hasBeanOfType(org.springframework.web.servlet.view.velocity.VelocityConfigurer.class)) {
+		if (!checkBeanOfType(org.springframework.web.servlet.view.velocity.VelocityConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a Velocity view resolver " +
 					"there must also be a single VelocityConfig bean in this web application context " +
 					"(or its parent): VelocityConfigurer is the usual implementation. " +
@@ -214,7 +219,7 @@ public class ViewResolverRegistry {
 	 * prefix and a default suffix of ".tpl".
 	 */
 	public UrlBasedViewResolverRegistration groovy() {
-		if (this.applicationContext != null && !hasBeanOfType(GroovyMarkupConfigurer.class)) {
+		if (!checkBeanOfType(GroovyMarkupConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a Groovy markup view resolver " +
 					"there must also be a single GroovyMarkupConfig bean in this web application context " +
 					"(or its parent): GroovyMarkupConfigurer is the usual implementation. " +
@@ -230,7 +235,7 @@ public class ViewResolverRegistry {
 	 * @since 4.2
 	 */
 	public UrlBasedViewResolverRegistration scriptTemplate() {
-		if (this.applicationContext != null && !hasBeanOfType(ScriptTemplateConfigurer.class)) {
+		if (!checkBeanOfType(ScriptTemplateConfigurer.class)) {
 			throw new BeanInitializationException("In addition to a script template view resolver " +
 					"there must also be a single ScriptTemplateConfig bean in this web application context " +
 					"(or its parent): ScriptTemplateConfigurer is the usual implementation. " +
@@ -281,11 +286,6 @@ public class ViewResolverRegistry {
 		this.order = order;
 	}
 
-	protected boolean hasBeanOfType(Class<?> beanType) {
-		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-				this.applicationContext, beanType, false, false));
-	}
-
 
 	protected int getOrder() {
 		return (this.order != null ? this.order : Ordered.LOWEST_PRECEDENCE);
@@ -300,6 +300,28 @@ public class ViewResolverRegistry {
 		}
 	}
 
+	private boolean checkBeanOfType(Class<?> beanType) {
+		return (this.applicationContext == null ||
+				!ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+						this.applicationContext, beanType, false, false)));
+	}
+
+	@Deprecated
+	protected boolean hasBeanOfType(Class<?> beanType) {
+		return !ObjectUtils.isEmpty(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+				this.applicationContext, beanType, false, false));
+	}
+
+	@Deprecated
+	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	@Deprecated
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 
 	private static class TilesRegistration extends UrlBasedViewResolverRegistration {
 
@@ -307,6 +329,7 @@ public class ViewResolverRegistry {
 			super(new TilesViewResolver());
 		}
 	}
+
 
 	private static class VelocityRegistration extends UrlBasedViewResolverRegistration {
 
@@ -317,6 +340,7 @@ public class ViewResolverRegistry {
 		}
 	}
 
+
 	private static class FreeMarkerRegistration extends UrlBasedViewResolverRegistration {
 
 		public FreeMarkerRegistration() {
@@ -325,6 +349,7 @@ public class ViewResolverRegistry {
 		}
 	}
 
+
 	private static class GroovyMarkupRegistration extends UrlBasedViewResolverRegistration {
 
 		public GroovyMarkupRegistration() {
@@ -332,6 +357,7 @@ public class ViewResolverRegistry {
 			getViewResolver().setSuffix(".tpl");
 		}
 	}
+
 
 	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
 

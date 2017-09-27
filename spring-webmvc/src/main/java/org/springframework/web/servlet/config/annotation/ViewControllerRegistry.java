@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
+	private ApplicationContext applicationContext;
+
 	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>(4);
 
 	private final List<RedirectViewControllerRegistration> redirectRegistrations =
@@ -43,7 +45,18 @@ public class ViewControllerRegistry {
 
 	private int order = 1;
 
-	private ApplicationContext applicationContext;
+
+	/**
+	 * Class constructor with {@link ApplicationContext}.
+	 * @since 4.3.12
+	 */
+	public ViewControllerRegistry(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	@Deprecated
+	public ViewControllerRegistry() {
+	}
 
 
 	/**
@@ -96,19 +109,17 @@ public class ViewControllerRegistry {
 		this.order = order;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 
 	/**
 	 * Return the {@code HandlerMapping} that contains the registered view
 	 * controller mappings, or {@code null} for no registrations.
+	 * @since 4.3.12
 	 */
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected SimpleUrlHandlerMapping buildHandlerMapping() {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
+
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
@@ -116,10 +127,24 @@ public class ViewControllerRegistry {
 		for (RedirectViewControllerRegistration registration : this.redirectRegistrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
+
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
+		handlerMapping.setOrder(this.order);
 		return handlerMapping;
+	}
+
+	/**
+	 * @deprecated as of 4.3.12, in favor of {@link #buildHandlerMapping()}
+	 */
+	@Deprecated
+	protected AbstractHandlerMapping getHandlerMapping() {
+		return buildHandlerMapping();
+	}
+
+	@Deprecated
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
 
 }

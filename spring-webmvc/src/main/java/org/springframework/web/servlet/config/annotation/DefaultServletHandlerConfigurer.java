@@ -16,12 +16,10 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import javax.servlet.ServletContext;
 
 import org.springframework.util.Assert;
-import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -82,23 +80,30 @@ public class DefaultServletHandlerConfigurer {
 		this.handler.setServletContext(this.servletContext);
 	}
 
+
 	/**
 	 * Return a handler mapping instance ordered at {@link Integer#MAX_VALUE} containing the
 	 * {@link DefaultServletHttpRequestHandler} instance mapped to {@code "/**"};
 	 * or {@code null} if default servlet handling was not been enabled.
+	 * @since 4.3.12
 	 */
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected SimpleUrlHandlerMapping buildHandlerMapping() {
 		if (this.handler == null) {
 			return null;
 		}
 
-		Map<String, HttpRequestHandler> urlMap = new HashMap<String, HttpRequestHandler>();
-		urlMap.put("/**", this.handler);
-
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
+		handlerMapping.setUrlMap(Collections.singletonMap("/**", this.handler));
 		handlerMapping.setOrder(Integer.MAX_VALUE);
-		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
+	}
+
+	/**
+	 * @deprecated as of 4.3.12, in favor of {@link #buildHandlerMapping()}
+	 */
+	@Deprecated
+	protected AbstractHandlerMapping getHandlerMapping() {
+		return buildHandlerMapping();
 	}
 
 }

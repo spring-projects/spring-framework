@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,7 @@ public class PathMatchConfigurer {
 	 * <p>By default this is set to "false".
 	 * @see WebMvcConfigurer#configureContentNegotiation
 	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(
-			Boolean registeredSuffixPatternMatch) {
-
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
 		return this;
 	}
@@ -105,6 +103,7 @@ public class PathMatchConfigurer {
 		this.pathMatcher = pathMatcher;
 		return this;
 	}
+
 
 	public Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
