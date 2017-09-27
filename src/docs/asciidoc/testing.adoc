@@ -979,7 +979,8 @@ well as any __set up__ or __tear down__ of the test fixture.
 ==== Spring JUnit Jupiter Testing Annotations
 
 The following annotations are __only__ supported when used in conjunction with the
-`SpringExtension` and JUnit Jupiter (i.e., the programming model in JUnit 5).
+<<testcontext-junit-jupiter-extension,`SpringExtension`>> and JUnit Jupiter (i.e., the
+programming model in JUnit 5).
 
 ===== @SpringJUnitConfig
 
@@ -3910,6 +3911,199 @@ tied to a Spring-specific class hierarchy, you can configure your own custom tes
 by using `@RunWith(SpringRunner.class)` or <<testcontext-junit4-rules,Spring's
 JUnit rules>>.
 ====
+
+
+[[testcontext-junit-jupiter-extension]]
+===== SpringExtension for JUnit Jupiter
+
+The __Spring TestContext Framework__ offers full integration with the _JUnit Jupiter_
+testing framework introduced in JUnit 5. By annotating test classes with
+`@ExtendWith(SpringExtension.class)`, developers can implement standard JUnit Jupiter
+based unit and integration tests and simultaneously reap the benefits of the TestContext
+framework such as support for loading application contexts, dependency injection of test
+instances, transactional test method execution, and so on.
+
+Furthermore, thanks to the rich extension API in JUnit Jupiter, Spring is able to provide
+the following features above and beyond the feature set that Spring supports for JUnit 4
+and TestNG.
+
+* Dependency injection for test constructors, test methods, and test lifecycle callback
+  methods
+  - See <<testcontext-junit-jupiter-di>> for further details.
+* Powerful support for link:http://junit.org/junit5/docs/current/user-guide/#extensions-conditions[_conditional test execution_]
+  based on SpEL expressions, environment variables, system properties, etc.
+  - See the documentation for `@EnabledIf` and `@DisabledIf` in
+    <<integration-testing-annotations-junit-jupiter>> for further details and examples.
+* Custom _composed annotations_ that combine annotations from Spring **and** JUnit
+  Jupiter.
+  - See the `@TransactionalDevTestConfig` and `@TransactionalIntegrationTest` examples in
+    <<integration-testing-annotations-meta>> for further details.
+
+The following code listing demonstrates how to configure a test class to use the
+`SpringExtension` in conjunction with `@ContextConfiguration`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// Instructs JUnit Jupiter to extend the test with Spring support.
+@ExtendWith(SpringExtension.class)
+// Instructs Spring to load an ApplicationContext from TestConfig.class
+@ContextConfiguration(classes = TestConfig.class)
+class SimpleTests {
+
+   @Test
+   void testMethod() {
+      // execute test logic...
+   }
+}
+----
+
+Since annotations in JUnit 5 can also be used as meta-annotations, Spring is able to
+provide `@SpringJUnitConfig` and `@SpringJUnitWebConfig` __composed annotations__ to
+simplify the configuration of the test `ApplicationContext` and JUnit Jupiter.
+
+For example, the following example uses `@SpringJUnitConfig` to reduce the amount of
+configuration used in the previous example.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// Instructs Spring to register the SpringExtension with JUnit
+// Jupiter and load an ApplicationContext from TestConfig.class
+@SpringJUnitConfig(TestConfig.class)
+class SimpleTests {
+
+   @Test
+   void testMethod() {
+      // execute test logic...
+   }
+}
+----
+
+Similarly, the following example uses `@SpringJUnitWebConfig` to create a
+`WebApplicationContext` for use with JUnit Jupiter.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// Instructs Spring to register the SpringExtension with JUnit
+// Jupiter and load a WebApplicationContext from TestWebConfig.class
+@SpringJUnitWebConfig(TestWebConfig.class)
+class SimpleWebTests {
+
+   @Test
+   void testMethod() {
+      // execute test logic...
+   }
+}
+----
+
+See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
+<<integration-testing-annotations-junit-jupiter>> for further details.
+
+
+[[testcontext-junit-jupiter-di]]
+===== Dependency Injection with the SpringExtension
+
+The `SpringExtension` implements the
+link:http://junit.org/junit5/docs/current/user-guide/#extensions-parameter-resolution[`ParameterResolver`]
+extension API from JUnit Jupiter which allows Spring to provide dependency injection for
+test constructors, test methods, and test lifecycle callback methods.
+
+Specifically, the `SpringExtension` is able to inject dependencies from the test's
+`ApplicationContext` into test constructors and methods annotated with `@BeforeAll`,
+`@AfterAll`, `@BeforeEach`, `@AfterEach`, `@Test`, `@RepeatedTest`, `@ParameterizedTest`,
+etc.
+
+[[testcontext-junit-jupiter-di-constructor]]
+====== Constructor Injection
+
+If a parameter in a constructor for a JUnit Jupiter test class is of type
+`ApplicationContext` (or a sub-type thereof) or is annotated or meta-annotated with
+`@Autowired`, `@Qualifier`, or `@Value`, Spring will inject the value for that specific
+parameter with the corresponding bean from the test's `ApplicationContext`. A test
+constructor can also be directly annotated with `@Autowired` if all of the parameters
+should be supplied by Spring.
+
+[WARNING]
+====
+If the constructor for a test class is itself annotated with `@Autowired`, Spring will
+assume the responsibility for resolving **all** parameters in the constructor.
+Consequently, no other `ParameterResolver` registered with JUnit Jupiter will be able to
+resolve parameters for such a constructor.
+====
+
+In the following example, Spring will inject the `OrderService` bean from the
+`ApplicationContext` loaded from `TestConfig.class` into the
+`OrderServiceIntegrationTests` constructor. Note as well that this feature allows test
+dependencies to be `final` and therefore _immutable_.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@SpringJUnitConfig(TestConfig.class)
+class OrderServiceIntegrationTests {
+
+   private final OrderService orderService;
+
+   @Autowired
+   OrderServiceIntegrationTests(OrderService orderService) {
+      this.orderService = orderService.
+   }
+
+   // tests that use the injected OrderService
+}
+----
+
+[[testcontext-junit-jupiter-di-method]]
+====== Method Injection
+
+If a parameter in a JUnit Jupiter test method or test lifecycle callback method is of
+type `ApplicationContext` (or a sub-type thereof) or is annotated or meta-annotated with
+`@Autowired`, `@Qualifier`, or `@Value`, Spring will inject the value for that specific
+parameter with the corresponding bean from the test's `ApplicationContext`.
+
+In the following example, Spring will inject the `OrderService` from the
+`ApplicationContext` loaded from `TestConfig.class` into the `deleteOrder()` test method.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@SpringJUnitConfig(TestConfig.class)
+class OrderServiceIntegrationTests {
+
+   @Test
+   void deleteOrder(@Autowired OrderService orderService) {
+      // use orderService from the test's ApplicationContext
+   }
+}
+----
+
+Due to the robustness of the `ParameterResolver` support in JUnit Jupiter, it is also
+possible to have multiple dependencies injected into a single method not only from Spring
+but also from JUnit Jupiter itself or other third-party extensions.
+
+The following example demonstrates how to have both Spring and JUnit Jupiter inject
+dependencies into the `placeOrderRepeatedly()` test method simultaneously. Note that the
+use of `@RepeatedTest` from JUnit Jupiter allows the test method to gain access to the
+`RepetitionInfo`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@SpringJUnitConfig(TestConfig.class)
+class OrderServiceIntegrationTests {
+
+   @RepeatedTest(10)
+   void placeOrderRepeatedly(
+         @Autowired OrderService orderService, 
+         RepetitionInfo repetitionInfo) {
+
+      // use orderService from the test's ApplicationContext
+      // and repetitionInfo from JUnit Jupiter
+   }
+}
+----
 
 
 [[testcontext-support-classes-testng]]
