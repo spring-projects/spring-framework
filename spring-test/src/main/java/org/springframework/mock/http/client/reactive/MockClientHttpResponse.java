@@ -55,8 +55,6 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private boolean closed = false;
-
 
 	public MockClientHttpResponse(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus is required");
@@ -98,19 +96,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		if (this.closed) {
-			return Flux.error(new IllegalStateException("Connection has been closed."));
-		}
 		return this.body;
-	}
-
-	@Override
-	public void close() {
-		this.closed = true;
-	}
-
-	public boolean isClosed() {
-		return this.closed;
 	}
 
 	/**

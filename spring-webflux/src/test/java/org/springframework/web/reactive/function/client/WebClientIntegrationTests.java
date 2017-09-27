@@ -541,15 +541,15 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void shouldReceiveEmptyResponse() throws Exception {
-		prepareResponse(response -> response.setHeader("Content-Length", "0"));
+		prepareResponse(response -> response.setHeader("Content-Length", "0").setBody(""));
 
-		Mono<ClientResponse> result = this.webClient.get()
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.uri("/noContent")
-				.exchange();
+				.exchange()
+				.flatMap(response -> response.toEntity(Void.class));
 
 		StepVerifier.create(result).assertNext(r -> {
-			assertTrue(r.statusCode().is2xxSuccessful());
-			StepVerifier.create(r.bodyToMono(Void.class)).verifyComplete();
+			assertTrue(r.getStatusCode().is2xxSuccessful());
 		}).verifyComplete();
 	}
 

@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -44,7 +43,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface ClientResponse extends Closeable {
+public interface ClientResponse {
 
 	/**
 	 * Return the status code of this response.
@@ -132,18 +131,6 @@ public interface ClientResponse extends Closeable {
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
-
-	/**
-	 * Close this response and the underlying HTTP connection.
-	 * <p>This non-blocking method has to be called if its body isn't going
-	 * to be consumed. Not doing so might result in HTTP connection pool
-	 * inconsistencies or memory leaks.
-	 * <p>This shouldn't be called if the response body is read,
-	 * because it would prevent connections to be reused and cancel
-	 * the benefits of using a connection pooling.
-	 */
-	@Override
-	void close();
 
 
 	/**

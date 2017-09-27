@@ -90,11 +90,6 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	public void close() {
-		this.response.dispose();
-	}
-
-	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +

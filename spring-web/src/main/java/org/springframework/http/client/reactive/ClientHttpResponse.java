@@ -16,8 +16,6 @@
 
 package org.springframework.http.client.reactive;
 
-import java.io.Closeable;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ResponseCookie;
@@ -30,7 +28,7 @@ import org.springframework.util.MultiValueMap;
  * @author Brian Clozel
  * @since 5.0
  */
-public interface ClientHttpResponse extends ReactiveHttpInputMessage, Closeable {
+public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
 	 * Return the HTTP status as an {@link HttpStatus} enum value.
@@ -41,17 +39,5 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage, Closeable 
 	 * Return a read-only map of response cookies received from the server.
 	 */
 	MultiValueMap<String, ResponseCookie> getCookies();
-
-	/**
-	 * Close this response and the underlying HTTP connection.
-	 * <p>This non-blocking method has to be called if its body isn't going
-	 * to be consumed. Not doing so might result in HTTP connection pool
-	 * inconsistencies or memory leaks.
-	 * <p>This shouldn't be called if the response body is read,
-	 * because it would prevent connections to be reused and cancel
-	 * the benefits of using a connection pooling.
-	 */
-	@Override
-	void close();
 
 }
