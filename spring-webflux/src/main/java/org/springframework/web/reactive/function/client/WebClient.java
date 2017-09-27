@@ -491,6 +491,8 @@ public interface WebClient {
 		 *     .retrieve()
 		 *     .bodyToMono(Pojo.class);
 		 * </pre>
+		 * <p>Since this method reads the response body,
+		 * {@link ClientResponse#close()} should not be called.
 		 * @return spec with options for extracting the response body
 		 */
 		ResponseSpec retrieve();

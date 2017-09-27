@@ -98,24 +98,22 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		Mono<T> body = body(BodyExtractors.toMono(elementClass));
-		return body.doOnTerminate(this.response::close);
+		return  body(BodyExtractors.toMono(elementClass));
 	}
 
 	@Override
 	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		return body(BodyExtractors.toMono(typeReference)).doOnTerminate(this.response::close);
+		return body(BodyExtractors.toMono(typeReference));
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		Flux<T> body = body(BodyExtractors.toFlux(elementClass));
-		return body.doOnTerminate(this.response::close);
+		return body(BodyExtractors.toFlux(elementClass));
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		return body(BodyExtractors.toFlux(typeReference)).doOnTerminate(this.response::close);
+		return body(BodyExtractors.toFlux(typeReference));
 	}
 
 	@Override
@@ -134,8 +132,7 @@ class DefaultClientResponse implements ClientResponse {
 		return bodyMono
 				.map(body -> new ResponseEntity<>(body, headers, statusCode))
 				.switchIfEmpty(Mono.defer(
-						() -> Mono.just(new ResponseEntity<>(headers, statusCode))))
-				.doOnTerminate(this.response::close);
+						() -> Mono.just(new ResponseEntity<>(headers, statusCode))));
 	}
 
 	@Override
@@ -154,8 +151,7 @@ class DefaultClientResponse implements ClientResponse {
 		HttpStatus statusCode = statusCode();
 		return bodyFlux
 				.collectList()
-				.map(body -> new ResponseEntity<>(body, headers, statusCode))
-				.doOnTerminate(this.response::close);
+				.map(body -> new ResponseEntity<>(body, headers, statusCode));
 	}
 
 	@Override

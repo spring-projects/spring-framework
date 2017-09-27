@@ -409,7 +409,7 @@ class DefaultWebClient implements WebClient {
 		@SuppressWarnings("unchecked")
 		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
 			return this.responseMono.flatMap(
-					response -> bodyToMono(response, BodyExtractors.toMono(bodyType),
+					response -> bodyToPublisher(response, BodyExtractors.toMono(bodyType),
 							this::monoThrowableToMono));
 		}
 
@@ -417,38 +417,25 @@ class DefaultWebClient implements WebClient {
 		@SuppressWarnings("unchecked")
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
 			return this.responseMono.flatMap(
-					response -> bodyToMono(response, BodyExtractors.toMono(typeReference),
-							this::monoThrowableToMono));
+					response -> bodyToPublisher(response, BodyExtractors.toMono(typeReference),
+							mono -> (Mono<T>)mono));
 		}
 
 		private <T> Mono<T> monoThrowableToMono(Mono<? extends Throwable> mono) {
 			return mono.flatMap(Mono::error);
 		}
 
-		private <T> Mono<T> bodyToMono(ClientResponse response,
-				BodyExtractor<Mono<T>, ? super ClientHttpResponse> extractor,
-				Function<Mono<? extends Throwable>, Mono<T>> errorFunction) {
-
-			return this.statusHandlers.stream()
-					.filter(statusHandler -> statusHandler.test(response.statusCode()))
-					.findFirst()
-					.map(statusHandler -> statusHandler.apply(response))
-					.map(errorFunction::apply)
-					.orElse(response.body(extractor))
-					.doAfterTerminate(response::close);
-		}
-
- 		@Override
+		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
 			return this.responseMono.flatMapMany(
-					response -> bodyToFlux(response, BodyExtractors.toFlux(elementType),
+					response -> bodyToPublisher(response, BodyExtractors.toFlux(elementType),
 							this::monoThrowableToFlux));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
 			return this.responseMono.flatMapMany(
-					response -> bodyToFlux(response, BodyExtractors.toFlux(typeReference),
+					response -> bodyToPublisher(response, BodyExtractors.toFlux(typeReference),
 							this::monoThrowableToFlux));
 		}
 
@@ -456,17 +443,16 @@ class DefaultWebClient implements WebClient {
 			return mono.flatMapMany(Flux::error);
 		}
 
-		private <T> Flux<T> bodyToFlux(ClientResponse response,
-				BodyExtractor<Flux<T>, ? super ClientHttpResponse> extractor,
-				Function<Mono<? extends Throwable>, Flux<T>> errorFunction) {
+		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
+				BodyExtractor<T, ? super ClientHttpResponse> extractor,
+				Function<Mono<? extends Throwable>, T> errorFunction) {
 
 			return this.statusHandlers.stream()
 					.filter(statusHandler -> statusHandler.test(response.statusCode()))
 					.findFirst()
 					.map(statusHandler -> statusHandler.apply(response))
 					.map(errorFunction::apply)
-					.orElse(response.body(extractor))
-					.doAfterTerminate(response::close);
+					.orElse(response.body(extractor));
 		}
 
 		private static Mono<WebClientResponseException> createResponseException(ClientResponse response) {
