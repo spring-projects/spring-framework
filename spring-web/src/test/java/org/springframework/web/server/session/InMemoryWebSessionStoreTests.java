@@ -17,6 +17,7 @@ package org.springframework.web.server.session;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 
 import org.junit.Test;
 
@@ -28,35 +29,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Unit tests.
+ * Unit tests for {@link InMemoryWebSessionStore}.
  * @author Rob Winch
  */
 public class InMemoryWebSessionStoreTests {
 
 	private InMemoryWebSessionStore store = new InMemoryWebSessionStore();
 
-
-	@Test
-	public void constructorWhenImplicitStartCopiedThenCopyIsStarted() {
-		WebSession original = this.store.createWebSession().block();
-		assertNotNull(original);
-		original.getAttributes().put("foo", "bar");
-
-		WebSession copy = this.store.updateLastAccessTime(original).block();
-		assertNotNull(copy);
-		assertTrue(copy.isStarted());
-	}
-
-	@Test
-	public void constructorWhenExplicitStartCopiedThenCopyIsStarted() {
-		WebSession original = this.store.createWebSession().block();
-		assertNotNull(original);
-		original.start();
-
-		WebSession copy = this.store.updateLastAccessTime(original).block();
-		assertNotNull(copy);
-		assertTrue(copy.isStarted());
-	}
 
 	@Test
 	public void startsSessionExplicitly() {
@@ -87,8 +66,27 @@ public class InMemoryWebSessionStoreTests {
 		assertNotNull(retrieved);
 		assertSame(session, retrieved);
 
+		// Fast-forward 31 minutes
 		this.store.setClock(Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
 		WebSession retrievedAgain = this.store.retrieveSession(id).block();
 		assertNull(retrievedAgain);
+	}
+
+	@Test
+	public void lastAccessTimeIsUpdatedOnRetrieve() throws Exception {
+		WebSession session1 = this.store.createWebSession().block();
+		assertNotNull(session1);
+		String id = session1.getId();
+		Instant time1 = session1.getLastAccessTime();
+		session1.save();
+
+		// Fast-forward a few seconds
+		this.store.setClock(Clock.offset(this.store.getClock(), Duration.ofSeconds(5)));
+
+		WebSession session2 = this.store.retrieveSession(id).block();
+		assertNotNull(session2);
+		assertSame(session1, session2);
+		Instant time2 = session2.getLastAccessTime();
+		assertTrue(time1.isBefore(time2));
 	}
 }

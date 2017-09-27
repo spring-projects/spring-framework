@@ -78,11 +78,9 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
-		return Mono.defer(() ->
-				retrieveSession(exchange)
-						.flatMap(this.getSessionStore()::updateLastAccessTime)
-						.switchIfEmpty(this.sessionStore.createWebSession())
-						.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
+		return Mono.defer(() -> retrieveSession(exchange)
+				.switchIfEmpty(this.sessionStore.createWebSession())
+				.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
@@ -93,11 +91,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
-			return Mono.error(new IllegalStateException(
-					"Sessions are checked for expiration and have their " +
-							"lastAccessTime updated when first accessed during request processing. " +
-							"However this session is expired meaning that maxIdleTime elapsed " +
-							"before the call to session.save()."));
+			return Mono.error(new IllegalStateException("Session='" + session.getId() + "' expired."));
 		}
 
 		if (!session.isStarted()) {
