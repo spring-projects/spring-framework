@@ -3552,24 +3552,23 @@ which references a URL (e.g., a path prefixed with `classpath:`, `file:`, `http:
 will be loaded using the specified resource protocol.
 
 The following example demonstrates how to use `@Sql` at the class level and at the method
-level within a JUnit 4 based integration test class.
+level within a JUnit Jupiter based integration test class.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration
+	@SpringJUnitConfig
 	@Sql("/test-schema.sql")
-	public class DatabaseTests {
+	class DatabaseTests {
 
 		@Test
-		public void emptySchemaTest {
+		void emptySchemaTest {
 			// execute code that uses the test schema without any test data
 		}
 
 		@Test
 		@Sql({"/test-schema.sql", "/test-user-data.sql"})
-		public void userTest {
+		void userTest {
 			// execute code that uses the test schema and test data
 		}
 	}
@@ -3699,41 +3698,41 @@ executed in an isolated transaction. Although a thorough discussion of all suppo
 options for transaction management with `@Sql` is beyond the scope of this reference
 manual, the javadocs for `@SqlConfig` and `SqlScriptsTestExecutionListener` provide
 detailed information, and the following example demonstrates a typical testing scenario
-using JUnit 4 and transactional tests with `@Sql`. Note that there is no need to clean up
-the database after the `usersTest()` method is executed since any changes made to the
-database (either within the test method or within the `/test-data.sql` script) will
-be automatically rolled back by the `TransactionalTestExecutionListener` (see
+using JUnit Jupiter and transactional tests with `@Sql`. Note that there is no need to
+clean up the database after the `usersTest()` method is executed since any changes made
+to the database (either within the test method or within the `/test-data.sql` script)
+will be automatically rolled back by the `TransactionalTestExecutionListener` (see
 <<testcontext-tx,transaction management>> for details).
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration(classes = TestDatabaseConfig.class)
+	@SpringJUnitConfig(TestDatabaseConfig.class)
 	@Transactional
-	public class TransactionalSqlScriptsTests {
+	class TransactionalSqlScriptsTests {
 
-		protected JdbcTemplate jdbcTemplate;
+		final JdbcTemplate jdbcTemplate;
 
 		@Autowired
-		public void setDataSource(DataSource dataSource) {
+		TransactionalSqlScriptsTests(DataSource dataSource) {
 			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
 
 		@Test
 		@Sql("/test-data.sql")
-		public void usersTest() {
+		void usersTest() {
 			// verify state in test database:
 			assertNumUsers(2);
 			// execute code that uses the test data...
 		}
 
-		protected int countRowsInTable(String tableName) {
+		int countRowsInTable(String tableName) {
 			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
 		}
 
-		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"));
+		void assertNumUsers(int expected) {
+			assertEquals(expected, countRowsInTable("user"),
+				"Number of rows in the [user] table.");
 		}
 	}
 ----
@@ -4095,9 +4094,8 @@ use of `@RepeatedTest` from JUnit Jupiter allows the test method to gain access 
 class OrderServiceIntegrationTests {
 
    @RepeatedTest(10)
-   void placeOrderRepeatedly(
-         @Autowired OrderService orderService, 
-         RepetitionInfo repetitionInfo) {
+   void placeOrderRepeatedly(RepetitionInfo repetitionInfo,
+         @Autowired OrderService orderService) {
 
       // use orderService from the test's ApplicationContext
       // and repetitionInfo from JUnit Jupiter
@@ -4194,37 +4192,33 @@ of the Servlet API>> available in the `spring-test` module. This allows performi
 requests and generating responses without the need for running in a Servlet container.
 For the most part everything should work as it does at runtime with a few notable
 exceptions as explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. Here is a
-JUnit 4 based example of using Spring MVC Test:
+JUnit Jupiter based example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
-	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-	import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-	@RunWith(SpringRunner.class)
-	@WebAppConfiguration
-	@ContextConfiguration("test-servlet-context.xml")
-	public class ExampleTests {
+@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
+class ExampleTests {
 
-		@Autowired
-		private WebApplicationContext wac;
+   private MockMvc mockMvc;
 
-		private MockMvc mockMvc;
+   @BeforeEach
+   void setup(WebApplicationContext wac) {
+      this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+   }
 
-		@Before
-		public void setup() {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-		}
+   @Test
+   void getAccount() throws Exception {
+      this.mockMvc.perform(get("/accounts/1")
+            .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
+         .andExpect(status().isOk())
+         .andExpect(content().contentType("application/json"))
+         .andExpect(jsonPath("$.name").value("Lee"));
+   }
 
-		@Test
-		public void getAccount() throws Exception {
-			this.mockMvc.perform(get("/accounts/1").accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType("application/json"))
-				.andExpect(jsonPath("$.name").value("Lee"));
-		}
-
-	}
+}
 ----
 
 The above test relies on the `WebApplicationContext` support of the __TestContext framework__
