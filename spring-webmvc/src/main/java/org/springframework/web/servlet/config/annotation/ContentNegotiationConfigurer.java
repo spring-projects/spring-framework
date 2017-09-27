@@ -186,8 +186,8 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * @deprecated as of 5.0, in favor of {@link #useRegisteredExtensionsOnly(boolean)}, which
-	 * has reverse behavior.
+	 * @deprecated as of 5.0, in favor of {@link #useRegisteredExtensionsOnly(boolean)}
+	 * which has reverse behavior
 	 */
 	@Deprecated
 	public ContentNegotiationConfigurer useJaf(boolean useJaf) {
@@ -262,7 +262,12 @@ public class ContentNegotiationConfigurer {
 	}
 
 
-	protected ContentNegotiationManager getContentNegotiationManager() throws Exception {
+	/**
+	 * Build a {@link ContentNegotiationManager} based on this configurer's settings.
+	 * @since 4.3.12
+	 * @see ContentNegotiationManagerFactoryBean#getObject()
+	 */
+	protected ContentNegotiationManager buildContentNegotiationManager() {
 		this.factory.addMediaTypes(this.mediaTypes);
 		return this.factory.build();
 	}

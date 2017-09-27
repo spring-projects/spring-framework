@@ -86,6 +86,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link #setStrategies(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.2
  */
 public class ContentNegotiationManagerFactoryBean
@@ -293,6 +294,10 @@ public class ContentNegotiationManagerFactoryBean
 		build();
 	}
 
+	/**
+	 * Actually build the {@link ContentNegotiationManager}.
+	 * @since 5.0
+	 */
 	public ContentNegotiationManager build() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
@@ -303,8 +308,7 @@ public class ContentNegotiationManagerFactoryBean
 			if (this.favorPathExtension) {
 				PathExtensionContentNegotiationStrategy strategy;
 				if (this.servletContext != null && !useRegisteredExtensionsOnly()) {
-					strategy = new ServletPathExtensionContentNegotiationStrategy(
-							this.servletContext, this.mediaTypes);
+					strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
 				}
 				else {
 					strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
@@ -317,14 +321,13 @@ public class ContentNegotiationManagerFactoryBean
 			}
 
 			if (this.favorParameter) {
-				ParameterContentNegotiationStrategy strategy =
-						new ParameterContentNegotiationStrategy(this.mediaTypes);
+				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
 				strategy.setParameterName(this.parameterName);
 				if (this.useRegisteredExtensionsOnly != null) {
 					strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
 				}
 				else {
-					strategy.setUseRegisteredExtensionsOnly(true); // backwards compatibility
+					strategy.setUseRegisteredExtensionsOnly(true);  // backwards compatibility
 				}
 				strategies.add(strategy);
 			}
