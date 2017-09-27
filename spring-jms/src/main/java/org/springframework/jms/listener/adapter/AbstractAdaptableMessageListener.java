@@ -189,6 +189,7 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Return the {@link QosSettings} to use when sending a response,
 	 * or {@code null} if the defaults should be used.
+	 * @since 5.0
 	 */
 	@Nullable
 	protected QosSettings getResponseQosSettings() {

@@ -60,11 +60,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, @Nullable byte[] content)
 			throws SQLException {
 
-		Blob blob = ps.getConnection().createBlob();
-		blob.setBytes(1, content);
-
-		this.temporaryBlobs.add(blob);
-		ps.setBlob(paramIndex, blob);
+		if (content != null) {
+			Blob blob = ps.getConnection().createBlob();
+			blob.setBytes(1, content);
+			this.temporaryBlobs.add(blob);
+			ps.setBlob(paramIndex, blob);
+		}
+		else {
+			ps.setBlob(paramIndex, (Blob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied bytes into temporary BLOB with length " + content.length :
@@ -103,11 +107,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setClobAsString(PreparedStatement ps, int paramIndex, @Nullable String content)
 			throws SQLException {
 
-		Clob clob = ps.getConnection().createClob();
-		clob.setString(1, content);
-
-		this.temporaryClobs.add(clob);
-		ps.setClob(paramIndex, clob);
+		if (content != null) {
+			Clob clob = ps.getConnection().createClob();
+			clob.setString(1, content);
+			this.temporaryClobs.add(clob);
+			ps.setClob(paramIndex, clob);
+		}
+		else {
+			ps.setClob(paramIndex, (Clob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied string into temporary CLOB with length " + content.length() :
@@ -183,4 +191,5 @@ public class TemporaryLobCreator implements LobCreator {
 			logger.error("Could not free LOB", ex);
 		}
 	}
+
 }
