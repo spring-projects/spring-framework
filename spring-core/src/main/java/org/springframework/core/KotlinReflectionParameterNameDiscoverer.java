@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -27,7 +26,6 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link ParameterNameDiscoverer} implementation which uses Kotlin's reflection facilities
@@ -41,27 +39,13 @@ import org.springframework.util.ClassUtils;
  */
 public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	@Nullable
-	private static final Class<?> kotlinMetadata;
-
-	static {
-		Class<?> metadata;
-		try {
-			metadata = ClassUtils.forName("kotlin.Metadata", KotlinReflectionParameterNameDiscoverer.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Kotlin API not available - no special support for Kotlin class instantiation
-			metadata = null;
-		}
-		kotlinMetadata = metadata;
-	}
-
 	@Override
 	@Nullable
 	public String[] getParameterNames(Method method) {
-		if (!useKotlinSupport(method.getDeclaringClass())) {
+		if (!KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			return null;
 		}
+
 		try {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			return (function != null ? getParameterNames(function.getParameters()) : null);
@@ -74,9 +58,10 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		if (!useKotlinSupport(ctor.getDeclaringClass())) {
+		if (!KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 			return null;
 		}
+
 		try {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
 			return (function != null ? getParameterNames(function.getParameters()) : null);
@@ -101,15 +86,6 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 			parameterNames[i] = name;
 		}
 		return parameterNames;
-	}
-
-	/**
-	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
-	 */
-	@SuppressWarnings("unchecked")
-	private static boolean useKotlinSupport(Class<?> clazz) {
-		return (kotlinMetadata != null &&
-				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
 
 }

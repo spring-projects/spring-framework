@@ -69,6 +69,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -99,6 +100,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
@@ -1762,6 +1764,30 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Test
+	public void dataClassBindingWithOptionalParameter() throws Exception {
+		initServletWithControllers(ValidatedDataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("optionalParam", "8");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("value1-true-8", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithMissingParameter() throws Exception {
+		initServletWithControllers(ValidatedDataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertTrue(response.getContentAsString().contains("field 'param2'"));
+	}
+
+	@Test
 	public void dataClassBindingWithConversionError() throws Exception {
 		initServletWithControllers(ValidatedDataClassController.class);
 
@@ -3390,10 +3416,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		public int param3;
 
-		@ConstructorProperties({"param1", "param2"})
-		public DataClass(String param1, boolean p2) {
+		@ConstructorProperties({"param1", "param2", "optionalParam"})
+		public DataClass(String param1, boolean p2, Optional<Integer> optionalParam) {
 			this.param1 = param1;
 			this.param2 = p2;
+			Assert.notNull(optionalParam, "Optional must not be null");
+			optionalParam.ifPresent(integer -> this.param3 = integer);
 		}
 
 		public void setParam3(int param3) {
@@ -3418,6 +3446,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
 			binder.setValidator(vf);
+			binder.setConversionService(new DefaultFormattingConversionService());
 		}
 
 		@RequestMapping("/bind")

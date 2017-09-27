@@ -34,11 +34,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
@@ -50,22 +50,6 @@ import org.springframework.util.ClassUtils;
  */
 @SuppressWarnings("serial")
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
-
-	@Nullable
-	private static final Class<?> kotlinMetadata;
-
-	static {
-		Class<?> metadata;
-		try {
-			metadata = ClassUtils.forName("kotlin.Metadata", DependencyDescriptor.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Kotlin API not available - no Kotlin support
-			metadata = null;
-		}
-		kotlinMetadata = metadata;
-	}
-
 
 	private final Class<?> declaringClass;
 
@@ -183,20 +167,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		if (this.field != null) {
 			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
-					(useKotlinSupport(this.field.getDeclaringClass()) && KotlinDelegate.isNullable(this.field)));
+					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) &&
+							KotlinDelegate.isNullable(this.field)));
 		}
 		else {
 			return !obtainMethodParameter().isOptional();
 		}
-	}
-
-	/**
-	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
-	 */
-	@SuppressWarnings("unchecked")
-	private static boolean useKotlinSupport(Class<?> clazz) {
-		return (kotlinMetadata != null &&
-				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
 
 	/**

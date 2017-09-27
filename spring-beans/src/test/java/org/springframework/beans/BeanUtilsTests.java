@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -274,23 +273,6 @@ public class BeanUtilsTests {
 						keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
 			}
 		}
-	}
-	
-	@Test 
-	public void testFindDefaultConstructorAndInstantiate() {
-		Constructor<Bean> ctor = BeanUtils.findPrimaryConstructor(Bean.class);
-		assertNotNull(ctor);
-		Bean bean = BeanUtils.instantiateClass(ctor);
-		assertNotNull(bean);
-	}
-
-	@Test
-	public void testFindSingleNonDefaultConstructorAndInstantiate() {
-		Constructor<BeanWithSingleNonDefaultConstructor> ctor = BeanUtils.findPrimaryConstructor(BeanWithSingleNonDefaultConstructor.class);
-		assertNotNull(ctor);
-		BeanWithSingleNonDefaultConstructor bean = BeanUtils.instantiateClass(ctor, "foo");
-		assertNotNull(bean);
-		assertEquals("foo", bean.getName());
 	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {

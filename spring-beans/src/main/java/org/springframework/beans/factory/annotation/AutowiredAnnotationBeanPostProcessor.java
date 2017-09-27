@@ -34,10 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import kotlin.jvm.JvmClassMappingKt;
-import kotlin.reflect.KFunction;
-import kotlin.reflect.full.KClasses;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -122,22 +118,6 @@ import org.springframework.util.StringUtils;
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
-
-	@Nullable
-	private static final Class<?> kotlinMetadata;
-
-	static {
-		Class<?> metadata;
-		try {
-			metadata = ClassUtils.forName("kotlin.Metadata", AutowiredAnnotationBeanPostProcessor.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Kotlin API not available - no Kotlin support
-			metadata = null;
-		}
-		kotlinMetadata = metadata;
-	}
-	
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -303,12 +283,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					List<Constructor<?>> candidates = new ArrayList<Constructor<?>>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
-					Constructor<?> kotlinPrimaryConstructor = null;
-					if (useKotlinSupport(beanClass)) {
-						kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(beanClass);
-					}
+					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
 					for (Constructor<?> candidate : rawCandidates) {
-						if (kotlinPrimaryConstructor != null && candidate.isSynthetic()) {
+						if (primaryConstructor != null && candidate.isSynthetic()) {
 							continue;
 						}
 						AnnotationAttributes ann = findAutowiredAnnotation(candidate);
@@ -366,10 +343,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
-					else if (kotlinPrimaryConstructor != null) {
+					else if (primaryConstructor != null) {
 						candidateConstructors = (defaultConstructor != null ?
-								new Constructor<?>[] {kotlinPrimaryConstructor, defaultConstructor} :
-								new Constructor<?>[] {kotlinPrimaryConstructor});
+								new Constructor<?>[] {primaryConstructor, defaultConstructor} :
+								new Constructor<?>[] {primaryConstructor});
 					}
 					else {
 						candidateConstructors = new Constructor<?>[0];
@@ -379,15 +356,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			}
 		}
 		return (candidateConstructors.length > 0 ? candidateConstructors : null);
-	}
-
-	/**
-	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
-	 */
-	@SuppressWarnings("unchecked")
-	private static boolean useKotlinSupport(Class<?> clazz) {
-		return (kotlinMetadata != null &&
-				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
 	}
 
 	@Override
@@ -769,34 +737,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		public Object resolveShortcut(BeanFactory beanFactory) {
 			return beanFactory.getBean(this.shortcut, this.requiredType);
 		}
-	}
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		/**
-		 * Return the Java constructor corresponding to the Kotlin primary constructor if any.
-		 * @param clazz the {@link Class} of the Kotlin class
-		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">http://kotlinlang.org/docs/reference/classes.html#constructors</a>
-		 */
-		@Nullable
-		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
-			try {
-				KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
-				if (primaryConstructor == null) {
-					return null;
-				}
-				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
-				Assert.notNull(constructor, "Can't get the Java constructor corresponding to the Kotlin primary constructor of " + clazz.getName());
-				return constructor;
-			}
-			catch (UnsupportedOperationException ex) {
-				return null;
-			}
-		}
-
 	}
 
 }

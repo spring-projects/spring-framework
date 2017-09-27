@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.KotlinDetector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -762,7 +763,7 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		// Kotlin present?
-		if (ClassUtils.isPresent("kotlin.Metadata", this.moduleClassLoader)) {
+		if (KotlinDetector.isKotlinPresent()) {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);

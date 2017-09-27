@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,6 +41,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -69,21 +69,6 @@ public abstract class BeanUtils {
 
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
-
-	@Nullable
-	private static final Class<?> kotlinMetadata;
-
-	static {
-		Class<?> metadata;
-		try {
-			metadata = ClassUtils.forName("kotlin.Metadata", BeanUtils.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Kotlin API not available - no special support for Kotlin class instantiation
-			metadata = null;
-		}
-		kotlinMetadata = metadata;
-	}
 
 
 	/**
@@ -127,7 +112,7 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			Constructor<T> ctor = (useKotlinSupport(clazz) ?
+			Constructor<T> ctor = (KotlinDetector.isKotlinType(clazz) ?
 					KotlinDelegate.findPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
 			if (ctor == null) {
 				throw new BeanInstantiationException(clazz, "No default constructor found");
@@ -174,7 +159,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return (useKotlinSupport(ctor.getDeclaringClass()) ?
+			return (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
 					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
 		}
 		catch (InstantiationException ex) {
@@ -189,6 +174,28 @@ public abstract class BeanUtils {
 		catch (InvocationTargetException ex) {
 			throw new BeanInstantiationException(ctor, "Constructor threw exception", ex.getTargetException());
 		}
+	}
+
+	/**
+	 * Return the primary constructor of the provided class. For Kotlin classes, this
+	 * returns the Java constructor corresponding to the Kotlin primary constructor
+	 * (as defined in the Kotlin specification). Otherwise, in particular for non-Kotlin
+	 * classes, this simply returns {@code null}.
+	 * @param clazz the class to check
+	 * @since 5.0
+	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 */
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		if (KotlinDetector.isKotlinType(clazz)) {
+			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
+			if (kotlinPrimaryConstructor != null) {
+				return kotlinPrimaryConstructor;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -329,40 +336,6 @@ public abstract class BeanUtils {
 					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
 		return targetMethod;
-	}
-
-	/**
-	 * Return the primary constructor of the provided class. For Java classes, it returns
-	 * the single or the default constructor if any. For Kotlin classes, it returns the Java
-	 * constructor corresponding to the Kotlin primary constructor (as defined in
-	 * Kotlin specification), the single or the default constructor if any.
-	 *
-	 * @param clazz the class to check
-	 * @since 5.0
-	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
-	 */
-	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		if (useKotlinSupport(clazz)) {
-			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
-			if (kotlinPrimaryConstructor != null) {
-				return kotlinPrimaryConstructor;
-			}
-		}
-		Constructor<T>[] ctors = (Constructor<T>[]) clazz.getConstructors();
-		if (ctors.length == 1) {
-			return ctors[0];
-		}
-		else {
-			try {
-				return clazz.getDeclaredConstructor();
-			}
-			catch (NoSuchMethodException ex) {
-				return null;
-			}
-		}
 	}
 
 	/**
@@ -712,15 +685,6 @@ public abstract class BeanUtils {
 		}
 	}
 
-	/**
-	 * Return true if Kotlin is present and if the specified class is a Kotlin one.
-	 */
-	@SuppressWarnings("unchecked")
-	private static boolean useKotlinSupport(Class<?> clazz) {
-		return (kotlinMetadata != null &&
-				clazz.getDeclaredAnnotation((Class<? extends Annotation>) kotlinMetadata) != null);
-	}
-	
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
@@ -736,13 +700,13 @@ public abstract class BeanUtils {
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 			try {
-				KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
-				if (primaryConstructor == null) {
+				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+				if (primaryCtor == null) {
 					return null;
 				}
-				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
+				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryCtor);
 				Assert.notNull(constructor,
-						() -> "Failed to find Java constructor corresponding to Kotlin primary constructor: " + clazz.getName());
+						() -> "Failed to find Java constructor for Kotlin primary constructor: " + clazz.getName());
 				return constructor;
 			}
 			catch (UnsupportedOperationException ex) {
@@ -765,9 +729,9 @@ public abstract class BeanUtils {
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
 			Assert.isTrue(args.length <= parameters.size(),
-					"The number of provided arguments should be less of equals than the number of constructor parameters");
+					"Number of provided arguments should be less of equals than number of constructor parameters");
 			for (int i = 0 ; i < args.length ; i++) {
-				if (!(parameters.get(i).isOptional() && (args[i] == null))) {
+				if (!(parameters.get(i).isOptional() && args[i] == null)) {
 					argParameters.put(parameters.get(i), args[i]);
 				}
 			}

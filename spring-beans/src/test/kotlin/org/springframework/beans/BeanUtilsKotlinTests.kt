@@ -66,26 +66,6 @@ class BeanUtilsKotlinTests {
 		assertEquals(12, baz.param2)
 	}
 
-	@Test
-	fun `2 constructors with default one`() {
-		assertEquals(TwoConstructorsWithDefaultOne::class.java.getDeclaredConstructor(), BeanUtils.findPrimaryConstructor(TwoConstructorsWithDefaultOne::class.java))
-	}
-
-	@Test
-	fun `2 constructors without default one`() {
-		assertNull(BeanUtils.findPrimaryConstructor(TwoConstructorsWithoutDefaultOne::class.java))
-	}
-
-	@Test
-	fun `1 constructor with default one`() {
-		assertEquals(OneConstructorWithDefaultOne::class.java.getDeclaredConstructor(), BeanUtils.findPrimaryConstructor(OneConstructorWithDefaultOne::class.java))
-	}
-
-	@Test
-	fun `1 constructor without default one`() {
-		assertEquals(OneConstructorWithoutDefaultOne::class.java.getDeclaredConstructor(String::class.java), BeanUtils.findPrimaryConstructor(OneConstructorWithoutDefaultOne::class.java))
-	}
-
 	class Foo(val param1: String, val param2: Int)
 
 	class Bar(val param1: String, val param2: Int = 12)

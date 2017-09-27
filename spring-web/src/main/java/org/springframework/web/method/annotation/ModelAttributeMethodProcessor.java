@@ -198,11 +198,22 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
-		Class<?> type = nestedParameter.getNestedParameterType();
+		Class<?> clazz = nestedParameter.getNestedParameterType();
 
-		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(type);
+		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
 		if (ctor == null) {
-			throw new IllegalStateException("No primary constructor found for " + type.getName());
+			Constructor<?>[] ctors = clazz.getConstructors();
+			if (ctors.length == 1) {
+				ctor = ctors[0];
+			}
+			else {
+				try {
+					ctor = clazz.getDeclaredConstructor();
+				}
+				catch (NoSuchMethodException ex) {
+					throw new IllegalStateException("No primary or default constructor found for " + clazz, ex);
+				}
+			}
 		}
 
 		Object attribute = constructAttribute(ctor, attributeName, binderFactory, webRequest);
@@ -263,8 +274,13 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				}
 			}
 			try {
-				args[i] = (value != null ?
-						binder.convertIfNecessary(value, paramType, new MethodParameter(ctor, i)) : null);
+				MethodParameter methodParam = new MethodParameter(ctor, i);
+				if (value == null && methodParam.isOptional()) {
+					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
+				}
+				else {
+					args[i] = binder.convertIfNecessary(value, paramType, methodParam);
+				}
 			}
 			catch (TypeMismatchException ex) {
 				bindingFailure = true;
