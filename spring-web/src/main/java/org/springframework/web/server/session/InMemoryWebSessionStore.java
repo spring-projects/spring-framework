@@ -20,9 +20,12 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import reactor.core.publisher.Mono;
 
@@ -40,12 +43,20 @@ import org.springframework.web.server.WebSession;
  */
 public class InMemoryWebSessionStore implements WebSessionStore {
 
+	/** Minimum period between expiration checks */
+	private static final Duration EXPIRATION_CHECK_PERIOD = Duration.ofSeconds(60);
+
+
 	private static final IdGenerator idGenerator = new JdkIdGenerator();
 
 
 	private Clock clock = Clock.system(ZoneId.of("GMT"));
 
-	private final Map<String, InMemoryWebSession> sessions = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, InMemoryWebSession> sessions = new ConcurrentHashMap<>();
+
+	private volatile Instant nextExpirationCheckTime = Instant.now(this.clock).plus(EXPIRATION_CHECK_PERIOD);
+
+	private final ReentrantLock expirationCheckLock = new ReentrantLock();
 
 
 	/**
@@ -60,6 +71,8 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	public void setClock(Clock clock) {
 		Assert.notNull(clock, "Clock is required");
 		this.clock = clock;
+		// Force a check when clock changes..
+		this.nextExpirationCheckTime = Instant.now(this.clock);
 	}
 
 	/**
@@ -77,17 +90,43 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	@Override
 	public Mono<WebSession> retrieveSession(String id) {
+
+		Instant currentTime = Instant.now(this.clock);
+
+		if (!this.sessions.isEmpty() && !currentTime.isBefore(this.nextExpirationCheckTime)) {
+			checkExpiredSessions(currentTime);
+		}
+
 		InMemoryWebSession session = this.sessions.get(id);
 		if (session == null) {
 			return Mono.empty();
 		}
-		else if (session.isExpired()) {
+		else if (session.isExpired(currentTime)) {
 			this.sessions.remove(id);
 			return Mono.empty();
 		}
 		else {
-			session.updateLastAccessTime();
+			session.updateLastAccessTime(currentTime);
 			return Mono.just(session);
+		}
+	}
+
+	private void checkExpiredSessions(Instant currentTime) {
+		if (this.expirationCheckLock.tryLock()) {
+			try {
+				Iterator<InMemoryWebSession> iterator = this.sessions.values().iterator();
+				while (iterator.hasNext()) {
+					InMemoryWebSession session = iterator.next();
+					if (session.isExpired(currentTime)) {
+						iterator.remove();
+						session.invalidate();
+					}
+				}
+			}
+			finally {
+				this.nextExpirationCheckTime = currentTime.plus(EXPIRATION_CHECK_PERIOD);
+				this.expirationCheckLock.unlock();
+			}
 		}
 	}
 
@@ -101,7 +140,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		return Mono.fromSupplier(() -> {
 			Assert.isInstanceOf(InMemoryWebSession.class, webSession);
 			InMemoryWebSession session = (InMemoryWebSession) webSession;
-			session.updateLastAccessTime();
+			session.updateLastAccessTime(Instant.now(getClock()));
 			return session;
 		});
 	}
@@ -122,7 +161,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 
-		InMemoryWebSession() {
+		public InMemoryWebSession() {
 			this.creationTime = Instant.now(getClock());
 			this.lastAccessTime = this.creationTime;
 		}
@@ -201,25 +240,28 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		@Override
 		public boolean isExpired() {
+			return isExpired(Instant.now(getClock()));
+		}
+
+		private boolean isExpired(Instant currentTime) {
 			if (this.state.get().equals(State.EXPIRED)) {
 				return true;
 			}
-			if (checkExpired()) {
+			if (checkExpired(currentTime)) {
 				this.state.set(State.EXPIRED);
 				return true;
 			}
 			return false;
 		}
 
-		private boolean checkExpired() {
+		private boolean checkExpired(Instant currentTime) {
 			return isStarted() && !this.maxIdleTime.isNegative() &&
-					Instant.now(getClock()).minus(this.maxIdleTime).isAfter(this.lastAccessTime);
+					currentTime.minus(this.maxIdleTime).isAfter(this.lastAccessTime);
 		}
 
-		private void updateLastAccessTime() {
-			this.lastAccessTime = Instant.now(getClock());
+		private void updateLastAccessTime(Instant currentTime) {
+			this.lastAccessTime = currentTime;
 		}
-
 	}
 
 	private enum State { NEW, STARTED, EXPIRED }
