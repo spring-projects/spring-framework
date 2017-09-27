@@ -866,19 +866,20 @@ however, these lifecycle annotations have limited usage within an actual test cl
 
 If a method within a test class is annotated with `@PostConstruct`, that method will be
 executed before any __before__ methods of the underlying test framework (e.g., methods
-annotated with JUnit 4's `@Before`), and that will apply for every test method in the test
-class. On the other hand, if a method within a test class is annotated with
+annotated with JUnit Jupiter's `@BeforeEach`), and that will apply for every test method
+in the test class. On the other hand, if a method within a test class is annotated with
 `@PreDestroy`, that method will __never__ be executed. Within a test class it is
 therefore recommended to use test lifecycle callbacks from the underlying test framework
 instead of `@PostConstruct` and `@PreDestroy`.
 ====
 
 
-[[integration-testing-annotations-junit]]
+[[integration-testing-annotations-junit4]]
 ==== Spring JUnit 4 Testing Annotations
+
 The following annotations are __only__ supported when used in conjunction with the
 <<testcontext-junit4-runner,SpringRunner>>, <<testcontext-junit4-rules,Spring's JUnit
-rules>>, or <<testcontext-support-classes-junit4,Spring's JUnit 4 support classes>>.
+4 rules>>, or <<testcontext-support-classes-junit4,Spring's JUnit 4 support classes>>.
 
 ===== @IfProfileValue
 `@IfProfileValue` indicates that the annotated test is enabled for a specific testing
@@ -974,6 +975,147 @@ well as any __set up__ or __tear down__ of the test fixture.
 	}
 ----
 
+[[integration-testing-annotations-junit-jupiter]]
+==== Spring JUnit Jupiter Testing Annotations
+
+The following annotations are __only__ supported when used in conjunction with the
+`SpringExtension` and JUnit Jupiter (i.e., the programming model in JUnit 5).
+
+===== @SpringJUnitConfig
+
+`@SpringJUnitConfig` is a _composed annotation_ that combines
+`@ExtendWith(SpringExtension.class)` from JUnit Jupiter with `@ContextConfiguration` from
+the Spring TestContext Framework. It can be used at the class level as a drop-in
+replacement for `@ContextConfiguration`. With regard to configuration options, the only
+difference between `@ContextConfiguration` and `@SpringJUnitConfig` is that annotated
+classes may be declared via the `value` attribute in `@SpringJUnitConfig`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@SpringJUnitConfig**(TestConfig.class)
+	class ConfigurationClassJUnitJupiterSpringTests {
+		// class body...
+	}
+----
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@SpringJUnitConfig**(**locations** = "/test-config.xml")
+	class XmlJUnitJupiterSpringTests {
+		// class body...
+	}
+----
+
+See <<testcontext-ctx-management>> as well as the javadocs for `@SpringJUnitConfig` and
+`@ContextConfiguration` for further details.
+
+===== @SpringJUnitWebConfig
+
+`@SpringJUnitWebConfig` is a _composed annotation_ that combines
+`@ExtendWith(SpringExtension.class)` from JUnit Jupiter with `@ContextConfiguration` and
+`@WebAppConfiguration` from the Spring TestContext Framework. It can be used at the class
+level as a drop-in replacement for `@ContextConfiguration` and `@WebAppConfiguration`.
+With regard to configuration options, the only difference between `@ContextConfiguration`
+and `@SpringJUnitWebConfig` is that annotated classes may be declared via the `value`
+attribute in `@SpringJUnitWebConfig`. In addition, the `value` attribute from
+`@WebAppConfiguration` can only be overridden via the `resourcePath` attribute in
+`@SpringJUnitWebConfig`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@SpringJUnitWebConfig**(TestConfig.class)
+	class ConfigurationClassJUnitJupiterSpringWebTests {
+		// class body...
+	}
+----
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@SpringJUnitWebConfig**(**locations** = "/test-config.xml")
+	class XmlJUnitJupiterSpringWebTests {
+		// class body...
+	}
+----
+
+See <<testcontext-ctx-management>> as well as the javadocs for `@SpringJUnitWebConfig`,
+`@ContextConfiguration`, and `@WebAppConfiguration` for further details.
+
+===== @EnabledIf
+
+`@EnabledIf` is used to signal that the annotated JUnit Jupiter test class or test method
+is _enabled_ and should be executed if the supplied `expression` evaluates to `true`.
+Specifically, if the expression evaluates to `Boolean.TRUE` or a `String` equal to
+`"true"` (ignoring case), the test will be __enabled__. When applied at the class level,
+all test methods within that class are automatically enabled by default as well.
+
+Expressions can be any of the following.
+
+* Spring Expression Language (SpEL) expression – for example:
+  - `@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
+* Placeholder for a property available in the Spring `Environment` – for example:
+  - `@EnabledIf("${smoke.tests.enabled}")`
+* Text literal – for example:
+  - `@EnabledIf("true")`
+
+Note, however, that a text literal which is _not_ the result of dynamic resolution of a
+property placeholder is of zero practical value since `@EnabledIf("false")` is equivalent
+to `@Disabled` and `@EnabledIf("true")` is logically meaningless.
+
+`@EnabledIf` may be used as a meta-annotation to create custom composed annotations. For
+example, a custom `@EnabledOnMac` annotation can be created as follows.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@EnabledIf(
+    expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
+    reason = "Enabled on Mac OS"
+)
+public @interface EnabledOnMac {}
+----
+
+===== @DisabledIf
+
+`@DisabledIf` is used to signal that the annotated JUnit Jupiter test class or test
+method is _disabled_ and should not be executed if the supplied `expression` evaluates to
+`true`. Specifically, if the expression evaluates to `Boolean.TRUE` or a `String` equal
+to `"true"` (ignoring case), the test will be __disabled__. When applied at the class
+level, all test methods within that class are automatically disabled as well.
+
+Expressions can be any of the following.
+
+* Spring Expression Language (SpEL) expression – for example:
+  - `@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
+* Placeholder for a property available in the Spring `Environment` – for example:
+  - `@DisabledIf("${smoke.tests.disabled}")`
+* Text literal – for example:
+  - `@DisabledIf("true")`
+
+Note, however, that a text literal which is _not_ the result of dynamic resolution of a
+property placeholder is of zero practical value since `@DisabledIf("true")` is
+equivalent to `@Disabled` and `@DisabledIf("false")` is logically meaningless.
+
+`@DisabledIf` may be used as a meta-annotation to create custom composed annotations. For
+example, a custom `@DisabledOnMac` annotation can be created as follows.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@DisabledIf(
+    expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
+    reason = "Disabled on Mac OS"
+)
+public @interface DisabledOnMac {}
+----
+
 
 [[integration-testing-annotations-meta]]
 ==== Meta-Annotation Support for Testing
@@ -1000,13 +1142,17 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@Sql`
 * `@SqlConfig`
 * `@SqlGroup`
-* `@Repeat`
-* `@Timed`
-* `@IfProfileValue`
-* `@ProfileValueSourceConfiguration`
+* `@Repeat` _(JUnit 4)_
+* `@Timed` _(JUnit 4)_
+* `@IfProfileValue` _(JUnit 4)_
+* `@ProfileValueSourceConfiguration` _(JUnit 4)_
+* `@SpringJUnitConfig` _(JUnit Jupiter)_
+* `@SpringJUnitWebConfig` _(JUnit Jupiter)_
+* `@EnabledIf` _(JUnit Jupiter)_
+* `@DisabledIf` _(JUnit Jupiter)_
 
-For example, if we discover that we are repeating the following configuration
-across our JUnit 4 based test suite...
+For example, if we discover that we are repeating the following configuration across our
+_JUnit 4_ based test suite...
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1024,8 +1170,8 @@ across our JUnit 4 based test suite...
 	public class UserRepositoryTests { }
 ----
 
-We can reduce the above duplication by introducing a custom _composed annotation_
-that centralizes the common test configuration like this:
+We can reduce the above duplication by introducing a custom _composed annotation_ that
+centralizes the common test configuration for Spring like this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1035,25 +1181,106 @@ that centralizes the common test configuration like this:
 	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
 	@ActiveProfiles("dev")
 	@Transactional
-	public @interface TransactionalDevTest { }
+	public @interface TransactionalDevTestConfig { }
 ----
 
-Then we can use our custom `@TransactionalDevTest` annotation to simplify the
-configuration of individual test classes as follows:
+Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
+configuration of individual JUnit 4 based test classes as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@RunWith(SpringRunner.class)
-	@TransactionalDevTest
+	@TransactionalDevTestConfig
 	public class OrderRepositoryTests { }
 
 	@RunWith(SpringRunner.class)
-	@TransactionalDevTest
+	@TransactionalDevTestConfig
 	public class UserRepositoryTests { }
 ----
 
-For further details, consult the <<core.adoc#annotation-programming-model,Spring Annotation Programming Model>>.
+If we are writing tests using JUnit Jupiter, we can reduce code duplication even further
+since annotations in JUnit 5 can also be used as meta-annotations. For example, if we
+discover that we are repeating the following configuration across our JUnit Jupiter based
+test suite...
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	class OrderRepositoryTests { }
+
+	@ExtendWith(SpringExtension.class)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	class UserRepositoryTests { }
+----
+
+We can reduce the above duplication by introducing a custom _composed annotation_
+that centralizes the common test configuration for Spring and JUnit Jupiter like this:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@ExtendWith(SpringExtension.class)
+	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles("dev")
+	@Transactional
+	public @interface TransactionalDevTestConfig { }
+----
+
+Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
+configuration of individual JUnit Jupiter based test classes as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@TransactionalDevTestConfig
+	class OrderRepositoryTests { }
+
+	@TransactionalDevTestConfig
+	class UserRepositoryTests { }
+----
+
+Since JUnit Jupiter supports the use of `@Test`, `@RepeatedTest`, `ParameterizedTest`,
+etc. as meta-annotations, it is also possible to create custom composed annotations at
+the test method level. For example, if we wish to create a _composed annotation_ that
+combines the `@Test` and `@Tag` annotations from JUnit Jupiter with the `@Transactional`
+annotation from Spring, we could create an `@TransactionalIntegrationTest` annotation as
+follows.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Transactional
+	@Tag("integration-test") // org.junit.jupiter.api.Tag
+	@Test // org.junit.jupiter.api.Test
+	public @interface TransactionalIntegrationTest { }
+----
+
+Then we can use our custom `@TransactionalIntegrationTest` annotation to simplify the
+configuration of individual JUnit Jupiter based test methods as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@TransactionalIntegrationTest
+	void saveOrder() { }
+
+	@TransactionalIntegrationTest
+	void deleteOrder() { }
+----
+
+For further details, consult the <<core.adoc#annotation-programming-model,Spring
+Annotation Programming Model>>.
 
 
 [[testcontext-framework]]
@@ -1066,15 +1293,17 @@ configuration__ with reasonable defaults that can be overridden through annotati
 configuration.
 
 In addition to generic testing infrastructure, the TestContext framework provides
-explicit support for JUnit 4 and TestNG in the form of `abstract` support classes. For
-JUnit 4, Spring also provides a custom JUnit `Runner` and custom JUnit `Rules` that allow
-one to write so-called __POJO test classes__. POJO test classes are not required to
-extend a particular class hierarchy.
+explicit support for JUnit 4, JUnit Jupiter (a.k.a., JUnit 5), and TestNG. For JUnit 4
+and TestNG, Spring provides `abstract` support classes. Furthermore, Spring provides a
+custom JUnit `Runner` and custom JUnit `Rules` for _JUnit 4_ as well as a custom
+`Extension` for _JUnit Jupiter_ that allow one to write so-called __POJO test classes__.
+POJO test classes are not required to extend a particular class hierarchy such as the
+`abstract` support classes.
 
-The following section provides an overview of the internals of the TestContext
-framework. If you are only interested in _using_ the framework and not necessarily
-interested in _extending_ it with your own custom listeners or custom loaders, feel free
-to go directly to the configuration (<<testcontext-ctx-management,context management>>,
+The following section provides an overview of the internals of the TestContext framework.
+If you are only interested in _using_ the framework and not necessarily interested in
+_extending_ it with your own custom listeners or custom loaders, feel free to go directly
+to the configuration (<<testcontext-ctx-management,context management>>,
 <<testcontext-fixture-di,dependency injection>>, <<testcontext-tx,transaction
 management>>), <<testcontext-support-classes,support classes>>, and
 <<integration-testing-annotations,annotation support>> sections.
@@ -1085,14 +1314,14 @@ management>>), <<testcontext-support-classes,support classes>>, and
 The core of the framework consists of the `TestContextManager` class and the
 `TestContext`, `TestExecutionListener`, and `SmartContextLoader` interfaces. A
 `TestContextManager` is created per test class (e.g., for the execution of all test
-methods within a single test class in JUnit 4). The `TestContextManager` in turn manages a
-`TestContext` that holds the context of the current test. The `TestContextManager` also
-updates the state of the `TestContext` as the test progresses and delegates to
-`TestExecutionListener` implementations, which instrument the actual test execution by
-providing dependency injection, managing transactions, and so on. A `SmartContextLoader`
-is responsible for loading an `ApplicationContext` for a given test class. Consult the
-javadocs and the Spring test suite for further information and examples of various
-implementations.
+methods within a single test class in JUnit Jupiter). The `TestContextManager` in turn
+manages a `TestContext` that holds the context of the current test. The
+`TestContextManager` also updates the state of the `TestContext` as the test progresses
+and delegates to `TestExecutionListener` implementations, which instrument the actual
+test execution by providing dependency injection, managing transactions, and so on. A
+`SmartContextLoader` is responsible for loading an `ApplicationContext` for a given test
+class. Consult the javadocs and the Spring test suite for further information and
+examples of various implementations.
 
 ===== TestContext
 `TestContext` encapsulates the context in which a test is executed, agnostic of the
@@ -3090,11 +3319,11 @@ transaction method__ or __after transaction method__ is executed at the appropri
 
 [TIP]
 ====
-Any __before methods__ (such as methods annotated with JUnit 4's `@Before`) and any __after
-methods__ (such as methods annotated with JUnit 4's `@After`) are executed __within__ a
-transaction. In addition, methods annotated with `@BeforeTransaction` or
-`@AfterTransaction` are naturally not executed for test methods that are not configured
-to run within a transaction.
+Any __before methods__ (such as methods annotated with JUnit Jupiter's `@BeforeEach`) and
+any __after methods__ (such as methods annotated with JUnit Jupiter's `@AfterEach`) are
+executed __within__ a transaction. In addition, methods annotated with
+`@BeforeTransaction` or `@AfterTransaction` are naturally not executed for test methods
+that are not configured to run within a transaction.
 ====
 
 [[testcontext-tx-mgr-config]]
@@ -3112,7 +3341,7 @@ used to look up a transaction manager in the test's `ApplicationContext`.
 [[testcontext-tx-annotation-demo]]
 ===== Demonstration of all transaction-related annotations
 
-The following JUnit 4 based example displays a fictitious integration testing scenario
+The following JUnit 4 based example displays a _fictitious_ integration testing scenario
 highlighting all transaction-related annotations. The example is **not** intended to
 demonstrate best practices but rather to demonstrate how these annotations can be used.
 Consult the <<integration-testing-annotations,annotation support>> section for further
