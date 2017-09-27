@@ -31,10 +31,9 @@ https://start.spring.io/#!language=kotlin[start.spring.io].
 [[extensions]]
 == Extensions
 
-Thanks to its great https://kotlinlang.org/docs/reference/java-interop.html[Java interoperability]
-and to https://kotlinlang.org/docs/reference/extensions.html[Kotlin extensions], Spring
-Framework Kotlin APIs leverage regular Java APIs and are additionally enhanced by a few Kotlin specific APIs
-available out of the box within Spring Framework 5 artifacts.
+Kotlin https://kotlinlang.org/docs/reference/extensions.html[extensions] provide the ability
+to extend existing classes with additional functionality. The Spring Framework Kotlin APIs make
+use of these extensions to add new Kotlin specific conveniences to existing Spring APIs.
 
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/[Spring Framework KDoc API] lists
 and documents all the Kotlin extensions and DSLs available.
@@ -343,11 +342,11 @@ Whilst Kotlin's JVM-friendly design is generally frictionless with Spring,
 this specific Kotlin feature can prevent the application from starting, if this fact is not taken in
 consideration. This is because Spring beans are normally proxified with CGLIB
 - such as `@Configuration` classes - which need to be inherited at runtime for technical reasons.
+The workaround was to add an `open` keyword on each class and member
+functions of Spring beans proxified with CGLIB such as `@Configuration` classes, which can
+quickly become painful and is against Kotlin principle to keep code concise and predictable.
 
-Before Kotlin 1.0.6, one needed to add an `open` keyword on each class and member
-functions of Spring beans proxified with CGLIB such as `@Configuration` classes.
-
-Fortunately, Kotlin 1.0.6+ now provides a
+Fortunately, Kotlin now provides a
 https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
 plugin, a preconfigured version of `kotlin-allopen` plugin that automatically opens classes
 and their member functions for types annotated or meta-annotated with one of the following
@@ -362,7 +361,8 @@ Meta-annotations support means that types annotated with `@Configuration`, `@Con
 `@RestController`, `@Service` or `@Repository` are automatically opened since these
 annotations are meta-annotated with `@Component`.
 
-http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default.
+http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so in practice
+you will be able to write your Kotlin beans without any additional `open` keyword, like in Java.
 
 === Using immutable class instances for persistence
 
