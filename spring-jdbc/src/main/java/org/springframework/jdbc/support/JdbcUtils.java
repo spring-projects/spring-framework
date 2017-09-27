@@ -472,8 +472,8 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Convert a column name with underscores to the corresponding property name using "camel case".  A name
-	 * like "customer_number" would match a "customerNumber" property name.
+	 * Convert a column name with underscores to the corresponding property name using "camel case".
+	 * A name like "customer_number" would match a "customerNumber" property name.
 	 * @param name the column name to be converted
 	 * @return the name using "camel case"
 	 */

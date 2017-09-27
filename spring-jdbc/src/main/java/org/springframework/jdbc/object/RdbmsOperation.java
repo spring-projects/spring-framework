@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.util.Assert;
 
 /**
  * An "RDBMS operation" is a multi-threaded, reusable object representing a query,
@@ -85,27 +86,25 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 
 	/**
-	 * An alternative to the more commonly used setDataSource() when you want to
-	 * use the same JdbcTemplate in multiple RdbmsOperations. This is appropriate if the
-	 * JdbcTemplate has special configuration such as a SQLExceptionTranslator that should
-	 * apply to multiple RdbmsOperation objects.
+	 * An alternative to the more commonly used {@link #setDataSource} when you want to
+	 * use the same {@link JdbcTemplate} in multiple {@code RdbmsOperations}. This is
+	 * appropriate if the {@code JdbcTemplate} has special configuration such as a
+	 * {@link org.springframework.jdbc.support.SQLExceptionTranslator} to be reused.
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-		if (jdbcTemplate == null) {
-			throw new IllegalArgumentException("jdbcTemplate must not be null");
-		}
+		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	/**
-	 * Return the JdbcTemplate object used by this object.
+	 * Return the {@link JdbcTemplate} used by this operation object.
 	 */
 	public JdbcTemplate getJdbcTemplate() {
 		return this.jdbcTemplate;
 	}
 
 	/**
-	 * Set the JDBC DataSource to obtain connections from.
+	 * Set the JDBC {@link DataSource} to obtain connections from.
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
@@ -233,9 +232,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Subclasses can override this to supply dynamic SQL if they wish,
-	 * but SQL is normally set by calling the setSql() method
-	 * or in a subclass constructor.
+	 * Subclasses can override this to supply dynamic SQL if they wish, but SQL is
+	 * normally set by calling the {@link #setSql} method or in a subclass constructor.
 	 */
 	public String getSql() {
 		return this.sql;
@@ -287,7 +285,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters Array containing the declared {@link SqlParameter} objects
 	 * @see #declaredParameters
 	 */
-	public void setParameters(SqlParameter[] parameters) {
+	public void setParameters(SqlParameter... parameters) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once the query is compiled");
 		}
@@ -396,7 +394,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Validate the named parameters passed to an execute method based on declared parameters.
 	 * Subclasses should invoke this method before every {@code executeQuery()} or
 	 * {@code update()} method.
-	 * @param parameters parameter Map supplied. May be {@code null}.
+	 * @param parameters parameter Map supplied (may be {@code null})
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateNamedParameters(Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {

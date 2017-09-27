@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,10 +170,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	}
 
 	public Session getSession(Class<? extends Session> sessionType, Connection connection) {
-		List<Session> sessions = this.sessions;
-		if (connection != null) {
-			sessions = this.sessionsPerConnection.get(connection);
-		}
+		List<Session> sessions = (connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
 

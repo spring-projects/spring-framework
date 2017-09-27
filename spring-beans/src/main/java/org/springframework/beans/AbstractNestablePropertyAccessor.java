@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ import org.springframework.util.StringUtils;
  * as String arrays are converted in such a format if the array itself is not
  * assignable.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Rob Harrop
  * @author Stephane Nicoll
+ * @author Rod Johnson
+ * @author Rob Harrop
  * @since 4.2
  * @see #registerCustomEditor
  * @see #setPropertyValues
@@ -96,9 +96,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	Object rootObject;
 
-	/**
-	 * Map with cached nested Accessors: nested path -> Accessor instance.
-	 */
+	/** Map with cached nested Accessors: nested path -> Accessor instance */
 	private Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
 

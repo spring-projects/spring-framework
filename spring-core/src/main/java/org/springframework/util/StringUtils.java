@@ -114,7 +114,7 @@ public abstract class StringUtils {
 	 * @see #hasText(String)
 	 */
 	public static boolean hasLength(String str) {
-		return hasLength((CharSequence) str);
+		return (str != null && !str.isEmpty());
 	}
 
 	/**
@@ -159,7 +159,7 @@ public abstract class StringUtils {
 	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasText(String str) {
-		return hasText((CharSequence) str);
+		return (str != null && !str.isEmpty() && hasText((CharSequence) str));
 	}
 
 	/**
@@ -376,8 +376,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Count the occurrences of the substring {@code sub} in string {@code str}.
-	 * @param str string to search in. Return 0 if this is {@code null}.
-	 * @param sub string to search for. Return 0 if this is {@code null}.
+	 * @param str string to search in
+	 * @param sub string to search for
 	 */
 	public static int countOccurrencesOf(String str, String sub) {
 		if (!hasLength(str) || !hasLength(sub)) {
@@ -395,8 +395,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Replace all occurrences of a substring within a string with
-	 * another string.
+	 * Replace all occurrences of a substring within a string with another string.
 	 * @param inString {@code String} to examine
 	 * @param oldPattern {@code String} to replace
 	 * @param newPattern {@code String} to insert
@@ -513,9 +512,8 @@ public abstract class StringUtils {
 	 * Capitalize a {@code String}, changing the first letter to
 	 * upper case as per {@link Character#toUpperCase(char)}.
 	 * No other letters are changed.
-	 * @param str the {@code String} to capitalize, may be {@code null}
-	 * @return the capitalized {@code String}, or {@code null} if the supplied
-	 * string is {@code null}
+	 * @param str the {@code String} to capitalize
+	 * @return the capitalized {@code String}
 	 */
 	public static String capitalize(String str) {
 		return changeFirstCharacterCase(str, true);
@@ -525,9 +523,8 @@ public abstract class StringUtils {
 	 * Uncapitalize a {@code String}, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
-	 * @param str the {@code String} to uncapitalize, may be {@code null}
-	 * @return the uncapitalized {@code String}, or {@code null} if the supplied
-	 * string is {@code null}
+	 * @param str the {@code String} to uncapitalize
+	 * @return the uncapitalized {@code String}
 	 */
 	public static String uncapitalize(String str) {
 		return changeFirstCharacterCase(str, false);
@@ -597,9 +594,8 @@ public abstract class StringUtils {
 	/**
 	 * Strip the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
-	 * @param path the file path (may be {@code null})
-	 * @return the path with stripped filename extension,
-	 * or {@code null} if none
+	 * @param path the file path
+	 * @return the path with stripped filename extension
 	 */
 	public static String stripFilenameExtension(String path) {
 		if (path == null) {
@@ -724,7 +720,7 @@ public abstract class StringUtils {
 	 * @param localeString the locale {@code String}, following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc);
 	 * also accepts spaces as separators, as an alternative to underscores
-	 * @return a corresponding {@code Locale} instance
+	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
 	public static Locale parseLocaleString(String localeString) {
@@ -877,8 +873,7 @@ public abstract class StringUtils {
 	 * Copy the given {@code Collection} into a {@code String} array.
 	 * <p>The {@code Collection} must contain {@code String} elements only.
 	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array ({@code null} if the supplied
-	 * {@code Collection} was {@code null})
+	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Collection<String> collection) {
 		if (collection == null) {
@@ -892,8 +887,7 @@ public abstract class StringUtils {
 	 * Copy the given Enumeration into a {@code String} array.
 	 * The Enumeration must contain {@code String} elements only.
 	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array ({@code null} if the passed-in
-	 * Enumeration was {@code null})
+	 * @return the {@code String} array
 	 */
 	public static String[] toStringArray(Enumeration<String> enumeration) {
 		if (enumeration == null) {
@@ -1048,8 +1042,7 @@ public abstract class StringUtils {
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * (only applies to tokens that are empty after trimming; StringTokenizer
 	 * will not consider subsequent delimiters as token in the first place).
-	 * @return an array of the tokens ({@code null} if the input {@code String}
-	 * was {@code null})
+	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
 	 * @see String#trim()
 	 * @see #delimitedListToStringArray

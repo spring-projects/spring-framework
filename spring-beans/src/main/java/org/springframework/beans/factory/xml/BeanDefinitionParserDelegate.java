@@ -389,8 +389,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Return the defaults definition object, or {@code null} if the
-	 * defaults have been initialized yet.
+	 * Return the defaults definition object.
 	 */
 	public DocumentDefaultsDefinition getDefaults() {
 		return this.defaults;

@@ -240,12 +240,14 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
-		if (this.resolvableType == null) {
-			this.resolvableType = (this.field != null ?
+		ResolvableType resolvableType = this.resolvableType;
+		if (resolvableType == null) {
+			resolvableType = (this.field != null ?
 					ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
 					ResolvableType.forMethodParameter(this.methodParameter));
+			this.resolvableType = resolvableType;
 		}
-		return this.resolvableType;
+		return resolvableType;
 	}
 
 	/**

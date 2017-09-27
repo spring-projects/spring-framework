@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -153,16 +154,15 @@ public abstract class WebUtils {
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException(
-				"Cannot set web app root system property when WAR file is not expanded");
+					"Cannot set web app root system property when WAR file is not expanded");
 		}
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
 		if (oldValue != null && !StringUtils.pathEquals(oldValue, root)) {
-			throw new IllegalStateException(
-				"Web app root system property already set to different value: '" +
-				key + "' = [" + oldValue + "] instead of [" + root + "] - " +
-				"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
+			throw new IllegalStateException("Web app root system property already set to different value: '" +
+					key + "' = [" + oldValue + "] instead of [" + root + "] - " +
+					"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: '" + key + "' = [" + root + "]");
@@ -814,7 +814,7 @@ public abstract class WebUtils {
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
 	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
-	 * of cross-origin request.
+	 * of cross-origin request
 	 * @since 4.2
 	 */
 	public static boolean isSameOrigin(HttpRequest request) {
@@ -837,7 +837,8 @@ public abstract class WebUtils {
 		}
 		UriComponents actualUrl = urlBuilder.build();
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+		return (ObjectUtils.nullSafeEquals(actualUrl.getHost(), originUrl.getHost()) &&
+				getPort(actualUrl) == getPort(originUrl));
 	}
 
 	private static int getPort(UriComponents uri) {

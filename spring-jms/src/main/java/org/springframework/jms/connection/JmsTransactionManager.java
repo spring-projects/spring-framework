@@ -170,7 +170,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		return (txObject.getResourceHolder() != null);
+		return txObject.hasResourceHolder();
 	}
 
 	@Override
@@ -314,6 +314,10 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 
 		public JmsResourceHolder getResourceHolder() {
 			return this.resourceHolder;
+		}
+
+		public boolean hasResourceHolder() {
+			return (this.resourceHolder != null);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,6 +191,9 @@ public abstract class AbstractAdaptableMessageListener
 		}
 	}
 
+	@Override
+	public abstract void onMessage(Message message, Session session) throws JMSException;
+
 	/**
 	 * Handle the given exception that arose during listener execution.
 	 * The default implementation logs the exception at error level.
@@ -203,6 +206,7 @@ public abstract class AbstractAdaptableMessageListener
 	protected void handleListenerException(Throwable ex) {
 		logger.error("Listener execution failed", ex);
 	}
+
 
 	/**
 	 * Extract the message body from the given JMS message.
@@ -453,6 +457,7 @@ public abstract class AbstractAdaptableMessageListener
 		@Override
 		protected Message createMessageForPayload(Object payload, Session session, Object conversionHint)
 				throws JMSException {
+
 			MessageConverter converter = getMessageConverter();
 			if (converter == null) {
 				throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
@@ -463,6 +468,7 @@ public abstract class AbstractAdaptableMessageListener
 			}
 			return converter.toMessage(payload, session);
 		}
+
 
 		protected class LazyResolutionMessage implements org.springframework.messaging.Message<Object> {
 
@@ -487,7 +493,6 @@ public abstract class AbstractAdaptableMessageListener
 								"Failed to extract payload from [" + this.message + "]", ex);
 					}
 				}
-				//
 				return this.payload;
 			}
 
@@ -513,7 +518,6 @@ public abstract class AbstractAdaptableMessageListener
 				return this.headers;
 			}
 		}
-
 	}
 
 

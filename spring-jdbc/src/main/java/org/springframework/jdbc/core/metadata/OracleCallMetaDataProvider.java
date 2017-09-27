@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 
 /**
- * Oracle specific implementation for the {@link CallMetaDataProvider} interface.
+ * Oracle-specific implementation for the {@link CallMetaDataProvider} interface.
  * This class is intended for internal use by the Simple JDBC classes.
  *
  * @author Thomas Risberg
@@ -59,13 +59,13 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	@Override
 	public String metaDataCatalogNameToUse(String catalogName) {
 		// Oracle uses catalog name for package name or an empty string if no package
-		return catalogName == null ? "" : catalogNameToUse(catalogName);
+		return (catalogName == null ? "" : catalogNameToUse(catalogName));
 	}
 
 	@Override
 	public String metaDataSchemaNameToUse(String schemaName) {
 		// Use current user schema if no schema specified
-		return schemaName == null ? getUserName() : super.metaDataSchemaNameToUse(schemaName);
+		return (schemaName == null ? getUserName() : super.metaDataSchemaNameToUse(schemaName));
 	}
 
 	@Override

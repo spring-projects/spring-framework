@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,7 +197,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #setDestinationName(String)
 	 */
 	public void setDestination(Destination destination) {
-		Assert.notNull(destination, "'destination' must not be null");
 		this.destination = destination;
 		if (destination instanceof Topic && !(destination instanceof Queue)) {
 			// Clearly a Topic: let's set the "pubSubDomain" flag accordingly.
@@ -223,11 +222,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * container picking up the new destination immediately (works e.g. with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
-	 * @param destinationName the desired destination (can be {@code null})
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
-		Assert.notNull(destinationName, "'destinationName' must not be null");
 		this.destination = destinationName;
 	}
 
@@ -246,7 +243,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * (never {@code null}).
 	 */
 	protected String getDestinationDescription() {
-		return this.destination.toString();
+		Object destination = this.destination;
+		return (destination != null ? destination.toString() : "");
 	}
 
 	/**
@@ -432,7 +430,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
 		this.subscriptionName = durableSubscriptionName;
-		this.subscriptionDurable = true;
+		this.subscriptionDurable = (durableSubscriptionName != null);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 			throws SQLException {
 
-		Blob blob = ps.getConnection().createBlob();
-		blob.setBytes(1, content);
-
-		this.temporaryBlobs.add(blob);
-		ps.setBlob(paramIndex, blob);
+		if (content != null) {
+			Blob blob = ps.getConnection().createBlob();
+			blob.setBytes(1, content);
+			this.temporaryBlobs.add(blob);
+			ps.setBlob(paramIndex, blob);
+		}
+		else {
+			ps.setBlob(paramIndex, (Blob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied bytes into temporary BLOB with length " + content.length :
@@ -76,16 +80,20 @@ public class TemporaryLobCreator implements LobCreator {
 			PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 			throws SQLException {
 
-		Blob blob = ps.getConnection().createBlob();
-		try {
-			FileCopyUtils.copy(binaryStream, blob.setBinaryStream(1));
+		if (binaryStream != null) {
+			Blob blob = ps.getConnection().createBlob();
+			try {
+				FileCopyUtils.copy(binaryStream, blob.setBinaryStream(1));
+			}
+			catch (IOException ex) {
+				throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+			}
+			this.temporaryBlobs.add(blob);
+			ps.setBlob(paramIndex, blob);
 		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+		else {
+			ps.setBlob(paramIndex, (Blob) null);
 		}
-
-		this.temporaryBlobs.add(blob);
-		ps.setBlob(paramIndex, blob);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(binaryStream != null ?
@@ -98,11 +106,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 			throws SQLException {
 
-		Clob clob = ps.getConnection().createClob();
-		clob.setString(1, content);
-
-		this.temporaryClobs.add(clob);
-		ps.setClob(paramIndex, clob);
+		if (content != null) {
+			Clob clob = ps.getConnection().createClob();
+			clob.setString(1, content);
+			this.temporaryClobs.add(clob);
+			ps.setClob(paramIndex, clob);
+		}
+		else {
+			ps.setClob(paramIndex, (Clob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied string into temporary CLOB with length " + content.length() :
@@ -115,16 +127,20 @@ public class TemporaryLobCreator implements LobCreator {
 			PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 			throws SQLException {
 
-		Clob clob = ps.getConnection().createClob();
-		try {
-			FileCopyUtils.copy(asciiStream, clob.setAsciiStream(1));
+		if (asciiStream != null) {
+			Clob clob = ps.getConnection().createClob();
+			try {
+				FileCopyUtils.copy(asciiStream, clob.setAsciiStream(1));
+			}
+			catch (IOException ex) {
+				throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+			}
+			this.temporaryClobs.add(clob);
+			ps.setClob(paramIndex, clob);
 		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+		else {
+			ps.setClob(paramIndex, (Clob) null);
 		}
-
-		this.temporaryClobs.add(clob);
-		ps.setClob(paramIndex, clob);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(asciiStream != null ?
@@ -138,16 +154,20 @@ public class TemporaryLobCreator implements LobCreator {
 			PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 			throws SQLException {
 
-		Clob clob = ps.getConnection().createClob();
-		try {
-			FileCopyUtils.copy(characterStream, clob.setCharacterStream(1));
+		if (characterStream != null) {
+			Clob clob = ps.getConnection().createClob();
+			try {
+				FileCopyUtils.copy(characterStream, clob.setCharacterStream(1));
+			}
+			catch (IOException ex) {
+				throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+			}
+			this.temporaryClobs.add(clob);
+			ps.setClob(paramIndex, clob);
 		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Could not copy into LOB stream", ex);
+		else {
+			ps.setClob(paramIndex, (Clob) null);
 		}
-
-		this.temporaryClobs.add(clob);
-		ps.setClob(paramIndex, clob);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(characterStream != null ?
@@ -170,4 +190,5 @@ public class TemporaryLobCreator implements LobCreator {
 			logger.error("Could not free LOB", ex);
 		}
 	}
+
 }

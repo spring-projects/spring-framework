@@ -197,7 +197,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * Build the URL for the tag from the tag attributes and parameters.
 	 * @return the URL value as a String
 	 */
-	private String createUrl() throws JspException {
+	String createUrl() throws JspException {
 		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
 		HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
 

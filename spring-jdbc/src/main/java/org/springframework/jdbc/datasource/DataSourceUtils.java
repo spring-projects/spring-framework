@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,8 +268,10 @@ public abstract class DataSourceUtils {
 	 */
 	public static void applyTimeout(Statement stmt, DataSource dataSource, int timeout) throws SQLException {
 		Assert.notNull(stmt, "No Statement specified");
-		Assert.notNull(dataSource, "No DataSource specified");
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		ConnectionHolder holder = null;
+		if (dataSource != null) {
+			holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		}
 		if (holder != null && holder.hasTimeout()) {
 			// Remaining transaction timeout overrides specified value.
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());

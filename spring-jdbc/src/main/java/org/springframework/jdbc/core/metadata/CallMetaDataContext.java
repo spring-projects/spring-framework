@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,6 +235,14 @@ public class CallMetaDataContext {
 
 
 	/**
+	 * Initialize this class with metadata from the database.
+	 * @param dataSource the DataSource used to retrieve metadata
+	 */
+	public void initializeMetaData(DataSource dataSource) {
+		this.metaDataProvider = CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
+	}
+
+	/**
 	 * Create a ReturnResultSetParameter/SqlOutParameter depending on the support provided
 	 * by the JDBC driver used for the database in use.
 	 * @param parameterName the name of the parameter (also used as the name of the List returned in the output)
@@ -276,14 +284,6 @@ public class CallMetaDataContext {
 	 */
 	public List<SqlParameter> getCallParameters() {
 		return this.callParameters;
-	}
-
-	/**
-	 * Initialize this class with metadata from the database.
-	 * @param dataSource the DataSource used to retrieve metadata
-	 */
-	public void initializeMetaData(DataSource dataSource) {
-		this.metaDataProvider = CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
 	}
 
 	/**

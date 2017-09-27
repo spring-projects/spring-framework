@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,8 @@ public interface CallMetaDataProvider {
 	 * @throws SQLException in case of initialization failure
 	 * @see	org.springframework.jdbc.core.simple.SimpleJdbcCall#withoutProcedureColumnMetaDataAccess()
 	 */
-	void initializeWithProcedureColumnMetaData(
-			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName)
-			throws SQLException;
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
+			String schemaName, String procedureName) throws SQLException;
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta data currently used.

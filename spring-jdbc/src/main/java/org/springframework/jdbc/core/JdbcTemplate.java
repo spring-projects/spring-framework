@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1267,11 +1267,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param param the corresponding stored procedure parameter
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected Map<String, Object> processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	protected Map<String, Object> processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param)
+			throws SQLException {
+
 		if (rs == null) {
 			return Collections.emptyMap();
 		}
+
 		Map<String, Object> returnedResults = new HashMap<String, Object>();
 		try {
 			ResultSet rsToUse = rs;
