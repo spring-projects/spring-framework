@@ -367,7 +367,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
 					else if (kotlinPrimaryConstructor != null) {
-						candidateConstructors = new Constructor<?>[] {kotlinPrimaryConstructor};
+						candidateConstructors = (defaultConstructor != null ?
+								new Constructor<?>[] {kotlinPrimaryConstructor, defaultConstructor} :
+								new Constructor<?>[] {kotlinPrimaryConstructor});
 					}
 					else {
 						candidateConstructors = new Constructor<?>[0];

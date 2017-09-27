@@ -122,6 +122,36 @@ class KotlinAutowiredTests {
 		assertSame(colour, kb.injectedFromSecondaryConstructor)
 	}
 
+	@Test  // SPR-16012
+	fun `Fallback on the default constructor when no autowirable primary constructor is defined`() {
+		val bf = DefaultListableBeanFactory()
+		val bpp = AutowiredAnnotationBeanPostProcessor()
+		bpp.setBeanFactory(bf)
+		bf.addBeanPostProcessor(bpp)
+		val bd = RootBeanDefinition(KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
+		bf.registerBeanDefinition("bean", bd)
+
+		val kb = bf.getBean("bean", KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
+		assertNotNull(kb.testBean)
+	}
+
+	@Test  // SPR-16012
+	fun `Instantiation via primary constructor when a default is defined`() {
+		val bf = DefaultListableBeanFactory()
+		val bpp = AutowiredAnnotationBeanPostProcessor()
+		bpp.setBeanFactory(bf)
+		bf.addBeanPostProcessor(bpp)
+		val bd = RootBeanDefinition(KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
+		bd.scope = RootBeanDefinition.SCOPE_PROTOTYPE
+		bf.registerBeanDefinition("bean", bd)
+		val tb = TestBean()
+		bf.registerSingleton("testBean", tb)
+
+		val kb = bf.getBean("bean", KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
+		assertEquals(tb, kb.testBean)
+	}
+
 
 	class KotlinBean(val injectedFromConstructor: TestBean?) {
 		
@@ -161,6 +191,11 @@ class KotlinAutowiredTests {
 		}
 
 		var injectedFromSecondaryConstructor: Colour? = null
+	}
+
+	@Suppress("unused")
+	class KotlinBeanWithPrimaryAndDefaultConstructors(val testBean: TestBean) {
+		constructor() : this(TestBean())
 	}
 
 }
