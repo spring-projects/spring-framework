@@ -15,11 +15,16 @@
  */
 package org.springframework.web.server.session;
 
+import java.time.Clock;
+import java.time.Duration;
+
 import org.junit.Test;
 
 import org.springframework.web.server.WebSession;
 
+import static junit.framework.TestCase.assertSame;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -28,34 +33,34 @@ import static org.junit.Assert.assertTrue;
  */
 public class InMemoryWebSessionStoreTests {
 
-	private InMemoryWebSessionStore sessionStore = new InMemoryWebSessionStore();
+	private InMemoryWebSessionStore store = new InMemoryWebSessionStore();
 
 
 	@Test
 	public void constructorWhenImplicitStartCopiedThenCopyIsStarted() {
-		WebSession original = this.sessionStore.createWebSession().block();
+		WebSession original = this.store.createWebSession().block();
 		assertNotNull(original);
 		original.getAttributes().put("foo", "bar");
 
-		WebSession copy = this.sessionStore.updateLastAccessTime(original).block();
+		WebSession copy = this.store.updateLastAccessTime(original).block();
 		assertNotNull(copy);
 		assertTrue(copy.isStarted());
 	}
 
 	@Test
 	public void constructorWhenExplicitStartCopiedThenCopyIsStarted() {
-		WebSession original = this.sessionStore.createWebSession().block();
+		WebSession original = this.store.createWebSession().block();
 		assertNotNull(original);
 		original.start();
 
-		WebSession copy = this.sessionStore.updateLastAccessTime(original).block();
+		WebSession copy = this.store.updateLastAccessTime(original).block();
 		assertNotNull(copy);
 		assertTrue(copy.isStarted());
 	}
 
 	@Test
 	public void startsSessionExplicitly() {
-		WebSession session = this.sessionStore.createWebSession().block();
+		WebSession session = this.store.createWebSession().block();
 		assertNotNull(session);
 		session.start();
 		assertTrue(session.isStarted());
@@ -63,11 +68,27 @@ public class InMemoryWebSessionStoreTests {
 
 	@Test
 	public void startsSessionImplicitly() {
-		WebSession session = this.sessionStore.createWebSession().block();
+		WebSession session = this.store.createWebSession().block();
 		assertNotNull(session);
 		session.start();
 		session.getAttributes().put("foo", "bar");
 		assertTrue(session.isStarted());
 	}
 
+	@Test
+	public void retrieveExpiredSession() throws Exception {
+		WebSession session = this.store.createWebSession().block();
+		assertNotNull(session);
+		session.getAttributes().put("foo", "bar");
+		session.save();
+
+		String id = session.getId();
+		WebSession retrieved = this.store.retrieveSession(id).block();
+		assertNotNull(retrieved);
+		assertSame(session, retrieved);
+
+		this.store.setClock(Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
+		WebSession retrievedAgain = this.store.retrieveSession(id).block();
+		assertNull(retrievedAgain);
+	}
 }

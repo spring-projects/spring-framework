@@ -40,8 +40,10 @@ public interface WebSessionStore {
 
 	/**
 	 * Return the WebSession for the given id.
+	 * <p><strong>Note:</strong> This method should perform an expiration check,
+	 * remove the session if it has expired and return empty.
 	 * @param sessionId the session to load
-	 * @return the session, or an empty {@code Mono}.
+	 * @return the session, or an empty {@code Mono} .
 	 */
 	Mono<WebSession> retrieveSession(String sessionId);
 

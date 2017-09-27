@@ -40,7 +40,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -65,19 +64,15 @@ public class DefaultWebSessionManagerTests {
 	private WebSession createSession;
 
 	@Mock
-	private WebSession retrieveSession;
-
-	@Mock
 	private WebSession updateSession;
 
+	
 	@Before
 	public void setUp() throws Exception {
 		when(this.store.createWebSession()).thenReturn(Mono.just(this.createSession));
 		when(this.store.updateLastAccessTime(any())).thenReturn(Mono.just(this.updateSession));
-		when(this.store.retrieveSession(any())).thenReturn(Mono.just(this.retrieveSession));
 		when(this.createSession.save()).thenReturn(Mono.empty());
 		when(this.updateSession.getId()).thenReturn("update-session-id");
-		when(this.retrieveSession.getId()).thenReturn("retrieve-session-id");
 
 		this.manager = new DefaultWebSessionManager();
 		this.manager.setSessionIdResolver(this.idResolver);
@@ -97,7 +92,6 @@ public class DefaultWebSessionManagerTests {
 
 		assertFalse(session.isStarted());
 		assertFalse(session.isExpired());
-		verifyZeroInteractions(this.retrieveSession, this.updateSession);
 		verify(this.createSession, never()).save();
 		verify(this.idResolver, never()).setSessionId(any(), any());
 	}
@@ -136,19 +130,6 @@ public class DefaultWebSessionManagerTests {
 		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertNotNull(actual);
 		assertEquals(id, actual.getId());
-	}
-
-	@Test
-	public void existingSessionIsExpired() throws Exception {
-		String id = this.retrieveSession.getId();
-		when(this.retrieveSession.isExpired()).thenReturn(true);
-		when(this.idResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.singletonList(id));
-		when(this.store.removeSession(any())).thenReturn(Mono.empty());
-
-		WebSession actual = this.manager.getSession(this.exchange).block();
-		assertEquals(this.createSession.getId(), actual.getId());
-		verify(this.store).removeSession(id);
-		verify(this.idResolver).expireSession(any());
 	}
 
 	@Test

@@ -77,7 +77,17 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	@Override
 	public Mono<WebSession> retrieveSession(String id) {
-		return (this.sessions.containsKey(id) ? Mono.just(this.sessions.get(id)) : Mono.empty());
+		WebSession session = this.sessions.get(id);
+		if (session == null) {
+			return Mono.empty();
+		}
+		else if (session.isExpired()) {
+			this.sessions.remove(id);
+			return Mono.empty();
+		}
+		else {
+			return Mono.just(session);
+		}
 	}
 
 	@Override

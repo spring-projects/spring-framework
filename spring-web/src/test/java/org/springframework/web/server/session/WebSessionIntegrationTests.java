@@ -43,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for with a server-side session.
@@ -109,7 +110,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNull(response.getHeaders().get("Set-Cookie"));
 		assertEquals(2, this.handler.getSessionRequestCount());
 
-		// Now set the clock of the session back by 31 minutes
+		// Now fast-forward by 31 minutes
 		InMemoryWebSessionStore store = (InMemoryWebSessionStore) this.sessionManager.getSessionStore();
 		WebSession session = store.retrieveSession(id).block();
 		assertNotNull(session);
@@ -123,6 +124,33 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		id = extractSessionId(response.getHeaders());
 		assertNotNull("Expected new session id", id);
 		assertEquals(1, this.handler.getSessionRequestCount());
+	}
+
+	@Test
+	public void expiredSessionEnds() throws Exception {
+
+		// First request: no session yet, new session created
+		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
+		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		String id = extractSessionId(response.getHeaders());
+		assertNotNull(id);
+		assertEquals(1, this.handler.getSessionRequestCount());
+
+		// Now fast-forward by 31 minutes
+		InMemoryWebSessionStore store = (InMemoryWebSessionStore) this.sessionManager.getSessionStore();
+		store.setClock(Clock.offset(store.getClock(), Duration.ofMinutes(31)));
+
+		// Second request: session expires
+		URI uri = new URI("http://localhost:" + this.port + "/?expiredSession");
+		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
+		response = this.restTemplate.exchange(request, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		String value = response.getHeaders().getFirst("Set-Cookie");
+		assertNotNull(value);
+		assertTrue("Actual value: " + value, value.contains("Max-Age=0"));
 	}
 
 	@Test
@@ -178,11 +206,18 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
-			if (exchange.getRequest().getQueryParams().containsKey("changeId")) {
+			if (exchange.getRequest().getQueryParams().containsKey("expiredSession")) {
+				return exchange.getSession().doOnNext(session -> {
+					// Don't do anything, leave it expired...
+				}).then();
+			}
+			else if (exchange.getRequest().getQueryParams().containsKey("changeId")) {
 				return exchange.getSession().flatMap(session ->
 						session.changeSessionId().doOnSuccess(aVoid -> updateSessionAttribute(session)));
 			}
-			return exchange.getSession().doOnSuccess(this::updateSessionAttribute).then();
+			else {
+				return exchange.getSession().doOnSuccess(this::updateSessionAttribute).then();
+			}
 		}
 
 		private void updateSessionAttribute(WebSession session) {
