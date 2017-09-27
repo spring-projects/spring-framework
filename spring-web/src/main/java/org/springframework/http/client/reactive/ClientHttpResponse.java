@@ -43,12 +43,13 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage, Closeable 
 	MultiValueMap<String, ResponseCookie> getCookies();
 
 	/**
-	 * Close this response, freeing any resources created.
-	 * <p>This non-blocking method has to be called once the response has been
-	 * processed and the resources are no longer needed; not doing so might
-	 * create resource leaks or connection issues.
-	 * <p>Depending on the client configuration and HTTP version,
-	 * this can lead to closing the connection or returning it to a connection pool.
+	 * Close this response and the underlying HTTP connection.
+	 * <p>This non-blocking method has to be called if its body isn't going
+	 * to be consumed. Not doing so might result in HTTP connection pool
+	 * inconsistencies or memory leaks.
+	 * <p>This shouldn't be called if the response body is read,
+	 * because it would prevent connections to be reused and cancel
+	 * the benefits of using a connection pooling.
 	 */
 	@Override
 	void close();

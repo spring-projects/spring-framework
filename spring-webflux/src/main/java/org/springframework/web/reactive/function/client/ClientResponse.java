@@ -134,14 +134,13 @@ public interface ClientResponse extends Closeable {
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
 
 	/**
-	 * Close this response, freeing any resources created.
-	 * <p>This non-blocking method has to be called once the response has been processed
-	 * and the resources are no longer needed.
-	 * <p>{@code ClientResponse.bodyTo*}, {@code ClientResponse.toEntity*}
-	 * and all methods under {@code WebClient.retrieve()} will close the response
-	 * automatically.
-	 * <p>It is required to call close() manually otherwise; not doing so might
-	 * create resource leaks or connection issues.
+	 * Close this response and the underlying HTTP connection.
+	 * <p>This non-blocking method has to be called if its body isn't going
+	 * to be consumed. Not doing so might result in HTTP connection pool
+	 * inconsistencies or memory leaks.
+	 * <p>This shouldn't be called if the response body is read,
+	 * because it would prevent connections to be reused and cancel
+	 * the benefits of using a connection pooling.
 	 */
 	@Override
 	void close();
