@@ -70,7 +70,6 @@ public class DefaultWebSessionManagerTests {
 	@Before
 	public void setUp() throws Exception {
 		when(this.store.createWebSession()).thenReturn(Mono.just(this.createSession));
-		when(this.store.updateLastAccessTime(any())).thenReturn(Mono.just(this.updateSession));
 		when(this.createSession.save()).thenReturn(Mono.empty());
 		when(this.updateSession.getId()).thenReturn("update-session-id");
 

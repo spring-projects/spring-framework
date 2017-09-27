@@ -109,25 +109,22 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	private class InMemoryWebSession implements WebSession {
 
-		private final AtomicReference<String> id;
+		private final AtomicReference<String> id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
 
-		private final Map<String, Object> attributes;
+		private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 		private final Instant creationTime;
 
 		private volatile Instant lastAccessTime;
 
-		private volatile Duration maxIdleTime;
+		private volatile Duration maxIdleTime = Duration.ofMinutes(30);
 
-		private volatile boolean started;
+		private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 
 		InMemoryWebSession() {
-			this.id = new AtomicReference<>(String.valueOf(idGenerator.generateId()));
-			this.attributes = new ConcurrentHashMap<>();
 			this.creationTime = Instant.now(getClock());
 			this.lastAccessTime = this.creationTime;
-			this.maxIdleTime = Duration.ofMinutes(30);
 		}
 
 
@@ -163,12 +160,12 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		@Override
 		public void start() {
-			this.started = true;
+			this.state.compareAndSet(State.NEW, State.STARTED);
 		}
 
 		@Override
 		public boolean isStarted() {
-			return this.started || !getAttributes().isEmpty();
+			return this.state.get().equals(State.STARTED) || !getAttributes().isEmpty();
 		}
 
 		@Override
@@ -186,20 +183,45 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		}
 
 		@Override
+		public Mono<Void> invalidate() {
+			this.state.set(State.EXPIRED);
+			getAttributes().clear();
+			InMemoryWebSessionStore.this.sessions.remove(this.id.get());
+			return Mono.empty();
+		}
+
+		@Override
 		public Mono<Void> save() {
+			if (!getAttributes().isEmpty()) {
+				this.state.compareAndSet(State.NEW, State.STARTED);
+			}
 			InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
 			return Mono.empty();
 		}
 
 		@Override
 		public boolean isExpired() {
-			return (isStarted() && !this.maxIdleTime.isNegative() &&
-					Instant.now(getClock()).minus(this.maxIdleTime).isAfter(this.lastAccessTime));
+			if (this.state.get().equals(State.EXPIRED)) {
+				return true;
+			}
+			if (checkExpired()) {
+				this.state.set(State.EXPIRED);
+				return true;
+			}
+			return false;
+		}
+
+		private boolean checkExpired() {
+			return isStarted() && !this.maxIdleTime.isNegative() &&
+					Instant.now(getClock()).minus(this.maxIdleTime).isAfter(this.lastAccessTime);
 		}
 
 		private void updateLastAccessTime() {
 			this.lastAccessTime = Instant.now(getClock());
 		}
+
 	}
+
+	private enum State { NEW, STARTED, EXPIRED }
 
 }

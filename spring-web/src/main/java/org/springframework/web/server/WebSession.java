@@ -110,6 +110,12 @@ public interface WebSession {
 	Mono<Void> changeSessionId();
 
 	/**
+	 * Invalidate the current session and clear session storage.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> invalidate();
+
+	/**
 	 * Save the session persisting attributes (e.g. if stored remotely) and also
 	 * sending the session id to the client if the session is new.
 	 * <p>Note that a session must be started explicitly via {@link #start()} or

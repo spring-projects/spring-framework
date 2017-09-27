@@ -89,4 +89,9 @@ public class InMemoryWebSessionStoreTests {
 		Instant time2 = session2.getLastAccessTime();
 		assertTrue(time1.isBefore(time2));
 	}
+
+	@Test
+	public void invalidate() throws Exception {
+
+	}
 }
