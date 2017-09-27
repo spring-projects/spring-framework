@@ -1054,9 +1054,10 @@ all test methods within that class are automatically enabled by default as well.
 
 Expressions can be any of the following.
 
-* Spring Expression Language (SpEL) expression – for example:
+* <<core.adoc#expressions,Spring Expression Language>> (SpEL) expression – for example:
   - `@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
-* Placeholder for a property available in the Spring `Environment` – for example:
+* Placeholder for a property available in the Spring
+  <<core.adoc#beans-environment,`Environment`>> – for example:
   - `@EnabledIf("${smoke.tests.enabled}")`
 * Text literal – for example:
   - `@EnabledIf("true")`
@@ -1090,9 +1091,10 @@ level, all test methods within that class are automatically disabled as well.
 
 Expressions can be any of the following.
 
-* Spring Expression Language (SpEL) expression – for example:
+* <<core.adoc#expressions,Spring Expression Language>> (SpEL) expression – for example:
   - `@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
-* Placeholder for a property available in the Spring `Environment` – for example:
+* Placeholder for a property available in the Spring
+  <<core.adoc#beans-environment,`Environment`>> – for example:
   - `@DisabledIf("${smoke.tests.disabled}")`
 * Text literal – for example:
   - `@DisabledIf("true")`
