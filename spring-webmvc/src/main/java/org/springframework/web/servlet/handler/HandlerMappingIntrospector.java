@@ -18,20 +18,23 @@ package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
@@ -56,33 +59,66 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Rossen Stoyanchev
  * @since 4.3.1
  */
-public class HandlerMappingIntrospector implements CorsConfigurationSource {
+public class HandlerMappingIntrospector
+		implements CorsConfigurationSource, ApplicationContextAware, InitializingBean {
 
-	private final List<HandlerMapping> handlerMappings;
+	@Nullable
+	private ApplicationContext applicationContext;
 
+	@Nullable
+	private List<HandlerMapping> handlerMappings;
+
+
+	/**
+	 * Constructor for use with {@link ApplicationContextAware}.
+	 */
+	public HandlerMappingIntrospector() {
+	}
 
 	/**
 	 * Constructor that detects the configured {@code HandlerMapping}s in the
 	 * given {@code ApplicationContext} or falls back on
 	 * "DispatcherServlet.properties" like the {@code DispatcherServlet}.
 	 */
+	@Deprecated
 	public HandlerMappingIntrospector(ApplicationContext context) {
 		this.handlerMappings = initHandlerMappings(context);
 	}
 
 
-	private static List<HandlerMapping> initHandlerMappings(ApplicationContext context) {
+	/**
+	 * Return the configured HandlerMapping's.
+	 */
+	public List<HandlerMapping> getHandlerMappings() {
+		return this.handlerMappings;
+	}
+
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		if (this.handlerMappings == null) {
+			Assert.notNull(this.applicationContext, "No ApplicationContext");
+			this.handlerMappings = initHandlerMappings(this.applicationContext);
+		}
+	}
+
+	private static List<HandlerMapping> initHandlerMappings(ApplicationContext applicationContext) {
 		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, HandlerMapping.class, true, false);
+				applicationContext, HandlerMapping.class, true, false);
 		if (!beans.isEmpty()) {
 			List<HandlerMapping> mappings = new ArrayList<>(beans.values());
 			AnnotationAwareOrderComparator.sort(mappings);
-			return mappings;
+			return Collections.unmodifiableList(mappings);
 		}
-		return initDefaultHandlerMappings(context);
+		return Collections.unmodifiableList(initFallback(applicationContext));
 	}
 
-	private static List<HandlerMapping> initDefaultHandlerMappings(ApplicationContext context) {
+	private static List<HandlerMapping> initFallback(ApplicationContext applicationContext) {
 		Properties props;
 		String path = "DispatcherServlet.properties";
 		try {
@@ -99,7 +135,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 		for (String name : names) {
 			try {
 				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());
-				Object mapping = context.getAutowireCapableBeanFactory().createBean(clazz);
+				Object mapping = applicationContext.getAutowireCapableBeanFactory().createBean(clazz);
 				result.add((HandlerMapping) mapping);
 			}
 			catch (ClassNotFoundException ex) {
@@ -109,13 +145,6 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 		return result;
 	}
 
-
-	/**
-	 * Return the configured HandlerMapping's.
-	 */
-	public List<HandlerMapping> getHandlerMappings() {
-		return this.handlerMappings;
-	}
 
 	/**
 	 * Find the {@link HandlerMapping} that would handle the given request and
@@ -129,6 +158,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 	 */
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
+		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			Object handler = handlerMapping.getHandler(wrapper);
@@ -146,6 +176,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			HandlerExecutionChain handler = null;
