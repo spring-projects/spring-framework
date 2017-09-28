@@ -97,7 +97,8 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 		if (supportedLocale != null) {
 			return new SimpleLocaleContext(supportedLocale);
 		}
-		return (defaultLocale != null ? new SimpleLocaleContext(defaultLocale) : new SimpleLocaleContext(requestLocale));
+		return (this.defaultLocale != null ? new SimpleLocaleContext(this.defaultLocale) :
+				new SimpleLocaleContext(requestLocale));
 	}
 
 	private boolean isSupportedLocale(@Nullable Locale locale) {

@@ -129,7 +129,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	/**
 	 * Configure a custom {@link LocaleContextResolver}. The provided instance is set on
 	 * each created {@link DefaultServerWebExchange}.
-	 * <p>By default this is set to {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
+	 * <p>By default this is set to
+	 * {@link org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver}.
 	 * @param localeContextResolver the locale context resolver to use
 	 */
 	public void setLocaleContextResolver(LocaleContextResolver localeContextResolver) {
@@ -147,7 +148,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@link LocaleContextResolver}.
 	 */
 	public LocaleContextResolver getLocaleContextResolver() {
-		return (this.localeContextResolver != null ? this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
+		return (this.localeContextResolver != null ?
+				this.localeContextResolver : new AcceptHeaderLocaleContextResolver());
 	}
 
 
@@ -164,7 +166,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer(), getLocaleContextResolver());
+		return new DefaultServerWebExchange(request, response, this.sessionManager,
+				getCodecConfigurer(), getLocaleContextResolver());
 	}
 
 	private void logHandleFailure(Throwable ex) {
