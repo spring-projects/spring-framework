@@ -3062,7 +3062,7 @@ framework.
 				c:loginAction-ref="loginAction" />
 
 		<bean id="loginAction" class="com.example.LoginAction"
-				c:username="#{request.getParameter('user')}"
+				c:username="\#{request.getParameter('user')}"
 				c:password="#{request.getParameter('pswd')}"
 				scope="request">
 			<aop:scoped-proxy />
