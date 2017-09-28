@@ -5098,10 +5098,10 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support and even
-Hibernate ORM 5.0+ for programming against the native Hibernate Session API. Note that
-the Hibernate team does not maintain any versions prior to 5.0 anymore and is likely
-to focus on 5.2+ exclusively soon.
+As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
+and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
+Note that the Hibernate team does not maintain any versions prior to 5.0 anymore and
+is likely to focus on 5.2+ exclusively soon.
 ====
 
 

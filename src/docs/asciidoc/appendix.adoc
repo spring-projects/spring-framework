@@ -14,7 +14,7 @@ link:{wiki-spring-framework}/++What's-New-in-the-Spring-Framework++[Wiki page].
 
 
 [[migration-4.x]]
-== Migrating to Spring Framework 4.x
+== Migrating to Spring Framework 4.3 / 5.0
 Migration guides for upgrading from previous releases of the Spring Framework are now provided as a
 {wiki-spring-framework}/Migrating-from-earlier-versions-of-the-spring-framework[Wiki page].
 
