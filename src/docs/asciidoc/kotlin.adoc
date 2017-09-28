@@ -10,7 +10,7 @@
 == Introduction
 
 https://kotlinlang.org[Kotlin] is a statically-typed language targeting the JVM (and other platforms)
-which allows writing concise and elegant code while providing a very good
+which allows writing concise and elegant code while providing very good
 https://kotlinlang.org/docs/reference/java-interop.html[interoperability] with
 existing libraries written in Java.
 
@@ -75,13 +75,13 @@ val users : Flux<User> = client.get().retrieve().bodyToFlux()
 ----
 
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
-for a shorter syntax.
+for shorter syntax.
 
 [[null-safety]]
 == Null-safety
 
 One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety]
-which cleanly deals with `null` values at compile time rather than bumping into the famous
+- which cleanly deals with `null` values at compile time rather than bumping into the famous
 `NullPointerException` at runtime. This makes applications safer through nullability
 declarations and expressing "value or no value" semantics without paying the cost of wrappers like `Optional`.
 (Kotlin allows using functional constructs with nullable values; check out this
@@ -302,7 +302,7 @@ https://jira.spring.io/browse/SPR-15064[i18n and nested templates].
 Kotlin provides similar support and allows the rendering of Kotlin based templates, see
 https://github.com/spring-projects/spring-framework/commit/badde3a479a53e1dd0777dd1bd5b55cb1021cf9e[this commit] for details.
 
-This enables some interesting use cases like writing type-safe templates using
+This enables some interesting use cases - like writing type-safe templates using
 https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or simply using Kotlin multiline `String` with interpolation.
 
 This can allow one to write Kotlin templates with full autocompletion and
@@ -328,7 +328,7 @@ project for more details.
 [[spring-projects-in-kotlin]]
 == Spring projects in Kotlin
 
-This section provides a focus on some specific hints and recommendations worth
+This section provides focus on some specific hints and recommendations worth
 knowing when developing Spring projects in Kotlin.
 
 === Final by default
@@ -340,11 +340,11 @@ be overridden.
 
 Whilst Kotlin's JVM-friendly design is generally frictionless with Spring,
 this specific Kotlin feature can prevent the application from starting, if this fact is not taken in
-consideration. This is because Spring beans are normally proxified with CGLIB
+consideration. This is because Spring beans are normally proxied by CGLIB
 - such as `@Configuration` classes - which need to be inherited at runtime for technical reasons.
 The workaround was to add an `open` keyword on each class and member
-functions of Spring beans proxified with CGLIB such as `@Configuration` classes, which can
-quickly become painful and is against Kotlin principle to keep code concise and predictable.
+functions of Spring beans proxied by CGLIB such as `@Configuration` classes, which can
+quickly become painful and is against the Kotlin principle of keeping code concise and predictable.
 
 Fortunately, Kotlin now provides a
 https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
@@ -366,8 +366,9 @@ you will be able to write your Kotlin beans without any additional `open` keywor
 
 === Using immutable class instances for persistence
 
-In Kotlin, it is very convenient and a best practice to declare read-only properties within
-the primary constructor, as in the following example:
+In Kotlin, it is very convenient and considered best practice to declare
+read-only properties within the primary constructor, as in the following
+example:
 
 [source,kotlin]
 ----
@@ -407,9 +408,9 @@ class YourBean(
 
 [NOTE]
 ====
-As of Spring Framework 4.3, classes with a single constructor have its parameters
-automatically autowired, that's why there is no need for `@Autowired constructor`
-in the example shown above.
+As of Spring Framework 4.3, classes with a single constructor have their
+parameters automatically autowired, that's why there is no need for an
+explicit `@Autowired constructor` in the example shown above.
 ====
 
 If one really needs to use field injection, use the `lateinit var` construct,
