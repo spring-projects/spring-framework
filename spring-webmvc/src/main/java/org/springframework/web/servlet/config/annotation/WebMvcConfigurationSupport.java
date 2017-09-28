@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -77,6 +78,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -953,6 +955,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected void addCorsMappings(CorsRegistry registry) {
 	}
+
+	@Bean @Lazy
+	public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
+		return new HandlerMappingIntrospector();
+	}
+
 
 
 	private static final class EmptyHandlerMapping extends AbstractHandlerMapping {

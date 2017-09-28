@@ -28,6 +28,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.util.UrlPathHelper;
@@ -56,11 +57,14 @@ abstract class MvcNamespaceUtils {
 
 	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
+	private static final String HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME = "mvcHandlerMappingIntrospector";
+
 
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
 		registerHttpRequestHandlerAdapter(parserContext, source);
 		registerSimpleControllerHandlerAdapter(parserContext, source);
+		registerHandlerMappingIntrospector(parserContext, source);
 	}
 
 	/**
@@ -182,6 +186,21 @@ abstract class MvcNamespaceUtils {
 			corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfigurations);
 		}
 		return new RuntimeBeanReference(CORS_CONFIGURATION_BEAN_NAME);
+	}
+
+	/**
+	 * Registers  an {@link HandlerMappingIntrospector} under a well-known name
+	 * unless already registered.
+	 */
+	private static void registerHandlerMappingIntrospector(ParserContext parserContext, Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)){
+			RootBeanDefinition beanDef = new RootBeanDefinition(HandlerMappingIntrospector.class);
+			beanDef.setSource(source);
+			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			beanDef.setLazyInit(true);
+			parserContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME, beanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(beanDef, HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME));
+		}
 	}
 
 	/**
