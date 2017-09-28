@@ -446,48 +446,46 @@ public interface WebClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Exchange the request for a {@code ClientResponse} with full access
-		 * to the response status and headers before extracting the body.
-		 * <p>Use {@link Mono#flatMap(Function)} or
-		 * {@link Mono#flatMapMany(Function)} to compose further on the response:
-		 * <pre>
-		 * Mono&lt;Pojo&gt; mono = client.get().uri("/")
+		 * Perform the HTTP request and retrieve the response body:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; bodyMono = client.get()
+		 *     .uri("/persons/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .retrieve()
+		 *     .bodyToMono(Person.class);
+		 * </pre>
+		 * <p>This method is a shortcut to using {@link #exchange()} and
+		 * decoding the response body through {@link ClientResponse}.
+		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * @see #exchange()
+		 */
+		ResponseSpec retrieve();
+
+		/**
+		 * Perform the HTTP request and return a {@link ClientResponse} with the
+		 * response status and headers. You can then use methods of the response
+		 * to consume the body:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; mono = client.get()
+		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .exchange()
-		 *     .flatMap(response -> response.bodyToMono(Pojo.class));
+		 *     .flatMap(response -> response.bodyToMono(Person.class));
 		 *
-		 * Flux&lt;Pojo&gt; flux = client.get().uri("/")
+		 * Flux&lt;Person&gt; flux = client.get()
+		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_STREAM_JSON)
 		 *     .exchange()
-		 *     .flatMapMany(response -> response.bodyToFlux(Pojo.class));
+		 *     .flatMapMany(response -> response.bodyToFlux(Person.class));
 		 * </pre>
-		 * <p>The response body should always be consumed with {@code bodyTo*}
-		 * or {@code toEntity*} methods; if you do not care about the body,
-		 * you can use {@code bodyToMono(Void.class)}.
-		 * <p>Not consuming the response body might lead to HTTP connection pool
-		 * inconsistencies or memory leaks.
-		 * @return a {@code Mono} with the response
+		 * <p><strong>NOTE:</strong> You must always use of the body or entity
+		 * methods on {@link ClientResponse} to ensure resources are released and
+		 * avoid potential issues with HTTP connection pooling. If not interested
+		 * in the response body, use {@code "bodyToMono(Void.class)"} to complete.
+		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */
 		Mono<ClientResponse> exchange();
-
-		/**
-		 * A variant of {@link #exchange()} that provides the shortest path to
-		 * retrieving the full response (i.e. status, headers, and body) where
-		 * instead of returning {@code Mono<ClientResponse>} it exposes shortcut
-		 * methods to extract the response body.
-		 * <p>Use of this method is simpler when you don't need to deal directly
-		 * with {@link ClientResponse}, e.g. to use a custom {@code BodyExtractor}
-		 * or to check the status and headers before extracting the response.
-		 * <pre>
-		 * Mono&lt;Pojo&gt; bodyMono = client.get().uri("/")
-		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .retrieve()
-		 *     .bodyToMono(Pojo.class);
-		 * </pre>
-		 * @return spec with options for extracting the response body
-		 */
-		ResponseSpec retrieve();
 	}
 
 

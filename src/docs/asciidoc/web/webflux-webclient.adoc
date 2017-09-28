@@ -88,7 +88,7 @@ At this level you can also create a full `ResponseEntity`:
     Mono<ResponseEntity<Person>> result = client.get()
             .uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .flatMap(response -> response.bodyToEntity(Person.class));
+            .flatMap(response -> response.toEntity(Person.class));
 ----
 
 Note that unlike `retrieve()`, with `exchange()` there are no automatic error signals for
@@ -96,13 +96,10 @@ Note that unlike `retrieve()`, with `exchange()` there are no automatic error si
 
 [CAUTION]
 ====
-When you use `exchange()`, you must call `response.close()` if you do not intend to read
-the response body in order to close the underlying HTTP connection. Not doing so can
-result in connection pool inconsistencies or memory leaks.
-
-You do not have to call `response.close()` if you consume the body because forcing a
-connection to be closed negates the benefits of persistent connections and connection
-pooling.
+When using `exchange()` you must always use any of the body or entity methods of
+`ClientResponse` to ensure resources are released and to avoid potential issues with HTTP
+connection pooling. If not interested in the response body use `bodyToMono(Void.class)`
+to complete.
 ====
 
 

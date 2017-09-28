@@ -34,10 +34,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
- * Represents an HTTP response, as returned by the {@link ExchangeFunction}.
- * Access to headers and body is offered by {@link Headers} and
- * {@link #body(BodyExtractor)}, {@link #bodyToMono(Class)}, {@link #bodyToFlux(Class)}
- * respectively.
+ * Represents an HTTP response, as returned by {@link WebClient} and also
+ * {@link ExchangeFunction}. Provides access to the response status and headers,
+ * and also methods to consume the response body.
+ *
+ * <p><strong>NOTE:</strong> When given access to a {@link ClientResponse} you
+ * must always use the response body or entity methods to ensure resources are
+ * released and to avoid potential issues with HTTP connection pooling. If not
+ * interested in the response body, use {@code "bodyToMono(Void.class)"}.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
