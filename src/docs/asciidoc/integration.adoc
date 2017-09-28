@@ -946,50 +946,24 @@ plugging in third-party or custom solutions here.
 
 
 [[rest-client-access]]
-=== Accessing RESTful services on the Client
-The `RestTemplate` is the core class for client-side access to RESTful services. It is
-conceptually similar to other template classes in Spring, such as `JdbcTemplate` and
-`JmsTemplate` and other template classes found in other Spring portfolio projects.
-`RestTemplate`'s behavior is customized by providing callback methods and configuring
-the `HttpMessageConverter` used to marshal objects into the HTTP request body and to
-unmarshal any response back into an object. As it is common to use XML as a message
-format, Spring provides a `MarshallingHttpMessageConverter` that uses the Object-to-XML
-framework that is part of the `org.springframework.oxm` package. This gives you a wide
-range of choices of XML to Object mapping technologies to choose from.
+=== Accessing REST endpoints
 
-This section describes how to use the `RestTemplate` and its associated
-`HttpMessageConverters`.
+The Spring Framework offers two choices for client-side access to REST endpoints:
 
+* <<rest-resttemplate>> -- the original Spring REST client with an API similar to other
+template classes in Spring, such as `JdbcTemplate`, `JmsTemplate` and others. The
+`RestTemplate` is built for synchronous use with the blocking I/O.
+* <<webflux-client,WebClient>> -- reactive client with a functional,
+fluent API. It is built on a non-blocking foundation for async and sync scenarios and
+supports Reactive Streams back pressure.
 
 
 [[rest-resttemplate]]
 ==== RestTemplate
-Invoking RESTful services in Java is typically done using a helper class such as Apache
-HttpComponents `HttpClient`. For common REST operations this approach is too low level as
-shown below.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	String uri = "http://example.com/hotels/1/bookings";
-
-	PostMethod post = new PostMethod(uri);
-	String request = // create booking request content
-	post.setRequestEntity(new StringRequestEntity(request));
-
-	httpClient.executeMethod(post);
-
-	if (HttpStatus.SC_CREATED == post.getStatusCode()) {
-		Header location = post.getRequestHeader("Location");
-		if (location != null) {
-			System.out.println("Created new booking at :" + location.getValue());
-		}
-	}
-----
-
-RestTemplate provides higher level methods that correspond to each of the six main HTTP
-methods that make invoking many RESTful services a one-liner and enforce REST best
-practices.
+The `RestTemplate` provides a higher level API over HTTP client libraries with methods
+that correspond to each of the six main HTTP methods that make invoking many RESTful
+services a one-liner and enforce REST best practices.
 
 
 [NOTE]
@@ -1372,6 +1346,8 @@ and writes the media type supported by the Java I/O API.
 The `AsyncRestTemplate` is deprecated.
 Please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
 
+
+include::web/webflux-client.adoc[leveloffset=+3]
 
 
 
