@@ -1283,7 +1283,7 @@ evaluated and if present a `304` status code is returned.
 
 The resource handler also supports a chain of
 {api-spring-framework}/web/reactive/resource/ResourceResolver.html[ResourceResolver]'s and
-{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceResolver]'s.
+{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[ResourceTransformer]'s.
 which can be used to create a toolchain for working with optimized resources.
 
 The `VersionResourceResolver` can be used for versioned resource URLs based on an MD5 hash
