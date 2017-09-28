@@ -5,9 +5,9 @@
 == Introduction
 The original web framework included in the Spring Framework, Spring Web MVC, was purpose
 built for the Servlet API and Servlet containers. The reactive stack, web framework,
-Spring WebFlux, was added later in version 5.0. It is built on a
-http://www.reactive-streams.org/[Reactive Streams] API and runs on non-blocking
-servers such as Netty, Undertow, and Servlet 3.1+ containers.
+Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
+http://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on servers such as
+Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
 https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
@@ -26,11 +26,11 @@ a `WebTestClient` for testing web endpoints, and WebSocket support.
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
 small number of threads and scale with less hardware resources. Servlet 3.1 did provide
-an API for non-blocking I/O. However the use of that leads away from using the rest of the
-Servlet API which remains synchronous -- `Filter`, `Servlet`, and blocking -- `getParameter`,
-`getPart`. On the positive side a new common API foundation makes it possible to support any
-server and that is important because of runtimes such as Netty that are well established in
-the async, non-blocking space.
+an API for non-blocking I/O. However, using it leads away from the rest of the Servlet API
+where contracts are synchronous (`Filter`, `Servlet`) or blocking (`getParameter`,
+`getPart`). This was the motivation for a new common API to serve as a foundation across
+any non-blocking runtime. That is important because of servers such as Netty that are well
+established in the async, non-blocking space.
 
 The other part of the answer is functional programming. Much like the addition of annotations
 in Java 5 created opportunities -- e.g. annotated REST controllers or unit tests, the addition
@@ -92,8 +92,8 @@ https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html
 to work on data sequences of 0..1 and 0..N through a rich set of operators aligned with the
 ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
 Reactor is a Reactive Streams library and therefore all of its operators support non-blocking back pressure.
-Reactor has a strong focus on server-side Java.
-It is developed in close collaboration with and feedback from Spring projects.
+Reactor has a strong focus on server-side Java. It is developed in close collaboration
+with Spring.
 
 WebFlux requires Reactor as a core dependency but it is interoperable with other reactive
 libraries via Reactive Streams. As a general rule WebFlux APIs accept a plain `Publisher`
@@ -150,10 +150,10 @@ for the same annotation-based programming model in both frameworks makes it easi
 re-use knowledge while also selecting the right tool for the right job.
 
 A simple way to evaluate an application is to check its dependencies. If you have blocking
-persistence APIs, or networking APIs to use, then Spring MVC is the best choice for common
-architectures at least. It is technically feasible with both Reactor and RxJava to perform
-blocking calls on a separate thread but you wouldn't be making the most of a non-blocking
-web stack.
+persistence APIs (JPA, JDBC), or networking APIs to use, then Spring MVC is the best choice
+for common architectures at least. It is technically feasible with both Reactor and
+RxJava to perform blocking calls on a separate thread but you wouldn't be making the
+most of a non-blocking web stack.
 
 If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
 You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>)
