@@ -16,9 +16,9 @@ and co-exist side by side in the Spring Framework. Each module is optional.
 Applications may use one or the other module, or in some cases both --
 e.g. Spring MVC controllers with the reactive `WebClient`.
 
-In addition to the WebFlux web framework, the `spring-webflux` module includes several
-other reactive components such as a <<webflux-client>> for performing HTTP requests,
-a `WebTestClient` for testing web endpoints, and WebSocket support.
+In addition to the web framework, Spring WebFlux also provides a <<webflux-client>> for
+performing HTTP requests, a `WebTestClient` for testing web endpoints, and
+also client and server reactive, WebSocket support.
 
 
 [[webflux-new-framework]]
@@ -1386,7 +1386,7 @@ from the base class and you can still have any number of other ``WebMvcConfigure
 the classpath.
 
 
-include::webflux-client.adoc[leveloffset=+1]
+include::webflux-webclient.adoc[leveloffset=+1]
 
 
 [[webflux-reactive-libraries]]

@@ -1347,7 +1347,8 @@ The `AsyncRestTemplate` is deprecated.
 Please use the <<web-reactive.adoc#webflux-client,WebClient>> instead.
 
 
-include::web/webflux-client.adoc[leveloffset=+3]
+
+include::web/webflux-webclient.adoc[leveloffset=+3]
 
 
 
