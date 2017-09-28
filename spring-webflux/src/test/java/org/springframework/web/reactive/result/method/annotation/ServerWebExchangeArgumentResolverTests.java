@@ -16,6 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.time.ZoneId;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -60,6 +64,9 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Locale.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(TimeZone.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ZoneId.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriComponentsBuilder.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriBuilder.class)));
 
@@ -81,6 +88,13 @@ public class ServerWebExchangeArgumentResolverTests {
 		testResolveArgument(this.testMethod.arg(ServerHttpRequest.class), this.exchange.getRequest());
 		testResolveArgument(this.testMethod.arg(ServerHttpResponse.class), this.exchange.getResponse());
 		testResolveArgument(this.testMethod.arg(HttpMethod.class), HttpMethod.GET);
+		testResolveArgument(this.testMethod.arg(TimeZone.class), TimeZone.getDefault());
+		testResolveArgument(this.testMethod.arg(ZoneId.class), ZoneId.systemDefault());
+	}
+
+	private void testResolveArgument(MethodParameter parameter, Object expected) {
+		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
+		assertEquals(expected, mono.block());
 	}
 
 	@Test
@@ -93,10 +107,6 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertEquals("/path/next", ((UriComponentsBuilder) value).path("/next").build().toUriString());
 	}
 
-	private void testResolveArgument(MethodParameter parameter, Object expected) {
-		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
-		assertSame(expected, mono.block());
-	}
 
 
 	@SuppressWarnings("unused")
@@ -106,6 +116,9 @@ public class ServerWebExchangeArgumentResolverTests {
 			ServerHttpResponse response,
 			WebSession session,
 			HttpMethod httpMethod,
+			Locale locale,
+			TimeZone timeZone,
+			ZoneId zoneId,
 			UriComponentsBuilder uriComponentsBuilder,
 			UriBuilder uriBuilder,
 			String s,

@@ -873,15 +873,13 @@ Supports reactive types.
 |`org.springframework.http.HttpMethod`
 |The HTTP method of the request.
 
-// TODO: not supported
-// |`java.util.Locale`
-// |The current request locale, determined by the most specific `LocaleResolver` available, in
-// effect, the configured `LocaleResolver`/`LocaleContextResolver`.
+ |`java.util.Locale`
+ |The current request locale, determined by the most specific `LocaleResolver` available, in
+ effect, the configured `LocaleResolver`/`LocaleContextResolver`.
 
-// TODO: not supported
-//|Java 6+: `java.util.TimeZone` +
-//Java 8+: `java.time.ZoneId`
-//|The time zone associated with the current request, as determined by a `LocaleContextResolver`.
+|Java 6+: `java.util.TimeZone` +
+Java 8+: `java.time.ZoneId`
+|The time zone associated with the current request, as determined by a `LocaleContextResolver`.
 
 |`@PathVariable`
 |For access to URI template variables.
