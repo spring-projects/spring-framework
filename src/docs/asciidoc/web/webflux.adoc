@@ -699,7 +699,7 @@ paths in web applications where a large number of URI path patterns are matched 
 
 Spring WebFlux does not support suffix pattern matching -- unlike Spring MVC, where a
 mapping such as `/person` also matches to `/person.{asterisk}`. For URL based content
-negotiation, if needed, we recommend using a query parameter, which is more simpler, more
+negotiation, if needed, we recommend using a query parameter, which is simpler, more
 explicit, and less vulnerable to URL path based exploits.
 
 
