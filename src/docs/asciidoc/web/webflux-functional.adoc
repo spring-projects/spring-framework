@@ -4,63 +4,65 @@
 Spring WebFlux provides a lightweight, functional programming model where functions
 are used to route and handle requests and where contracts are designed for immutability.
 It is an alternative to the annotated-based programming model but runs on the same
-<<web-reactive.adoc#webflux-reactive-spring-web>> foundation
-
+<<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 [[webflux-fn-handler-functions]]
 == HandlerFunction
 
-Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a function that
-takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The annotation counterpart to a
-handler function is an `@RequestMapping` method.
+Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a
+function that takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The
+annotation counterpart to a handler function is an `@RequestMapping` method.
 
-`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly access
-to the underlying HTTP messages with http://www.reactive-streams.org[Reactive Streams]
-non-blocking back pressure. The request exposes the body as Reactor `Flux` or `Mono`
-types; the response accepts any Reactive Streams `Publisher` as body (see
+`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly
+access to the underlying HTTP messages with http://www.reactive-streams.org[Reactive
+Streams] non-blocking back pressure. The request exposes the body as Reactor `Flux` or
+`Mono` types. The response accepts any Reactive Streams `Publisher` as body (see
 <<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>).
 
+`ServerRequest` gives access to various HTTP request elements: the method, the URI, the
+query  parameters, and (through the separate `ServerRequest.Headers` interface), the
+headers. Access to the body is provided through the `body` methods. For instance, the
+following example shows how to extract the request body into a `Mono<String>`:
 
-`ServerRequest` gives access to various HTTP request elements:
-the method, URI, query parameters, and -- through the separate `ServerRequest.Headers` interface
--- the headers. Access to the body is provided through the `body` methods. For instance, this is
-how to extract the request body into a `Mono<String>`:
+[source,java]
+Mono<String> string = request.bodyToMono(String.class);
 
- Mono<String> string = request.bodyToMono(String.class);
+The following example shows how to extract the body into a `Flux`, where `Person` is a
+class that can be deserialized from the contents of the body. `Person` is supported by
+Jackson if the body contains JSON or by JAXB if the body contains XML.
 
-And here is how to extract the body into a `Flux`, where `Person` is a class that can be
-deserialised from the contents of the body (i.e. `Person` is supported by Jackson if the body
-contains JSON, or JAXB if XML).
+[source,java]
+Flux<Person> people = request.bodyToFlux(Person.class);
 
- Flux<Person> people = request.bodyToFlux(Person.class);
+`bodyToMono` and `bodyToFlux` are convenience methods that use the generic
+`ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is a functional strategy
+interface that lets you write your own extraction logic. Common `BodyExtractor` instances
+can be found in the `BodyExtractors` utility class. Consequently, the preceding examples
+can be replaced with the following example:
 
-The above -- `bodyToMono` and `bodyToFlux`, are, in fact, convenience methods that use the
-generic `ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is
-a functional strategy interface that allows you to write your own extraction logic, but common
-`BodyExtractor` instances can be found in the `BodyExtractors` utility class. So, the above
-examples can be replaced with:
+[source,java]
+Mono<String> string = request.body(BodyExtractors.toMono(String.class);
+Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class);
 
- Mono<String> string = request.body(BodyExtractors.toMono(String.class);
- Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class);
+Similarly, `ServerResponse` provides access to the HTTP response. Since it is immutable,
+you must create a `ServerResponse` with a builder. The builder lets you set the response
+status, add response headers, and provide a body. For instance, the following example
+shows how to create a response with a 200 OK status, a JSON content-type, and a body:
 
-Similarly, `ServerResponse` provides access to the HTTP response. Since it is immutable, you create
-a `ServerResponse` with a builder. The builder allows you to set the response status, add response
-headers, and provide a body. For instance, this is how to create a response with a 200 OK status,
-a JSON content-type, and a body:
+[source,java]
+Mono<Person> person = ...
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
 
- Mono<Person> person = ...
- ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
+The following example shows how to build a response with a 201 CREATED status, a
+`"Location"` header, and an empty body:
 
-And here is how to build a response with a 201 CREATED status, a `"Location"` header, and
-empty body:
+[source,java]
+URI location = ...
+ServerResponse.created(location).build();
 
- URI location = ...
- ServerResponse.created(location).build();
-
-
-Putting these together allows us to create a `HandlerFunction`. For instance, here is an example
-of a simple "Hello World" handler lambda, that returns a response with a 200 status and a body
-based on a String:
+Putting the two preceding examples together lets us create a `HandlerFunction`. For
+instance, the following example shows a simple "Hello World" handler lambda that returns
+a response with a 200 status and a body based on a String:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -69,10 +71,11 @@ HandlerFunction<ServerResponse> helloWorld =
   request -> ServerResponse.ok().body(fromObject("Hello World"));
 ----
 
-Writing handler functions as lambda's, as we do above, is convenient, but perhaps lacks in
-readability and becomes less maintainable when dealing with multiple functions. Therefore, it is
-recommended to group related handler functions into a handler or controller class. For example,
-here is a class that exposes a reactive `Person` repository:
+Writing handler functions as lambdas, as we do above, is convenient but perhaps lacks in
+readability and becomes less maintainable when dealing with multiple functions.
+Therefore, it is recommended to group related handler functions into a handler or
+controller class. For example, the following example shows a class that exposes a
+reactive `Person` repository:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -108,34 +111,35 @@ public class PersonHandler {
 	}
 }
 ----
-<1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
-JSON.
-<2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
-Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an empty Mono that emits
-a completion signal when the person has been read from the request and stored. So we use the
-`build(Publisher<Void>)` method to send a response when that completion signal is received, i.e.
-when the `Person` has been saved.
-<3> `getPerson` is a handler function that returns a single person, identified via the path
-variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
-found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
+<1> `listPeople` is a handler function that returns all `Person` objects found in the
+repository as JSON.
+<2> `createPerson` is a handler function that stores a new `Person` contained in the
+request body. Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an
+empty Mono that emits a completion signal when the person has been read from the request
+and stored. So we use the `build(Publisher<Void>)` method to send a response when that
+completion signal is received (that is, when the `Person` has been saved).
+<3> `getPerson` is a handler function that returns a single person, identified through
+the path variable, `id`. We retrieve that `Person` from the repository and create a JSON
+response if it is found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a
+404 Not Found response.
 
 [[webflux-fn-router-functions]]
 == RouterFunction
 
-Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a function
-that takes a `ServerRequest`, and returns a `Mono<HandlerFunction>`. If a request matches a
-particular route, a handler function is returned; otherwise it returns an empty `Mono`. The
-`RouterFunction` has a similar purpose as the `@RequestMapping` annotation in `@Controller` classes.
+Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a
+function that takes a `ServerRequest` and returns a `Mono<HandlerFunction>`. If a request
+matches a particular route, a handler function is returned. Otherwise, it returns an
+empty `Mono`. The `RouterFunction` has a similar purpose as the `@RequestMapping`
+annotation in `@Controller` classes.
 
 Typically, you do not write router functions yourself, but rather use
-`RouterFunctions.route(RequestPredicate, HandlerFunction)` to
-create one using a request predicate and handler function. If the predicate applies, the request is
-routed to the given handler function; otherwise no routing is performed, resulting in a
-404 Not Found response.
-Though you can write your own `RequestPredicate`, you do not have to: the `RequestPredicates`
-utility class offers commonly used predicates, such matching based on path, HTTP method,
-content-type, etc.
-Using `route`, we can route to our "Hello World" handler function:
+`RouterFunctions.route(RequestPredicate, HandlerFunction)` to create one with a request
+predicate and handler function. If the predicate applies, the request is routed to the
+given handler function. Otherwise, no routing is performed, resulting in a 404 Not Found
+response. Though you can write your own `RequestPredicate`, you do not have to. The
+`RequestPredicates` utility class offers commonly used predicates, such matching based on
+path, HTTP method, content-type, and others. Using `route`, we can route to our
+"Hello World" handler function, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -145,18 +149,18 @@ RouterFunction<ServerResponse> helloWorldRoute =
 	request -> Response.ok().body(fromObject("Hello World")));
 ----
 
-Two router functions can be composed into a new router function that routes to either handler
-function: if the predicate of the first route does not match, the second is evaluated.
-Composed router functions are evaluated in order, so it makes sense to put specific functions
-before generic ones.
-You can compose two router functions by calling `RouterFunction.and(RouterFunction)`, or by calling
-`RouterFunction.andRoute(RequestPredicate, HandlerFunction)`, which is a convenient combination
-of `RouterFunction.and()` with `RouterFunctions.route()`.
+Two router functions can be composed into a new router function that routes to either
+handler function. If the predicate of the first route does not match, the second is
+evaluated. Composed router functions are evaluated in order, so it makes sense to put
+specific functions before generic ones. You can compose two router functions by calling
+`RouterFunction.and(RouterFunction)` or by calling
+`RouterFunction.andRoute(RequestPredicate, HandlerFunction)`, which is a convenient
+combination of `RouterFunction.and()` with `RouterFunctions.route()`.
 
-Given the `PersonHandler` we showed above, we can now define a router function that routes to the
-respective handler functions.
-We use https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html[method-references]
-to refer to the handler functions:
+Given the `PersonHandler` we previously showed, we can now define a router function that
+routes to the respective handler functions. We use
+https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html[method-references]
+to refer to the handler functions, as shown in the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -174,43 +178,39 @@ RouterFunction<ServerResponse> personRoute =
 ----
 
 Besides router functions, you can also compose request predicates, by calling
-`RequestPredicate.and(RequestPredicate)` or `RequestPredicate.or(RequestPredicate)`.
-These work as expected: for `and` the resulting predicate matches if *both* given predicates match;
-`or` matches if *either* predicate does.
-Most of the predicates found in `RequestPredicates` are compositions.
-For instance, `RequestPredicates.GET(String)` is a composition of
+`RequestPredicate.and(RequestPredicate)` or `RequestPredicate.or(RequestPredicate)`. For
+`and`, the resulting predicate matches if *both* given predicates match. `or` matches if
+*either* predicate does. Most of the predicates found in `RequestPredicates` are
+compositions. For instance, `RequestPredicates.GET(String)` is a composition of
 `RequestPredicates.method(HttpMethod)` and `RequestPredicates.path(String)`.
 
-
 [[webflux-fn-running]]
-== Running a server
+== Running a Server
 
 How do you run a router function in an HTTP server? A simple option is to convert a
-router function to an `HttpHandler` via `RouterFunctions.toHttpHandler(RouterFunction)`.
-The `HttpHandler` can then be used with a number of servers adapters.
-See <<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific
-instructions.
+router function to an `HttpHandler` through
+`RouterFunctions.toHttpHandler(RouterFunction)`. The `HttpHandler` can then be used with
+a number of servers adapters. See <<web-reactive.adoc#webflux-httphandler,HttpHandler>>
+for server-specific instructions.
 
-it is also possible to run with a
-<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> setup -- side by side
+It is also possible to run with a
+<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> setup, side by side
 with annotated controllers. The easiest way to do that is through the
-<<web-reactive.adoc#webflux-config>> which creates the necessary configuration to
+<<web-reactive.adoc#webflux-config>>m, which creates the necessary configuration to
 handle requests with router and handler functions.
-
-
 
 [[webflux-fn-handler-filter-function]]
 == HandlerFilterFunction
 
 Routes mapped by a router function can be filtered by calling
-`RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is essentially a
-function that takes a `ServerRequest` and `HandlerFunction`, and returns a `ServerResponse`.
-The handler function parameter represents the next element in the chain: this is typically the
-`HandlerFunction` that is routed to, but can also be another `FilterFunction` if multiple filters
-are applied.
-With annotations, similar functionality can be achieved using `@ControllerAdvice` and/or a `ServletFilter`.
-Let's add a simple security filter to our route, assuming that we have a `SecurityManager` that
-can determine whether a particular path is allowed:
+`RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is
+essentially a function that takes a `ServerRequest` and `HandlerFunction` and returns a
+`ServerResponse`. The handler function parameter represents the next element in the
+chain, which is typically the `HandlerFunction` that is routed to but can also be another
+`FilterFunction` if multiple filters are applied. With annotations, similar functionality
+can be achieved by using `@ControllerAdvice` and/or a `ServletFilter`. In the following
+example, we add a simple security filter to our route, assuming that we have a
+`SecurityManager` that can determine whether a particular path is allowed:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -231,5 +231,5 @@ RouterFunction<ServerResponse> filteredRoute =
   });
 ----
 
-You can see in this example that invoking the `next.handle(ServerRequest)` is optional: we only
-allow the handler function to be executed when access is allowed.
+You can see in the preceding example that invoking the `next.handle(ServerRequest)` is
+optional: We only let the handler function be executed when access is allowed.
