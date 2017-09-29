@@ -4479,7 +4479,7 @@ non-required constructors can be annotated. In that case, each is considered amo
 candidates and Spring uses the __greediest__ constructor whose dependencies can be
 satisfied, that is the constructor that has the largest number of arguments.
 
-`@Autowired`'s __required__ attribute is recommended over the `@Required` annotation.
+The __required__ attribute of `@Autowired` is recommended over the `@Required` annotation.
 The __required__ attribute indicates that the property is not required for autowiring
 purposes, the property is ignored if it cannot be autowired. `@Required`, on the other
 hand, is stronger in that it enforces the property that was set by any means supported
