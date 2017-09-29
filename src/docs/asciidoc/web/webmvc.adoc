@@ -1152,9 +1152,10 @@ default `HttpMessageConverters`:
 * `FormHttpMessageConverter` converts form data to/from a MultiValueMap<String, String>.
 * `SourceHttpMessageConverter` converts to/from a javax.xml.transform.Source.
 
-For more information on these converters, see <<rest-message-conversion,Message
-Converters>>. Also note that if using the MVC namespace or the MVC Java config, a wider
-range of message converters are registered by default. See <<mvc-config-enable>> for more information.
+For more information on these converters, see <<integration.adoc#rest-message-conversion,
+Message Converters>>. Also note that if using the MVC namespace or the MVC Java config, a
+wider range of message converters are registered by default. See <<mvc-config-enable>> for
+more information.
 
 If you intend to read and write XML, you will need to configure the
 `MarshallingHttpMessageConverter` with a specific `Marshaller` and an `Unmarshaller`
@@ -1226,7 +1227,7 @@ response stream.
 
 As with `@RequestBody`, Spring converts the returned object to a response body by using
 an `HttpMessageConverter`. For more information on these converters, see the previous
-section and <<rest-message-conversion,Message Converters>>.
+section and <<integration.adoc#rest-message-conversion,Message Converters>>.
 
 [[mvc-ann-restcontroller]]
 ==== Creating REST Controllers with the @RestController annotation
@@ -1275,7 +1276,8 @@ World` to the response stream, and sets the response status code to 201 (Created
 
 As with `@RequestBody` and `@ResponseBody`, Spring uses `HttpMessageConverter` to
 convert from and to the request and response streams. For more information on these
-converters, see the previous section and <<rest-message-conversion,Message Converters>>.
+converters, see the previous section and <<integration.adoc#rest-message-conversion,
+Message Converters>>.
 
 
 [[mvc-ann-modelattrib-methods]]
