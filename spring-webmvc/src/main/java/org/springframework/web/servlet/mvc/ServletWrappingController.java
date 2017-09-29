@@ -148,6 +148,9 @@ public class ServletWrappingController extends AbstractController
 		if (this.servletName == null) {
 			this.servletName = this.beanName;
 		}
+		if (this.servletInstance != null) {
+			this.servletInstance.destroy();
+		}
 		this.servletInstance = ReflectionUtils.accessibleConstructor(this.servletClass).newInstance();
 		this.servletInstance.init(new DelegatingServletConfig());
 	}
