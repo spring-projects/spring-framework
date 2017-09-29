@@ -23,6 +23,7 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -45,12 +46,16 @@ import org.springframework.util.StringValueResolver;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Ales Justin
  * @since 4.1
  */
 public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint implements BeanFactoryAware {
 
 	@Nullable
 	private Object bean;
+
+	@Nullable
+	private BeanFactory beanFactory;
 
 	@Nullable
 	private Method method;
@@ -135,6 +140,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 */
 	@Override
 	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory) {
 			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
@@ -178,6 +184,14 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 * @return a new {@code MessagingMessageListenerAdapter} or subclass thereof
 	 */
 	protected MessagingMessageListenerAdapter createMessageListenerInstance() {
+		if (beanFactory != null) {
+			try {
+				MessagingMessageListenerAdapterFactory factory =
+		            beanFactory.getBean(MessagingMessageListenerAdapterFactory.class);
+				return factory.create();
+			} catch (NoSuchBeanDefinitionException ignored) {
+			}
+		}
 		return new MessagingMessageListenerAdapter();
 	}
 

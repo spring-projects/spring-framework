@@ -36,7 +36,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -74,6 +76,7 @@ import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Stephane Nicoll
+ * @author Ales Justin
  */
 public class MethodJmsListenerEndpointTests {
 
@@ -115,6 +118,30 @@ public class MethodJmsListenerEndpointTests {
 		endpoint.setMessageHandlerMethodFactory(this.factory);
 
 		assertNotNull(endpoint.createMessageListener(this.container));
+	}
+
+	@Test
+	public void createMessageListenerAdapter() {
+		final MessagingMessageListenerAdapter adapter = new MessagingMessageListenerAdapter() {
+			@Override
+			protected void postProcessResponse(javax.jms.Message request, javax.jms.Message response) throws JMSException {
+			}
+		};
+		final MessagingMessageListenerAdapterFactory mmlaFactory = () -> adapter;
+
+		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
+		endpoint.setBeanFactory(new DefaultListableBeanFactory() {
+			@Override
+			public <T> T getBean(Class<T> requiredType) throws BeansException {
+				if (MessagingMessageListenerAdapterFactory.class.equals(requiredType)) {
+					//noinspection unchecked
+					return (T) mmlaFactory;
+				}
+				return super.getBean(requiredType);
+			}
+		});
+
+		assertSame(adapter, endpoint.createMessageListenerInstance());
 	}
 
 	@Test
