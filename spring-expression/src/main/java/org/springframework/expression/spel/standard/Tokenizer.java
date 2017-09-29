@@ -293,7 +293,7 @@ class Tokenizer {
 					terminated = true;
 				}
 			}
-			if (ch == 0) {
+			if (this.pos == this.max - 1) {
 				throw new InternalParseException(new SpelParseException(this.expressionString, start,
 						SpelMessage.NON_TERMINATING_QUOTED_STRING));
 			}
@@ -318,7 +318,7 @@ class Tokenizer {
 					terminated = true;
 				}
 			}
-			if (ch == 0) {
+			if (this.pos == this.max - 1) {
 				throw new InternalParseException(new SpelParseException(this.expressionString,
 						start, SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING));
 			}
