@@ -42,7 +42,10 @@ public class SpringConfiguredConfiguration {
 	public static final String BEAN_CONFIGURER_ASPECT_BEAN_NAME =
 			"org.springframework.context.config.internalBeanConfigurerAspect";
 
-	@Bean(name = BEAN_CONFIGURER_ASPECT_BEAN_NAME)
+	private static final String BEAN_CONFIGURER_ASPECT_CLASS_NAME =
+			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
+
+	@Bean(name = {BEAN_CONFIGURER_ASPECT_BEAN_NAME, BEAN_CONFIGURER_ASPECT_CLASS_NAME})
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationBeanConfigurerAspect beanConfigurerAspect() {
 		return AnnotationBeanConfigurerAspect.aspectOf();

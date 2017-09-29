@@ -51,7 +51,8 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 			def.setFactoryMethodName("aspectOf");
 			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			def.setSource(parserContext.extractSource(element));
-			parserContext.registerBeanComponent(new BeanComponentDefinition(def, BEAN_CONFIGURER_ASPECT_BEAN_NAME));
+			parserContext.registerBeanComponent(new BeanComponentDefinition(def, BEAN_CONFIGURER_ASPECT_BEAN_NAME,
+					new String[] {BEAN_CONFIGURER_ASPECT_CLASS_NAME}));
 		}
 		return null;
 	}
