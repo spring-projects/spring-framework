@@ -29,7 +29,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
@@ -108,7 +108,8 @@ public class DefaultRenderingResponseTests {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerHttpRequest build = MockServerHttpRequest.get("http://localhost").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(build);
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));

@@ -28,7 +28,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -67,7 +67,7 @@ public class DispatcherHandlerTests {
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler(context);
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 		dispatcherHandler.handle(exchange).block(Duration.ofSeconds(0));
 		assertEquals("1", exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5)));
 	}

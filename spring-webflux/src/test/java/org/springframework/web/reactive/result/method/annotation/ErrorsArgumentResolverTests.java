@@ -27,7 +27,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -53,7 +53,7 @@ public class ErrorsArgumentResolverTests {
 
 	private BindingResult bindingResult;
 
-	private MockServerWebExchange exchange = MockServerHttpRequest.post("/path").toExchange();
+	private MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").build());
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

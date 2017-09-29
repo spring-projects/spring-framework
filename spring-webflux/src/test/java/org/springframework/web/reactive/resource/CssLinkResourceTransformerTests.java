@@ -33,7 +33,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -76,7 +76,8 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transform() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/main.css").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/static/main.css").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		Resource css = new ClassPathResource("test/main.css", getClass());
 
 		String expected = "\n" +
@@ -98,7 +99,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformNoLinks() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/foo.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/foo.css").build());
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
 				.consumeNextWith(resource -> assertSame(expected, resource))
@@ -107,7 +108,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformExtLinksNotAllowed() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/external.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/external.css").build());
 		ResourceResolverChain resolverChain = Mockito.mock(DefaultResourceResolverChain.class);
 		ResourceTransformerChain transformerChain = new DefaultResourceTransformerChain(resolverChain,
 				Collections.singletonList(new CssLinkResourceTransformer()));
@@ -133,7 +134,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformWithNonCssResource() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/images/image.png").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/images/image.png").build());
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
 		StepVerifier.create(this.transformerChain.transform(exchange, expected))
 				.expectNext(expected)
@@ -142,7 +143,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformWithGzippedResource() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/static/main.css").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/main.css").build());
 		Resource original = new ClassPathResource("test/main.css", getClass());
 		createTempCopy("main.css", "main.css.gz");
 		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);

@@ -41,6 +41,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -104,7 +105,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		ServerWebExchange exchange = get("/path").accept(MediaType.APPLICATION_JSON).toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON).build());
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 

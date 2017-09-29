@@ -30,11 +30,13 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link AbstractView}.
@@ -47,7 +49,7 @@ public class AbstractViewTests {
 
     @Before
     public void setup() {
-        this.exchange = MockServerHttpRequest.get("/").toExchange();
+        this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
     }
 
     @SuppressWarnings("unchecked")

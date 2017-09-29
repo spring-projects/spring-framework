@@ -30,9 +30,9 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
@@ -76,9 +76,12 @@ public class KotlinScriptTemplateTests {
 	}
 
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
+	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model,
+			Locale locale, Class<?> configuration) throws Exception {
+
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
 		return exchange.getResponse();
 	}

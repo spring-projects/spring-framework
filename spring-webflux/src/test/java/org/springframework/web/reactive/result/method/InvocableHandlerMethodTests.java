@@ -25,7 +25,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -46,7 +46,7 @@ import static org.springframework.web.method.ResolvableMethod.*;
 public class InvocableHandlerMethodTests {
 
 	private final MockServerWebExchange exchange =
-			MockServerHttpRequest.get("http://localhost:8080/path").toExchange();
+			MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost:8080/path").build());
 
 
 	@Test

@@ -34,6 +34,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.Model;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Validator;
@@ -66,7 +67,8 @@ public class ModelInitializerTests {
 
 	private ModelInitializer modelInitializer;
 
-	private final ServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
+	private final ServerWebExchange exchange = MockServerWebExchange.from(
+			MockServerHttpRequest.get("/path").build());
 
 
 	@Before

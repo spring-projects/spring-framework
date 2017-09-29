@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
@@ -59,7 +59,7 @@ public class NashornScriptTemplateTests {
 
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
 		return exchange.getResponse();
 	}

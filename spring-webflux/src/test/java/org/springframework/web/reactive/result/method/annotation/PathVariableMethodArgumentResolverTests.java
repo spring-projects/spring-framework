@@ -31,7 +31,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -54,7 +54,8 @@ public class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
 
-	private final MockServerWebExchange exchange= MockServerHttpRequest.get("/").toExchange();
+	private final MockServerWebExchange exchange= MockServerWebExchange.from(
+			MockServerHttpRequest.get("/").build());
 
 	private MethodParameter paramNamedString;
 	private MethodParameter paramString;

@@ -43,7 +43,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
@@ -191,17 +191,18 @@ public class DefaultEntityResponseBuilderTests {
 
 		Mono<EntityResponse<Publisher<String>>> result = EntityResponse.fromPublisher(publisher, String.class).build();
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost").build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		ServerResponse.Context context = new ServerResponse.Context() {
 			@Override
 			public List<HttpMessageWriter<?>> messageWriters() {
-				return Collections.<HttpMessageWriter<?>>singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+				return Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 			}
 
 			@Override
 			public List<ViewResolver> viewResolvers() {
-				return Collections.<ViewResolver>emptyList();
+				return Collections.emptyList();
 			}
 		};
 		StepVerifier.create(result)

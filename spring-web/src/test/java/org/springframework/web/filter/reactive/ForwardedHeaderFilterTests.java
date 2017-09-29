@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 
@@ -43,13 +43,13 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void removeOnly() {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
 				.header("Forwarded", "for=192.0.2.60;proto=http;by=203.0.113.43")
 				.header("X-Forwarded-Host", "example.com")
 				.header("X-Forwarded-Port", "8080")
 				.header("X-Forwarded-Proto", "http")
 				.header("X-Forwarded-Prefix", "prefix")
-				.toExchange();
+				.build());
 
 		this.filter.setRemoveOnly(true);
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
@@ -65,11 +65,11 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void xForwardedRequest() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://example.com/path")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
 				.header("X-Forwarded-Host", "84.198.58.199")
 				.header("X-Forwarded-Port", "443")
 				.header("X-Forwarded-Proto", "https")
-				.toExchange();
+				.build());
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -79,10 +79,10 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void forwardedRequest() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://example.com/path")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
 				.header("Forwarded", "host=84.198.58.199;proto=https")
 
-				.toExchange();
+				.build());
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -92,9 +92,9 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithForwardedPrefix() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://example.com/path")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
 				.header("X-Forwarded-Prefix", "/prefix")
-				.toExchange();
+				.build());
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 
@@ -104,9 +104,9 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://example.com/path")
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/path")
 				.header("X-Forwarded-Prefix", "/prefix/")
-				.toExchange();
+				.build());
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
 

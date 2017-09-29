@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.*;
@@ -32,10 +32,11 @@ public class ServerWebExchangeTests {
 
 	private ServerWebExchange exchange;
 
+
 	@Before
 	public void createExchange() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com").build();
-		this.exchange = new MockServerWebExchange(request);
+		this.exchange = MockServerWebExchange.from(request);
 	}
 
 	@Test

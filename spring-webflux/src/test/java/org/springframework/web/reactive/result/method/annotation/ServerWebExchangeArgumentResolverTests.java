@@ -29,7 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
@@ -40,7 +40,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -53,7 +52,8 @@ public class ServerWebExchangeArgumentResolverTests {
 	private final ServerWebExchangeArgumentResolver resolver =
 			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(
+			MockServerHttpRequest.get("/path").build());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 

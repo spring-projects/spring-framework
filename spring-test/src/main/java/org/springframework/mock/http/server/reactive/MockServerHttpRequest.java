@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -45,10 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock extension of {@link AbstractServerHttpRequest} for use in tests without
- * an actual server.
- *
- * <p>Use the static builder methods in this class to create an instance possibly
- * further creating a {@link MockServerWebExchange} via {@link #toExchange()}.
+ * an actual server. Use the static methods to obtain a builder.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -106,13 +104,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public <T> T getNativeRequest() {
 		throw new IllegalStateException("This is a mock. No running server, no native request.");
-	}
-
-	/**
-	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
-	 */
-	public MockServerWebExchange toExchange() {
-		return new MockServerWebExchange(this);
 	}
 
 
@@ -267,6 +258,13 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B acceptCharset(Charset... acceptableCharsets);
 
 		/**
+		 * Set the list of acceptable {@linkplain Locale locales}, as specified
+		 * by the {@code Accept-Languages} header.
+		 * @param acceptableLocales the acceptable locales
+		 */
+		B acceptLanguageAsLocales(Locale... acceptableLocales);
+
+		/**
 		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
@@ -304,11 +302,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 */
 		MockServerHttpRequest build();
 
-		/**
-		 * Shortcut for:<br>
-		 * {@code build().toExchange()}
-		 */
-		MockServerWebExchange toExchange();
 	}
 
 	/**
@@ -357,6 +350,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
 
+
 		private final HttpMethod method;
 
 		private final URI url;
@@ -370,6 +364,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Nullable
 		private InetSocketAddress remoteAddress;
+
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -427,6 +422,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder acceptLanguageAsLocales(Locale... acceptableLocales) {
+			this.headers.setAcceptLanguageAsLocales(Arrays.asList(acceptableLocales));
+			return this;
+		}
+
+		@Override
 		public BodyBuilder contentLength(long contentLength) {
 			this.headers.setContentLength(contentLength);
 			return this;
@@ -465,11 +466,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest build() {
 			return body(Flux.empty());
-		}
-
-		@Override
-		public MockServerWebExchange toExchange() {
-			return build().toExchange();
 		}
 
 		@Override

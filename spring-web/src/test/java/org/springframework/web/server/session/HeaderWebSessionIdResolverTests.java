@@ -18,6 +18,7 @@ package org.springframework.web.server.session;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.Arrays;
@@ -40,7 +41,7 @@ public class HeaderWebSessionIdResolverTests {
 	@Before
 	public void setUp() {
 		this.idResolver = new HeaderWebSessionIdResolver();
-		this.exchange = MockServerHttpRequest.get("/path").toExchange();
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path").build());
 	}
 
 	@Test
@@ -121,9 +122,9 @@ public class HeaderWebSessionIdResolverTests {
 	@Test
 	public void resolveSessionIdsWhenIdThenIdFound() {
 		String id = "123";
-		this.exchange = MockServerHttpRequest.get("/path")
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path")
 				.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id)
-				.toExchange();
+				.build());
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 
@@ -134,9 +135,10 @@ public class HeaderWebSessionIdResolverTests {
 	public void resolveSessionIdsWhenMultipleIdsThenIdsFound() {
 		String id1 = "123";
 		String id2 = "abc";
-		this.exchange = MockServerHttpRequest.get("/path")
-				.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id1, id2)
-				.toExchange();
+		this.exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/path")
+						.header(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME, id1, id2)
+						.build());
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 

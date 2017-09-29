@@ -38,6 +38,7 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -223,7 +224,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		ServerWebExchange exchange = MockServerHttpRequest.post("/path").body(body).toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").body(body));
 		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -237,7 +238,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(MethodParameter param) {
-		ServerWebExchange exchange = MockServerHttpRequest.post("/path").build().toExchange();
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").build());
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 

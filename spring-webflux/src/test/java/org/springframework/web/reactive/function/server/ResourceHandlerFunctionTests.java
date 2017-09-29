@@ -34,10 +34,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -71,7 +73,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void get() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost").build());
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -107,7 +109,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void head() throws IOException {
-		MockServerWebExchange exchange = MockServerHttpRequest.head("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("http://localhost").build());
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
@@ -132,7 +134,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void options() {
-		MockServerWebExchange exchange = MockServerHttpRequest.options("http://localhost").toExchange();
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("http://localhost").build());
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults().messageReaders());
